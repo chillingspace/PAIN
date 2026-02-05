@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Level1.scn",
+    "type": "Scenes"
+  },
+  "build_data": {
+    "hash": 2886376037626763789
+  },
+  "descriptor_version": 1,
+  "guid": "b0e22adc-59ff-804a-a8e3-78ef53ed42df",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scenes\\Level1.scn"
+  }
+}

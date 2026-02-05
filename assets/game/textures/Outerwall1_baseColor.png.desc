@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Outerwall1_baseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 16300315768276816834
+  },
+  "descriptor_version": 1,
+  "guid": "8ec89d31-ef7e-9247-834a-8782dd0c614d",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Outerwall1_baseColor.png"
+  }
+}

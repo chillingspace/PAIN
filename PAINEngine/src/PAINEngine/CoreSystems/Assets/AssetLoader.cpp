@@ -1348,6 +1348,7 @@ namespace PAIN {
                     if (layerJson.contains("id")) layer.id = layerJson["id"].get<int>();
                     if (layerJson.contains("mask")) layer.mask = layerJson["mask"].get<int>();
                     if (layerJson.contains("enabled")) layer.enabled = layerJson["enabled"].get<bool>();
+                    if (layerJson.contains("pickable")) layer.pickable = layerJson["pickable"].get<bool>();
                     if (layerJson.contains("name")) layer.name = layerJson["name"].get<std::string>();
                     if (layerJson.contains("color") && layerJson["color"].is_array() && layerJson["color"].size() >= 3) {
                         layer.color = glm::vec3(

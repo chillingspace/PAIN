@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "skip menu hover.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 6996311129710390609
+  },
+  "descriptor_version": 1,
+  "guid": "5953539e-f594-184c-be92-d05f809c6e84",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\skip menu hover.png"
+  }
+}

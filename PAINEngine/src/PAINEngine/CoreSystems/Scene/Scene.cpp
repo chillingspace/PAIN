@@ -369,7 +369,7 @@ namespace PAIN {
 					layer.layer_id = 0;
 					layer.layer_mask = 1;
 				}
-
+				
 				// Update mask based on ID
 				layer.layer_mask = 1 << layer.layer_id;
 				layer.layerName = layers[layer.layer_id].name;
@@ -519,7 +519,7 @@ namespace PAIN {
 			auto controller = services->get<ECS::Controller>();
 			auto prefabService = services->get<Prefab::Service>();
 
-			// 1. Serialize THIS entity
+			// Serialize THIS entity
 			nlohmann::json E = nlohmann::json::object();
 
 			// Name
@@ -538,7 +538,7 @@ namespace PAIN {
 			// Add to main JSON Array
 			jsonArray.push_back(nlohmann::json{ {"Entity", std::move(E)} });
 
-			// 2. Find and Sort Children
+			// Find and Sort Children
 			if (auto h = controller->getEntityComponent<Entity::Hierarchy>(entity)) {
 				std::vector<entt::entity> children;
 				for (const auto& childGUID : h.value().get().childrenGUIDs) {
@@ -548,7 +548,7 @@ namespace PAIN {
 					}
 				}
 
-				// [CRITICAL] Sort Children by Sibling Index before saving
+				// Sort Children by Sibling Index before saving
 				std::stable_sort(children.begin(), children.end(), [&](entt::entity a, entt::entity b) {
 					auto hA = controller->getEntityComponent<Entity::Hierarchy>(a);
 					auto hB = controller->getEntityComponent<Entity::Hierarchy>(b);
@@ -557,7 +557,7 @@ namespace PAIN {
 					return idxA < idxB;
 					});
 
-				// 3. Recurse
+				// Recurse
 				for (auto child : children) {
 					recursiveCapture(child, jsonArray);
 				}
@@ -765,6 +765,8 @@ namespace PAIN {
 		}
 
 		nlohmann::json SceneManager::convertSceneToJSON(SceneAsset& scn_asset) {
+			//*** NOTE When adding variables to capture remember to add into AssetLoader.cpp as well to parse the json var
+			
 			//Convert scene asset to JSON
 			nlohmann::json sceneJson = nlohmann::json::object();
 
@@ -830,6 +832,7 @@ namespace PAIN {
 					{"id", layer.id},
 					{"mask", layer.mask},
 					{"enabled", layer.enabled},
+					{"pickable", layer.pickable},
 					{"name", layer.name},
 					{"color",  {layer.color.r, layer.color.g, layer.color.b}}
 					});
@@ -1275,8 +1278,9 @@ namespace PAIN {
 			}
 
 			//Scene loaded successfully
-			PN_CORE_INFO("[SceneManager] Loaded scene from GUID: {}", sceneGUID.ToString());
+			PN_CORE_INFO("[SceneManager] Loaded scene {} from GUID: {}", currentSceneAsset->name, sceneGUID.ToString());
 			curr_scene_id = sceneGUID;
+			services->get<Serialization::Service>()->setCurrSceneFileName(currentSceneAsset->name);
 
 			services->get<Serialization::Service>()->markSceneChanged();
 
@@ -1296,6 +1300,88 @@ namespace PAIN {
 
 			//Load scene
 			loadScene(id);
+		}
+
+		void SceneManager::changeScene(const Assets::GUID& sceneGUID)
+		{
+			PN_CORE_INFO("[SceneManager] Scheduling scene transition to GUID: {}", sceneGUID.ToString());
+
+			// Store the target scene and set the flag
+			next_scene_guid = sceneGUID;
+			pending_scene_change = true;
+
+		}
+
+		void SceneManager::processPendingSceneChange()
+		{
+			// If no change is pending, do nothing
+			if (!pending_scene_change) return;
+
+			PN_CORE_INFO("[SceneManager] Executing pending scene transition...");
+
+			pending_scene_change = false;
+
+			auto assetManager = services->get<Assets::Manager>();
+			if (!assetManager) {
+				PN_CORE_ERROR("[SceneManager] Asset Manager not available");
+				return;
+			}
+
+			// Get scene asset by GUID
+			auto sceneOpt = assetManager->getAsset<SceneAsset>(next_scene_guid);
+			if (!sceneOpt.has_value()) {
+				PN_CORE_ERROR("[SceneManager] Failed to load scene with GUID: {}", next_scene_guid.ToString());
+				return;
+			}
+
+			//Get scene asset
+			auto currentSceneAsset = sceneOpt.value();
+
+			//Clear old scene
+			PN_CORE_INFO("[SceneManager] Unloading current scene");
+
+			// reset lua scripting state before destroying entities
+			//auto controller = services->get<ECS::Controller>();
+			//PN_CORE_INFO("[SceneManager::onStop] Resetting Lua scripting state...");
+			//auto scriptingSystem = controller->getSystem<Scripting::GameScriptingSystem>();
+			//if (scriptingSystem) {
+			//	scriptingSystem->getLuaManager().resetForSceneReload();
+			//	PN_CORE_INFO("[SceneManager::onStop] Lua state reset complete");
+			//}
+			//else {
+			//	PN_CORE_WARN("[SceneManager::onStop] GameScriptingSystem not found!");
+			//}
+
+			// Destroy all ECS entities
+			auto controller = services->get<ECS::Controller>();
+			if (controller) {
+				controller->destroyAllEntities();
+				PN_CORE_INFO("[SceneManager] Cleared all entities");
+			}
+
+			//Reset with default
+			curr_scene_id = Assets::GUID();
+			services->get<Serialization::Service>()->setCurrSceneFileName("");
+
+			// Reset camera
+			active_game_cam = "";
+
+			//Configure the new scene
+			if (currentSceneAsset) {
+				configScene(*currentSceneAsset);
+			}
+			else {
+				PN_CORE_INFO("[SceneManager] Failed to configure scene with GUID: {}", next_scene_guid.ToString());
+				return;
+			}
+
+			//Scene changed successfully
+			PN_CORE_INFO("[SceneManager] Changed scene to {} from GUID: {}", currentSceneAsset->name, next_scene_guid.ToString());
+			curr_scene_id = next_scene_guid;
+			services->get<Serialization::Service>()->setCurrSceneFileName(currentSceneAsset->name);
+
+			setPlaying(true);
+			setGamePaused(false);
 		}
 
 #ifdef PN_PLATFORM_WINDOWS
@@ -1405,11 +1491,22 @@ namespace PAIN {
 			PN_CORE_INFO("[SceneManager] Unloading current scene");
 
 			if (is_playing) {
-				is_playing = false;
+				setPlaying(false);
+			}
+
+			// reset lua scripting state before destroying entities
+			auto controller = services->get<ECS::Controller>();
+			PN_CORE_INFO("[SceneManager::onStop] Resetting Lua scripting state...");
+			auto scriptingSystem = controller->getSystem<Scripting::GameScriptingSystem>();
+			if (scriptingSystem) {
+				scriptingSystem->getLuaManager().resetForSceneReload();
+				PN_CORE_INFO("[SceneManager::onStop] Lua state reset complete");
+			}
+			else {
+				PN_CORE_WARN("[SceneManager::onStop] GameScriptingSystem not found!");
 			}
 
 			// Destroy all ECS entities
-			auto controller = services->get<ECS::Controller>();
 			if (controller) {
 				controller->destroyAllEntities();
 				PN_CORE_INFO("[SceneManager] Cleared all entities");
@@ -1417,10 +1514,9 @@ namespace PAIN {
 
 			//Reset with default
 			curr_scene_id = Assets::GUID();
+			services->get<Serialization::Service>()->clearModifiedFlag();
+			services->get<Serialization::Service>()->setCurrSceneFileName("");
 
-			// Clear lights
-			//LightSources::get().clear();
-			//PN_CORE_INFO("[SceneManager] Cleared all lights");
 
 			// Reset camera (but don't destroy it - we'll reuse it)
 			active_game_cam = "";
@@ -1434,13 +1530,25 @@ namespace PAIN {
 			PN_CORE_INFO("PLAY");
 			captureSceneVariables(scene_snapshot);
 			scene_snapshot.entityData = captureCurrentEntities();
-			is_playing = true;
+			guid_snapshot = curr_scene_id;
+			setPlaying(true);
 		}
 
 		void SceneManager::onStop()
 		{
 			PN_CORE_INFO("STOPPED");
 			auto controller = services->get<ECS::Controller>();
+
+			// reset lua scripting state before destroying entities
+			PN_CORE_INFO("[SceneManager::onStop] Resetting Lua scripting state...");
+			auto scriptingSystem = controller->getSystem<Scripting::GameScriptingSystem>();
+			if (scriptingSystem) {
+				scriptingSystem->getLuaManager().resetForSceneReload();
+				PN_CORE_INFO("[SceneManager::onStop] Lua state reset complete");
+			}
+			else {
+				PN_CORE_WARN("[SceneManager::onStop] GameScriptingSystem not found!");
+			}
 			
 			// Clears all entities
 			controller->destroyAllEntities();
@@ -1448,16 +1556,38 @@ namespace PAIN {
 			controller->getGUIDRegistry().clear();
 
 			// Restore env snapshot variables
+			setupLoadingScreen(scene_snapshot);
+			if (curr_scene_id != guid_snapshot) {
+				curr_scene_id = guid_snapshot;
+				setupCamera(scene_snapshot);
+			}
 			setupEnvironment(scene_snapshot);
 			setupLayers(scene_snapshot);
 
-			// Rebuild entites from snapshop
+			// Rebuild entites from snapshot
 			buildEntitiesFromAsset(scene_snapshot);	
 
 			services->get<Serialization::Service>()->markSceneChanged();
 
-			is_playing = false;
+			setPlaying(false);
 
+		}
+
+		void SceneManager::setPlaying(bool playing)
+		{
+			if (playing)
+			{
+				is_playing = true;
+			}
+			else {
+				is_game_paused = false;
+				is_playing = false;
+			}
+		}
+
+		void SceneManager::setGamePaused(bool paused)
+		{
+			is_game_paused = paused;
 		}
 
 		void SceneManager::setCurrSkyBoxTexture(Assets::GUID const& skybox_id) {
@@ -1493,10 +1623,6 @@ namespace PAIN {
 			if (it != game_cameras.end()) {
 				SetActiveCamera(it->second.get());
 			}
-			else {
-				PN_CORE_ERROR("Game camera not found");
-			}
-
 		}
 
 		void SceneManager::ChangeGameCamera(std::string cam_name)
@@ -1513,6 +1639,17 @@ namespace PAIN {
 		const std::unordered_map<std::string, std::unique_ptr<Camera>>& SceneManager::GetAllGameCamera() const {
 			return game_cameras;
 		}
-	}
+
+		int SceneManager::getPickingMask() const
+		{
+			int mask = 0;
+			for (const auto& layer : layers) {
+				if (layer.enabled && layer.pickable) {
+					mask |= layer.mask; // (1 << layer.id)
+				}
+			}
+			return mask;
+		}
+}
 
 }

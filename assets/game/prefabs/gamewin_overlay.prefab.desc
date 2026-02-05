@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "gamewin_overlay.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 15413422646952511461
+  },
+  "descriptor_version": 1,
+  "guid": "9518f1e9-570e-124c-a9fc-a3974432dce0",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\gamewin_overlay.prefab"
+  }
+}

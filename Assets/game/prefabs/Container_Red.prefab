@@ -1,0 +1,100 @@
+{
+    "entities": [
+        {
+            "components": {
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        -3.8247485160827637,
+                        0.0,
+                        -33.17413330078125
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "1708e4d2-69c9-ba43-9ef6-85d417b11f01",
+                            "aoTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                            "normalTextureOverride": "c79c529b-71e5-164c-854d-f8cf076f5318",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "c3240e7d-4066-2444-a024-c1d31c71a299",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "Container_Red"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        1.100000023841858,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        2.700000047683716,
+                        4.300000190734863,
+                        5.599999904632568
+                    ],
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 1
+                    },
+                    "use_gravity": true,
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "4b63afae-38b8-9449-b7da-79abee6ce859"
+        }
+    ],
+    "prefabName": "Container_Red",
+    "rootEntityGUID": "4b63afae-38b8-9449-b7da-79abee6ce859"
+}

@@ -392,6 +392,7 @@ namespace PAIN {
                             newLayer.mask = 1 << newId;
                             newLayer.enabled = true;
                             newLayer.name = "Layer " + std::to_string(newId);
+                            newLayer.pickable = true;
 
                             // Assign a nice default color
                             static const glm::vec3 defaultColors[] = {
@@ -536,7 +537,7 @@ namespace PAIN {
 
                     // Card background
                     ImVec2 cardPos = ImGui::GetCursorScreenPos();
-                    ImVec2 cardSize = ImVec2(ImGui::GetContentRegionAvail().x, 80);
+                    ImVec2 cardSize = ImVec2(ImGui::GetContentRegionAvail().x, 100);
 
                     ImU32 cardColor = isSelected
                         ? IM_COL32(60, 80, 100, 255)   // Selected
@@ -568,23 +569,8 @@ namespace PAIN {
 
                     ImGui::BeginGroup();
                     {
-                        // Row 1: Visibility + Name + Actions
+                        // Row 1: Name, Color, Duplicate
                         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 4);
-
-                        // Visibility toggle with nice icon
-                        bool wasEnabled = layer.enabled;
-                        if (ImGui::Checkbox(layer.enabled ? "Visible" : "Hidden", &layer.enabled)) {
-                            if (wasEnabled != layer.enabled) {
-                                PN_CORE_INFO("[LayerPanel] Layer '{}' {}",
-                                    layer.name,
-                                    layer.enabled ? "enabled" : "disabled");
-                            }
-                        }
-                        if (ImGui::IsItemHovered()) {
-                            ImGui::SetTooltip(layer.enabled ? "Layer Visible" : "Layer Hidden");
-                        }
-
-                        ImGui::SameLine();
 
                         // Layer name (editable)
                         ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.2f, 0.25f, 0.3f, 0.8f));
@@ -604,6 +590,7 @@ namespace PAIN {
                             ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel)) {
                             // Color changed
                         }
+                        if (ImGui::IsItemHovered()) ImGui::SetTooltip("Layer Name Color");
 
                         ImGui::SameLine();
 
@@ -628,7 +615,33 @@ namespace PAIN {
                             ImGui::SetTooltip("Duplicate layer");
                         }
 
-                        // Row 2: Layer info
+                        // Row 2 : Visibility and Pickable Toggles
+                        bool wasEnabled = layer.enabled;
+                        if (ImGui::Checkbox(layer.enabled ? "Visible" : "Hidden", &layer.enabled)) {
+                            if (wasEnabled != layer.enabled) {
+                                PN_CORE_INFO("[LayerPanel] Layer '{}' {}",
+                                    layer.name,
+                                    layer.enabled ? "enabled" : "disabled");
+                            }
+                        }
+                        if (ImGui::IsItemHovered()) {
+                            ImGui::SetTooltip(layer.enabled ? "Layer Visible" : "Layer Hidden");
+                        }
+
+                        ImGui::SameLine();
+
+                        bool wasPickable = layer.pickable;
+
+                        if (ImGui::Checkbox(layer.pickable ? "Pickable" : "Not Pickable", &layer.pickable)) {
+                            if (wasPickable != layer.pickable) {
+                                PN_CORE_INFO("[LayerPanel] Layer '{}' {}", layer.name, layer.pickable ? "pickable" : "locked");
+                            }
+                        }
+                        if (ImGui::IsItemHovered()) {
+                            ImGui::SetTooltip(layer.pickable ? "Can be selected by mouse" : "Cannot be selected by mouse");
+                        }
+
+                        // Row 3: Layer info
                         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 4);
                         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
                         ImGui::Text("ID");
@@ -654,7 +667,7 @@ namespace PAIN {
                         ImGui::Text("Collides with: %d layers", collisionCount);
                         ImGui::PopStyleColor();
 
-                        // Row 3: Entity count (if entities have layer component)
+                        // Entity count (if entities have layer component)
                         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 4);
 
                         int entityCount = 0;

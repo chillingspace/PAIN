@@ -1,0 +1,100 @@
+{
+    "entities": [
+        {
+            "components": {
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        -2.270752429962158,
+                        0.0,
+                        -7.310388565063477
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "e182099e-b02e-f047-955a-601cf382ed3b",
+                            "aoTextureOverride": "834affba-d9d2-f048-b6ec-3bca7c2cd265",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "9dc666a4-a004-0346-803d-0530eb3a2f70",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "834affba-d9d2-f048-b6ec-3bca7c2cd265",
+                            "normalTextureOverride": "1982f63e-4b4f-8e44-bda6-ed47f4d8ba20",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "834affba-d9d2-f048-b6ec-3bca7c2cd265",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "f6863a86-d8e4-194c-9c87-f42435c1060a",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "Truck2"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        0.699999988079071,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        2.200000047683716,
+                        1.0,
+                        4.800000190734863
+                    ],
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 0
+                    },
+                    "use_gravity": true,
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "bc78c7ad-0455-1343-bb79-2cbc48968d1f"
+        }
+    ],
+    "prefabName": "Truck2",
+    "rootEntityGUID": "bc78c7ad-0455-1343-bb79-2cbc48968d1f"
+}

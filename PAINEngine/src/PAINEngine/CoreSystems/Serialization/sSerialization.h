@@ -67,10 +67,6 @@ namespace PAIN {
             void onAppPause() override {}
             void onAppResume() override {}
             void onEvent(Event::Event& e) override {}
-            void modifyScene() { isModifiedScene = true; }
-
-            bool getIsModifiedScene() { return isModifiedScene; }
-            bool getIsCurSceneEmpty() { return curr_scene_file_.empty(); }
 
             // Tell listeners (like the EntityPanel) that the scene graph changed.
             void markSceneChanged();
@@ -85,7 +81,13 @@ namespace PAIN {
             bool saveSceneToFile(const std::string& file_path);
             bool loadSceneFromFile(const std::string& file_path);
 
-            const std::string& getCurrSceneFile() const { return curr_scene_file_; }
+            void modifyScene();
+            void clearModifiedFlag() { isModifiedScene = false; }
+            bool getIsModifiedScene() { return isModifiedScene; }
+            bool getIsCurSceneEmpty() { return curr_scene_file.empty(); }
+            void setCurrSceneFileName(const std::string& file_name) { curr_scene_file = file_name; isModifiedScene = false; };
+            const std::string& getCurrSceneFileName() const { return curr_scene_file; }
+
             std::string getCurrSceneId() const;
             std::string getSceneId(std::string file_path) const;
 
@@ -125,7 +127,7 @@ namespace PAIN {
             bool deleteSceneById(std::string_view sceneIdWithExt); 
 
         private:
-            std::string curr_scene_file_;
+            std::string curr_scene_file;
             bool isModifiedScene = false;
             SceneDoc doc_;
 

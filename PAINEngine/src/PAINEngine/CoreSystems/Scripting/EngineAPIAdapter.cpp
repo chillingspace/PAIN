@@ -134,15 +134,26 @@ namespace PAIN {
     /*                                  Lookup                                     */
     /* =========================================================================== */
     std::optional<int> EngineAPIAdapter::FindEntity(std::string_view name) {
-        // 1) Fast path: use the meta index
-        if (auto opt = meta_.getEntityByName(std::string{ name })) {
-            return asInt(*opt);
-        }
-
-        // 2) Fallback: scan the registry for Entity::Name
         auto& reg = ecs_.getRegistry();
-        //PN_CORE_INFO("[FindEntity] ecs registry @ {}; names in this reg = {}", (void*)&reg, reg.view<PAIN::Entity::Name>().size());
-
+        
+        // 1) Fast path: check meta cache BUT VALIDATE
+        if (auto opt = meta_.getEntityByName(std::string{ name })) {
+            entt::entity e = *opt;
+            
+            // Validate: entity must be alive and still have this name
+            if (reg.valid(e) && reg.all_of<PAIN::Entity::Name>(e)) {
+                const auto& entityName = reg.get<PAIN::Entity::Name>(e).name;
+                if (entityName == name) {
+                    return asInt(e);  // Valid cached entity
+                }
+            }
+            
+            // Stale cache entry detected - will be refreshed below
+            PN_CORE_WARN("[FindEntity] Stale cache entry for '{}' (entity {}) - refreshing", 
+                         name, entt::to_integral(e));
+        }
+        
+        // 2) Fallback: scan the registry for Entity::Name
         auto view = reg.view<PAIN::Entity::Name>();
         for (auto e : view) {
             const auto& n = view.get<PAIN::Entity::Name>(e).name;
@@ -151,7 +162,6 @@ namespace PAIN {
                 meta_.setEntityName(e, std::string{ name });
                 return asInt(e);
             }
-            /*PN_CORE_INFO("[FindEntity] saw name: {}", reg.get<PAIN::Entity::Name>(e).name);*/
         }
 
         return std::nullopt;
@@ -191,6 +201,33 @@ namespace PAIN {
     std::string EngineAPIAdapter::GetPrefabsGUID(std::string_view name) { return GetAssetGUID(name, PAIN::Assets::Type::Prefabs); }
     std::string EngineAPIAdapter::GetDataGUID(std::string_view name) { return GetAssetGUID(name, PAIN::Assets::Type::Data); }
     std::string EngineAPIAdapter::GetShaderGUID(std::string_view name) { return GetAssetGUID(name, PAIN::Assets::Type::Shader); }
+
+    std::string EngineAPIAdapter::GetEntityTexture(entt::entity entityId) {
+        auto& reg = ecs_.getRegistry();
+
+        // Check if entity exists and has a texture
+        if (reg.valid(entityId) && reg.all_of<PAIN::Texture2D>(entityId)) {
+            auto& texComp = reg.get<PAIN::Texture2D>(entityId);
+            return texComp.texture_guid.ToString();
+        }
+
+        return ""; // Return empty if no texture component found
+    }
+
+    void EngineAPIAdapter::SetEntityTexture(entt::entity entityId, const std::string& guidStr) {
+        auto& reg = ecs_.getRegistry();
+
+        // 1. Validation: Ensure entity is valid and has the component
+        if (!reg.valid(entityId) || !reg.all_of<PAIN::Texture2D>(entityId)) {
+            return;
+        }
+
+        // 2. Update the component data
+        auto& texComp = reg.get<PAIN::Texture2D>(entityId);
+
+        // Convert string to GUID (using the constructor/method available in your engine)
+        texComp.texture_guid = PAIN::Assets::GUID(guidStr);
+    }
 
     //int EngineAPIAdapter::guidToInt(const PAIN::Assets::GUID& id) {
     //    uint32_t v = 0; std::memcpy(&v, id.bytes, sizeof(uint32_t));
@@ -465,62 +502,87 @@ namespace PAIN {
             return false;
         }
 
-        // Invalid default
-        PAIN::Assets::GUID targetGuid; 
+        auto scn_opt = assets_->getAssetData(name);
 
-        // Get asset metadata
-        auto sceneInfos = assets_->getAllAssetDataOfType(PAIN::Assets::Type::Scenes);
+        if (scn_opt) {
 
-        for (const auto& info : sceneInfos) {
-            if (info->name == name) {     
-                // e.g "prototype.scn"
-                targetGuid = info->guid;
-                break;
-            }
+            scene_->changeScene(scn_opt.get()->guid);
+            //SetGameCamera();
         }
 
-        if (!targetGuid.IsValid()) {
-            PN_CORE_WARN("[EngineAPI] No scene GUID found for scene name '{}'", name);
+        return true;
 
-            for (const auto& info : sceneInfos) {
-                PN_CORE_INFO("[EngineAPI] Scene asset: name='{}', guid={}", info->name, info->guid.ToString());
-            }
+        //// Invalid default
+        //PAIN::Assets::GUID targetGuid; 
 
+        //// Get asset metadata
+        //auto sceneInfos = assets_->getAllAssetDataOfType(PAIN::Assets::Type::Scenes);
+
+        //for (const auto& info : sceneInfos) {
+        //    if (info->name == name) {     
+        //        // e.g "prototype.scn"
+        //        targetGuid = info->guid;
+        //        break;
+        //    }
+        //}
+
+        //if (!targetGuid.IsValid()) {
+        //    PN_CORE_WARN("[EngineAPI] No scene GUID found for scene name '{}'", name);
+
+        //    for (const auto& info : sceneInfos) {
+        //        PN_CORE_INFO("[EngineAPI] Scene asset: name='{}', guid={}", info->name, info->guid.ToString());
+        //    }
+
+        //    return false;
+        //}
+
+        //PN_CORE_INFO("[EngineAPI] Changing scene '{}' (GUID {})",
+        //    name, targetGuid.ToString());
+
+        //// Preserve play state
+        //bool previousSceneState = scene_->isPlaying();
+
+        //// Load next scene
+        //scene_->loadScene(targetGuid);
+        //
+        //// Set scene to play
+        //if (previousSceneState) {
+        //    scene_->onPlay();
+        //}
+        //else {
+        //    scene_->onStop();
+        //}
+
+        //// Set Camera to game camera
+        //scene_->SetGameCamera();
+
+    }
+
+    // Expose pausing to lua
+    void EngineAPIAdapter::SetGamePaused(bool pause) {
+        if (!scene_) {
+            PN_CORE_WARN("[EngineAPI] Missing SceneManager.");
+            return;
+        }
+
+        scene_->setGamePaused(pause);
+    }
+    // Check if game is paused
+    bool EngineAPIAdapter::IsGamePaused() const { 
+        if (!scene_) {
+            PN_CORE_WARN("[EngineAPI] Missing SceneManager.");
             return false;
         }
 
-        PN_CORE_INFO("[EngineAPI] Changing scene '{}' (GUID {})",
-            name, targetGuid.ToString());
-
-        // Preserve play state
-        bool previousSceneState = scene_->isPlaying();
-
-        // Load next scene
-        scene_->loadScene(targetGuid);
-        
-        // Set scene to play
-        if (previousSceneState) {
-            scene_->onPlay();
-        }
-        else {
-            scene_->onStop();
-        }
-
-        // Set Camera to game camera
-        scene_->SetGameCamera();
-
-        return true;
+        return scene_->isGamePaused();
     }
-
-    void EngineAPIAdapter::PauseAllSystems(bool) {}
-    bool EngineAPIAdapter::IsGamePaused() const { return false; }
     float EngineAPIAdapter::GetFps() const { return 0.0f; }
     void EngineAPIAdapter::SetDeltaMultiplier(float) {}
     float EngineAPIAdapter::GetDeltaMultiplier() const { return 1.0f; }
 
     /* =========================================================================== */
-/*                              Layer Control                                  */
-/* =========================================================================== */
+    /*                              Layer Control                                  */
+    /* =========================================================================== */
 
     bool EngineAPIAdapter::SetLayerEnabled(int layerId, bool enabled) {
         if (!scene_) {
@@ -556,6 +618,23 @@ namespace PAIN {
 
         PN_CORE_WARN("[EngineAPIAdapter] Layer {} not found", layerId);
         return false;
+    }
+
+    /* =========================================================================== */
+    /*                         Application / Quit Control                           */
+    /* =========================================================================== */
+    void EngineAPIAdapter::QuitApplication()
+    {
+        // Prefer a safe shutdown via the window system when available
+        if (window_) {
+            PN_CORE_INFO("[EngineAPIAdapter] QuitApplication -> calling Window::safeShutdown()");
+            window_->safeShutdown();
+            return;
+        }
+
+        // Fallback: request quit via global flag (Application::Run checks this)
+        PN_CORE_INFO("[EngineAPIAdapter] QuitApplication -> window not available, setting g_shouldQuitApplication");
+        PAIN::g_shouldQuitApplication = true;
     }
 
 
@@ -720,6 +799,13 @@ namespace PAIN {
 #endif
     }
 
+
+    void EngineAPIAdapter::Hide_Cursor(bool b_set_cursor)
+    {
+        window_->setCursorMode(b_set_cursor);
+    }
+
+
     bool EngineAPIAdapter::Input_IsKeyDown(int key) { return keysDown_.count(key) != 0; }
     bool EngineAPIAdapter::Input_WasKeyPressed(int key) { return keysPressed_.count(key) != 0; }
     bool EngineAPIAdapter::Input_WasKeyReleased(int key) { return keysReleased_.count(key) != 0; }
@@ -809,57 +895,23 @@ namespace PAIN {
     void EngineAPIAdapter::SetLightPosition(entt::entity entityId, float x, float y, float z) {
         auto& l = ensure<PAIN::Lighting>(entityId);
         l.offset = { x,y,z };
-
-        /*PAIN::Lighting* l = nullptr;
-        if (!try_get<PAIN::Lighting>(entityId, l)) {
-            PN_CORE_ERROR("SetLightPosition: Entity {} has no Lighting component", static_cast<entt::id_type>(entt::to_integral(entityId)));
-            return;
-        }
-        l->position = { x, y, z };*/
     }
     void EngineAPIAdapter::SetLightIntensity(entt::entity entityId, float r, float g, float b) {
         auto& l = ensure<PAIN::Lighting>(entityId);
         l.light_intensity = { r,g,b };
-
-        /*PAIN::Lighting* l = nullptr;
-        if (!try_get<PAIN::Lighting>(entityId, l)) {
-            PN_CORE_ERROR("SetLightIntensity: Entity {} has no Lighting component", static_cast<entt::id_type>(entt::to_integral(entityId)));
-            return;
-        }
-        l->light_intensity = { r, g, b };*/
     }
     void EngineAPIAdapter::SetLightType(entt::entity entityId, int ty) {
         auto& l = ensure<PAIN::Lighting>(entityId);
         l.light_type = static_cast<PAIN::TYPES>(ty);
-
-        /*PAIN::Lighting* l = nullptr;
-        if (!try_get<PAIN::Lighting>(entityId, l)) {
-            PN_CORE_ERROR("SetLightType: Entity {} has no Lighting component", static_cast<entt::id_type>(entt::to_integral(entityId)));
-            return;
-        }
-        l->light_type = static_cast<PAIN::TYPES>(ty);*/
     }
     void EngineAPIAdapter::SetLightDirection(entt::entity entityId, float x, float y, float z) {
         auto& l = ensure<PAIN::Lighting>(entityId);
         l.direction = glm::normalize(glm::vec3{ x,y,z });
-
-        /*PAIN::Lighting* l = nullptr;
-        if (!try_get<PAIN::Lighting>(entityId, l)) {
-            PN_CORE_ERROR("SetLightForward: Entity {} has no Lighting component", static_cast<entt::id_type>(entt::to_integral(entityId)));
-            return;
-        }
-        l->forward = glm::normalize(glm::vec3{ x, y, z });*/
     }
     void EngineAPIAdapter::SetShadowType(entt::entity entityId, int st) {
         auto& l = ensure<PAIN::Lighting>(entityId);
         l.shadow_type = static_cast<PAIN::SHADOW_TYPES>(st);
 
-        /*PAIN::Lighting* l = nullptr;
-        if (!try_get<PAIN::Lighting>(entityId, l)) {
-            PN_CORE_ERROR("SetShadowType: Entity {} has no Lighting component", static_cast<entt::id_type>(entt::to_integral(entityId)));
-            return;
-        }
-        l->shadow_type = static_cast<PAIN::SHADOW_TYPES>(st);*/
     }
 
     /* =========================================================================== */

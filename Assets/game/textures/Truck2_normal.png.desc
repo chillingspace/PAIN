@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Truck2_normal.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 8009362395209381480
+  },
+  "descriptor_version": 1,
+  "guid": "b17a7e7a-a4f4-f746-9d4c-8101b65d9b4b",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Truck2_normal.png"
+  }
+}

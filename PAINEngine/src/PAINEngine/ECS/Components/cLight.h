@@ -39,6 +39,9 @@ namespace PAIN {
         float inner_angle = 12.5f;
         float outer_angle = 17.5f;
 
+        static constexpr const char* LightTypeNames[] = { "Point", "Directional", "Spotlight" };
+        static constexpr const char* ShadowTypeNames[] = { "None", "Mapped", "Screen Space" };
+
         //Serialization flag
         static constexpr bool ShouldSerialize = true;
     };
@@ -56,28 +59,6 @@ NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::TYPES, {
         {PAIN::TYPES::SPOTLIGHT, "spotlight"}
     })
 
-// This is needed as json still does not now how to handle seri for the custom comps,
-// These types not supported by refl, so we need add struct-level seri 
-//namespace nlohmann {
-//template<>
-//    struct adl_serializer<PAIN::Lighting> {
-//        static void to_json(json& j, const PAIN::Lighting& light) {
-//            j["position"] = light.offset;
-//            j["light_intensity"] = light.light_intensity;
-//            j["light_type"] = light.light_type;
-//            j["forward"] = light.forward;
-//            j["shadow_type"] = light.shadow_type;
-//        }
-//
-//        static void from_json(const json& j, PAIN::Lighting& light) {
-//            light.offset = j["offset"].get<glm::vec3>();
-//            light.light_intensity = j["light_intensity"].get<glm::vec3>();
-//            light.light_type = j["light_type"].get<PAIN::TYPES>();
-//            light.forward = j["forward"].get<glm::vec3>();
-//            light.shadow_type = j["shadow_type"].get<PAIN::SHADOW_TYPES>();
-//        }
-//    };
-//}
 
 // Reflection
 REFL_TYPE(PAIN::Lighting)
@@ -85,10 +66,9 @@ REFL_FIELD(offset)
 REFL_FIELD(light_intensity)
 REFL_FIELD(light_type)
 REFL_FIELD(shadow_type)
-//these are added manually in components panel
-//REFL_FIELD(direction)
-//REFL_FIELD(inner_angle)
-//REFL_FIELD(outer_angle)
+REFL_FIELD(direction)
+REFL_FIELD(inner_angle)
+REFL_FIELD(outer_angle)
 REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::Lighting>);

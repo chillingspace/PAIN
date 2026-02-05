@@ -49,6 +49,9 @@ namespace PAIN {
         virtual std::string GetDataGUID(std::string_view name) = 0;
         virtual std::string GetShaderGUID(std::string_view name) = 0;
 
+        virtual std::string GetEntityTexture(entt::entity entityId) = 0;
+        virtual void SetEntityTexture(entt::entity entity, const std::string& guidStr) = 0;
+
         /* =========================================================================== */
         /*                     Metadata (name / tags / groups)                         */
         /* =========================================================================== */
@@ -98,7 +101,7 @@ namespace PAIN {
         /*                           Scene / System state                              */
         /* =========================================================================== */
         virtual bool  ChangeScene(std::string name) = 0;
-        virtual void  PauseAllSystems(bool toPause) = 0;
+        virtual void  SetGamePaused(bool pause) = 0;
         virtual bool  IsGamePaused() const = 0;
         virtual float GetFps() const = 0;
         virtual void  SetDeltaMultiplier(float m) = 0;
@@ -139,6 +142,8 @@ namespace PAIN {
         virtual bool      Input_IsCursorInWindow() = 0;
         virtual void      Input_EndFrame() = 0; // call once per frame to clear edges
         virtual void      Input_OnEvent(PAIN::Event::Event& e) = 0; // feed events into the adapter 
+        virtual void      Hide_Cursor(bool b_set_cursor) = 0;
+
 
         /* =========================================================================== */
         /*                                ModelRenderer                                 */
@@ -171,6 +176,12 @@ namespace PAIN {
         virtual void Animation_SetLoop(entt::entity entityId, bool loop) = 0;
         virtual bool Animation_IsPlaying(entt::entity entityId, std::string animName) = 0;
         virtual float GetAnimationDuration(entt::entity entityId) = 0;
+
+        /* =========================================================================== */
+        /*                              Application Control                              */
+        /* =========================================================================== */
+        // Request application quit / safe shutdown
+        virtual void QuitApplication() = 0;
 
     };
 

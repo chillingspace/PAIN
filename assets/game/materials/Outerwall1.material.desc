@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Outerwall1.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 1501511180622949147
+  },
+  "descriptor_version": 1,
+  "guid": "4ab9b8a8-4bdc-e046-83a2-24863013c030",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Outerwall1.material"
+  }
+}

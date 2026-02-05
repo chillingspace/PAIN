@@ -15,6 +15,7 @@
 #include "PAINEngine/CoreSystems/Assets/sAssets.h"
 #include "Common/AssetTypes/src/AssetData.h"
 #include "CoreSystems/Scene/Scene.h"
+#include "CoreSystems/Windows/Window.h"
 
 namespace PAIN {
 
@@ -27,10 +28,11 @@ namespace PAIN {
             PAIN::Assets::Manager* assets,
             //PAIN::Audio::Audio* audio,
             PAIN::Path::Path* fs,
-            PAIN::Scene::SceneManager* scene)
+            PAIN::Scene::SceneManager* scene,
+            PAIN::Window::Window* window = nullptr)
             //PAIN::Serialization::Service* ser)
-            : ecs_(ecs), meta_(meta), assets_(assets), //audio_(audio), 
-              fs_(fs), scene_(scene)
+                        : ecs_(ecs), meta_(meta), assets_(assets), //audio_(audio), 
+                            fs_(fs), scene_(scene), window_(window)
         {
             //PN_CORE_INFO("[LuaAdapter] ecs_ registry @ {}", (void*)&ecs_.getRegistry());
             //PN_CORE_INFO("[LuaAdapter] meta_         @ {}", (void*)&meta_);
@@ -60,6 +62,9 @@ namespace PAIN {
         std::string GetPrefabsGUID(std::string_view name) override;
         std::string GetDataGUID(std::string_view name) override;
         std::string GetShaderGUID(std::string_view name) override;
+
+        std::string GetEntityTexture(entt::entity entityId);
+        void SetEntityTexture(entt::entity entity, const std::string& guidStr);
 
         /* =========================================================================== */
         /*                     Metadata (name / tags / groups)                         */
@@ -110,11 +115,13 @@ namespace PAIN {
         /*                           Scene / System state                              */
         /* =========================================================================== */
         bool  ChangeScene(std::string name) override;
-        void  PauseAllSystems(bool toPause) override;
+        void  SetGamePaused(bool pause) override;
         bool  IsGamePaused() const override;
+
         float GetFps() const override;
         void  SetDeltaMultiplier(float m) override;
         float GetDeltaMultiplier() const override;
+        void QuitApplication() override;
 
         /* =========================================================================== */
         /*                              Layer Control                                  */
@@ -152,6 +159,9 @@ namespace PAIN {
 
         void Input_EndFrame() override; // call once per frame to clear edges
         void Input_OnEvent(PAIN::Event::Event& e) override; // feed events into the adapter
+
+        void Hide_Cursor(bool b_set_cursor) override;
+
 
         /* =========================================================================== */
         /*                                ModelRenderer                                 */
@@ -211,6 +221,7 @@ namespace PAIN {
         //PAIN::Audio::Audio* audio_ = nullptr;
         PAIN::Path::Path* fs_ = nullptr;
         PAIN::Scene::SceneManager* scene_ = nullptr;
+        PAIN::Window::Window* window_ = nullptr;
         PAIN::Serialization::Service* ser_ = nullptr;
         PAIN::Assets::Manager* assets_ = nullptr;
         std::unordered_set<int> keysDown_, mouseDown_;

@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "c9.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 1490777928574210455
+  },
+  "descriptor_version": 1,
+  "guid": "a3851ae6-0244-1a45-8aed-68b044ea00a6",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\c9.png"
+  }
+}

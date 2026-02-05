@@ -1840,7 +1840,7 @@ namespace PAIN {
 				registerPopUp("New Material", newMaterialPopup("New Material"));
 				registerPopUp("Info", defPopUp("Info"));
 
-				registerPopUp("Script Editor", scriptEditorPopup("Script Editor"));
+				registerPopUp("Script Editor", scriptEditorPopup("Script Editor"), ImGuiWindowFlags_None);
 
 				//Initialize root and current path
 #ifdef PN_PLATFORM_ANDROID

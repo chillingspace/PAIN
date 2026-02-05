@@ -14,8 +14,6 @@
 struct ScriptExternalVar { std::string id; std::variant<std::string, double, bool> val; };
 
 namespace PAIN {
-    //namespace Path { class Path; } 
-    //}
 
     class IEngineAPI;
 
@@ -35,7 +33,7 @@ namespace PAIN {
         bool loadScriptForEntity(entt::entity entityId, const std::string& filePath,
             const std::vector<ScriptExternalVar>& vars = {}, bool runWhenPaused = false);
 
-        void tick(double dt);
+        void tick(double dt, double unscaled_dt);
         void setPrefabInstantiator(std::function<entt::entity(const std::string& prefab,
             const std::string& layer,
             const std::string& name)> fn);

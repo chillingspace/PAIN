@@ -1,0 +1,35 @@
+{
+  "asset_info": {
+    "name": "Truck2.gltf",
+    "type": "Model"
+  },
+  "build_data": {
+    "hash": 6599776531154222957
+  },
+  "descriptor_version": 1,
+  "guid": "f6863a86-d8e4-194c-9c87-f42435c1060a",
+  "import_settings": {
+    "extension": ".mesh",
+    "generate_lods": false,
+    "generate_normals": false,
+    "generate_tangents": true,
+    "import_animations": false,
+    "import_skeleton": false,
+    "improve_cache_locality": true,
+    "join_identical_vertices": true,
+    "lod_levels": 3,
+    "lod_reduction": 0.5,
+    "max_bone_weights": 4,
+    "optimize_meshes": true,
+    "optimize_vertices": true,
+    "quantize_normals": false,
+    "quantize_positions": false,
+    "quantize_uvs": false,
+    "remove_redundant_materials": true,
+    "triangulate": true,
+    "weld_threshold": 0.0010000000474974513
+  },
+  "meta_data": {
+    "source_file": "game\\models\\Truck2.gltf"
+  }
+}

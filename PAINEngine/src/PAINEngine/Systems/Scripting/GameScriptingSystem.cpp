@@ -9,6 +9,7 @@
 #include "PAINEngine/CoreSystems/Assets/sAssets.h"
 #include "PAINEngine/CoreSystems/Scene/Scene.h"
 #include "PAINEngine/CoreSystems/Scene/Camera.h"
+#include "PAINEngine/CoreSystems/Windows/Window.h"
 
 #ifdef PN_PLATFORM_ANDROID
 #include "PAINEngine/CoreSystems/Events/Android/TouchEvents.h"
@@ -54,11 +55,16 @@ namespace PAIN {
             ensureInit();
             if (!init_) return;
 
-            // IF GAME IS STOPPED
-            if (timing.dt <= 0.0001f) {
-                return;
-            }
+            auto services_ptr = getServices();
+            auto scene = services_ptr->get<Scene::SceneManager>();
 
+            #ifdef _DEBUG
+            if (scene) {
+                if (!scene->isPlaying()) { // If scene isn't playing don't run any scripts
+                    return;
+                }
+            }
+            #endif
 
             // --- publish LuaManager* into this registry's context once ---
             {
@@ -68,7 +74,7 @@ namespace PAIN {
                 }
             }
 
-            auto services_ptr = getServices();
+
             auto assets = services_ptr->get<Assets::Manager>();
             auto fs = services_ptr->get<Path::Path>();
 
@@ -96,6 +102,11 @@ namespace PAIN {
                         fs->aliasCombineRelative("assets", meta->shipped_relative_path.string());
                     std::string realPath = fs->resolvePath(vpath);
 
+                   /* PN_CORE_INFO("[GameScriptingSystem] Loading script '{}' for entity {} (entt::entity={})",
+                        meta->name,
+                        static_cast<uint32_t>(e),
+                        entt::to_integral(e));*/
+
                     // attach this script to this entity
                     attachScript(e, realPath);
 
@@ -104,7 +115,7 @@ namespace PAIN {
                 }
             }
 
-            luaManager_.tick(timing.dt);
+            luaManager_.tick(timing.dt, timing.unscaled_dt);
             luaManager_.Input_EndFrame();
 
         }
@@ -273,12 +284,15 @@ namespace PAIN {
                 return;
             }
 
+            // Provide optional window pointer so adapter can request safeShutdown
+            auto window_ptr = services_ptr->get<Window::Window>();
             auto adapter = std::make_shared<EngineAPIAdapter>(
                 *ecs_ptr,
                 *meta_ptr,
                 assets_ptr.get(),
                 path_ptr.get(),
-                scene_ptr.get()
+                scene_ptr.get(),
+                window_ptr ? window_ptr.get() : nullptr
             );
 
 #ifdef _DEBUG

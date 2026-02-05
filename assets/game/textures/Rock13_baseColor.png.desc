@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Rock13_baseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 17621552844629590846
+  },
+  "descriptor_version": 1,
+  "guid": "38a421a9-1ffc-3c47-a8e2-f0af50f2e2c2",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Rock13_baseColor.png"
+  }
+}

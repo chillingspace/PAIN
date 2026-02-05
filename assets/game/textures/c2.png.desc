@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "c2.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 11252970796691178342
+  },
+  "descriptor_version": 1,
+  "guid": "4050b80f-b767-1d4d-a82e-8811894abf99",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\c2.png"
+  }
+}

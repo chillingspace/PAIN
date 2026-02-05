@@ -15,22 +15,39 @@ namespace PAIN {
         class SceneManager : public AppSystem {
         private:
 
+            /* =========================================================================== */
+            /*                                CAMERAS                                      */
+            /* =========================================================================== */
             //Curr active camera
             Camera* active_camera = nullptr;
 
-            //Runtime objects
+            //editor camera
             std::unique_ptr<Camera> editor_camera;
 
-            //Map of cameras
+            // map of camera
             std::unordered_map<std::string, std::unique_ptr<Camera>> game_cameras;
             std::unordered_set<std::string> active_cameras;
-
-
             std::string active_game_cam;
 
-            //Current scene
+            /* =========================================================================== */
+            /*                                SCENES                                       */
+            /* =========================================================================== */
+            //Current scene id
             Assets::GUID curr_scene_id;
 
+            // Change scene variables
+            bool pending_scene_change = false;
+            Assets::GUID next_scene_guid;
+
+            //Scene Snapshot for play/stop scene (DEBUG ONLY)
+            SceneAsset scene_snapshot;
+            Assets::GUID guid_snapshot;
+            bool is_playing = false;
+            bool is_game_paused = false;
+
+            /* =========================================================================== */
+            /*                            ENVIRONMENT                                      */
+            /* =========================================================================== */
             //Light sources names
             std::string camera_light_name = "cam";
             std::string world_light_name = "world";
@@ -45,12 +62,15 @@ namespace PAIN {
             std::vector<Layer> layers;
             std::vector<std::vector<bool>> mask_matrix;
 
-            //Internal methods
+            // Internal methods
+            // LOADING
             bool buildEntitiesFromAsset(SceneAsset const& scene_asset);
             void setupCamera(SceneAsset const& scene_asset);
             void setupEnvironment(SceneAsset const& scene_asset);
             void setupLayers(SceneAsset const& scene_asset);
             void setupLoadingScreen(SceneAsset const& scene_asset);
+
+            // SAVING
             void cacheSceneAssets(SceneAsset const& scene_asset);
             nlohmann::json captureCurrentEntities();
             void recursiveCapture(entt::entity entity, nlohmann::json& jsonArray);
@@ -61,14 +81,10 @@ namespace PAIN {
             bool saveSceneToPath(SceneAsset& scn_asset, std::filesystem::path const& relative);
 #endif
 
-            //Scene Snapshot for play/stop scene
-            SceneAsset scene_snapshot;
-            bool is_playing = false;
-
             //Scene configuration
             void configScene(SceneAsset const& scn_asset);
 
-            //Internal add object used for testing
+            // Internal add object used for testing
             entt::entity AddObject(const std::shared_ptr<Assets::Model>& mdl, const std::string& name, const glm::vec3& pos, const glm::quat& quat, const glm::vec3& scale, Assets::GUID const& diff_id = Assets::GUID{}, Assets::GUID const& ao_id = Assets::GUID{});
 
         public:
@@ -90,6 +106,11 @@ namespace PAIN {
             //Load scene through relative path
             void loadScene(std::filesystem::path const& relative_path);
 
+            //Change scene 
+            void changeScene(const Assets::GUID& sceneGUID);
+
+            void processPendingSceneChange();
+
 #ifdef PN_PLATFORM_WINDOWS
 
             //Delete current active scene
@@ -99,11 +120,9 @@ namespace PAIN {
             //Create default scene
             void createScene(std::string const& name);
 #endif
-
             //Save curr scene
             void saveActiveScene(Assets::GUID const& scn_id, std::string const& name = "");
 #endif
-
             //Unload scene
             void unloadScene();
 
@@ -111,7 +130,9 @@ namespace PAIN {
             bool isPlaying() const { return is_playing; }
             void onPlay();
             void onStop();
-            void setPlaying(bool playing) { if (playing) is_playing = true; else is_playing = false; }
+            void setPlaying(bool playing);
+            bool isGamePaused() const { return is_game_paused;  }
+            void setGamePaused(bool paused);
 
             //Accessor
             Assets::GUID getCurrSkyBoxTextureID() const { return curr_skybox_id; }
@@ -179,6 +200,9 @@ namespace PAIN {
 
                 return mask_matrix[layer1][layer2];
             }
+
+            // Get Picking mask
+            int getPickingMask() const;
         };
 	}
 }

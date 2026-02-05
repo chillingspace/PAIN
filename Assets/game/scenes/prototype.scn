@@ -733,6 +733,14 @@
                                 "Name": {
                                     "name": "heart_1"
                                 },
+                                "Scripts": {
+                                    "scripts": [
+                                        {
+                                            "enabled": true,
+                                            "script_asset": "357751f9-ce90-1a4a-9151-75339efa9e50"
+                                        }
+                                    ]
+                                },
                                 "Texture2D": {
                                     "pos": [
                                         -0.9190000295639038,
@@ -753,6 +761,14 @@
                             "correspondingPrefabEntityGUID": "80d31589-343e-fa42-99b5-8ee35b84600b",
                             "instanceRootGUID": "b2b19dcb-e3a1-f74f-918e-34d1acd7840d",
                             "sourcePrefabGUID": "8dd07ba9-f750-7445-93aa-f8f72393ff06"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "357751f9-ce90-1a4a-9151-75339efa9e50"
+                                }
+                            ]
                         },
                         "Texture2D": {
                             "pos": [
@@ -884,6 +900,14 @@
                                 "Name": {
                                     "name": "heart_2"
                                 },
+                                "Scripts": {
+                                    "scripts": [
+                                        {
+                                            "enabled": true,
+                                            "script_asset": "357751f9-ce90-1a4a-9151-75339efa9e50"
+                                        }
+                                    ]
+                                },
                                 "Texture2D": {
                                     "pos": [
                                         -0.800000011920929,
@@ -904,6 +928,14 @@
                             "correspondingPrefabEntityGUID": "80d31589-343e-fa42-99b5-8ee35b84600b",
                             "instanceRootGUID": "b2b19dcb-e3a1-f74f-918e-34d1acd7840d",
                             "sourcePrefabGUID": "8dd07ba9-f750-7445-93aa-f8f72393ff06"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "357751f9-ce90-1a4a-9151-75339efa9e50"
+                                }
+                            ]
                         },
                         "Texture2D": {
                             "pos": [
@@ -1035,6 +1067,14 @@
                                 "Name": {
                                     "name": "heart_3"
                                 },
+                                "Scripts": {
+                                    "scripts": [
+                                        {
+                                            "enabled": true,
+                                            "script_asset": "357751f9-ce90-1a4a-9151-75339efa9e50"
+                                        }
+                                    ]
+                                },
                                 "Texture2D": {
                                     "pos": [
                                         -0.6800000071525574,
@@ -1055,6 +1095,14 @@
                             "correspondingPrefabEntityGUID": "80d31589-343e-fa42-99b5-8ee35b84600b",
                             "instanceRootGUID": "b2b19dcb-e3a1-f74f-918e-34d1acd7840d",
                             "sourcePrefabGUID": "8dd07ba9-f750-7445-93aa-f8f72393ff06"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "357751f9-ce90-1a4a-9151-75339efa9e50"
+                                }
+                            ]
                         },
                         "Texture2D": {
                             "pos": [

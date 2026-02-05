@@ -1,5 +1,6 @@
 #include "luaManager.h"
 #include "IEngineAPI.h"
+#include "PAINEngine/CoreSystems/Audio/Audio.h"
 #include "Utility/Log.h"
 
 #include <fstream>
@@ -211,10 +212,15 @@ namespace PAIN {
     }
 
     void LuaManager::resetForSceneReload() {
+        PN_CORE_INFO("[LuaManager::resetForSceneReload] Starting reset...");
+
+        PN_CORE_INFO("[LuaManager::resetForSceneReload] Clearing {} update callbacks", updates_.size());
         updates_.clear();
+        PN_CORE_INFO("[LuaManager::resetForSceneReload] Clearing key handlers");
         keyDown_.clear();
         keyUp_.clear();
         onClick_.clear();
+        PN_CORE_INFO("[LuaManager::resetForSceneReload] Clearing {} collision handlers", onCollision_.size());
         onCollision_.clear();
         pauseHandlers_.clear();
         timeouts_.clear();
@@ -227,6 +233,26 @@ namespace PAIN {
         while (!timeoutHeap_.empty()) timeoutHeap_.pop();
 
         pendingSceneChange_.reset();
+
+        // clear cached entity references directly from lua globals
+        PN_CORE_INFO("[LuaManager::resetForSceneReload] Clearing Lua global cached entities...");
+
+        // clear known globals that cache entity state
+        lua_["PlayerEntity"] = sol::nil;
+        lua_["PlayerState"] = sol::nil;
+        lua_["DetectionUI"] = sol::nil;
+        lua_["CameraState"] = sol::nil;
+        lua_["gamePaused"] = sol::nil;
+        lua_["PlayerInput"] = sol::nil;
+
+        // clear the _G.UI table if it exists
+        sol::object ui_obj = lua_["UI"];
+        if (ui_obj.valid()) {
+            lua_["UI"] = sol::nil;
+        }
+
+        PN_CORE_INFO("[LuaManager::resetForSceneReload] Cleared Lua global cached values");
+        PN_CORE_INFO("[LuaManager::resetForSceneReload] Reset complete");
     }
 
 
@@ -473,6 +499,16 @@ namespace PAIN {
         lua_.set_function("getDataID", [this](const std::string name) { return api_ ? api_->GetDataGUID(name) : std::string{};    });
         lua_.set_function("getShaderID", [this](const std::string name) { return api_ ? api_->GetShaderGUID(name) : std::string{};  });
 
+        lua_.set_function("getTexture", [this](entt::entity entityId) {
+            return api_ ? api_->GetEntityTexture(entityId) : "";
+            });
+        lua_.set_function("setTexture", [this](entt::entity entityId, std::string guidStr) {
+            if (api_) {
+                api_->SetEntityTexture(entityId, guidStr);
+            }
+            });
+
+
         /* =========================================================================== */
         /*                     Metadata (name / tags / groups)                         */
         /* =========================================================================== */
@@ -636,6 +672,68 @@ namespace PAIN {
             api_->Audio_SetLooping(entityId, looping);
             });
 
+        // ==================== New Direct File Playback Functions ====================
+        // These functions access the Audio service directly via services_
+
+        // audioPlayFile(filename, volumeDb?, looping?, is3D?)
+        // Plays audio file with optional spatial positioning
+        lua_.set_function("audioPlayFile", [this](const std::string& filename, 
+            sol::optional<float> volumeDb, 
+            sol::optional<bool> looping, 
+            sol::optional<bool> is3D) -> int {
+            if (!services_) return -1;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return -1;
+            
+            float vol = volumeDb.value_or(0.0f);
+            bool loop = looping.value_or(false);
+            bool spatial = is3D.value_or(false);
+            glm::vec3 pos(0.0f); // Default position for non-3D
+            
+            auto result = audio->playFile(filename, "sfx", vol, loop, spatial, pos,
+                Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
+            
+            return result ? result->value : -1;
+            });
+
+        // audioPlaySFX(filename, looping?) - Simple SFX playback
+        lua_.set_function("audioPlaySFX", [this](const std::string& filename, sol::optional<bool> looping) -> int {
+            if (!services_) return -1;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return -1;
+            
+            auto result = audio->playSFX(filename, looping.value_or(false), 0.0f);
+            return result ? result->value : -1;
+            });
+
+        // audioPlayBGM(filename, overlay?) - Play BGM, overlay adds to existing BGM
+        lua_.set_function("audioPlayBGM", [this](const std::string& filename, sol::optional<bool> overlay) -> int {
+            if (!services_) return -1;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return -1;
+            
+            auto result = audio->playBGM(filename, overlay.value_or(false), 0.0f);
+            return result ? result->value : -1;
+            });
+
+        // audioTransitionBGM(newFilename, transitionTime?) - Crossfade to new BGM
+        lua_.set_function("audioTransitionBGM", [this](const std::string& newFilename, sol::optional<float> transitionTime) {
+            if (!services_) return;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return;
+            
+            audio->transitionBGM(newFilename, transitionTime.value_or(2.0f), 0.0f);
+            });
+
+        // audioTransitionBGMWithSFX(newBGMFilename, sfxFilename, transitionTime?) - Crossfade with SFX trigger
+        lua_.set_function("audioTransitionBGMWithSFX", [this](const std::string& newBGMFilename, 
+            const std::string& sfxFilename, sol::optional<float> transitionTime) {
+            if (!services_) return;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return;
+            
+            audio->transitionBGMWithSFX(newBGMFilename, sfxFilename, transitionTime.value_or(2.0f), 0.0f);
+            });
 
         /* =========================================================================== */
         /*                           Scene / System state                              */
@@ -644,8 +742,12 @@ namespace PAIN {
             if (!api_ || pendingSceneChange_) return;
             setPendingSceneChange([this, n = std::move(name)] { api_->ChangeScene(n); });
             });
-        lua_.set_function("pauseAllSystems", [this](bool p) { if (api_) api_->PauseAllSystems(p); });
-        lua_.set_function("isGamePaused", [this] { return api_ ? api_->IsGamePaused() : false; });
+        lua_.set_function("quitApplication", [this]() {
+            if (!api_) return;
+            api_->QuitApplication();
+            });
+        lua_.set_function("SetGamePaused", [this](bool p) { if (api_) api_->SetGamePaused(p); });
+        lua_.set_function("IsGamePaused", [this] { return api_ ? api_->IsGamePaused() : false; });
         lua_.set_function("getFPS", [this] { return api_ ? api_->GetFps() : 0.0f; });
         lua_.set_function("setDeltaTimeMultiplier", [this](float m) { if (api_) api_->SetDeltaMultiplier(m); });
         lua_.set_function("getDeltaTimeMultiplier", [this] { return api_ ? api_->GetDeltaMultiplier() : 1.0f; });
@@ -728,18 +830,11 @@ namespace PAIN {
         /* =========================================================================== */
         /*                              Cursor Control                                 */
         /* =========================================================================== */
-        lua_.set_function("showCursor", []() {
-            // Don't access 'this' or member variables
-            PN_INFO("[Lua] showCursor - not implemented yet");
-            });
 
-        lua_.set_function("hideCursor", []() {
-            // Don't access 'this' or member variables
-            PN_INFO("[Lua] hideCursor - not implemented yet");
-            });
-
-
-
+        lua_.set_function("Hide_Cursor", [this] { 
+           if (!api_) return;
+           api_->Hide_Cursor(true); 
+        });
 
         /* =========================================================================== */
         /*                                ModelRenderer                                 */
@@ -861,7 +956,15 @@ namespace PAIN {
 
     }
 
-    void LuaManager::tick(double dt) {
+    void LuaManager::tick(double dt, double unscaled_dt) {
+        //// Update Global Time Table
+        //sol::table time = lua_["Time"];
+        //if (!time.valid()) time = lua_.create_named_table("Time");
+
+        //time["deltaTime"] = dt;                 // 0.0 when paused
+        //time["unscaledDeltaTime"] = unscaled_dt; // 0.016 always
+        //time["timeScale"] = (unscaled_dt > 0) ? (dt / unscaled_dt) : 0.0;
+
         // 1) Move any newly scheduled timeouts into the heap with absolute times
         if (!timeouts_.empty()) {
             const double base = nowSeconds();

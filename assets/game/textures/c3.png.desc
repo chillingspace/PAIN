@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "c3.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 11304746829549335295
+  },
+  "descriptor_version": 1,
+  "guid": "a424ced4-8f34-344b-969b-0fdc2a927c40",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\c3.png"
+  }
+}

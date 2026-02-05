@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "menu button hover sp.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 10427267824222408721
+  },
+  "descriptor_version": 1,
+  "guid": "7f7ef5f1-5ba7-6b44-abd1-c3d6776e2f99",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\menu button hover sp.png"
+  }
+}

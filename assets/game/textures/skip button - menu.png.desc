@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "skip button - menu.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 6519206154099041457
+  },
+  "descriptor_version": 1,
+  "guid": "75de646d-0f4a-ca40-8a7d-7c31ac7292a5",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\skip button - menu.png"
+  }
+}

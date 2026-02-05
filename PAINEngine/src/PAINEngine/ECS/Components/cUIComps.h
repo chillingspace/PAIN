@@ -116,7 +116,23 @@ namespace PAIN {
 		menu_QuitGame,
 
 		menu_OpenTutorial,
-		menu_BackToMain
+		menu_BackToMain,
+
+		// quit confirmation overlay
+		quit_Confirm,
+		quit_Cancel,
+		goto_Pause,
+
+		howtoplay_ArrowLeft,
+		howtoplay_ArrowRight,
+		restart_Confirm,
+		restart_Cancel,
+
+		cutscene_Open_Menu,
+		cutscene_Close_Menu,
+		cutscene_Menu_Quit,
+		cutscene_Quit_Confirm,
+		cutscene_Quit_Cancel,
 	};
 
 	struct UIButton {
@@ -307,7 +323,17 @@ NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::UIAction, {
 	{PAIN::UIAction::menu_QuitGame, "menu_QuitGame"},
 
 	{PAIN::UIAction::menu_OpenTutorial, "menu_OpenTutorial"},
-	{PAIN::UIAction::menu_BackToMain, "menu_BackToMain"} })
+	{PAIN::UIAction::menu_BackToMain, "menu_BackToMain"},
+
+	{PAIN::UIAction::quit_Confirm, "quit_Confirm"},
+	{PAIN::UIAction::quit_Cancel, "quit_Cancel"},
+	{PAIN::UIAction::restart_Confirm, "restart_Confirm"},
+	{PAIN::UIAction::restart_Cancel, "restart_Cancel"},
+	{PAIN::UIAction::goto_Pause, "goto_Pause"},
+
+	{ PAIN::UIAction::howtoplay_ArrowLeft, "howtoplay_ArrowLeft" },
+	{ PAIN::UIAction::howtoplay_ArrowRight, "howtoplay_ArrowRight" }
+})
 
 REFL_TYPE(PAIN::UIRectTransform)
 REFL_FIELD(local_position)

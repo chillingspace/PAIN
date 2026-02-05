@@ -216,6 +216,12 @@ namespace PAIN {
 			//Drain all events in queue
 			drainEventQueue();
 
+			// Process scene changes
+			auto sceneManager = services->get<Scene::SceneManager>();
+			if (sceneManager) {
+				sceneManager->processPendingSceneChange();
+			}
+
 			if (window->isMinimized()) {
 				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 				continue; // Go back to start of while loop
@@ -253,17 +259,24 @@ namespace PAIN {
 			}
 #endif
 #ifdef _DEBUG
-			if (services->get<Scene::SceneManager>()->isPlaying()) {
+			if (!services->get<Scene::SceneManager>()->isPlaying()) {
+				timing.dt = 0.0f;
+				services->get<Audio::Audio>()->pauseAll();
+			}
+			else if (services->get<Scene::SceneManager>()->isGamePaused()) {
+				timing.dt = 0.0f;
+			}
+			else {
 				timing.dt = real_dt;
 				services->get<Audio::Audio>()->resumeAll();
 			}
-			else {
-				timing.dt = 0.0f;
-				services->get<Audio::Audio>()->pauseAll();
-
-			}
 #else
-			timing.dt = real_dt;
+			if (services->get<Scene::SceneManager>()->isGamePaused()) {
+				timing.dt = 0.0f;
+			}
+			else {
+				timing.dt = real_dt;
+			}
 #endif
 
 
@@ -331,6 +344,9 @@ namespace PAIN {
 		// ADDED: Log graceful shutdown if quit was requested from script
 		if (g_shouldQuitApplication) {
 			PN_CORE_INFO("Application quit requested from script, shutting down gracefully");
+			// Quit application 
+			auto window = services->get<Window::Window>();
+			if (window) window->safeShutdown();
 		}
 	}
 

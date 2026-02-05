@@ -1,0 +1,29 @@
+{
+    "flags": {
+        "doubleSided": false,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "emissive": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "metallic": 1.0,
+        "roughness": 1.0
+    },
+    "textures": {
+        "albedo": "game\\textures\\Pipe10_baseColor.png",
+        "ao": "game\\textures\\Pipe10_occlusionRoughnessMetallic.png",
+        "emissive": "game\\textures\\Pipe10_emissive.png",
+        "lightmap": "game\\textures\\Pipe10_occlusionRoughnessMetallic.png",
+        "metallic": "game\\textures\\Pipe10_occlusionRoughnessMetallic.png",
+        "normal": "game\\textures\\Pipe10_normal.png",
+        "roughness": "game\\textures\\Pipe10_occlusionRoughnessMetallic.png"
+    }
+}

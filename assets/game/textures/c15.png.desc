@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "c15.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 17642329776046408471
+  },
+  "descriptor_version": 1,
+  "guid": "9ff8f46e-f5c2-2f4b-8a13-0ad19f00f3ab",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\c15.png"
+  }
+}

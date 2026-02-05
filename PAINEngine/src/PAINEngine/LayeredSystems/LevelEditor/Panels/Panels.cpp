@@ -94,14 +94,14 @@ namespace PAIN {
 			// ----------------------------
 			bool IPanel::b_popup_showing = false;
 
-			void IPanel::registerPopUp(std::string const& popup_id, std::function<void(std::any const&)> popup_func) {
+			void IPanel::registerPopUp(std::string const& popup_id, std::function<void(std::any const&)> popup_func, ImGuiWindowFlags flags) {
 				//Check if popup has already been registered
 				if (popups.find(popup_id) != popups.end()) {
 					throw std::runtime_error("Popup already registered");
 				}
 
 				//Emplace popup
-				popups.emplace(popup_id, InternalPopUp{ nullptr, false, std::move(popup_func) });
+				popups.emplace(popup_id, InternalPopUp{ nullptr, false, std::move(popup_func), flags });
 			}
 
 			void IPanel::editPopUp(std::string const& popup_id, std::function<void(std::any const&)> popup_func) {
@@ -162,7 +162,7 @@ namespace PAIN {
 						ImGui::OpenPopup(popup.first.c_str());
 						
 						//Begin popup modal
-						if (ImGui::BeginPopupModal(popup.first.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+						if (ImGui::BeginPopupModal(popup.first.c_str(), nullptr, popup.second.flags)) {
 							popup.second.popUpFunction(popup.second.data);
 							ImGui::EndPopup();
 						}

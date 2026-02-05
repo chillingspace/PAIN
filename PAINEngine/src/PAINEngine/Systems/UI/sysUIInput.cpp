@@ -35,7 +35,6 @@ namespace PAIN {
 		case UIAction::pause_Restart:          return "pause_Restart";
 		case UIAction::pause_Settings:         return "pause_Settings";
 		case UIAction::pause_ReturnToMainMenu: return "pause_ReturnToMainMenu";
-			// quit to start ??
 
 		case UIAction::menu_StartGame:         return "menu_StartGame";
 		case UIAction::menu_OpenSettings:      return "menu_OpenSettings";
@@ -46,7 +45,25 @@ namespace PAIN {
 		case UIAction::menu_OpenTutorial:      return "menu_OpenTutorial";
 		case UIAction::menu_BackToMain:        return "menu_BackToMain";
 
+        case UIAction::howtoplay_ArrowLeft:    return "howtoplay_ArrowLeft";
+        case UIAction::howtoplay_ArrowRight:   return "howtoplay_ArrowRight";
+
+		case UIAction::quit_Confirm:           return "quit_Confirm";
+		case UIAction::quit_Cancel:            return "quit_Cancel";
+
+        case UIAction::goto_Pause:             return "goto_Pause";
+        case UIAction::restart_Confirm:        return "restart_Confirm";
+		case UIAction::restart_Cancel:         return "restart_Cancel";
+
+        case UIAction::cutscene_Open_Menu:     return "cutscene_Open_Menu";
+        case UIAction::cutscene_Close_Menu:    return "cutscene_Close_Menu";
+        case UIAction::cutscene_Menu_Quit:     return "cutscene_Menu_Quit";
+
+        case UIAction::cutscene_Quit_Confirm:  return "cutscene_Quit_Confirm";
+        case UIAction::cutscene_Quit_Cancel:   return "cutscene_Quit_Cancel";
+
 		case UIAction::None:
+
 		default:                               return "None";
 		}
 	}
@@ -535,8 +552,18 @@ namespace PAIN {
 			auto view = registry.view<Texture2D, UIElement, UIRectTransform>();
 			std::vector<std::tuple<entt::entity, int, int>> candidates;
 
+			auto scene = services.lock()->get<Scene::SceneManager>();
+
 			for (auto [entity, tex, element, rect] : view.each()) {
 				if (!element.b_is_enabled || !element.b_is_interactable) continue;
+
+				// Skip if layer is disabled
+				if (registry.all_of<Entity::Layer>(entity)) {
+					const auto& layer = registry.get<Entity::Layer>(entity);
+					if (scene && !scene->isLayerEnabled(layer.layer_id)) {
+						continue;
+					}
+				}
 
 				glm::vec2 rect_min, rect_max;
 

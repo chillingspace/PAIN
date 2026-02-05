@@ -15,8 +15,10 @@ namespace PAIN {
             int id = 0;
             int mask = 1;
             bool enabled = true;
+            bool pickable = true;
             std::string name = "Layer " + std::to_string(id);
             glm::vec3 color = glm::vec3(1.0f);
+
         };
 
         struct SceneAsset : public Assets::IAsset {
