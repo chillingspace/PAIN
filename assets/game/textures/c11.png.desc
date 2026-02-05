@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "c11.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 5846953800703855407
+  },
+  "descriptor_version": 1,
+  "guid": "0d125733-5bf0-a74c-b87f-3aa74ba43afe",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\c11.png"
+  }
+}

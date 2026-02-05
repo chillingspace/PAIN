@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Rock13_normal.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 15541240251084929059
+  },
+  "descriptor_version": 1,
+  "guid": "6100a187-8732-804d-903d-32a5c3dc0576",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Rock13_normal.png"
+  }
+}

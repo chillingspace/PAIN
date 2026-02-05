@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "c12.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 17925168178692810748
+  },
+  "descriptor_version": 1,
+  "guid": "968f4f0d-ff02-8c4c-ad90-b3cc91268718",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\c12.png"
+  }
+}
