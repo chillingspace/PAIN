@@ -23,6 +23,7 @@ namespace PAIN {
         
         static std::vector<GlobalAudioTrack> s_globalTracks;
         static bool s_globalAudioInitialized = false;
+        static std::string s_lastSceneWithGlobalBGM;  // Track which scene initialized global audio
         
         // Fade management
         struct FadeRequest {
@@ -178,6 +179,18 @@ namespace PAIN {
 
                 // Handle Global_BGM entity with multi-track audio
                 if (isGlobalBGM && !audioSrc.audio_tracks.empty()) {
+                    // Get current scene name for tracking
+                    std::string currentSceneName;
+                    if (scene) {
+                        auto guid = scene->getCurrScnID();
+                        if (guid.IsValid()) {
+                            auto assetData = asset_service->getAssetData(guid);
+                            if (assetData) {
+                                currentSceneName = assetData->main_relative_path.generic_string();
+                            }
+                        }
+                    }
+                    
                     // Check if these tracks match what's already playing globally
                     bool tracksMatch = (s_globalTracks.size() == audioSrc.audio_tracks.size());
                     if (tracksMatch) {
@@ -188,8 +201,11 @@ namespace PAIN {
                         }
                     }
                     
-                    if (tracksMatch && s_globalAudioInitialized) {
-                        // Same tracks already playing, sync entity's channel IDs with static storage
+                    // Check if we changed scenes - even if same tracks, might need to reset state
+                    bool sceneChanged = (!currentSceneName.empty() && currentSceneName != s_lastSceneWithGlobalBGM);
+                    
+                    if (tracksMatch && s_globalAudioInitialized && !sceneChanged) {
+                        // Same tracks already playing in same scene, sync entity's channel IDs with static storage
                         audioSrc.track_channel_ids.clear();
                         for (const auto& track : s_globalTracks) {
                             audioSrc.track_channel_ids.push_back(track.channelId);
@@ -197,6 +213,15 @@ namespace PAIN {
                         audioSrc.hasStarted = true;
                         audioSrc.state = AudioState::Playing;
                         continue; // Audio already playing, nothing to start
+                    }
+                    
+                    // Log what's happening
+                    if (sceneChanged) {
+                        PN_CORE_INFO("[AudioSystem] Scene changed from '{}' to '{}' - checking global audio", 
+                            s_lastSceneWithGlobalBGM, currentSceneName);
+                    }
+                    if (!tracksMatch) {
+                        PN_CORE_INFO("[AudioSystem] Track mismatch detected - reinitializing global audio");
                     }
                     
                     // New or different tracks - start them
@@ -266,6 +291,8 @@ namespace PAIN {
                         audioSrc.hasStarted = true;
                         audioSrc.state = AudioState::Playing;
                         s_globalAudioInitialized = true;
+                        s_lastSceneWithGlobalBGM = currentSceneName;  // Track which scene owns these tracks
+                        PN_CORE_INFO("[AudioSystem] Global BGM initialized for scene: {}", currentSceneName);
                     }
                     continue; // Skip normal processing for Global_BGM
                 }
