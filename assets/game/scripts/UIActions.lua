@@ -3,7 +3,7 @@
 local G = _G_root
 
 -- scene defaults
-G.CurrentLevelName    = G.CurrentLevelName   or "game/scenes/Level1.scn"
+G.CurrentLevelName    = G.CurrentLevelName   or "game/scenes/Tutorial.scn"
 G.FirstLevelScene     = G.FirstLevelScene    or "game/scenes/Level1.scn"
 G.TutorialSceneName   = G.TutorialSceneName  or "game/scenes/Tutorial.scn"
 G.MainMenuSceneName   = G.MainMenuSceneName  or "game/scenes/mainmenu.scn"
@@ -12,7 +12,7 @@ G.HowToPlaySceneName2 = G.HowToPlaySceneName2 or "game/scenes/howtoplay2.scn"
 G.CreditsSceneName    = G.CreditsSceneName   or "game/scenes/credits.scn"
 
 -- Placeholder for next level
-G.NextLevelName       = G.NextLevelName      or "game/scenes/Tutorial.scn"
+-- G.NextLevelName       = G.NextLevelName      or "game/scenes/Tutorial.scn"
 
 local Layers = {
     DEFAULT = 0,
@@ -221,17 +221,22 @@ local handlers = {
         end
         
         -- Restart Scene
-        if changeScene then
+        if setCurrentScene then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 Hide_Cursor(true)
             end
-            -- default to current level or fallback
-            -- local sceneToLoad = G.CurrentLevelName or "game/scenes/Level1.scn"
-            printLog("[UI] restart_Confirm -> changeScene("..G.CurrentLevelName..")")
+            
+            local curr = ""
+            if getCurrentSceneName then curr = getCurrentSceneName() end
+            if curr == "" then curr = G.CurrentLevelName end
+            
+            printLog("[UI] restart_Confirm -> setCurrentScene("..tostring(curr)..")")
+            setCurrentScene(curr)
+        elseif changeScene then
             changeScene(G.CurrentLevelName)
         else
-            printLog("[UI] restart_Confirm pressed, but changeScene is not bound")
+            printLog("[UI] restart_Confirm pressed, but setCurrentScene is not bound")
         end
     end,
 
@@ -346,24 +351,24 @@ local handlers = {
         --     _G.ResetThirdPersonCamera()
         -- end
 
-        if G.FirstLevelScene and changeScene then
+        if G.TutorialSceneName and setCurrentScene then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 Hide_Cursor(true)
                 
             end
-            changeScene(G.FirstLevelScene)
+            setCurrentScene(G.TutorialSceneName)
         else
-            printLog("[UI] menu_StartGame pressed, but changeScene is not bound")
+            printLog("[UI] menu_StartGame pressed, but setCurrentScene is not bound")
         end
     end,
 
     menu_HowToPlay = function(buttonEntity, payload)
         --local howtoplayScene = resolveSceneName(payload or G.HowToPlaySceneName, "howtoplay.scn")
 
-        if G.HowToPlaySceneName and changeScene then
-            printLog("[UI] menu_HowToPlay -> changeScene("..G.HowToPlaySceneName..")")
-            changeScene(G.HowToPlaySceneName)
+        if G.HowToPlaySceneName and setCurrentScene then
+            printLog("[UI] menu_HowToPlay -> setCurrentScene("..G.HowToPlaySceneName..")")
+            setCurrentScene(G.HowToPlaySceneName)
         else
             printLog("[UI] menu_HowToPlay pressed (no scene specified / not implemented)")
         end
@@ -372,9 +377,9 @@ local handlers = {
     menu_Credits = function(buttonEntity, payload)
         --local creditsScene = resolveSceneName(payload or G.CreditsSceneName, "credits.scn")
 
-        --if G.CreditsSceneName and changeScene then
-        --    printLog("[UI] menu_Credits -> changeScene("..G.CreditsSceneName..")")
-        --    changeScene(G.CreditsSceneName)
+        --if G.CreditsSceneName and setCurrentScene then
+        --    printLog("[UI] menu_Credits -> setCurrentScene("..G.CreditsSceneName..")")
+        --    setCurrentScene(G.CreditsSceneName)
         --else
             printLog("[UI] menu_Credits pressed (no scene specified / not implemented)")
         --end
@@ -392,25 +397,28 @@ local handlers = {
     menu_OpenTutorial = function(buttonEntity, payload)
         --local tutorialScene = resolveSceneName(payload or G.TutorialSceneName, "Tutorial.scn")
 
-        if G.TutorialSceneName and changeScene then
-            printLog("[UI] menu_OpenTutorial -> changeScene("..G.TutorialSceneName..")")
-            changeScene(G.TutorialSceneName)
+        if G.TutorialSceneName and setCurrentScene then
+            printLog("[UI] menu_OpenTutorial -> setCurrentScene("..G.TutorialSceneName..")")
+            setCurrentScene(G.TutorialSceneName)
         else
             printLog("[UI] menu_OpenTutorial pressed (no scene specified / not implemented)")
         end
     end,
 
     menu_BackToMain = function(buttonEntity, payload)
-        printLog("[UI] menu_BackToMain -> changeScene("..G.MainMenuSceneName..")")
-        if changeScene then
+        -- User requested to always go back to Main Menu (avoids loop in HowToPlay scenes)
+        local target = G.MainMenuSceneName
+        
+        printLog("[UI] menu_BackToMain -> setCurrentScene("..tostring(target)..")")
+        if setCurrentScene then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 Hide_Cursor(false)
                 
             end
-            changeScene(G.MainMenuSceneName)
+            setCurrentScene(target)
         else
-            printLog("[UI] menu_BackToMain pressed (no scene specified / not implemented)")
+            printLog("[UI] menu_BackToMain pressed (setCurrentScene not bound)")
         end
     end,
 

@@ -112,6 +112,8 @@ namespace PAIN {
         /*                           Scene / System state                              */
         /* =========================================================================== */
         bool  ChangeScene(std::string name) override;
+        std::string GetCurrentSceneName() override;
+        std::string GetPreviousSceneName() override;
         void  SetGamePaused(bool pause) override;
         bool  IsGamePaused() const override;
 

@@ -34,6 +34,7 @@ namespace PAIN {
             /* =========================================================================== */
             //Current scene id
             Assets::GUID curr_scene_id;
+            Assets::GUID prev_scene_id;
 
             // Change scene variables
             bool pending_scene_change = false;
@@ -138,6 +139,7 @@ namespace PAIN {
             Assets::GUID getCurrSkyBoxTextureID() const { return curr_skybox_id; }
             void setCurrSkyBoxTexture(Assets::GUID const& skybox_id);
             Assets::GUID getCurrScnID() { return curr_scene_id; }
+            Assets::GUID getPrevScnID() { return prev_scene_id; }
 
             // When you need to access the light
             Light* getCameraLight() {

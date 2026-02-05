@@ -1297,19 +1297,21 @@ namespace PAIN {
 
 			//Get GUID to load scene
 			auto id = assets_service->findGUID(relative_path);
-
-			//Load scene
-			loadScene(id);
+				loadScene(id);
 		}
 
-		void SceneManager::changeScene(const Assets::GUID& sceneGUID)
-		{
-			PN_CORE_INFO("[SceneManager] Scheduling scene transition to GUID: {}", sceneGUID.ToString());
+		void SceneManager::changeScene(const Assets::GUID& sceneGUID) {
+			if (sceneGUID.IsValid()) {
+				// Only update previous scene if we are actually switching to a different scene
+				// This preserves the "Back" history if we are just restarting the current level
+				if (sceneGUID != curr_scene_id) {
+					prev_scene_id = curr_scene_id;
+				}
 
-			// Store the target scene and set the flag
-			next_scene_guid = sceneGUID;
-			pending_scene_change = true;
-
+				PN_CORE_INFO("[SceneManager] Scheduling scene transition to GUID: {}", sceneGUID.ToString());
+				pending_scene_change = true;
+				next_scene_guid = sceneGUID;
+			}
 		}
 
 		void SceneManager::processPendingSceneChange()
