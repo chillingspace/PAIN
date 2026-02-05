@@ -139,6 +139,9 @@ namespace PAIN {
 
 		credits_ArrowLeft,
 		credits_ArrowRight,
+		
+		// game end next level
+		end_NextLevel
 	};
 
 	struct UIButton {

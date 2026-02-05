@@ -29,6 +29,11 @@ end)
 
 -- Make TogglePause globally accessible
 function TogglePause()
+    -- Prevent pausing after game ends
+    if PlayerState.gameEnded then
+        return
+    end
+
     isPaused = not isPaused
     
     log("[PauseManager] Toggling pause: " .. tostring(isPaused))
