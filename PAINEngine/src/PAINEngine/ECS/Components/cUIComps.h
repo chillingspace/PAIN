@@ -133,6 +133,9 @@ namespace PAIN {
 		cutscene_Menu_Quit,
 		cutscene_Quit_Confirm,
 		cutscene_Quit_Cancel,
+
+		mainmenu_Quit_Confirm,
+		mainmenu_Quit_Cancel,
 	};
 
 	struct UIButton {

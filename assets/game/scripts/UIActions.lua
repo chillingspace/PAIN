@@ -381,11 +381,18 @@ local handlers = {
     end,
 
     menu_QuitGame = function(buttonEntity, payload)
-        if quitApplication then
-            printLog("[UI] menu_QuitGame -> quitApplication()")
-            quitApplication()
+        if IsGamePaused() then
+            local isMobile = (isAndroid ~= nil and isAndroid())
+            if isMobile then
+                Hide_Cursor(true)
+            end
+            --SetGamePaused(not IsGamePaused()) 
+            _G_root.TogglePause()
+            
+            setLayerEnabled(2, true)
+            printLog("[UI] cutscene_Menu_Button -> called TogglePause()")
         else
-            printLog("[UI] menu_QuitGame pressed (quitapplication() not bound; implement in EngineAPI)")
+            printLog("[UI] cutscene_Menu_Button pressed, but TogglePause is not available")
         end
     end,
 
@@ -530,6 +537,37 @@ local handlers = {
         
         if setLayerEnabled then
             setLayerEnabled(3, false)
+            setLayerEnabled(2, false) -- Return to Menu
+            local isMobile = (isAndroid ~= nil and isAndroid())
+            if isMobile then
+                Hide_Cursor(false)
+            end
+            --_G_root.TogglePause()
+            printLog("[UI] QuitOverlay (layer 5) hidden - returning to menu")
+        else
+            printLog("[UI] setLayerEnabled not available")
+        end
+    end,
+
+
+    ----------------------------------------------------------------------
+    -- MAIN MENU QUIT CONFIRMATION
+    ----------------------------------------------------------------------
+    mainmenu_Quit_Confirm = function(buttonEntity, payload)
+        if quitApplication then
+            printLog("[UI] cutscene_Quit_Confirm -> quitApplication()")
+            quitApplication()
+        else
+            printLog("[UI] cutscene_Quit_Confirm pressed (quitapplication() not bound; implement in EngineAPI)")
+        end
+    end,
+
+    mainmenu_Quit_Cancel = function(buttonEntity, payload)
+        -- User pressed NO - close popup
+        printLog("[UI] mainmenu_Quit_Cancel -> closing quit confirmation")
+        
+        if setLayerEnabled then
+
             setLayerEnabled(2, false) -- Return to Menu
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
