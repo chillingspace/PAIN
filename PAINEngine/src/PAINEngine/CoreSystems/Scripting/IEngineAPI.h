@@ -177,8 +177,10 @@ namespace PAIN {
         virtual void Animation_SetSpeed(entt::entity entityId, float speed) = 0;
         virtual void Animation_SetLoop(entt::entity entityId, bool loop) = 0;
         virtual bool Animation_IsPlaying(entt::entity entityId, std::string animName) = 0;
+        virtual float GetAnimationTime(entt::entity entityId) = 0;
         virtual float GetAnimationDuration(entt::entity entityId) = 0;
-
+        virtual bool Animation_HasFinished(entt::entity entityId) = 0;
+        virtual void SetAnimationTime(entt::entity entityId, float time) = 0;
         /* =========================================================================== */
         /*                              Application Control                              */
         /* =========================================================================== */

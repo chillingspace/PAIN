@@ -189,11 +189,6 @@ registerUpdate(function(dt)
     local rz = -pitchX * sinY + pitchZ * cosY
     local ry = pitchY
 
-
-    -- Always track camera position
-    frozenCx, frozenCy, frozenCz = cx, cy, cz
-    frozenTx, frozenTy, frozenTz = px, py + 0.1, pz
-
     -- Initialize smooth vars if nil
     if not smoothX then 
         smoothX, smoothY, smoothZ = px, py, pz 
@@ -208,6 +203,10 @@ registerUpdate(function(dt)
     local cx = smoothX + rx
     local cy = smoothY + ry
     local cz = smoothZ + rz
+
+    -- Always track camera position
+    frozenCx, frozenCy, frozenCz = cx, cy, cz
+    frozenTx, frozenTy, frozenTz = px, py + 0.1, pz
 
     cameraSetTransform(
         cx, cy, cz,

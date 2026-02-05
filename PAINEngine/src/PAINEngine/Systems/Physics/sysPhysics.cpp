@@ -657,7 +657,7 @@ namespace PAIN {
 
 					settings.mMotionQuality = JPH::EMotionQuality::LinearCast;
 
-					//settings.mFriction = .75f;
+					settings.mFriction = 0.f;
 					settings.mAngularDamping = 20.f;
 
 					settings.mAllowedDOFs = JPH::EAllowedDOFs::TranslationX |

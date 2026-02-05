@@ -195,7 +195,10 @@ namespace PAIN {
         void Animation_SetSpeed(entt::entity entityId, float speed) override;
         void Animation_SetLoop(entt::entity entityId, bool loop) override;
         bool Animation_IsPlaying(entt::entity entityId, std::string animName) override;
+        float GetAnimationTime(entt::entity entityId) override;
         float GetAnimationDuration(entt::entity entityId) override;
+        bool Animation_HasFinished(entt::entity entityId) override;
+        void SetAnimationTime(entt::entity entityId, float time) override;
 
     private:
         using EntityType = decltype(std::declval<PAIN::ECS::Controller&>().createEntity());

@@ -1020,7 +1020,7 @@ namespace PAIN {
         // OR check if we are transitioning TO it
         return (anim.currentAnimationIndex == idx && anim.isPlaying) || (anim.nextAnimationIndex == idx);
     }
-    float EngineAPIAdapter::GetAnimationDuration(entt::entity entityId)
+    float EngineAPIAdapter::GetAnimationTime(entt::entity entityId)
     {
         auto& reg = ecs_.getRegistry();
         if (reg.all_of<PAIN::Animation>(entityId)) {
@@ -1028,5 +1028,40 @@ namespace PAIN {
         }
 
         return 0.0f;
+    }
+    float EngineAPIAdapter::GetAnimationDuration(entt::entity entityId)
+    {
+        auto& reg = ecs_.getRegistry();
+        if (reg.all_of<PAIN::Animation>(entityId)) {
+            return reg.get<PAIN::Animation>(entityId).animationDuration;
+        }
+
+        return 0.0f;
+    }
+    bool EngineAPIAdapter::Animation_HasFinished(entt::entity entityId)
+    {
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<PAIN::Animation>(entityId)) return false;
+
+        const auto& anim = reg.get<PAIN::Animation>(entityId);
+
+        // Looping animations never "finish"
+        if (anim.loopAnimation) return false;
+
+        // 2. Safety check against uninitialized animations
+        if (anim.animationDuration<= 0.001f) return false;
+
+        // 3. Check if current time has reached or exceeded the total duration
+        // We use a small epsilon (0.05f) to be safe, or just direct comparison
+        return anim.animationTime >= (anim.animationDuration - 0.01f);
+
+        return false;
+    }
+    void EngineAPIAdapter::SetAnimationTime(entt::entity entityId, float time)
+    {
+        auto& reg = ecs_.getRegistry();
+        if (reg.all_of<PAIN::Animation>(entityId)) {
+            reg.get<PAIN::Animation>(entityId).animationTime = time;
+        }
     }
 }

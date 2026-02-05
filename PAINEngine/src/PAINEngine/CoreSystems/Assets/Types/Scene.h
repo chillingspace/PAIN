@@ -77,10 +77,10 @@ namespace PAIN {
                 bool showStatusText = false;
                 
                 // Spritesheet Animation
-                int frameCount = 5;
-                int framesPerRow = 5;
+                int frameCount = 1;
+                int framesPerRow = 1;
                 float frameTime = 0.1f;
-                bool animationEnabled = true;
+                bool animationEnabled = false;
             } loadingScreen;
 
             //Layers

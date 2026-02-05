@@ -87,6 +87,8 @@ namespace PAIN {
 				float duration = renderer.cachedModelAsset->animations[anim.currentAnimationIndex].duration;
 				if (duration <= 0.001f) duration = 1.0f; // Prevent divide by zero
 
+				anim.animationDuration = duration;
+
 				// Progress the animation time
 				anim.animationTime += deltaTime * anim.playbackSpeed;
 
@@ -115,10 +117,11 @@ namespace PAIN {
 						anim.transitionWeight += deltaTime / anim.transitionDuration;
 
 						float nextDuration = renderer.cachedModelAsset->animations[anim.nextAnimationIndex].duration;
-						float nextTime = anim.animationTime;
-						if (nextDuration > 0.001f) {
-							nextTime = fmod(nextTime, nextDuration);
-						}
+						if (nextDuration <= 0.001f) nextDuration = 1.0f;
+
+						float normalizedTime = anim.animationTime / duration;
+						float nextTime = normalizedTime * nextDuration;
+						
 
 						// Sample Next Animation (Using same time for sync - simplistic but works for now)
 						LocalPose nextPose = SampleAnimation(renderer.cachedModelAsset.get(), anim.nextAnimationIndex, anim.animationTime);
@@ -147,69 +150,6 @@ namespace PAIN {
 				renderer.boneTransforms = anim.boneTransforms;
 			}
 		}
-
-		//void System::computeBoneTransforms(entt::entity entity, Animation& anim, ModelRenderer& renderer, const Assets::AnimationClip& animData) {
-		//	// Get skeleton from model
-		//	if (!renderer.cachedModelAsset || renderer.cachedModelAsset->skeleton.empty()) {
-		//		return;
-		//	}
-
-		//	const auto& skeleton = renderer.cachedModelAsset->skeleton;
-
-
-		//	// Resize bone transform array if needed
-		//	if (anim.boneTransforms.size() != skeleton.size()) {
-		//		anim.boneTransforms.resize(skeleton.size(), glm::mat4(1.0f));
-		//	}
-
-		//	// Sample animation at current time
-		//	float time = anim.animationTime;
-
-		//	// For each bone in skeleton
-		//	for (size_t i = 0; i < skeleton.size(); ++i) {
-		//		const auto& bone = skeleton[i];
-
-		//		// Find this bone's animation track
-		//		auto trackIt = animData.track_map.find(bone.name);
-
-		//		if (trackIt != animData.track_map.end()) {
-		//			const auto& track = trackIt->second;
-
-		//			// Sample the track at current time (simple linear interpolation)
-		//			glm::vec3 translation = glm::vec3(0.0f);
-		//			glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-		//			glm::vec3 scale = glm::vec3(1.0f);
-
-		//			if (!track.empty()) {
-		//				// Find keyframes around current time
-		//				size_t keyIndex = 0;
-		//				for (size_t k = 0; k < track.size() - 1; ++k) {
-		//					if (track[k].time <= time && time < track[k + 1].time) {
-		//						keyIndex = k;
-		//						break;
-		//					}
-		//				}
-
-		//				// Simple: just use the nearest keyframe (no interpolation for now)
-		//				translation = track[keyIndex].translation;
-		//				rotation = track[keyIndex].rotation;
-		//				scale = track[keyIndex].scale;
-		//			}
-
-		//			// Build bone transform matrix
-		//			glm::mat4 T = glm::translate(glm::mat4(1.0f), translation);
-		//			glm::mat4 R = glm::mat4_cast(rotation);
-		//			glm::mat4 S = glm::scale(glm::mat4(1.0f), scale);
-
-		//			anim.boneTransforms[i] = T * R * S;
-		//		}
-		//		else {
-		//			// No animation track for this bone, use identity
-		//			anim.boneTransforms[i] = glm::mat4(1.0f);
-		//		}
-		//	}
-
-		//}
 
 		// Returns pose for a specific time of the animation
 		LocalPose System::SampleAnimation(const Assets::Model* model, int animIndex, float time)

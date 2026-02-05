@@ -598,9 +598,9 @@ namespace PAIN {
         void LoadingScreen::defaultSetup() {
             //Set default digipen screen for texture rendering
 #ifdef PN_PLATFORM_WINDOWS
-            std::filesystem::path tex_path = "game/textures/loading spritesheet.png";
+            std::filesystem::path tex_path = "engine/textures/DigiPen_BLACK.png";
 #else
-            std::filesystem::path tex_path = "game\\textures\\loading spritesheet.png";
+            std::filesystem::path tex_path = "engine\\textures\\DigiPen_BLACK.png";
 #endif
             m_backgroundTextureGUID = services.lock()->get<Assets::Manager>()->findGUID(tex_path);
             m_backGroundColor = { 0.1f, 0.1f, 0.1f };
@@ -615,9 +615,9 @@ namespace PAIN {
             showStatus = false;
 
             //Default animation
-            m_animationEnabled = true;
-            m_frameCount = 5;
-            m_framesPerRow = 5;
+            m_animationEnabled = false;
+            m_frameCount = 1;
+            m_framesPerRow = 1;
 
             //Setup other variables
             auto win = services.lock()->get<Window::Window>();

@@ -1093,8 +1093,15 @@ namespace PAIN {
                 return false;
         });
         animTable.set_function("GetTime", [this](entt::entity entityId) {
+            if (api_) return api_->GetAnimationTime(entityId);
+            return 0.0f;
+            });
+        animTable.set_function("GetDuration", [this](entt::entity entityId) {
             if (api_) return api_->GetAnimationDuration(entityId);
             return 0.0f;
+            });
+        animTable.set_function("SetTime", [this](entt::entity entityId, float time) {
+            if (api_) api_->SetAnimationTime(entityId, time);
             });
     }
 

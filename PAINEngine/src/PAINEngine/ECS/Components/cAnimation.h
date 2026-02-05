@@ -18,6 +18,7 @@ namespace PAIN {
 
         // Runtime states (DO NOT SERIALIZE)
         int currentAnimationIndex = -1;
+        float animationDuration = 0.f;
         float animationTime = 0.0f;
         bool isPlaying = false;
 
