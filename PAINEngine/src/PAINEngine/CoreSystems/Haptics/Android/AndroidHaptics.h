@@ -42,7 +42,6 @@ namespace PAIN {
             jobject m_HeavyClickEffect = nullptr;
             jobject m_TickEffect = nullptr;
             jobject m_DoubleClickEffect = nullptr;
-            jmethodID m_PerformEffectMethod = nullptr;
             
             void initJNI();
             void cleanupJNI();

@@ -24,6 +24,7 @@ namespace PAIN {
 
         AndroidHaptics::AndroidHaptics(void* app) 
             : m_App(static_cast<android_app*>(app)) {
+            init();
         }
 
         AndroidHaptics::~AndroidHaptics() {
@@ -194,10 +195,6 @@ namespace PAIN {
                                     env->DeleteLocalRef(doubleClickEffect);
                                 }
                             }
-                            
-                            // Perform haptic feedback method
-                            m_PerformEffectMethod = env->GetMethodID(m_VibratorClass, "performHapticFeedback",
-                                "(I)Z");
                         }
                     }
                 } else {
