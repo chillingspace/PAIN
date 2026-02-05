@@ -1,4 +1,4 @@
-﻿/*****************************************************************//**
+/*****************************************************************//**
  * \file   sysUILayout.h
  * \brief  Declaration of UI layout system
  *
@@ -16,6 +16,7 @@
 #include "CoreSystems/Events/GLFW/KeyEvents.h"
 #include "CoreSystems/Events/GLFW/MouseEvents.h"
 #include "CoreSystems/Events/Android/TouchEvents.h"
+#include "CoreSystems/Haptics/Haptics.h"
 
 #ifdef PN_PLATFORM_WINDOWS
 #include "imgui.h"
@@ -191,6 +192,14 @@ namespace PAIN {
                         updateButtonState(m_pressed_entity, registry, UIButtonState::Pressed);
                         PN_CORE_INFO("[UIInput] MouseDown on UI entity id = {}",
                             static_cast<uint32_t>(m_pressed_entity));
+                        
+                        // Haptic feedback on button press (Android only, Windows stub does nothing)
+                        if (auto haptics = services.lock()->get<Haptics::Haptics>()) {
+                            if (haptics->hasHaptics()) {
+                                haptics->tick();
+                            }
+                        }
+                        
                         return true; // UI consumed event
                     }
                     return false;
@@ -266,6 +275,13 @@ namespace PAIN {
                                     ToActionName(button.action));
 
                                 activateButton(m_pressed_entity, registry);
+                                
+                                // Haptic feedback on button click
+                                if (auto haptics = services.lock()->get<Haptics::Haptics>()) {
+                                    if (haptics->hasHaptics()) {
+                                        haptics->click();
+                                    }
+                                }
                             }
                         }
 
@@ -368,29 +384,37 @@ namespace PAIN {
                     auto& registry = ecs->getRegistry();
                     auto hit_entity = raycastUI(m_mouse_position, registry);
 
-                    if (hit_entity.has_value()) {
-                        int pointer_id = e.getPointerId();
-                        entt::entity entity = hit_entity.value();
+                        if (hit_entity.has_value()) {
+                            int pointer_id = e.getPointerId();
+                            entt::entity entity = hit_entity.value();
 
-                        PN_CORE_INFO("[UIInput] TouchDown: pointer={}, entity={}",
-                            pointer_id, static_cast<uint32_t>(entity));
+                            PN_CORE_INFO("[UIInput] TouchDown: pointer={}, entity={}",
+                                pointer_id, static_cast<uint32_t>(entity));
 
-                        // Store this touch in the map
-                        m_active_touches[pointer_id] = entity;
+                            // Store this touch in the map
+                            m_active_touches[pointer_id] = entity;
 
-                        // Initialize joystick if this is a joystick entity
-                        if (registry.all_of<UIJoystick>(entity)) {
-                            auto& joystick = registry.get<UIJoystick>(entity);
-                            auto& tex = registry.get<Texture2D>(entity);
-                            joystick.center_position = tex.pos;
-                            joystick.is_dragging = false;
+                            // Initialize joystick if this is a joystick entity
+                            if (registry.all_of<UIJoystick>(entity)) {
+                                auto& joystick = registry.get<UIJoystick>(entity);
+                                auto& tex = registry.get<Texture2D>(entity);
+                                joystick.center_position = tex.pos;
+                                joystick.is_dragging = false;
 
-                            PN_CORE_INFO("[UIInput] Joystick initialized for pointer {}", pointer_id);
+                                PN_CORE_INFO("[UIInput] Joystick initialized for pointer {}", pointer_id);
+                            }
+
+                            updateButtonState(entity, registry, UIButtonState::Pressed);
+                            
+                            // Haptic feedback on button press
+                            if (auto haptics = services.lock()->get<Haptics::Haptics>()) {
+                                if (haptics->hasHaptics()) {
+                                    haptics->tick();
+                                }
+                            }
+                            
+                            return true;
                         }
-
-                        updateButtonState(entity, registry, UIButtonState::Pressed);
-                        return true;
-                    }
                     return false;
                     });
             }
@@ -477,9 +501,16 @@ namespace PAIN {
                                 }
                             }
 
-                            if (should_process) {
+                        if (should_process) {
                                 // go through activateButton so UIAction works + fallback lua works
                                 activateButton(touch_entity, registry);
+                                
+                                // Haptic feedback on button click
+                                if (auto haptics = services.lock()->get<Haptics::Haptics>()) {
+                                    if (haptics->hasHaptics()) {
+                                        haptics->click();
+                                    }
+                                }
                             }
                         }
 
