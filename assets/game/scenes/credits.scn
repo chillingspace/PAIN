@@ -537,14 +537,6 @@
                         "Name": {
                             "name": "credits1"
                         },
-                        "Scripts": {
-                            "scripts": [
-                                {
-                                    "enabled": true,
-                                    "script_asset": "8ec5603e-4501-4a4f-adc9-41cc449d880d"
-                                }
-                            ]
-                        },
                         "Texture2D": {
                             "pos": [
                                 0.0,
@@ -552,8 +544,8 @@
                             ],
                             "texture_guid": "6cc01a36-3d0c-194f-8c6c-65706320ab2f",
                             "texture_scale": [
-                                3.5999999046325684,
-                                3.0
+                                2.0,
+                                1.0
                             ]
                         },
                         "UIElement": {
@@ -944,6 +936,7 @@
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
                                     "use_gravity": true,
                                     "velocity": [
                                         0.0,
@@ -976,6 +969,7 @@
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
                             "use_gravity": true,
                             "velocity": [
                                 0.0,

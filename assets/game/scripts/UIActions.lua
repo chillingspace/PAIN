@@ -452,11 +452,12 @@ local handlers = {
     menu_QuitGame = function(buttonEntity, payload)
         local isMobile = (isAndroid ~= nil and isAndroid())
         if isMobile then
-            Hide_Cursor(true)
+           hideCursor(true)
         end
         --SetGamePaused(not IsGamePaused()) 
         _G_root.TogglePause()
         
+        setLayerEnabled(1, false)
         setLayerEnabled(2, true)
         printLog("[UI] cutscene_Menu_Button -> called TogglePause()")
     end,
@@ -632,10 +633,11 @@ local handlers = {
         
         if setLayerEnabled then
 
+            setLayerEnabled(1, true)
             setLayerEnabled(2, false) -- Return to Menu
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(false)
+                hideCursor(false)
             end
             _G_root.TogglePause()
 

@@ -552,7 +552,7 @@
                             ],
                             "texture_guid": "41fb6c3d-c2e9-2e48-9acd-e7e1ef17ebf6",
                             "texture_scale": [
-                                1.7999999523162842,
+                                2.0,
                                 1.0
                             ]
                         },
@@ -944,6 +944,7 @@
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
                                     "use_gravity": true,
                                     "velocity": [
                                         0.0,
@@ -976,6 +977,7 @@
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
                             "use_gravity": true,
                             "velocity": [
                                 0.0,

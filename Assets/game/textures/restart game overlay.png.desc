@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "credits pg1.png",
+    "name": "restart game overlay.png",
     "type": "Texture"
   },
   "build_data": {
-    "hash": 14328068244392967902
+    "hash": 16531472975259042323
   },
   "descriptor_version": 1,
-  "guid": "6cc01a36-3d0c-194f-8c6c-65706320ab2f",
+  "guid": "4e4e3fb2-a907-c441-b6c2-ae4c80e1e782",
   "import_settings": {
     "android_compression": "ASTC_4x4",
     "generate_mipmaps": true,
@@ -15,6 +15,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\credits pg1.png"
+    "source_file": "game\\textures\\restart game overlay.png"
   }
 }

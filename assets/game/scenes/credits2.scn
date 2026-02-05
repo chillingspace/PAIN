@@ -331,10 +331,10 @@
                         },
                         "UVCoordinates": {
                             "uv": [
-                                0.010416666977107525,
-                                0.010869565419852734,
-                                0.4895833432674408,
-                                0.989130437374115
+                                0.004629629664123058,
+                                0.008333333767950535,
+                                0.49537035822868347,
+                                0.9916666746139526
                             ]
                         }
                     },
@@ -544,8 +544,8 @@
                             ],
                             "texture_guid": "7158b6f0-2b9a-a646-ae06-b0e132c7181b",
                             "texture_scale": [
-                                4.0,
-                                3.0
+                                2.0,
+                                1.0
                             ]
                         },
                         "UIElement": {
@@ -936,6 +936,7 @@
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
+                                    "physics_enabled": true,
                                     "use_gravity": true,
                                     "velocity": [
                                         0.0,
@@ -968,6 +969,7 @@
                             "physics_behavior": {
                                 "behavior": 1
                             },
+                            "physics_enabled": true,
                             "use_gravity": true,
                             "velocity": [
                                 0.0,

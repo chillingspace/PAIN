@@ -810,17 +810,6 @@ namespace PAIN {
 				dispatchUIAction(entity, registry, button.action);
 				return;
 			}
-
-			// fallback, old lua callback
-			if (!button.on_click_callback_lua.empty()) {
-				auto& ctx = registry.ctx();
-				if (ctx.contains<LuaManager*>()) {
-					auto& luaMgr = ctx.get<LuaManager*>();
-					if (luaMgr) {
-						luaMgr->callGlobal(button.on_click_callback_lua);
-					}
-				}
-			}
 		}
 
 		void InputSystem::dispatchUIAction(entt::entity entity, entt::registry& registry, UIAction action)
