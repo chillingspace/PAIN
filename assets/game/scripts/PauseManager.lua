@@ -1,7 +1,14 @@
 -- PauseManager.lua
 log("[PauseManager] Script LOADED at startup!")
+hideCursor(true) -- hide cursor on startup
 
 -- Track current level globally
+if getCurrentSceneName then
+    local loaded = getCurrentSceneName()
+    if loaded and loaded ~= "" then
+        _G_root.CurrentLevelName = loaded
+    end
+end
 _G_root.CurrentLevelName = _G_root.CurrentLevelName or "Level1.scn"
 
 local isPaused = false
@@ -33,20 +40,18 @@ function TogglePause()
     setLayerEnabled(1, not isPaused)  -- Game UI layer
     setLayerEnabled(2, isPaused)       -- Pause menu layer
     setLayerEnabled(4, false)  
-
-    Hide_Cursor(isPaused)
     
     -- Show/hide cursor based on pause state
     if isPaused then
-        if showCursor then 
-            showCursor()
-            log("[PauseManager] Cursor shown")
-        end
+
+        hideCursor(false)
+        log("[PauseManager] Cursor shown")
+
     else
-        if hideCursor then 
-            hideCursor()
-            log("[PauseManager] Cursor hidden")
-        end
+
+        hideCursor(true)
+        log("[PauseManager] Cursor hidden")
+
     end
     
     log("[PauseManager] Layers toggled successfully")
@@ -56,7 +61,8 @@ end
 _G_root.TogglePause = TogglePause
 
 -- Helper function to update current level name
-function _G_root.SetCurrentLevel(sceneName)
-    _G_root.CurrentLevelName = sceneName
-    log("[PauseManager] Current level set to: " .. sceneName)
-end
+-- Deprecated: Use getCurrentSceneName() from EngineAPI instead
+-- function _G_root.SetCurrentLevel(sceneName)
+--     _G_root.CurrentLevelName = sceneName
+--     log("[PauseManager] Current level set to: " .. sceneName)
+-- end

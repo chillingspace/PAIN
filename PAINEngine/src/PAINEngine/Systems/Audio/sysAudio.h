@@ -11,6 +11,18 @@
 namespace PAIN {
     namespace Audio {
 
+        // ==================== GLOBAL AUDIO API ====================
+        // Persistent audio that survives scene changes
+        // Used by Lua bindings and other systems
+        
+        int GlobalAudio_GetTrackCount();
+        float GlobalAudio_GetVolume(int index);
+        void GlobalAudio_SetVolume(int index, float volumeDb, PAIN::Audio::Audio* audioService);
+        void GlobalAudio_Fade(int index, float targetDb, float durationSeconds);
+        void GlobalAudio_StopAll(PAIN::Audio::Audio* audioService);
+        void GlobalAudio_Clear();
+        bool GlobalAudio_IsInitialized();
+
         class System : public ECS::System::ISystem
         {
         public:

@@ -35,16 +35,16 @@
         "aspectRatioW": 16.0,
         "farPlane": 100.0,
         "forward": [
-            0.4890598952770233,
-            -0.2889010012149811,
-            -0.8230168223381042
+            0.496366024017334,
+            -0.23636727035045624,
+            -0.8353151082992554
         ],
         "fov": 90.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            1.332805871963501,
-            0.11987363547086716,
-            1.0452131032943726
+            1.3138142824172974,
+            0.14137351512908936,
+            1.0761075019836426
         ],
         "sensitivity": 0.11999999731779099,
         "speed": 0.10000000149011612,
@@ -825,6 +825,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
+                            "audio_tracks": [],
                             "group_name": "music",
                             "is3D": false,
                             "looping": true,
@@ -838,6 +839,7 @@
                                 0.0
                             ],
                             "selected_audio": "82bb33a4-ab3b-254d-b093-b2b9d7ab363d",
+                            "track_volumes": [],
                             "volumeDb": 0.0
                         },
                         "GUID": {
@@ -881,6 +883,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
+                            "audio_tracks": [],
                             "group_name": "music",
                             "is3D": false,
                             "looping": true,
@@ -894,6 +897,7 @@
                                 0.0
                             ],
                             "selected_audio": "e87054db-0ef8-f34b-96a0-e2fede943a49",
+                            "track_volumes": [],
                             "volumeDb": 0.0
                         },
                         "GUID": {
@@ -1421,6 +1425,7 @@
                             "playbackSpeed": 1.0080000162124634
                         },
                         "AudioSource": {
+                            "audio_tracks": [],
                             "group_name": "sfx",
                             "is3D": true,
                             "looping": true,
@@ -1434,6 +1439,7 @@
                                 0.0
                             ],
                             "selected_audio": "70e060fa-e805-a24b-8f37-cce5a7a9fc73",
+                            "track_volumes": [],
                             "volumeDb": 1.0
                         },
                         "GUID": {

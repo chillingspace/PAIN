@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Rock14.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 6338286272631572413
+  },
+  "descriptor_version": 1,
+  "guid": "e7b02aa4-f05d-3240-b5d4-dc5f08b09d58",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Rock14.prefab"
+  }
+}

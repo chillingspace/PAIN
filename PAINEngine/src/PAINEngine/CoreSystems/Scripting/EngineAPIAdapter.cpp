@@ -459,7 +459,24 @@ namespace PAIN {
     /*                           Scene / System state                              */
     /* =========================================================================== */
 
+    std::string EngineAPIAdapter::GetCurrentSceneName() {
+        if (!scene_ || !assets_) return "";
+        auto guid = scene_->getCurrScnID();
+        if (!guid.IsValid()) return "";
+        auto asset = assets_->getAssetData(guid);
+        return asset ? asset->main_relative_path.generic_string() : "";
+    }
+
+    std::string EngineAPIAdapter::GetPreviousSceneName() {
+        if (!scene_ || !assets_) return "";
+        auto guid = scene_->getPrevScnID();
+        if (!guid.IsValid()) return "";
+        auto asset = assets_->getAssetData(guid);
+        return asset ? asset->main_relative_path.generic_string() : "";
+    }
+
     bool EngineAPIAdapter::ChangeScene(std::string name) {
+
         if (!scene_ || !assets_) {
             PN_CORE_WARN("[EngineAPI] Missing SceneManager or Assets::Manager; cannot change scene '{}'", name);
             return false;
@@ -763,9 +780,10 @@ namespace PAIN {
     }
 
 
-    void EngineAPIAdapter::Hide_Cursor(bool b_set_cursor)
+    void EngineAPIAdapter::HideCursor(bool hidden)
     {
-        window_->setCursorMode(b_set_cursor);
+        PN_CORE_ERROR("Setting CURSOR mode to {}", hidden);
+        window_->hideCursor(hidden);
     }
 
 

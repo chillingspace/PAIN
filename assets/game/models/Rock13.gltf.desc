@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Cube.gltf",
+    "name": "Rock13.gltf",
     "type": "Model"
   },
   "build_data": {
-    "hash": 13489141898285819278
+    "hash": 9754475200309383959
   },
   "descriptor_version": 1,
-  "guid": "b52c18d6-0dcb-454a-b7b0-b9cb830eaee7",
+  "guid": "09ad029a-cc39-194a-a76b-bc0a584060be",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "engine\\models\\Cube.gltf"
+    "source_file": "game\\models\\Rock13.gltf"
   }
 }
