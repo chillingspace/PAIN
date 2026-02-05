@@ -465,7 +465,8 @@ namespace PAIN {
 
 							"credits_ArrowLeft",
 							"credits_ArrowRight",
-							"end_NextLevel"
+							"end_NextLevel",
+							"change_Level1",
 						};
 
 						int action_idx = static_cast<int>(button.action);

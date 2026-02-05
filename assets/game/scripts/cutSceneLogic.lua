@@ -16,6 +16,8 @@ registerUpdate(function(dt)
         
         -- 2. Increment the frame
         currentFrame = currentFrame + 1
+
+        local isMobile = (isAndroid ~= nil and isAndroid())
         
         -- 3. Check if we finished the cutscene
         if currentFrame > maxFrames then 
@@ -24,7 +26,6 @@ registerUpdate(function(dt)
             if changeScene then
                 local nextScene = G.TutorialSceneName 
                 
-                local isMobile = (isAndroid ~= nil and isAndroid())
                 if isMobile then
                     hideCursor(true)
                 end
@@ -36,7 +37,16 @@ registerUpdate(function(dt)
             return
         end
         
-        local fileName = "c" .. currentFrame .. ".ktx"
+        -- Determine file path based on platform
+        local fileName = ""
+        if isMobile then
+            -- Android: use KTX format (compressed texture format)
+            fileName = "game/textures/c" .. currentFrame .. ".ktx"
+        else
+            -- Windows: use PNG format
+            fileName = "game/textures/c" .. currentFrame .. ".png"
+        end
+        
         local guid = getImageID(fileName)
         
         if guid ~= "" and guid ~= nil then

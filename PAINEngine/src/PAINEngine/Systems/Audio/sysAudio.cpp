@@ -163,9 +163,9 @@ namespace PAIN {
             }
 
             // 2. Iterate all entities with AudioSource and Transform
-            auto group = registry.group<AudioSource>(entt::get<LocalTransform, WorldTransform>);
+            auto group = registry.group<AudioSource>(entt::get< WorldTransform>);
             
-            for (auto [entity, audioSrc, transform, worldtransform] : group.each())
+            for (auto [entity, audioSrc, worldtransform] : group.each())
             {
                 // Check if this is the Global_BGM entity (by name)
                 bool isGlobalBGM = false;
@@ -322,7 +322,8 @@ namespace PAIN {
                 // 4. Update 3D position for active, 3D sounds
                 if (audioSrc.state == AudioState::Playing && audioSrc.is3D && audioSrc.channelId.isValid())
                 {
-                    audioService->setPosition(audioSrc.channelId, transform.position);
+                    glm::vec3 worldPos = glm::vec3(worldtransform.matrix[3]);
+                    audioService->setPosition(audioSrc.channelId, worldPos);
                 }
             }
         }

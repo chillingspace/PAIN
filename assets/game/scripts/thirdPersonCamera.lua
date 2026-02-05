@@ -19,6 +19,10 @@ local lastMouseY = nil
 local isInit = false
 local firstFrame = true  -- Force reset on first frame
 
+-- Camera
+local smoothX, smoothY, smoothZ = nil, nil, nil
+local smoothFactor = 15.0 -- Higher = tighter, Lower = smoother (and more lag)
+
 _G.CameraState = { yaw = yaw, pitch = pitch }
 local frozenCx, frozenCy, frozenCz = nil, nil, nil
 local frozenTx, frozenTy, frozenTz = nil, nil, nil
@@ -185,17 +189,29 @@ registerUpdate(function(dt)
     local rz = -pitchX * sinY + pitchZ * cosY
     local ry = pitchY
 
-    local cx = px + rx
-    local cy = py + ry
-    local cz = pz + rz
 
     -- Always track camera position
     frozenCx, frozenCy, frozenCz = cx, cy, cz
     frozenTx, frozenTy, frozenTz = px, py + 0.1, pz
 
+    -- Initialize smooth vars if nil
+    if not smoothX then 
+        smoothX, smoothY, smoothZ = px, py, pz 
+    end
+
+    -- SMOOTHING: Interpolate towards the physics position
+    -- Formula: current = current + (target - current) * speed * dt
+    smoothX = smoothX + (px - smoothX) * smoothFactor * dt
+    smoothY = smoothY + (py - smoothY) * smoothFactor * dt
+    smoothZ = smoothZ + (pz - smoothZ) * smoothFactor * dt
+
+    local cx = smoothX + rx
+    local cy = smoothY + ry
+    local cz = smoothZ + rz
+
     cameraSetTransform(
         cx, cy, cz,
-        px, py + 0.1, pz,
+        smoothX, smoothY + 0.1, smoothZ, -- Target
         0.0, 1.0, 0.0
     )
 
