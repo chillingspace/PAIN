@@ -1,8 +1,18 @@
 {
     "assets": [
-        "df7c04c2-94d4-5347-8dad-6527e853bf94",
-        "f57adda3-64e1-a544-86a2-842c8976e7e0",
+        "d9a10e76-3db1-0c41-9368-c476a1845c40",
+        "496c08af-d9df-cc45-898c-20cc692a2e08",
+        "443d2baf-24fb-dc42-a6f9-403310b06194",
+        "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
+        "8fb18e50-fe3a-dd4c-889f-62f426ff9d18",
+        "8e26f21e-f0ca-5448-a80f-70f21e165ec6",
+        "9dc666a4-a004-0346-803d-0530eb3a2f70",
+        "4ab9b8a8-4bdc-e046-83a2-24863013c030",
+        "8ec89d31-ef7e-9247-834a-8782dd0c614d",
+        "2d87afdc-663f-ed4a-bdce-4ac73c3b6db0",
         "15808cf2-db36-c04b-8954-48d10ebaf528",
+        "f57adda3-64e1-a544-86a2-842c8976e7e0",
+        "df7c04c2-94d4-5347-8dad-6527e853bf94",
         "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
         "ab88a2ae-3d34-3342-b2ed-df719f19b490",
         "d67f82f6-9682-ba48-a64c-8697034ad488",
@@ -56,14 +66,11 @@
         "60d237d0-60e1-c146-86e6-e76c967840d4",
         "1708e4d2-69c9-ba43-9ef6-85d417b11f01",
         "ba8ea99f-16b6-da48-9465-54f48d7cd3a7",
-        "d9a10e76-3db1-0c41-9368-c476a1845c40",
         "e1eb1144-0c31-5e4a-8ca0-dbcf5c49dda2",
         "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
         "630fadbb-2e36-ce45-9b42-33cb68aec2bd",
         "14377587-a8fe-2b47-9f46-dad6bdad2753",
         "a67656ca-15a5-d441-b14d-dae036e5245e",
-        "8fb18e50-fe3a-dd4c-889f-62f426ff9d18",
-        "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
         "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
         "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
         "e60f5690-3ae8-a142-b726-5ea017a209e9",
@@ -78,17 +85,12 @@
         "19d818f3-a8fc-1b4a-bf95-b233da10f329",
         "9da056a0-d46c-664b-a2bd-9ba986135c23",
         "f6863a86-d8e4-194c-9c87-f42435c1060a",
-        "8e26f21e-f0ca-5448-a80f-70f21e165ec6",
-        "4ab9b8a8-4bdc-e046-83a2-24863013c030",
-        "9dc666a4-a004-0346-803d-0530eb3a2f70",
         "e3c50ccd-4dd5-024b-bde1-eb1f473cb339",
         "3688e05d-7434-b849-8904-1d7884ad053f",
         "4aecfe47-ed20-4341-805a-b691f14700e1",
         "0b9ad008-e8ad-144b-855d-115dd4683035",
         "b6f7c506-7c21-1847-a0b9-597479e83e13",
         "9d082b82-72a3-e149-a6bb-b0fa70c02de0",
-        "8ec89d31-ef7e-9247-834a-8782dd0c614d",
-        "2d87afdc-663f-ed4a-bdce-4ac73c3b6db0",
         "a77749e3-6c15-7446-a792-5609dd96b391",
         "c49ebb97-d7ba-f148-9e46-16d6c5543147",
         "3e8dc653-3d17-ab42-bb53-da040f01f965",
@@ -115,19 +117,19 @@
         "aspectRatioW": 16.0,
         "farPlane": 100.0,
         "forward": [
-            -0.02136986516416073,
-            -0.348291277885437,
-            -0.9371427893638611
+            -0.039076752960681915,
+            -0.6371973156929016,
+            -0.7697094678878784
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            -10.965487480163574,
-            5.204748153686523,
-            10.280619621276855
+            -11.209724426269531,
+            3.4464452266693115,
+            0.9831008315086365
         ],
         "sensitivity": 0.10000000149011612,
-        "speed": 10.5,
+        "speed": 20.0,
         "up": [
             0.0,
             1.0,
@@ -136,6 +138,1629 @@
     },
     "ecs": {
         "Entities": [
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "32f9b5c7-56fe-af47-8cf8-416e22f25896"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                14.710870742797852,
+                                -1.9073486328125e-06,
+                                -31.29059600830078
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.5199999809265137,
+                                0.5199999809265137,
+                                0.5199999809265137
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "1f9300e8-e21d-3e4e-9334-537b00dbf4a7",
+                                    "aoTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "f793c645-cb9b-3444-8452-17b2ed3756aa",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
+                                    "normalTextureOverride": "400c0192-8f2c-6f4a-bff0-1a60e7813d56",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "496c08af-d9df-cc45-898c-20cc692a2e08",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Rock13"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                                    "siblingIndex": 0
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        14.710870742797852,
+                                        -1.9073486328125e-06,
+                                        -31.29059600830078
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "scale": [
+                                        0.5199999809265137,
+                                        0.5199999809265137,
+                                        0.5199999809265137
+                                    ]
+                                },
+                                "ModelRenderer": {
+                                    "castShadows": true,
+                                    "materials": [
+                                        {
+                                            "albedoTextureOverride": "1f9300e8-e21d-3e4e-9334-537b00dbf4a7",
+                                            "aoTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
+                                            "baseColorOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "materialGUID": "f793c645-cb9b-3444-8452-17b2ed3756aa",
+                                            "metallicOverride": 1.0,
+                                            "metallicTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
+                                            "normalTextureOverride": "400c0192-8f2c-6f4a-bff0-1a60e7813d56",
+                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "roughnessOverride": 1.0,
+                                            "roughnessTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
+                                            "useOverrides": false
+                                        }
+                                    ],
+                                    "modelGUID": "496c08af-d9df-cc45-898c-20cc692a2e08",
+                                    "receiveShadows": true,
+                                    "visible": true
+                                },
+                                "Name": {
+                                    "name": "Rock13"
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "6843c295-3946-054b-8599-b29ad75e0d61",
+                            "instanceRootGUID": "32f9b5c7-56fe-af47-8cf8-416e22f25896",
+                            "sourcePrefabGUID": "01481fc1-e10d-b544-b438-d25d397226bb"
+                        }
+                    },
+                    "Name": "Rock13"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "3d4bb99e-735a-9441-984d-9b1fc1e76ee6"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                28.15117073059082,
+                                -1.9524798393249512,
+                                -19.69733238220215
+                            ],
+                            "rotation": [
+                                1.8374582850810839e-06,
+                                -0.8527877330780029,
+                                -1.8374582850810839e-06,
+                                0.5222576260566711
+                            ],
+                            "scale": [
+                                0.6800000071525574,
+                                0.6800000071525574,
+                                0.6800000071525574
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "7adf415c-e35d-ee49-83ee-b42c3bfb708b",
+                                    "aoTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                    "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Rock14"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                                    "siblingIndex": 0
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        28.15117073059082,
+                                        -1.9524798393249512,
+                                        -19.69733238220215
+                                    ],
+                                    "rotation": [
+                                        1.8374582850810839e-06,
+                                        -0.8527877330780029,
+                                        -1.8374582850810839e-06,
+                                        0.5222576260566711
+                                    ],
+                                    "scale": [
+                                        0.6800000071525574,
+                                        0.6800000071525574,
+                                        0.6800000071525574
+                                    ]
+                                },
+                                "ModelRenderer": {
+                                    "castShadows": true,
+                                    "materials": [
+                                        {
+                                            "albedoTextureOverride": "7adf415c-e35d-ee49-83ee-b42c3bfb708b",
+                                            "aoTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                            "baseColorOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                            "metallicOverride": 1.0,
+                                            "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                            "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
+                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "roughnessOverride": 1.0,
+                                            "roughnessTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                            "useOverrides": false
+                                        }
+                                    ],
+                                    "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                                    "receiveShadows": true,
+                                    "visible": true
+                                },
+                                "Name": {
+                                    "name": "Rock14"
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "7218871c-9649-0f42-93fe-2ad6b3eccd97",
+                            "instanceRootGUID": "3d4bb99e-735a-9441-984d-9b1fc1e76ee6",
+                            "sourcePrefabGUID": "6fc75a72-a024-ed4e-a35a-910d770ce9eb"
+                        }
+                    },
+                    "Name": "Rock14"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "e5daec0b-dc44-a747-afc3-f64319ac4852"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                54.00459289550781,
+                                0.0,
+                                -21.83077049255371
+                            ],
+                            "rotation": [
+                                -1.26159795854619e-06,
+                                0.8326932191848755,
+                                -1.26159795854619e-06,
+                                -0.5537346601486206
+                            ],
+                            "scale": [
+                                0.5199999809265137,
+                                0.5199999809265137,
+                                0.5199999809265137
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "1f9300e8-e21d-3e4e-9334-537b00dbf4a7",
+                                    "aoTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "f793c645-cb9b-3444-8452-17b2ed3756aa",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
+                                    "normalTextureOverride": "400c0192-8f2c-6f4a-bff0-1a60e7813d56",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "496c08af-d9df-cc45-898c-20cc692a2e08",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Rock13"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                                    "siblingIndex": 0
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        54.00459289550781,
+                                        0.0,
+                                        -21.83077049255371
+                                    ],
+                                    "rotation": [
+                                        -1.26159795854619e-06,
+                                        0.8326932191848755,
+                                        -1.26159795854619e-06,
+                                        -0.5537346601486206
+                                    ],
+                                    "scale": [
+                                        0.5199999809265137,
+                                        0.5199999809265137,
+                                        0.5199999809265137
+                                    ]
+                                },
+                                "ModelRenderer": {
+                                    "castShadows": true,
+                                    "materials": [
+                                        {
+                                            "albedoTextureOverride": "1f9300e8-e21d-3e4e-9334-537b00dbf4a7",
+                                            "aoTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
+                                            "baseColorOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "materialGUID": "f793c645-cb9b-3444-8452-17b2ed3756aa",
+                                            "metallicOverride": 1.0,
+                                            "metallicTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
+                                            "normalTextureOverride": "400c0192-8f2c-6f4a-bff0-1a60e7813d56",
+                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "roughnessOverride": 1.0,
+                                            "roughnessTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
+                                            "useOverrides": false
+                                        }
+                                    ],
+                                    "modelGUID": "496c08af-d9df-cc45-898c-20cc692a2e08",
+                                    "receiveShadows": true,
+                                    "visible": true
+                                },
+                                "Name": {
+                                    "name": "Rock13"
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "6843c295-3946-054b-8599-b29ad75e0d61",
+                            "instanceRootGUID": "e5daec0b-dc44-a747-afc3-f64319ac4852",
+                            "sourcePrefabGUID": "01481fc1-e10d-b544-b438-d25d397226bb"
+                        }
+                    },
+                    "Name": "Rock13"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "59d26b0f-ea71-2e42-a02b-42a5bb2a3e93"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                64.33984375,
+                                -2.5772128105163574,
+                                -20.722492218017578
+                            ],
+                            "rotation": [
+                                1.2173331924714148e-06,
+                                -0.7108755111694336,
+                                2.999295247718692e-07,
+                                0.7033178210258484
+                            ],
+                            "scale": [
+                                0.6800000071525574,
+                                0.6800000071525574,
+                                0.6800000071525574
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "7adf415c-e35d-ee49-83ee-b42c3bfb708b",
+                                    "aoTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                    "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Rock14"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                                    "siblingIndex": 0
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        64.33984375,
+                                        -2.5772128105163574,
+                                        -20.722492218017578
+                                    ],
+                                    "rotation": [
+                                        1.2173331924714148e-06,
+                                        -0.7108755111694336,
+                                        2.999295247718692e-07,
+                                        0.7033178210258484
+                                    ],
+                                    "scale": [
+                                        0.6800000071525574,
+                                        0.6800000071525574,
+                                        0.6800000071525574
+                                    ]
+                                },
+                                "ModelRenderer": {
+                                    "castShadows": true,
+                                    "materials": [
+                                        {
+                                            "albedoTextureOverride": "7adf415c-e35d-ee49-83ee-b42c3bfb708b",
+                                            "aoTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                            "baseColorOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                            "metallicOverride": 1.0,
+                                            "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                            "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
+                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "roughnessOverride": 1.0,
+                                            "roughnessTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                            "useOverrides": false
+                                        }
+                                    ],
+                                    "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                                    "receiveShadows": true,
+                                    "visible": true
+                                },
+                                "Name": {
+                                    "name": "Rock14"
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "7218871c-9649-0f42-93fe-2ad6b3eccd97",
+                            "instanceRootGUID": "59d26b0f-ea71-2e42-a02b-42a5bb2a3e93",
+                            "sourcePrefabGUID": "6fc75a72-a024-ed4e-a35a-910d770ce9eb"
+                        }
+                    },
+                    "Name": "Rock14"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "1f4b0db6-f66d-224d-81ee-6620ef588e03"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                43.27508544921875,
+                                -3.4436612129211426,
+                                -18.317968368530273
+                            ],
+                            "rotation": [
+                                1.5528157746302895e-06,
+                                -0.6117004752159119,
+                                -2.5864005692710634e-07,
+                                0.7910894751548767
+                            ],
+                            "scale": [
+                                0.6800000071525574,
+                                0.6800000071525574,
+                                0.6800000071525574
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "7adf415c-e35d-ee49-83ee-b42c3bfb708b",
+                                    "aoTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                    "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Rock14"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                                    "siblingIndex": 0
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        43.27508544921875,
+                                        -3.4436612129211426,
+                                        -18.317968368530273
+                                    ],
+                                    "rotation": [
+                                        1.5528157746302895e-06,
+                                        -0.6117004752159119,
+                                        -2.5864005692710634e-07,
+                                        0.7910894751548767
+                                    ],
+                                    "scale": [
+                                        0.6800000071525574,
+                                        0.6800000071525574,
+                                        0.6800000071525574
+                                    ]
+                                },
+                                "ModelRenderer": {
+                                    "castShadows": true,
+                                    "materials": [
+                                        {
+                                            "albedoTextureOverride": "7adf415c-e35d-ee49-83ee-b42c3bfb708b",
+                                            "aoTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                            "baseColorOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                            "metallicOverride": 1.0,
+                                            "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                            "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
+                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "roughnessOverride": 1.0,
+                                            "roughnessTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                            "useOverrides": false
+                                        }
+                                    ],
+                                    "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                                    "receiveShadows": true,
+                                    "visible": true
+                                },
+                                "Name": {
+                                    "name": "Rock14"
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "7218871c-9649-0f42-93fe-2ad6b3eccd97",
+                            "instanceRootGUID": "1f4b0db6-f66d-224d-81ee-6620ef588e03",
+                            "sourcePrefabGUID": "6fc75a72-a024-ed4e-a35a-910d770ce9eb"
+                        }
+                    },
+                    "Name": "Rock14"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "2851cba9-c9c6-8d4f-8fde-d567a892d4a4"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                54.79511642456055,
+                                -1.9073486328125e-06,
+                                20.45738983154297
+                            ],
+                            "rotation": [
+                                -9.14312863642408e-07,
+                                -0.9999884963035583,
+                                9.14312863642408e-07,
+                                -0.004791827406734228
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "8ec89d31-ef7e-9247-834a-8782dd0c614d",
+                                    "aoTextureOverride": "f57adda3-64e1-a544-86a2-842c8976e7e0",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "4ab9b8a8-4bdc-e046-83a2-24863013c030",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "f57adda3-64e1-a544-86a2-842c8976e7e0",
+                                    "normalTextureOverride": "2d87afdc-663f-ed4a-bdce-4ac73c3b6db0",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "f57adda3-64e1-a544-86a2-842c8976e7e0",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "8fb18e50-fe3a-dd4c-889f-62f426ff9d18",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Outerwall1151"
+                        }
+                    },
+                    "Name": "Outerwall1151"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "af30fe23-e812-7f48-b450-0d5ada4202b9"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                24.686477661132813,
+                                -1.3336939811706543,
+                                14.90082836151123
+                            ],
+                            "rotation": [
+                                0.0,
+                                -0.24845050275325775,
+                                0.0,
+                                0.9686446189880371
+                            ],
+                            "scale": [
+                                0.5199999809265137,
+                                0.5199999809265137,
+                                0.5199999809265137
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "1f9300e8-e21d-3e4e-9334-537b00dbf4a7",
+                                    "aoTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "f793c645-cb9b-3444-8452-17b2ed3756aa",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
+                                    "normalTextureOverride": "400c0192-8f2c-6f4a-bff0-1a60e7813d56",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "496c08af-d9df-cc45-898c-20cc692a2e08",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Rock13"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                                    "siblingIndex": 0
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        24.686477661132813,
+                                        -1.3336939811706543,
+                                        14.90082836151123
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        -0.24845050275325775,
+                                        0.0,
+                                        0.9686446189880371
+                                    ],
+                                    "scale": [
+                                        0.5199999809265137,
+                                        0.5199999809265137,
+                                        0.5199999809265137
+                                    ]
+                                },
+                                "ModelRenderer": {
+                                    "castShadows": true,
+                                    "materials": [
+                                        {
+                                            "albedoTextureOverride": "1f9300e8-e21d-3e4e-9334-537b00dbf4a7",
+                                            "aoTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
+                                            "baseColorOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "materialGUID": "f793c645-cb9b-3444-8452-17b2ed3756aa",
+                                            "metallicOverride": 1.0,
+                                            "metallicTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
+                                            "normalTextureOverride": "400c0192-8f2c-6f4a-bff0-1a60e7813d56",
+                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "roughnessOverride": 1.0,
+                                            "roughnessTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
+                                            "useOverrides": false
+                                        }
+                                    ],
+                                    "modelGUID": "496c08af-d9df-cc45-898c-20cc692a2e08",
+                                    "receiveShadows": true,
+                                    "visible": true
+                                },
+                                "Name": {
+                                    "name": "Rock13"
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "6843c295-3946-054b-8599-b29ad75e0d61",
+                            "instanceRootGUID": "af30fe23-e812-7f48-b450-0d5ada4202b9",
+                            "sourcePrefabGUID": "01481fc1-e10d-b544-b438-d25d397226bb"
+                        }
+                    },
+                    "Name": "Rock13"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "b1f09a16-4b76-8543-a3be-ce7f859e64fa"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                28.37042236328125,
+                                -3.6242012977600098,
+                                24.08992576599121
+                            ],
+                            "rotation": [
+                                -9.064695660754296e-10,
+                                0.1248743087053299,
+                                -7.290562376027765e-09,
+                                0.9921725392341614
+                            ],
+                            "scale": [
+                                0.6800000071525574,
+                                0.6800000071525574,
+                                0.6800000071525574
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "7adf415c-e35d-ee49-83ee-b42c3bfb708b",
+                                    "aoTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                    "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Rock14"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                                    "siblingIndex": 0
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        28.37042236328125,
+                                        -3.6242012977600098,
+                                        24.08992576599121
+                                    ],
+                                    "rotation": [
+                                        -9.064695660754296e-10,
+                                        0.1248743087053299,
+                                        -7.290562376027765e-09,
+                                        0.9921725392341614
+                                    ],
+                                    "scale": [
+                                        0.6800000071525574,
+                                        0.6800000071525574,
+                                        0.6800000071525574
+                                    ]
+                                },
+                                "ModelRenderer": {
+                                    "castShadows": true,
+                                    "materials": [
+                                        {
+                                            "albedoTextureOverride": "7adf415c-e35d-ee49-83ee-b42c3bfb708b",
+                                            "aoTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                            "baseColorOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                            "metallicOverride": 1.0,
+                                            "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                            "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
+                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "roughnessOverride": 1.0,
+                                            "roughnessTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                            "useOverrides": false
+                                        }
+                                    ],
+                                    "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                                    "receiveShadows": true,
+                                    "visible": true
+                                },
+                                "Name": {
+                                    "name": "Rock14"
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "7218871c-9649-0f42-93fe-2ad6b3eccd97",
+                            "instanceRootGUID": "b1f09a16-4b76-8543-a3be-ce7f859e64fa",
+                            "sourcePrefabGUID": "6fc75a72-a024-ed4e-a35a-910d770ce9eb"
+                        }
+                    },
+                    "Name": "Rock14"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "f8227ac0-0c9b-cf45-8955-63e5f1c0ecaf"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                16.712465286254883,
+                                -3.6811251640319824,
+                                13.204571723937988
+                            ],
+                            "rotation": [
+                                -4.5340584620134905e-09,
+                                0.6183266043663025,
+                                -5.780913525654796e-09,
+                                0.7859212160110474
+                            ],
+                            "scale": [
+                                0.6800000071525574,
+                                0.6800000071525574,
+                                0.6800000071525574
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "7adf415c-e35d-ee49-83ee-b42c3bfb708b",
+                                    "aoTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                    "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Rock14"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                                    "siblingIndex": 0
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        16.712465286254883,
+                                        -3.6811251640319824,
+                                        13.204571723937988
+                                    ],
+                                    "rotation": [
+                                        -4.5340584620134905e-09,
+                                        0.6183266043663025,
+                                        -5.780913525654796e-09,
+                                        0.7859212160110474
+                                    ],
+                                    "scale": [
+                                        0.6800000071525574,
+                                        0.6800000071525574,
+                                        0.6800000071525574
+                                    ]
+                                },
+                                "ModelRenderer": {
+                                    "castShadows": true,
+                                    "materials": [
+                                        {
+                                            "albedoTextureOverride": "7adf415c-e35d-ee49-83ee-b42c3bfb708b",
+                                            "aoTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                            "baseColorOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                            "metallicOverride": 1.0,
+                                            "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                            "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
+                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "roughnessOverride": 1.0,
+                                            "roughnessTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                            "useOverrides": false
+                                        }
+                                    ],
+                                    "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                                    "receiveShadows": true,
+                                    "visible": true
+                                },
+                                "Name": {
+                                    "name": "Rock14"
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "7218871c-9649-0f42-93fe-2ad6b3eccd97",
+                            "instanceRootGUID": "f8227ac0-0c9b-cf45-8955-63e5f1c0ecaf",
+                            "sourcePrefabGUID": "6fc75a72-a024-ed4e-a35a-910d770ce9eb"
+                        }
+                    },
+                    "Name": "Rock14"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "79f5aed4-33cf-924e-9f84-a318a64753d2"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                2.2667484283447266,
+                                -4.568225860595703,
+                                17.416614532470703
+                            ],
+                            "rotation": [
+                                -4.809886604562053e-07,
+                                0.9201489686965942,
+                                -4.809886604562053e-07,
+                                0.39156845211982727
+                            ],
+                            "scale": [
+                                0.6800000071525574,
+                                0.6800000071525574,
+                                0.6800000071525574
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "7adf415c-e35d-ee49-83ee-b42c3bfb708b",
+                                    "aoTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                    "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Rock14"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                                    "siblingIndex": 0
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        2.2667484283447266,
+                                        -4.568225860595703,
+                                        17.416614532470703
+                                    ],
+                                    "rotation": [
+                                        -4.809886604562053e-07,
+                                        0.9201489686965942,
+                                        -4.809886604562053e-07,
+                                        0.39156845211982727
+                                    ],
+                                    "scale": [
+                                        0.6800000071525574,
+                                        0.6800000071525574,
+                                        0.6800000071525574
+                                    ]
+                                },
+                                "ModelRenderer": {
+                                    "castShadows": true,
+                                    "materials": [
+                                        {
+                                            "albedoTextureOverride": "7adf415c-e35d-ee49-83ee-b42c3bfb708b",
+                                            "aoTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                            "baseColorOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                            "metallicOverride": 1.0,
+                                            "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                            "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
+                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "roughnessOverride": 1.0,
+                                            "roughnessTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                            "useOverrides": false
+                                        }
+                                    ],
+                                    "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                                    "receiveShadows": true,
+                                    "visible": true
+                                },
+                                "Name": {
+                                    "name": "Rock14"
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "7218871c-9649-0f42-93fe-2ad6b3eccd97",
+                            "instanceRootGUID": "79f5aed4-33cf-924e-9f84-a318a64753d2",
+                            "sourcePrefabGUID": "6fc75a72-a024-ed4e-a35a-910d770ce9eb"
+                        }
+                    },
+                    "Name": "Rock14"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "2f98b5ff-9c4f-e645-b956-0faf1a7f8376"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                -18.77257537841797,
+                                -2.3278679847717285,
+                                24.729448318481445
+                            ],
+                            "rotation": [
+                                -5.113406587042846e-09,
+                                0.6970949769020081,
+                                -5.275126113701845e-09,
+                                0.7169787883758545
+                            ],
+                            "scale": [
+                                0.6800000071525574,
+                                0.6800000071525574,
+                                0.6800000071525574
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "7adf415c-e35d-ee49-83ee-b42c3bfb708b",
+                                    "aoTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                    "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Rock14"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                                    "siblingIndex": 0
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        -18.77257537841797,
+                                        -2.3278679847717285,
+                                        24.729448318481445
+                                    ],
+                                    "rotation": [
+                                        -5.113406587042846e-09,
+                                        0.6970949769020081,
+                                        -5.275126113701845e-09,
+                                        0.7169787883758545
+                                    ],
+                                    "scale": [
+                                        0.6800000071525574,
+                                        0.6800000071525574,
+                                        0.6800000071525574
+                                    ]
+                                },
+                                "ModelRenderer": {
+                                    "castShadows": true,
+                                    "materials": [
+                                        {
+                                            "albedoTextureOverride": "7adf415c-e35d-ee49-83ee-b42c3bfb708b",
+                                            "aoTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                            "baseColorOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                            "metallicOverride": 1.0,
+                                            "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                            "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
+                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "roughnessOverride": 1.0,
+                                            "roughnessTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
+                                            "useOverrides": false
+                                        }
+                                    ],
+                                    "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                                    "receiveShadows": true,
+                                    "visible": true
+                                },
+                                "Name": {
+                                    "name": "Rock14"
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "7218871c-9649-0f42-93fe-2ad6b3eccd97",
+                            "instanceRootGUID": "2f98b5ff-9c4f-e645-b956-0faf1a7f8376",
+                            "sourcePrefabGUID": "6fc75a72-a024-ed4e-a35a-910d770ce9eb"
+                        }
+                    },
+                    "Name": "Rock14"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "c1da390e-7410-0a4d-a358-6cd5a7939948"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                -4.868793964385986,
+                                0.0,
+                                25.213424682617188
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.146611288189888,
+                                0.0,
+                                0.9891941547393799
+                            ],
+                            "scale": [
+                                0.5199999809265137,
+                                0.5199999809265137,
+                                0.5199999809265137
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "1f9300e8-e21d-3e4e-9334-537b00dbf4a7",
+                                    "aoTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "f793c645-cb9b-3444-8452-17b2ed3756aa",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
+                                    "normalTextureOverride": "400c0192-8f2c-6f4a-bff0-1a60e7813d56",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "496c08af-d9df-cc45-898c-20cc692a2e08",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Rock13"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                                    "siblingIndex": 0
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        -4.868793964385986,
+                                        0.0,
+                                        25.213424682617188
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.146611288189888,
+                                        0.0,
+                                        0.9891941547393799
+                                    ],
+                                    "scale": [
+                                        0.5199999809265137,
+                                        0.5199999809265137,
+                                        0.5199999809265137
+                                    ]
+                                },
+                                "ModelRenderer": {
+                                    "castShadows": true,
+                                    "materials": [
+                                        {
+                                            "albedoTextureOverride": "1f9300e8-e21d-3e4e-9334-537b00dbf4a7",
+                                            "aoTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
+                                            "baseColorOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "materialGUID": "f793c645-cb9b-3444-8452-17b2ed3756aa",
+                                            "metallicOverride": 1.0,
+                                            "metallicTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
+                                            "normalTextureOverride": "400c0192-8f2c-6f4a-bff0-1a60e7813d56",
+                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "roughnessOverride": 1.0,
+                                            "roughnessTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
+                                            "useOverrides": false
+                                        }
+                                    ],
+                                    "modelGUID": "496c08af-d9df-cc45-898c-20cc692a2e08",
+                                    "receiveShadows": true,
+                                    "visible": true
+                                },
+                                "Name": {
+                                    "name": "Rock13"
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "6843c295-3946-054b-8599-b29ad75e0d61",
+                            "instanceRootGUID": "c1da390e-7410-0a4d-a358-6cd5a7939948",
+                            "sourcePrefabGUID": "01481fc1-e10d-b544-b438-d25d397226bb"
+                        }
+                    },
+                    "Name": "Rock13"
+                }
+            },
             {
                 "Entity": {
                     "Components": {
@@ -247,7 +1872,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 0
+                            "siblingIndex": 1
                         },
                         "Layer": {
                             "layer_id": 6,
@@ -352,7 +1977,7 @@
                                 "675345f8-21f4-d84c-a928-f9bcdd48cb9f"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 0
+                            "siblingIndex": 2
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -508,7 +2133,7 @@
                                 -1.0,
                                 0.0
                             ],
-                            "inner_angle": 12.5,
+                            "inner_angle": 29.0,
                             "light_intensity": [
                                 0.5,
                                 0.5,
@@ -520,7 +2145,7 @@
                                 0.0,
                                 0.0
                             ],
-                            "outer_angle": 17.5,
+                            "outer_angle": 32.0,
                             "shadow_type": 0
                         },
                         "LocalTransform": {
@@ -763,7 +2388,7 @@
                                 -1.0,
                                 0.0
                             ],
-                            "inner_angle": 12.5,
+                            "inner_angle": 29.0,
                             "light_intensity": [
                                 0.5,
                                 0.5,
@@ -775,7 +2400,7 @@
                                 0.0,
                                 0.0
                             ],
-                            "outer_angle": 17.5,
+                            "outer_angle": 32.0,
                             "shadow_type": 0
                         },
                         "LocalTransform": {
@@ -1018,7 +2643,7 @@
                                 -1.0,
                                 0.0
                             ],
-                            "inner_angle": 12.5,
+                            "inner_angle": 29.0,
                             "light_intensity": [
                                 0.5,
                                 0.5,
@@ -1030,7 +2655,7 @@
                                 0.0,
                                 0.0
                             ],
-                            "outer_angle": 17.5,
+                            "outer_angle": 32.0,
                             "shadow_type": 0
                         },
                         "LocalTransform": {
@@ -1315,7 +2940,7 @@
                                 -1.0,
                                 0.0
                             ],
-                            "inner_angle": 12.5,
+                            "inner_angle": 29.0,
                             "light_intensity": [
                                 0.5,
                                 0.5,
@@ -1327,7 +2952,7 @@
                                 0.0,
                                 0.0
                             ],
-                            "outer_angle": 17.5,
+                            "outer_angle": 32.0,
                             "shadow_type": 0
                         },
                         "LocalTransform": {
@@ -1505,7 +3130,7 @@
                                 "d5e71205-e8f8-054b-9be4-4b6d6b41040e"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 1
+                            "siblingIndex": 3
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -2819,7 +4444,7 @@
                                 "6ab9c0ad-0050-ed49-8499-b6b60d2c3a57"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 2
+                            "siblingIndex": 4
                         },
                         "Layer": {
                             "layer_id": 3,
@@ -3037,7 +4662,7 @@
                                 "7793f64e-0c39-a64b-8aff-3cb5abaa0837"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 3
+                            "siblingIndex": 5
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -4445,7 +6070,7 @@
                                 "18934621-8352-cc40-8c3c-7baf0a9001d9"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 4
+                            "siblingIndex": 6
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -5104,7 +6729,7 @@
                                 "9bf4b89e-0533-6f4c-8cdd-d87badf74cec"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 5
+                            "siblingIndex": 7
                         },
                         "Layer": {
                             "layer_id": 4,
@@ -5730,7 +7355,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 6
+                            "siblingIndex": 8
                         },
                         "Layer": {
                             "layer_id": 4,
@@ -5827,6 +7452,398 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
+                            "guid": "298bdf47-4935-4249-8458-79ec7945219d"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [
+                                "029fbf7c-f6f7-6d42-a25f-4368ecc83037",
+                                "ef70de61-5f27-3f47-8882-c109e400bccb"
+                            ],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 9
+                        },
+                        "Layer": {
+                            "layer_id": 5,
+                            "layer_mask": 32
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                11.793588638305664,
+                                0.0,
+                                -28.492372512817383
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "restart_manager"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [
+                                        "029fbf7c-f6f7-6d42-a25f-4368ecc83037",
+                                        "ef70de61-5f27-3f47-8882-c109e400bccb"
+                                    ],
+                                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                                    "siblingIndex": 9
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        11.793588638305664,
+                                        0.0,
+                                        -28.492372512817383
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "scale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "5b06bcce-31b8-8340-baaa-ac9c654e80d8",
+                            "instanceRootGUID": "298bdf47-4935-4249-8458-79ec7945219d",
+                            "sourcePrefabGUID": "ba6b7137-3a6f-d74e-ae1b-16d6c16fe571"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "39e6a9ce-8772-dd4b-9f93-5ed126fa6c2c"
+                                }
+                            ]
+                        }
+                    },
+                    "Name": "restart_manager"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "CustomHitbox2D": {
+                            "max_point": [
+                                100.0,
+                                50.0
+                            ],
+                            "min_point": [
+                                -100.0,
+                                -50.0
+                            ],
+                            "position_offset": [
+                                60.0,
+                                0.0
+                            ]
+                        },
+                        "GUID": {
+                            "guid": "029fbf7c-f6f7-6d42-a25f-4368ecc83037"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "298bdf47-4935-4249-8458-79ec7945219d",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 5,
+                            "layer_mask": 32
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                2.8526031970977783,
+                                1.9104310274124146,
+                                -5.961182594299316
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "no_button"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "298bdf47-4935-4249-8458-79ec7945219d",
+                                    "siblingIndex": 0
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "0aafdc40-3450-8143-be1d-2f43ada89af1",
+                            "instanceRootGUID": "298bdf47-4935-4249-8458-79ec7945219d",
+                            "sourcePrefabGUID": "ba6b7137-3a6f-d74e-ae1b-16d6c16fe571"
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                0.25,
+                                -0.15000000596046448
+                            ],
+                            "texture_guid": "ac631a82-95a9-7944-91cf-a1d2c21d425a",
+                            "texture_scale": [
+                                0.20000000298023224,
+                                0.07999999821186066
+                            ]
+                        },
+                        "UIAnimation": {
+                            "b_loop": true,
+                            "b_playing": false,
+                            "duration": 0.20000000298023224,
+                            "frame_duration": 0.10000000149011612,
+                            "spritesheet_columns": 2,
+                            "spritesheet_rows": 1,
+                            "total_frames": 2
+                        },
+                        "UIButton": {
+                            "action": 22,
+                            "disabled_color": -10066330,
+                            "highlighted_color": -3355444,
+                            "normal_color": -1,
+                            "payload": "",
+                            "pressed_color": -5592406,
+                            "state": 0
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                1024.0,
+                                88.0
+                            ]
+                        },
+                        "UVCoordinates": {
+                            "uv": [
+                                0.0023809524718672037,
+                                0.011363636702299118,
+                                0.49761903285980225,
+                                0.9886363744735718
+                            ]
+                        }
+                    },
+                    "Name": "no_button"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "CustomHitbox2D": {
+                            "max_point": [
+                                100.0,
+                                50.0
+                            ],
+                            "min_point": [
+                                -100.0,
+                                -50.0
+                            ],
+                            "position_offset": [
+                                60.0,
+                                0.0
+                            ]
+                        },
+                        "GUID": {
+                            "guid": "ef70de61-5f27-3f47-8882-c109e400bccb"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "298bdf47-4935-4249-8458-79ec7945219d",
+                            "siblingIndex": 1
+                        },
+                        "Layer": {
+                            "layer_id": 5,
+                            "layer_mask": 32
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                2.8526031970977783,
+                                1.9104310274124146,
+                                -5.961182594299316
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "yes_button"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "298bdf47-4935-4249-8458-79ec7945219d",
+                                    "siblingIndex": 1
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "dd464bb8-d9f7-a245-9822-3d2644e4bbe2",
+                            "instanceRootGUID": "298bdf47-4935-4249-8458-79ec7945219d",
+                            "sourcePrefabGUID": "ba6b7137-3a6f-d74e-ae1b-16d6c16fe571"
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                -0.3499999940395355,
+                                -0.15000000596046448
+                            ],
+                            "texture_guid": "374d15d2-5a0b-0947-bef6-f7255d7f399e",
+                            "texture_scale": [
+                                0.20000000298023224,
+                                0.07999999821186066
+                            ]
+                        },
+                        "UIAnimation": {
+                            "b_loop": true,
+                            "b_playing": false,
+                            "duration": 0.20000000298023224,
+                            "frame_duration": 0.10000000149011612,
+                            "spritesheet_columns": 2,
+                            "spritesheet_rows": 1,
+                            "total_frames": 2
+                        },
+                        "UIButton": {
+                            "action": 21,
+                            "disabled_color": -10066330,
+                            "highlighted_color": -3355444,
+                            "normal_color": -1,
+                            "payload": "",
+                            "pressed_color": -5592406,
+                            "state": 0
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                1024.0,
+                                88.0
+                            ]
+                        },
+                        "UVCoordinates": {
+                            "uv": [
+                                0.0020325202494859695,
+                                0.011363636702299118,
+                                0.4979674816131592,
+                                0.9886363744735718
+                            ]
+                        }
+                    },
+                    "Name": "yes_button"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
                             "guid": "cbc53e43-5867-7042-86ff-da57ea2d741f"
                         },
                         "Hierarchy": {
@@ -5836,7 +7853,7 @@
                                 "85229db1-9cf5-064e-bd77-71c88e8dbfcc"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 7
+                            "siblingIndex": 9
                         },
                         "Layer": {
                             "layer_id": 2,
@@ -6751,7 +8768,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 8
+                            "siblingIndex": 10
                         },
                         "Layer": {
                             "layer_id": 2,
@@ -6848,6 +8865,133 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
+                            "guid": "990021b8-d0bb-a24e-9f21-ccf9de321940"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 11
+                        },
+                        "Layer": {
+                            "layer_id": 5,
+                            "layer_mask": 32
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                -6.992116928100586,
+                                0.0,
+                                -5.942984104156494
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "restart_overlay"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "LocalTransform": {
+                                    "position": [
+                                        -6.992116928100586,
+                                        0.0,
+                                        -5.942984104156494
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "scale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "85b01bc4-04be-3243-96a9-4c8d0d4a8ad7",
+                            "instanceRootGUID": "990021b8-d0bb-a24e-9f21-ccf9de321940",
+                            "sourcePrefabGUID": "743a3c5d-e45e-c948-ba6c-b8d0b9534e25"
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                0.0,
+                                0.0
+                            ],
+                            "texture_guid": "a932d5f4-4bf6-e049-8020-f5065cdc75bd",
+                            "texture_scale": [
+                                1.7999999523162842,
+                                1.0
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "restart_overlay"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
                             "guid": "08f7b37b-512b-8046-aa8f-df4df3c659da"
                         },
                         "Hierarchy": {
@@ -6857,7 +9001,7 @@
                                 "c8989800-69e0-aa48-a789-d62df22f9123"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 9
+                            "siblingIndex": 11
                         },
                         "Layer": {
                             "layer_id": 1,
@@ -8478,7 +10622,7 @@
                                 "f6bf96c3-da1d-c24d-9cde-a658757a021a"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 10
+                            "siblingIndex": 12
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -8718,15 +10862,15 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                -7.43027400970459,
+                                -11.495000839233398,
                                 0.0,
-                                -0.7253859043121338
+                                -2.1672987937927246
                             ],
                             "rotation": [
                                 0.0,
+                                0.23507459461688995,
                                 0.0,
-                                0.0,
-                                1.0
+                                0.9719773530960083
                             ],
                             "scale": [
                                 1.4700000286102295,
@@ -8778,15 +10922,15 @@
                                 },
                                 "LocalTransform": {
                                     "position": [
-                                        -7.43027400970459,
+                                        -11.495000839233398,
                                         0.0,
-                                        -0.7253859043121338
+                                        -2.1672987937927246
                                     ],
                                     "rotation": [
                                         0.0,
+                                        0.23507459461688995,
                                         0.0,
-                                        0.0,
-                                        1.0
+                                        0.9719773530960083
                                     ],
                                     "scale": [
                                         1.4700000286102295,
@@ -9149,7 +11293,7 @@
                                 "82bda318-997b-3f40-a7d8-1634ac23bb04"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 11
+                            "siblingIndex": 13
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -13184,7 +15328,7 @@
                             "position": [
                                 -12.210182189941406,
                                 -9.5367431640625e-07,
-                                -22.33736228942871
+                                -21.51003074645996
                             ],
                             "rotation": [
                                 0.0,
@@ -15411,7 +17555,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 12
+                            "siblingIndex": 14
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -15509,7 +17653,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 13
+                            "siblingIndex": 15
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -15628,7 +17772,7 @@
                                 "907a1195-b2a6-0043-8310-bf00276c7d9f"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 14
+                            "siblingIndex": 16
                         },
                         "Layer": {
                             "layer_id": 3,
@@ -16235,7 +18379,7 @@
                                 "f43d5820-93eb-b846-9f31-f2adea46d86e"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 15
+                            "siblingIndex": 17
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -19221,7 +21365,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 16
+                            "siblingIndex": 18
                         },
                         "Layer": {
                             "layer_id": 0,
