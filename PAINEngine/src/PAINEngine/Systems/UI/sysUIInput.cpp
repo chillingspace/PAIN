@@ -86,15 +86,10 @@ namespace PAIN {
 		void InputSystem::onUpdate(AppTiming timing, entt::registry& registry) {
 			auto hit_entity = raycastUI(m_mouse_position, registry);
 
-			// Check if previously hovered entity is still valid and on an enabled layer
-			bool prev_hovered_valid = (m_hovered_entity != entt::null && 
-										registry.valid(m_hovered_entity) && 
-										isEntityOnEnabledLayer(m_hovered_entity, registry));
-
 			// Update hover states
 			if (hit_entity.has_value() && hit_entity.value() != m_hovered_entity) {
-				// Clear old hover if it was valid
-				if (prev_hovered_valid) {
+				// Clear old hover
+				if (m_hovered_entity != entt::null && registry.valid(m_hovered_entity)) {
 					updateButtonState(m_hovered_entity, registry, UIButtonState::Normal);
 				}
 
@@ -104,14 +99,13 @@ namespace PAIN {
 					updateButtonState(m_hovered_entity, registry, UIButtonState::Highlighted);
 				}
 			}
-			else if (!hit_entity.has_value()) {
-				// Mouse left all UI or hit entity became invalid
-				if (prev_hovered_valid) {
+			else if (!hit_entity.has_value() && m_hovered_entity != entt::null) {
+				// Mouse left all UI
+				if (registry.valid(m_hovered_entity)) {
 					updateButtonState(m_hovered_entity, registry, UIButtonState::Normal);
 				}
 				m_hovered_entity = entt::null;
 			}
-			// Note: if hit_entity has_value and equals m_hovered_entity, state is already correct
 		}
 
         void InputSystem::onEvent(Event::Event& event) {
@@ -585,24 +579,6 @@ namespace PAIN {
 #endif
         }
 
-
-		// ══════════════════════════════════════════════════════════════════
-		// Layer Validation Helper
-		// ══════════════════════════════════════════════════════════════════
-		bool InputSystem::isEntityOnEnabledLayer(entt::entity entity, entt::registry& registry) {
-			// If entity has no layer component, it's always enabled
-			if (!registry.all_of<Entity::Layer>(entity)) {
-				return true;
-			}
-
-			const auto& layer = registry.get<Entity::Layer>(entity);
-			auto scene = services.lock()->get<Scene::SceneManager>();
-			if (!scene) {
-				return true; // If no scene manager, assume enabled
-			}
-
-			return scene->isLayerEnabled(layer.layer_id);
-		}
 
 		// ══════════════════════════════════════════════════════════════════
 		// Raycast UI

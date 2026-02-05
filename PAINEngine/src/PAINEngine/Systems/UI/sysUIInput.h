@@ -39,9 +39,6 @@ namespace PAIN {
 			std::optional<entt::entity> raycastUI(const glm::vec2& mouse_pos,
 				entt::registry& registry);
 
-			// Check if entity is on an enabled layer (or has no layer)
-			bool isEntityOnEnabledLayer(entt::entity entity, entt::registry& registry);
-
 			void updateButtonState(entt::entity entity, entt::registry& registry, UIButtonState new_state);
 			void activateButton(entt::entity entity, entt::registry& registry);
 			void dispatchUIAction(entt::entity entity, entt::registry& registry, UIAction action);
