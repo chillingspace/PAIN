@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Rock14.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 17463994564555300792
+  },
+  "descriptor_version": 1,
+  "guid": "4a4d8f17-8372-5b47-b8c9-ff8e51474ccf",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\Rock14.glb"
+  }
+}

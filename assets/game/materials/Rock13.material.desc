@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Rock13.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 5597211689352459174
+  },
+  "descriptor_version": 1,
+  "guid": "0ece8b98-462b-624a-b90f-df3d4e2def8f",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Rock13.material"
+  }
+}
