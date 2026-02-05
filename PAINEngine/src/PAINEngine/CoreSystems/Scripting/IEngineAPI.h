@@ -98,6 +98,7 @@ namespace PAIN {
         /*                           Scene / System state                              */
         /* =========================================================================== */
         virtual bool  ChangeScene(std::string name) = 0;
+        virtual std::string GetCurrentSceneName() = 0;
         virtual void  SetGamePaused(bool pause) = 0;
         virtual bool  IsGamePaused() const = 0;
         virtual float GetFps() const = 0;

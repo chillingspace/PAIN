@@ -408,6 +408,10 @@ namespace PAIN {
             return api_ != nullptr;
             });
 
+        lua_.set_function("getCurrentSceneName", [this] {
+            return api_ ? api_->GetCurrentSceneName() : std::string();
+            });
+
         // ---------- logging / print ----------
         lua_.set_function("log", [this](sol::variadic_args va, sol::this_state ts) {
             sol::state_view L(ts);
