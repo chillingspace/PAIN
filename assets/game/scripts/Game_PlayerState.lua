@@ -672,6 +672,8 @@ function S.update(dt)
             if audioPlay then
                 audioPlay(bestLetter)
             end
+            
+            disablePhysics(bestLetter)
 
             log("[PlayerState] Collected letter on back")
         end
@@ -750,6 +752,7 @@ function S.onCaught(player)
     -- drop carried letter
     if S.carriedLetter then
         setPosition(S.carriedLetter, deathPos.x, deathPos.y, deathPos.z)
+        enablePhysics(S.carriedLetter)
         if removeTag then removeTag(S.carriedLetter, "letter_carried") end
         if addTag then addTag(S.carriedLetter, "letter_collectible") end
         log("[PlayerState] Dropped carried letter at death position")

@@ -339,6 +339,10 @@ namespace PAIN {
 
 				for (auto&& [entity, rigidBody, transform, world] : group.each()) {
 
+					if (!rigidBody.physics_enabled) {
+						continue;
+					}
+
 					if (!rigidBody.bodyID.IsInvalid()) {
 						JPH::ObjectLayer current_layer =
 							body_interface.GetObjectLayer(rigidBody.bodyID);
@@ -488,6 +492,11 @@ namespace PAIN {
 			// Use view to avoid group ownership conflict with onUpdate
 			auto view = registry.view<Physics::RigidBody3D, LocalTransform>();
 			for (auto&& [entity, rigidBody, transform] : view.each()) {
+
+				// skip if physics disabled
+				if (!rigidBody.physics_enabled) {
+					continue;
+				}
 
 				// Check if scale OR offset changed in editor
 				// If so, destroy the existing body so it can be recreated below with new
@@ -866,13 +875,9 @@ namespace PAIN {
 
 						hitNormal = hitShape->GetSurfaceNormal(result.mSubShapeID2,
 							hitPos - hitBody.GetPosition());
-
-						PN_CORE_INFO("Hit normal: ({0}, {1}, {2}), Y value: {3}",
-							hitNormal.GetX(), hitNormal.GetY(), hitNormal.GetZ(), hitNormal.GetY());
 					}
 
 					if (hitNormal.GetY() > 0.7f) {
-						PN_CORE_INFO("Grounded = TRUE");
 						return true;
 					}
 					else {
@@ -968,5 +973,48 @@ namespace PAIN {
 			return false;
 		}
 
+		void System::disablePhysics(entt::entity e) {
+			auto svc = services.lock();
+			if (!svc) return;
+
+			auto ecs = svc->get<ECS::Controller>();
+			if (!ecs) return;
+
+			auto& registry = ecs->getRegistry();
+			if (!registry.valid(e) || !registry.all_of<Physics::RigidBody3D>(e)) return;
+
+			auto& rb = registry.get<Physics::RigidBody3D>(e);
+
+			if (!rb.bodyID.IsInvalid() && body_interface) {
+				body_interface->RemoveBody(rb.bodyID);
+				body_interface->DestroyBody(rb.bodyID);
+				rb.bodyID = JPH::BodyID(JPH::BodyID::cInvalidBodyID);
+
+				PN_CORE_TRACE("[Physics] Disabled physics for entity {}", (uint32_t)e);
+			}
+
+			rb.physics_enabled = false;
+		}
+
+		void System::enablePhysics(entt::entity e) {
+			auto svc = services.lock();
+			if (!svc) return;
+
+			auto ecs = svc->get<ECS::Controller>();
+			if (!ecs) return;
+
+			auto& registry = ecs->getRegistry();
+			if (!registry.valid(e) || !registry.all_of<Physics::RigidBody3D>(e)) return;
+
+			auto& rb = registry.get<Physics::RigidBody3D>(e);
+
+			// Body will be recreated in syncNewBodies on next physics update
+			// Just invalidate it to trigger recreation
+			rb.bodyID = JPH::BodyID(JPH::BodyID::cInvalidBodyID);
+
+			rb.physics_enabled = true;
+
+			PN_CORE_TRACE("[Physics] Enabled physics for entity {}", (uint32_t)e);
+		}
 	} // namespace Physics
 } // namespace PAIN

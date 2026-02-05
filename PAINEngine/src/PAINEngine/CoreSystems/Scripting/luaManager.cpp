@@ -582,6 +582,16 @@ namespace PAIN {
             return std::make_tuple(hit, normal.x, normal.y, normal.z);
             });
 
+        lua_.set_function("disablePhysics", [this](entt::entity entityId) {
+            if (!api_) return;
+            api_->DisablePhysics(entityId); 
+            });
+
+        lua_.set_function("enablePhysics", [this](entt::entity entityId) {
+            if (!api_) return;
+            api_->EnablePhysics(entityId);
+            });
+
         /* =========================================================================== */
         /*                                   Audio                                     */
         /* =========================================================================== */

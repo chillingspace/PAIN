@@ -388,6 +388,26 @@ namespace PAIN {
         return { false, glm::vec3(0.0f) };
     }
 
+    void EngineAPIAdapter::DisablePhysics(entt::entity entityId) {
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<PAIN::Physics::RigidBody3D>(entityId)) return;
+
+        auto& rb = reg.get<PAIN::Physics::RigidBody3D>(entityId);
+
+        if (auto phys = ecs_.getSystem<PAIN::Physics::System>()) {
+            phys->disablePhysics(entityId);
+        }
+    }
+
+    void EngineAPIAdapter::EnablePhysics(entt::entity entityId) {
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<PAIN::Physics::RigidBody3D>(entityId)) return;
+
+        if (auto phys = ecs_.getSystem<PAIN::Physics::System>()) {
+            phys->enablePhysics(entityId); 
+        }
+    }
+
     /* =========================================================================== */
     /*                                   Audio                                     */
     /* =========================================================================== */

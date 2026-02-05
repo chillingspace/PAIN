@@ -94,6 +94,8 @@ namespace PAIN {
         void SetVelocity(entt::entity entityId, glm::vec3 v) override;
 		bool IsGrounded(entt::entity entityId, float maxDistance = .25f) override;
         std::tuple<bool, glm::vec3> GetWallNormal(entt::entity entityId, glm::vec3 direction, float checkDistance) override;
+        void DisablePhysics(entt::entity e) override;
+        void EnablePhysics(entt::entity e) override;
 
         /* =========================================================================== */
         /*                                   Audio                                     */
