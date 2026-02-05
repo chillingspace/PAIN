@@ -329,12 +329,12 @@ void main() {
             float m_statusTextScale{ 0.03f };                  // Scale factor for font size
 
             // Spritesheet Animation Support
-            int m_frameCount{ 1 };                            // Number of frames in spritesheet
-            int m_framesPerRow{ 1 };                          // Frames per row in spritesheet
+            int m_frameCount{ 5 };                            // Number of frames in spritesheet
+            int m_framesPerRow{ 5 };                          // Frames per row in spritesheet
             float m_frameTime{ 0.1f };                        // Time per frame in seconds
             float m_currentFrameTime{ 0.0f };                 // Accumulated time for current frame
             int m_currentFrameIndex{ 0 };                     // Current frame index
-            bool m_animationEnabled{ false };                 // Animation enabled flag
+            bool m_animationEnabled{ true };                 // Animation enabled flag
 
             // Color scheme
             glm::vec3 m_fillColor{ 0.2f, 0.8f, 0.9f };      // Cyan

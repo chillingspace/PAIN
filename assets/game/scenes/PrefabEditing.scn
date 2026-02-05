@@ -1,4 +1,5 @@
 {
+    "assets": [],
     "camera": {
         "active_game_cam": "",
         "aspectRatioH": 9.0,
@@ -24,7 +25,9 @@
             0.0
         ]
     },
-    "ecs": null,
+    "ecs": {
+        "Entities": []
+    },
     "environment": {
         "cameraLightIntensity": [
             0.009999999776482582,
@@ -32,7 +35,7 @@
             0.009999999776482582
         ],
         "pbr_map": 0,
-        "skyboxGUID": "00000000-0000-0000-0000-000000000000",
+        "skyboxGUID": "1fe7b95c-7093-7f44-8aac-322eae96b634",
         "useAOMap": true,
         "useDiffuseMap": true,
         "useEmissionMap": true,
@@ -56,8 +59,50 @@
             "enabled": true,
             "id": 0,
             "mask": 1,
-            "name": "Layer 0"
+            "name": "Layer 0",
+            "pickable": true
         }
     ],
+    "loadingScreen": {
+        "animationEnabled": true,
+        "backgroundColor": [
+            0.10000000149011612,
+            0.10000000149011612,
+            0.10000000149011612
+        ],
+        "backgroundTextureGUID": "472ea16e-c69d-b84e-98de-9356aa8f96fd",
+        "bgScale": 1.0,
+        "fillColor": [
+            0.20000000298023224,
+            0.800000011920929,
+            0.8999999761581421
+        ],
+        "frameCount": 5,
+        "frameTime": 0.10000000149011612,
+        "framesPerRow": 5,
+        "glowColor": [
+            0.4000000059604645,
+            0.8999999761581421,
+            1.0
+        ],
+        "glowIntensity": 0.5,
+        "progressBarPosition": [
+            800.0,
+            135.0
+        ],
+        "progressBarSize": [
+            960.0000610351563,
+            40.0
+        ],
+        "showBackground": true,
+        "showOverlay": false,
+        "showProgressBar": false,
+        "showStatusText": false,
+        "statusTextPosition": [
+            800.0,
+            65.0
+        ],
+        "statusTextScale": 0.029999999329447746
+    },
     "mask_matrix": []
 }
