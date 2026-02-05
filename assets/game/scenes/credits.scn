@@ -537,14 +537,6 @@
                         "Name": {
                             "name": "credits1"
                         },
-                        "Scripts": {
-                            "scripts": [
-                                {
-                                    "enabled": true,
-                                    "script_asset": "8ec5603e-4501-4a4f-adc9-41cc449d880d"
-                                }
-                            ]
-                        },
                         "Texture2D": {
                             "pos": [
                                 0.0,
