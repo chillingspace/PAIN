@@ -3,6 +3,12 @@ log("[PauseManager] Script LOADED at startup!")
 hideCursor(true) -- hide cursor on startup
 
 -- Track current level globally
+if getCurrentSceneName then
+    local loaded = getCurrentSceneName()
+    if loaded and loaded ~= "" then
+        _G_root.CurrentLevelName = loaded
+    end
+end
 _G_root.CurrentLevelName = _G_root.CurrentLevelName or "Level1.scn"
 
 local isPaused = false
@@ -55,7 +61,8 @@ end
 _G_root.TogglePause = TogglePause
 
 -- Helper function to update current level name
-function _G_root.SetCurrentLevel(sceneName)
-    _G_root.CurrentLevelName = sceneName
-    log("[PauseManager] Current level set to: " .. sceneName)
-end
+-- Deprecated: Use getCurrentSceneName() from EngineAPI instead
+-- function _G_root.SetCurrentLevel(sceneName)
+--     _G_root.CurrentLevelName = sceneName
+--     log("[PauseManager] Current level set to: " .. sceneName)
+-- end

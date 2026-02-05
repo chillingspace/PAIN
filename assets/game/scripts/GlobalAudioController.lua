@@ -19,6 +19,17 @@
     - Level1.scn: Track 0 = Level BGM, Track 1 = Ambient, Track 2 = Combat BGM
 ]]
 
+-- ==================== USER SETTINGS ====================
+-- Control the volume of the Main Menu BGM here (0.0 to 1.0)
+local MAINMENU_BGM_VOLUME_SCALE = 0.5
+
+-- ==================== HELPERS ====================
+local function linearToDb(linear)
+    if linear <= 0.0001 then return -80.0 end
+    -- Polyfill for log10
+    return 20.0 * (math.log(linear) / math.log(10))
+end
+
 -- ==================== CONFIGURATION ====================
 local CONFIG = {
     -- Fade durations (seconds)
@@ -35,16 +46,22 @@ local CONFIG = {
 
 -- ==================== SCENE DETECTION ====================
 local function detectCurrentScene()
+    local sceneName = "unknown"
     if getCurrentSceneName then
-        local sceneName = getCurrentSceneName()
+        sceneName = getCurrentSceneName()
         if sceneName then
+            log("[GlobalAudioDebug] Raw Scene Name: " .. tostring(sceneName))
             local lowerName = string.lower(sceneName)
             if string.find(lowerName, "mainmenu") then return "mainmenu" end
             if string.find(lowerName, "howtoplay2") then return "howtoplay2" end
             if string.find(lowerName, "howtoplay") then return "howtoplay" end
             if string.find(lowerName, "level1") then return "level1" end
             if string.find(lowerName, "level") then return "level" end
+        else
+            log("[GlobalAudioDebug] getCurrentSceneName returned nil")
         end
+    else
+        log("[GlobalAudioDebug] getCurrentSceneName function NOT found")
     end
     return "unknown"
 end
@@ -57,11 +74,14 @@ local inCombat = false
 -- ==================== SCENE-SPECIFIC VOLUME CONFIG ====================
 local function applySceneVolumes()
     local trackCount = globalBGMGetTrackCount()
-    log("[GlobalAudio] Scene:" .. currentScene .. " Tracks:" .. tostring(trackCount) .. " Init:" .. tostring(globalBGMIsInitialized()))
+    log("[GlobalAudioDebug] applySceneVolumes - Scene: " .. tostring(currentScene) .. " Tracks: " .. tostring(trackCount) .. " Scale: " .. tostring(MAINMENU_BGM_VOLUME_SCALE))
     
     if currentScene == "mainmenu" then
         -- Track 0: Main BGM, Track 1: Ambient
-        if trackCount >= 1 then globalBGMFade(0, CONFIG.defaultVolume, CONFIG.fadeDuration) end
+        local mainBGMVolume = linearToDb(MAINMENU_BGM_VOLUME_SCALE)
+        log("[GlobalAudioDebug] Setting MainMenu BGM (Track 0) to " .. mainBGMVolume .. " dB")
+        
+        if trackCount >= 1 then globalBGMFade(0, mainBGMVolume, CONFIG.fadeDuration) end
         if trackCount >= 2 then globalBGMFade(1, CONFIG.ambientVolume, CONFIG.fadeDuration) end
         
     elseif currentScene == "howtoplay" or currentScene == "howtoplay2" then
@@ -79,6 +99,7 @@ local function applySceneVolumes()
         
     else
         -- Unknown scene: fade in all tracks
+        log("[GlobalAudioDebug] Unknown scene - fading all tracks to default volume")
         for i = 0, trackCount - 1 do
             globalBGMFade(i, CONFIG.defaultVolume, CONFIG.fadeDuration)
         end
