@@ -969,7 +969,7 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 9,
+                            "action": 14,
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,

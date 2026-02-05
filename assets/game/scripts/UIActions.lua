@@ -9,7 +9,8 @@ G.TutorialSceneName   = G.TutorialSceneName  or "game/scenes/Tutorial.scn"
 G.MainMenuSceneName   = G.MainMenuSceneName  or "game/scenes/mainmenu.scn"
 G.HowToPlaySceneName  = G.HowToPlaySceneName or "game/scenes/howtoplay.scn"
 G.HowToPlaySceneName2 = G.HowToPlaySceneName2 or "game/scenes/howtoplay2.scn"
-G.CreditsSceneName    = G.CreditsSceneName   or "game/scenes/credits.scn"
+G.CutSceneName        = G.CutSceneName        or "game/scenes/cutscene.scn"
+G.CreditsSceneName    = G.CreditsSceneName    or "game/scenes/credits.scn"
 
 -- Placeholder for next level
 -- G.NextLevelName       = G.NextLevelName      or "game/scenes/Tutorial.scn"
@@ -371,12 +372,12 @@ local handlers = {
         --     _G.ResetThirdPersonCamera()
         -- end
 
-        if G.TutorialSceneName and setCurrentScene then
+        if G.CutSceneName and setCurrentScene then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 hideCursor(true)
             end
-            changeSceneWithAudioFade(G.TutorialSceneName)
+            changeSceneWithAudioFade(G.CutSceneName)
         else
             printLog("[UI] menu_StartGame pressed, but setCurrentScene is not bound")
         end
