@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "restart game overlay.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 16531472975259042323
+  },
+  "descriptor_version": 1,
+  "guid": "4e4e3fb2-a907-c441-b6c2-ae4c80e1e782",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\restart game overlay.png"
+  }
+}
