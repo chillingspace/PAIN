@@ -663,8 +663,77 @@ namespace PAIN {
 					});
 				// ---- AudioSource ----
 				registerCompUIFunc<PAIN::Audio::AudioSource>(
-					"AudioSource", [this](ComponentsPanel&, PAIN::Audio::AudioSource& as) {
+					"AudioSource", [this](ComponentsPanel& panel, PAIN::Audio::AudioSource& as) {
+						// Draw basic fields with reflection
 						DrawWithReflection(as, static_cast<ComponentsPanel*>(this));
+
+						// Multi-track Audio Section (for Global BGM)
+						ImGui::Spacing();
+						ImGui::Separator();
+						ImGui::Text("Multi-Track Audio (Global BGM)");
+						ImGui::TextDisabled("Add multiple audio tracks for synchronized playback");
+						ImGui::Spacing();
+
+						// Display current tracks
+						int removeIdx = -1;
+						for (size_t i = 0; i < as.audio_tracks.size(); ++i) {
+							ImGui::PushID(static_cast<int>(i));
+							
+							// Track label
+							ImGui::Text("Track %zu:", i);
+							ImGui::SameLine();
+
+							// Asset selector for this track
+							if (DrawAssetSelectorField(
+									("##track" + std::to_string(i)).c_str(), 
+									as.audio_tracks[i],
+									PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Audio),
+									panel.services)) {
+								// Track changed
+							}
+
+							ImGui::SameLine();
+
+							// Volume for this track
+							if (i < as.track_volumes.size()) {
+								ImGui::SetNextItemWidth(80.0f);
+								ImGui::DragFloat(("##vol" + std::to_string(i)).c_str(), 
+									&as.track_volumes[i], 0.5f, -80.0f, 12.0f, "%.1f dB");
+							}
+
+							ImGui::SameLine();
+
+							// Remove button
+							ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.6f, 0.2f, 0.2f, 1.0f));
+							if (ImGui::Button(("X##rm" + std::to_string(i)).c_str())) {
+								removeIdx = static_cast<int>(i);
+							}
+							ImGui::PopStyleColor();
+
+							ImGui::PopID();
+						}
+
+						// Handle removal
+						if (removeIdx >= 0) {
+							as.audio_tracks.erase(as.audio_tracks.begin() + removeIdx);
+							if (removeIdx < static_cast<int>(as.track_volumes.size())) {
+								as.track_volumes.erase(as.track_volumes.begin() + removeIdx);
+							}
+						}
+
+						// Add track button
+						if (ImGui::Button("+ Add Track")) {
+							as.audio_tracks.push_back(Assets::GUID{});
+							as.track_volumes.push_back(-80.0f); // Default muted
+						}
+
+						if (as.audio_tracks.empty()) {
+							ImGui::TextDisabled("No tracks added. Add tracks for multi-audio playback.");
+						} else {
+							ImGui::TextDisabled("Tracks play simultaneously when entity is 'Global_BGM'");
+						}
+
+						ImGui::Spacing();
 					});
 
 				// ---- BoundingVolume ----

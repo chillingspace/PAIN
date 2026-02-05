@@ -33,6 +33,12 @@ namespace PAIN {
             float maxDistance = 50.0f;
             glm::vec3 pos = glm::vec3(0);
 
+            // --- MULTI-TRACK SUPPORT (For Global BGM) ---
+            // List of audio assets for multi-track playback
+            std::vector<Assets::GUID> audio_tracks;
+            // Individual volume for each track (dB, serialized)
+            std::vector<float> track_volumes;
+
             // --- STATE (Managed by AudioSystem) ---
             AudioState state = AudioState::Stopped;
 
@@ -51,10 +57,13 @@ namespace PAIN {
             // --- RUNTIME (Internal handle) ---
             // Do not serialize or edit
             PAIN::Audio::AudioChannelId channelId{ -1 };
+            // Runtime channel handles for multi-track (not serialized)
+            std::vector<PAIN::Audio::AudioChannelId> track_channel_ids;
 
             //Serialization flag
             static constexpr bool ShouldSerialize = true;
         };
+
 
     } // namespace Audio
 } // namespace PAIN
@@ -74,11 +83,15 @@ REFL_TYPE(PAIN::Audio::AudioSource)
     REFL_FIELD(maxDistance)   // Serialized
     REFL_FIELD(pos)   // Serialized
     REFL_FIELD(playOnStart)   // Serialized (will save as "playOnStart")
+    // Multi-track support for Global BGM
+    REFL_FIELD(audio_tracks)  // Serialized list of audio assets
+    REFL_FIELD(track_volumes) // Serialized per-track volumes
     //
     // Intentionally NOT reflecting the runtime fields:
     // - state
     // - stopTrigger
     // - channelId
+    // - track_channel_ids
     // These will be default-initialized when the component is loaded
 REFL_END
 

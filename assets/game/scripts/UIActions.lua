@@ -14,6 +14,26 @@ G.CreditsSceneName    = G.CreditsSceneName   or "game/scenes/credits.scn"
 -- Placeholder for next level
 -- G.NextLevelName       = G.NextLevelName      or "game/scenes/Tutorial.scn"
 
+-- ==================== AUDIO-AWARE SCENE CHANGE ====================
+-- Helper to do scene transitions with audio fade-out
+local function changeSceneWithAudioFade(scenePath)
+    if not scenePath then
+        printLog("[UI] Error: scenePath is nil")
+        return
+    end
+    
+    -- Use GlobalAudio fade if available, otherwise direct change
+    if _G.GlobalAudio and _G.GlobalAudio.changeSceneWithFade then
+        printLog("[UI] changeSceneWithAudioFade -> " .. scenePath)
+        _G.GlobalAudio.changeSceneWithFade(scenePath)
+    elseif changeScene then
+        printLog("[UI] changeScene (no fade) -> " .. scenePath)
+        changeScene(scenePath)
+    else
+        printLog("[UI] changeScene not available")
+    end
+end
+
 local Layers = {
     DEFAULT = 0,
     UI = 1,
@@ -355,9 +375,8 @@ local handlers = {
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 Hide_Cursor(true)
-                
             end
-            setCurrentScene(G.TutorialSceneName)
+            changeSceneWithAudioFade(G.TutorialSceneName)
         else
             printLog("[UI] menu_StartGame pressed, but setCurrentScene is not bound")
         end
@@ -368,7 +387,7 @@ local handlers = {
 
         if G.HowToPlaySceneName and setCurrentScene then
             printLog("[UI] menu_HowToPlay -> setCurrentScene("..G.HowToPlaySceneName..")")
-            setCurrentScene(G.HowToPlaySceneName)
+            changeSceneWithAudioFade(G.HowToPlaySceneName)
         else
             printLog("[UI] menu_HowToPlay pressed (no scene specified / not implemented)")
         end
@@ -420,6 +439,7 @@ local handlers = {
         else
             printLog("[UI] menu_BackToMain pressed (setCurrentScene not bound)")
         end
+        changeSceneWithAudioFade(G.MainMenuSceneName)
     end,
 
 
@@ -427,26 +447,22 @@ local handlers = {
     -- HOW TO PLAY
     ----------------------------------------------------------------------
     howtoplay_ArrowLeft = function(buttonEntity, payload)
-        -- Back to How To Play Page 1
-        --local howtoplayScene = resolveSceneName(payload or G.HowToPlaySceneName, "howtoplay.scn")
-
+        -- Navigate to How To Play Page 1 (no fade - same audio context)
         if G.HowToPlaySceneName and changeScene then
-            printLog("[UI] backtohowToPlay1 -> changeScene("..G.HowToPlaySceneName..")")
-            changeScene(G.HowToPlaySceneName)
+            printLog("[UI] howtoplay_ArrowLeft -> " .. G.HowToPlaySceneName)
+            changeScene(G.HowToPlaySceneName)  -- Direct change, same global audio continues
         else
-            printLog("[UI] backtohowToPlay1 pressed (no scene specified / not implemented)")
+            printLog("[UI] howtoplay_ArrowLeft: scene not set")
         end
     end,
 
     howtoplay_ArrowRight = function(buttonEntity, payload)
-        -- Back to How To Play Page 2
-        --local howtoplayScene2 = resolveSceneName(payload or G.HowToPlaySceneName2, "howtoplay2.scn")
-
+        -- Navigate to How To Play Page 2 (no fade - same audio context)
         if G.HowToPlaySceneName2 and changeScene then
-            printLog("[UI] backtohowToPlay2 -> changeScene("..G.HowToPlaySceneName2..")")
-            changeScene(G.HowToPlaySceneName2)
+            printLog("[UI] howtoplay_ArrowRight -> " .. G.HowToPlaySceneName2)
+            changeScene(G.HowToPlaySceneName2)  -- Direct change, same global audio continues
         else
-            printLog("[UI] backtohowToPlay2 pressed (no scene specified / not implemented)")
+            printLog("[UI] howtoplay_ArrowRight: scene not set")
         end
     end,
 
