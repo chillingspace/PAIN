@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "restart_overlay.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 11123728936406956888
+  },
+  "descriptor_version": 1,
+  "guid": "743a3c5d-e45e-c948-ba6c-b8d0b9534e25",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\restart_overlay.prefab"
+  }
+}
