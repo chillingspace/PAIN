@@ -1117,6 +1117,15 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "be8917e4-c272-0146-a32d-25f70c28b1a0",
                                     "siblingIndex": 0
+                                },
+                                "UIButton": {
+                                    "action": 32,
+                                    "disabled_color": -10066330,
+                                    "highlighted_color": -3355444,
+                                    "normal_color": -1,
+                                    "payload": "",
+                                    "pressed_color": -5592406,
+                                    "state": 0
                                 }
                             },
                             "correspondingPrefabEntityGUID": "f180b514-744b-3d42-a07b-2585106fb8e8",
@@ -1144,7 +1153,7 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 28,
+                            "action": 32,
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
