@@ -112,14 +112,14 @@ namespace PAIN {
 			return (width == 0 || height == 0);
 		}
 
-		void GLFW_Window::setCursorMode(bool locked)
+		void GLFW_Window::hideCursor(bool hide)
 		{
 			int currentMode = glfwGetInputMode(ptr_window, GLFW_CURSOR);
 			bool isCurrentlyLocked = (currentMode == GLFW_CURSOR_DISABLED);
 
-			if (locked != isCurrentlyLocked)
+			if (hide != isCurrentlyLocked)
 			{
-				if (locked) {
+				if (hide) {
 					// Hides cursor and locks it to center (set it only once)
 					int width, height;
 					glfwGetWindowSize(ptr_window, &width, &height);

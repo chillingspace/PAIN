@@ -154,12 +154,14 @@ namespace PAIN {
                 if (ImGui::IsKeyPressed(ImGuiKey_F1, false)) {
 
                     auto scene = services->get<Scene::SceneManager>();
+                    auto window = services->get<Window::Window>();
 
                     // When hiding editor, auto-play the scene
                     if (!scene->isPlaying()) {
                         editor_visible ? scene->onPlay() : scene->onStop();
                     }
                     toggleVisible();
+                    window->hideCursor(!editor_visible);
                     PN_CORE_INFO("Editor visibility: {}", editor_visible ? "ON" : "OFF");
                 }
 

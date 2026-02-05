@@ -67,8 +67,8 @@ namespace PAIN {
 			//Get is minimized
 			virtual bool isMinimized() const = 0;
 
-			//Set cursor mode
-			virtual void setCursorMode(bool locked) = 0;
+			//Hide cursor 
+			virtual void hideCursor(bool hide) = 0;
 
 			//Create window
 			static Window* create(void* app = nullptr, Package const& package = Package());

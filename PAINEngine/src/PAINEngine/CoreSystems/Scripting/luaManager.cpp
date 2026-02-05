@@ -1,6 +1,10 @@
 #include "luaManager.h"
 #include "IEngineAPI.h"
 #include "PAINEngine/CoreSystems/Audio/Audio.h"
+#include "Systems/Audio/sysAudio.h"
+#include "ECS/Components/cEntity.h"
+#include "ECS/Components/cAudioSource.h"
+#include "ECS/Controller.h"
 #include "Utility/Log.h"
 
 #include <fstream>
@@ -404,6 +408,10 @@ namespace PAIN {
             return api_ != nullptr;
             });
 
+        lua_.set_function("getCurrentSceneName", [this] {
+            return api_ ? api_->GetCurrentSceneName() : std::string();
+            });
+
         // ---------- logging / print ----------
         lua_.set_function("log", [this](sol::variadic_args va, sol::this_state ts) {
             sol::state_view L(ts);
@@ -735,12 +743,207 @@ namespace PAIN {
             audio->transitionBGMWithSFX(newBGMFilename, sfxFilename, transitionTime.value_or(2.0f), 0.0f);
             });
 
+        // ==================== Spatial / 3D Audio Functions ====================
+
+        // audioPlaySFXAt(filename, x, y, z, volumeDb?, looping?) - Play SFX at 3D position
+        lua_.set_function("audioPlaySFXAt", [this](const std::string& filename, 
+            float x, float y, float z, sol::optional<float> volumeDb, sol::optional<bool> looping) -> int {
+            if (!services_) return -1;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return -1;
+            
+            auto result = audio->playSFXAt(filename, glm::vec3(x, y, z), 
+                volumeDb.value_or(0.0f), looping.value_or(false),
+                Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
+            return result ? result->value : -1;
+            });
+
+        // audioPlaySFXFromEntity(filename, entityId, volumeDb?, looping?) - Play SFX from entity's position
+        lua_.set_function("audioPlaySFXFromEntity", [this](const std::string& filename, 
+            entt::entity entityId, sol::optional<float> volumeDb, sol::optional<bool> looping) -> int {
+            if (!services_ || !api_) return -1;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return -1;
+            
+            // Get entity position
+            glm::vec3 pos = api_->GetPosition(entityId);
+            
+            auto result = audio->playSFXAt(filename, pos, 
+                volumeDb.value_or(0.0f), looping.value_or(false),
+                Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
+            return result ? result->value : -1;
+            });
+
+        // ==================== Random SFX Functions ====================
+
+        // audioPlayRandomSFX({file1, file2, ...}, volumeDb?) - Play random SFX from list
+        lua_.set_function("audioPlayRandomSFX", [this](sol::table fileList, sol::optional<float> volumeDb) -> int {
+            if (!services_) return -1;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return -1;
+            
+            std::vector<std::string> files;
+            for (size_t i = 1; i <= fileList.size(); ++i) {
+                sol::optional<std::string> f = fileList[i];
+                if (f) files.push_back(*f);
+            }
+            
+            if (files.empty()) return -1;
+            
+            auto result = audio->playRandomFromList(files, volumeDb.value_or(0.0f), false, 
+                glm::vec3(0), Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
+            return result ? result->value : -1;
+            });
+
+        // audioPlayRandomSFXAt({file1, file2, ...}, x, y, z, volumeDb?) - Random SFX at position
+        lua_.set_function("audioPlayRandomSFXAt", [this](sol::table fileList, 
+            float x, float y, float z, sol::optional<float> volumeDb) -> int {
+            if (!services_) return -1;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return -1;
+            
+            std::vector<std::string> files;
+            for (size_t i = 1; i <= fileList.size(); ++i) {
+                sol::optional<std::string> f = fileList[i];
+                if (f) files.push_back(*f);
+            }
+            
+            if (files.empty()) return -1;
+            
+            auto result = audio->playRandomFromList(files, volumeDb.value_or(0.0f), true, 
+                glm::vec3(x, y, z), Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
+            return result ? result->value : -1;
+            });
+
+        // audioPlayRandomSFXFromEntity({file1, file2, ...}, entityId, volumeDb?) - Random SFX from entity
+        lua_.set_function("audioPlayRandomSFXFromEntity", [this](sol::table fileList, 
+            entt::entity entityId, sol::optional<float> volumeDb) -> int {
+            if (!services_ || !api_) return -1;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return -1;
+            
+            std::vector<std::string> files;
+            for (size_t i = 1; i <= fileList.size(); ++i) {
+                sol::optional<std::string> f = fileList[i];
+                if (f) files.push_back(*f);
+            }
+            
+            if (files.empty()) return -1;
+            
+            glm::vec3 pos = api_->GetPosition(entityId);
+            
+            auto result = audio->playRandomFromList(files, volumeDb.value_or(0.0f), true, 
+                pos, Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
+            return result ? result->value : -1;
+            });
+
+        // ==================== Channel Control Functions ====================
+
+        // audioSetChannelVolume(channelId, volumeDb) - Set volume of a specific channel
+        lua_.set_function("audioSetChannelVolume", [this](int channelId, float volumeDb) {
+            if (!services_) return;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return;
+            audio->setVolumeDb(Audio::AudioChannelId{channelId}, volumeDb);
+            });
+
+        // audioSetChannelPosition(channelId, x, y, z) - Set 3D position of a channel
+        lua_.set_function("audioSetChannelPosition", [this](int channelId, float x, float y, float z) {
+            if (!services_) return;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return;
+            audio->setPosition(Audio::AudioChannelId{channelId}, glm::vec3(x, y, z));
+            });
+
+        // audioStopChannel(channelId) - Stop a specific channel
+        lua_.set_function("audioStopChannel", [this](int channelId) {
+            if (!services_) return;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return;
+            audio->stop(Audio::AudioChannelId{channelId});
+            });
+
+        // ==================== Global Audio Multi-Track Control ====================
+        // These functions control persistent global audio that survives scene changes
+        // Uses static storage in sysAudio.cpp
+
+        // globalBGMSetVolume(trackIndex, volumeDb) - Set volume immediately
+        lua_.set_function("globalBGMSetVolume", [this](int trackIndex, float volumeDb) {
+            if (!services_) return;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return;
+            Audio::GlobalAudio_SetVolume(trackIndex, volumeDb, audio.get());
+        });
+
+        // globalBGMFade(trackIndex, targetDb, durationSeconds) - Smooth C++ fade
+        lua_.set_function("globalBGMFade", [this](int trackIndex, float targetDb, float duration) {
+            Audio::GlobalAudio_Fade(trackIndex, targetDb, duration);
+            PN_INFO("[Lua] globalBGMFade: Track {} fading to {}dB over {}s", trackIndex, targetDb, duration);
+        });
+
+        // globalBGMGetTrackCount() - Get number of active Global Audio tracks
+        lua_.set_function("globalBGMGetTrackCount", []() -> int {
+            return Audio::GlobalAudio_GetTrackCount();
+        });
+
+        // globalBGMGetVolume(trackIndex) - Get current volume of a track
+        lua_.set_function("globalBGMGetVolume", [](int trackIndex) -> float {
+            return Audio::GlobalAudio_GetVolume(trackIndex);
+        });
+
+        // globalBGMStopAll() - Stop all Global Audio tracks
+        lua_.set_function("globalBGMStopAll", [this]() {
+            if (!services_) return;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return;
+            Audio::GlobalAudio_StopAll(audio.get());
+        });
+
+        // globalBGMClear() - Clear initialization flag for new track set (used during scene transitions)
+        lua_.set_function("globalBGMClear", []() {
+            Audio::GlobalAudio_Clear();
+        });
+
+        // globalBGMIsInitialized() - Check if global audio is initialized
+        lua_.set_function("globalBGMIsInitialized", []() -> bool {
+            return Audio::GlobalAudio_IsInitialized();
+        });
+
+        // globalBGMFadeAllAndQuit(durationSeconds) - Fade all tracks then quit
+        lua_.set_function("globalBGMFadeAllAndQuit", [this](float duration) {
+            if (!services_) return;
+            
+            // Fade all tracks to -80dB
+            int count = Audio::GlobalAudio_GetTrackCount();
+            for (int i = 0; i < count; ++i) {
+                Audio::GlobalAudio_Fade(i, -80.0f, duration);
+            }
+            
+            // Schedule quit after fade (using pending scene change mechanism)
+            // For now, just log - actual quit delay needs additional implementation
+            PN_INFO("[Lua] globalBGMFadeAllAndQuit: Fading {} tracks over {}s then quit", count, duration);
+            
+            // Note: To actually delay quit, we'd need a timer system
+            // For now the script should manually call quitApplication() after waiting
+        });
+
+
         /* =========================================================================== */
         /*                           Scene / System state                              */
         /* =========================================================================== */
         lua_.set_function("changeScene", [this](std::string name) {
             if (!api_ || pendingSceneChange_) return;
             setPendingSceneChange([this, n = std::move(name)] { api_->ChangeScene(n); });
+            });
+        lua_.set_function("setCurrentScene", [this](std::string name) {
+            if (!api_ || pendingSceneChange_) return;
+            setPendingSceneChange([this, n = std::move(name)] { api_->ChangeScene(n); });
+            });
+        lua_.set_function("getCurrentSceneName", [this]() -> std::string {
+            return api_ ? api_->GetCurrentSceneName() : "";
+            });
+        lua_.set_function("getPreviousSceneName", [this]() -> std::string {
+            return api_ ? api_->GetPreviousSceneName() : "";
             });
         lua_.set_function("quitApplication", [this]() {
             if (!api_) return;
@@ -826,14 +1029,9 @@ namespace PAIN {
         lua_.set_function("mousePos", [this] { return api_ ? api_->Input_GetMousePos() : glm::vec2{ 0 }; });
         lua_.set_function("mouseScroll", [this] { return api_ ? api_->Input_GetScrollDelta() : glm::vec2{ 0 }; });
         lua_.set_function("cursorInWindow", [this] { return api_ && api_->Input_IsCursorInWindow(); });
-
-        /* =========================================================================== */
-        /*                              Cursor Control                                 */
-        /* =========================================================================== */
-
-        lua_.set_function("Hide_Cursor", [this] { 
+        lua_.set_function("hideCursor", [this](bool hidden){
            if (!api_) return;
-           api_->Hide_Cursor(true); 
+           api_->HideCursor(hidden);
         });
 
         /* =========================================================================== */

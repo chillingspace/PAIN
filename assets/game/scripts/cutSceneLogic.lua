@@ -22,10 +22,8 @@ registerUpdate(function(dt)
             print("[Cutscene] Last frame reached. Changing scene...")
             
             if changeScene then
-                -- Pull the level name from your UIActions defaults
-                local nextScene = G.FirstLevelScene or "game/scenes/Level1.scn"
+                local nextScene = G.TutorialSceneName  or "game/scenes/Tutorial.scn"
                 
-                -- Handle mobile cursor hide as seen in UIActions.lua
                 local isMobile = (isAndroid ~= nil and isAndroid())
                 if isMobile then
                     Hide_Cursor(true)
@@ -38,7 +36,6 @@ registerUpdate(function(dt)
             return
         end
         
-        -- 4. Try to find the image
         local fileName = "c" .. currentFrame .. ".dds"
         local guid = getImageID(fileName)
         

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "PauseManager.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 16119833061528550848
+  },
+  "descriptor_version": 1,
+  "guid": "83d79194-afe1-4340-b2a4-e0ba12c24339",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\PauseManager.prefab"
+  }
+}

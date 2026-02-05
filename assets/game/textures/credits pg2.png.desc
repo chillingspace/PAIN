@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "credits pg2.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 16270567242017105220
+  },
+  "descriptor_version": 1,
+  "guid": "7158b6f0-2b9a-a646-ae06-b0e132c7181b",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\credits pg2.png"
+  }
+}

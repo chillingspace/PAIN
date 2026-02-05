@@ -93,7 +93,7 @@ namespace PAIN {
 
             bool isMinimized() const override;
 
-            void setCursorMode(bool locked) override;
+            void hideCursor(bool hidden) override;
         };
 	}
 }

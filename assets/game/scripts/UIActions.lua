@@ -3,16 +3,38 @@
 local G = _G_root
 
 -- scene defaults
-G.CurrentLevelName    = G.CurrentLevelName   or "game/scenes/Level1.scn"
+G.CurrentLevelName    = G.CurrentLevelName   or "game/scenes/Tutorial.scn"
 G.FirstLevelScene     = G.FirstLevelScene    or "game/scenes/Level1.scn"
 G.TutorialSceneName   = G.TutorialSceneName  or "game/scenes/Tutorial.scn"
 G.MainMenuSceneName   = G.MainMenuSceneName  or "game/scenes/mainmenu.scn"
 G.HowToPlaySceneName  = G.HowToPlaySceneName or "game/scenes/howtoplay.scn"
 G.HowToPlaySceneName2 = G.HowToPlaySceneName2 or "game/scenes/howtoplay2.scn"
-G.CreditsSceneName    = G.CreditsSceneName   or "game/scenes/credits.scn"
+G.CutSceneName        = G.CutSceneName        or "game/scenes/cutscene.scn"
+G.CreditsSceneName    = G.CreditsSceneName    or "game/scenes/credits.scn"
+G.CreditsSceneName2   = G.CreditsSceneName2   or "game/scenes/credits2.scn"
 
 -- Placeholder for next level
 G.NextLevelName       = G.NextLevelName      or "game/scenes/Tutorial.scn"
+
+-- ==================== AUDIO-AWARE SCENE CHANGE ====================
+-- Helper to do scene transitions with audio fade-out
+local function changeSceneWithAudioFade(scenePath)
+    if not scenePath then
+        printLog("[UI] Error: scenePath is nil")
+        return
+    end
+    
+    -- Use GlobalAudio fade if available, otherwise direct change
+    if _G.GlobalAudio and _G.GlobalAudio.changeSceneWithFade then
+        printLog("[UI] changeSceneWithAudioFade -> " .. scenePath)
+        _G.GlobalAudio.changeSceneWithFade(scenePath)
+    elseif changeScene then
+        printLog("[UI] changeScene (no fade) -> " .. scenePath)
+        changeScene(scenePath)
+    else
+        printLog("[UI] changeScene not available")
+    end
+end
 
 local Layers = {
     DEFAULT = 0,
@@ -59,6 +81,9 @@ local function showGameEndOverlay(result)
     setLayerEnabled(Layers.GAME_OVER, false)
     setLayerEnabled(Layers.GAME_WIN,  false)
 
+    -- Enable Cursor
+    hideCursor(false)
+
     if result == "win" then
         setLayerEnabled(Layers.GAME_WIN, true)
         printLog("[UI] Showing GAME WIN overlay")
@@ -83,6 +108,13 @@ local handlers = {
     end_Restart = function()
         if changeScene then
             changeScene(G.CurrentLevelName)
+        end
+    end,
+
+    end_NextLevel = function()
+        if changeScene then
+            printLog("[UI] Changing to next level: " .. G.NextLevelName)
+            changeScene(G.NextLevelName)
         end
     end,
 
@@ -161,7 +193,7 @@ local handlers = {
         if _G_root.TogglePause then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(false)
+                hideCursor(false)
                 
             end
             _G_root.TogglePause()
@@ -175,7 +207,7 @@ local handlers = {
         if IsGamePaused() then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(true)
+                hideCursor(true)
                 
             end
             --SetGamePaused(not IsGamePaused()) 
@@ -194,9 +226,13 @@ local handlers = {
         if setLayerEnabled then
             setLayerEnabled(Layers.RESTART, true)  -- Show RestartOverlay layer (layer 5)
             setLayerEnabled(Layers.PAUSE, false) -- Hide PauseMenu
+
+            setLayerEnabled(Layers.GAME_OVER, false)
+            setLayerEnabled(Layers.GAME_WIN, false)
+
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(false)
+                hideCursor(false)
             end
             printLog("[UI] RestartOverlay (layer 5) shown")
         else
@@ -221,17 +257,22 @@ local handlers = {
         end
         
         -- Restart Scene
-        if changeScene then
+        if setCurrentScene then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(true)
+                hideCursor(true)
             end
-            -- default to current level or fallback
-            -- local sceneToLoad = G.CurrentLevelName or "game/scenes/Level1.scn"
-            printLog("[UI] restart_Confirm -> changeScene("..G.CurrentLevelName..")")
+            
+            local curr = ""
+            if getCurrentSceneName then curr = getCurrentSceneName() end
+            if curr == "" then curr = G.CurrentLevelName end
+            
+            printLog("[UI] restart_Confirm -> setCurrentScene("..tostring(curr)..")")
+            setCurrentScene(curr)
+        elseif changeScene then
             changeScene(G.CurrentLevelName)
         else
-            printLog("[UI] restart_Confirm pressed, but changeScene is not bound")
+            printLog("[UI] restart_Confirm pressed, but setCurrentScene is not bound")
         end
     end,
 
@@ -241,12 +282,24 @@ local handlers = {
         
         if setLayerEnabled then
             setLayerEnabled(Layers.RESTART, false)
-            setLayerEnabled(Layers.PAUSE, true) -- Return to Pause Menu
+
+            if PlayerState and PlayerState.gameEnded then
+                if PlayerState.gameWon then
+                    setLayerEnabled(Layers.GAME_WIN, true)
+                else
+                    setLayerEnabled(Layers.GAME_OVER, true)
+                end
+            elseif _G_root.IsGamePaused then
+                -- Return to pause menu if paused
+                setLayerEnabled(Layers.PAUSE, true) -- Return to Pause Menu
+            end
+            
+
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(false)
+                hideCursor(false)
             end
-            printLog("[UI] RestartOverlay (layer 5) hidden - returning to pause menu")
+            printLog("[UI] Overlay (layer 5) hidden - returning to pause menu")
         else
             printLog("[UI] setLayerEnabled not available")
         end
@@ -263,16 +316,21 @@ local handlers = {
         end
     end,
 
+    -- This is the quit button
     pause_ReturnToMainMenu = function(buttonEntity, payload)
         -- Show confirmation popup
         printLog("[UI] pause_ReturnToMainMenu -> showing quit confirmation")
         
         if setLayerEnabled then
             setLayerEnabled(Layers.QUIT, true)  -- Show QuitOverlay layer (layer 4)
+
+            setLayerEnabled(Layers.GAME_OVER, false)
+            setLayerEnabled(Layers.GAME_WIN, false)
+
             setLayerEnabled(Layers.PAUSE, false)
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(false)
+                hideCursor(false)
                 
             end
             printLog("[UI] QuitOverlay (layer 4) shown")
@@ -305,7 +363,7 @@ local handlers = {
         if changeScene then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(true)
+                hideCursor(true)
                 
             end
             changeScene(G.MainMenuSceneName)
@@ -320,10 +378,22 @@ local handlers = {
         
         if setLayerEnabled then
             setLayerEnabled(Layers.QUIT, false)
-            setLayerEnabled(Layers.PAUSE, true)
+            -- setLayerEnabled(Layers.PAUSE, true)
+
+            if PlayerState and PlayerState.gameEnded then
+                if PlayerState.gameWon then
+                    setLayerEnabled(Layers.GAME_WIN, true)
+                else
+                    setLayerEnabled(Layers.GAME_OVER, true)
+                end
+            elseif _G_root.IsGamePaused then
+                -- Return to pause menu if paused
+                setLayerEnabled(Layers.PAUSE, true) -- Return to Pause Menu
+            end
+
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(false)
+                hideCursor(false)
                 
             end
             printLog("[UI] QuitOverlay (layer 4) hidden - returning to pause menu")
@@ -346,24 +416,23 @@ local handlers = {
         --     _G.ResetThirdPersonCamera()
         -- end
 
-        if G.FirstLevelScene and changeScene then
+        if G.CutSceneName and setCurrentScene then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(true)
-                
+                hideCursor(true)
             end
-            changeScene(G.FirstLevelScene)
+            changeSceneWithAudioFade(G.CutSceneName)
         else
-            printLog("[UI] menu_StartGame pressed, but changeScene is not bound")
+            printLog("[UI] menu_StartGame pressed, but setCurrentScene is not bound")
         end
     end,
 
     menu_HowToPlay = function(buttonEntity, payload)
         --local howtoplayScene = resolveSceneName(payload or G.HowToPlaySceneName, "howtoplay.scn")
 
-        if G.HowToPlaySceneName and changeScene then
-            printLog("[UI] menu_HowToPlay -> changeScene("..G.HowToPlaySceneName..")")
-            changeScene(G.HowToPlaySceneName)
+        if G.HowToPlaySceneName and setCurrentScene then
+            printLog("[UI] menu_HowToPlay -> setCurrentScene("..G.HowToPlaySceneName..")")
+            changeSceneWithAudioFade(G.HowToPlaySceneName)
         else
             printLog("[UI] menu_HowToPlay pressed (no scene specified / not implemented)")
         end
@@ -372,46 +441,53 @@ local handlers = {
     menu_Credits = function(buttonEntity, payload)
         --local creditsScene = resolveSceneName(payload or G.CreditsSceneName, "credits.scn")
 
-        --if G.CreditsSceneName and changeScene then
-        --    printLog("[UI] menu_Credits -> changeScene("..G.CreditsSceneName..")")
-        --    changeScene(G.CreditsSceneName)
-        --else
+        if G.CreditsSceneName and setCurrentScene then
+            printLog("[UI] menu_Credits -> setCurrentScene("..G.CreditsSceneName..")")
+            changeSceneWithAudioFade(G.CreditsSceneName)
+        else
             printLog("[UI] menu_Credits pressed (no scene specified / not implemented)")
-        --end
+        end
     end,
 
     menu_QuitGame = function(buttonEntity, payload)
-        if quitApplication then
-            printLog("[UI] menu_QuitGame -> quitApplication()")
-            quitApplication()
-        else
-            printLog("[UI] menu_QuitGame pressed (quitapplication() not bound; implement in EngineAPI)")
+        local isMobile = (isAndroid ~= nil and isAndroid())
+        if isMobile then
+            Hide_Cursor(true)
         end
+        --SetGamePaused(not IsGamePaused()) 
+        _G_root.TogglePause()
+        
+        setLayerEnabled(2, true)
+        printLog("[UI] cutscene_Menu_Button -> called TogglePause()")
     end,
 
     menu_OpenTutorial = function(buttonEntity, payload)
         --local tutorialScene = resolveSceneName(payload or G.TutorialSceneName, "Tutorial.scn")
 
-        if G.TutorialSceneName and changeScene then
-            printLog("[UI] menu_OpenTutorial -> changeScene("..G.TutorialSceneName..")")
-            changeScene(G.TutorialSceneName)
+        if G.TutorialSceneName and setCurrentScene then
+            printLog("[UI] menu_OpenTutorial -> setCurrentScene("..G.TutorialSceneName..")")
+            setCurrentScene(G.TutorialSceneName)
         else
             printLog("[UI] menu_OpenTutorial pressed (no scene specified / not implemented)")
         end
     end,
 
     menu_BackToMain = function(buttonEntity, payload)
-        printLog("[UI] menu_BackToMain -> changeScene("..G.MainMenuSceneName..")")
-        if changeScene then
+        -- User requested to always go back to Main Menu (avoids loop in HowToPlay scenes)
+        local target = G.MainMenuSceneName
+        
+        printLog("[UI] menu_BackToMain -> setCurrentScene("..tostring(target)..")")
+        if setCurrentScene then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(false)
+                hideCursor(false)
                 
             end
-            changeScene(G.MainMenuSceneName)
+            setCurrentScene(target)
         else
-            printLog("[UI] menu_BackToMain pressed (no scene specified / not implemented)")
+            printLog("[UI] menu_BackToMain pressed (setCurrentScene not bound)")
         end
+        changeSceneWithAudioFade(G.MainMenuSceneName)
     end,
 
 
@@ -419,26 +495,22 @@ local handlers = {
     -- HOW TO PLAY
     ----------------------------------------------------------------------
     howtoplay_ArrowLeft = function(buttonEntity, payload)
-        -- Back to How To Play Page 1
-        --local howtoplayScene = resolveSceneName(payload or G.HowToPlaySceneName, "howtoplay.scn")
-
+        -- Navigate to How To Play Page 1 (no fade - same audio context)
         if G.HowToPlaySceneName and changeScene then
-            printLog("[UI] backtohowToPlay1 -> changeScene("..G.HowToPlaySceneName..")")
-            changeScene(G.HowToPlaySceneName)
+            printLog("[UI] howtoplay_ArrowLeft -> " .. G.HowToPlaySceneName)
+            changeScene(G.HowToPlaySceneName)  -- Direct change, same global audio continues
         else
-            printLog("[UI] backtohowToPlay1 pressed (no scene specified / not implemented)")
+            printLog("[UI] howtoplay_ArrowLeft: scene not set")
         end
     end,
 
     howtoplay_ArrowRight = function(buttonEntity, payload)
-        -- Back to How To Play Page 2
-        --local howtoplayScene2 = resolveSceneName(payload or G.HowToPlaySceneName2, "howtoplay2.scn")
-
+        -- Navigate to How To Play Page 2 (no fade - same audio context)
         if G.HowToPlaySceneName2 and changeScene then
-            printLog("[UI] backtohowToPlay2 -> changeScene("..G.HowToPlaySceneName2..")")
-            changeScene(G.HowToPlaySceneName2)
+            printLog("[UI] howtoplay_ArrowRight -> " .. G.HowToPlaySceneName2)
+            changeScene(G.HowToPlaySceneName2)  -- Direct change, same global audio continues
         else
-            printLog("[UI] backtohowToPlay2 pressed (no scene specified / not implemented)")
+            printLog("[UI] howtoplay_ArrowRight: scene not set")
         end
     end,
 
@@ -448,30 +520,27 @@ local handlers = {
     ----------------------------------------------------------------------
     cutscene_Open_Menu = function(buttonEntity, payload)
         -- Android touch button callback to pause the game
-        if _G_root.TogglePause then
-            local isMobile = (isAndroid ~= nil and isAndroid())
-            if isMobile then
-                Hide_Cursor(false)
-                
-            end
-            _G_root.TogglePause()
-            printLog("[UI] cutscene_Open_Menu (Android) -> called TogglePause()")
-        else
-            printLog("[UI] cutscene_Open_Menu pressed, but TogglePause is not available")
+        local isMobile = (isAndroid ~= nil and isAndroid())
+        if isMobile then
+            hideCursor(false)
         end
+        SetGamePaused(true)
+
+        setLayerEnabled(2, true)
+
+        printLog("[UI] cutscene_Open_Menu (Android) -> called TogglePause()")
     end,
 
     cutscene_Close_Menu = function(buttonEntity, payload)
         if IsGamePaused() then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(true)
+                hideCursor(true)
             end
             --SetGamePaused(not IsGamePaused()) 
-            _G_root.TogglePause()
+            SetGamePaused(false)
             
-            setLayerEnabled(1, not _G_root.IsGamePaused())
-            setLayerEnabled(2, _G_root.IsGamePaused())
+            setLayerEnabled(2, false)
             printLog("[UI] cutscene_Close_Menu -> called TogglePause()")
         else
             printLog("[UI] cutscene_Close_Menu pressed, but TogglePause is not available")
@@ -482,10 +551,10 @@ local handlers = {
         if IsGamePaused() then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(true)
+                hideCursor(true)
             end
             --SetGamePaused(not IsGamePaused()) 
-            _G_root.TogglePause()
+            SetGamePaused(true)
             
             setLayerEnabled(3, true)
             printLog("[UI] cutscene_Menu_Button -> called TogglePause()")
@@ -515,7 +584,7 @@ local handlers = {
         if changeScene then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(true)
+                hideCursor(true)
                 
             end
             changeScene(G.MainMenuSceneName)
@@ -529,16 +598,75 @@ local handlers = {
         printLog("[UI] cutscene_Quit_Cancel -> closing quit confirmation")
         
         if setLayerEnabled then
+            SetGamePaused(false)
+
             setLayerEnabled(3, false)
             setLayerEnabled(2, false) -- Return to Menu
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(false)
+                hideCursor(false)
             end
             --_G_root.TogglePause()
             printLog("[UI] QuitOverlay (layer 5) hidden - returning to menu")
         else
             printLog("[UI] setLayerEnabled not available")
+        end
+    end,
+
+
+    ----------------------------------------------------------------------
+    -- MAIN MENU QUIT CONFIRMATION
+    ----------------------------------------------------------------------
+    mainmenu_Quit_Confirm = function(buttonEntity, payload)
+        if quitApplication then
+            printLog("[UI] cutscene_Quit_Confirm -> quitApplication()")
+            quitApplication()
+        else
+            printLog("[UI] cutscene_Quit_Confirm pressed (quitapplication() not bound; implement in EngineAPI)")
+        end
+    end,
+
+    mainmenu_Quit_Cancel = function(buttonEntity, payload)
+        -- User pressed NO - close popup
+        printLog("[UI] mainmenu_Quit_Cancel -> closing quit confirmation")
+        
+        if setLayerEnabled then
+
+            setLayerEnabled(2, false) -- Return to Menu
+            local isMobile = (isAndroid ~= nil and isAndroid())
+            if isMobile then
+                Hide_Cursor(false)
+            end
+            _G_root.TogglePause()
+
+            printLog("[UI] QuitOverlay (layer 5) hidden - returning to menu")
+        else
+            printLog("[UI] setLayerEnabled not available")
+        end
+    end,
+
+
+
+    ----------------------------------------------------------------------
+    -- CREDITS
+    ----------------------------------------------------------------------
+    credits_ArrowLeft = function(buttonEntity, payload)
+        -- Navigate to How To Play Page 1 (no fade - same audio context)
+        if G.CreditsSceneName and changeScene then
+            printLog("[UI] credits_ArrowLeft -> " .. G.CreditsSceneName)
+            changeScene(G.CreditsSceneName)  -- Direct change, same global audio continues
+        else
+            printLog("[UI] credits_ArrowLeft: scene not set")
+        end
+    end,
+
+    credits_ArrowRight = function(buttonEntity, payload)
+        -- Navigate to How To Play Page 2 (no fade - same audio context)
+        if G.CreditsSceneName2 and changeScene then
+            printLog("[UI] credits_ArrowRight -> " .. G.CreditsSceneName2)
+            changeScene(G.CreditsSceneName2)  -- Direct change, same global audio continues
+        else
+            printLog("[UI] credits_ArrowRight: scene not set")
         end
     end,
 }

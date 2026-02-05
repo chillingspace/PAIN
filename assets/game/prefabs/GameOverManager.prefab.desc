@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "GameOverManager.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 17171034106010986650
+  },
+  "descriptor_version": 1,
+  "guid": "114dfe50-ef4f-9d4d-b239-ce0e8fb1bd48",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\GameOverManager.prefab"
+  }
+}
