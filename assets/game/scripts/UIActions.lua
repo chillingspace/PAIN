@@ -86,6 +86,13 @@ local handlers = {
         end
     end,
 
+    end_NextLevel = function()
+        if changeScene then
+            printLog("[UI] Changing to next level: " .. G.NextLevelName)
+            changeScene(G.NextLevelName)
+        end
+    end,
+
     end_MainMenu = function()
         if changeScene then
             changeScene(G.MainMenuSceneName)

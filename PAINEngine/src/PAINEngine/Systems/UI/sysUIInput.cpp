@@ -62,6 +62,8 @@ namespace PAIN {
         case UIAction::cutscene_Quit_Confirm:  return "cutscene_Quit_Confirm";
         case UIAction::cutscene_Quit_Cancel:   return "cutscene_Quit_Cancel";
 
+        case UIAction::end_NextLevel:         return "end_NextLevel";
+
 		case UIAction::None:
 
 		default:                               return "None";

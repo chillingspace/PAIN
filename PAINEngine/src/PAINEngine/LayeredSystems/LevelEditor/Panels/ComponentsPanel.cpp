@@ -458,7 +458,9 @@ namespace PAIN {
 							"cutscene_Menu_Quit",
 
 							"cutscene_Quit_Confirm",
-							"cutscene_Quit_Cancel"
+							"cutscene_Quit_Cancel",
+
+							"end_NextLevel"
 						};
 
 						int action_idx = static_cast<int>(button.action);
