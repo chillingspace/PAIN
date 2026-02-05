@@ -544,8 +544,8 @@
                             ],
                             "texture_guid": "7158b6f0-2b9a-a646-ae06-b0e132c7181b",
                             "texture_scale": [
-                                4.0,
-                                3.0
+                                1.7999999523162842,
+                                1.0
                             ]
                         },
                         "UIElement": {
