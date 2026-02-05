@@ -133,6 +133,15 @@ namespace PAIN {
 		cutscene_Menu_Quit,
 		cutscene_Quit_Confirm,
 		cutscene_Quit_Cancel,
+
+		mainmenu_Quit_Confirm,
+		mainmenu_Quit_Cancel,
+
+		credits_ArrowLeft,
+		credits_ArrowRight,
+		
+		// game end next level
+		end_NextLevel
 	};
 
 	struct UIButton {

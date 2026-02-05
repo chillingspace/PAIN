@@ -19,9 +19,9 @@
         "fov": 90.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            0.13208907842636108,
-            0.6261352896690369,
-            1.114875316619873
+            0.11548863351345062,
+            0.6400731205940247,
+            1.1484932899475098
         ],
         "sensitivity": 0.11999999731779099,
         "speed": 0.10000000149011612,
@@ -37,7 +37,7 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
-                            "guid": "677d0196-4f4e-2d4a-91ec-210225b33906"
+                            "guid": "e89dd2d6-d65e-8144-b1a7-40144df13802"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
@@ -50,7 +50,7 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                0.0,
+                                -1.080651044845581,
                                 0.0,
                                 0.0
                             ],
@@ -93,7 +93,7 @@
                                 "7beaa535-462c-7f45-9d6d-4090ca227034"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 1
+                            "siblingIndex": 0
                         },
                         "Layer": {
                             "layer_id": 1,
@@ -247,14 +247,14 @@
                             ]
                         },
                         "Name": {
-                            "name": "left_arrow_button"
+                            "name": "right_arrow_button"
                         },
                         "Texture2D": {
                             "pos": [
-                                -0.8799999952316284,
+                                0.8799999952316284,
                                 0.0
                             ],
-                            "texture_guid": "d32a536c-d126-354d-9ce9-99219b421a34",
+                            "texture_guid": "5d5a177c-a015-344d-9b30-9cd9ada4c265",
                             "texture_scale": [
                                 0.10000000149011612,
                                 0.10000000149011612
@@ -270,7 +270,7 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 19,
+                            "action": 31,
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
@@ -338,7 +338,7 @@
                             ]
                         }
                     },
-                    "Name": "left_arrow_button"
+                    "Name": "right_arrow_button"
                 }
             },
             {
@@ -510,7 +510,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 2
+                            "siblingIndex": 1
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -535,17 +535,25 @@
                             ]
                         },
                         "Name": {
-                            "name": "instructions1"
+                            "name": "credits1"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "8ec5603e-4501-4a4f-adc9-41cc449d880d"
+                                }
+                            ]
                         },
                         "Texture2D": {
                             "pos": [
                                 0.0,
                                 0.0
                             ],
-                            "texture_guid": "7de36637-5be8-964c-9b0a-26b3d0c3bd47",
+                            "texture_guid": "6cc01a36-3d0c-194f-8c6c-65706320ab2f",
                             "texture_scale": [
-                                1.7999999523162842,
-                                1.0
+                                3.5999999046325684,
+                                3.0
                             ]
                         },
                         "UIElement": {
@@ -600,7 +608,7 @@
                             ]
                         }
                     },
-                    "Name": "instructions1"
+                    "Name": "credits1"
                 }
             },
             {
@@ -633,7 +641,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 3
+                            "siblingIndex": 2
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -681,7 +689,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 4
+                            "siblingIndex": 3
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -727,7 +735,7 @@
                                 "ce700d51-a84c-e24e-970b-f0cc7c63c275"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 5
+                            "siblingIndex": 4
                         },
                         "Layer": {
                             "layer_id": 0,

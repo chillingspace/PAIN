@@ -83,6 +83,9 @@ namespace PAIN {
         virtual glm::vec3 GetVelocity(entt::entity entityId) = 0;
         virtual void SetVelocity(entt::entity entityId, glm::vec3 v) = 0;
 		virtual bool IsGrounded(entt::entity entityId, float maxDistance) = 0;
+        virtual std::tuple<bool, glm::vec3> GetWallNormal(entt::entity entityId, glm::vec3 direction, float checkDistance) = 0;
+        virtual void DisablePhysics(entt::entity e) = 0;
+        virtual void EnablePhysics(entt::entity e) = 0;
 
         /* =========================================================================== */
         /*                                   Audio                                     */

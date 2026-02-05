@@ -77,7 +77,7 @@
                             "scripts": [
                                 {
                                     "enabled": true,
-                                    "script_asset": "39e6a9ce-8772-dd4b-9f93-5ed126fa6c2c"
+                                    "script_asset": "dc7fd95a-a106-4f46-87bd-ec491f47571c"
                                 }
                             ]
                         }
@@ -89,6 +89,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
+                            "audio_tracks": [],
                             "group_name": "sfx",
                             "is3D": true,
                             "looping": true,
@@ -102,6 +103,7 @@
                                 0.0
                             ],
                             "selected_audio": "6621d58f-1f66-bb4f-8c78-b77404b6296b",
+                            "track_volumes": [],
                             "volumeDb": 0.0
                         },
                         "CustomHitbox2D": {
@@ -247,6 +249,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
+                            "audio_tracks": [],
                             "group_name": "sfx",
                             "is3D": true,
                             "looping": true,
@@ -260,6 +263,7 @@
                                 0.0
                             ],
                             "selected_audio": "6621d58f-1f66-bb4f-8c78-b77404b6296b",
+                            "track_volumes": [],
                             "volumeDb": 0.0
                         },
                         "CustomHitbox2D": {
@@ -548,7 +552,7 @@
                             "scripts": [
                                 {
                                     "enabled": true,
-                                    "script_asset": "39e6a9ce-8772-dd4b-9f93-5ed126fa6c2c"
+                                    "script_asset": "dc7fd95a-a106-4f46-87bd-ec491f47571c"
                                 }
                             ]
                         }
@@ -560,6 +564,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
+                            "audio_tracks": [],
                             "group_name": "sfx",
                             "is3D": true,
                             "looping": true,
@@ -573,6 +578,7 @@
                                 0.0
                             ],
                             "selected_audio": "6621d58f-1f66-bb4f-8c78-b77404b6296b",
+                            "track_volumes": [],
                             "volumeDb": 0.0
                         },
                         "CustomHitbox2D": {
@@ -718,6 +724,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
+                            "audio_tracks": [],
                             "group_name": "sfx",
                             "is3D": true,
                             "looping": true,
@@ -731,6 +738,7 @@
                                 0.0
                             ],
                             "selected_audio": "6621d58f-1f66-bb4f-8c78-b77404b6296b",
+                            "track_volumes": [],
                             "volumeDb": 0.0
                         },
                         "CustomHitbox2D": {
@@ -876,6 +884,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
+                            "audio_tracks": [],
                             "group_name": "sfx",
                             "is3D": true,
                             "looping": true,
@@ -889,6 +898,7 @@
                                 0.0
                             ],
                             "selected_audio": "6621d58f-1f66-bb4f-8c78-b77404b6296b",
+                            "track_volumes": [],
                             "volumeDb": 0.0
                         },
                         "CustomHitbox2D": {
@@ -959,7 +969,7 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 9,
+                            "action": 14,
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
@@ -1421,6 +1431,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
+                            "audio_tracks": [],
                             "group_name": "sfx",
                             "is3D": true,
                             "looping": true,
@@ -1434,6 +1445,7 @@
                                 0.0
                             ],
                             "selected_audio": "6621d58f-1f66-bb4f-8c78-b77404b6296b",
+                            "track_volumes": [],
                             "volumeDb": 0.0
                         },
                         "CustomHitbox2D": {
@@ -3321,6 +3333,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
+                            "audio_tracks": [],
                             "group_name": "music",
                             "is3D": false,
                             "looping": true,
@@ -3334,6 +3347,7 @@
                                 0.0
                             ],
                             "selected_audio": "82bb33a4-ab3b-254d-b093-b2b9d7ab363d",
+                            "track_volumes": [],
                             "volumeDb": 0.0
                         },
                         "GUID": {
@@ -3377,6 +3391,7 @@
                 "Entity": {
                     "Components": {
                         "AudioSource": {
+                            "audio_tracks": [],
                             "group_name": "music",
                             "is3D": false,
                             "looping": true,
@@ -3390,6 +3405,7 @@
                                 0.0
                             ],
                             "selected_audio": "e87054db-0ef8-f34b-96a0-e2fede943a49",
+                            "track_volumes": [],
                             "volumeDb": 0.0
                         },
                         "GUID": {
