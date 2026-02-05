@@ -63,8 +63,8 @@ namespace PAIN {
         std::string GetDataGUID(std::string_view name) override;
         std::string GetShaderGUID(std::string_view name) override;
 
-        std::string GetEntityTexture(entt::entity entityId);
-        void SetEntityTexture(entt::entity entity, const std::string& guidStr);
+        std::string GetEntityTexture(entt::entity entityId) override;
+        void SetEntityTexture(entt::entity entity, const std::string& guidStr) override;
 
         /* =========================================================================== */
         /*                     Metadata (name / tags / groups)                         */

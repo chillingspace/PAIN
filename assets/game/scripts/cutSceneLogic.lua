@@ -22,11 +22,11 @@ registerUpdate(function(dt)
             print("[Cutscene] Last frame reached. Changing scene...")
             
             if changeScene then
-                local nextScene = G.TutorialSceneName  or "game/scenes/Tutorial.scn"
+                local nextScene = G.TutorialSceneName 
                 
                 local isMobile = (isAndroid ~= nil and isAndroid())
                 if isMobile then
-                    Hide_Cursor(true)
+                    hideCursor(true)
                 end
                 
                 changeScene(nextScene)
@@ -36,7 +36,7 @@ registerUpdate(function(dt)
             return
         end
         
-        local fileName = "c" .. currentFrame .. ".dds"
+        local fileName = "c" .. currentFrame .. ".ktx"
         local guid = getImageID(fileName)
         
         if guid ~= "" and guid ~= nil then

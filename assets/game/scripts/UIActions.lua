@@ -452,7 +452,7 @@ local handlers = {
     menu_QuitGame = function(buttonEntity, payload)
         local isMobile = (isAndroid ~= nil and isAndroid())
         if isMobile then
-            Hide_Cursor(true)
+           hideCursor(true)
         end
         --SetGamePaused(not IsGamePaused()) 
         _G_root.TogglePause()
@@ -637,7 +637,7 @@ local handlers = {
             setLayerEnabled(2, false) -- Return to Menu
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
-                Hide_Cursor(false)
+                hideCursor(false)
             end
             _G_root.TogglePause()
 
