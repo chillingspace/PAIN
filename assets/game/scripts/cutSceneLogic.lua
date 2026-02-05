@@ -1,0 +1,48 @@
+-- 1. DEFINE THESE OUTSIDE THE FUNCTION
+if currentFrame == nil then
+    currentFrame = 1
+end
+local maxFrames = 15
+local G = _G_root
+
+registerUpdate(function(dt)
+    -- Check for mouse click
+    if wasMousePressed(0) then
+        print("1. Mouse Click Detected!")
+        
+        -- 2. Increment the frame
+        currentFrame = currentFrame + 1
+        
+        -- 3. Check if we finished the cutscene
+        if currentFrame > maxFrames then 
+            print("[Cutscene] Last frame reached. Changing scene...")
+            
+            if changeScene then
+                -- Pull the level name from your UIActions defaults
+                local nextScene = G.FirstLevelScene or "game/scenes/Level1.scn"
+                
+                -- Handle mobile cursor hide as seen in UIActions.lua
+                local isMobile = (isAndroid ~= nil and isAndroid())
+                if isMobile then
+                    Hide_Cursor(true)
+                end
+                
+                changeScene(nextScene)
+            else
+                print("[Cutscene] Error: changeScene function not found")
+            end
+            return -- Exit to prevent trying to load a non-existent frame 16
+        end
+        
+        -- 4. Try to find the image
+        local fileName = "c" .. currentFrame .. ".dds"
+        local guid = getImageID(fileName)
+        
+        if guid ~= "" and guid ~= nil then
+            print("3. Success! Found: " .. fileName .. " | GUID: " .. guid)
+            setTexture(entityId, guid)
+        else
+            print("2. Asset Error: Could not find " .. fileName)
+        end
+    end
+end)

@@ -202,6 +202,33 @@ namespace PAIN {
     std::string EngineAPIAdapter::GetDataGUID(std::string_view name) { return GetAssetGUID(name, PAIN::Assets::Type::Data); }
     std::string EngineAPIAdapter::GetShaderGUID(std::string_view name) { return GetAssetGUID(name, PAIN::Assets::Type::Shader); }
 
+    std::string EngineAPIAdapter::GetEntityTexture(entt::entity entityId) {
+        auto& reg = ecs_.getRegistry();
+
+        // Check if entity exists and has a texture
+        if (reg.valid(entityId) && reg.all_of<PAIN::Texture2D>(entityId)) {
+            auto& texComp = reg.get<PAIN::Texture2D>(entityId);
+            return texComp.texture_guid.ToString();
+        }
+
+        return ""; // Return empty if no texture component found
+    }
+
+    void EngineAPIAdapter::SetEntityTexture(entt::entity entityId, const std::string& guidStr) {
+        auto& reg = ecs_.getRegistry();
+
+        // 1. Validation: Ensure entity is valid and has the component
+        if (!reg.valid(entityId) || !reg.all_of<PAIN::Texture2D>(entityId)) {
+            return;
+        }
+
+        // 2. Update the component data
+        auto& texComp = reg.get<PAIN::Texture2D>(entityId);
+
+        // Convert string to GUID (using the constructor/method available in your engine)
+        texComp.texture_guid = PAIN::Assets::GUID(guidStr);
+    }
+
     //int EngineAPIAdapter::guidToInt(const PAIN::Assets::GUID& id) {
     //    uint32_t v = 0; std::memcpy(&v, id.bytes, sizeof(uint32_t));
     //    return static_cast<int>(v);
