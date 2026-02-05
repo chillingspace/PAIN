@@ -538,15 +538,6 @@ namespace PAIN {
 
     }
 
-    std::string EngineAPIAdapter::GetCurrentSceneName() {
-        if (!scene_ || !assets_) return "";
-        auto guid = scene_->getCurrScnID();
-        if (!guid.IsValid()) return "";
-        
-        auto meta = assets_->getAssetData(guid);
-        return meta ? meta->name : "";
-    }
-
     // Expose pausing to lua
     void EngineAPIAdapter::SetGamePaused(bool pause) {
         if (!scene_) {
