@@ -37,6 +37,14 @@ namespace PAIN {
                 float aspectRatioH{ 9.f };
                 float speed{ 15.f };
                 float sensitivity{ 0.1f };
+                
+                // Camera collision settings
+                bool collisionEnabled = true;
+                float collisionRadius = 0.5f;
+                float collisionOffset = 0.1f;
+                float capsuleHeight = 1.8f;
+                bool useCapsuleCollision = false;
+                bool showCollisionGizmo = false;
             } camera;
 
             //Environment settings

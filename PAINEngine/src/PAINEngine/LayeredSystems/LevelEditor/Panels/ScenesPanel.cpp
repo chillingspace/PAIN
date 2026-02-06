@@ -905,6 +905,64 @@ namespace PAIN {
 
                         cam->sensitivity = curr_sens;
                     }
+                    ImGui::Spacing();
+                    
+                    // ============================================
+                    // Camera Collision Settings
+                    // ============================================
+                    if (ImGui::CollapsingHeader("Camera Collision", ImGuiTreeNodeFlags_DefaultOpen)) {
+                        ImGui::Indent();
+                        
+                        // Enable/disable collision
+                        bool collisionEnabled = cam->collisionEnabled;
+                        if (ImGui::Checkbox("Enable Collision", &collisionEnabled)) {
+                            cam->collisionEnabled = collisionEnabled;
+                        }
+                        
+                        ImGui::BeginDisabled(!collisionEnabled);
+                        
+                        // Collision shape selector
+                        const char* shapes[] = { "Sphere", "Capsule" };
+                        int shapeIdx = cam->useCapsuleCollision ? 1 : 0;
+                        if (ImGui::Combo("Collision Shape", &shapeIdx, shapes, IM_ARRAYSIZE(shapes))) {
+                            cam->useCapsuleCollision = (shapeIdx == 1);
+                        }
+                        
+                        // Radius slider
+                        float radius = cam->collisionRadius;
+                        if (ImGui::DragFloat("Collision Radius", &radius, 0.01f, 0.1f, 2.0f, "%.2f")) {
+                            cam->collisionRadius = radius;
+                        }
+                        if (ImGui::IsItemHovered()) {
+                            ImGui::SetTooltip("Size of camera collision sphere/capsule");
+                        }
+                        
+                        // Capsule height (only visible for capsule)
+                        if (cam->useCapsuleCollision) {
+                            float height = cam->capsuleHeight;
+                            if (ImGui::DragFloat("Capsule Height", &height, 0.01f, 0.5f, 3.0f, "%.2f")) {
+                                cam->capsuleHeight = height;
+                            }
+                        }
+                        
+                        // Offset from surfaces
+                        float offset = cam->collisionOffset;
+                        if (ImGui::DragFloat("Surface Offset", &offset, 0.01f, 0.0f, 0.5f, "%.2f")) {
+                            cam->collisionOffset = offset;
+                        }
+                        if (ImGui::IsItemHovered()) {
+                            ImGui::SetTooltip("Minimum distance camera maintains from surfaces");
+                        }
+                        
+                        // Show gizmo in editor
+                        bool showGizmo = cam->showCollisionGizmo;
+                        if (ImGui::Checkbox("Show Collision Gizmo", &showGizmo)) {
+                            cam->showCollisionGizmo = showGizmo;
+                        }
+                        
+                        ImGui::EndDisabled();
+                        ImGui::Unindent();
+                    }
                 }
 
             }

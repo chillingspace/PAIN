@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "Scene.h"
 #include "CoreSystems/Path/Path.h"
 #include "CoreSystems/Assets/sAssets.h"
@@ -282,6 +282,15 @@ namespace PAIN {
 				camSettings.speed,
 				camSettings.sensitivity
 			);
+			
+			// Setup camera collision settings
+			editor_camera->collisionEnabled = camSettings.collisionEnabled;
+			editor_camera->collisionRadius = camSettings.collisionRadius;
+			editor_camera->collisionOffset = camSettings.collisionOffset;
+			editor_camera->capsuleHeight = camSettings.capsuleHeight;
+			editor_camera->useCapsuleCollision = camSettings.useCapsuleCollision;
+			editor_camera->showCollisionGizmo = camSettings.showCollisionGizmo;
+			
 			SetEditorCamera();
 
 			PN_CORE_ERROR("[SceneManager] Camera setup: pos({}, {}, {}), fov={} , speed={}, sens={}",
@@ -714,6 +723,14 @@ namespace PAIN {
 				scene_asset.camera.aspectRatioH = active_camera->height_ratio;
 				scene_asset.camera.speed = active_camera->speed;
 				scene_asset.camera.sensitivity = active_camera->sensitivity;
+				
+				// Camera collision settings
+				scene_asset.camera.collisionEnabled = active_camera->collisionEnabled;
+				scene_asset.camera.collisionRadius = active_camera->collisionRadius;
+				scene_asset.camera.collisionOffset = active_camera->collisionOffset;
+				scene_asset.camera.capsuleHeight = active_camera->capsuleHeight;
+				scene_asset.camera.useCapsuleCollision = active_camera->useCapsuleCollision;
+				scene_asset.camera.showCollisionGizmo = active_camera->showCollisionGizmo;
 
 			}
 
@@ -782,7 +799,14 @@ namespace PAIN {
 				{"aspectRatioW", scn_asset.camera.aspectRatioW},
 				{"aspectRatioH", scn_asset.camera.aspectRatioH},
 				{"speed", scn_asset.camera.speed},
-				{"sensitivity", scn_asset.camera.sensitivity}
+				{"sensitivity", scn_asset.camera.sensitivity},
+				// Camera collision settings
+				{"collisionEnabled", scn_asset.camera.collisionEnabled},
+				{"collisionRadius", scn_asset.camera.collisionRadius},
+				{"collisionOffset", scn_asset.camera.collisionOffset},
+				{"capsuleHeight", scn_asset.camera.capsuleHeight},
+				{"useCapsuleCollision", scn_asset.camera.useCapsuleCollision},
+				{"showCollisionGizmo", scn_asset.camera.showCollisionGizmo}
 			};
 
 			//Environment settings

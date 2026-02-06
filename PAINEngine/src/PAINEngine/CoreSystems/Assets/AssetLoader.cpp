@@ -1139,6 +1139,26 @@ namespace PAIN {
                 if (cam.contains("speed")) {
                     sceneAsset->camera.speed = cam["speed"].get<float>();
                 }
+                
+                // Parse camera collision settings
+                if (cam.contains("collisionEnabled")) {
+                    sceneAsset->camera.collisionEnabled = cam["collisionEnabled"].get<bool>();
+                }
+                if (cam.contains("collisionRadius")) {
+                    sceneAsset->camera.collisionRadius = cam["collisionRadius"].get<float>();
+                }
+                if (cam.contains("collisionOffset")) {
+                    sceneAsset->camera.collisionOffset = cam["collisionOffset"].get<float>();
+                }
+                if (cam.contains("capsuleHeight")) {
+                    sceneAsset->camera.capsuleHeight = cam["capsuleHeight"].get<float>();
+                }
+                if (cam.contains("useCapsuleCollision")) {
+                    sceneAsset->camera.useCapsuleCollision = cam["useCapsuleCollision"].get<bool>();
+                }
+                if (cam.contains("showCollisionGizmo")) {
+                    sceneAsset->camera.showCollisionGizmo = cam["showCollisionGizmo"].get<bool>();
+                }
             }
 
             // Parse environment settings

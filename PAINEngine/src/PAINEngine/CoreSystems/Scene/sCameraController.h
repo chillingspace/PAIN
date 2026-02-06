@@ -2,6 +2,7 @@
 
 #include "Camera.h"
 #include "Scene.h"
+#include "CameraCollisionSystem.h"
 #include "CoreSystems/Events/GLFW/KeyEvents.h"
 #include "CoreSystems/Events/GLFW/MouseEvents.h"
 #include "CoreSystems/Events/GLFW/WindowEvents.h"
@@ -73,6 +74,9 @@ namespace PAIN {
 	private:
 		Camera* camera;
 		std::shared_ptr<Scene::SceneManager> m_Scene;
+		
+		// Camera collision system
+		std::unique_ptr<Scene::CameraCollisionSystem> m_collisionSystem;
 
 		bool m_isMuted = false; // For toggling all audio (testing)
 

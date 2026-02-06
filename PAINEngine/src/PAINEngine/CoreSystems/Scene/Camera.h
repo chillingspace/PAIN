@@ -37,6 +37,16 @@ namespace PAIN {
 		float speed;
 		float sensitivity;
 
+		// ============================================
+		// Camera Collision Settings
+		// ============================================
+		bool collisionEnabled = true;           // Toggle collision on/off
+		float collisionRadius = 0.5f;           // Sphere/capsule radius
+		float collisionOffset = 0.1f;           // Minimum distance from surfaces
+		float capsuleHeight = 1.8f;             // Height for capsule collision
+		bool useCapsuleCollision = false;       // false = sphere, true = capsule
+		bool showCollisionGizmo = false;        // Show collision visualization in editor
+
 		// temp
 		glm::mat4 model() const;
 

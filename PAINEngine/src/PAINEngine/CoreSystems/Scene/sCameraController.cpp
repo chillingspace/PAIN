@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "sCameraController.h"
+#include "Systems/Physics/sysPhysics.h"
 
 #ifdef _DEBUG
 #include <imgui.h>
@@ -16,6 +17,15 @@ namespace PAIN {
     {
         //get scene
         m_Scene = services->get<Scene::SceneManager>();
+        
+        // Initialize collision system
+        m_collisionSystem = std::make_unique<Scene::CameraCollisionSystem>();
+        
+        // Get physics system for collision queries
+        auto physicsSystem = services->get<Physics::System>();
+        if (physicsSystem) {
+            m_collisionSystem->init(physicsSystem->GetPhysicsSystem());
+        }
     }
 
 #ifdef PN_PLATFORM_ANDROID
@@ -282,63 +292,96 @@ namespace PAIN {
 
         float currentMoveSpeed = camera->speed * speedMultiplier * dt;
 
+        // Store original position for collision resolution
+        glm::vec3 originalPos = camera->pos;
+        glm::vec3 proposedPos = originalPos;
+        bool hasMovement = false;
+        
         switch (move_mode) {
         case FREE_FLY:
             // Move forward/backward directly in camera forward direction
             if (W_KEYDOWN) {
-                glm::vec3 offset = camera->forward * currentMoveSpeed;
-                camera->pos += offset;
+                proposedPos += camera->forward * currentMoveSpeed;
+                hasMovement = true;
             }
             if (S_KEYDOWN) {
-                glm::vec3 offset = camera->forward * currentMoveSpeed;
-                camera->pos -= offset;
+                proposedPos -= camera->forward * currentMoveSpeed;
+                hasMovement = true;
             }
             if (A_KEYDOWN) {
-                camera->pos -= right * currentMoveSpeed;
+                proposedPos -= right * currentMoveSpeed;
+                hasMovement = true;
             }
             if (D_KEYDOWN) {
-                camera->pos += right * currentMoveSpeed;
+                proposedPos += right * currentMoveSpeed;
+                hasMovement = true;
             }
 
             // Move up/down along camera up vector
             if (E_KEYDOWN) {
-                camera->pos += camera->up * currentMoveSpeed;
+                proposedPos += camera->up * currentMoveSpeed;
+                hasMovement = true;
             }
             if (Q_KEYDOWN) {
-                camera->pos -= camera->up * currentMoveSpeed;
+                proposedPos -= camera->up * currentMoveSpeed;
+                hasMovement = true;
             }
-
-
             break;
 
         case FIRST_PERSON:
             static glm::mat4 mmtx = glm::scale(glm::mat4(1.f), glm::vec3(1, 0, 1));
             if (W_KEYDOWN) {
-                glm::vec3 offset = glm::vec3(mmtx * glm::vec4(camera->forward, 1.f)) * currentMoveSpeed;
-                camera->pos += offset;
+                proposedPos += glm::vec3(mmtx * glm::vec4(camera->forward, 1.f)) * currentMoveSpeed;
+                hasMovement = true;
             }
             if (S_KEYDOWN) {
-                glm::vec3 offset = glm::vec3(mmtx * glm::vec4(camera->forward, 1.f)) * currentMoveSpeed;
-                camera->pos -= offset;
+                proposedPos -= glm::vec3(mmtx * glm::vec4(camera->forward, 1.f)) * currentMoveSpeed;
+                hasMovement = true;
             }
             if (A_KEYDOWN) {
-                glm::vec3 offset = glm::normalize(glm::cross(camera->forward, camera->up)) * currentMoveSpeed;
-                camera->pos -= offset;
+                proposedPos -= glm::normalize(glm::cross(camera->forward, camera->up)) * currentMoveSpeed;
+                hasMovement = true;
             }
             if (D_KEYDOWN) {
-                glm::vec3 offset = glm::normalize(glm::cross(camera->forward, camera->up)) * currentMoveSpeed;
-                camera->pos += offset;
+                proposedPos += glm::normalize(glm::cross(camera->forward, camera->up)) * currentMoveSpeed;
+                hasMovement = true;
             }
-            //if (SPACE_KEYDOWN) {
-            //    glm::vec3 offset = camera->up * currentMoveSpeed;
-            //    camera->pos += offset;
-            //}
-            //if (LCTRL_KEYDOWN) {
-            //    glm::vec3 offset = camera->up * currentMoveSpeed;
-            //    camera->pos -= offset;
-            //}
             break;
-
+        }
+        
+        // Apply collision detection and resolution if there's movement
+        if (hasMovement && camera->collisionEnabled && m_collisionSystem) {
+            // DEBUG: Log collision check
+            static int collisionCheckCount = 0;
+            collisionCheckCount++;
+            if (collisionCheckCount % 60 == 0) {
+                PN_CORE_INFO("[CameraController] Checking collision #{} - enabled: {}, radius: {:.2f}, shape: {}",
+                    collisionCheckCount, 
+                    camera->collisionEnabled, 
+                    camera->collisionRadius,
+                    camera->useCapsuleCollision ? "capsule" : "sphere");
+            }
+            
+            camera->pos = m_collisionSystem->resolveCollision(
+                proposedPos,
+                originalPos,
+                camera->up,
+                camera->collisionRadius,
+                camera->capsuleHeight,
+                camera->collisionOffset,
+                camera->useCapsuleCollision
+            );
+        } else {
+            if (hasMovement) {
+                // DEBUG: Log why collision was skipped
+                static int skipCount = 0;
+                skipCount++;
+                if (skipCount % 120 == 0) { // Every 2 seconds at 60fps
+                    PN_CORE_WARN("[CameraController] Collision skipped - hasMovement: {}, collisionEnabled: {}, hasSystem: {}",
+                        hasMovement, camera->collisionEnabled, (m_collisionSystem != nullptr));
+                }
+            }
+            camera->pos = proposedPos;
         }
 
         if (mouseButtonDown && xOffset != 0.f) {
