@@ -245,7 +245,7 @@ registerUpdate(function(dt)
         
         -- Make sure animation is not looping
         if isGrounded then 
-            Animation.SetSpeed(id, 1.5)
+            Animation.SetSpeed(id, 1.8)
             Animation.SetLoop(id, false)
          end
     end
@@ -322,6 +322,7 @@ registerUpdate(function(dt)
 
         -- jump sfx
         if S and S.sfxJump then
+            audioStop(entityId)
             audioPlay(S.sfxJump)
         end
         
