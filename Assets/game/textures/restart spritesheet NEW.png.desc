@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "restart spritesheet NEW.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 16520162270059541225
+  },
+  "descriptor_version": 1,
+  "guid": "6d12a8ac-ad22-794c-a7e9-2fe32d9f6b57",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\restart spritesheet NEW.png"
+  }
+}

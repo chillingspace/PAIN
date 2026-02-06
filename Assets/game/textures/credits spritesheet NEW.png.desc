@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "credits spritesheet NEW.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 7110994356264685485
+  },
+  "descriptor_version": 1,
+  "guid": "eecf5a32-1aae-ba47-abd4-5f5d0a33231a",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\credits spritesheet NEW.png"
+  }
+}

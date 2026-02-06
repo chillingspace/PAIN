@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "how to play spritesheet NEW.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 2197756691287283284
+  },
+  "descriptor_version": 1,
+  "guid": "735265cf-2100-2e42-a5b3-62b89a726aa7",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\how to play spritesheet NEW.png"
+  }
+}

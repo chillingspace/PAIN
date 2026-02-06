@@ -713,7 +713,7 @@
                                 -0.5299999713897705,
                                 0.14000000059604645
                             ],
-                            "texture_guid": "7a4b0369-55bd-034d-bf03-baf1ee0fa117",
+                            "texture_guid": "6bef86d6-a383-584a-9eca-876382d77682",
                             "texture_scale": [
                                 0.4000000059604645,
                                 0.11999999731779099
@@ -790,10 +790,10 @@
                         },
                         "UVCoordinates": {
                             "uv": [
-                                0.0015625000232830644,
-                                0.011363636702299118,
-                                0.4984374940395355,
-                                0.9886363744735718
+                                0.0015243901871144772,
+                                0.010416666977107525,
+                                0.4984756112098694,
+                                0.9895833134651184
                             ]
                         }
                     },
@@ -855,7 +855,7 @@
                                 -0.5,
                                 -0.15000000596046448
                             ],
-                            "texture_guid": "55db93f1-01d1-7443-a48c-b34b244c40ac",
+                            "texture_guid": "735265cf-2100-2e42-a5b3-62b89a726aa7",
                             "texture_scale": [
                                 0.5,
                                 0.09000000357627869
@@ -933,9 +933,9 @@
                         "UVCoordinates": {
                             "uv": [
                                 0.0009765625,
-                                0.011904762126505375,
+                                0.009999999776482582,
                                 0.4990234375,
-                                0.988095223903656
+                                0.9900000095367432
                             ]
                         }
                     },
@@ -997,7 +997,7 @@
                                 -0.5,
                                 -0.4000000059604645
                             ],
-                            "texture_guid": "0c767eaa-0d1b-9042-b665-0c75fb70697d",
+                            "texture_guid": "eecf5a32-1aae-ba47-abd4-5f5d0a33231a",
                             "texture_scale": [
                                 0.3499999940395355,
                                 0.09000000357627869
@@ -1074,14 +1074,87 @@
                         },
                         "UVCoordinates": {
                             "uv": [
-                                0.0013227512827143073,
-                                0.011363636702299118,
-                                0.49867725372314453,
-                                0.9886363744735718
+                                0.0013020833721384406,
+                                0.010416666977107525,
+                                0.4986979067325592,
+                                0.9895833134651184
                             ]
                         }
                     },
                     "Name": "credits_button"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "Camera": {
+                            "far_plane": 100.0,
+                            "height_ratio": 9.0,
+                            "near_plane": 0.10000000149011612,
+                            "rot_offset": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "scale_offset": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "trans_offset": [
+                                0.0,
+                                1.2999999523162842,
+                                0.10000000149011612
+                            ],
+                            "width_ratio": 16.0
+                        },
+                        "GUID": {
+                            "guid": "cb54d9a0-38a4-0d40-aadc-6d795ef2096c"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 3
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.3681994676589966,
+                                0.3213023543357849,
+                                0.45718085765838623
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "game manager"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "ed87d956-cf59-3c4f-ab23-639f04e53783"
+                                },
+                                {
+                                    "enabled": true,
+                                    "script_asset": "a03605c3-e8d3-a149-9f63-b06f941776a2"
+                                }
+                            ]
+                        }
+                    },
+                    "Name": "game manager"
                 }
             },
             {
@@ -1139,7 +1212,7 @@
                                 -0.5199999809265137,
                                 -0.6499999761581421
                             ],
-                            "texture_guid": "6d404311-26e9-0a44-b50b-e8119ed2ee78",
+                            "texture_guid": "c3bf7110-7bea-8e4d-8ac3-e97081eee4a9",
                             "texture_scale": [
                                 0.30000001192092896,
                                 0.09000000357627869
@@ -1229,34 +1302,13 @@
             {
                 "Entity": {
                     "Components": {
-                        "Camera": {
-                            "far_plane": 100.0,
-                            "height_ratio": 9.0,
-                            "near_plane": 0.10000000149011612,
-                            "rot_offset": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "scale_offset": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "trans_offset": [
-                                0.0,
-                                1.2999999523162842,
-                                0.10000000149011612
-                            ],
-                            "width_ratio": 16.0
-                        },
                         "GUID": {
-                            "guid": "cb54d9a0-38a4-0d40-aadc-6d795ef2096c"
+                            "guid": "1389dd85-40a8-f74c-a6d7-994318217228"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 3
+                            "siblingIndex": 4
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1264,9 +1316,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                0.3681994676589966,
-                                0.3213023543357849,
-                                0.45718085765838623
+                                0.0,
+                                0.0,
+                                0.0
                             ],
                             "rotation": [
                                 0.0,
@@ -1281,22 +1333,10 @@
                             ]
                         },
                         "Name": {
-                            "name": "game manager"
-                        },
-                        "Scripts": {
-                            "scripts": [
-                                {
-                                    "enabled": true,
-                                    "script_asset": "ed87d956-cf59-3c4f-ab23-639f04e53783"
-                                },
-                                {
-                                    "enabled": true,
-                                    "script_asset": "a03605c3-e8d3-a149-9f63-b06f941776a2"
-                                }
-                            ]
+                            "name": "end_screen"
                         }
                     },
-                    "Name": "game manager"
+                    "Name": "end_screen"
                 }
             },
             {
@@ -1399,46 +1439,6 @@
                         }
                     },
                     "Name": "overlay"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "GUID": {
-                            "guid": "1389dd85-40a8-f74c-a6d7-994318217228"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 4
-                        },
-                        "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "end_screen"
-                        }
-                    },
-                    "Name": "end_screen"
                 }
             },
             {
