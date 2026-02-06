@@ -1101,6 +1101,11 @@ namespace PAIN {
 					// === Camera Collision Visualization ===
 					// ========================================
 					if (camera->showCollisionGizmo && camera->collisionEnabled) {
+						// Use the same viewport position and size as the rendered image
+						// These were set earlier at line ~480 before ImGui::Image
+						ImVec2 imagePos = viewportPos;
+						ImVec2 imageSize = size;
+						
 						// Project camera position to screen space for visualization
 						glm::mat4 viewProj = camera->projection() * camera->view();
 						
@@ -1112,14 +1117,14 @@ namespace PAIN {
 						ImDrawList* drawList = ImGui::GetWindowDrawList();
 						ImU32 color = IM_COL32(0, 255, 0, 200); // Green for collision
 						
-						// Project 3D points to 2D screen space
+						// Project 3D points to 2D screen space using the actual rendered viewport
 						auto projectToScreen = [&](const glm::vec3& worldPos) -> ImVec2 {
 							glm::vec4 clip = viewProj * glm::vec4(worldPos, 1.0f);
 							if (clip.w > 0.001f) {
 								glm::vec3 ndc = glm::vec3(clip) / clip.w;
 								return ImVec2(
-									viewportPos.x + (ndc.x * 0.5f + 0.5f) * size.x,
-									viewportPos.y + (1.0f - (ndc.y * 0.5f + 0.5f)) * size.y
+									imagePos.x + (ndc.x * 0.5f + 0.5f) * imageSize.x,
+									imagePos.y + (1.0f - (ndc.y * 0.5f + 0.5f)) * imageSize.y
 								);
 							}
 							return ImVec2(-1000, -1000); // Off-screen

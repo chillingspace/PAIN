@@ -279,7 +279,11 @@ namespace PAIN {
         // Move left/right based on cross product of forward and up vectors
         glm::vec3 right = glm::normalize(glm::cross(camera->forward, camera->up));
 
-        // Android editor camera
+        // Store original position FIRST - before any movement
+        glm::vec3 originalPos = camera->pos;
+        glm::vec3 proposedPos = originalPos;
+        
+        // Android editor camera - accumulate movement into proposedPos, not camera->pos
         if (m_move.active && camera) {
             // Project forward to XZ like you already do
             static glm::mat4 mmtx = glm::scale(glm::mat4(1.f), glm::vec3(1, 0, 1));
@@ -288,8 +292,8 @@ namespace PAIN {
 
             // Map: up on stick (negative ny) -> forward, right on stick (positive nx) -> strafe right
             float speed = camera->speed * m_moveScale;
-            camera->pos += (-m_cachedMoveY) * fwd * speed * dt;
-            camera->pos += (m_cachedMoveX)*right * speed * dt;
+            proposedPos += (-m_cachedMoveY) * fwd * speed * dt;
+            proposedPos += (m_cachedMoveX)*right * speed * dt;
             hasMovement = true;
         }
 
@@ -302,10 +306,6 @@ namespace PAIN {
         }
 
         float currentMoveSpeed = camera->speed * speedMultiplier * dt;
-
-        // Store original position for collision resolution
-        glm::vec3 originalPos = camera->pos;
-        glm::vec3 proposedPos = originalPos;
         
         switch (move_mode) {
         case FREE_FLY:
@@ -378,18 +378,17 @@ namespace PAIN {
 
         // Apply collision detection and resolution if there's movement
         if (hasMovement && camera->collisionEnabled && m_collisionSystem) {
-            // DEBUG: Log collision check
+            // DEBUG: Log camera position before collision check
             static int collisionCheckCount = 0;
             collisionCheckCount++;
             if (collisionCheckCount % 60 == 0) {
-                PN_CORE_INFO("[CameraController] Checking collision #{} - enabled: {}, radius: {:.2f}, shape: {}",
-                    collisionCheckCount, 
-                    camera->collisionEnabled, 
-                    camera->collisionRadius,
-                    camera->useCapsuleCollision ? "capsule" : "sphere");
+                PN_CORE_INFO("[CameraController] Pos({:.2f}, {:.2f}, {:.2f}) -> Proposed({:.2f}, {:.2f}, {:.2f}) radius={:.2f}",
+                    originalPos.x, originalPos.y, originalPos.z,
+                    proposedPos.x, proposedPos.y, proposedPos.z,
+                    camera->collisionRadius);
             }
             
-            camera->pos = m_collisionSystem->resolveCollision(
+            glm::vec3 resolvedPos = m_collisionSystem->resolveCollision(
                 proposedPos,
                 originalPos,
                 camera->up,
@@ -398,6 +397,15 @@ namespace PAIN {
                 camera->collisionOffset,
                 camera->useCapsuleCollision
             );
+            
+            // DEBUG: Log position change after collision
+            if (glm::length(resolvedPos - proposedPos) > 0.001f && collisionCheckCount % 60 == 0) {
+                PN_CORE_WARN("[CameraController] Collision resolved: Proposed({:.2f}, {:.2f}, {:.2f}) -> Final({:.2f}, {:.2f}, {:.2f})",
+                    proposedPos.x, proposedPos.y, proposedPos.z,
+                    resolvedPos.x, resolvedPos.y, resolvedPos.z);
+            }
+            
+            camera->pos = resolvedPos;
         } else {
             if (hasMovement) {
                 // DEBUG: Log why collision was skipped

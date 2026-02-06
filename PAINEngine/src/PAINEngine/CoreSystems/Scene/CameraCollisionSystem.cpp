@@ -48,7 +48,20 @@ namespace PAIN {
             
             glm::vec3 normal;
             float depth;
-            return performCollisionQuery(position, up, radius, height, useCapsule, normal, depth);
+            bool collides = performCollisionQuery(position, up, radius, height, useCapsule, normal, depth);
+            
+            // DEBUG: Log when no collision detected
+            static int noHitCount = 0;
+            if (!collides) {
+                noHitCount++;
+                if (noHitCount % 120 == 0) { // Every ~2 seconds
+                    JPH::PhysicsSystem* physics = static_cast<JPH::PhysicsSystem*>(m_physicsSystem);
+                    uint32_t bodyCount = physics->GetNumBodies();
+                    PN_CORE_INFO("[CameraCollision] No collision detected. Physics bodies in world: {}", bodyCount);
+                }
+            }
+            
+            return collides;
         }
 
         glm::vec3 CameraCollisionSystem::resolveCollision(const glm::vec3& proposedPos,
@@ -99,29 +112,42 @@ namespace PAIN {
             }
             
             // Collision detected - calculate slide vector
-            PN_CORE_INFO("[CameraCollision] Collision at proposed pos (depth: {:.3f}), attempting to slide...", depth);
+            // Ensure depth is positive - negative depth means we're within separation distance but not overlapping
+            float penetrationDepth = glm::max(depth, 0.0f);
             
-            // Ensure normal points against movement direction (out from surface)
-            float normalDotMovement = glm::dot(normal, movementDir);
-            if (normalDotMovement < 0.0f) {
-                // Normal points with movement, flip it
-                normal = -normal;
-                normalDotMovement = -normalDotMovement;
+            PN_CORE_INFO("[CameraCollision] Collision at proposed pos (raw depth: {:.3f}, penetration: {:.3f}), attempting to slide...", 
+                depth, penetrationDepth);
+            
+            // The normal from Jolt points from the collided body toward our camera shape
+            // This is the direction we need to move to resolve the collision
+            // No need to flip - Jolt's mPenetrationAxis already points from shape1 (world) to shape2 (camera)
+            
+            // Calculate how much we need to push back
+            float pushBackDist = penetrationDepth + offset;
+            
+            // First try: Push back from proposed position along normal
+            glm::vec3 pushedBackPos = proposedPos + normal * pushBackDist;
+            
+            glm::vec3 pushNormal;
+            float pushDepth;
+            if (!performCollisionQuery(pushedBackPos, up, radius, height, useCapsule, pushNormal, pushDepth)) {
+                PN_CORE_INFO("[CameraCollision] Push back successful! Moved by {:.3f}", pushBackDist);
+                return pushedBackPos;
             }
             
-            // Project movement onto collision normal plane
-            if (normalDotMovement > 0.0001f) {
-                // Moving into surface, need to slide
+            // Second try: Project movement onto collision normal plane (sliding)
+            float normalDotMovement = glm::dot(normal, movementDir);
+            
+            // Only slide if we're actually moving toward the surface
+            if (normalDotMovement > 0.0f) {
                 glm::vec3 slideDir = movementDir - normal * normalDotMovement;
                 float slideDirLen = glm::length(slideDir);
                 
                 if (slideDirLen > 0.0001f) {
                     slideDir = slideDir / slideDirLen;
-                    // Reduce slide distance slightly to avoid sticking
-                    float slideDist = movementDist * slideDirLen * 0.95f;
-                    glm::vec3 slidePos = currentPos + slideDir * slideDist;
+                    // Use full movement distance but push out by normal first
+                    glm::vec3 slidePos = currentPos + slideDir * movementDist + normal * (offset + 0.05f);
                     
-                    // Check if slide position is clear
                     glm::vec3 slideNormal;
                     float slideDepth;
                     if (!performCollisionQuery(slidePos, up, radius, height, useCapsule, slideNormal, slideDepth)) {
@@ -131,28 +157,48 @@ namespace PAIN {
                 }
             }
             
-            // Try intermediate positions along the path with offset
-            PN_CORE_INFO("[CameraCollision] Slide failed, trying intermediate positions...");
-            const int steps = 8;
-            for (int i = steps - 1; i >= 0; --i) {
-                float t = static_cast<float>(i) / static_cast<float>(steps);
+            // Third try: Binary search for valid position along movement path
+            PN_CORE_INFO("[CameraCollision] Slide failed, trying binary search...");
+            float tMin = 0.0f;
+            float tMax = 1.0f;
+            glm::vec3 bestPos = currentPos;
+            
+            for (int i = 0; i < 6; ++i) { // 6 iterations = ~1.5% precision
+                float t = (tMin + tMax) * 0.5f;
                 glm::vec3 testPos = currentPos + movementDir * (movementDist * t);
                 
-                // Push out by normal to avoid collision
-                testPos += normal * (offset + 0.01f);
+                // Always push out slightly by normal
+                testPos += normal * offset;
                 
                 glm::vec3 testNormal;
                 float testDepth;
-                if (!performCollisionQuery(testPos, up, radius, height, useCapsule, testNormal, testDepth)) {
-                    PN_CORE_INFO("[CameraCollision] Found valid position at step {}/{} (t={:.2f})", i, steps, t);
-                    return testPos;
+                if (performCollisionQuery(testPos, up, radius, height, useCapsule, testNormal, testDepth)) {
+                    // Collision, reduce max
+                    tMax = t;
+                } else {
+                    // No collision, can move here, increase min
+                    tMin = t;
+                    bestPos = testPos;
                 }
             }
             
-            // All positions blocked, stay at current position but push out if inside geometry
+            if (tMin > 0.01f) {
+                PN_CORE_INFO("[CameraCollision] Binary search found valid position at t={:.2f}", tMin);
+                return bestPos;
+            }
+            
+            // All positions blocked, stay at current position
             PN_CORE_WARN("[CameraCollision] All positions blocked! Staying at current position.");
-            if (performCollisionQuery(currentPos, up, radius, height, useCapsule, normal, depth)) {
-                return currentPos + normal * (depth + offset);
+            
+            // If currently in collision, push out
+            glm::vec3 currentNormal;
+            float currentDepth;
+            if (performCollisionQuery(currentPos, up, radius, height, useCapsule, currentNormal, currentDepth)) {
+                float currentPenetration = glm::max(currentDepth, 0.0f);
+                if (currentPenetration > 0.0f) {
+                    PN_CORE_WARN("[CameraCollision] Pushing out of geometry by {:.3f}", currentPenetration + offset);
+                    return currentPos + currentNormal * (currentPenetration + offset);
+                }
             }
             
             return currentPos;
@@ -204,35 +250,54 @@ namespace PAIN {
             static int queryCount = 0;
             queryCount++;
             if (queryCount % 60 == 0) { // Log every 60 queries (about once per second at 60fps)
-                PN_CORE_INFO("[CameraCollision] Query #{} at pos({:.2f}, {:.2f}, {:.2f}) radius={:.2f}", 
-                    queryCount, position.x, position.y, position.z, radius);
+                PN_CORE_INFO("[CameraCollision] Query #{} at pos({:.2f}, {:.2f}, {:.2f}) radius={:.2f} useCapsule={}", 
+                    queryCount, position.x, position.y, position.z, radius, useCapsule);
             }
             
-            // Create collision shape settings
+            // Create collision shape using proper Jolt API
             JPH::Ref<JPH::Shape> shape;
-            JPH::Vec3 shapeOffset(0, 0, 0);
             
             if (useCapsule) {
                 // Capsule: half height of the cylinder part (excluding hemispheres)
                 float halfHeight = (height - 2.0f * radius) * 0.5f;
                 if (halfHeight < 0.0f) halfHeight = 0.0f;
-                shape = new JPH::CapsuleShape(halfHeight, radius);
-                // Position capsule so its center is at the camera position
-                // No offset needed since we want camera at center of capsule
-                shapeOffset = JPH::Vec3(0, 0, 0);
+                
+                JPH::CapsuleShapeSettings capsuleSettings(halfHeight, radius);
+                JPH::ShapeSettings::ShapeResult result = capsuleSettings.Create();
+                if (result.IsValid()) {
+                    shape = result.Get();
+                } else {
+                    PN_CORE_ERROR("[CameraCollision] Failed to create capsule shape!");
+                    return false;
+                }
             } else {
                 // Sphere - camera is at center
-                shape = new JPH::SphereShape(radius);
+                JPH::SphereShapeSettings sphereSettings(radius);
+                JPH::ShapeSettings::ShapeResult result = sphereSettings.Create();
+                if (result.IsValid()) {
+                    shape = result.Get();
+                } else {
+                    PN_CORE_ERROR("[CameraCollision] Failed to create sphere shape!");
+                    return false;
+                }
             }
             
-            // Create shape cast
-            JPH::Vec3 joltPos(position.x, position.y, position.z);
-            JPH::Quat joltRot = JPH::Quat::sIdentity();
+            if (!shape) {
+                PN_CORE_ERROR("[CameraCollision] Shape is null after creation!");
+                return false;
+            }
             
-            // Collision query settings - use tolerance for better detection
+            // Create transform for the shape at camera position
+            // Use RMat44 (real/double precision) to match Jolt's CollideShape API
+            JPH::RMat44 transform = JPH::RMat44::sTranslation(JPH::RVec3(position.x, position.y, position.z));
+            
+            // Collision query settings
             JPH::CollideShapeSettings settings;
-            settings.mMaxSeparationDistance = 0.01f; // Small tolerance for near-misses
+            // Set max separation distance to be slightly larger than 0 to catch near-misses
+            settings.mMaxSeparationDistance = radius * 0.1f; 
             settings.mBackFaceMode = JPH::EBackFaceMode::CollideWithBackFaces;
+            // Enable active edge detection for better normal calculation
+            settings.mActiveEdgeMode = JPH::EActiveEdgeMode::CollideOnlyWithActive;
             
             // Perform collision check
             class CollisionCollector : public JPH::CollideShapeCollector {
@@ -256,18 +321,44 @@ namespace PAIN {
             
             CollisionCollector collector;
             
-            // Query collision against all bodies
+            // Create layer filters to collide with NON_MOVING (static) and MOVING (dynamic) objects
+            // This matches the layer setup in your physics system
+            class CameraCollisionLayerFilter : public JPH::BroadPhaseLayerFilter {
+            public:
+                virtual bool ShouldCollide(JPH::BroadPhaseLayer inLayer) const override {
+                    // Collide with NON_MOVING, MOVING, DEBRIS, and SENSOR broadphase layers
+                    return true; // Allow all broadphase layers for camera collision
+                }
+            };
+            
+            class CameraObjectLayerFilter : public JPH::ObjectLayerFilter {
+            public:
+                virtual bool ShouldCollide(JPH::ObjectLayer inLayer) const override {
+                    // Collide with all object layers except UNUSED ones
+                    // Layer::NON_MOVING = 4, Layer::MOVING = 5, Layer::DEBRIS = 6, Layer::SENSOR = 7
+                    return inLayer >= 4 && inLayer <= 7;
+                }
+            };
+            
+            CameraCollisionLayerFilter bpFilter;
+            CameraObjectLayerFilter objFilter;
+            
+            // Query collision against all bodies with proper layer filters
+            // Pass references (not pointers) to the filters
+            // Use RVec3 for base offset to match transform precision
             physics->GetNarrowPhaseQuery().CollideShape(
                 shape,
-                JPH::Vec3::sReplicate(1.0f), // scale
-                JPH::RMat44::sTranslation(joltPos + shapeOffset),
+                JPH::Vec3::sReplicate(1.0f), // scale - uniform scaling
+                transform,
                 settings,
-                joltPos + shapeOffset, // base offset
-                collector
+                JPH::RVec3(0, 0, 0), // base offset - centered at camera position
+                collector,
+                bpFilter, // broad phase layer filter (reference)
+                objFilter // object layer filter (reference)
             );
             
             if (collector.hasCollision) {
-                // Ensure normal is normalized
+                // Ensure normal is normalized and points in correct direction
                 JPH::Vec3 n = collector.deepestNormal;
                 float len = n.Length();
                 if (len > 0.0001f) {
@@ -280,10 +371,24 @@ namespace PAIN {
                 outNormal = glm::vec3(n.GetX(), n.GetY(), n.GetZ());
                 outDepth = collector.deepestDepth;
                 
-                // DEBUG: Log collision detection
-                PN_CORE_WARN("[CameraCollision] COLLISION DETECTED! Hits: {} Depth: {:.3f} Normal: ({:.2f}, {:.2f}, {:.2f})",
-                    collector.hitCount, outDepth, outNormal.x, outNormal.y, outNormal.z);
+                // DEBUG: Log collision detection with more detail
+                PN_CORE_WARN("[CameraCollision] COLLISION DETECTED! Hits: {} Depth: {:.3f} Normal: ({:.2f}, {:.2f}, {:.2f}) at Pos({:.2f}, {:.2f}, {:.2f})",
+                    collector.hitCount, outDepth, outNormal.x, outNormal.y, outNormal.z, position.x, position.y, position.z);
+                
+                // Additional debug: if depth is negative, we're within separation distance but not actually colliding
+                if (outDepth < 0.0f) {
+                    PN_CORE_INFO("[CameraCollision] Note: Negative depth ({:.3f}) means within separation distance but not overlapping", outDepth);
+                }
+                
                 return true;
+            }
+            
+            // DEBUG: Log occasional "no collision" at higher frequency for debugging
+            static int noCollisionCount = 0;
+            noCollisionCount++;
+            if (noCollisionCount % 300 == 0) { // Every 5 seconds at 60fps
+                PN_CORE_INFO("[CameraCollision] No collision at Pos({:.2f}, {:.2f}, {:.2f}) Radius={:.2f}",
+                    position.x, position.y, position.z, radius);
             }
             
             return false;
