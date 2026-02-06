@@ -5,6 +5,7 @@
 #include "ECS/Components/cTransform.h"
 #include "ECS/Components/cAudioSource.h"
 #include "ECS/Components/cEntity.h"
+#include <unordered_set>
 
 namespace PAIN {
     namespace Audio {
@@ -177,9 +178,9 @@ namespace PAIN {
                     }
                 }
 
-                // Handle Global_BGM entity with multi-track audio
-                if (isGlobalBGM && !audioSrc.audio_tracks.empty()) {
-                    // Get current scene name for tracking
+                // Handle Global_BGM entity - per-track comparison logic
+                if (isGlobalBGM) {
+                    // Get current scene name for logging
                     std::string currentSceneName;
                     if (scene) {
                         auto guid = scene->getCurrScnID();
@@ -191,57 +192,67 @@ namespace PAIN {
                         }
                     }
                     
-                    // Check if these tracks match what's already playing globally
-                    bool tracksMatch = (s_globalTracks.size() == audioSrc.audio_tracks.size());
-                    if (tracksMatch) {
-                        for (size_t i = 0; i < audioSrc.audio_tracks.size() && tracksMatch; ++i) {
-                            if (s_globalTracks[i].assetGuid != audioSrc.audio_tracks[i]) {
-                                tracksMatch = false;
+                    bool hasNewTracks = !audioSrc.audio_tracks.empty();
+                    bool hasExistingTracks = !s_globalTracks.empty() && s_globalAudioInitialized;
+                    
+                    // ========== CASE 1: No new tracks specified ==========
+                    // Keep existing tracks playing (muted state continues)
+                    if (!hasNewTracks) {
+                        if (hasExistingTracks) {
+                            // Sync entity to existing tracks (they stay muted, Lua will fade in if needed)
+                            audioSrc.track_channel_ids.clear();
+                            for (const auto& track : s_globalTracks) {
+                                audioSrc.track_channel_ids.push_back(track.channelId);
+                            }
+                            audioSrc.hasStarted = true;
+                            audioSrc.state = AudioState::Playing;
+                            PN_CORE_INFO("[AudioSystem] Global_BGM in '{}' has no tracks - keeping {} existing tracks (muted)", 
+                                currentSceneName, s_globalTracks.size());
+                        } else {
+                            PN_CORE_INFO("[AudioSystem] Global_BGM in '{}' has no tracks and no existing tracks", currentSceneName);
+                        }
+                        continue; // Skip normal processing
+                    }
+                    
+                    // ========== CASE 2: New scene has tracks - per-track comparison ==========
+                    // Build set of new track GUIDs for quick lookup
+                    std::unordered_set<Assets::GUID> newTrackSet;
+                    for (const auto& guid : audioSrc.audio_tracks) {
+                        newTrackSet.insert(guid);
+                    }
+                    
+                    // Process existing tracks: keep SAME, remove OLD
+                    std::vector<GlobalAudioTrack> tracksToKeep;
+                    std::unordered_set<Assets::GUID> keptTrackGuids;
+                    
+                    for (auto& existingTrack : s_globalTracks) {
+                        if (newTrackSet.count(existingTrack.assetGuid) > 0) {
+                            // SAME track - check if channel is still valid
+                            if (existingTrack.channelId.isValid() && 
+                                audioService->isChannelValid(existingTrack.channelId)) {
+                                // Keep this track (it will continue from current position)
+                                tracksToKeep.push_back(existingTrack);
+                                keptTrackGuids.insert(existingTrack.assetGuid);
+                                PN_CORE_INFO("[AudioSystem] SAME track kept: channel {}", existingTrack.channelId.value);
+                            } else {
+                                // Channel invalid - will need to restart this track
+                                PN_CORE_WARN("[AudioSystem] SAME track but channel {} invalid - will restart", 
+                                    existingTrack.channelId.value);
+                            }
+                        } else {
+                            // OLD track - not in new scene, stop it
+                            if (existingTrack.channelId.isValid()) {
+                                audioService->stop(existingTrack.channelId);
+                                PN_CORE_INFO("[AudioSystem] OLD track stopped: channel {}", existingTrack.channelId.value);
                             }
                         }
                     }
                     
-                    // Check if we changed scenes - even if same tracks, might need to reset state
-                    bool sceneChanged = (!currentSceneName.empty() && currentSceneName != s_lastSceneWithGlobalBGM);
-                    
-                    if (tracksMatch && s_globalAudioInitialized && !sceneChanged) {
-                        // Same tracks already playing in same scene, sync entity's channel IDs with static storage
-                        audioSrc.track_channel_ids.clear();
-                        for (const auto& track : s_globalTracks) {
-                            audioSrc.track_channel_ids.push_back(track.channelId);
-                        }
-                        audioSrc.hasStarted = true;
-                        audioSrc.state = AudioState::Playing;
-                        continue; // Audio already playing, nothing to start
-                    }
-                    
-                    // Log what's happening
-                    if (sceneChanged) {
-                        PN_CORE_INFO("[AudioSystem] Scene changed from '{}' to '{}' - checking global audio", 
-                            s_lastSceneWithGlobalBGM, currentSceneName);
-                    }
-                    if (!tracksMatch) {
-                        PN_CORE_INFO("[AudioSystem] Track mismatch detected - reinitializing global audio");
-                    }
-                    
-                    // New or different tracks - start them
-                    if (!audioSrc.hasStarted || !tracksMatch) {
-                        PN_CORE_INFO("[AudioSystem] Starting Global BGM with {} tracks (persistent)", audioSrc.audio_tracks.size());
-                        
-                        // Clear previous global tracks (but don't stop if crossfading)
-                        // For Option B crossfade, we keep old playing until new ones are ready
-                        std::vector<GlobalAudioTrack> oldTracks = s_globalTracks;
-                        s_globalTracks.clear();
-                        audioSrc.track_channel_ids.clear();
-                        
-                        // Ensure track_volumes has correct size
-                        while (audioSrc.track_volumes.size() < audioSrc.audio_tracks.size()) {
-                            audioSrc.track_volumes.push_back(-80.0f);
-                        }
-                        
-                        // Start all new tracks at muted volume
-                        for (size_t i = 0; i < audioSrc.audio_tracks.size(); ++i) {
-                            auto audio_opt = asset_service->getAsset<Sound>(audioSrc.audio_tracks[i]);
+                    // Start NEW tracks (in new scene but not in existing, or channel was invalid)
+                    for (const auto& newGuid : audioSrc.audio_tracks) {
+                        if (keptTrackGuids.count(newGuid) == 0) {
+                            // This is a NEW track - start it
+                            auto audio_opt = asset_service->getAsset<Sound>(newGuid);
                             if (audio_opt.has_value()) {
                                 auto channelOpt = audioService->play(
                                     audio_opt.value(),
@@ -253,7 +264,7 @@ namespace PAIN {
                                 );
                                 
                                 GlobalAudioTrack newTrack;
-                                newTrack.assetGuid = audioSrc.audio_tracks[i];
+                                newTrack.assetGuid = newGuid;
                                 newTrack.currentVolume = -80.0f;
                                 newTrack.targetVolume = -80.0f;
                                 newTrack.fadeSpeed = 0.0f;
@@ -261,39 +272,57 @@ namespace PAIN {
                                 
                                 if (channelOpt.has_value()) {
                                     newTrack.channelId = channelOpt.value();
-                                    audioSrc.track_channel_ids.push_back(channelOpt.value());
-                                    PN_CORE_INFO("[AudioSystem] Global BGM track {} started on channel {}", 
-                                        i, channelOpt.value().value);
+                                    PN_CORE_INFO("[AudioSystem] NEW track started: channel {}", channelOpt.value().value);
                                 } else {
                                     newTrack.channelId = { -1 };
-                                    audioSrc.track_channel_ids.push_back(AudioChannelId{-1});
-                                    PN_CORE_WARN("[AudioSystem] Failed to start Global BGM track {}", i);
+                                    PN_CORE_WARN("[AudioSystem] Failed to start NEW track");
                                 }
                                 
-                                s_globalTracks.push_back(newTrack);
+                                tracksToKeep.push_back(newTrack);
                             } else {
                                 GlobalAudioTrack emptyTrack;
+                                emptyTrack.assetGuid = newGuid;
                                 emptyTrack.channelId = { -1 };
                                 emptyTrack.isActive = false;
-                                s_globalTracks.push_back(emptyTrack);
-                                audioSrc.track_channel_ids.push_back(AudioChannelId{-1});
-                                PN_CORE_WARN("[AudioSystem] Global BGM track {} asset not found", i);
+                                tracksToKeep.push_back(emptyTrack);
+                                PN_CORE_WARN("[AudioSystem] NEW track asset not found");
                             }
                         }
-                        
-                        // Stop old tracks now that new ones are playing (Option B crossfade)
-                        for (auto& old : oldTracks) {
-                            if (old.channelId.isValid()) {
-                                audioService->stop(old.channelId);
-                            }
-                        }
-                        
-                        audioSrc.hasStarted = true;
-                        audioSrc.state = AudioState::Playing;
-                        s_globalAudioInitialized = true;
-                        s_lastSceneWithGlobalBGM = currentSceneName;  // Track which scene owns these tracks
-                        PN_CORE_INFO("[AudioSystem] Global BGM initialized for scene: {}", currentSceneName);
                     }
+                    
+                    // Rebuild s_globalTracks in the ORDER of audioSrc.audio_tracks
+                    // This ensures track indices match what Lua expects
+                    s_globalTracks.clear();
+                    audioSrc.track_channel_ids.clear();
+                    for (const auto& newGuid : audioSrc.audio_tracks) {
+                        // Find the track with this GUID in tracksToKeep
+                        bool found = false;
+                        for (const auto& track : tracksToKeep) {
+                            if (track.assetGuid == newGuid) {
+                                s_globalTracks.push_back(track);
+                                audioSrc.track_channel_ids.push_back(track.channelId);
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            // Should not happen, but handle gracefully
+                            GlobalAudioTrack emptyTrack;
+                            emptyTrack.assetGuid = newGuid;
+                            emptyTrack.channelId = { -1 };
+                            emptyTrack.isActive = false;
+                            s_globalTracks.push_back(emptyTrack);
+                            audioSrc.track_channel_ids.push_back(AudioChannelId{-1});
+                        }
+                    }
+                    
+                    audioSrc.hasStarted = true;
+                    audioSrc.state = AudioState::Playing;
+                    s_globalAudioInitialized = true;
+                    s_lastSceneWithGlobalBGM = currentSceneName;
+                    
+                    PN_CORE_INFO("[AudioSystem] Global BGM processed for '{}': {} tracks total", 
+                        currentSceneName, s_globalTracks.size());
                     continue; // Skip normal processing for Global_BGM
                 }
 

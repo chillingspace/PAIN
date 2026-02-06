@@ -36,6 +36,28 @@
             {
                 "Entity": {
                     "Components": {
+                        "AudioSource": {
+                            "audio_tracks": [
+                                "e87054db-0ef8-f34b-96a0-e2fede943a49"
+                            ],
+                            "group_name": "",
+                            "is3D": true,
+                            "looping": false,
+                            "maxDistance": 50.0,
+                            "minDistance": 1.0,
+                            "pitchDb": 0.0,
+                            "playOnStart": false,
+                            "pos": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "selected_audio": "00000000-0000-0000-0000-000000000000",
+                            "track_volumes": [
+                                {}
+                            ],
+                            "volumeDb": 0.0
+                        },
                         "GUID": {
                             "guid": "e89dd2d6-d65e-8144-b1a7-40144df13802"
                         },

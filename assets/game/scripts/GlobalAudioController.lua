@@ -85,10 +85,11 @@ local function applySceneVolumes()
         if trackCount >= 2 then globalBGMFade(1, CONFIG.ambientVolume, CONFIG.fadeDuration) end
         
     elseif currentScene == "howtoplay" or currentScene == "howtoplay2" then
-        -- howtoplay scenes don't have their own Global_BGM tracks, 
-        -- they just keep playing whatever was already initialized
-        -- Don't fade anything - let mainmenu tracks continue
-        log("[GlobalAudio] howtoplay scene - keeping existing tracks")
+        -- howtoplay has only MainBGM (1 track) - Ambient was stopped by C++ (OLD track)
+        -- Just fade in track 0 (MainBGM, which continues from mainmenu uninterrupted)
+        log("[GlobalAudio] howtoplay scene - fading track 0 (MainBGM) back in")
+        local mainBGMVolume = linearToDb(MAINMENU_BGM_VOLUME_SCALE)
+        if trackCount >= 1 then globalBGMFade(0, mainBGMVolume, CONFIG.fadeDuration) end
         
     elseif currentScene == "level1" or currentScene == "level" then
         -- Track 0: Level BGM, Track 1: Ambient, Track 2: Combat (muted initially)
@@ -184,11 +185,20 @@ _G.GlobalAudio.isInCombat = function() return inCombat end
 -- ==================== INITIALIZATION ====================
 -- Run immediately when script loads
 currentScene = detectCurrentScene()
+log("[GlobalAudio] Script loaded for scene: " .. tostring(currentScene))
 
--- Use registerUpdate to check once on first frame
+-- Wait a few frames before applying volumes
+-- This ensures C++ has processed the Global_BGM entity first
+local frameCount = 0
+local FRAMES_TO_WAIT = 3  -- Wait 3 frames for C++ to update tracks
+
 registerUpdate(function(dt)
     if not initialized then
-        initialized = true
-        applySceneVolumes()
+        frameCount = frameCount + 1
+        if frameCount >= FRAMES_TO_WAIT then
+            initialized = true
+            log("[GlobalAudio] Applying volumes after " .. tostring(frameCount) .. " frames")
+            applySceneVolumes()
+        end
     end
 end)
