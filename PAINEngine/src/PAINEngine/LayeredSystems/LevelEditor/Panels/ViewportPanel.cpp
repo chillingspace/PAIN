@@ -1098,6 +1098,106 @@ namespace PAIN {
 					}
 
 					// ========================================
+					// === Camera Collision Visualization ===
+					// ========================================
+					if (camera->showCollisionGizmo && camera->collisionEnabled) {
+						// Project camera position to screen space for visualization
+						glm::mat4 viewProj = camera->projection() * camera->view();
+						
+						// Draw wireframe sphere/capsule around camera
+						glm::vec3 camPos = camera->pos;
+						float radius = camera->collisionRadius;
+						
+						// Simple visualization: draw circles in different planes
+						ImDrawList* drawList = ImGui::GetWindowDrawList();
+						ImU32 color = IM_COL32(0, 255, 0, 200); // Green for collision
+						
+						// Project 3D points to 2D screen space
+						auto projectToScreen = [&](const glm::vec3& worldPos) -> ImVec2 {
+							glm::vec4 clip = viewProj * glm::vec4(worldPos, 1.0f);
+							if (clip.w > 0.001f) {
+								glm::vec3 ndc = glm::vec3(clip) / clip.w;
+								return ImVec2(
+									viewportPos.x + (ndc.x * 0.5f + 0.5f) * size.x,
+									viewportPos.y + (1.0f - (ndc.y * 0.5f + 0.5f)) * size.y
+								);
+							}
+							return ImVec2(-1000, -1000); // Off-screen
+						};
+						
+						// Draw circle in XY plane
+						const int segments = 32;
+						for (int i = 0; i < segments; ++i) {
+							float angle1 = (float(i) / segments) * 2.0f * 3.14159f;
+							float angle2 = (float(i + 1) / segments) * 2.0f * 3.14159f;
+							
+							glm::vec3 p1 = camPos + glm::vec3(cos(angle1) * radius, sin(angle1) * radius, 0);
+							glm::vec3 p2 = camPos + glm::vec3(cos(angle2) * radius, sin(angle2) * radius, 0);
+							
+							ImVec2 screen1 = projectToScreen(p1);
+							ImVec2 screen2 = projectToScreen(p2);
+							
+							if (screen1.x > -100 && screen2.x > -100) {
+								drawList->AddLine(screen1, screen2, color, 2.0f);
+							}
+						}
+						
+						// Draw circle in XZ plane
+						for (int i = 0; i < segments; ++i) {
+							float angle1 = (float(i) / segments) * 2.0f * 3.14159f;
+							float angle2 = (float(i + 1) / segments) * 2.0f * 3.14159f;
+							
+							glm::vec3 p1 = camPos + glm::vec3(cos(angle1) * radius, 0, sin(angle1) * radius);
+							glm::vec3 p2 = camPos + glm::vec3(cos(angle2) * radius, 0, sin(angle2) * radius);
+							
+							ImVec2 screen1 = projectToScreen(p1);
+							ImVec2 screen2 = projectToScreen(p2);
+							
+							if (screen1.x > -100 && screen2.x > -100) {
+								drawList->AddLine(screen1, screen2, color, 2.0f);
+							}
+						}
+						
+						// Draw circle in YZ plane
+						for (int i = 0; i < segments; ++i) {
+							float angle1 = (float(i) / segments) * 2.0f * 3.14159f;
+							float angle2 = (float(i + 1) / segments) * 2.0f * 3.14159f;
+							
+							glm::vec3 p1 = camPos + glm::vec3(0, cos(angle1) * radius, sin(angle1) * radius);
+							glm::vec3 p2 = camPos + glm::vec3(0, cos(angle2) * radius, sin(angle2) * radius);
+							
+							ImVec2 screen1 = projectToScreen(p1);
+							ImVec2 screen2 = projectToScreen(p2);
+							
+							if (screen1.x > -100 && screen2.x > -100) {
+								drawList->AddLine(screen1, screen2, color, 2.0f);
+							}
+						}
+						
+						// For capsule, draw lines showing height
+						if (camera->useCapsuleCollision) {
+							float halfHeight = (camera->capsuleHeight - 2.0f * radius) * 0.5f;
+							if (halfHeight > 0) {
+								glm::vec3 top = camPos + glm::vec3(0, halfHeight, 0);
+								glm::vec3 bottom = camPos - glm::vec3(0, halfHeight, 0);
+								
+								// Draw vertical lines to show capsule extent
+								for (int i = 0; i < 8; ++i) {
+									float angle = (float(i) / 8) * 2.0f * 3.14159f;
+									glm::vec3 offset(cos(angle) * radius, 0, sin(angle) * radius);
+									
+									ImVec2 screenTop = projectToScreen(top + offset);
+									ImVec2 screenBottom = projectToScreen(bottom + offset);
+									
+									if (screenTop.x > -100 && screenBottom.x > -100) {
+										drawList->AddLine(screenTop, screenBottom, color, 1.0f);
+									}
+								}
+							}
+						}
+					}
+
+					// ========================================
 					 // === Mouse Picking - AFTER GIZMO ===
 					 // ========================================
 

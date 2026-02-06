@@ -30,7 +30,7 @@ namespace PAIN {
 
         void CameraCollisionSystem::init(void* physicsSystem) {
             m_physicsSystem = physicsSystem;
-            m_initialized = (physicsSystem != nullptr);
+            m_initialized = (static_cast<JPH::PhysicsSystem*>(m_physicsSystem) != nullptr);
             
             if (m_initialized) {
                 PN_CORE_INFO("[CameraCollisionSystem] Initialized with Jolt Physics");
@@ -99,35 +99,51 @@ namespace PAIN {
             }
             
             // Collision detected - calculate slide vector
-            PN_CORE_INFO("[CameraCollision] Collision at proposed pos, attempting to slide...");
+            PN_CORE_INFO("[CameraCollision] Collision at proposed pos (depth: {:.3f}), attempting to slide...", depth);
+            
+            // Ensure normal points against movement direction (out from surface)
+            float normalDotMovement = glm::dot(normal, movementDir);
+            if (normalDotMovement < 0.0f) {
+                // Normal points with movement, flip it
+                normal = -normal;
+                normalDotMovement = -normalDotMovement;
+            }
             
             // Project movement onto collision normal plane
-            float normalDotMovement = glm::dot(normal, movementDir);
-            if (normalDotMovement > 0.0f) {
+            if (normalDotMovement > 0.0001f) {
                 // Moving into surface, need to slide
                 glm::vec3 slideDir = movementDir - normal * normalDotMovement;
-                float slideDist = movementDist * glm::length(slideDir);
+                float slideDirLen = glm::length(slideDir);
                 
-                if (slideDist > 0.0001f) {
-                    slideDir = glm::normalize(slideDir);
+                if (slideDirLen > 0.0001f) {
+                    slideDir = slideDir / slideDirLen;
+                    // Reduce slide distance slightly to avoid sticking
+                    float slideDist = movementDist * slideDirLen * 0.95f;
                     glm::vec3 slidePos = currentPos + slideDir * slideDist;
                     
                     // Check if slide position is clear
-                    if (!performCollisionQuery(slidePos, up, radius, height, useCapsule, normal, depth)) {
+                    glm::vec3 slideNormal;
+                    float slideDepth;
+                    if (!performCollisionQuery(slidePos, up, radius, height, useCapsule, slideNormal, slideDepth)) {
                         PN_CORE_INFO("[CameraCollision] Sliding successful!");
                         return slidePos;
                     }
                 }
             }
             
-            // Try intermediate positions along the path
+            // Try intermediate positions along the path with offset
             PN_CORE_INFO("[CameraCollision] Slide failed, trying intermediate positions...");
-            const int steps = 5;
+            const int steps = 8;
             for (int i = steps - 1; i >= 0; --i) {
                 float t = static_cast<float>(i) / static_cast<float>(steps);
                 glm::vec3 testPos = currentPos + movementDir * (movementDist * t);
                 
-                if (!performCollisionQuery(testPos, up, radius, height, useCapsule, normal, depth)) {
+                // Push out by normal to avoid collision
+                testPos += normal * (offset + 0.01f);
+                
+                glm::vec3 testNormal;
+                float testDepth;
+                if (!performCollisionQuery(testPos, up, radius, height, useCapsule, testNormal, testDepth)) {
                     PN_CORE_INFO("[CameraCollision] Found valid position at step {}/{} (t={:.2f})", i, steps, t);
                     return testPos;
                 }
@@ -201,10 +217,11 @@ namespace PAIN {
                 float halfHeight = (height - 2.0f * radius) * 0.5f;
                 if (halfHeight < 0.0f) halfHeight = 0.0f;
                 shape = new JPH::CapsuleShape(halfHeight, radius);
-                // Offset so bottom of capsule is at position.y
-                shapeOffset = JPH::Vec3(0, height * 0.5f, 0);
+                // Position capsule so its center is at the camera position
+                // No offset needed since we want camera at center of capsule
+                shapeOffset = JPH::Vec3(0, 0, 0);
             } else {
-                // Sphere
+                // Sphere - camera is at center
                 shape = new JPH::SphereShape(radius);
             }
             
@@ -212,9 +229,9 @@ namespace PAIN {
             JPH::Vec3 joltPos(position.x, position.y, position.z);
             JPH::Quat joltRot = JPH::Quat::sIdentity();
             
-            // Collision query settings
+            // Collision query settings - use tolerance for better detection
             JPH::CollideShapeSettings settings;
-            settings.mMaxSeparationDistance = 0.0f;
+            settings.mMaxSeparationDistance = 0.01f; // Small tolerance for near-misses
             settings.mBackFaceMode = JPH::EBackFaceMode::CollideWithBackFaces;
             
             // Perform collision check
@@ -228,8 +245,10 @@ namespace PAIN {
                 void AddHit(const JPH::CollideShapeResult& result) override {
                     hasCollision = true;
                     hitCount++;
+                    // mPenetrationDepth is positive when shapes overlap
                     if (result.mPenetrationDepth > deepestDepth) {
                         deepestDepth = result.mPenetrationDepth;
+                        // mPenetrationAxis points from shape 2 to shape 1 (from world geometry to our shape)
                         deepestNormal = result.mPenetrationAxis;
                     }
                 }
@@ -248,9 +267,17 @@ namespace PAIN {
             );
             
             if (collector.hasCollision) {
-                outNormal = glm::vec3(collector.deepestNormal.GetX(), 
-                                     collector.deepestNormal.GetY(), 
-                                     collector.deepestNormal.GetZ());
+                // Ensure normal is normalized
+                JPH::Vec3 n = collector.deepestNormal;
+                float len = n.Length();
+                if (len > 0.0001f) {
+                    n = n / len;
+                } else {
+                    // Default normal pointing up if we can't determine direction
+                    n = JPH::Vec3(0, 1, 0);
+                }
+                
+                outNormal = glm::vec3(n.GetX(), n.GetY(), n.GetZ());
                 outDepth = collector.deepestDepth;
                 
                 // DEBUG: Log collision detection

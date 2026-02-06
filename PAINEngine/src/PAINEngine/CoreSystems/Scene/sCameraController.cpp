@@ -22,9 +22,17 @@ namespace PAIN {
         m_collisionSystem = std::make_unique<Scene::CameraCollisionSystem>();
         
         // Get physics system for collision queries
-        auto physicsSystem = services->get<Physics::System>();
+        auto physicsSystem = services->get<ECS::Controller>()->getSystem<Physics::System>();
         if (physicsSystem) {
-            m_collisionSystem->init(physicsSystem->GetPhysicsSystem());
+            void* physPtr = physicsSystem->GetPhysicsSystem();
+            if (physPtr) {
+                m_collisionSystem->init(physPtr);
+                PN_CORE_INFO("[CameraController] Camera collision system initialized successfully");
+            } else {
+                PN_CORE_ERROR("[CameraController] Physics system returned null pointer!");
+            }
+        } else {
+            PN_CORE_ERROR("[CameraController] Physics::System not available! Camera collision will not work.");
         }
     }
 
@@ -233,6 +241,8 @@ namespace PAIN {
         camera = m_Scene->GetActiveCamera();
         if (!camera) return;
 
+        //Boolean to 
+        bool hasMovement = false;
 
 
         // -------- GAME MODE --------
@@ -280,6 +290,7 @@ namespace PAIN {
             float speed = camera->speed * m_moveScale;
             camera->pos += (-m_cachedMoveY) * fwd * speed * dt;
             camera->pos += (m_cachedMoveX)*right * speed * dt;
+            hasMovement = true;
         }
 
         float speedMultiplier = 1.0f;
@@ -295,7 +306,6 @@ namespace PAIN {
         // Store original position for collision resolution
         glm::vec3 originalPos = camera->pos;
         glm::vec3 proposedPos = originalPos;
-        bool hasMovement = false;
         
         switch (move_mode) {
         case FREE_FLY:
@@ -348,7 +358,24 @@ namespace PAIN {
             }
             break;
         }
-        
+
+        if (mouseButtonDown && xOffset != 0.f) {
+            // transformation matrix(rotate)
+            const glm::mat4 rot = glm::rotate(glm::mat4(1.f), glm::radians(-camera->sensitivity * xOffset), camera->up);
+            camera->forward = glm::normalize(glm::vec3(rot * glm::vec4(camera->forward, 0.f)));
+            hasMovement = true;
+        }
+
+        if (mouseButtonDown && yOffset != 0.f) {
+            // transformation matrix(rotate)
+            const glm::vec3 right = -glm::normalize(glm::cross(camera->forward, camera->up));
+            const glm::mat4 rot = glm::rotate(glm::mat4(1.f), glm::radians(-camera->sensitivity * yOffset), right);
+            camera->forward = glm::normalize(glm::vec3(rot * glm::vec4(camera->forward, 0.f)));
+            hasMovement = true;
+        }
+        xOffset = 0.f;
+        yOffset = 0.f;
+
         // Apply collision detection and resolution if there's movement
         if (hasMovement && camera->collisionEnabled && m_collisionSystem) {
             // DEBUG: Log collision check
@@ -383,21 +410,6 @@ namespace PAIN {
             }
             camera->pos = proposedPos;
         }
-
-        if (mouseButtonDown && xOffset != 0.f) {
-            // transformation matrix(rotate)
-            const glm::mat4 rot = glm::rotate(glm::mat4(1.f), glm::radians(-camera->sensitivity * xOffset), camera->up);
-            camera->forward = glm::normalize(glm::vec3(rot * glm::vec4(camera->forward, 0.f)));
-        }
-
-        if (mouseButtonDown && yOffset != 0.f) {
-            // transformation matrix(rotate)
-            const glm::vec3 right = -glm::normalize(glm::cross(camera->forward, camera->up));
-            const glm::mat4 rot = glm::rotate(glm::mat4(1.f), glm::radians(-camera->sensitivity * yOffset), right);
-            camera->forward = glm::normalize(glm::vec3(rot * glm::vec4(camera->forward, 0.f)));
-        }
-        xOffset = 0.f;
-        yOffset = 0.f;
     }
 
     void sCameraController::onEvent(Event::Event& e) {
@@ -631,6 +643,19 @@ namespace PAIN {
                 PN_CORE_INFO("Toggled DEBUG_DRAW_UI_HITBOXES: {}", gs.DEBUG_DRAW_UI_HITBOXES);
                 break;
 
+            case PAIN_KEY_F12:
+                if (camera) {
+                    camera->showCollisionGizmo = !camera->showCollisionGizmo;
+                    PN_CORE_INFO("Toggled Camera Collision Gizmo: {}", camera->showCollisionGizmo);
+                }
+                break;
+
+            case PAIN_KEY_C:
+                if (camera && LCTRL_KEYDOWN) {
+                    camera->collisionEnabled = !camera->collisionEnabled;
+                    PN_CORE_INFO("Toggled Camera Collision: {}", camera->collisionEnabled);
+                }
+                break;
 
             //case PAIN_KEY_G:
             //    gs.gamma_correction = !gs.gamma_correction;

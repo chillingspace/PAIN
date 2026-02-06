@@ -1239,10 +1239,27 @@ namespace PAIN {
 					curr_cam->far_plane = far_plane;
 					curr_cam->width_ratio = width_ratio;
 					curr_cam->height_ratio = height_ratio;
+					// Copy collision settings from editor camera
+					if (editor_camera) {
+						curr_cam->collisionEnabled = editor_camera->collisionEnabled;
+						curr_cam->collisionRadius = editor_camera->collisionRadius;
+						curr_cam->collisionOffset = editor_camera->collisionOffset;
+						curr_cam->capsuleHeight = editor_camera->capsuleHeight;
+						curr_cam->useCapsuleCollision = editor_camera->useCapsuleCollision;
+					}
 
 				}
 				else {
-					game_cameras.insert(std::pair<std::string, std::unique_ptr<Camera>>(entity_name, std::make_unique<Camera>(cam_pos, forward, up, GraphicsSettings::get().fov, near_plane, far_plane, width_ratio, height_ratio)));
+					auto new_cam = std::make_unique<Camera>(cam_pos, forward, up, GraphicsSettings::get().fov, near_plane, far_plane, width_ratio, height_ratio);
+					// Copy collision settings from editor camera
+					if (editor_camera) {
+						new_cam->collisionEnabled = editor_camera->collisionEnabled;
+						new_cam->collisionRadius = editor_camera->collisionRadius;
+						new_cam->collisionOffset = editor_camera->collisionOffset;
+						new_cam->capsuleHeight = editor_camera->capsuleHeight;
+						new_cam->useCapsuleCollision = editor_camera->useCapsuleCollision;
+					}
+					game_cameras.insert(std::pair<std::string, std::unique_ptr<Camera>>(entity_name, std::move(new_cam)));
 
 				}
 			}
