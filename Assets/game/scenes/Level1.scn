@@ -1,12 +1,12 @@
 {
     "assets": [
+        "443d2baf-24fb-dc42-a6f9-403310b06194",
         "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
         "8fb18e50-fe3a-dd4c-889f-62f426ff9d18",
         "4ab9b8a8-4bdc-e046-83a2-24863013c030",
         "8ec89d31-ef7e-9247-834a-8782dd0c614d",
         "2d87afdc-663f-ed4a-bdce-4ac73c3b6db0",
         "f57adda3-64e1-a544-86a2-842c8976e7e0",
-        "443d2baf-24fb-dc42-a6f9-403310b06194",
         "d9a10e76-3db1-0c41-9368-c476a1845c40",
         "496c08af-d9df-cc45-898c-20cc692a2e08",
         "df7c04c2-94d4-5347-8dad-6527e853bf94",
@@ -1117,7 +1117,7 @@
                                     "siblingIndex": 0
                                 },
                                 "UIButton": {
-                                    "action": 32,
+                                    "action": 16,
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
@@ -1151,7 +1151,7 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 32,
+                            "action": 16,
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
