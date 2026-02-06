@@ -9978,6 +9978,20 @@
             {
                 "Entity": {
                     "Components": {
+                        "CustomHitbox2D": {
+                            "max_point": [
+                                50.0,
+                                50.0
+                            ],
+                            "min_point": [
+                                -50.0,
+                                -50.0
+                            ],
+                            "position_offset": [
+                                0.0,
+                                0.0
+                            ]
+                        },
                         "GUID": {
                             "guid": "234f63d2-9ce2-de4a-b2e9-b51df68fadf4"
                         },
@@ -10393,8 +10407,8 @@
                             "siblingIndex": 3
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -10786,8 +10800,8 @@
                             "siblingIndex": 1
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -10888,8 +10902,8 @@
                             "siblingIndex": 2
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -10990,8 +11004,8 @@
                             "siblingIndex": 3
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
