@@ -41,8 +41,8 @@
                                 "e87054db-0ef8-f34b-96a0-e2fede943a49"
                             ],
                             "group_name": "",
-                            "is3D": true,
-                            "looping": false,
+                            "is3D": false,
+                            "looping": true,
                             "maxDistance": 50.0,
                             "minDistance": 1.0,
                             "pitchDb": 0.0,
