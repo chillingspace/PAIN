@@ -1,5 +1,26 @@
 {
     "assets": [
+        "ea2431c4-c2c5-724e-a713-daf897030244",
+        "14c2b2ac-66d8-104e-98f3-96bbd5bc18b6",
+        "a8a9e677-4cd6-524b-b77b-0227fe39f7a2",
+        "cb4f12f2-ee24-f145-8c48-9cab6179e963",
+        "3688e05d-7434-b849-8904-1d7884ad053f",
+        "e3c50ccd-4dd5-024b-bde1-eb1f473cb339",
+        "ad95c15c-a360-f548-8f9e-f7cab095c869",
+        "4abba89c-2728-1a4b-bf13-c88751021af2",
+        "04a181ef-234c-2045-945f-0053f79a7033",
+        "256aaf03-37ee-654a-947b-dba5e889cb54",
+        "5aa8f938-deee-7048-9a6b-33482dd8252b",
+        "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+        "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
+        "91e02ba2-c6b8-184f-bd48-b59674946972",
+        "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
+        "30cd3b32-bce1-564e-8046-1204bbfee443",
+        "e01c794e-0add-d542-9860-03f63c3193ab",
+        "496c08af-d9df-cc45-898c-20cc692a2e08",
+        "d9a10e76-3db1-0c41-9368-c476a1845c40",
+        "e1eb1144-0c31-5e4a-8ca0-dbcf5c49dda2",
+        "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
         "443d2baf-24fb-dc42-a6f9-403310b06194",
         "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
         "8fb18e50-fe3a-dd4c-889f-62f426ff9d18",
@@ -7,8 +28,6 @@
         "8ec89d31-ef7e-9247-834a-8782dd0c614d",
         "2d87afdc-663f-ed4a-bdce-4ac73c3b6db0",
         "f57adda3-64e1-a544-86a2-842c8976e7e0",
-        "d9a10e76-3db1-0c41-9368-c476a1845c40",
-        "496c08af-d9df-cc45-898c-20cc692a2e08",
         "df7c04c2-94d4-5347-8dad-6527e853bf94",
         "15808cf2-db36-c04b-8954-48d10ebaf528",
         "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
@@ -45,8 +64,6 @@
         "a8977689-ded0-fa41-9efb-33354e83dec7",
         "dd9ec25f-57d2-bf41-be2d-95dd1f1eddcd",
         "9927db1c-9aff-be47-a5dc-3068b2c9f8f9",
-        "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
-        "91e02ba2-c6b8-184f-bd48-b59674946972",
         "d9eeea8a-2cf6-3849-8511-2e6c3be0f011",
         "df12f04f-34c5-644d-980a-c8251d57cd55",
         "0d290cee-b55d-2e45-907d-ae2c745f492f",
@@ -83,18 +100,11 @@
         "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
         "c79a09c6-ea1f-ca46-8d92-d5cf53337487",
         "4ac8b55a-c418-6b4b-9f91-518bf8df79f1",
-        "14c2b2ac-66d8-104e-98f3-96bbd5bc18b6",
-        "ea2431c4-c2c5-724e-a713-daf897030244",
         "d716543f-207b-5a47-9496-b5ccafe42b6b",
         "45a24c40-8fa2-c747-9653-4d55350bf379",
         "8500da5f-b5ff-4d4f-be3b-cbda036f39d2",
         "ca65c8fb-c79d-9c4e-b32c-2ce453f01543",
         "b8a2c974-f619-014b-9cb4-6143cbdf7c4b",
-        "4abba89c-2728-1a4b-bf13-c88751021af2",
-        "04a181ef-234c-2045-945f-0053f79a7033",
-        "256aaf03-37ee-654a-947b-dba5e889cb54",
-        "5aa8f938-deee-7048-9a6b-33482dd8252b",
-        "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
         "b3ec7aee-c5ff-af48-9aa1-f912f843a888",
         "c3be7e4a-501e-0744-ac10-55d1b5a38d86",
         "510e3ede-f637-c448-99e8-7dc200d60c8f",
@@ -103,11 +113,6 @@
         "0b9ad008-e8ad-144b-855d-115dd4683035",
         "b6f7c506-7c21-1847-a0b9-597479e83e13",
         "9d082b82-72a3-e149-a6bb-b0fa70c02de0",
-        "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
-        "30cd3b32-bce1-564e-8046-1204bbfee443",
-        "e01c794e-0add-d542-9860-03f63c3193ab",
-        "e1eb1144-0c31-5e4a-8ca0-dbcf5c49dda2",
-        "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
         "79269c4e-addb-ea41-85c6-57e984c24ff3",
         "a77749e3-6c15-7446-a792-5609dd96b391",
         "14377587-a8fe-2b47-9f46-dad6bdad2753",
@@ -121,11 +126,6 @@
         "c4f49888-b844-fb45-be89-dbc964b48c18",
         "1ec3ccd3-20b9-e646-8fc8-f33ee22ea4e4",
         "a4f0ef0e-e825-fd4c-a9c7-0ca0ace59222",
-        "e3c50ccd-4dd5-024b-bde1-eb1f473cb339",
-        "3688e05d-7434-b849-8904-1d7884ad053f",
-        "a8a9e677-4cd6-524b-b77b-0227fe39f7a2",
-        "cb4f12f2-ee24-f145-8c48-9cab6179e963",
-        "ad95c15c-a360-f548-8f9e-f7cab095c869",
         "b1efb887-fc4c-cc45-9de3-74ecb3311e35",
         "cf15ebf1-3c0e-d341-b9c7-44121d571eb4",
         "a420d8b0-4125-dd45-a4f1-62df5efd4c5c",
@@ -137,16 +137,16 @@
         "aspectRatioW": 16.0,
         "farPlane": 100.0,
         "forward": [
-            -0.6863910555839539,
-            -0.7106082439422607,
-            -0.15460699796676636
+            -0.31511232256889343,
+            -0.8404310941696167,
+            0.4408854842185974
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            7.663806915283203,
-            27.66141128540039,
-            -10.486271858215332
+            0.9034181833267212,
+            9.174710273742676,
+            -14.207289695739746
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 29.899999618530273,
@@ -158,6 +158,159 @@
     },
     "ecs": {
         "Entities": [
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "6c2d4e84-f3ea-dc44-b75b-b7c3573829b5"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                -0.4769097566604614,
+                                0.0,
+                                -6.643589973449707
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "cb4f12f2-ee24-f145-8c48-9cab6179e963",
+                                    "aoTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "a8a9e677-4cd6-524b-b77b-0227fe39f7a2",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                                    "normalTextureOverride": "e3c50ccd-4dd5-024b-bde1-eb1f473cb339",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "14c2b2ac-66d8-104e-98f3-96bbd5bc18b6",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "OilDrumRed"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "LocalTransform": {
+                                    "position": [
+                                        -0.4769097566604614,
+                                        0.0,
+                                        -6.643589973449707
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "scale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "collider_offset": [
+                                        0.0,
+                                        0.5,
+                                        0.0
+                                    ],
+                                    "collider_scale": [
+                                        0.699999988079071,
+                                        1.0,
+                                        0.699999988079071
+                                    ],
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 0
+                                    },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "06535ebb-fd69-044f-b8c9-d8aefbf44cdd",
+                            "instanceRootGUID": "6c2d4e84-f3ea-dc44-b75b-b7c3573829b5",
+                            "sourcePrefabGUID": "ebc36048-73cc-7f4d-8ddf-b8433bbe6e21"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collider_offset": [
+                                0.0,
+                                0.5,
+                                0.0
+                            ],
+                            "collider_scale": [
+                                0.699999988079071,
+                                1.0,
+                                0.699999988079071
+                            ],
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 0
+                            },
+                            "physics_enabled": true,
+                            "use_gravity": true,
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    },
+                    "Name": "OilDrumRed"
+                }
+            },
             {
                 "Entity": {
                     "Components": {
@@ -581,6 +734,465 @@
                         }
                     },
                     "Name": "yes_button"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "35ab5d0e-d940-c041-a4c1-a9461def467e"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                -0.780746579170227,
+                                0.0,
+                                -5.331145286560059
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.03449301794171333,
+                                0.9994049668312073
+                            ],
+                            "scale": [
+                                2.880000114440918,
+                                2.880000114440918,
+                                2.880000114440918
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "e01c794e-0add-d542-9860-03f63c3193ab",
+                                    "aoTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "normalTextureOverride": "d9a10e76-3db1-0c41-9368-c476a1845c40",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Crate"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "LocalTransform": {
+                                    "position": [
+                                        -0.780746579170227,
+                                        0.0,
+                                        -5.331145286560059
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.03449301794171333,
+                                        0.9994049668312073
+                                    ],
+                                    "scale": [
+                                        2.880000114440918,
+                                        2.880000114440918,
+                                        2.880000114440918
+                                    ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "collider_offset": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "collider_scale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 0
+                                    },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "2fc12db1-dc23-944a-a2e6-9b1fc43f948e",
+                            "instanceRootGUID": "35ab5d0e-d940-c041-a4c1-a9461def467e",
+                            "sourcePrefabGUID": "9b62d2c6-23dc-5d4f-898b-ee799df743e7"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collider_offset": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collider_scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 0
+                            },
+                            "physics_enabled": true,
+                            "use_gravity": true,
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    },
+                    "Name": "Crate"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "fe920aff-0a2c-cc46-87cf-dd05629a2776"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                1.970245122909546,
+                                0.0,
+                                -6.004755973815918
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.3863859176635742,
+                                0.9223371744155884
+                            ],
+                            "scale": [
+                                1.6999999284744263,
+                                1.6999999284744263,
+                                1.6999999284744263
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "256aaf03-37ee-654a-947b-dba5e889cb54",
+                                    "aoTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "04a181ef-234c-2045-945f-0053f79a7033",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                                    "normalTextureOverride": "5aa8f938-deee-7048-9a6b-33482dd8252b",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "4abba89c-2728-1a4b-bf13-c88751021af2",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "MetalPillar1"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "LocalTransform": {
+                                    "position": [
+                                        1.970245122909546,
+                                        0.0,
+                                        -6.004755973815918
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.3863859176635742,
+                                        0.9223371744155884
+                                    ],
+                                    "scale": [
+                                        1.6999999284744263,
+                                        1.6999999284744263,
+                                        1.6999999284744263
+                                    ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "collider_offset": [
+                                        0.0,
+                                        0.800000011920929,
+                                        0.0
+                                    ],
+                                    "collider_scale": [
+                                        0.800000011920929,
+                                        2.5,
+                                        0.800000011920929
+                                    ],
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 0
+                                    },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "d75edf81-0818-9744-af9c-1468f7c72dd3",
+                            "instanceRootGUID": "fe920aff-0a2c-cc46-87cf-dd05629a2776",
+                            "sourcePrefabGUID": "5ac4c35c-18cf-6e4b-b2e3-a8aa10ed2295"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collider_offset": [
+                                0.0,
+                                0.800000011920929,
+                                0.0
+                            ],
+                            "collider_scale": [
+                                0.800000011920929,
+                                2.5,
+                                0.800000011920929
+                            ],
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 0
+                            },
+                            "physics_enabled": true,
+                            "use_gravity": true,
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    },
+                    "Name": "MetalPillar1"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "8ce44c65-a330-9545-baaa-4870ca257391"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                1.538071870803833,
+                                0.0,
+                                -7.205696105957031
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "cb4f12f2-ee24-f145-8c48-9cab6179e963",
+                                    "aoTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "a8a9e677-4cd6-524b-b77b-0227fe39f7a2",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                                    "normalTextureOverride": "e3c50ccd-4dd5-024b-bde1-eb1f473cb339",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "ad95c15c-a360-f548-8f9e-f7cab095c869",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "14c2b2ac-66d8-104e-98f3-96bbd5bc18b6",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "OilDrumRed"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "LocalTransform": {
+                                    "position": [
+                                        1.538071870803833,
+                                        0.0,
+                                        -7.205696105957031
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "scale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "collider_offset": [
+                                        0.0,
+                                        0.5,
+                                        0.0
+                                    ],
+                                    "collider_scale": [
+                                        0.699999988079071,
+                                        1.0,
+                                        0.699999988079071
+                                    ],
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 0
+                                    },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "06535ebb-fd69-044f-b8c9-d8aefbf44cdd",
+                            "instanceRootGUID": "8ce44c65-a330-9545-baaa-4870ca257391",
+                            "sourcePrefabGUID": "ebc36048-73cc-7f4d-8ddf-b8433bbe6e21"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collider_offset": [
+                                0.0,
+                                0.5,
+                                0.0
+                            ],
+                            "collider_scale": [
+                                0.699999988079071,
+                                1.0,
+                                0.699999988079071
+                            ],
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 0
+                            },
+                            "physics_enabled": true,
+                            "use_gravity": true,
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    },
+                    "Name": "OilDrumRed"
                 }
             },
             {
@@ -14819,7 +15431,7 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                -9.265243530273438,
+                                -10.903932571411133,
                                 0.0,
                                 -9.334178924560547
                             ],
@@ -14879,7 +15491,7 @@
                                 },
                                 "LocalTransform": {
                                     "position": [
-                                        -9.265243530273438,
+                                        -10.903932571411133,
                                         0.0,
                                         -9.334178924560547
                                     ],
