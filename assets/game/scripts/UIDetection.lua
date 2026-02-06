@@ -35,10 +35,14 @@ local function cachePositions()
     cached = true
 end
 
--- audio entities (SFX only - combat BGM now handled by GlobalAudio)
-local sfxAlertOnce   = findEntity("Enemy_Alert_Hit_v1")
-local sfxAlertLoop   = findEntity("Enemy_Alert_Loop_v1")
--- bgmCombatLayer is now controlled via GlobalAudio.setCombat()
+-- SFX file paths (no entity required)
+local SFX_ALERT_HIT = "game/audio/sfx/enemy/Enemy_Alert_Hit_v1.wav"
+local SFX_ALERT_LOOP = "game/audio/sfx/enemy/Enemy_Alert_Loop_v1.wav"
+local alertLoopChannel = -1  -- Track looping channel for stopping later
+
+-- SFX volumes
+local ALERT_ONCE_DB = -8.0   
+local ALERT_LOOP_DB = -12.0
 
 -- internal state
 ui.active      = false
@@ -46,10 +50,6 @@ ui.timer       = 0.0
 ui.duration    = DURATION
 ui.sourceEnemy = nil
 ui.isDetected  = false
-
--- SFX volumes
-local ALERT_ONCE_DB = -8.0   
-local ALERT_LOOP_DB = -12.0
 
 -- helpers -------------------------------------------------------
 
@@ -79,7 +79,11 @@ local function showUI()
 end
 
 local function stopAudio()
-    if sfxAlertLoop   then audioStop(sfxAlertLoop)   end
+    -- Stop looping alert sound using stored channel ID
+    if alertLoopChannel >= 0 then
+        audioStopChannel(alertLoopChannel)
+        alertLoopChannel = -1
+    end
     -- Combat BGM now controlled via GlobalAudio.setCombat(false)
     if _G.GlobalAudio and _G.GlobalAudio.setCombat then
         _G.GlobalAudio.setCombat(false)
@@ -101,17 +105,9 @@ function ui.begin(enemyEntity)
 
     showUI()
 
-    -- enemy alert SFX once then loop
-    if sfxAlertOnce then 
-        audioSetVolumeDb(sfxAlertOnce, ALERT_ONCE_DB)
-        audioPlay(sfxAlertOnce) 
-    end
-
-    if sfxAlertLoop then
-        audioSetLooping(sfxAlertLoop, true)
-        audioSetVolumeDb(sfxAlertLoop, ALERT_LOOP_DB)
-        audioPlay(sfxAlertLoop)
-    end
+    -- Enemy alert SFX: hit sound once, then start looping alert
+    audioPlaySFX(SFX_ALERT_HIT)  -- One-shot alert hit
+    alertLoopChannel = audioPlaySFX(SFX_ALERT_LOOP, true)  -- Looping alert
 
     -- Start combat BGM layer via GlobalAudio
     if _G.GlobalAudio and _G.GlobalAudio.setCombat then

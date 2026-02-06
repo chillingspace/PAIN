@@ -76,45 +76,35 @@ local inCombat = false
 -- ==================== SCENE-SPECIFIC VOLUME CONFIG ====================
 local function applySceneVolumes()
     local trackCount = globalBGMGetTrackCount()
-    log("[GlobalAudioDebug] applySceneVolumes - Scene: " .. tostring(currentScene) .. " Tracks: " .. tostring(trackCount) .. " Scale: " .. tostring(MAINMENU_BGM_VOLUME_SCALE))
     
     if currentScene == "mainmenu" then
         -- Track 0: Main BGM, Track 1: Ambient
         local mainBGMVolume = linearToDb(MAINMENU_BGM_VOLUME_SCALE)
-        log("[GlobalAudioDebug] Setting MainMenu BGM (Track 0) to " .. mainBGMVolume .. " dB")
-        
         if trackCount >= 1 then globalBGMFade(0, mainBGMVolume, CONFIG.fadeDuration) end
         if trackCount >= 2 then globalBGMFade(1, CONFIG.ambientVolume, CONFIG.fadeDuration) end
         
     elseif currentScene == "howtoplay" or currentScene == "howtoplay2" then
-        -- howtoplay has only MainBGM (1 track) - Ambient was stopped by C++ (OLD track)
-        -- Just fade in track 0 (MainBGM, which continues from mainmenu uninterrupted)
-        log("[GlobalAudio] howtoplay scene - fading track 0 (MainBGM) back in")
+        -- howtoplay has only MainBGM (1 track) - Ambient was stopped by C++
         local mainBGMVolume = linearToDb(MAINMENU_BGM_VOLUME_SCALE)
         if trackCount >= 1 then globalBGMFade(0, mainBGMVolume, CONFIG.fadeDuration) end
         
     elseif currentScene == "cutscene" then
         -- Cutscene uses same main BGM as mainmenu/tutorial
-        -- Track 0: Main BGM, no ambient track
-        log("[GlobalAudio] cutscene scene - fading track 0 (MainBGM) in")
         local mainBGMVolume = linearToDb(MAINMENU_BGM_VOLUME_SCALE)
         if trackCount >= 1 then globalBGMFade(0, mainBGMVolume, CONFIG.fadeDuration) end
-        -- Mute any other tracks
         for i = 1, trackCount - 1 do
             globalBGMFade(i, CONFIG.mutedVolume, 0.1)
         end
         
     elseif currentScene == "tutorial" or currentScene == "level1" or currentScene == "level" then
         -- Track 0: Level BGM (main), Track 1: Ambient, Track 2: Combat (muted initially)
-        log("[GlobalAudio] " .. tostring(currentScene) .. " scene - fading BGM and Ambient, muting Combat")
         if trackCount >= 1 then globalBGMFade(0, CONFIG.defaultVolume, CONFIG.fadeDuration) end
         if trackCount >= 2 then globalBGMFade(1, CONFIG.ambientVolume, CONFIG.fadeDuration) end
-        if trackCount >= 3 then globalBGMFade(2, CONFIG.mutedVolume, 0.1) end  -- Combat starts muted
+        if trackCount >= 3 then globalBGMFade(2, CONFIG.mutedVolume, 0.1) end
         inCombat = false
         
     else
-        -- Unknown scene: fade in all tracks
-        log("[GlobalAudioDebug] Unknown scene - fading all tracks to default volume")
+        -- Unknown scene: fade in all tracks to default
         for i = 0, trackCount - 1 do
             globalBGMFade(i, CONFIG.defaultVolume, CONFIG.fadeDuration)
         end
@@ -124,7 +114,6 @@ end
 -- ==================== FADE OUT ALL TRACKS ====================
 local function fadeOutAllTracks()
     local trackCount = globalBGMGetTrackCount()
-    log("[GlobalAudio] Fading out " .. tostring(trackCount) .. " tracks for transition")
     for i = 0, trackCount - 1 do
         globalBGMFade(i, CONFIG.mutedVolume, CONFIG.sceneTransitionDelay - 0.2)
     end

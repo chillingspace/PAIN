@@ -13,8 +13,11 @@ local pointA = nil
 local pointB = nil
 local goingToB = true
 local waitTimer = 0.0
-local moveSoundPlaying = false
 local waitYaw = nil
+
+-- SFX for enemy movement (spatial 3D audio)
+local SFX_ENEMY_WALK = "game/audio/sfx/enemy/Ball enemy walking.wav"
+local walkChannel = -1  -- Track channel for position updates and stopping
 
 local function findNearestByTag(originX, originY, originZ, tag, maxDistSq)
     local candidates = getEntitiesByTag(tag)
@@ -46,9 +49,10 @@ registerUpdate(function(dt)
 
     -- freeze while detecting
     if _G.EnemyFrozen and _G.EnemyFrozen[id] then
-        if moveSoundPlaying and audioStop then
-            audioStop(id)
-            moveSoundPlaying = false
+        -- Stop walking sound when frozen
+        if walkChannel >= 0 then
+            audioStopChannel(walkChannel)
+            walkChannel = -1
         end
         return
     end
@@ -110,9 +114,9 @@ registerUpdate(function(dt)
         end
 
         -- stop movement sound while waiting
-        if moveSoundPlaying and audioStop then
-            audioStop(id)
-            moveSoundPlaying = false
+        if walkChannel >= 0 then
+            audioStopChannel(walkChannel)
+            walkChannel = -1
         end
 
         -- keep the stored facing during wait
@@ -156,9 +160,9 @@ registerUpdate(function(dt)
         end
 
         -- stop movement sound while waiting
-        if moveSoundPlaying and audioStop then
-            audioStop(id)
-            moveSoundPlaying = false
+        if walkChannel >= 0 then
+            audioStopChannel(walkChannel)
+            walkChannel = -1
         end
 
         return
@@ -179,10 +183,12 @@ registerUpdate(function(dt)
         setRotation(id, 0.0, yaw, 0.0)
     end
 
-    -- play movement sound while walking
-    if not moveSoundPlaying and audioPlay then
-        if audioSetLooping then audioSetLooping(id, true) end
-        audioPlay(id)
-        moveSoundPlaying = true
+    -- Play/update movement sound while walking (spatial 3D)
+    if walkChannel < 0 then
+        -- Start new looping walk sound at enemy position
+        walkChannel = audioPlaySFXAt(SFX_ENEMY_WALK, x, y, z, -6.0, true)
+    else
+        -- Update position of existing walk sound
+        audioSetChannelPosition(walkChannel, x, y, z)
     end
 end)

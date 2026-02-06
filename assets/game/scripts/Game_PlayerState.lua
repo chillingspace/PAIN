@@ -7,8 +7,10 @@
 
 log("[PlayerState] Script loaded on entityId=", tostring(entityId))
 
--- local G = _G_root
--- print("[Game_PlayerState] load time _G.CurrentLevelName=", _G.CurrentLevelName)
+-- Game Over SFX file paths
+local SFX_GAMEOVER_HIT = "game/audio/bgm/gameover bgm/GameOver Hit 2.wav"
+local SFX_GAMEOVER_LOOP = "game/audio/bgm/gameover bgm/GameOver Loop.wav"
+local gameOverLoopChannel = -1  -- Track looping channel for stopping on restart
 
 
 -- global so other scripts can use
@@ -95,6 +97,11 @@ local function triggerGameOver()
     end
     S.gameEnded = true
     S.gameWon   = false
+    
+    -- Play Game Over SFX: hit sound once, then looping background
+    audioPlaySFX(SFX_GAMEOVER_HIT)
+    gameOverLoopChannel = audioPlaySFX(SFX_GAMEOVER_LOOP, true)
+    
     requestEndOverlay("lose")
 end
 

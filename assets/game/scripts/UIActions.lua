@@ -47,6 +47,32 @@ local Layers = {
     GAME_WIN = 7,
 }
 
+-- ==================== UI SFX ====================
+local UI_SFX_CLICKS = {
+    "game/audio/sfx/ui/clicks/click 1.wav",
+    "game/audio/sfx/ui/clicks/click 2.wav",
+    "game/audio/sfx/ui/clicks/click 3.wav",
+    "game/audio/sfx/ui/clicks/click 4.wav"
+}
+local UI_SFX_MENU_OPEN = "game/audio/sfx/ui/menu/menu open sfx.mp3"
+local UI_SFX_MENU_CLOSE = "game/audio/sfx/ui/menu/menu close sfx.mp3"
+
+-- Play random UI click sound (non-spatial)
+local function playUIClick()
+    if audioPlayRandomSFX then
+        audioPlayRandomSFX(UI_SFX_CLICKS, -3.0)
+    end
+end
+
+-- Play menu open/close sounds
+local function playMenuOpen()
+    if audioPlaySFX then audioPlaySFX(UI_SFX_MENU_OPEN) end
+end
+
+local function playMenuClose()
+    if audioPlaySFX then audioPlaySFX(UI_SFX_MENU_CLOSE) end
+end
+
 -- Store current level name globally (For Game_PlayerState)
 if G and G.CurrentLevelName then
     _G.CurrentLevelName = G.CurrentLevelName
@@ -201,8 +227,8 @@ local handlers = {
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 hideCursor(false)
-                
             end
+            playMenuOpen()  -- Play menu open SFX
             _G_root.TogglePause()
             printLog("[UI] goto_Pause (Android) -> called TogglePause()")
         else
@@ -215,9 +241,8 @@ local handlers = {
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 hideCursor(true)
-                
             end
-            --SetGamePaused(not IsGamePaused()) 
+            playMenuClose()  -- Play menu close SFX
             _G_root.TogglePause()
             setLayerEnabled(1, not _G_root.IsGamePaused())
             printLog("[UI] pause_Resume -> called TogglePause()")
@@ -681,6 +706,8 @@ local handlers = {
 function G.UI_OnAction(actionName, buttonEntity, payload)
     local h = handlers[actionName]
     if h then
+        -- Play UI click sound for all button presses
+        playUIClick()
         h(buttonEntity, payload)
     else
         printLog("[UI] No handler for action "..tostring(actionName))

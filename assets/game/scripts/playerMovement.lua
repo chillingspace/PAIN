@@ -109,10 +109,29 @@ local currentYaw = baseRy or 0.0
 local playerStateInited = false
 
 local idleTimer = 0.0
-local idleInterval = 5.0
+local idleInterval = 5.0 + math.random() * 3.0  -- Random 5-8 seconds
 local S = nil
 
 local maxGroundCheckDist = 0.1
+
+-- Player SFX file paths
+local SFX_PLAYER_HOPS = {
+    "game/audio/sfx/player/frog hop/Player_Hop_01.wav",
+    "game/audio/sfx/player/frog hop/Player_Hop_02.wav",
+    "game/audio/sfx/player/frog hop/Player_Hop_03.wav",
+    "game/audio/sfx/player/frog hop/Player_Hop_04.wav",
+    "game/audio/sfx/player/frog hop/Player_Hop_05.wav",
+    "game/audio/sfx/player/frog hop/Player_Hop_06.wav",
+    "game/audio/sfx/player/frog hop/Player_Hop_07.wav"
+}
+
+local SFX_PLAYER_IDLES = {
+    "game/audio/sfx/player/frog croak/Player_VO_Idle_01.wav",
+    "game/audio/sfx/player/frog croak/Player_VO_Idle_02.wav",
+    "game/audio/sfx/player/frog croak/Player_VO_Idle_03.wav",
+    "game/audio/sfx/player/frog croak/Player_VO_Idle_04.wav",
+    "game/audio/sfx/player/frog croak/Player_VO_Idle_05.wav"
+}
 
 registerUpdate(function(dt)
     -- EARLY EXIT: If game is paused, freeze player completely
@@ -217,20 +236,17 @@ registerUpdate(function(dt)
         end
 
         if not wasMoving then
-            if audioPlay then 
-                 audioSetLooping(id, false)
-                 audioPlay(id) 
-            end
-            -- Reset lastAnimTime to 0.0 so we don't trigger again immediately
-            lastAnimTime = 0.0 
+            -- Play hop sound when starting to move
+            audioPlayRandomSFXFromEntity(SFX_PLAYER_HOPS, id, -6.0)
+            lastAnimTime = 0.0
         
-        -- LOOP
+        -- LOOP: play hop sound at animation loop point
         elseif Animation and Animation.GetTime then
             local t = Animation.GetTime(id)
             
             -- Play audio at the start of the walk cycle
             if t < lastAnimTime and t < 0.2 then
-                 if audioPlay then audioPlay(id) end
+                audioPlayRandomSFXFromEntity(SFX_PLAYER_HOPS, id, -6.0)
             end
             
             lastAnimTime = t
@@ -250,16 +266,17 @@ registerUpdate(function(dt)
          end
     end
 
-    -- idle sfx: when not moving, in intervals
+    -- idle sfx: when not moving, play random idle vocal at random intervals
     if not isMoving then
         idleTimer = idleTimer + dt
         if idleTimer >= idleInterval then
             idleTimer = 0.0
-            if S and S.sfxIdle then
-                audioPlay(S.sfxIdle)
-                Animation.SetLoop(id, true) -- overwrite is grounded animation
-                PlayAnim(id, ANIM_IDLE, 0.2, true)
-            end
+            idleInterval = 5.0 + math.random() * 3.0  -- Randomize next interval
+            
+            -- Play random idle sound at player position
+            audioPlayRandomSFXFromEntity(SFX_PLAYER_IDLES, id, -3.0)
+            Animation.SetLoop(id, true)
+            PlayAnim(id, ANIM_IDLE, 0.2, true)
         end
     else
         idleTimer = 0.0
@@ -320,10 +337,8 @@ registerUpdate(function(dt)
         Animation.SetLoop(id, true)
         PlayAnim(id, ANIM_JUMP, 0.05, true)
 
-        -- jump sfx
-        if S and S.sfxJump then
-            audioPlay(S.sfxJump)
-        end
+        -- Play random hop sound for jump
+        audioPlayRandomSFXFromEntity(SFX_PLAYER_HOPS, id, -6.0)
         
         -- consume jump
         jumpPressed = false
