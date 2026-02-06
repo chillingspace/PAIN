@@ -78,9 +78,7 @@ namespace PAIN {
             track.targetVolume = targetDb;
             float deltaDb = targetDb - track.currentVolume;
             track.fadeSpeed = deltaDb / durationSeconds;
-            
-            PN_CORE_INFO("[GlobalAudio] Fade track {} from {:.1f} to {:.1f} dB over {:.2f}s", 
-                index, track.currentVolume, targetDb, durationSeconds);
+            // Note: Removed per-frame logging for performance
         }
         
         void GlobalAudio_StopAll(PAIN::Audio::Audio* audioService) {
@@ -93,13 +91,11 @@ namespace PAIN {
             }
             s_globalTracks.clear();
             s_globalAudioInitialized = false;
-            PN_CORE_INFO("[GlobalAudio] All tracks stopped and cleared");
         }
         
         void GlobalAudio_Clear() {
             // Keep tracks playing but mark as not initialized so new scene can take over
             s_globalAudioInitialized = false;
-            PN_CORE_INFO("[GlobalAudio] Cleared initialization flag for new track set");
         }
         
         bool GlobalAudio_IsInitialized() {
@@ -148,7 +144,6 @@ namespace PAIN {
                     
                     if (reachedTarget) {
                         track.fadeSpeed = 0.0f;
-                        PN_CORE_INFO("[GlobalAudio] Track fade complete, volume now {:.1f} dB", track.currentVolume);
                     }
                     
                     // Apply volume to channel
@@ -199,17 +194,13 @@ namespace PAIN {
                     // Keep existing tracks playing (muted state continues)
                     if (!hasNewTracks) {
                         if (hasExistingTracks) {
-                            // Sync entity to existing tracks (they stay muted, Lua will fade in if needed)
+                        // Sync entity to existing tracks (they stay muted, Lua will fade in if needed)
                             audioSrc.track_channel_ids.clear();
                             for (const auto& track : s_globalTracks) {
                                 audioSrc.track_channel_ids.push_back(track.channelId);
                             }
                             audioSrc.hasStarted = true;
                             audioSrc.state = AudioState::Playing;
-                            PN_CORE_INFO("[AudioSystem] Global_BGM in '{}' has no tracks - keeping {} existing tracks (muted)", 
-                                currentSceneName, s_globalTracks.size());
-                        } else {
-                            PN_CORE_INFO("[AudioSystem] Global_BGM in '{}' has no tracks and no existing tracks", currentSceneName);
                         }
                         continue; // Skip normal processing
                     }
@@ -233,17 +224,12 @@ namespace PAIN {
                                 // Keep this track (it will continue from current position)
                                 tracksToKeep.push_back(existingTrack);
                                 keptTrackGuids.insert(existingTrack.assetGuid);
-                                PN_CORE_INFO("[AudioSystem] SAME track kept: channel {}", existingTrack.channelId.value);
-                            } else {
-                                // Channel invalid - will need to restart this track
-                                PN_CORE_WARN("[AudioSystem] SAME track but channel {} invalid - will restart", 
-                                    existingTrack.channelId.value);
                             }
+                            // Note: If channel is invalid, track will be restarted below
                         } else {
                             // OLD track - not in new scene, stop it
                             if (existingTrack.channelId.isValid()) {
                                 audioService->stop(existingTrack.channelId);
-                                PN_CORE_INFO("[AudioSystem] OLD track stopped: channel {}", existingTrack.channelId.value);
                             }
                         }
                     }
@@ -272,7 +258,6 @@ namespace PAIN {
                                 
                                 if (channelOpt.has_value()) {
                                     newTrack.channelId = channelOpt.value();
-                                    PN_CORE_INFO("[AudioSystem] NEW track started: channel {}", channelOpt.value().value);
                                 } else {
                                     newTrack.channelId = { -1 };
                                     PN_CORE_WARN("[AudioSystem] Failed to start NEW track");
@@ -320,9 +305,6 @@ namespace PAIN {
                     audioSrc.state = AudioState::Playing;
                     s_globalAudioInitialized = true;
                     s_lastSceneWithGlobalBGM = currentSceneName;
-                    
-                    PN_CORE_INFO("[AudioSystem] Global BGM processed for '{}': {} tracks total", 
-                        currentSceneName, s_globalTracks.size());
                     continue; // Skip normal processing for Global_BGM
                 }
 
