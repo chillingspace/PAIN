@@ -1,12 +1,12 @@
 {
     "assets": [
-        "443d2baf-24fb-dc42-a6f9-403310b06194",
         "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
         "8fb18e50-fe3a-dd4c-889f-62f426ff9d18",
         "4ab9b8a8-4bdc-e046-83a2-24863013c030",
         "8ec89d31-ef7e-9247-834a-8782dd0c614d",
         "2d87afdc-663f-ed4a-bdce-4ac73c3b6db0",
         "f57adda3-64e1-a544-86a2-842c8976e7e0",
+        "443d2baf-24fb-dc42-a6f9-403310b06194",
         "d9a10e76-3db1-0c41-9368-c476a1845c40",
         "496c08af-d9df-cc45-898c-20cc692a2e08",
         "df7c04c2-94d4-5347-8dad-6527e853bf94",
@@ -41,8 +41,6 @@
         "476662dc-9a7b-2243-97be-6e01bceeb854",
         "351d0711-28db-d346-81fe-fe5904ff854a",
         "f8f9abf4-39b2-3f41-9e00-4bdfd4476881",
-        "5cccecaa-acca-ae47-a45d-0210732e76aa",
-        "4515fcc7-a4d7-654b-b5a0-a2b191ab7f7c",
         "d9977322-f31e-bc4c-b298-fbcd6690c4ba",
         "a8977689-ded0-fa41-9efb-33354e83dec7",
         "dd9ec25f-57d2-bf41-be2d-95dd1f1eddcd",
@@ -10882,38 +10880,6 @@
                                 1.0,
                                 1.0
                             ]
-                        },
-                        "ModelRenderer": {
-                            "castShadows": true,
-                            "materials": [
-                                {
-                                    "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "baseColorOverride": [
-                                        0.6000000238418579,
-                                        0.6000000238418579,
-                                        0.6000000238418579
-                                    ],
-                                    "emissiveOverride": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "4515fcc7-a4d7-654b-b5a0-a2b191ab7f7c",
-                                    "metallicOverride": 0.0,
-                                    "metallicTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "roughnessOverride": 0.5,
-                                    "roughnessTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "useOverrides": false
-                                }
-                            ],
-                            "modelGUID": "5cccecaa-acca-ae47-a45d-0210732e76aa",
-                            "receiveShadows": true,
-                            "visible": true
                         },
                         "Name": {
                             "name": "Global_BGM"

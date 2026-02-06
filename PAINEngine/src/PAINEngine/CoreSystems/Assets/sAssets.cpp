@@ -506,11 +506,14 @@ namespace PAIN {
 
 			std::unique_lock<std::shared_mutex> lock(cache_mutex);
 
-			//Clear asset cache except for shaders
+			//Clear asset cache except for shaders and audio (audio persists for global BGM)
 			for (auto it = asset_cache.begin(); it != asset_cache.end();) {
 
-				//Ensure that asset shader cache is not getting removed
-				if (it->second->type != Assets::Type::Shader) it = asset_cache.erase(it);
+				//Ensure that shader and audio cache is not getting removed
+				if (it->second->type != Assets::Type::Shader && 
+					it->second->type != Assets::Type::Audio) {
+					it = asset_cache.erase(it);
+				}
 				else ++it;
 			}
 		}

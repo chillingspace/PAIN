@@ -36,6 +36,76 @@
             {
                 "Entity": {
                     "Components": {
+                        "AudioSource": {
+                            "audio_tracks": [
+                                "1d28dd5c-5baa-f54c-a266-bcb84246193a"
+                            ],
+                            "group_name": "",
+                            "is3D": false,
+                            "looping": true,
+                            "maxDistance": 50.0,
+                            "minDistance": 1.0,
+                            "pitchDb": 0.0,
+                            "playOnStart": false,
+                            "pos": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "selected_audio": "00000000-0000-0000-0000-000000000000",
+                            "track_volumes": [
+                                {}
+                            ],
+                            "volumeDb": 0.0
+                        },
+                        "GUID": {
+                            "guid": "02c12844-562d-ce44-b0d7-5ce10eb2b58a"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "Global_BGM"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "b0284e1b-335e-ee46-bbc0-e7601f4b8c7b"
+                                }
+                            ]
+                        }
+                    },
+                    "Name": "Global_BGM"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
                         "GUID": {
                             "guid": "346b9208-ecb4-214c-bfed-80ed570401aa"
                         },
@@ -1577,10 +1647,10 @@
                         },
                         "UVCoordinates": {
                             "uv": [
-                                0.0011210762895643711,
-                                0.0062500000931322575,
-                                0.49887892603874207,
-                                0.9937499761581421
+                                0.001923076924867928,
+                                0.01315789483487606,
+                                0.4980769157409668,
+                                0.9868420958518982
                             ]
                         }
                     },
@@ -3332,122 +3402,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "AudioSource": {
-                            "audio_tracks": [],
-                            "group_name": "music",
-                            "is3D": false,
-                            "looping": true,
-                            "maxDistance": 50.0,
-                            "minDistance": 1.0,
-                            "pitchDb": 0.0,
-                            "playOnStart": false,
-                            "pos": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "selected_audio": "82bb33a4-ab3b-254d-b093-b2b9d7ab363d",
-                            "track_volumes": [],
-                            "volumeDb": 0.0
-                        },
-                        "GUID": {
-                            "guid": "96d4a9ae-20db-774e-b860-3e2a34cf4380"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 22
-                        },
-                        "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "ambience"
-                        }
-                    },
-                    "Name": "ambience"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "AudioSource": {
-                            "audio_tracks": [],
-                            "group_name": "music",
-                            "is3D": false,
-                            "looping": true,
-                            "maxDistance": 50.0,
-                            "minDistance": 1.0,
-                            "pitchDb": 0.0,
-                            "playOnStart": false,
-                            "pos": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "selected_audio": "e87054db-0ef8-f34b-96a0-e2fede943a49",
-                            "track_volumes": [],
-                            "volumeDb": 0.0
-                        },
-                        "GUID": {
-                            "guid": "a3242ae0-e1b1-5646-89d0-97604a276a09"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 23
-                        },
-                        "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "bgm"
-                        }
-                    },
-                    "Name": "bgm"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
                         "Camera": {
                             "far_plane": 100.0,
                             "height_ratio": 9.0,
@@ -3475,7 +3429,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 24
+                            "siblingIndex": 22
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -3523,7 +3477,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 25
+                            "siblingIndex": 23
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -3569,7 +3523,7 @@
                                 "ce700d51-a84c-e24e-970b-f0cc7c63c275"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 26
+                            "siblingIndex": 24
                         },
                         "Layer": {
                             "layer_id": 0,

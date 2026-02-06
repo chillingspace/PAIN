@@ -417,6 +417,15 @@ namespace PAIN {
 			return AudioResult::Ok;
 		}
 
+		bool FmodAudio::isChannelValid(AudioChannelId chId) {
+			if (!chId.isValid()) return false;
+			auto it = impl_->channels.find(chId.value);
+			if (it == impl_->channels.end() || !it->second.ch) return false;
+			bool playing = false;
+			FMOD_RESULT result = it->second.ch->isPlaying(&playing);
+			return (result == FMOD_OK && playing);
+		}
+
 		void FmodAudio::stopAll() {
 			for (auto& pair : impl_->groups) {
 				auto& g = pair.second;

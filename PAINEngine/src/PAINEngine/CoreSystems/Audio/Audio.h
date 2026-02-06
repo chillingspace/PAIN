@@ -120,6 +120,7 @@ namespace PAIN {
 
             // control (dB)
             virtual AudioResult stop(AudioChannelId ch) = 0;
+            virtual bool isChannelValid(AudioChannelId ch) = 0;  // Check if channel is still playing/valid
             virtual void        stopAll() = 0;
             virtual AudioResult pauseChannel(AudioChannelId ch) = 0;
             virtual AudioResult resumeChannel(AudioChannelId ch) = 0;

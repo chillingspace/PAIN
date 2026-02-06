@@ -21,18 +21,22 @@ registerUpdate(function(dt)
         
         -- 3. Check if we finished the cutscene
         if currentFrame > maxFrames then 
-            print("[Cutscene] Last frame reached. Changing scene...")
+            print("[Cutscene] Last frame reached. Changing scene with audio fade...")
             
-            if changeScene then
-                local nextScene = G.TutorialSceneName 
-                
-                if isMobile then
-                    hideCursor(true)
-                end
-                
+            local nextScene = G.TutorialSceneName 
+            
+            if isMobile then
+                hideCursor(true)
+            end
+            
+            -- Use GlobalAudio's fade system for proper audio transition
+            if _G.GlobalAudio and _G.GlobalAudio.changeSceneWithFade then
+                _G.GlobalAudio.changeSceneWithFade(nextScene)
+            elseif changeScene then
+                -- Fallback to direct change if GlobalAudio not available
                 changeScene(nextScene)
             else
-                print("[Cutscene] Error: changeScene function not found")
+                print("[Cutscene] Error: No scene change function available")
             end
             return
         end

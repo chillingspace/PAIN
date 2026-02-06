@@ -61,6 +61,7 @@ namespace PAIN {
 
 
             AudioResult stop(AudioChannelId) override;
+            bool isChannelValid(AudioChannelId ch) override;
             void        stopAll() override;
             AudioResult pauseChannel(AudioChannelId) override;
             AudioResult resumeChannel(AudioChannelId) override;
