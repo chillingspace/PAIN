@@ -1,8 +1,22 @@
 {
     "assets": [
-        "443d2baf-24fb-dc42-a6f9-403310b06194",
-        "d9a10e76-3db1-0c41-9368-c476a1845c40",
-        "496c08af-d9df-cc45-898c-20cc692a2e08",
+        "70fbb33a-74e7-a641-90d5-3a6255b9d413",
+        "f02f0a71-8e9c-1843-9873-8e636f4ad324",
+        "dd9ec25f-57d2-bf41-be2d-95dd1f1eddcd",
+        "336c6028-99aa-3946-8822-3af0335aabf1",
+        "e8745e08-2f02-b848-b7e4-255cb60bcefa",
+        "d0cb3aa0-6188-c142-8316-0b22e254c564",
+        "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
+        "6094d6ab-f4b7-054d-b7ef-f0cfc76d7718",
+        "f6a92284-3591-ca4c-9cf5-1e0167b2d240",
+        "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
+        "38a421a9-1ffc-3c47-a8e2-f0af50f2e2c2",
+        "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
+        "6100a187-8732-804d-903d-32a5c3dc0576",
+        "630fadbb-2e36-ce45-9b42-33cb68aec2bd",
+        "14377587-a8fe-2b47-9f46-dad6bdad2753",
+        "a67656ca-15a5-d441-b14d-dae036e5245e",
+        "1fe8b9a9-f998-cc41-bbaf-d6268f17914b",
         "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
         "8fb18e50-fe3a-dd4c-889f-62f426ff9d18",
         "8e26f21e-f0ca-5448-a80f-70f21e165ec6",
@@ -16,7 +30,6 @@
         "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
         "ab88a2ae-3d34-3342-b2ed-df719f19b490",
         "d67f82f6-9682-ba48-a64c-8697034ad488",
-        "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
         "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
         "ecc50f9b-7cb8-274e-afdf-1ab2b89c6d8c",
         "5dbc2f57-64e8-d242-8aaa-e4244c67e866",
@@ -36,7 +49,6 @@
         "38e8f9de-b2dc-0f47-ad64-f0209917e593",
         "6f80f4ba-d003-2c41-aa74-2535221b1df7",
         "9679f581-d33b-d44d-ae70-30f076c3dca3",
-        "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
         "c0baaed2-d818-9d47-84ad-339768d40e62",
         "9bc1e511-f6a7-9d48-9723-5cd1200ca942",
         "efff96ab-9011-d248-a0e3-56bb0e76f8e6",
@@ -55,7 +67,6 @@
         "5ccceeb5-887c-db4c-8cae-0efe9e91b198",
         "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
         "163da0e7-00d9-0541-a470-a859fd023b6b",
-        "dd9ec25f-57d2-bf41-be2d-95dd1f1eddcd",
         "9927db1c-9aff-be47-a5dc-3068b2c9f8f9",
         "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
         "91e02ba2-c6b8-184f-bd48-b59674946972",
@@ -66,11 +77,9 @@
         "60d237d0-60e1-c146-86e6-e76c967840d4",
         "1708e4d2-69c9-ba43-9ef6-85d417b11f01",
         "ba8ea99f-16b6-da48-9465-54f48d7cd3a7",
+        "d9a10e76-3db1-0c41-9368-c476a1845c40",
         "e1eb1144-0c31-5e4a-8ca0-dbcf5c49dda2",
         "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-        "630fadbb-2e36-ce45-9b42-33cb68aec2bd",
-        "14377587-a8fe-2b47-9f46-dad6bdad2753",
-        "a67656ca-15a5-d441-b14d-dae036e5245e",
         "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
         "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
         "e60f5690-3ae8-a142-b726-5ea017a209e9",
@@ -96,7 +105,6 @@
         "3e8dc653-3d17-ab42-bb53-da040f01f965",
         "06cab9b7-c91a-6948-bb59-426b8032ea12",
         "3c58c656-1127-1a47-92ea-6c59604296e5",
-        "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
         "cb4f12f2-ee24-f145-8c48-9cab6179e963",
         "c79c529b-71e5-164c-854d-f8cf076f5318",
         "55371533-69d5-ef4c-a840-48aa9d29d45d",
@@ -117,16 +125,16 @@
         "aspectRatioW": 16.0,
         "farPlane": 100.0,
         "forward": [
-            -0.039076752960681915,
-            -0.6371973156929016,
-            -0.7697094678878784
+            -0.27839651703834534,
+            -0.4630357325077057,
+            -0.8414828181266785
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            -11.209724426269531,
-            3.4464452266693115,
-            0.9831008315086365
+            -26.85495376586914,
+            0.5806602835655212,
+            -1.0069396495819092
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 20.0,
@@ -278,6 +286,17 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "298bdf47-4935-4249-8458-79ec7945219d",
                                     "siblingIndex": 0
+                                },
+                                "Texture2D": {
+                                    "pos": [
+                                        0.25,
+                                        -0.15000000596046448
+                                    ],
+                                    "texture_guid": "7fdfa6e4-cca0-6144-9aa0-9e18470ae75a",
+                                    "texture_scale": [
+                                        0.20000000298023224,
+                                        0.07999999821186066
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "0aafdc40-3450-8143-be1d-2f43ada89af1",
@@ -289,7 +308,7 @@
                                 0.25,
                                 -0.15000000596046448
                             ],
-                            "texture_guid": "ac631a82-95a9-7944-91cf-a1d2c21d425a",
+                            "texture_guid": "7fdfa6e4-cca0-6144-9aa0-9e18470ae75a",
                             "texture_scale": [
                                 0.20000000298023224,
                                 0.07999999821186066
@@ -432,6 +451,17 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "298bdf47-4935-4249-8458-79ec7945219d",
                                     "siblingIndex": 1
+                                },
+                                "Texture2D": {
+                                    "pos": [
+                                        -0.3499999940395355,
+                                        -0.15000000596046448
+                                    ],
+                                    "texture_guid": "0b7423ec-97fe-dc4b-ae96-4aa5a9bed448",
+                                    "texture_scale": [
+                                        0.20000000298023224,
+                                        0.07999999821186066
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "dd464bb8-d9f7-a245-9822-3d2644e4bbe2",
@@ -443,7 +473,7 @@
                                 -0.3499999940395355,
                                 -0.15000000596046448
                             ],
-                            "texture_guid": "374d15d2-5a0b-0947-bef6-f7255d7f399e",
+                            "texture_guid": "0b7423ec-97fe-dc4b-ae96-4aa5a9bed448",
                             "texture_scale": [
                                 0.20000000298023224,
                                 0.07999999821186066
@@ -528,6 +558,420 @@
                         }
                     },
                     "Name": "yes_button"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "830a21d4-a1e3-0940-9f5a-c3dee20bed7c"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [
+                                "fc416336-b577-ff46-ad22-1a6b488bc14b",
+                                "b3e953c2-2ebc-8b4c-aafd-452d74965515"
+                            ],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 1
+                        },
+                        "Layer": {
+                            "layer_id": 6,
+                            "layer_mask": 64
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                4.775875091552734,
+                                0.0,
+                                -16.414531707763672
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "GameOverManager"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [
+                                        "fc416336-b577-ff46-ad22-1a6b488bc14b",
+                                        "b3e953c2-2ebc-8b4c-aafd-452d74965515"
+                                    ],
+                                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                                    "siblingIndex": 1
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        4.775875091552734,
+                                        0.0,
+                                        -16.414531707763672
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "scale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "96b89587-c8d8-9142-995d-209c05066e8c",
+                            "instanceRootGUID": "830a21d4-a1e3-0940-9f5a-c3dee20bed7c",
+                            "sourcePrefabGUID": "114dfe50-ef4f-9d4d-b239-ce0e8fb1bd48"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "39e6a9ce-8772-dd4b-9f93-5ed126fa6c2c"
+                                }
+                            ]
+                        }
+                    },
+                    "Name": "GameOverManager"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "CustomHitbox2D": {
+                            "max_point": [
+                                250.0,
+                                50.0
+                            ],
+                            "min_point": [
+                                -250.0,
+                                -50.0
+                            ],
+                            "position_offset": [
+                                60.0,
+                                0.0
+                            ]
+                        },
+                        "GUID": {
+                            "guid": "fc416336-b577-ff46-ad22-1a6b488bc14b"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "830a21d4-a1e3-0940-9f5a-c3dee20bed7c",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 6,
+                            "layer_mask": 64
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                2.8526031970977783,
+                                1.9104310274124146,
+                                -5.961182594299316
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "restart_button"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "830a21d4-a1e3-0940-9f5a-c3dee20bed7c",
+                                    "siblingIndex": 0
+                                },
+                                "Texture2D": {
+                                    "pos": [
+                                        -0.4000000059604645,
+                                        -0.699999988079071
+                                    ],
+                                    "texture_guid": "6d12a8ac-ad22-794c-a7e9-2fe32d9f6b57",
+                                    "texture_scale": [
+                                        0.4000000059604645,
+                                        0.09000000357627869
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "f180b514-744b-3d42-a07b-2585106fb8e8",
+                            "instanceRootGUID": "830a21d4-a1e3-0940-9f5a-c3dee20bed7c",
+                            "sourcePrefabGUID": "114dfe50-ef4f-9d4d-b239-ce0e8fb1bd48"
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                -0.4000000059604645,
+                                -0.699999988079071
+                            ],
+                            "texture_guid": "6d12a8ac-ad22-794c-a7e9-2fe32d9f6b57",
+                            "texture_scale": [
+                                0.4000000059604645,
+                                0.09000000357627869
+                            ]
+                        },
+                        "UIAnimation": {
+                            "b_loop": true,
+                            "b_playing": false,
+                            "duration": 0.20000000298023224,
+                            "frame_duration": 0.10000000149011612,
+                            "spritesheet_columns": 2,
+                            "spritesheet_rows": 1,
+                            "total_frames": 2
+                        },
+                        "UIButton": {
+                            "action": 6,
+                            "disabled_color": -10066330,
+                            "highlighted_color": -3355444,
+                            "normal_color": -1,
+                            "payload": "",
+                            "pressed_color": -5592406,
+                            "state": 0
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                1024.0,
+                                88.0
+                            ]
+                        },
+                        "UVCoordinates": {
+                            "uv": [
+                                0.0012499999720603228,
+                                0.011363636702299118,
+                                0.4987500011920929,
+                                0.9886363744735718
+                            ]
+                        }
+                    },
+                    "Name": "restart_button"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "CustomHitbox2D": {
+                            "max_point": [
+                                200.0,
+                                40.400001525878906
+                            ],
+                            "min_point": [
+                                -150.0,
+                                -48.79999923706055
+                            ],
+                            "position_offset": [
+                                60.0,
+                                0.0
+                            ]
+                        },
+                        "GUID": {
+                            "guid": "b3e953c2-2ebc-8b4c-aafd-452d74965515"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "830a21d4-a1e3-0940-9f5a-c3dee20bed7c",
+                            "siblingIndex": 1
+                        },
+                        "Layer": {
+                            "layer_id": 6,
+                            "layer_mask": 64
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                2.8526031970977783,
+                                1.9104310274124146,
+                                -5.961182594299316
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "quit_button"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "830a21d4-a1e3-0940-9f5a-c3dee20bed7c",
+                                    "siblingIndex": 1
+                                },
+                                "Texture2D": {
+                                    "pos": [
+                                        0.30000001192092896,
+                                        -0.699999988079071
+                                    ],
+                                    "texture_guid": "c3bf7110-7bea-8e4d-8ac3-e97081eee4a9",
+                                    "texture_scale": [
+                                        0.30000001192092896,
+                                        0.10000000149011612
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "2987b941-811b-1846-90ac-69bed20a8ac3",
+                            "instanceRootGUID": "830a21d4-a1e3-0940-9f5a-c3dee20bed7c",
+                            "sourcePrefabGUID": "114dfe50-ef4f-9d4d-b239-ce0e8fb1bd48"
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                0.30000001192092896,
+                                -0.699999988079071
+                            ],
+                            "texture_guid": "c3bf7110-7bea-8e4d-8ac3-e97081eee4a9",
+                            "texture_scale": [
+                                0.30000001192092896,
+                                0.10000000149011612
+                            ]
+                        },
+                        "UIAnimation": {
+                            "b_loop": true,
+                            "b_playing": false,
+                            "duration": 0.20000000298023224,
+                            "frame_duration": 0.10000000149011612,
+                            "spritesheet_columns": 2,
+                            "spritesheet_rows": 1,
+                            "total_frames": 2
+                        },
+                        "UIButton": {
+                            "action": 8,
+                            "disabled_color": -10066330,
+                            "highlighted_color": -3355444,
+                            "normal_color": -1,
+                            "payload": "",
+                            "pressed_color": -5592406,
+                            "state": 0
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                1024.0,
+                                88.0
+                            ]
+                        },
+                        "UVCoordinates": {
+                            "uv": [
+                                0.0018248175038024783,
+                                0.011363636702299118,
+                                0.49817517399787903,
+                                0.9886363744735718
+                            ]
+                        }
+                    },
+                    "Name": "quit_button"
                 }
             },
             {
@@ -690,7 +1134,7 @@
                                         -0.4000000059604645,
                                         -0.699999988079071
                                     ],
-                                    "texture_guid": "6ef6e681-661d-af46-86b2-a425c3bc387c",
+                                    "texture_guid": "6989da0a-a6d0-3448-a662-8eccc81f78b7",
                                     "texture_scale": [
                                         0.4000000059604645,
                                         0.09000000357627869
@@ -715,7 +1159,7 @@
                                 -0.4000000059604645,
                                 -0.699999988079071
                             ],
-                            "texture_guid": "6ef6e681-661d-af46-86b2-a425c3bc387c",
+                            "texture_guid": "6989da0a-a6d0-3448-a662-8eccc81f78b7",
                             "texture_scale": [
                                 0.4000000059604645,
                                 0.09000000357627869
@@ -868,7 +1312,7 @@
                                         0.30000001192092896,
                                         -0.699999988079071
                                     ],
-                                    "texture_guid": "6d404311-26e9-0a44-b50b-e8119ed2ee78",
+                                    "texture_guid": "c3bf7110-7bea-8e4d-8ac3-e97081eee4a9",
                                     "texture_scale": [
                                         0.30000001192092896,
                                         0.10000000149011612
@@ -884,399 +1328,7 @@
                                 0.30000001192092896,
                                 -0.699999988079071
                             ],
-                            "texture_guid": "6d404311-26e9-0a44-b50b-e8119ed2ee78",
-                            "texture_scale": [
-                                0.30000001192092896,
-                                0.10000000149011612
-                            ]
-                        },
-                        "UIAnimation": {
-                            "b_loop": true,
-                            "b_playing": false,
-                            "duration": 0.20000000298023224,
-                            "frame_duration": 0.10000000149011612,
-                            "spritesheet_columns": 2,
-                            "spritesheet_rows": 1,
-                            "total_frames": 2
-                        },
-                        "UIButton": {
-                            "action": 8,
-                            "disabled_color": -10066330,
-                            "highlighted_color": -3355444,
-                            "normal_color": -1,
-                            "payload": "",
-                            "pressed_color": -5592406,
-                            "state": 0
-                        },
-                        "UIElement": {
-                            "b_is_enabled": true,
-                            "b_is_interactable": true,
-                            "layer": 0
-                        },
-                        "UIRectTransform": {
-                            "anchor_max": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchor_min": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchored_position": [
-                                0.0,
-                                0.0
-                            ],
-                            "local_position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "offset_max": [
-                                0.0,
-                                0.0
-                            ],
-                            "offset_min": [
-                                0.0,
-                                0.0
-                            ],
-                            "pivot": [
-                                0.5,
-                                0.5
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "size_delta": [
-                                1024.0,
-                                88.0
-                            ]
-                        },
-                        "UVCoordinates": {
-                            "uv": [
-                                0.0018248175038024783,
-                                0.011363636702299118,
-                                0.49817517399787903,
-                                0.9886363744735718
-                            ]
-                        }
-                    },
-                    "Name": "quit_button"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "GUID": {
-                            "guid": "830a21d4-a1e3-0940-9f5a-c3dee20bed7c"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [
-                                "fc416336-b577-ff46-ad22-1a6b488bc14b",
-                                "b3e953c2-2ebc-8b4c-aafd-452d74965515"
-                            ],
-                            "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 1
-                        },
-                        "Layer": {
-                            "layer_id": 6,
-                            "layer_mask": 64
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                4.775875091552734,
-                                0.0,
-                                -16.414531707763672
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "GameOverManager"
-                        },
-                        "PrefabInstance": {
-                            "componentOverrides": {
-                                "Hierarchy": {
-                                    "childrenGUIDs": [
-                                        "fc416336-b577-ff46-ad22-1a6b488bc14b",
-                                        "b3e953c2-2ebc-8b4c-aafd-452d74965515"
-                                    ],
-                                    "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 1
-                                },
-                                "LocalTransform": {
-                                    "position": [
-                                        4.775875091552734,
-                                        0.0,
-                                        -16.414531707763672
-                                    ],
-                                    "rotation": [
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        1.0
-                                    ],
-                                    "scale": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ]
-                                }
-                            },
-                            "correspondingPrefabEntityGUID": "96b89587-c8d8-9142-995d-209c05066e8c",
-                            "instanceRootGUID": "830a21d4-a1e3-0940-9f5a-c3dee20bed7c",
-                            "sourcePrefabGUID": "114dfe50-ef4f-9d4d-b239-ce0e8fb1bd48"
-                        },
-                        "Scripts": {
-                            "scripts": [
-                                {
-                                    "enabled": true,
-                                    "script_asset": "39e6a9ce-8772-dd4b-9f93-5ed126fa6c2c"
-                                }
-                            ]
-                        }
-                    },
-                    "Name": "GameOverManager"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "CustomHitbox2D": {
-                            "max_point": [
-                                250.0,
-                                50.0
-                            ],
-                            "min_point": [
-                                -250.0,
-                                -50.0
-                            ],
-                            "position_offset": [
-                                60.0,
-                                0.0
-                            ]
-                        },
-                        "GUID": {
-                            "guid": "fc416336-b577-ff46-ad22-1a6b488bc14b"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "830a21d4-a1e3-0940-9f5a-c3dee20bed7c",
-                            "siblingIndex": 0
-                        },
-                        "Layer": {
-                            "layer_id": 6,
-                            "layer_mask": 64
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                2.8526031970977783,
-                                1.9104310274124146,
-                                -5.961182594299316
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "restart_button"
-                        },
-                        "PrefabInstance": {
-                            "componentOverrides": {
-                                "Hierarchy": {
-                                    "childrenGUIDs": [],
-                                    "parentGUID": "830a21d4-a1e3-0940-9f5a-c3dee20bed7c",
-                                    "siblingIndex": 0
-                                }
-                            },
-                            "correspondingPrefabEntityGUID": "f180b514-744b-3d42-a07b-2585106fb8e8",
-                            "instanceRootGUID": "830a21d4-a1e3-0940-9f5a-c3dee20bed7c",
-                            "sourcePrefabGUID": "114dfe50-ef4f-9d4d-b239-ce0e8fb1bd48"
-                        },
-                        "Texture2D": {
-                            "pos": [
-                                -0.4000000059604645,
-                                -0.699999988079071
-                            ],
-                            "texture_guid": "97d2a125-9452-e944-8004-faedf25dc26c",
-                            "texture_scale": [
-                                0.4000000059604645,
-                                0.09000000357627869
-                            ]
-                        },
-                        "UIAnimation": {
-                            "b_loop": true,
-                            "b_playing": false,
-                            "duration": 0.20000000298023224,
-                            "frame_duration": 0.10000000149011612,
-                            "spritesheet_columns": 2,
-                            "spritesheet_rows": 1,
-                            "total_frames": 2
-                        },
-                        "UIButton": {
-                            "action": 6,
-                            "disabled_color": -10066330,
-                            "highlighted_color": -3355444,
-                            "normal_color": -1,
-                            "payload": "",
-                            "pressed_color": -5592406,
-                            "state": 0
-                        },
-                        "UIElement": {
-                            "b_is_enabled": true,
-                            "b_is_interactable": true,
-                            "layer": 0
-                        },
-                        "UIRectTransform": {
-                            "anchor_max": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchor_min": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchored_position": [
-                                0.0,
-                                0.0
-                            ],
-                            "local_position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "offset_max": [
-                                0.0,
-                                0.0
-                            ],
-                            "offset_min": [
-                                0.0,
-                                0.0
-                            ],
-                            "pivot": [
-                                0.5,
-                                0.5
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "size_delta": [
-                                1024.0,
-                                88.0
-                            ]
-                        },
-                        "UVCoordinates": {
-                            "uv": [
-                                0.0012499999720603228,
-                                0.011363636702299118,
-                                0.4987500011920929,
-                                0.9886363744735718
-                            ]
-                        }
-                    },
-                    "Name": "restart_button"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "CustomHitbox2D": {
-                            "max_point": [
-                                200.0,
-                                40.400001525878906
-                            ],
-                            "min_point": [
-                                -150.0,
-                                -48.79999923706055
-                            ],
-                            "position_offset": [
-                                60.0,
-                                0.0
-                            ]
-                        },
-                        "GUID": {
-                            "guid": "b3e953c2-2ebc-8b4c-aafd-452d74965515"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "830a21d4-a1e3-0940-9f5a-c3dee20bed7c",
-                            "siblingIndex": 1
-                        },
-                        "Layer": {
-                            "layer_id": 6,
-                            "layer_mask": 64
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                2.8526031970977783,
-                                1.9104310274124146,
-                                -5.961182594299316
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "quit_button"
-                        },
-                        "PrefabInstance": {
-                            "componentOverrides": {
-                                "Hierarchy": {
-                                    "childrenGUIDs": [],
-                                    "parentGUID": "830a21d4-a1e3-0940-9f5a-c3dee20bed7c",
-                                    "siblingIndex": 1
-                                }
-                            },
-                            "correspondingPrefabEntityGUID": "2987b941-811b-1846-90ac-69bed20a8ac3",
-                            "instanceRootGUID": "830a21d4-a1e3-0940-9f5a-c3dee20bed7c",
-                            "sourcePrefabGUID": "114dfe50-ef4f-9d4d-b239-ce0e8fb1bd48"
-                        },
-                        "Texture2D": {
-                            "pos": [
-                                0.30000001192092896,
-                                -0.699999988079071
-                            ],
-                            "texture_guid": "6d404311-26e9-0a44-b50b-e8119ed2ee78",
+                            "texture_guid": "c3bf7110-7bea-8e4d-8ac3-e97081eee4a9",
                             "texture_scale": [
                                 0.30000001192092896,
                                 0.10000000149011612
@@ -1414,7 +1466,7 @@
                                     ],
                                     "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                    "materialGUID": "f02f0a71-8e9c-1843-9873-8e636f4ad324",
                                     "metallicOverride": 1.0,
                                     "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
                                     "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
@@ -1424,7 +1476,7 @@
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                            "modelGUID": "70fbb33a-74e7-a641-90d5-3a6255b9d413",
                             "receiveShadows": true,
                             "visible": true
                         },
@@ -1478,7 +1530,7 @@
                                             ],
                                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                            "materialGUID": "f02f0a71-8e9c-1843-9873-8e636f4ad324",
                                             "metallicOverride": 1.0,
                                             "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
                                             "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
@@ -1488,7 +1540,7 @@
                                             "useOverrides": false
                                         }
                                     ],
-                                    "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                                    "modelGUID": "70fbb33a-74e7-a641-90d5-3a6255b9d413",
                                     "receiveShadows": true,
                                     "visible": true
                                 },
@@ -1555,7 +1607,7 @@
                                     ],
                                     "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                    "materialGUID": "f02f0a71-8e9c-1843-9873-8e636f4ad324",
                                     "metallicOverride": 1.0,
                                     "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
                                     "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
@@ -1565,7 +1617,7 @@
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                            "modelGUID": "70fbb33a-74e7-a641-90d5-3a6255b9d413",
                             "receiveShadows": true,
                             "visible": true
                         },
@@ -1619,7 +1671,7 @@
                                             ],
                                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                            "materialGUID": "f02f0a71-8e9c-1843-9873-8e636f4ad324",
                                             "metallicOverride": 1.0,
                                             "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
                                             "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
@@ -1629,7 +1681,7 @@
                                             "useOverrides": false
                                         }
                                     ],
-                                    "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                                    "modelGUID": "70fbb33a-74e7-a641-90d5-3a6255b9d413",
                                     "receiveShadows": true,
                                     "visible": true
                                 },
@@ -1696,7 +1748,7 @@
                                     ],
                                     "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                    "materialGUID": "f02f0a71-8e9c-1843-9873-8e636f4ad324",
                                     "metallicOverride": 1.0,
                                     "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
                                     "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
@@ -1706,7 +1758,7 @@
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                            "modelGUID": "70fbb33a-74e7-a641-90d5-3a6255b9d413",
                             "receiveShadows": true,
                             "visible": true
                         },
@@ -1760,7 +1812,7 @@
                                             ],
                                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                            "materialGUID": "f02f0a71-8e9c-1843-9873-8e636f4ad324",
                                             "metallicOverride": 1.0,
                                             "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
                                             "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
@@ -1770,7 +1822,7 @@
                                             "useOverrides": false
                                         }
                                     ],
-                                    "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                                    "modelGUID": "70fbb33a-74e7-a641-90d5-3a6255b9d413",
                                     "receiveShadows": true,
                                     "visible": true
                                 },
@@ -1837,7 +1889,7 @@
                                     ],
                                     "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "f793c645-cb9b-3444-8452-17b2ed3756aa",
+                                    "materialGUID": "f6a92284-3591-ca4c-9cf5-1e0167b2d240",
                                     "metallicOverride": 1.0,
                                     "metallicTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
                                     "normalTextureOverride": "400c0192-8f2c-6f4a-bff0-1a60e7813d56",
@@ -1847,7 +1899,7 @@
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "496c08af-d9df-cc45-898c-20cc692a2e08",
+                            "modelGUID": "6094d6ab-f4b7-054d-b7ef-f0cfc76d7718",
                             "receiveShadows": true,
                             "visible": true
                         },
@@ -1901,7 +1953,7 @@
                                             ],
                                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f793c645-cb9b-3444-8452-17b2ed3756aa",
+                                            "materialGUID": "f6a92284-3591-ca4c-9cf5-1e0167b2d240",
                                             "metallicOverride": 1.0,
                                             "metallicTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
                                             "normalTextureOverride": "400c0192-8f2c-6f4a-bff0-1a60e7813d56",
@@ -1911,7 +1963,7 @@
                                             "useOverrides": false
                                         }
                                     ],
-                                    "modelGUID": "496c08af-d9df-cc45-898c-20cc692a2e08",
+                                    "modelGUID": "6094d6ab-f4b7-054d-b7ef-f0cfc76d7718",
                                     "receiveShadows": true,
                                     "visible": true
                                 },
@@ -2050,7 +2102,7 @@
                                     ],
                                     "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                    "materialGUID": "f02f0a71-8e9c-1843-9873-8e636f4ad324",
                                     "metallicOverride": 1.0,
                                     "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
                                     "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
@@ -2060,7 +2112,7 @@
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                            "modelGUID": "70fbb33a-74e7-a641-90d5-3a6255b9d413",
                             "receiveShadows": true,
                             "visible": true
                         },
@@ -2114,7 +2166,7 @@
                                             ],
                                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                            "materialGUID": "f02f0a71-8e9c-1843-9873-8e636f4ad324",
                                             "metallicOverride": 1.0,
                                             "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
                                             "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
@@ -2124,7 +2176,7 @@
                                             "useOverrides": false
                                         }
                                     ],
-                                    "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                                    "modelGUID": "70fbb33a-74e7-a641-90d5-3a6255b9d413",
                                     "receiveShadows": true,
                                     "visible": true
                                 },
@@ -2191,7 +2243,7 @@
                                     ],
                                     "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                    "materialGUID": "f02f0a71-8e9c-1843-9873-8e636f4ad324",
                                     "metallicOverride": 1.0,
                                     "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
                                     "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
@@ -2201,7 +2253,7 @@
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                            "modelGUID": "70fbb33a-74e7-a641-90d5-3a6255b9d413",
                             "receiveShadows": true,
                             "visible": true
                         },
@@ -2255,7 +2307,7 @@
                                             ],
                                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                            "materialGUID": "f02f0a71-8e9c-1843-9873-8e636f4ad324",
                                             "metallicOverride": 1.0,
                                             "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
                                             "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
@@ -2265,7 +2317,7 @@
                                             "useOverrides": false
                                         }
                                     ],
-                                    "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                                    "modelGUID": "70fbb33a-74e7-a641-90d5-3a6255b9d413",
                                     "receiveShadows": true,
                                     "visible": true
                                 },
@@ -2332,7 +2384,7 @@
                                     ],
                                     "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "f793c645-cb9b-3444-8452-17b2ed3756aa",
+                                    "materialGUID": "f6a92284-3591-ca4c-9cf5-1e0167b2d240",
                                     "metallicOverride": 1.0,
                                     "metallicTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
                                     "normalTextureOverride": "400c0192-8f2c-6f4a-bff0-1a60e7813d56",
@@ -2342,7 +2394,7 @@
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "496c08af-d9df-cc45-898c-20cc692a2e08",
+                            "modelGUID": "6094d6ab-f4b7-054d-b7ef-f0cfc76d7718",
                             "receiveShadows": true,
                             "visible": true
                         },
@@ -2396,7 +2448,7 @@
                                             ],
                                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f793c645-cb9b-3444-8452-17b2ed3756aa",
+                                            "materialGUID": "f6a92284-3591-ca4c-9cf5-1e0167b2d240",
                                             "metallicOverride": 1.0,
                                             "metallicTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
                                             "normalTextureOverride": "400c0192-8f2c-6f4a-bff0-1a60e7813d56",
@@ -2406,7 +2458,7 @@
                                             "useOverrides": false
                                         }
                                     ],
-                                    "modelGUID": "496c08af-d9df-cc45-898c-20cc692a2e08",
+                                    "modelGUID": "6094d6ab-f4b7-054d-b7ef-f0cfc76d7718",
                                     "receiveShadows": true,
                                     "visible": true
                                 },
@@ -2473,7 +2525,7 @@
                                     ],
                                     "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                    "materialGUID": "f02f0a71-8e9c-1843-9873-8e636f4ad324",
                                     "metallicOverride": 1.0,
                                     "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
                                     "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
@@ -2483,7 +2535,7 @@
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                            "modelGUID": "70fbb33a-74e7-a641-90d5-3a6255b9d413",
                             "receiveShadows": true,
                             "visible": true
                         },
@@ -2537,7 +2589,7 @@
                                             ],
                                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                            "materialGUID": "f02f0a71-8e9c-1843-9873-8e636f4ad324",
                                             "metallicOverride": 1.0,
                                             "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
                                             "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
@@ -2547,7 +2599,7 @@
                                             "useOverrides": false
                                         }
                                     ],
-                                    "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                                    "modelGUID": "70fbb33a-74e7-a641-90d5-3a6255b9d413",
                                     "receiveShadows": true,
                                     "visible": true
                                 },
@@ -2614,7 +2666,7 @@
                                     ],
                                     "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "f793c645-cb9b-3444-8452-17b2ed3756aa",
+                                    "materialGUID": "f6a92284-3591-ca4c-9cf5-1e0167b2d240",
                                     "metallicOverride": 1.0,
                                     "metallicTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
                                     "normalTextureOverride": "400c0192-8f2c-6f4a-bff0-1a60e7813d56",
@@ -2624,7 +2676,7 @@
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "496c08af-d9df-cc45-898c-20cc692a2e08",
+                            "modelGUID": "6094d6ab-f4b7-054d-b7ef-f0cfc76d7718",
                             "receiveShadows": true,
                             "visible": true
                         },
@@ -2678,7 +2730,7 @@
                                             ],
                                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f793c645-cb9b-3444-8452-17b2ed3756aa",
+                                            "materialGUID": "f6a92284-3591-ca4c-9cf5-1e0167b2d240",
                                             "metallicOverride": 1.0,
                                             "metallicTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
                                             "normalTextureOverride": "400c0192-8f2c-6f4a-bff0-1a60e7813d56",
@@ -2688,7 +2740,7 @@
                                             "useOverrides": false
                                         }
                                     ],
-                                    "modelGUID": "496c08af-d9df-cc45-898c-20cc692a2e08",
+                                    "modelGUID": "6094d6ab-f4b7-054d-b7ef-f0cfc76d7718",
                                     "receiveShadows": true,
                                     "visible": true
                                 },
@@ -2857,7 +2909,7 @@
                                     ],
                                     "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "f793c645-cb9b-3444-8452-17b2ed3756aa",
+                                    "materialGUID": "f6a92284-3591-ca4c-9cf5-1e0167b2d240",
                                     "metallicOverride": 1.0,
                                     "metallicTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
                                     "normalTextureOverride": "400c0192-8f2c-6f4a-bff0-1a60e7813d56",
@@ -2867,7 +2919,7 @@
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "496c08af-d9df-cc45-898c-20cc692a2e08",
+                            "modelGUID": "6094d6ab-f4b7-054d-b7ef-f0cfc76d7718",
                             "receiveShadows": true,
                             "visible": true
                         },
@@ -2921,7 +2973,7 @@
                                             ],
                                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f793c645-cb9b-3444-8452-17b2ed3756aa",
+                                            "materialGUID": "f6a92284-3591-ca4c-9cf5-1e0167b2d240",
                                             "metallicOverride": 1.0,
                                             "metallicTextureOverride": "1c887c7f-1764-b24d-80cc-c501b98a5889",
                                             "normalTextureOverride": "400c0192-8f2c-6f4a-bff0-1a60e7813d56",
@@ -2931,7 +2983,7 @@
                                             "useOverrides": false
                                         }
                                     ],
-                                    "modelGUID": "496c08af-d9df-cc45-898c-20cc692a2e08",
+                                    "modelGUID": "6094d6ab-f4b7-054d-b7ef-f0cfc76d7718",
                                     "receiveShadows": true,
                                     "visible": true
                                 },
@@ -2998,7 +3050,7 @@
                                     ],
                                     "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                    "materialGUID": "f02f0a71-8e9c-1843-9873-8e636f4ad324",
                                     "metallicOverride": 1.0,
                                     "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
                                     "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
@@ -3008,7 +3060,7 @@
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                            "modelGUID": "70fbb33a-74e7-a641-90d5-3a6255b9d413",
                             "receiveShadows": true,
                             "visible": true
                         },
@@ -3062,7 +3114,7 @@
                                             ],
                                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "40cf0fce-b7e9-3142-80ba-5e9e7b6f52ed",
+                                            "materialGUID": "f02f0a71-8e9c-1843-9873-8e636f4ad324",
                                             "metallicOverride": 1.0,
                                             "metallicTextureOverride": "ef22f20c-5c02-0f48-9ba9-87a8e6eac8f7",
                                             "normalTextureOverride": "a5ff3ca6-9ac8-b741-9520-9e67b6b16e6d",
@@ -3072,7 +3124,7 @@
                                             "useOverrides": false
                                         }
                                     ],
-                                    "modelGUID": "443d2baf-24fb-dc42-a6f9-403310b06194",
+                                    "modelGUID": "70fbb33a-74e7-a641-90d5-3a6255b9d413",
                                     "receiveShadows": true,
                                     "visible": true
                                 },
@@ -8049,7 +8101,7 @@
                                         0.25,
                                         -0.15000000596046448
                                     ],
-                                    "texture_guid": "ac631a82-95a9-7944-91cf-a1d2c21d425a",
+                                    "texture_guid": "7fdfa6e4-cca0-6144-9aa0-9e18470ae75a",
                                     "texture_scale": [
                                         0.20000000298023224,
                                         0.07999999821186066
@@ -8142,7 +8194,7 @@
                                 0.25,
                                 -0.15000000596046448
                             ],
-                            "texture_guid": "ac631a82-95a9-7944-91cf-a1d2c21d425a",
+                            "texture_guid": "7fdfa6e4-cca0-6144-9aa0-9e18470ae75a",
                             "texture_scale": [
                                 0.20000000298023224,
                                 0.07999999821186066
@@ -8338,7 +8390,7 @@
                                         -0.3499999940395355,
                                         -0.15000000596046448
                                     ],
-                                    "texture_guid": "374d15d2-5a0b-0947-bef6-f7255d7f399e",
+                                    "texture_guid": "0b7423ec-97fe-dc4b-ae96-4aa5a9bed448",
                                     "texture_scale": [
                                         0.20000000298023224,
                                         0.07999999821186066
@@ -8431,7 +8483,7 @@
                                 -0.3499999940395355,
                                 -0.15000000596046448
                             ],
-                            "texture_guid": "374d15d2-5a0b-0947-bef6-f7255d7f399e",
+                            "texture_guid": "0b7423ec-97fe-dc4b-ae96-4aa5a9bed448",
                             "texture_scale": [
                                 0.20000000298023224,
                                 0.07999999821186066
@@ -8781,7 +8833,7 @@
                                         -0.05000000074505806,
                                         0.20000000298023224
                                     ],
-                                    "texture_guid": "6ef6e681-661d-af46-86b2-a425c3bc387c",
+                                    "texture_guid": "6989da0a-a6d0-3448-a662-8eccc81f78b7",
                                     "texture_scale": [
                                         0.44999998807907104,
                                         0.09000000357627869
@@ -8874,7 +8926,7 @@
                                 -0.05000000074505806,
                                 0.20000000298023224
                             ],
-                            "texture_guid": "6ef6e681-661d-af46-86b2-a425c3bc387c",
+                            "texture_guid": "6989da0a-a6d0-3448-a662-8eccc81f78b7",
                             "texture_scale": [
                                 0.44999998807907104,
                                 0.09000000357627869
@@ -9070,7 +9122,7 @@
                                         -0.054999999701976776,
                                         -0.10000000149011612
                                     ],
-                                    "texture_guid": "97d2a125-9452-e944-8004-faedf25dc26c",
+                                    "texture_guid": "6d12a8ac-ad22-794c-a7e9-2fe32d9f6b57",
                                     "texture_scale": [
                                         0.4000000059604645,
                                         0.09000000357627869
@@ -9163,7 +9215,7 @@
                                 -0.054999999701976776,
                                 -0.10000000149011612
                             ],
-                            "texture_guid": "97d2a125-9452-e944-8004-faedf25dc26c",
+                            "texture_guid": "6d12a8ac-ad22-794c-a7e9-2fe32d9f6b57",
                             "texture_scale": [
                                 0.4000000059604645,
                                 0.09000000357627869
@@ -9359,7 +9411,7 @@
                                         -0.07999999821186066,
                                         -0.4000000059604645
                                     ],
-                                    "texture_guid": "6d404311-26e9-0a44-b50b-e8119ed2ee78",
+                                    "texture_guid": "c3bf7110-7bea-8e4d-8ac3-e97081eee4a9",
                                     "texture_scale": [
                                         0.30000001192092896,
                                         0.10000000149011612
@@ -9452,7 +9504,7 @@
                                 -0.07999999821186066,
                                 -0.4000000059604645
                             ],
-                            "texture_guid": "6d404311-26e9-0a44-b50b-e8119ed2ee78",
+                            "texture_guid": "c3bf7110-7bea-8e4d-8ac3-e97081eee4a9",
                             "texture_scale": [
                                 0.30000001192092896,
                                 0.10000000149011612
@@ -9926,6 +9978,20 @@
             {
                 "Entity": {
                     "Components": {
+                        "CustomHitbox2D": {
+                            "max_point": [
+                                50.0,
+                                50.0
+                            ],
+                            "min_point": [
+                                -50.0,
+                                -50.0
+                            ],
+                            "position_offset": [
+                                0.0,
+                                0.0
+                            ]
+                        },
                         "GUID": {
                             "guid": "234f63d2-9ce2-de4a-b2e9-b51df68fadf4"
                         },
@@ -10341,8 +10407,8 @@
                             "siblingIndex": 3
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -10734,8 +10800,8 @@
                             "siblingIndex": 1
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -10836,8 +10902,8 @@
                             "siblingIndex": 2
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -10938,8 +11004,8 @@
                             "siblingIndex": 3
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [

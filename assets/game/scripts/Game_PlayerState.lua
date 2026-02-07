@@ -511,7 +511,8 @@ local function handleHideToggle(px, py, pz)
         if bestSpot then
             local bx, by, bz = getPosition(bestSpot)
             setPosition(S.player, bx, by, bz)
-
+            setVelocity(S.player, 0.0, 0.0, 0.0)
+            log("[PlayerState] SET VEL TO 0")
             -- Cache and apply hide scale
             if not S.playerBaseScale then
                 local sx, sy, sz = getScale(S.player)
@@ -519,7 +520,7 @@ local function handleHideToggle(px, py, pz)
             end
 
             applyHideScale(S.player, S.playerBaseScale)
-
+            
             -- Also scale carried letter
             if S.carriedLetter then
                 if not S.letterBaseScale then
@@ -528,7 +529,7 @@ local function handleHideToggle(px, py, pz)
                 end
                 applyHideScale(S.carriedLetter, S.letterBaseScale)
             end
-
+            
             resetInputState()
             S.hidden = true
             S.hiddenIn = bestSpot
