@@ -9,7 +9,6 @@
 #include "CoreSystems/Events/GLFW/KeyEvents.h"
 #include "CoreSystems/Events/GLFW/MouseEvents.h"
 #include "CoreSystems/Events/GLFW/AssetEvents.h"
-
 #include "Applications/Application.h"
 
 namespace PAIN {

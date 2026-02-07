@@ -24,41 +24,347 @@
 #include <thread>
 #include <atomic>
 
+#ifdef PN_PLATFORM_ANDROID
+#include <CoreSystems/Events/Android/FocusEvents.h>
+#endif
 namespace PAIN {
 	namespace Scene {
 
-		entt::entity SceneManager::AddObject(const std::shared_ptr<Assets::Model>& mdl, const std::string& name, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale, Assets::GUID const& diff_id, Assets::GUID const& ao_id)
-		{
+		void SceneManager::onAttach() {
+
+			//Services
 			auto ecs = services->get<ECS::Controller>();
-			auto meta = services->get<MetaData::Service>();
+			auto pathService = services->get<Path::Path>();
+			auto asset_manager = services->get<Assets::Manager>();
 
-			entt::entity entity = ecs->createEntity();
-			ecs->addEntityComponent(entity, Entity::Name{ name });
-			ecs->addEntityComponent(entity, LocalTransform{ pos, rot, scale });
-			ecs->addEntityComponent(entity, WorldTransform{});
-			ecs->addEntityComponent(entity, Entity::Hierarchy{});
+			//Set scecne manager for renderer
+			services->get<sRenderer>()->setScene(services->get<Scene::SceneManager>());
 
-			// Create ModelRenderer and CACHE the model asset pointer
-			ModelRenderer mr = ModelRenderer{ mdl->guid };
-			mr.cachedModelAsset = mdl;  // ← ADD THIS LINE!
-			ecs->addEntityComponent(entity, static_cast<ModelRenderer>(mr));
+			//Init loading screen
+			loadingScreen = std::make_unique<LoadingScreen>();
+			loadingScreen->init(services);
 
-			// Add Animation component if model has animations
-			if (mdl->animations.size()) {
-				Animation anim;
-				anim.PlayAnimation(0);  // Start first animation
-				ecs->addEntityComponent(entity, static_cast<Animation>(anim));
+			//Init skybox here, set texture for skybox in config scene
+			Skybox::get().init(services);
+			std::filesystem::path skybox_path = "engine/textures/skybox2.hdr";
+			setCurrSkyBoxTexture(asset_manager->findGUID(skybox_path));
+			PN_CORE_INFO("[SceneManager] Initialized skybox");
 
-				PN_CORE_INFO("Added {} to scene with animation playing", mdl->vpath);
+#ifdef _DEBUG
+			// Demo Object and Audio Setup
+			{
+				// for .mesh(converted from .obj only)
+				std::optional<std::shared_ptr<Assets::Model>> mdl_opt;
+				std::shared_ptr<Assets::Model> mdl;
+
+#ifdef PN_PLATFORM_WINDOWS
+				std::filesystem::path dm_path = "game/models/damagedhelmet/DamagedHelmet.mesh";
+#else	
+				std::filesystem::path dm_path = "game\\models\\damagedhelmet\\DamagedHelmet.mesh";
+#endif
+				//Get model
+				PN_CORE_INFO("Attempting to add {} to scene", dm_path.string());
+				mdl_opt = asset_manager->getAsset<Assets::Model>(dm_path);
+				if (mdl_opt.has_value()) {
+					mdl = mdl_opt.value();
+
+					auto e = AddObject(mdl, "dm", { 0.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(1.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
+				}
+
+
+#ifdef PN_PLATFORM_WINDOWS
+				std::filesystem::path fox_path = "game/models/Fox.mesh";
+#else	
+				std::filesystem::path fox_path = "game\\models\\Fox.mesh";
+#endif
+				//Get model
+				PN_CORE_INFO("Attempting to add {} to scene", fox_path.string());
+				mdl_opt = asset_manager->getAsset<Assets::Model>(fox_path);
+				if (mdl_opt.has_value()) {
+					mdl = mdl_opt.value();
+
+					auto e = AddObject(mdl, "fox", { 5.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(1.0f, 0.0f, 0.0f)), glm::vec3{ 0.05f });
+				}
+
+
+#ifdef PN_PLATFORM_WINDOWS
+				std::filesystem::path bs_path = "game/models/brainstem/BrainStem.mesh";
+#else	
+				std::filesystem::path bs_path = "game\\models\\brainstem\\BrainStem.mesh";
+#endif
+				//Get model
+
+				PN_CORE_INFO("Attempting to add {} to scene", bs_path.string());
+				mdl_opt = asset_manager->getAsset<Assets::Model>(bs_path);
+				if (mdl_opt.has_value()) {
+					mdl = mdl_opt.value();
+					//mdl->materials[0].metallic = 0.f;
+					//mdl->materials[0].roughness = 1.f;
+					//mdl->materials[0].baseColor = { 0.3f, 0.3f, 0.3f };
+					auto e = AddObject(mdl, "bs", { 0.f, 0.f, -10.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(0.0f, 0.0f, 0.0f)), { 5.f, 5.f, 5.f });
+				}
+				else {
+					throw std::runtime_error("animation obj err");
+				}
+
+#ifdef PN_PLATFORM_WINDOWS
+				std::filesystem::path fh_path = "game/models/FrogAnim.mesh";
+#else	
+				std::filesystem::path fh_path = "game\\models\\FrogAnim.mesh";
+#endif
+				//Get model
+				PN_CORE_INFO("Attempting to add {} to scene", fh_path.string());
+				mdl_opt = asset_manager->getAsset<Assets::Model>(fh_path);
+				if (mdl_opt.has_value()) {
+					mdl = mdl_opt.value();
+					//mdl->materials[0].metallic = 0.f;
+					//mdl->materials[0].roughness = 1.f;
+					//mdl->materials[0].baseColor = { 0.3f, 0.3f, 0.3f };
+					auto e = AddObject(mdl, "fh", { -3.f, 2.f, 0.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(0.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
+				}
+				else {
+					throw std::runtime_error("animation obj err");
+				}
+
+				//Create default scene asset
+				SceneAsset default_scene_config;
+
+				//Configure scene with default settings
+				configScene(default_scene_config);
 			}
-			else {
-				PN_CORE_INFO("Added {} to scene", mdl->vpath);
+#else
+			// Prep for subs
+			std::filesystem::path init_scn_path = "game/scenes/mainmenu.scn";
+
+			auto scn_opt = asset_manager->getAssetData(init_scn_path);
+
+			if (scn_opt) {
+
+				loadScene(scn_opt.get()->guid);
+				//SetGameCamera();
 			}
+#endif
 
-			if (meta) meta->setEntityName(entity, name);
-
-			return entity;
+			//Log scene manager init
+			PN_CORE_INFO("[SceneManager] Initialized");
 		}
+
+		void SceneManager::onDetach() {
+			PN_CORE_INFO("[SceneManager] Shutting down");
+
+			// Clean up current scene
+			unloadScene();
+		}
+
+		void SceneManager::onUpdate(AppTiming timing) {
+
+#ifndef _DEBUG
+			// !TODO: fix this impl for release
+			SetGameCamera();
+#endif
+
+			// Daytime / Nighttime setting
+			{
+				if (gs.world_light) {
+
+					auto olc = getWorldLight();
+
+					if (!olc) {
+						LightSources::get().create("world");
+						getWorldLight()->L_intensity = glm::vec3(GraphicsSettings::get().global_light_intensity);
+						getWorldLight()->direction = glm::normalize(glm::vec3{ -0.5f, -0.5f, -0.2f });
+						getWorldLight()->setShadowType(Light::SHADOW_TYPES::MAPPED);
+						getWorldLight()->type = Light::TYPES::DIRECTIONAL;
+					}
+					else {
+						olc->position = GetActiveCamera()->pos - glm::normalize(olc->direction) * olc->shadow_source_follow_distance;
+					}
+				}
+				else {
+					auto olc = LightSources::get().get("world");
+
+					if (olc) {
+						LightSources::get().destroy("world");
+					}
+				}
+			}
+
+			auto ecs = services->get<ECS::Controller>();
+			auto& registry = ecs->getRegistry();
+			auto view = registry.view<Entity::Name>();
+
+			std::unordered_set<std::string> cameras_seen_this_frame;
+
+
+			for (auto e : view) {
+
+
+				auto cam = ecs->getEntityComponent<Cam>(e);
+
+				if (!cam.has_value()) {
+					continue;
+				}
+				auto trans = ecs->getEntityComponent<LocalTransform>(e);
+
+				glm::vec3 entity_pos = { 0.f,0.f,0.f };
+				glm::quat entity_rot = glm::quat({ 0.f,0.f,0.f });
+				glm::vec3 entity_scale = { 0.f,0.f,0.f };
+
+				if (trans.has_value()) {
+					entity_pos = trans->get().position;
+					entity_rot = trans->get().rotation;
+					entity_scale = trans->get().scale;
+				}
+
+				glm::vec3 offset_world = entity_rot * (cam->get().trans_offset * entity_scale);
+				glm::vec3 cam_pos = entity_pos + offset_world;
+
+				glm::vec3 look_offset = cam->get().rot_offset * entity_scale; //offset from entity
+				glm::vec3 target_pos = entity_pos + look_offset;
+
+				glm::vec3 forward{ glm::normalize(target_pos - cam_pos) };
+				glm::vec3 up{ 0.f, 1.f, 0.f };
+				float near_plane = cam->get().near_plane;
+				float far_plane = cam->get().far_plane;
+				float width_ratio = cam->get().width_ratio;
+				float height_ratio = cam->get().height_ratio;
+
+
+				auto metadata = services->get<MetaData::Service>();
+
+				std::string entity_name = "UNNAMED CAMERA";
+				if (metadata) {
+					entity_name = metadata->getEntityName(e);
+				}
+
+				cameras_seen_this_frame.insert(entity_name);
+
+
+				auto it = game_cameras.find(entity_name); // Single lookup
+
+				// If camera exists update every frame else create new
+				if (it != game_cameras.end()) {
+					auto curr_cam = it->second.get();
+					curr_cam->pos = cam_pos;
+					curr_cam->forward = forward;
+					curr_cam->up = up;
+					curr_cam->fov = GraphicsSettings::get().fov;
+					curr_cam->near_plane = near_plane;
+					curr_cam->far_plane = far_plane;
+					curr_cam->width_ratio = width_ratio;
+					curr_cam->height_ratio = height_ratio;
+
+				}
+				else {
+					game_cameras.insert(std::pair<std::string, std::unique_ptr<Camera>>(entity_name, std::make_unique<Camera>(cam_pos, forward, up, GraphicsSettings::get().fov, near_plane, far_plane, width_ratio, height_ratio)));
+
+				}
+			}
+
+			// Clear unwanted cameras
+			for (auto it = game_cameras.begin(); it != game_cameras.end(); ) {
+				const std::string& map_name = it->first;
+				if (cameras_seen_this_frame.find(map_name) == cameras_seen_this_frame.end()) {
+
+					// SAFETY: Check if we are deleting the currently active camera
+					if (active_camera == it->second.get()) {
+						// Fallback to editor camera or nullptr to prevent crashing
+						SetEditorCamera();
+						active_game_cam = "";
+						PN_CORE_WARN("Active Camera '{}' was deleted. Switched to Editor Camera.", map_name);
+					}
+
+					// Erase returns the iterator to the NEXT element
+					it = game_cameras.erase(it);
+				}
+				else {
+					// Move to next
+					++it;
+				}
+
+			}
+
+		}
+		void SceneManager::onEvent(Event::Event& e) {
+			Event::Dispatcher dispatcher(e);
+#ifdef PN_PLATFORM_WINDOWS
+			dispatcher.Dispatch<Event::WindowFocused>([&](Event::WindowFocused& e) -> bool {
+				if (e.checkWindowFocus()) {
+					services->get<Audio::Audio>()->resumeAll();
+				}
+				else {
+					services->get<Audio::Audio>()->pauseAll();
+				}
+				PN_CORE_INFO(e.toString());
+				return false;
+				});
+
+#else
+            dispatcher.Dispatch<Event::FocusLost>([&](Event::FocusLost& e) -> bool {
+                services->get<Audio::Audio>()->pauseAll();
+                PN_CORE_INFO("[SceneManager] {}", e.toString());
+                return false;
+            });
+            dispatcher.Dispatch<Event::FocusGained>([&](Event::FocusGained& e) -> bool {
+                services->get<Audio::Audio>()->resumeAll();
+                PN_CORE_INFO("[SceneManager] {}", e.toString());
+                return false;
+            });
+
+#endif
+        }
+		/* =========================================================================== */
+		/*                                CAMERAS                                      */
+		/* =========================================================================== */
+
+		Camera* SceneManager::GetActiveCamera()
+		{
+			return active_camera;
+		}
+
+		Camera* SceneManager::GetGameCamera()
+		{
+			auto it = game_cameras.find(active_game_cam);
+			if (it != game_cameras.end()) {
+				return it->second.get();
+			}
+			return nullptr;
+		}
+
+		void SceneManager::SetActiveCamera(Camera* cam) {
+			active_camera = cam;
+		}
+
+		void SceneManager::SetEditorCamera() {
+			SetActiveCamera(editor_camera.get());
+		}
+
+		void SceneManager::SetGameCamera()
+		{
+			auto it = game_cameras.find(active_game_cam);
+			if (it != game_cameras.end()) {
+				SetActiveCamera(it->second.get());
+			}
+		}
+
+		void SceneManager::ChangeGameCamera(std::string cam_name)
+		{
+			PN_CORE_INFO("SELECTING Camera : {}", cam_name);
+			active_game_cam = cam_name;
+		}
+
+		const std::string& SceneManager::GetActiveGameCamera()
+		{
+			return active_game_cam;
+		}
+
+		const std::unordered_map<std::string, std::unique_ptr<Camera>>& SceneManager::GetAllGameCamera() const {
+			return game_cameras;
+		}
+
+		/* =========================================================================== */
+		/*                                SCENES                                       */
+		/* =========================================================================== */
 
 		bool SceneManager::buildEntitiesFromAsset(SceneAsset const& scene_asset) {
 			if (scene_asset.entityData.empty()) {
@@ -992,262 +1298,6 @@ namespace PAIN {
 			PN_CORE_INFO("[SceneManager] Scene configuration complete");
 		}
 
-		void SceneManager::onAttach() {
-
-			//Services
-			auto ecs = services->get<ECS::Controller>();
-			auto pathService = services->get<Path::Path>();
-			auto asset_manager = services->get<Assets::Manager>();
-
-			//Set scecne manager for renderer
-			services->get<sRenderer>()->setScene(services->get<Scene::SceneManager>());
-
-			//Init loading screen
-			loadingScreen = std::make_unique<LoadingScreen>();
-			loadingScreen->init(services);
-
-			//Init skybox here, set texture for skybox in config scene
-			Skybox::get().init(services);
-			std::filesystem::path skybox_path = "engine/textures/skybox2.hdr";
-			setCurrSkyBoxTexture(asset_manager->findGUID(skybox_path));
-			PN_CORE_INFO("[SceneManager] Initialized skybox");
-
-#ifdef _DEBUG
-			// Demo Object and Audio Setup
-			{
-				// for .mesh(converted from .obj only)
-				std::optional<std::shared_ptr<Assets::Model>> mdl_opt;
-				std::shared_ptr<Assets::Model> mdl;
-
-#ifdef PN_PLATFORM_WINDOWS
-				std::filesystem::path dm_path = "game/models/damagedhelmet/DamagedHelmet.mesh";
-#else	
-				std::filesystem::path dm_path = "game\\models\\damagedhelmet\\DamagedHelmet.mesh";
-#endif
-				//Get model
-				PN_CORE_INFO("Attempting to add {} to scene", dm_path.string());
-				mdl_opt = asset_manager->getAsset<Assets::Model>(dm_path);
-				if (mdl_opt.has_value()) {
-					mdl = mdl_opt.value();
-
-					auto e = AddObject(mdl, "dm", { 0.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(1.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
-				}
-
-
-#ifdef PN_PLATFORM_WINDOWS
-				std::filesystem::path fox_path = "game/models/Fox.mesh";
-#else	
-				std::filesystem::path fox_path = "game\\models\\Fox.mesh";
-#endif
-				//Get model
-				PN_CORE_INFO("Attempting to add {} to scene", fox_path.string());
-				mdl_opt = asset_manager->getAsset<Assets::Model>(fox_path);
-				if (mdl_opt.has_value()) {
-					mdl = mdl_opt.value();
-
-					auto e = AddObject(mdl, "fox", { 5.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(1.0f, 0.0f, 0.0f)), glm::vec3{ 0.05f });
-				}
-
-
-#ifdef PN_PLATFORM_WINDOWS
-				std::filesystem::path bs_path = "game/models/brainstem/BrainStem.mesh";
-#else	
-				std::filesystem::path bs_path = "game\\models\\brainstem\\BrainStem.mesh";
-#endif
-				//Get model
-
-				PN_CORE_INFO("Attempting to add {} to scene", bs_path.string());
-				mdl_opt = asset_manager->getAsset<Assets::Model>(bs_path);
-				if (mdl_opt.has_value()) {
-					mdl = mdl_opt.value();
-					//mdl->materials[0].metallic = 0.f;
-					//mdl->materials[0].roughness = 1.f;
-					//mdl->materials[0].baseColor = { 0.3f, 0.3f, 0.3f };
-					auto e = AddObject(mdl, "bs", { 0.f, 0.f, -10.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(0.0f, 0.0f, 0.0f)), { 5.f, 5.f, 5.f });
-				}
-				else {
-					throw std::runtime_error("animation obj err");
-				}
-
-#ifdef PN_PLATFORM_WINDOWS
-				std::filesystem::path fh_path = "game/models/FrogAnim.mesh";
-#else	
-				std::filesystem::path fh_path = "game\\models\\FrogAnim.mesh";
-#endif
-				//Get model
-				PN_CORE_INFO("Attempting to add {} to scene", fh_path.string());
-				mdl_opt = asset_manager->getAsset<Assets::Model>(fh_path);
-				if (mdl_opt.has_value()) {
-					mdl = mdl_opt.value();
-					//mdl->materials[0].metallic = 0.f;
-					//mdl->materials[0].roughness = 1.f;
-					//mdl->materials[0].baseColor = { 0.3f, 0.3f, 0.3f };
-					auto e = AddObject(mdl, "fh", { -3.f, 2.f, 0.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(0.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
-				}
-				else {
-					throw std::runtime_error("animation obj err");
-				}
-
-				//Create default scene asset
-				SceneAsset default_scene_config;
-
-				//Configure scene with default settings
-				configScene(default_scene_config);
-			}
-#else
-			// Prep for subs
-			std::filesystem::path init_scn_path = "game/scenes/mainmenu.scn";
-
-			auto scn_opt = asset_manager->getAssetData(init_scn_path);
-
-			if (scn_opt) {
-
-				loadScene(scn_opt.get()->guid);
-				//SetGameCamera();
-			}
-#endif
-
-			//Log scene manager init
-			PN_CORE_INFO("[SceneManager] Initialized");
-		}
-
-		void SceneManager::onDetach() {
-			PN_CORE_INFO("[SceneManager] Shutting down");
-
-			// Clean up current scene
-			unloadScene();
-		}
-
-		void SceneManager::onUpdate(AppTiming timing) {
-
-#ifndef _DEBUG
-			// !TODO: fix this impl for release
-			SetGameCamera();
-#endif
-
-			// Daytime / Nighttime setting
-			{
-				if (gs.world_light) {
-
-					auto olc = getWorldLight();
-
-					if (!olc) {
-						LightSources::get().create("world");
-						getWorldLight()->L_intensity = glm::vec3(GraphicsSettings::get().global_light_intensity);
-						getWorldLight()->direction = glm::normalize(glm::vec3{ -0.5f, -0.5f, -0.2f });
-						getWorldLight()->setShadowType(Light::SHADOW_TYPES::MAPPED);
-						getWorldLight()->type = Light::TYPES::DIRECTIONAL;
-					}
-					else {
-						olc->position = GetActiveCamera()->pos - glm::normalize(olc->direction) * olc->shadow_source_follow_distance;
-					}
-				}
-				else {
-					auto olc = LightSources::get().get("world");
-
-					if (olc) {
-						LightSources::get().destroy("world");
-					}
-				}
-			}
-
-			auto ecs = services->get<ECS::Controller>();
-			auto& registry = ecs->getRegistry();
-			auto view = registry.view<Entity::Name>();
-
-			std::unordered_set<std::string> cameras_seen_this_frame;
-
-
-			for (auto e : view) {
-
-
-				auto cam = ecs->getEntityComponent<Cam>(e);
-
-				if (!cam.has_value()) {
-					continue;
-				}
-				auto trans = ecs->getEntityComponent<LocalTransform>(e);
-
-				glm::vec3 entity_pos = { 0.f,0.f,0.f };
-				glm::quat entity_rot = glm::quat({ 0.f,0.f,0.f });
-				glm::vec3 entity_scale = { 0.f,0.f,0.f };
-
-				if (trans.has_value()) {
-					entity_pos = trans->get().position;
-					entity_rot = trans->get().rotation;
-					entity_scale = trans->get().scale;
-				}
-
-				glm::vec3 offset_world = entity_rot * (cam->get().trans_offset * entity_scale);
-				glm::vec3 cam_pos = entity_pos + offset_world;
-
-				glm::vec3 look_offset = cam->get().rot_offset * entity_scale; //offset from entity
-				glm::vec3 target_pos = entity_pos + look_offset;
-
-				glm::vec3 forward{ glm::normalize(target_pos - cam_pos) };
-				glm::vec3 up{ 0.f, 1.f, 0.f };
-				float near_plane = cam->get().near_plane;
-				float far_plane = cam->get().far_plane;
-				float width_ratio = cam->get().width_ratio;
-				float height_ratio = cam->get().height_ratio;
-
-
-				auto metadata = services->get<MetaData::Service>();
-
-				std::string entity_name = "UNNAMED CAMERA";
-				if (metadata) {
-					entity_name = metadata->getEntityName(e);
-				}
-
-				cameras_seen_this_frame.insert(entity_name);
-
-
-				auto it = game_cameras.find(entity_name); // Single lookup
-
-				// If camera exists update every frame else create new
-				if (it != game_cameras.end()) {
-					auto curr_cam = it->second.get();
-					curr_cam->pos = cam_pos;
-					curr_cam->forward = forward;
-					curr_cam->up = up;
-					curr_cam->fov = GraphicsSettings::get().fov;
-					curr_cam->near_plane = near_plane;
-					curr_cam->far_plane = far_plane;
-					curr_cam->width_ratio = width_ratio;
-					curr_cam->height_ratio = height_ratio;
-
-				}
-				else {
-					game_cameras.insert(std::pair<std::string, std::unique_ptr<Camera>>(entity_name, std::make_unique<Camera>(cam_pos, forward, up, GraphicsSettings::get().fov, near_plane, far_plane, width_ratio, height_ratio)));
-
-				}
-			}
-
-			// Clear unwanted cameras
-			for (auto it = game_cameras.begin(); it != game_cameras.end(); ) {
-				const std::string& map_name = it->first;
-				if (cameras_seen_this_frame.find(map_name) == cameras_seen_this_frame.end()) {
-
-					// SAFETY: Check if we are deleting the currently active camera
-					if (active_camera == it->second.get()) {
-						// Fallback to editor camera or nullptr to prevent crashing
-						SetEditorCamera();
-						active_game_cam = "";
-						PN_CORE_WARN("Active Camera '{}' was deleted. Switched to Editor Camera.", map_name);
-					}
-
-					// Erase returns the iterator to the NEXT element
-					it = game_cameras.erase(it);
-				}
-				else {
-					// Move to next
-					++it;
-				}
-
-			}
-
-		}
-
 		void SceneManager::loadScene(const Assets::GUID& sceneGUID) {
 			auto assetManager = services->get<Assets::Manager>();
 			if (!assetManager) {
@@ -1541,6 +1591,8 @@ namespace PAIN {
 			PN_CORE_INFO("STOPPED");
 			auto controller = services->get<ECS::Controller>();
 
+			services->get<Audio::Audio>()->stopAll();
+
 			// reset lua scripting state before destroying entities
 			PN_CORE_INFO("[SceneManager::onStop] Resetting Lua scripting state...");
 			auto scriptingSystem = controller->getSystem<Scripting::GameScriptingSystem>();
@@ -1592,54 +1644,69 @@ namespace PAIN {
 			is_game_paused = paused;
 		}
 
+
+		/* =========================================================================== */
+		/*                            ENVIRONMENT                                      */
+		/* =========================================================================== */
+
+
+		entt::entity SceneManager::AddObject(const std::shared_ptr<Assets::Model>& mdl, const std::string& name, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale, Assets::GUID const& diff_id, Assets::GUID const& ao_id)
+		{
+			auto ecs = services->get<ECS::Controller>();
+			auto meta = services->get<MetaData::Service>();
+
+			entt::entity entity = ecs->createEntity();
+			ecs->addEntityComponent(entity, Entity::Name{ name });
+			ecs->addEntityComponent(entity, LocalTransform{ pos, rot, scale });
+			ecs->addEntityComponent(entity, WorldTransform{});
+			ecs->addEntityComponent(entity, Entity::Hierarchy{});
+
+			// Create ModelRenderer and CACHE the model asset pointer
+			ModelRenderer mr = ModelRenderer{ mdl->guid };
+			mr.cachedModelAsset = mdl;  // ← ADD THIS LINE!
+			ecs->addEntityComponent(entity, static_cast<ModelRenderer>(mr));
+
+			// Add Animation component if model has animations
+			if (mdl->animations.size()) {
+				Animation anim;
+				anim.PlayAnimation(0);  // Start first animation
+				ecs->addEntityComponent(entity, static_cast<Animation>(anim));
+
+				PN_CORE_INFO("Added {} to scene with animation playing", mdl->vpath);
+			}
+			else {
+				PN_CORE_INFO("Added {} to scene", mdl->vpath);
+			}
+
+			if (meta) meta->setEntityName(entity, name);
+
+			return entity;
+		}
+
 		void SceneManager::setCurrSkyBoxTexture(Assets::GUID const& skybox_id) {
 			curr_skybox_id = skybox_id;
 			Skybox::get().setTexture(curr_skybox_id);
 		}
 
-		Camera* SceneManager::GetActiveCamera()
-		{
-			return active_camera;
-		}
+		/* =========================================================================== */
+		/*                                LAYERS                                       */
+		/* =========================================================================== */
 
-		Camera* SceneManager::GetGameCamera()
-		{
-			auto it = game_cameras.find(active_game_cam);
-			if (it != game_cameras.end()) {
-				return it->second.get();
+		bool SceneManager::isLayerEnabled(int layer_id) {
+			for (const auto& layer : layers) {
+				if (layer.id == layer_id) {
+					return layer.enabled;
+				}
 			}
-			return nullptr;
+			return true;
 		}
 
-		void SceneManager::SetActiveCamera(Camera* cam) {
-			active_camera = cam;
-		}
+		bool SceneManager::canLayersInteract(int layer1, int layer2) const {
+			if (layer1 < 0 || layer2 < 0) return true;  // Invalid = allow
+			if (layer1 >= mask_matrix.size()) return true;
+			if (layer2 >= mask_matrix[layer1].size()) return true;
 
-		void SceneManager::SetEditorCamera() {
-			SetActiveCamera(editor_camera.get());
-		}
-
-		void SceneManager::SetGameCamera()
-		{
-			auto it = game_cameras.find(active_game_cam);
-			if (it != game_cameras.end()) {
-				SetActiveCamera(it->second.get());
-			}
-		}
-
-		void SceneManager::ChangeGameCamera(std::string cam_name)
-		{
-			PN_CORE_INFO("SELECTING Camera : {}", cam_name);
-			active_game_cam = cam_name;
-		}
-
-		const std::string& SceneManager::GetActiveGameCamera()
-		{
-			return active_game_cam;
-		}
-
-		const std::unordered_map<std::string, std::unique_ptr<Camera>>& SceneManager::GetAllGameCamera() const {
-			return game_cameras;
+			return mask_matrix[layer1][layer2];
 		}
 
 		int SceneManager::getPickingMask() const
@@ -1652,6 +1719,6 @@ namespace PAIN {
 			}
 			return mask;
 		}
-}
 
+	}
 }
