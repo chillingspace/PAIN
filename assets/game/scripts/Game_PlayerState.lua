@@ -282,11 +282,7 @@ function S.init(player)
     updateHeartsUI()
 end
 
-local function playSfx(e)
-    if e and audioPlay then
-        audioPlay(e)
-    end
-end
+
 
 -- result = either win or lose
 -- local function requestEndOverlay(result) 
@@ -415,17 +411,7 @@ local function updateTapState(dt)
 end
 
 
--------------------------------------------------
--- Helper: Sync SFX positions to player
--------------------------------------------------
-    local sfxEntities = {
-        -- S.sfxHideIn, S.sfxHideOut, S.sfxRespawn,
-        -- S.sfxIdle, S.sfxJump, S.sfxDrop
-    }
-    -- for _, e in ipairs(sfxEntities) do
-    --    if e then setPosition(e, px, py, pz) end
-    -- end
-end
+
 
 -------------------------------------------------
 -- Helper: Find nearest entity with tag within radius
@@ -439,12 +425,14 @@ local function findNearestByTag(tag, px, py, pz, radius)
 
     for _, e in ipairs(entities) do
         local ex, ey, ez = getPosition(e)
-        local dx, dy, dz = px - ex, py - ey, pz - ez
-        local distSq = dx*dx + dy*dy + dz*dz
+        if ex and ey and ez then
+            local dx, dy, dz = px - ex, py - ey, pz - ez
+            local distSq = dx*dx + dy*dy + dz*dz
 
-        if distSq <= bestDistSq then
-            bestDistSq = distSq
-            bestEntity = e
+            if distSq <= bestDistSq then
+                bestDistSq = distSq
+                bestEntity = e
+            end
         end
     end
 
@@ -684,11 +672,7 @@ function S.update(dt)
     -------------------------------------------------
     updateTapState(dt)
 
-    -------------------------------------------------
-    -- 7. Get player position & sync SFX
-    -------------------------------------------------
-    local px, py, pz = getPosition(p)
-    syncAllSfx(px, py, pz)
+
 
     -------------------------------------------------
     -- 8. Hide/Unhide logic (H key)

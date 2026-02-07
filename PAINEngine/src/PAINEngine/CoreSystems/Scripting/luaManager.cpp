@@ -978,19 +978,12 @@ namespace PAIN {
         // audioPlayRandomSFXFromEntity({file1, file2, ...}, entityId, volumeDb?) - Random SFX from entity
         lua_.set_function("audioPlayRandomSFXFromEntity", [this](sol::table fileList, 
             entt::entity entityId, sol::optional<float> volumeDb) -> int {
-            PN_CORE_INFO("[SFX] audioPlayRandomSFXFromEntity called, services_={}, api_={}", 
-                (void*)services_, (void*)api_.get());
-            if (!services_ || !api_) {
-                PN_CORE_WARN("[SFX] audioPlayRandomSFXFromEntity: services_ or api_ is null!");
-                return -1;
-            }
+            if (!services_ || !api_) return -1;
+            auto assets = services_->get<Assets::Manager>();
             auto audio = services_->get<Audio::Audio>();
-            if (!audio) {
-                PN_CORE_WARN("[SFX] audioPlayRandomSFXFromEntity: Audio service not found!");
-                return -1;
-            }
+            if (!assets || !audio) return -1;
             
-            std::vector<std::string> files;
+            std::vector<Assets::GUID> validGuids;
             for (size_t i = 1; i <= fileList.size(); ++i) {
                 sol::optional<std::string> f = fileList[i];
                 if (f) {
@@ -1000,34 +993,28 @@ namespace PAIN {
                          PN_CORE_WARN("[LuaManager] audioPlayRandomSFXFromEntity: Audio asset '{}' not found!", filename);
                          continue;
                      }
-                     
-                     auto assets = services_->get<Assets::Manager>();
-                     if (assets) {
-                        auto soundOpt = assets->getAsset<Audio::Sound>(Assets::GUID(guidStr));
-                        if (soundOpt) {
-                            files.push_back(soundOpt.value()->getPath());
-                        }
-                     }
+                     validGuids.emplace_back(guidStr);
                 }
             }
             
-            if (files.empty()) {
-                PN_CORE_WARN("[SFX] audioPlayRandomSFXFromEntity: Empty file list!");
+            if (validGuids.empty()) {
+                PN_CORE_WARN("[SFX] audioPlayRandomSFXFromEntity: No valid audio assets found in list!");
+                return -1;
+            }
+            
+            // Random pick
+            size_t idx = rand() % validGuids.size();
+            auto soundOpt = assets->getAsset<Audio::Sound>(validGuids[idx]);
+            if (!soundOpt) {
                 return -1;
             }
             
             glm::vec3 pos = api_->GetPosition(entityId);
-            PN_CORE_INFO("[SFX] Playing random SFX from {} files at ({:.1f},{:.1f},{:.1f})", 
-                files.size(), pos.x, pos.y, pos.z);
             
-            auto result = audio->playRandomFromList(files, volumeDb.value_or(0.0f), true, 
+            // loop=false, spatial=true
+            auto result = audio->play(soundOpt.value(), "sfx", volumeDb.value_or(0.0f), 0.0f, false, true, 
                 pos, Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
             
-            if (result) {
-                PN_CORE_INFO("[SFX] SFX started, channel={}", result->value);
-            } else {
-                PN_CORE_WARN("[SFX] SFX playback failed!");
-            }
             return result ? result->value : -1;
             });
 
