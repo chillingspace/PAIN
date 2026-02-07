@@ -178,7 +178,7 @@ function GlobalAudio_SetGameOver(active)
 
     if active then
         -- Duck Main BGM (Track 0) to 0.1 linear volume
-        local duckVol = linearToDb(0.1)
+        local duckVol = linearToDb(0.0)
         globalBGMFade(0, duckVol, 0.5)
         log("[GlobalAudio] Game Over: Ducking BGM to 0.1")
     else
