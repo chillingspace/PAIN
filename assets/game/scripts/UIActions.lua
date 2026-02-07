@@ -57,20 +57,25 @@ local UI_SFX_CLICKS = {
 local UI_SFX_MENU_OPEN = "game/audio/sfx/ui/menu/menu open sfx.mp3"
 local UI_SFX_MENU_CLOSE = "game/audio/sfx/ui/menu/menu close sfx.mp3"
 
+-- SFX Volumes
+local VOL_UI_CLICK = -3.0
+local VOL_UI_OPEN = 0.0
+local VOL_UI_CLOSE = 0.0
+
 -- Play random UI click sound (non-spatial)
 local function playUIClick()
     if audioPlayRandomSFX then
-        audioPlayRandomSFX(UI_SFX_CLICKS, -3.0)
+        audioPlayRandomSFX(UI_SFX_CLICKS, VOL_UI_CLICK)
     end
 end
 
 -- Play menu open/close sounds
 local function playMenuOpen()
-    if audioPlaySFX then audioPlaySFX(UI_SFX_MENU_OPEN) end
+    if audioPlaySFX then audioPlaySFX(UI_SFX_MENU_OPEN, VOL_UI_OPEN) end
 end
 
 local function playMenuClose()
-    if audioPlaySFX then audioPlaySFX(UI_SFX_MENU_CLOSE) end
+    if audioPlaySFX then audioPlaySFX(UI_SFX_MENU_CLOSE, VOL_UI_CLOSE) end
 end
 
 -- Store current level name globally (For Game_PlayerState)

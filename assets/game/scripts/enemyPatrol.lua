@@ -18,6 +18,7 @@ local waitYaw = nil
 -- SFX for enemy movement (spatial 3D audio)
 local SFX_ENEMY_WALK = "game/audio/sfx/enemy/Ball enemy walking.wav"
 local walkChannel = -1  -- Track channel for position updates and stopping
+local VOL_ENEMY_WALK = -6.0
 
 local function findNearestByTag(originX, originY, originZ, tag, maxDistSq)
     local candidates = getEntitiesByTag(tag)
@@ -185,8 +186,8 @@ registerUpdate(function(dt)
 
     -- Play/update movement sound while walking (spatial 3D)
     if walkChannel < 0 then
-        -- Start new looping walk sound at enemy position
-        walkChannel = audioPlaySFXAt(SFX_ENEMY_WALK, x, y, z, -6.0, true)
+        -- Start new looping walk sound attached to enemy entity (initial pos)
+        walkChannel = audioPlaySFXFromEntity(SFX_ENEMY_WALK, id, VOL_ENEMY_WALK, true)
     else
         -- Update position of existing walk sound
         audioSetChannelPosition(walkChannel, x, y, z)

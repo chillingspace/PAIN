@@ -133,6 +133,10 @@ local SFX_PLAYER_IDLES = {
     "game/audio/sfx/player/frog croak/Player_VO_Idle_05.wav"
 }
 
+-- SFX Volumes
+local VOL_PLAYER_HOP = -3.0
+local VOL_PLAYER_IDLE = -3.0
+
 registerUpdate(function(dt)
     -- EARLY EXIT: If game is paused, freeze player completely
     if IsGamePaused() then
@@ -237,7 +241,7 @@ registerUpdate(function(dt)
 
         if not wasMoving then
             -- Play hop sound when starting to move
-            audioPlayRandomSFXFromEntity(SFX_PLAYER_HOPS, id, -6.0)
+            audioPlayRandomSFXFromEntity(SFX_PLAYER_HOPS, id, VOL_PLAYER_HOP)
             lastAnimTime = 0.0
         
         -- LOOP: play hop sound at animation loop point
@@ -246,7 +250,7 @@ registerUpdate(function(dt)
             
             -- Play audio at the start of the walk cycle
             if t < lastAnimTime and t < 0.2 then
-                audioPlayRandomSFXFromEntity(SFX_PLAYER_HOPS, id, -6.0)
+                audioPlayRandomSFXFromEntity(SFX_PLAYER_HOPS, id, VOL_PLAYER_HOP)
             end
             
             lastAnimTime = t
@@ -274,7 +278,7 @@ registerUpdate(function(dt)
             idleInterval = 5.0 + math.random() * 3.0  -- Randomize next interval
             
             -- Play random idle sound at player position
-            audioPlayRandomSFXFromEntity(SFX_PLAYER_IDLES, id, -3.0)
+            audioPlayRandomSFXFromEntity(SFX_PLAYER_IDLES, id, VOL_PLAYER_IDLE)
             Animation.SetLoop(id, true)
             PlayAnim(id, ANIM_IDLE, 0.2, true)
         end
@@ -338,7 +342,7 @@ registerUpdate(function(dt)
         PlayAnim(id, ANIM_JUMP, 0.05, true)
 
         -- Play random hop sound for jump
-        audioPlayRandomSFXFromEntity(SFX_PLAYER_HOPS, id, -6.0)
+        audioPlayRandomSFXFromEntity(SFX_PLAYER_HOPS, id, VOL_PLAYER_HOP)
         
         -- consume jump
         jumpPressed = false

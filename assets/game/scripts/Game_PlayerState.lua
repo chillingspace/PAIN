@@ -12,6 +12,17 @@ local SFX_GAMEOVER_HIT = "game/audio/bgm/gameover bgm/GameOver Hit 2.wav"
 local SFX_GAMEOVER_LOOP = "game/audio/bgm/gameover bgm/GameOver Loop.wav"
 local gameOverLoopChannel = -1  -- Track looping channel for stopping on restart
 
+-- New SFX Paths
+local SFX_RESPAWN = "game/audio/sfx/player/Player_Respawn_01.wav"
+local SFX_HIDE_IN = "game/audio/sfx/player/hide/Box In.wav"
+local SFX_HIDE_OUT = "game/audio/sfx/player/hide/Box Out.wav"
+
+-- SFX Volumes
+local VOL_GAMEOVER_HIT = 0.0
+local VOL_GAMEOVER_LOOP = 0.0
+local VOL_RESPAWN = -3.0
+local VOL_HIDE = -6.0
+
 
 -- global so other scripts can use
 _G.PlayerState = _G.PlayerState or {
@@ -41,13 +52,13 @@ _G.PlayerState = _G.PlayerState or {
     letterBaseScale = nil,
     hideScaleFactor = 0.1,   -- how small when hiding 
 
-     -- SFX entities
-    sfxHideIn  = nil,
-    sfxHideOut = nil,
-    sfxRespawn = nil,
-    sfxIdle    = nil,
-    sfxJump    = nil,
-    sfxDrop    = nil,
+    -- SFX entities (Legacy entities removed)
+    -- sfxHideIn  = nil,
+    -- sfxHideOut = nil,
+    -- sfxRespawn = nil,
+    -- sfxIdle    = nil,
+    -- sfxJump    = nil,
+    -- sfxDrop    = nil,
 
     -- end-game state
     gameEnded   = false,
@@ -99,8 +110,8 @@ local function triggerGameOver()
     S.gameWon   = false
     
     -- Play Game Over SFX: hit sound once, then looping background
-    audioPlaySFX(SFX_GAMEOVER_HIT)
-    gameOverLoopChannel = audioPlaySFX(SFX_GAMEOVER_LOOP, true)
+    audioPlaySFX(SFX_GAMEOVER_HIT, VOL_GAMEOVER_HIT)
+    gameOverLoopChannel = audioPlaySFX(SFX_GAMEOVER_LOOP, VOL_GAMEOVER_LOOP, true)
     
     requestEndOverlay("lose")
 end
@@ -230,6 +241,12 @@ function S.init(player)
             I.tapTimer = 0.0
             I.doubleTapped = false
         end
+
+        -- Stop Game Over loop if it's playing
+        if gameOverLoopChannel >= 0 then
+            if audioStopChannel then audioStopChannel(gameOverLoopChannel) end
+            gameOverLoopChannel = -1
+        end
     end
 
      -- cache start position
@@ -246,12 +263,13 @@ function S.init(player)
     end
 
     -- alw refresh entity ref (might change after reload)
-    S.sfxHideIn  = findEntity("sfx_hide_in")
-    S.sfxHideOut = findEntity("sfx_hide_out")
-    S.sfxRespawn = findEntity("sfx_respawn")
-    S.sfxIdle    = findEntity("sfx_idle")
-    S.sfxJump    = findEntity("sfx_jump")
-    S.sfxDrop    = findEntity("sfx_drop_collectible")
+    -- Legacy entity lookups removed
+    -- S.sfxHideIn  = findEntity("sfx_hide_in")
+    -- S.sfxHideOut = findEntity("sfx_hide_out")
+    -- S.sfxRespawn = findEntity("sfx_respawn")
+    -- S.sfxIdle    = findEntity("sfx_idle")
+    -- S.sfxJump    = findEntity("sfx_jump")
+    -- S.sfxDrop    = findEntity("sfx_drop_collectible")
     S.uiEndScreen = findEntity("end_screen")
     
     if S.uiEndScreen and setUITexture then
@@ -400,14 +418,13 @@ end
 -------------------------------------------------
 -- Helper: Sync SFX positions to player
 -------------------------------------------------
-local function syncAllSfx(px, py, pz)
     local sfxEntities = {
-        S.sfxHideIn, S.sfxHideOut, S.sfxRespawn,
-        S.sfxIdle, S.sfxJump, S.sfxDrop
+        -- S.sfxHideIn, S.sfxHideOut, S.sfxRespawn,
+        -- S.sfxIdle, S.sfxJump, S.sfxDrop
     }
-    for _, e in ipairs(sfxEntities) do
-        if e then setPosition(e, px, py, pz) end
-    end
+    -- for _, e in ipairs(sfxEntities) do
+    --    if e then setPosition(e, px, py, pz) end
+    -- end
 end
 
 -------------------------------------------------
@@ -503,7 +520,12 @@ local function handleHideToggle(px, py, pz)
 
         resetInputState()
         log("[PlayerState] Player left hiding spot")
-        playSfx(S.sfxHideOut)
+        resetInputState()
+        log("[PlayerState] Player left hiding spot")
+        -- NEW: Play hide out sound at the box location
+        if S.hiddenIn then
+            audioPlaySFXFromEntity(SFX_HIDE_OUT, S.hiddenIn, VOL_HIDE)
+        end
     else
         -- Try to hide
         local bestSpot = findNearestByTag("hiding_spot", px, py, pz, S.hideRadius)
@@ -534,7 +556,11 @@ local function handleHideToggle(px, py, pz)
             S.hidden = true
             S.hiddenIn = bestSpot
             log("[PlayerState] Player is hiding in a box")
-            playSfx(S.sfxHideIn)
+            S.hidden = true
+            S.hiddenIn = bestSpot
+            log("[PlayerState] Player is hiding in a box")
+            -- NEW: Play hide in sound at the box location
+            audioPlaySFXFromEntity(SFX_HIDE_IN, bestSpot, VOL_HIDE)
         end
     end
 end
@@ -758,7 +784,8 @@ function S.onCaught(player)
         return 
     end
     
-    playSfx(S.sfxRespawn)
+    -- NEW: Play respawn SFX at player position
+    audioPlaySFXFromEntity(SFX_RESPAWN, player, VOL_RESPAWN)
 
     -- drop carried letter
     if S.carriedLetter then
@@ -767,7 +794,7 @@ function S.onCaught(player)
         if removeTag then removeTag(S.carriedLetter, "letter_carried") end
         if addTag then addTag(S.carriedLetter, "letter_collectible") end
         log("[PlayerState] Dropped carried letter at death position")
-        playSfx(S.sfxDrop)
+        -- REMOVED: playSfx(S.sfxDrop)
         S.carriedLetter = nil
     end
 

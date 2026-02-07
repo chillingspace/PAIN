@@ -53,36 +53,6 @@ namespace {
         PN_INFO("[LuaManager] {}", msg);
     }
 
-    // Helper function to convert friendly paths (game/audio/...) to virtual paths (game_assets://audio/...)
-    // This allows Lua scripts to use simpler paths without knowing about the ":// " syntax
-    // Maps friendly names to registered aliases: "game" → "game_assets", "engine" → "engine_assets"
-    inline std::string toVirtualPath(const std::string& path) {
-        // If already in virtual path format (contains ://), return as-is
-        if (path.find("://") != std::string::npos) {
-            return path;
-        }
-        
-        // Find the first '/' to split alias from relative path
-        auto slashPos = path.find('/');
-        if (slashPos == std::string::npos) {
-            // No slash found, return as-is (might be an absolute path or invalid)
-            return path;
-        }
-        
-        // Extract the prefix and relative path
-        std::string prefix = path.substr(0, slashPos);
-        std::string relative = path.substr(slashPos + 1);
-        
-        // Map friendly names to actual registered aliases
-        std::string alias = prefix;
-        if (prefix == "game") {
-            alias = "game_assets";
-        } else if (prefix == "engine") {
-            alias = "engine_assets";
-        }
-        
-        return alias + "://" + relative;
-    }
 
 #ifdef __ANDROID__
     static std::string readAssetText(AAssetManager* mgr, const char* path) {
@@ -727,13 +697,22 @@ namespace PAIN {
             sol::optional<bool> looping, 
             sol::optional<bool> is3D) -> int {
             if (!services_) return -1;
+            
+            std::string guidStr = api_->GetAudioGUID(filename);
 
-            if (services_) {
-                auto path = services_->get<Path::Path>();
-                if (path && !path->pathExists(toVirtualPath(filename))) {
-                    PN_CORE_WARN("[LuaManager] audioPlayFile: Audio asset '{}' not found on disk!", filename);
-                    return -1;
-                }
+            if (guidStr.empty()) {
+                PN_CORE_WARN("[LuaManager] audioPlayFile: Audio asset '{}' not found in registry!", filename);
+                return -1;
+            }
+
+            auto assets = services_->get<Assets::Manager>();
+            if (!assets) return -1;
+            
+            Assets::GUID guid(guidStr);
+            auto soundOpt = assets->getAsset<Audio::Sound>(guid);
+            if (!soundOpt) {
+                PN_CORE_WARN("[LuaManager] audioPlayFile: Audio asset '{}' not loaded!", filename);
+                return -1;
             }
 
             auto audio = services_->get<Audio::Audio>();
@@ -744,14 +723,15 @@ namespace PAIN {
             bool spatial = is3D.value_or(false);
             glm::vec3 pos(0.0f); // Default position for non-3D
             
-            auto result = audio->playFile(toVirtualPath(filename), "sfx", vol, loop, spatial, pos,
+            // Use the physical path from the asset system
+            auto result = audio->playFile(soundOpt.value()->getPath(), "sfx", vol, loop, spatial, pos,
                 Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
             
             return result ? result->value : -1;
             });
 
-        // audioPlaySFX(filename, looping?) - Simple SFX playback
-        lua_.set_function("audioPlaySFX", [this](const std::string& filename, sol::optional<bool> looping) -> int {
+        // audioPlaySFX(filename, volumeDb?, looping?) - Simple SFX playback
+        lua_.set_function("audioPlaySFX", [this](const std::string& filename, sol::optional<float> volumeDb, sol::optional<bool> looping) -> int {
             if (!services_ || !api_) return -1;
 
             // 1. Get GUID from filename
@@ -776,7 +756,8 @@ namespace PAIN {
             auto audio = services_->get<Audio::Audio>();
             if (!audio) return -1;
             
-            auto result = audio->play(soundOpt.value(), "sfx", 0.0f, 0.0f, looping.value_or(false));
+            // Pass volumeDb
+            auto result = audio->play(soundOpt.value(), "sfx", volumeDb.value_or(0.0f), 0.0f, looping.value_or(false));
             return result ? result->value : -1;
             });
 
@@ -1014,11 +995,19 @@ namespace PAIN {
                 sol::optional<std::string> f = fileList[i];
                 if (f) {
                      std::string filename = *f;
-                     if (api_->GetAudioGUID(filename).empty()) {
+                     std::string guidStr = api_->GetAudioGUID(filename);
+                     if (guidStr.empty()) {
                          PN_CORE_WARN("[LuaManager] audioPlayRandomSFXFromEntity: Audio asset '{}' not found!", filename);
                          continue;
                      }
-                     files.push_back(toVirtualPath(filename));
+                     
+                     auto assets = services_->get<Assets::Manager>();
+                     if (assets) {
+                        auto soundOpt = assets->getAsset<Audio::Sound>(Assets::GUID(guidStr));
+                        if (soundOpt) {
+                            files.push_back(soundOpt.value()->getPath());
+                        }
+                     }
                 }
             }
             

@@ -41,8 +41,8 @@ local SFX_ALERT_LOOP = "game/audio/sfx/enemy/Enemy_Alert_Loop_v1.wav"
 local alertLoopChannel = -1  -- Track looping channel for stopping later
 
 -- SFX volumes
-local ALERT_ONCE_DB = -8.0   
-local ALERT_LOOP_DB = -12.0
+local VOL_ALERT_HIT = -8.0   
+local VOL_ALERT_LOOP = -12.0
 
 -- internal state
 ui.active      = false
@@ -106,8 +106,15 @@ function ui.begin(enemyEntity)
     showUI()
 
     -- Enemy alert SFX: hit sound once, then start looping alert
-    audioPlaySFX(SFX_ALERT_HIT)  -- One-shot alert hit
-    alertLoopChannel = audioPlaySFX(SFX_ALERT_LOOP, true)  -- Looping alert
+    -- Both need to be spatial from the enemy entity
+    if enemyEntity then
+        audioPlaySFXFromEntity(SFX_ALERT_HIT, enemyEntity, VOL_ALERT_HIT)
+        alertLoopChannel = audioPlaySFXFromEntity(SFX_ALERT_LOOP, enemyEntity, VOL_ALERT_LOOP, true)
+    else
+        -- Fallback if no entity provided (shouldn't happen based on usage)
+        audioPlaySFX(SFX_ALERT_HIT, VOL_ALERT_HIT)
+        alertLoopChannel = audioPlaySFX(SFX_ALERT_LOOP, VOL_ALERT_LOOP, true)
+    end
 
     -- Start combat BGM layer via GlobalAudio
     if _G.GlobalAudio and _G.GlobalAudio.setCombat then
@@ -235,6 +242,14 @@ local function update(dt)
         set2DPosition(barFillR, fillRX + shift - INNER_OFFSET, fillRY)
     end
 
+
+    -- Update position of the looping alert sound to follow the enemy
+    if alertLoopChannel >= 0 and ui.sourceEnemy then
+        local ex, ey, ez = getPosition(ui.sourceEnemy)
+        if audioSetChannelPosition then
+            audioSetChannelPosition(alertLoopChannel, ex, ey, ez)
+        end
+    end
 
     -- Combat BGM is now controlled via GlobalAudio.setCombat, no per-frame fade needed here
 end
