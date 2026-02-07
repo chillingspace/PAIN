@@ -302,6 +302,7 @@ namespace PAIN {
 #endif
 
             luaManager_.init(adapter, shipping);
+            luaManager_.setServices(services_ptr.get());  // Enable direct audio playback functions
             PN_CORE_INFO("[GameScriptingSystem] Lua initialized");
         }
 

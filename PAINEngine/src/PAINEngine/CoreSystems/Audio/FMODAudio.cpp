@@ -598,7 +598,13 @@ namespace PAIN {
 			const std::string& group, float volumeDb, bool looping, bool is3D, 
 			const glm::vec3& pos, float minDist, float maxDist) {
 			
-			if (!impl_->initialized) return std::nullopt;
+			PN_CORE_INFO("[FmodAudio::playFile] Playing: {} (group={}, vol={:.1f}dB, 3D={}, loop={})", 
+				filename, group, volumeDb, is3D, looping);
+			
+			if (!impl_->initialized) {
+				PN_CORE_WARN("[FmodAudio::playFile] FMOD not initialized!");
+				return std::nullopt;
+			}
 
 			// Create sound on-the-fly
 			FMOD_MODE mode = FMOD_DEFAULT;
@@ -608,7 +614,7 @@ namespace PAIN {
 			FMOD::Sound* s = nullptr;
 			FMOD_RESULT r = impl_->sys->createSound(filename.c_str(), mode, nullptr, &s);
 			if (r != FMOD_OK || !s) {
-				PN_CORE_ERROR("[FmodAudio::playFile] Failed to create sound: {}", filename);
+				PN_CORE_ERROR("[FmodAudio::playFile] Failed to create sound: {} (FMOD_RESULT={})", filename, (int)r);
 				return std::nullopt;
 			}
 
@@ -630,6 +636,7 @@ namespace PAIN {
 			FMOD::Channel* ch = nullptr;
 			r = impl_->sys->playSound(s, cg, true, &ch);
 			if (r != FMOD_OK || !ch) {
+				PN_CORE_ERROR("[FmodAudio::playFile] Failed to play sound: {} (FMOD_RESULT={})", filename, (int)r);
 				s->release();
 				return std::nullopt;
 			}
@@ -647,6 +654,7 @@ namespace PAIN {
 			// Track channel
 			int id = impl_->nextId++;
 			impl_->channels.emplace(id, Impl::Chan{ ch });
+			PN_CORE_INFO("[FmodAudio::playFile] Success! Channel ID={}", id);
 			return AudioChannelId{ id };
 		}
 
@@ -679,6 +687,8 @@ namespace PAIN {
 			size_t idx = dist(rng);
 
 			const std::string& selectedFile = files[idx];
+			PN_CORE_INFO("[FmodAudio::playRandomFromList] Selected file {} of {}: {}", 
+				idx + 1, files.size(), selectedFile);
 			return playFile(selectedFile, "sfx", volumeDb, false, is3D, pos, minDist, maxDist);
 		}
 

@@ -47,6 +47,37 @@ namespace {
         PN_INFO("[LuaManager] {}", msg);
     }
 
+    // Helper function to convert friendly paths (game/audio/...) to virtual paths (game_assets://audio/...)
+    // This allows Lua scripts to use simpler paths without knowing about the ":// " syntax
+    // Maps friendly names to registered aliases: "game" → "game_assets", "engine" → "engine_assets"
+    inline std::string toVirtualPath(const std::string& path) {
+        // If already in virtual path format (contains ://), return as-is
+        if (path.find("://") != std::string::npos) {
+            return path;
+        }
+        
+        // Find the first '/' to split alias from relative path
+        auto slashPos = path.find('/');
+        if (slashPos == std::string::npos) {
+            // No slash found, return as-is (might be an absolute path or invalid)
+            return path;
+        }
+        
+        // Extract the prefix and relative path
+        std::string prefix = path.substr(0, slashPos);
+        std::string relative = path.substr(slashPos + 1);
+        
+        // Map friendly names to actual registered aliases
+        std::string alias = prefix;
+        if (prefix == "game") {
+            alias = "game_assets";
+        } else if (prefix == "engine") {
+            alias = "engine_assets";
+        }
+        
+        return alias + "://" + relative;
+    }
+
 #ifdef __ANDROID__
     static std::string readAssetText(AAssetManager* mgr, const char* path) {
         if (!mgr) return {};
@@ -698,7 +729,7 @@ namespace PAIN {
             bool spatial = is3D.value_or(false);
             glm::vec3 pos(0.0f); // Default position for non-3D
             
-            auto result = audio->playFile(filename, "sfx", vol, loop, spatial, pos,
+            auto result = audio->playFile(toVirtualPath(filename), "sfx", vol, loop, spatial, pos,
                 Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
             
             return result ? result->value : -1;
@@ -710,7 +741,7 @@ namespace PAIN {
             auto audio = services_->get<Audio::Audio>();
             if (!audio) return -1;
             
-            auto result = audio->playSFX(filename, looping.value_or(false), 0.0f);
+            auto result = audio->playSFX(toVirtualPath(filename), looping.value_or(false), 0.0f);
             return result ? result->value : -1;
             });
 
@@ -720,7 +751,7 @@ namespace PAIN {
             auto audio = services_->get<Audio::Audio>();
             if (!audio) return -1;
             
-            auto result = audio->playBGM(filename, overlay.value_or(false), 0.0f);
+            auto result = audio->playBGM(toVirtualPath(filename), overlay.value_or(false), 0.0f);
             return result ? result->value : -1;
             });
 
@@ -730,7 +761,7 @@ namespace PAIN {
             auto audio = services_->get<Audio::Audio>();
             if (!audio) return;
             
-            audio->transitionBGM(newFilename, transitionTime.value_or(2.0f), 0.0f);
+            audio->transitionBGM(toVirtualPath(newFilename), transitionTime.value_or(2.0f), 0.0f);
             });
 
         // audioTransitionBGMWithSFX(newBGMFilename, sfxFilename, transitionTime?) - Crossfade with SFX trigger
@@ -740,7 +771,7 @@ namespace PAIN {
             auto audio = services_->get<Audio::Audio>();
             if (!audio) return;
             
-            audio->transitionBGMWithSFX(newBGMFilename, sfxFilename, transitionTime.value_or(2.0f), 0.0f);
+            audio->transitionBGMWithSFX(toVirtualPath(newBGMFilename), toVirtualPath(sfxFilename), transitionTime.value_or(2.0f), 0.0f);
             });
 
         // ==================== Spatial / 3D Audio Functions ====================
@@ -752,7 +783,7 @@ namespace PAIN {
             auto audio = services_->get<Audio::Audio>();
             if (!audio) return -1;
             
-            auto result = audio->playSFXAt(filename, glm::vec3(x, y, z), 
+            auto result = audio->playSFXAt(toVirtualPath(filename), glm::vec3(x, y, z), 
                 volumeDb.value_or(0.0f), looping.value_or(false),
                 Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
             return result ? result->value : -1;
@@ -768,7 +799,7 @@ namespace PAIN {
             // Get entity position
             glm::vec3 pos = api_->GetPosition(entityId);
             
-            auto result = audio->playSFXAt(filename, pos, 
+            auto result = audio->playSFXAt(toVirtualPath(filename), pos, 
                 volumeDb.value_or(0.0f), looping.value_or(false),
                 Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
             return result ? result->value : -1;
@@ -785,7 +816,7 @@ namespace PAIN {
             std::vector<std::string> files;
             for (size_t i = 1; i <= fileList.size(); ++i) {
                 sol::optional<std::string> f = fileList[i];
-                if (f) files.push_back(*f);
+                if (f) files.push_back(toVirtualPath(*f));
             }
             
             if (files.empty()) return -1;
@@ -805,7 +836,7 @@ namespace PAIN {
             std::vector<std::string> files;
             for (size_t i = 1; i <= fileList.size(); ++i) {
                 sol::optional<std::string> f = fileList[i];
-                if (f) files.push_back(*f);
+                if (f) files.push_back(toVirtualPath(*f));
             }
             
             if (files.empty()) return -1;
@@ -818,22 +849,41 @@ namespace PAIN {
         // audioPlayRandomSFXFromEntity({file1, file2, ...}, entityId, volumeDb?) - Random SFX from entity
         lua_.set_function("audioPlayRandomSFXFromEntity", [this](sol::table fileList, 
             entt::entity entityId, sol::optional<float> volumeDb) -> int {
-            if (!services_ || !api_) return -1;
+            PN_CORE_INFO("[SFX] audioPlayRandomSFXFromEntity called, services_={}, api_={}", 
+                (void*)services_, (void*)api_.get());
+            if (!services_ || !api_) {
+                PN_CORE_WARN("[SFX] audioPlayRandomSFXFromEntity: services_ or api_ is null!");
+                return -1;
+            }
             auto audio = services_->get<Audio::Audio>();
-            if (!audio) return -1;
+            if (!audio) {
+                PN_CORE_WARN("[SFX] audioPlayRandomSFXFromEntity: Audio service not found!");
+                return -1;
+            }
             
             std::vector<std::string> files;
             for (size_t i = 1; i <= fileList.size(); ++i) {
                 sol::optional<std::string> f = fileList[i];
-                if (f) files.push_back(*f);
+                if (f) files.push_back(toVirtualPath(*f));
             }
             
-            if (files.empty()) return -1;
+            if (files.empty()) {
+                PN_CORE_WARN("[SFX] audioPlayRandomSFXFromEntity: Empty file list!");
+                return -1;
+            }
             
             glm::vec3 pos = api_->GetPosition(entityId);
+            PN_CORE_INFO("[SFX] Playing random SFX from {} files at ({:.1f},{:.1f},{:.1f})", 
+                files.size(), pos.x, pos.y, pos.z);
             
             auto result = audio->playRandomFromList(files, volumeDb.value_or(0.0f), true, 
                 pos, Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
+            
+            if (result) {
+                PN_CORE_INFO("[SFX] SFX started, channel={}", result->value);
+            } else {
+                PN_CORE_WARN("[SFX] SFX playback failed!");
+            }
             return result ? result->value : -1;
             });
 
