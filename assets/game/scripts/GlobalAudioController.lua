@@ -22,6 +22,8 @@
 -- ==================== USER SETTINGS ====================
 -- Control the volume of the Main Menu BGM here (0.0 to 1.0)
 local MAINMENU_BGM_VOLUME_SCALE = 0.5
+local TUTORIAL_BGM_VOLUME_SCALE = 0.25
+local LEVEL1_BGM_VOLUME_SCALE   = 0.25
 
 -- ==================== HELPERS ====================
 local function linearToDb(linear)
@@ -96,8 +98,13 @@ local function applySceneVolumes()
         end
         
     elseif currentScene == "tutorial" or currentScene == "level1" or currentScene == "level" then
+        -- Determine target volume based on scene
+        local targetVol = CONFIG.defaultVolume
+        if currentScene == "tutorial" then targetVol = linearToDb(TUTORIAL_BGM_VOLUME_SCALE) end
+        if currentScene == "level1"   then targetVol = linearToDb(LEVEL1_BGM_VOLUME_SCALE) end
+
         -- Track 0: Level BGM (main), Track 1: Ambient, Track 2: Combat (muted initially)
-        if trackCount >= 1 then globalBGMFade(0, CONFIG.defaultVolume, CONFIG.fadeDuration) end
+        if trackCount >= 1 then globalBGMFade(0, targetVol, CONFIG.fadeDuration) end
         if trackCount >= 2 then globalBGMFade(1, CONFIG.ambientVolume, CONFIG.fadeDuration) end
         if trackCount >= 3 then globalBGMFade(2, CONFIG.mutedVolume, 0.1) end
         inCombat = false
@@ -152,26 +159,44 @@ function GlobalAudio_SetCombat(combatActive)
         if trackCount >= 3 then globalBGMFade(2, CONFIG.defaultVolume, CONFIG.crossfadeDuration) end
     else
         -- Fade in main BGM, fade out combat layer
-        if trackCount >= 1 then globalBGMFade(0, CONFIG.defaultVolume, CONFIG.crossfadeDuration) end
+        local targetVol = CONFIG.defaultVolume
+        if currentScene == "tutorial" then targetVol = linearToDb(TUTORIAL_BGM_VOLUME_SCALE) end
+        if currentScene == "level1"   then targetVol = linearToDb(LEVEL1_BGM_VOLUME_SCALE) end
+
+        if trackCount >= 1 then globalBGMFade(0, targetVol, CONFIG.crossfadeDuration) end
         if trackCount >= 3 then globalBGMFade(2, CONFIG.mutedVolume, CONFIG.crossfadeDuration) end
     end
 end
 
--- ==================== QUIT HANDLING ====================
-function GlobalAudio_PrepareQuit()
+-- ==================== GAME OVER DUCKING ====================
+function GlobalAudio_SetGameOver(active)
+    -- Only relevant for Tutorial and Level1 where we have BGM + Game Over Loop
+    if currentScene ~= "tutorial" and currentScene ~= "level1" and currentScene ~= "level" then return end
+    
     local trackCount = globalBGMGetTrackCount()
-    for i = 0, trackCount - 1 do
-        globalBGMFade(i, CONFIG.mutedVolume, CONFIG.quitFadeDuration)
+    if trackCount < 1 then return end
+
+    if active then
+        -- Duck Main BGM (Track 0) to 0.1 linear volume
+        local duckVol = linearToDb(0.1)
+        globalBGMFade(0, duckVol, 0.5)
+        log("[GlobalAudio] Game Over: Ducking BGM to 0.1")
+    else
+        -- Restore original volume
+        local targetVol = CONFIG.defaultVolume
+        if currentScene == "tutorial" then targetVol = linearToDb(TUTORIAL_BGM_VOLUME_SCALE) end
+        if currentScene == "level1"   then targetVol = linearToDb(LEVEL1_BGM_VOLUME_SCALE) end
+        
+        globalBGMFade(0, targetVol, 1.0)
+        log("[GlobalAudio] Game Over Ended: Restoring BGM")
     end
-    setTimeout(function()
-        quitApplication()
-    end, CONFIG.quitFadeDuration + 0.3)
 end
 
 -- ==================== PUBLIC API ====================
 _G.GlobalAudio = _G.GlobalAudio or {}
 _G.GlobalAudio.prepareQuit = GlobalAudio_PrepareQuit
 _G.GlobalAudio.setCombat = GlobalAudio_SetCombat
+_G.GlobalAudio.setGameOver = GlobalAudio_SetGameOver
 _G.GlobalAudio.changeSceneWithFade = changeSceneWithFade
 _G.GlobalAudio.fadeOutAllTracks = fadeOutAllTracks
 _G.GlobalAudio.getConfig = function() return CONFIG end

@@ -40,9 +40,9 @@ local SFX_ALERT_HIT = "game/audio/sfx/enemy/Enemy_Alert_Hit_v1.wav"
 local SFX_ALERT_LOOP = "game/audio/sfx/enemy/Enemy_Alert_Loop_v1.wav"
 local alertLoopChannel = -1  -- Track looping channel for stopping later
 
--- SFX volumes
-local VOL_ALERT_HIT = -8.0   
-local VOL_ALERT_LOOP = -12.0
+-- SFX volumes (decibel modifers)
+local VOL_ALERT_HIT = 0.0
+local VOL_ALERT_LOOP = 0.0
 
 -- internal state
 ui.active      = false

@@ -17,11 +17,11 @@ local SFX_RESPAWN = "game/audio/sfx/player/Player_Respawn_01.wav"
 local SFX_HIDE_IN = "game/audio/sfx/player/hide/Box In.wav"
 local SFX_HIDE_OUT = "game/audio/sfx/player/hide/Box Out.wav"
 
--- SFX Volumes
+-- SFX Volumes (decibel modifers)
 local VOL_GAMEOVER_HIT = 0.0
 local VOL_GAMEOVER_LOOP = 0.0
 local VOL_RESPAWN = -3.0
-local VOL_HIDE = -6.0
+local VOL_HIDE = 0.0
 
 
 -- global so other scripts can use
@@ -112,6 +112,11 @@ local function triggerGameOver()
     -- Play Game Over SFX: hit sound once, then looping background
     audioPlaySFX(SFX_GAMEOVER_HIT, VOL_GAMEOVER_HIT)
     gameOverLoopChannel = audioPlaySFX(SFX_GAMEOVER_LOOP, VOL_GAMEOVER_LOOP, true)
+
+    -- Duck Global BGM
+    if _G.GlobalAudio and _G.GlobalAudio.setGameOver then
+        _G.GlobalAudio.setGameOver(true)
+    end
     
     requestEndOverlay("lose")
 end
@@ -246,6 +251,11 @@ function S.init(player)
         if gameOverLoopChannel >= 0 then
             if audioStopChannel then audioStopChannel(gameOverLoopChannel) end
             gameOverLoopChannel = -1
+        end
+
+        -- Restore Global BGM volume check (failsafe)
+        if _G.GlobalAudio and _G.GlobalAudio.setGameOver then
+            _G.GlobalAudio.setGameOver(false)
         end
     end
 
@@ -672,7 +682,10 @@ function S.update(dt)
     -------------------------------------------------
     updateTapState(dt)
 
-
+    -------------------------------------------------
+    -- 7. Get player position
+    -------------------------------------------------
+    local px, py, pz = getPosition(p)
 
     -------------------------------------------------
     -- 8. Hide/Unhide logic (H key)
@@ -768,7 +781,7 @@ function S.onCaught(player)
         return 
     end
     
-    -- NEW: Play respawn SFX at player position
+    -- Play respawn SFX at player position
     audioPlaySFXFromEntity(SFX_RESPAWN, player, VOL_RESPAWN)
 
     -- drop carried letter

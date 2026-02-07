@@ -18,7 +18,7 @@ local waitYaw = nil
 -- SFX for enemy movement (spatial 3D audio)
 local SFX_ENEMY_WALK = "game/audio/sfx/enemy/Ball enemy walking.wav"
 local walkChannel = -1  -- Track channel for position updates and stopping
-local VOL_ENEMY_WALK = -6.0
+local VOL_ENEMY_WALK = 0.0  -- Decibel modifier
 
 local function findNearestByTag(originX, originY, originZ, tag, maxDistSq)
     local candidates = getEntitiesByTag(tag)

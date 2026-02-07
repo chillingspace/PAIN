@@ -133,9 +133,9 @@ local SFX_PLAYER_IDLES = {
     "game/audio/sfx/player/frog croak/Player_VO_Idle_05.wav"
 }
 
--- SFX Volumes
-local VOL_PLAYER_HOP = -3.0
-local VOL_PLAYER_IDLE = -3.0
+-- SFX Volumes modifier
+local VOL_PLAYER_HOP = 0.0
+local VOL_PLAYER_IDLE = 0.0
 
 registerUpdate(function(dt)
     -- EARLY EXIT: If game is paused, freeze player completely
