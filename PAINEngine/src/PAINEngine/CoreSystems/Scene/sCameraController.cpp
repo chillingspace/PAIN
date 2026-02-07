@@ -605,10 +605,7 @@ namespace PAIN {
             return false;
             });
 
-        dispatcher.Dispatch<Event::WindowFocused>([&](Event::WindowFocused& e) -> bool {
-            PN_CORE_INFO(e.toString());
-            return false;
-            });
+
 
 #else
         // ===== ANDROID: Touch events remain unchanged =====

@@ -450,20 +450,64 @@ namespace PAIN {
 
 		void FmodAudio::pauseAll()
 		{
-			if (!impl_->initialized) return;
-			for (auto& pair : impl_->groups) {
-				auto& g = pair.second;
-				if (g.cg) g.cg->setPaused(true);
+
+
+			if (!impl_->initialized) {
+				PN_CORE_WARN("[FMOD] pauseAll skipped - not initialized");
+				return;
 			}
+			// 1. ANDROID SPECIFIC: Suspend the mixer thread
+			// This stops the CPU usage and releases audio hardware to the OS
+#ifdef PN_PLATFORM_ANDROID
+			impl_->sys->mixerSuspend();
+#endif
+
+			// 2. LOGIC: Pause the Master Group Only
+			// This creates a "Global Pause" without modifying the Music/SFX flags.
+			// When we unpause Master, Music/SFX will return to whatever state they were in before.
+			auto it = impl_->groups.find("master");
+			if (it != impl_->groups.end() && it->second.cg) {
+				if (it->second.cg) {
+					it->second.cg->setPaused(true);
+					PN_CORE_INFO("[FMOD] pauseAll() called");
+				}
+				else {
+					PN_CORE_ERROR("[FMOD] Master Group pointer is NULL!");
+				}
+
+			}
+			else {
+				PN_CORE_ERROR("[FMOD] Could not find 'master' group in map!");
+			}
+
 		}
 
 		void FmodAudio::resumeAll()
 		{
-			if (!impl_->initialized) return;
-			for (auto& pair : impl_->groups) 
-			{
-				auto& g = pair.second;
-				if (g.cg) g.cg->setPaused(false);
+
+
+			if (!impl_->initialized) {
+				PN_CORE_WARN("[FMOD] resumeAll skipped - not initialized");
+				return;
+			}
+			// ANDROID SPECIFIC: Resume the mixer thread
+#ifdef PN_PLATFORM_ANDROID
+			impl_->sys->mixerResume();
+#endif
+			
+			// 2. LOGIC: Unpause Master Group
+			auto it = impl_->groups.find("master");
+			if (it != impl_->groups.end() && it->second.cg) {
+				if (it->second.cg) {
+					it->second.cg->setPaused(false);
+					PN_CORE_INFO("[FMOD] resumeAll() called");
+				}
+				else {
+					PN_CORE_ERROR("[FMOD] Master Group pointer is NULL!");
+				}
+			}
+			else {
+				PN_CORE_ERROR("[FMOD] Could not find 'master' group in map!");
 			}
 		}
 

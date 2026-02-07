@@ -332,6 +332,8 @@ namespace PAIN {
                 int32_t action = AKeyEvent_getAction(event);
                 int32_t meta_state = AKeyEvent_getMetaState(event);
 
+
+
                 // Special handling for back button
                 if (key_code == AKEYCODE_BACK) {
                     // Only dispatch on key up to avoid duplicates
@@ -403,7 +405,15 @@ namespace PAIN {
 
             case APP_CMD_GAINED_FOCUS:
                 PN_CORE_INFO("APP_CMD_GAINED_FOCUS received");
-                e_window->b_active = true;
+                if (e_window) {
+                    e_window->b_active = true;
+
+                    // FIX: Check if services exists before using it!
+                    if (e_window->services) {
+                        auto audio = e_window->services->get<Audio::Audio>();
+                        if (audio) audio->resumeAll();
+                    }
+                }
 
                 // Dispatch focus event
                 if (e_app) {
@@ -413,7 +423,14 @@ namespace PAIN {
 
             case APP_CMD_LOST_FOCUS:
                 PN_CORE_INFO("APP_CMD_LOST_FOCUS received");
-                e_window->b_active = false;
+                    if (e_window) {
+                        e_window->b_active = false;
+
+                        if (e_window->services) {
+                            auto audio = e_window->services->get<Audio::Audio>();
+                            if (audio) audio->pauseAll();
+                        }
+                    }
 
                 // Dispatch focus event
                 if (e_app) {
@@ -494,6 +511,7 @@ namespace PAIN {
                 }
             }
         }
+
 
         void Android_Window::swapBuffers() {
             if (m_Display != EGL_NO_DISPLAY && m_Surface != EGL_NO_SURFACE) {

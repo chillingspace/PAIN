@@ -46,23 +46,6 @@ namespace PAIN {
             bool is_playing = false;
             bool is_game_paused = false;
 
-            /* =========================================================================== */
-            /*                            ENVIRONMENT                                      */
-            /* =========================================================================== */
-            //Light sources names
-            std::string camera_light_name = "cam";
-            std::string world_light_name = "world";
-
-            //Curr Skybox texure id
-            Assets::GUID curr_skybox_id;
-
-            //Graphics settings
-            GraphicsSettings& gs = GraphicsSettings::get();
-
-            //Layers management
-            std::vector<Layer> layers;
-            std::vector<std::vector<bool>> mask_matrix;
-
             // Internal methods
             // LOADING
             bool buildEntitiesFromAsset(SceneAsset const& scene_asset);
@@ -85,8 +68,29 @@ namespace PAIN {
             //Scene configuration
             void configScene(SceneAsset const& scn_asset);
 
+            /* =========================================================================== */
+            /*                            ENVIRONMENT                                      */
+            /* =========================================================================== */
+            //Light sources names
+            std::string camera_light_name = "cam";
+            std::string world_light_name = "world";
+
+            //Curr Skybox texure id
+            Assets::GUID curr_skybox_id;
+
+            //Graphics settings
+            GraphicsSettings& gs = GraphicsSettings::get();
+
             // Internal add object used for testing
             entt::entity AddObject(const std::shared_ptr<Assets::Model>& mdl, const std::string& name, const glm::vec3& pos, const glm::quat& quat, const glm::vec3& scale, Assets::GUID const& diff_id = Assets::GUID{}, Assets::GUID const& ao_id = Assets::GUID{});
+
+            /* =========================================================================== */
+            /*                                LAYERS                                       */
+            /* =========================================================================== */
+                    
+            std::vector<Layer> layers;
+            std::vector<std::vector<bool>> mask_matrix;
+
 
         public:
             SceneManager() = default;
@@ -97,10 +101,26 @@ namespace PAIN {
             void onDetach() override;
             void onUpdate(AppTiming timing) override;
             void onFixedUpdate(AppTiming timing) override {}
-            void onEvent(Event::Event& e) override{}
+            void onEvent(Event::Event& e) override;
             void onAppPause() override {}
             void onAppResume() override {}
 
+
+            /* =========================================================================== */
+            /*                                CAMERAS                                      */
+            /* =========================================================================== */
+            Camera* GetActiveCamera();
+            Camera* GetGameCamera();
+            void SetActiveCamera(Camera* cam);
+            void SetEditorCamera();
+            void SetGameCamera();
+            void ChangeGameCamera(std::string cam_name);
+            const std::string& GetActiveGameCamera();
+            const std::unordered_map<std::string, std::unique_ptr<Camera>>& GetAllGameCamera() const;
+
+            /* =========================================================================== */
+            /*                                SCENES                                       */
+            /* =========================================================================== */
             //Load scene through scene asset GUID
             void loadScene(const Assets::GUID& sceneGUID);
 
@@ -113,13 +133,12 @@ namespace PAIN {
             void processPendingSceneChange();
 
 #ifdef PN_PLATFORM_WINDOWS
-
-            //Delete current active scene
-            void deleteScene(Assets::GUID const& id);
-
 #ifdef _DEBUG
             //Create default scene
             void createScene(std::string const& name);
+
+            //Delete current active scene
+            void deleteScene(Assets::GUID const& id);
 #endif
             //Save curr scene
             void saveActiveScene(Assets::GUID const& scn_id, std::string const& name = "");
@@ -135,6 +154,12 @@ namespace PAIN {
             bool isGamePaused() const { return is_game_paused;  }
             void setGamePaused(bool paused);
 
+            //Loading screen
+            std::unique_ptr<LoadingScreen> loadingScreen;
+
+            /* =========================================================================== */
+            /*                            ENVIRONMENT                                      */
+            /* =========================================================================== */
             //Accessor
             Assets::GUID getCurrSkyBoxTextureID() const { return curr_skybox_id; }
             void setCurrSkyBoxTexture(Assets::GUID const& skybox_id);
@@ -152,18 +177,10 @@ namespace PAIN {
                 return light.has_value() ? &light->get() : nullptr;
             }
 
-            //Loading screen
-            std::unique_ptr<LoadingScreen> loadingScreen;
 
-            // Cameras
-            Camera* GetActiveCamera();
-            Camera* GetGameCamera();
-            void SetActiveCamera(Camera* cam);
-            void SetEditorCamera();
-            void SetGameCamera();
-            void ChangeGameCamera(std::string cam_name);
-            const std::string& GetActiveGameCamera();
-            const std::unordered_map<std::string, std::unique_ptr<Camera>>& GetAllGameCamera() const;
+            /* =========================================================================== */
+            /*                                LAYERS                                       */
+            /* =========================================================================== */
 
             // Get current scene layers
             const std::vector<Scene::Layer>& getLayers() const {
@@ -175,14 +192,7 @@ namespace PAIN {
                 return layers;
             }
 
-            bool isLayerEnabled(int layer_id) {
-                for (const auto& layer : layers) {
-                    if (layer.id == layer_id) {
-                        return layer.enabled;
-                    }
-                }
-                return true;
-            }
+            bool isLayerEnabled(int layer_id);
 
             // Get mask matrix
             const std::vector<std::vector<bool>>& getMaskMatrix() const {
@@ -195,13 +205,7 @@ namespace PAIN {
             }
 
             // Check if two layers can interact
-            bool canLayersInteract(int layer1, int layer2) const {
-                if (layer1 < 0 || layer2 < 0) return true;  // Invalid = allow
-                if (layer1 >= mask_matrix.size()) return true;
-                if (layer2 >= mask_matrix[layer1].size()) return true;
-
-                return mask_matrix[layer1][layer2];
-            }
+            bool canLayersInteract(int layer1, int layer2) const;
 
             // Get Picking mask
             int getPickingMask() const;
