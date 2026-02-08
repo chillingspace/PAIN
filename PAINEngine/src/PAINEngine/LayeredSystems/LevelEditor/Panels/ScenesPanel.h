@@ -66,6 +66,9 @@ namespace PAIN {
                 // Layer management state
                 void drawGraphicsSettingsPanel();
 
+                // Floor Panel
+                void drawFloorSettingsPanel();
+
                 // Cam Panel
                 void drawActiveCamPanel();
 

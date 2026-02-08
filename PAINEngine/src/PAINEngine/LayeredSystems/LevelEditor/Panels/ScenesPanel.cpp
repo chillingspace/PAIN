@@ -10,6 +10,8 @@
 #include "LayeredSystems/LevelEditor/Panels/ReflectionUI.h"
 #include "CoreSystems/Windows/Window.h"
 
+#include "Systems/Physics/sysPhysics.h"
+
 
 namespace PAIN {
     namespace Editor {
@@ -847,6 +849,72 @@ namespace PAIN {
                 }
             }
 
+            void ScenesPanel::drawFloorSettingsPanel() {
+                auto scene = services->get<Scene::SceneManager>();
+                if (!scene) return;
+
+                // Floor enable/disable toggle
+                bool floorEnabled = scene->isFloorEnabled();
+                if (ImGui::Checkbox("Enable Floor Collision", &floorEnabled)) {
+                    scene->setFloorEnabled(floorEnabled);
+                    // Update physics system
+                    auto physics = services->get<ECS::Controller>()->getSystem<Physics::System>();
+                    if (physics) {
+                        physics->set_floor_enabled(floorEnabled);
+                    }
+                }
+                ImGui::Spacing();
+
+                ImGui::BeginDisabled(!floorEnabled);
+
+                // Floor position
+                glm::vec3 floorPos = scene->getFloorPosition();
+                float floorPosArray[3] = { floorPos.x, floorPos.y, floorPos.z };
+                if (ImGui::DragFloat3("Floor Position", floorPosArray, 0.1f)) {
+                    scene->setFloorPosition(glm::vec3(floorPosArray[0], floorPosArray[1], floorPosArray[2]));
+                    // Recreate floor in physics
+                    auto physics = services->get<ECS::Controller>()->getSystem<Physics::System>();
+                    if (physics) {
+                        physics->create_floor();
+                    }
+                }
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip("Center position of the floor collider");
+                }
+                ImGui::Spacing();
+
+                // Floor extents (half-extents)
+                glm::vec3 floorExtents = scene->getFloorExtents();
+                float floorExtentsArray[3] = { floorExtents.x, floorExtents.y, floorExtents.z };
+                if (ImGui::DragFloat3("Floor Half-Extents", floorExtentsArray, 0.1f, 0.01f, 1000.0f)) {
+                    scene->setFloorExtents(glm::vec3(floorExtentsArray[0], floorExtentsArray[1], floorExtentsArray[2]));
+                    // Recreate floor in physics
+                    auto physics = services->get<ECS::Controller>()->getSystem<Physics::System>();
+                    if (physics) {
+                        physics->create_floor();
+                    }
+                }
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip("Half-extents of the floor box (total size = 2x half-extents)");
+                }
+
+                ImGui::EndDisabled();
+
+                // Info text
+                if (!floorEnabled) {
+                    ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.0f, 1.0f), "Floor collision is DISABLED");
+                    ImGui::TextWrapped("Camera will not collide with the floor. Useful for flying cameras.");
+                } else {
+                    ImVec4 infoColor(0.7f, 0.7f, 0.7f, 1.0f);
+                    glm::vec3 pos = scene->getFloorPosition();
+                    glm::vec3 ext = scene->getFloorExtents();
+                    float top = pos.y + ext.y;
+                    float bottom = pos.y - ext.y;
+                    ImGui::TextColored(infoColor, "Floor top surface: Y=%.2f", top);
+                    ImGui::TextColored(infoColor, "Floor bottom: Y=%.2f", bottom);
+                }
+            }
+
             void ScenesPanel::drawActiveCamPanel()
             {
                 auto scene = services->get<Scene::SceneManager>();
@@ -1476,6 +1544,11 @@ namespace PAIN {
                 //Render graphics settings
                 if (ImGui::CollapsingHeader("Graphics Settings")) {
                     drawGraphicsSettingsPanel();
+                }
+
+                //Render Floor settings
+                if (ImGui::CollapsingHeader("Floor Settings")) {
+                    drawFloorSettingsPanel();
                 }
 
                 //Render Layer settings

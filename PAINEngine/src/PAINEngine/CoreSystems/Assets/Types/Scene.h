@@ -47,6 +47,13 @@ namespace PAIN {
                 bool showCollisionGizmo = false;
             } camera;
 
+            //Floor settings
+            struct FloorSettings {
+                bool enabled = true;
+                glm::vec3 position{ 0.0f, -1.0f, 0.0f };
+                glm::vec3 halfExtents{ 100.0f, 1.0f, 100.0f };
+            } floor;
+
             //Environment settings
             struct Environment {
                 Assets::GUID skyboxGUID;

@@ -1,4 +1,4 @@
-﻿/*****************************************************************//**
+/*****************************************************************//**
  * \file   sysPhysics.h
  * \brief  Declaration of physics system states
  *
@@ -51,9 +51,12 @@ namespace PAIN {
 			// Get system name
 			std::string getSysName() const override { return "Physics System"; }
 
-			void create_floor();
+		void create_floor();
+		void remove_floor();
+		void set_floor_enabled(bool enabled);
+		bool is_floor_enabled() const { return floor_enabled; }
 
-			void applyBounce(entt::registry&, entt::entity, float jumpImpulse);
+		void applyBounce(entt::registry&, entt::entity, float jumpImpulse);
 
 			// Getters
 			JPH::PhysicsSystem* GetPhysicsSystem() const { return jolt_physics.get(); }
@@ -126,10 +129,14 @@ namespace PAIN {
 
 			const i32 collision_steps;
 
-			glm::vec3 current_gravity = glm::vec3(0.0f, -9.81f, 0.0f);
+		glm::vec3 current_gravity = glm::vec3(0.0f, -9.81f, 0.0f);
 
-			// Jolt init setup
-			void joltSetup();
+		// Floor
+		JPH::BodyID floor_body_id = JPH::BodyID(JPH::BodyID::cInvalidBodyID);
+		bool floor_enabled = true;
+
+		// Jolt init setup
+		void joltSetup();
 
 			void notifyContact(const JPH::Body& b1, const JPH::Body& b2); // @TODO change to only enqueue collision, no lua
 

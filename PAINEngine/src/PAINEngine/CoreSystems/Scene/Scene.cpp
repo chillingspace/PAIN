@@ -21,6 +21,8 @@
 #include "LayeredSystems/LevelEditor/Panels/ResourcePanel.h"
 #include "LoadingScreen.h"
 
+#include "Systems/Physics/sysPhysics.h"
+
 #include <thread>
 #include <atomic>
 
@@ -356,6 +358,23 @@ namespace PAIN {
 			}
 
 			PN_CORE_INFO("[SceneManager] Environment setup complete");
+		}
+
+		void SceneManager::setupFloor(SceneAsset const& scene_asset) {
+			//Load floor settings from scene asset
+			floor_enabled = scene_asset.floor.enabled;
+			floor_position = scene_asset.floor.position;
+			floor_extents = scene_asset.floor.halfExtents;
+
+			//Update physics floor if physics system exists
+			auto physics = services->get<ECS::Controller>()->getSystem<Physics::System>();
+			if (physics) {
+				physics->set_floor_enabled(floor_enabled);
+			}
+
+			PN_CORE_INFO("[SceneManager] Floor setup: enabled={}, pos=({:.2f}, {:.2f}, {:.2f}), extents=({:.2f}, {:.2f}, {:.2f})",
+				floor_enabled, floor_position.x, floor_position.y, floor_position.z,
+				floor_extents.x, floor_extents.y, floor_extents.z);
 		}
 
 		void SceneManager::setupLayers(SceneAsset const& scene_asset) {
@@ -752,6 +771,11 @@ namespace PAIN {
 			scene_asset.layers = layers;
 			scene_asset.mask_matrix = mask_matrix;
 
+			//Capture floor settings
+			scene_asset.floor.enabled = floor_enabled;
+			scene_asset.floor.position = floor_position;
+			scene_asset.floor.halfExtents = floor_extents;
+
 			//Capture loading screen settings
 			if (loadingScreen) {
 				scene_asset.loadingScreen.backgroundTextureGUID = loadingScreen->getBackgroundTexture();
@@ -909,6 +933,7 @@ namespace PAIN {
 			setupLoadingScreen(scn_asset);
 			setupCamera(scn_asset);
 			setupEnvironment(scn_asset);
+			setupFloor(scn_asset);
 			setupLayers(scn_asset);
 
 			// Clear existing asset cache

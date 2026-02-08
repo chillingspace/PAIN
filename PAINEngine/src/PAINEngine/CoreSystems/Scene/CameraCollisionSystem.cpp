@@ -293,10 +293,11 @@ namespace PAIN {
             
             // Collision query settings
             JPH::CollideShapeSettings settings;
-            // Set max separation distance to be slightly larger than 0 to catch near-misses
-            settings.mMaxSeparationDistance = radius * 0.1f; 
+            // IMPORTANT: Set separation distance to 0 to only detect actual overlaps
+            // Non-zero values cause collisions to be reported before shapes actually touch
+            settings.mMaxSeparationDistance = 0.0f;
             settings.mBackFaceMode = JPH::EBackFaceMode::CollideWithBackFaces;
-            // Enable active edge detection for better normal calculation
+            // Enable active edge detection for better normal calculation  
             settings.mActiveEdgeMode = JPH::EActiveEdgeMode::CollideOnlyWithActive;
             
             // Perform collision check
@@ -306,6 +307,7 @@ namespace PAIN {
                 JPH::Vec3 deepestNormal;
                 float deepestDepth = 0.0f;
                 int hitCount = 0;
+                JPH::BodyID hitBodyID;
                 
                 void AddHit(const JPH::CollideShapeResult& result) override {
                     hasCollision = true;
@@ -315,18 +317,46 @@ namespace PAIN {
                         deepestDepth = result.mPenetrationDepth;
                         // mPenetrationAxis points from shape 2 to shape 1 (from world geometry to our shape)
                         deepestNormal = result.mPenetrationAxis;
+                        hitBodyID = result.mBodyID2; // Store the body we hit
+                        
+                        // DEBUG: Log collision details with body ID
+                        PN_CORE_ERROR("[CameraCollision] HIT BodyID={}: Depth={:.3f} Normal=({:.2f}, {:.2f}, {:.2f}) Contact1=({:.2f}, {:.2f}, {:.2f})",
+                            result.mBodyID2.GetIndex(),
+                            result.mPenetrationDepth,
+                            result.mPenetrationAxis.GetX(), result.mPenetrationAxis.GetY(), result.mPenetrationAxis.GetZ(),
+                            result.mContactPointOn1.GetX(), result.mContactPointOn1.GetY(), result.mContactPointOn1.GetZ());
                     }
                 }
             };
             
             CollisionCollector collector;
             
+            // DEBUG: Log layer filter info
+            static int layerCheckCount = 0;
+            if (layerCheckCount % 60 == 0) {
+                // Log all bodies and their layers
+                JPH::BodyIDVector bodyIDs;
+                physics->GetBodies(bodyIDs);
+                PN_CORE_INFO("[CameraCollision] Total bodies in world: {}", bodyIDs.size());
+                for (const auto& id : bodyIDs) {
+                    auto& lockInterface = physics->GetBodyLockInterface();
+                    JPH::BodyLockRead lock(lockInterface, id);
+                    if (lock.Succeeded()) {
+                        const JPH::Body& body = lock.GetBody();
+                        JPH::ObjectLayer layer = body.GetObjectLayer();
+                        JPH::RVec3 pos = body.GetPosition();
+                        PN_CORE_INFO("[CameraCollision] Body {}: Layer={}, Pos=({:.2f}, {:.2f}, {:.2f})", 
+                            id.GetIndex(), layer, (float)pos.GetX(), (float)pos.GetY(), (float)pos.GetZ());
+                    }
+                }
+            }
+            layerCheckCount++;
+            
             // Create layer filters to collide with NON_MOVING (static) and MOVING (dynamic) objects
             // This matches the layer setup in your physics system
             class CameraCollisionLayerFilter : public JPH::BroadPhaseLayerFilter {
             public:
                 virtual bool ShouldCollide(JPH::BroadPhaseLayer inLayer) const override {
-                    // Collide with NON_MOVING, MOVING, DEBRIS, and SENSOR broadphase layers
                     return true; // Allow all broadphase layers for camera collision
                 }
             };
@@ -334,6 +364,12 @@ namespace PAIN {
             class CameraObjectLayerFilter : public JPH::ObjectLayerFilter {
             public:
                 virtual bool ShouldCollide(JPH::ObjectLayer inLayer) const override {
+                    // DEBUG: Log what layers are being checked
+                    static int filterCount = 0;
+                    if (filterCount % 300 == 0) {
+                        PN_CORE_INFO("[CameraCollision] ObjectLayerFilter checking layer: {}", inLayer);
+                    }
+                    filterCount++;
                     // Collide with all object layers except UNUSED ones
                     // Layer::NON_MOVING = 4, Layer::MOVING = 5, Layer::DEBRIS = 6, Layer::SENSOR = 7
                     return inLayer >= 4 && inLayer <= 7;
@@ -342,6 +378,47 @@ namespace PAIN {
             
             CameraCollisionLayerFilter bpFilter;
             CameraObjectLayerFilter objFilter;
+            
+            // DEBUG: Critical position logging
+            PN_CORE_ERROR("[CameraCollision] QUERY: Pos({:.3f}, {:.3f}, {:.3f}) Radius={:.3f}", 
+                position.x, position.y, position.z, radius);
+            
+            // DEBUG: Log all bodies in physics world (once per second)
+            static int bodyLogCounter = 0;
+            if (bodyLogCounter % 60 == 0) {
+                JPH::BodyIDVector allBodies;
+                physics->GetBodies(allBodies);
+                PN_CORE_INFO("[CameraCollision] Total bodies in world: {}", allBodies.size());
+                for (const auto& bodyID : allBodies) {
+                    JPH::BodyLockRead lock(physics->GetBodyLockInterface(), bodyID);
+                    if (lock.Succeeded()) {
+                        const JPH::Body& body = lock.GetBody();
+                        JPH::ObjectLayer layer = body.GetObjectLayer();
+                        JPH::RVec3 pos = body.GetPosition();
+                        PN_CORE_INFO("[CameraCollision]   Body {}: Layer={} Pos=({:.2f}, {:.2f}, {:.2f}) Type={}",
+                            bodyID.GetIndex(), layer, 
+                            (float)pos.GetX(), (float)pos.GetY(), (float)pos.GetZ(),
+                            body.GetMotionType() == JPH::EMotionType::Static ? "Static" : "Dynamic");
+                    }
+                }
+            }
+            bodyLogCounter++;
+            
+            // Create a body filter to exclude specific bodies if needed
+            class CameraBodyFilter : public JPH::BodyFilter {
+            public:
+                virtual bool ShouldCollideLocked(const JPH::Body& inBody) const override {
+                    // Allow collision with all bodies for now
+                    // You can add body ID exclusions here if needed
+                    return true;
+                }
+                
+                virtual bool ShouldCollide(const JPH::BodyID &inBodyID) const override {
+                    return true;
+                }
+            };
+            
+            CameraBodyFilter bodyFilter;
             
             // Query collision against all bodies with proper layer filters
             // Pass references (not pointers) to the filters
@@ -354,7 +431,8 @@ namespace PAIN {
                 JPH::RVec3(0, 0, 0), // base offset - centered at camera position
                 collector,
                 bpFilter, // broad phase layer filter (reference)
-                objFilter // object layer filter (reference)
+                objFilter, // object layer filter (reference)
+                bodyFilter // body filter (reference)
             );
             
             if (collector.hasCollision) {

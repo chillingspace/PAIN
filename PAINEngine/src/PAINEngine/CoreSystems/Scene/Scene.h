@@ -63,11 +63,19 @@ namespace PAIN {
             std::vector<Layer> layers;
             std::vector<std::vector<bool>> mask_matrix;
 
+            /* =========================================================================== */
+            /*                                FLOOR                                        */
+            /* =========================================================================== */
+            bool floor_enabled = true;
+            glm::vec3 floor_position{ 0.0f, -1.0f, 0.0f };
+            glm::vec3 floor_extents{ 100.0f, 1.0f, 100.0f };
+
             // Internal methods
             // LOADING
             bool buildEntitiesFromAsset(SceneAsset const& scene_asset);
             void setupCamera(SceneAsset const& scene_asset);
             void setupEnvironment(SceneAsset const& scene_asset);
+            void setupFloor(SceneAsset const& scene_asset);
             void setupLayers(SceneAsset const& scene_asset);
             void setupLoadingScreen(SceneAsset const& scene_asset);
 
@@ -151,6 +159,14 @@ namespace PAIN {
                 auto light = LightSources::get().get(world_light_name);
                 return light.has_value() ? &light->get() : nullptr;
             }
+
+            // Floor settings
+            bool isFloorEnabled() const { return floor_enabled; }
+            void setFloorEnabled(bool enabled) { floor_enabled = enabled; }
+            glm::vec3 getFloorPosition() const { return floor_position; }
+            void setFloorPosition(const glm::vec3& pos) { floor_position = pos; }
+            glm::vec3 getFloorExtents() const { return floor_extents; }
+            void setFloorExtents(const glm::vec3& extents) { floor_extents = extents; }
 
             //Loading screen
             std::unique_ptr<LoadingScreen> loadingScreen;

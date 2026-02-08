@@ -1,4 +1,4 @@
-﻿/*****************************************************************/ /**
+/*****************************************************************/ /**
  * \file   sysPhysics.cpp
  * \brief  Definition of physics system states
  *
@@ -801,21 +801,74 @@ namespace PAIN {
 			if (!body_interface)
 				return;
 
+			// Remove existing floor if any
+			remove_floor();
+
+			// Get scene manager for floor settings
+			auto svc = services.lock();
+			glm::vec3 floorPos(0.0f, -1.0f, 0.0f);
+			glm::vec3 floorExtents(100.0f, 1.0f, 100.0f);
+			
+			if (svc) {
+				auto sceneMgr = svc->get<Scene::SceneManager>();
+				if (sceneMgr) {
+					floorPos = sceneMgr->getFloorPosition();
+					floorExtents = sceneMgr->getFloorExtents();
+				}
+			}
+
 			// Half extents
-			JPH::Vec3 halfExtent(100.0f, 1.0f, 100.0f);
+			JPH::Vec3 halfExtent(floorExtents.x, floorExtents.y, floorExtents.z);
 
 			// Create shape
 			JPH::Ref<JPH::BoxShape> floorShape = new JPH::BoxShape(halfExtent, 0.0f);
 
-			// Body settingsx
+			// Body settings
 			JPH::BodyCreationSettings floorSettings(
-				floorShape, JPH::RVec3(0.0f, -1.f, 0.0f), // move down by halfHeight
+				floorShape, JPH::RVec3(floorPos.x, floorPos.y, floorPos.z),
 				JPH::Quat::sIdentity(), JPH::EMotionType::Static,
 				PAIN::Layer::NON_MOVING);
 
 			// Create and add
 			JPH::Body* floorBody = body_interface->CreateBody(floorSettings);
-			body_interface->AddBody(floorBody->GetID(), JPH::EActivation::DontActivate);
+			floor_body_id = floorBody->GetID();
+			
+			if (floor_enabled) {
+				body_interface->AddBody(floor_body_id, JPH::EActivation::DontActivate);
+			}
+			
+			PN_CORE_INFO("[Physics] Floor created at ({:.2f}, {:.2f}, {:.2f}) with extents ({:.2f}, {:.2f}, {:.2f})",
+				floorPos.x, floorPos.y, floorPos.z,
+				floorExtents.x, floorExtents.y, floorExtents.z);
+		}
+
+		void System::remove_floor() {
+			if (!body_interface || floor_body_id.IsInvalid())
+				return;
+
+			body_interface->RemoveBody(floor_body_id);
+			body_interface->DestroyBody(floor_body_id);
+			floor_body_id = JPH::BodyID(JPH::BodyID::cInvalidBodyID);
+			
+			PN_CORE_INFO("[Physics] Floor removed");
+		}
+
+		void System::set_floor_enabled(bool enabled) {
+			if (floor_enabled == enabled)
+				return;
+
+			floor_enabled = enabled;
+
+			if (!body_interface || floor_body_id.IsInvalid())
+				return;
+
+			if (enabled) {
+				body_interface->AddBody(floor_body_id, JPH::EActivation::DontActivate);
+				PN_CORE_INFO("[Physics] Floor enabled");
+			} else {
+				body_interface->RemoveBody(floor_body_id);
+				PN_CORE_INFO("[Physics] Floor disabled");
+			}
 		}
 
 		// Check if on object
