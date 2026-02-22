@@ -709,6 +709,32 @@ namespace PAIN {
         );
     }
 
+    glm::vec3 EngineAPIAdapter::Camera_GetPositionWithCollision(const glm::vec3& playerPos, const glm::vec3& desiredPos)
+    {
+        if (!scene_) return desiredPos;
+        
+        auto cam = scene_->GetActiveCamera();
+        if (!cam || !cam->collisionEnabled) return desiredPos;
+        
+        auto collisionSystem = scene_->getCameraCollisionSystem();
+        if (!collisionSystem) return desiredPos;
+        
+        // Use the camera's collision offset setting
+        float offset = cam->collisionOffset;
+        
+        // Get last valid camera position for smooth interpolation
+        glm::vec3 lastValidPos = cam->pos;
+        
+        // Use raycast-based camera positioning
+        return collisionSystem->getCameraPositionWithRaycast(
+            playerPos,
+            desiredPos,
+            offset,
+            0.0f, // No smooth interpolation - instant response for responsiveness
+            lastValidPos
+        );
+    }
+
     /* =========================================================================== */
     /*                                Particles                                    */
     /* =========================================================================== */

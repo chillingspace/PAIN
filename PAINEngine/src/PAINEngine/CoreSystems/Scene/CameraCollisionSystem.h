@@ -46,6 +46,21 @@ namespace PAIN {
             // Check collision for a specific camera (convenience method)
             glm::vec3 checkCameraCollision(Camera* camera, const glm::vec3& proposedPos);
             
+            // Raycast-based camera position for third-person camera
+            // Casts ray from player to desired position, returns best camera position
+            // If blocked: returns hit point - offset (or interpolated closer position)
+            // If not blocked: returns desired position
+            // smoothFactor: 0 = snap to hit point, 1 = full interpolation
+            glm::vec3 getCameraPositionWithRaycast(const glm::vec3& playerPos,
+                                                    const glm::vec3& desiredPos,
+                                                    float offset,
+                                                    float smoothFactor = 0.0f,
+                                                    const glm::vec3& lastValidPos = glm::vec3(0.0f));
+            
+            // Simple raycast from player to desired camera position
+            // Returns distance to hit, or -1 if no hit
+            float raycastToPosition(const glm::vec3& from, const glm::vec3& to);
+            
         private:
             void* m_physicsSystem;  // JPH::PhysicsSystem*
             bool m_initialized;

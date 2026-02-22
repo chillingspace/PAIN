@@ -237,6 +237,149 @@ namespace PAIN {
             );
         }
 
+        float CameraCollisionSystem::raycastToPosition(const glm::vec3& from, const glm::vec3& to) {
+            if (!m_initialized) return -1.0f;
+            
+            JPH::PhysicsSystem* physics = static_cast<JPH::PhysicsSystem*>(m_physicsSystem);
+            
+            glm::vec3 direction = to - from;
+            float maxDist = glm::length(direction);
+            if (maxDist < 0.001f) return -1.0f;
+            direction = direction / maxDist;
+            
+            JPH::RRayCast ray;
+            ray.mOrigin = JPH::RVec3(from.x, from.y, from.z);
+            ray.mDirection = JPH::Vec3(direction.x, direction.y, direction.z) * maxDist;
+            
+            JPH::RayCastResult result;
+            
+            // Use broadphase layer filter to only hit relevant objects
+            class CameraRayLayerFilter : public JPH::BroadPhaseLayerFilter {
+            public:
+                virtual bool ShouldCollide(JPH::BroadPhaseLayer inLayer) const override {
+                    return true;
+                }
+            };
+            
+            class CameraRayObjectFilter : public JPH::ObjectLayerFilter {
+            public:
+                virtual bool ShouldCollide(JPH::ObjectLayer inLayer) const override {
+                    return inLayer >= 4 && inLayer <= 7;
+                }
+            };
+            
+            class CameraRayBodyFilter : public JPH::BodyFilter {
+            public:
+                virtual bool ShouldCollideLocked(const JPH::Body& inBody) const override {
+                    return true;
+                }
+                virtual bool ShouldCollide(const JPH::BodyID& inBodyID) const override {
+                    return true;
+                }
+            };
+            
+            CameraRayLayerFilter bpFilter;
+            CameraRayObjectFilter objFilter;
+            CameraRayBodyFilter bodyFilter;
+            
+            if (physics->GetNarrowPhaseQuery().CastRay(ray, result, bpFilter, objFilter, bodyFilter)) {
+                return result.mFraction * maxDist;
+            }
+            
+            return -1.0f; // No hit
+        }
+
+        glm::vec3 CameraCollisionSystem::getCameraPositionWithRaycast(const glm::vec3& playerPos,
+                                                                       const glm::vec3& desiredPos,
+                                                                       float offset,
+                                                                       float smoothFactor,
+                                                                       const glm::vec3& lastValidPos) {
+            if (!m_initialized) {
+                return desiredPos;
+            }
+            
+            // Work with a local copy to allow modification
+            glm::vec3 finalDesiredPos = desiredPos;
+            
+            glm::vec3 direction = finalDesiredPos - playerPos;
+            float desiredDist = glm::length(direction);
+            
+            // Enforce minimum camera distance - camera should never be too close to player
+            float minCameraDist = 1.0f; // Minimum 1 unit from player
+            float minDistThreshold = 1.2f; // Threshold to start blocking - slightly above min to create a buffer zone
+            
+            // Track if we're in the "danger zone" where mouse is trying to push camera too close
+            bool approachingMinLimit = (desiredDist < minDistThreshold);
+            
+            if (desiredDist < minCameraDist) {
+                // Recalculate desired position to be at minimum distance
+                if (desiredDist > 0.001f) {
+                    direction = direction / desiredDist;
+                } else {
+                    direction = glm::vec3(0.0f, 1.0f, 0.0f); // Default up
+                }
+                finalDesiredPos = playerPos + direction * minCameraDist;
+                desiredDist = minCameraDist;
+            }
+            
+            if (desiredDist < 0.001f) {
+                return finalDesiredPos;
+            }
+            
+            direction = direction / desiredDist;
+            
+            // Cast ray from player towards desired camera position
+            // Start ray slightly outside player position to avoid hitting player's own collider
+            glm::vec3 rayStart = playerPos + direction * 0.3f;
+            float hitDist = raycastToPosition(rayStart, finalDesiredPos);
+            
+            // Adjust hitDist to account for the ray start offset
+            if (hitDist > 0.0f) {
+                hitDist += 0.3f;
+            }
+            
+            // No obstacle OR hit is beyond desired position minus offset
+            if (hitDist < 0.0f) {
+                // No hit - return desired camera position
+                return finalDesiredPos;
+            }
+            
+            // Add small tolerance to prevent phasing - require hit to be at least this much before camera
+            float toleranceBuffer = 0.05f; // 5cm buffer to prevent phasing
+            
+            // Check if we're approaching the minimum distance limit AND there's a collision
+            // In this case, block the movement entirely to prevent phasing
+            if (approachingMinLimit && hitDist < minDistThreshold) {
+                // We're trying to move into the minimum distance zone AND there's an obstacle
+                // Block movement - stay at last valid position or push out slightly
+                if (lastValidPos != glm::vec3(0.0f) && smoothFactor > 0.0f) {
+                    return lastValidPos;
+                }
+                // If no last valid position, use minimum distance position
+                glm::vec3 minPos = playerPos + direction * minCameraDist;
+                return minPos;
+            }
+            
+            if (hitDist >= desiredDist - offset - toleranceBuffer) {
+                // Hit is beyond desired camera position (with tolerance) - no collision
+                return finalDesiredPos;
+            }
+            
+            // Obstacle detected between player and desired camera position
+            // Place camera at hit point minus offset (with extra tolerance), but never closer than minimum distance
+            float cameraDist = glm::max(minCameraDist, hitDist - offset - toleranceBuffer);
+            glm::vec3 hitPoint = playerPos + direction * hitDist;
+            glm::vec3 blockedPos = playerPos + direction * cameraDist;
+            
+            // Apply smooth interpolation if requested
+            if (smoothFactor > 0.0f && lastValidPos != glm::vec3(0.0f)) {
+                // Blend between last valid position and blocked position
+                return lastValidPos + (blockedPos - lastValidPos) * smoothFactor;
+            }
+            
+            return blockedPos;
+        }
+
         bool CameraCollisionSystem::performCollisionQuery(const glm::vec3& position,
                                                          const glm::vec3& up,
                                                          float radius,

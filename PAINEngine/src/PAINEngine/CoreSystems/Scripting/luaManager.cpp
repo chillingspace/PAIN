@@ -1019,6 +1019,18 @@ namespace PAIN {
                 return std::make_tuple(resolved.x, resolved.y, resolved.z);
             });
 
+        lua_.set_function("cameraGetPositionWithCollision",
+            [this](float playerX, float playerY, float playerZ,
+                   float desiredX, float desiredY, float desiredZ) {
+                if (!api_) return std::make_tuple(desiredX, desiredY, desiredZ);
+                
+                glm::vec3 result = api_->Camera_GetPositionWithCollision(
+                    glm::vec3(playerX, playerY, playerZ),
+                    glm::vec3(desiredX, desiredY, desiredZ)
+                );
+                return std::make_tuple(result.x, result.y, result.z);
+            });
+
         /* =========================================================================== */
         /*                                Particles                                    */
         /* =========================================================================== */

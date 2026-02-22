@@ -204,11 +204,12 @@ registerUpdate(function(dt)
     local cy = smoothY + ry
     local cz = smoothZ + rz
 
-    -- Apply camera collision (uses active camera's settings from editor)
-    if cameraResolveCollision then
-        cx, cy, cz = cameraResolveCollision(
-            cx, cy, cz,                    -- proposed position
-            frozenCx or cx, frozenCy or cy, frozenCz or cz  -- current/last valid position
+    -- Apply camera collision using raycast (player position -> desired camera position)
+    -- This naturally handles sliding: as player moves, camera follows and adjusts if blocked
+    if cameraGetPositionWithCollision then
+        cx, cy, cz = cameraGetPositionWithCollision(
+            smoothX, smoothY, smoothZ,  -- player position (smoothed)
+            cx, cy, cz                  -- desired camera position
         )
     end
 
