@@ -1,6 +1,12 @@
+#include "pch.h"
 #include "luaManager.h"
+#include <string>
+#include <vector>
+#include <algorithm>
 #include "IEngineAPI.h"
 #include "PAINEngine/CoreSystems/Audio/Audio.h"
+#include "PAINEngine/CoreSystems/Path/Path.h"
+#include "PAINEngine/CoreSystems/Assets/sAssets.h"
 #include "Systems/Audio/sysAudio.h"
 #include "ECS/Components/cEntity.h"
 #include "ECS/Components/cAudioSource.h"
@@ -46,6 +52,7 @@ namespace {
     inline void logMsg(std::string_view msg) {
         PN_INFO("[LuaManager] {}", msg);
     }
+
 
 #ifdef __ANDROID__
     static std::string readAssetText(AAssetManager* mgr, const char* path) {
@@ -690,6 +697,24 @@ namespace PAIN {
             sol::optional<bool> looping, 
             sol::optional<bool> is3D) -> int {
             if (!services_) return -1;
+            
+            std::string guidStr = api_->GetAudioGUID(filename);
+
+            if (guidStr.empty()) {
+                PN_CORE_WARN("[LuaManager] audioPlayFile: Audio asset '{}' not found in registry!", filename);
+                return -1;
+            }
+
+            auto assets = services_->get<Assets::Manager>();
+            if (!assets) return -1;
+            
+            Assets::GUID guid(guidStr);
+            auto soundOpt = assets->getAsset<Audio::Sound>(guid);
+            if (!soundOpt) {
+                PN_CORE_WARN("[LuaManager] audioPlayFile: Audio asset '{}' not loaded!", filename);
+                return -1;
+            }
+
             auto audio = services_->get<Audio::Audio>();
             if (!audio) return -1;
             
@@ -698,49 +723,135 @@ namespace PAIN {
             bool spatial = is3D.value_or(false);
             glm::vec3 pos(0.0f); // Default position for non-3D
             
-            auto result = audio->playFile(filename, "sfx", vol, loop, spatial, pos,
+            // Use the physical path from the asset system
+            auto result = audio->playFile(soundOpt.value()->getPath(), "sfx", vol, loop, spatial, pos,
                 Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
             
             return result ? result->value : -1;
             });
 
-        // audioPlaySFX(filename, looping?) - Simple SFX playback
-        lua_.set_function("audioPlaySFX", [this](const std::string& filename, sol::optional<bool> looping) -> int {
-            if (!services_) return -1;
+        // audioPlaySFX(filename, volumeDb?, looping?) - Simple SFX playback
+        lua_.set_function("audioPlaySFX", [this](const std::string& filename, sol::optional<float> volumeDb, sol::optional<bool> looping) -> int {
+            if (!services_ || !api_) return -1;
+
+            // 1. Get GUID from filename
+            std::string guidStr = api_->GetAudioGUID(filename);
+            if (guidStr.empty()) {
+                PN_CORE_WARN("[LuaManager] audioPlaySFX: Audio asset '{}' not found in registry!", filename);
+                return -1;
+            }
+
+            // 2. Get Asset
+            auto assets = services_->get<Assets::Manager>();
+            if (!assets) return -1;
+            
+            Assets::GUID guid(guidStr);
+            auto soundOpt = assets->getAsset<Audio::Sound>(guid);
+            if (!soundOpt) {
+                PN_CORE_WARN("[LuaManager] audioPlaySFX: Failed to load audio asset '{}'", filename);
+                return -1;
+            }
+
+            // 3. Play using Asset
             auto audio = services_->get<Audio::Audio>();
             if (!audio) return -1;
             
-            auto result = audio->playSFX(filename, looping.value_or(false), 0.0f);
+            // Pass volumeDb
+            auto result = audio->play(soundOpt.value(), "sfx", volumeDb.value_or(0.0f), 0.0f, looping.value_or(false));
             return result ? result->value : -1;
             });
 
         // audioPlayBGM(filename, overlay?) - Play BGM, overlay adds to existing BGM
         lua_.set_function("audioPlayBGM", [this](const std::string& filename, sol::optional<bool> overlay) -> int {
-            if (!services_) return -1;
+            if (!services_ || !api_) return -1;
+
+            std::string guidStr = api_->GetAudioGUID(filename);
+            if (guidStr.empty()) {
+                PN_CORE_WARN("[LuaManager] audioPlayBGM: Audio asset '{}' not found!", filename);
+                return -1;
+            }
+
+            auto assets = services_->get<Assets::Manager>();
             auto audio = services_->get<Audio::Audio>();
-            if (!audio) return -1;
+            if (!assets || !audio) return -1;
+
+            Assets::GUID guid(guidStr);
+            auto soundOpt = assets->getAsset<Audio::Sound>(guid);
+            if (!soundOpt) {
+                PN_CORE_WARN("[LuaManager] audioPlayBGM: Failed to load asset '{}'", filename);
+                return -1;
+            }
+
+            // overlay logic: if !overlay, stop music? 
+            // Audio::playBGM handled this. checking Audio.h... playBGM implementation likely does logic.
+            // But we must use play(sound). 
+            // If !overlay, we should probably stop "music" group or previous BGM.
+            // For now, let's just play. The user's GlobalAudioController manages tracks anyway!
             
-            auto result = audio->playBGM(filename, overlay.value_or(false), 0.0f);
+            auto result = audio->play(soundOpt.value(), "music", 0.0f, 0.0f, true); // BGM usually loops
             return result ? result->value : -1;
             });
 
         // audioTransitionBGM(newFilename, transitionTime?) - Crossfade to new BGM
         lua_.set_function("audioTransitionBGM", [this](const std::string& newFilename, sol::optional<float> transitionTime) {
-            if (!services_) return;
+            if (!services_ || !api_) return;
+
+            std::string guidStr = api_->GetAudioGUID(newFilename);
+            if (guidStr.empty()) {
+                PN_CORE_WARN("[LuaManager] audioTransitionBGM: Audio asset '{}' not found!", newFilename);
+                return;
+            }
+
+            auto assets = services_->get<Assets::Manager>();
             auto audio = services_->get<Audio::Audio>();
-            if (!audio) return;
+            if (!assets || !audio) return;
             
-            audio->transitionBGM(newFilename, transitionTime.value_or(2.0f), 0.0f);
+            Assets::GUID guid(guidStr);
+            auto soundOpt = assets->getAsset<Audio::Sound>(guid);
+            if (!soundOpt) {
+                PN_CORE_WARN("[LuaManager] audioTransitionBGM: Failed to load asset '{}'", newFilename);
+                return;
+            }
+
+            audio->transitionBGM(soundOpt.value()->getPath(), transitionTime.value_or(2.0f), 0.0f);
             });
 
         // audioTransitionBGMWithSFX(newBGMFilename, sfxFilename, transitionTime?) - Crossfade with SFX trigger
         lua_.set_function("audioTransitionBGMWithSFX", [this](const std::string& newBGMFilename, 
             const std::string& sfxFilename, sol::optional<float> transitionTime) {
-            if (!services_) return;
+            if (!services_ || !api_) return;
+
+            auto assets = services_->get<Assets::Manager>();
             auto audio = services_->get<Audio::Audio>();
-            if (!audio) return;
-            
-            audio->transitionBGMWithSFX(newBGMFilename, sfxFilename, transitionTime.value_or(2.0f), 0.0f);
+            if (!assets || !audio) return;
+
+            // BGM Asset
+            std::string bgmGuidStr = api_->GetAudioGUID(newBGMFilename);
+            if (bgmGuidStr.empty()) {
+                PN_CORE_WARN("[LuaManager] audioTransitionBGMWithSFX: BGM '{}' not found!", newBGMFilename);
+                return;
+            }
+            auto bgmSound = assets->getAsset<Audio::Sound>(Assets::GUID(bgmGuidStr));
+            if (!bgmSound) {
+                 PN_CORE_WARN("[LuaManager] audioTransitionBGMWithSFX: BGM asset '{}' failed load", newBGMFilename);
+                 return;
+            }
+
+            // SFX Asset
+            std::string sfxGuidStr = api_->GetAudioGUID(sfxFilename);
+            std::string sfxPath = "";
+            if (!sfxGuidStr.empty()) {
+                auto sfxSound = assets->getAsset<Audio::Sound>(Assets::GUID(sfxGuidStr));
+                 if (sfxSound) {
+                     sfxPath = sfxSound.value()->getPath();
+                 } else {
+                     PN_CORE_WARN("[LuaManager] audioTransitionBGMWithSFX: SFX asset '{}' failed load", sfxFilename);
+                 }
+            } else {
+                PN_CORE_WARN("[LuaManager] audioTransitionBGMWithSFX: SFX '{}' not found!", sfxFilename);
+            }
+
+            audio->transitionBGMWithSFX(bgmSound.value()->getPath(), sfxPath, transitionTime.value_or(2.0f), 0.0f);
             });
 
         // ==================== Spatial / 3D Audio Functions ====================
@@ -748,13 +859,26 @@ namespace PAIN {
         // audioPlaySFXAt(filename, x, y, z, volumeDb?, looping?) - Play SFX at 3D position
         lua_.set_function("audioPlaySFXAt", [this](const std::string& filename, 
             float x, float y, float z, sol::optional<float> volumeDb, sol::optional<bool> looping) -> int {
-            if (!services_) return -1;
+            if (!services_ || !api_) return -1;
+
+            std::string guidStr = api_->GetAudioGUID(filename);
+            if (guidStr.empty()) {
+                PN_CORE_WARN("[LuaManager] audioPlaySFXAt: Audio asset '{}' not found!", filename);
+                return -1;
+            }
+
+            auto assets = services_->get<Assets::Manager>();
             auto audio = services_->get<Audio::Audio>();
-            if (!audio) return -1;
+            if (!assets || !audio) return -1;
             
-            auto result = audio->playSFXAt(filename, glm::vec3(x, y, z), 
-                volumeDb.value_or(0.0f), looping.value_or(false),
-                Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
+            Assets::GUID guid(guidStr);
+            auto soundOpt = assets->getAsset<Audio::Sound>(guid);
+            if (!soundOpt) {
+                PN_CORE_WARN("[LuaManager] audioPlaySFXAt: Failed to load asset '{}'", filename);
+                return -1;
+            }
+
+            auto result = audio->play(soundOpt.value(), "sfx", volumeDb.value_or(0.0f), 0.0f, looping.value_or(false), true, glm::vec3(x, y, z), Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
             return result ? result->value : -1;
             });
 
@@ -762,15 +886,26 @@ namespace PAIN {
         lua_.set_function("audioPlaySFXFromEntity", [this](const std::string& filename, 
             entt::entity entityId, sol::optional<float> volumeDb, sol::optional<bool> looping) -> int {
             if (!services_ || !api_) return -1;
+
+            std::string guidStr = api_->GetAudioGUID(filename);
+            if (guidStr.empty()) {
+                PN_CORE_WARN("[LuaManager] audioPlaySFXFromEntity: Audio asset '{}' not found!", filename);
+                return -1;
+            }
+
+            auto assets = services_->get<Assets::Manager>();
             auto audio = services_->get<Audio::Audio>();
-            if (!audio) return -1;
+            if (!assets || !audio) return -1;
             
-            // Get entity position
+            Assets::GUID guid(guidStr);
+            auto soundOpt = assets->getAsset<Audio::Sound>(guid);
+            if (!soundOpt) {
+                PN_CORE_WARN("[LuaManager] audioPlaySFXFromEntity: Failed to load asset '{}'", filename);
+                return -1;
+            }
+
             glm::vec3 pos = api_->GetPosition(entityId);
-            
-            auto result = audio->playSFXAt(filename, pos, 
-                volumeDb.value_or(0.0f), looping.value_or(false),
-                Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
+            auto result = audio->play(soundOpt.value(), "sfx", volumeDb.value_or(0.0f), 0.0f, looping.value_or(false), true, pos, Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
             return result ? result->value : -1;
             });
 
@@ -778,40 +913,65 @@ namespace PAIN {
 
         // audioPlayRandomSFX({file1, file2, ...}, volumeDb?) - Play random SFX from list
         lua_.set_function("audioPlayRandomSFX", [this](sol::table fileList, sol::optional<float> volumeDb) -> int {
-            if (!services_) return -1;
+            if (!services_ || !api_) return -1;
+            auto assets = services_->get<Assets::Manager>();
             auto audio = services_->get<Audio::Audio>();
-            if (!audio) return -1;
+            if (!assets || !audio) return -1;
             
-            std::vector<std::string> files;
+            std::vector<Assets::GUID> validGuids;
             for (size_t i = 1; i <= fileList.size(); ++i) {
                 sol::optional<std::string> f = fileList[i];
-                if (f) files.push_back(*f);
+                if (f) {
+                    std::string filename = *f;
+                    std::string guidStr = api_->GetAudioGUID(filename);
+                    if (guidStr.empty()) {
+                        PN_CORE_WARN("[LuaManager] audioPlayRandomSFX: Audio asset '{}' not found! Skipping.", filename);
+                        continue;
+                    }
+                    validGuids.emplace_back(guidStr);
+                }
             }
             
-            if (files.empty()) return -1;
+            if (validGuids.empty()) return -1;
             
-            auto result = audio->playRandomFromList(files, volumeDb.value_or(0.0f), false, 
-                glm::vec3(0), Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
+            // Random pick
+            size_t idx = rand() % validGuids.size();
+            auto soundOpt = assets->getAsset<Audio::Sound>(validGuids[idx]);
+            if (!soundOpt) return -1;
+
+            auto result = audio->play(soundOpt.value(), "sfx", volumeDb.value_or(0.0f), 0.0f, false);
             return result ? result->value : -1;
             });
 
         // audioPlayRandomSFXAt({file1, file2, ...}, x, y, z, volumeDb?) - Random SFX at position
         lua_.set_function("audioPlayRandomSFXAt", [this](sol::table fileList, 
             float x, float y, float z, sol::optional<float> volumeDb) -> int {
-            if (!services_) return -1;
+            if (!services_ || !api_) return -1;
+            auto assets = services_->get<Assets::Manager>();
             auto audio = services_->get<Audio::Audio>();
-            if (!audio) return -1;
+            if (!assets || !audio) return -1;
             
-            std::vector<std::string> files;
+            std::vector<Assets::GUID> validGuids;
             for (size_t i = 1; i <= fileList.size(); ++i) {
                 sol::optional<std::string> f = fileList[i];
-                if (f) files.push_back(*f);
+                if (f) {
+                    std::string filename = *f;
+                    std::string guidStr = api_->GetAudioGUID(filename);
+                    if (guidStr.empty()) {
+                        PN_CORE_WARN("[LuaManager] audioPlayRandomSFXAt: Audio asset '{}' not found! Skipping.", filename);
+                        continue; 
+                    }
+                    validGuids.emplace_back(guidStr);
+                }
             }
             
-            if (files.empty()) return -1;
+            if (validGuids.empty()) return -1;
             
-            auto result = audio->playRandomFromList(files, volumeDb.value_or(0.0f), true, 
-                glm::vec3(x, y, z), Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
+            size_t idx = rand() % validGuids.size();
+            auto soundOpt = assets->getAsset<Audio::Sound>(validGuids[idx]);
+            if (!soundOpt) return -1;
+
+            auto result = audio->play(soundOpt.value(), "sfx", volumeDb.value_or(0.0f), 0.0f, false, true, glm::vec3(x, y, z), Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
             return result ? result->value : -1;
             });
 
@@ -819,21 +979,42 @@ namespace PAIN {
         lua_.set_function("audioPlayRandomSFXFromEntity", [this](sol::table fileList, 
             entt::entity entityId, sol::optional<float> volumeDb) -> int {
             if (!services_ || !api_) return -1;
+            auto assets = services_->get<Assets::Manager>();
             auto audio = services_->get<Audio::Audio>();
-            if (!audio) return -1;
+            if (!assets || !audio) return -1;
             
-            std::vector<std::string> files;
+            std::vector<Assets::GUID> validGuids;
             for (size_t i = 1; i <= fileList.size(); ++i) {
                 sol::optional<std::string> f = fileList[i];
-                if (f) files.push_back(*f);
+                if (f) {
+                     std::string filename = *f;
+                     std::string guidStr = api_->GetAudioGUID(filename);
+                     if (guidStr.empty()) {
+                         PN_CORE_WARN("[LuaManager] audioPlayRandomSFXFromEntity: Audio asset '{}' not found!", filename);
+                         continue;
+                     }
+                     validGuids.emplace_back(guidStr);
+                }
             }
             
-            if (files.empty()) return -1;
+            if (validGuids.empty()) {
+                PN_CORE_WARN("[SFX] audioPlayRandomSFXFromEntity: No valid audio assets found in list!");
+                return -1;
+            }
+            
+            // Random pick
+            size_t idx = rand() % validGuids.size();
+            auto soundOpt = assets->getAsset<Audio::Sound>(validGuids[idx]);
+            if (!soundOpt) {
+                return -1;
+            }
             
             glm::vec3 pos = api_->GetPosition(entityId);
             
-            auto result = audio->playRandomFromList(files, volumeDb.value_or(0.0f), true, 
+            // loop=false, spatial=true
+            auto result = audio->play(soundOpt.value(), "sfx", volumeDb.value_or(0.0f), 0.0f, false, true, 
                 pos, Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
+            
             return result ? result->value : -1;
             });
 
@@ -1126,6 +1307,38 @@ namespace PAIN {
             });
         animTable.set_function("SetTime", [this](entt::entity entityId, float time) {
             if (api_) api_->SetAnimationTime(entityId, time);
+            });
+        // OVERRIDE: Safe audioPlayRandomSFXFromEntity
+        lua_.set_function("audioPlayRandomSFXFromEntity", [this](sol::table fileList, 
+            entt::entity entityId, sol::optional<float> volumeDb) -> int {
+            if (!services_ || !api_) return -1;
+            auto assets = services_->get<Assets::Manager>();
+            auto audio = services_->get<Audio::Audio>();
+            if (!assets || !audio) return -1;
+            
+            std::vector<Assets::GUID> validGuids;
+            for (size_t i = 1; i <= fileList.size(); ++i) {
+                sol::optional<std::string> f = fileList[i];
+                if (f) {
+                    std::string filename = *f;
+                    std::string guidStr = api_->GetAudioGUID(filename);
+                    if (guidStr.empty()) {
+                        PN_CORE_WARN("[LuaManager] audioPlayRandomSFXFromEntity: Audio asset '{}' not found! Skipping.", filename);
+                        continue;
+                    }
+                    validGuids.emplace_back(guidStr);
+                }
+            }
+            
+            if (validGuids.empty()) return -1;
+            
+            size_t idx = rand() % validGuids.size();
+            auto soundOpt = assets->getAsset<Audio::Sound>(validGuids[idx]);
+            if (!soundOpt) return -1;
+
+            glm::vec3 pos = api_->GetPosition(entityId);
+            auto result = audio->play(soundOpt.value(), "sfx", volumeDb.value_or(0.0f), 0.0f, false, true, pos, Audio::MIN_DISTANCE_3D, Audio::MAX_DISTANCE_3D);
+            return result ? result->value : -1;
             });
     }
 

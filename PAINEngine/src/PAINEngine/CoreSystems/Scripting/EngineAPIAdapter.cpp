@@ -524,54 +524,9 @@ namespace PAIN {
         if (scn_opt) {
 
             scene_->changeScene(scn_opt.get()->guid);
-            //SetGameCamera();
         }
 
         return true;
-
-        //// Invalid default
-        //PAIN::Assets::GUID targetGuid; 
-
-        //// Get asset metadata
-        //auto sceneInfos = assets_->getAllAssetDataOfType(PAIN::Assets::Type::Scenes);
-
-        //for (const auto& info : sceneInfos) {
-        //    if (info->name == name) {     
-        //        // e.g "prototype.scn"
-        //        targetGuid = info->guid;
-        //        break;
-        //    }
-        //}
-
-        //if (!targetGuid.IsValid()) {
-        //    PN_CORE_WARN("[EngineAPI] No scene GUID found for scene name '{}'", name);
-
-        //    for (const auto& info : sceneInfos) {
-        //        PN_CORE_INFO("[EngineAPI] Scene asset: name='{}', guid={}", info->name, info->guid.ToString());
-        //    }
-
-        //    return false;
-        //}
-
-        //PN_CORE_INFO("[EngineAPI] Changing scene '{}' (GUID {})",
-        //    name, targetGuid.ToString());
-
-        //// Preserve play state
-        //bool previousSceneState = scene_->isPlaying();
-
-        //// Load next scene
-        //scene_->loadScene(targetGuid);
-        //
-        //// Set scene to play
-        //if (previousSceneState) {
-        //    scene_->onPlay();
-        //}
-        //else {
-        //    scene_->onStop();
-        //}
-
-        //// Set Camera to game camera
-        //scene_->SetGameCamera();
 
     }
 

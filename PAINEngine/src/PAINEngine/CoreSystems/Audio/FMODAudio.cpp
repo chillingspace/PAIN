@@ -450,20 +450,64 @@ namespace PAIN {
 
 		void FmodAudio::pauseAll()
 		{
-			if (!impl_->initialized) return;
-			for (auto& pair : impl_->groups) {
-				auto& g = pair.second;
-				if (g.cg) g.cg->setPaused(true);
+
+
+			if (!impl_->initialized) {
+				PN_CORE_WARN("[FMOD] pauseAll skipped - not initialized");
+				return;
 			}
+			// 1. ANDROID SPECIFIC: Suspend the mixer thread
+			// This stops the CPU usage and releases audio hardware to the OS
+#ifdef PN_PLATFORM_ANDROID
+			impl_->sys->mixerSuspend();
+#endif
+
+			// 2. LOGIC: Pause the Master Group Only
+			// This creates a "Global Pause" without modifying the Music/SFX flags.
+			// When we unpause Master, Music/SFX will return to whatever state they were in before.
+			auto it = impl_->groups.find("master");
+			if (it != impl_->groups.end() && it->second.cg) {
+				if (it->second.cg) {
+					it->second.cg->setPaused(true);
+					PN_CORE_INFO("[FMOD] pauseAll() called");
+				}
+				else {
+					PN_CORE_ERROR("[FMOD] Master Group pointer is NULL!");
+				}
+
+			}
+			else {
+				PN_CORE_ERROR("[FMOD] Could not find 'master' group in map!");
+			}
+
 		}
 
 		void FmodAudio::resumeAll()
 		{
-			if (!impl_->initialized) return;
-			for (auto& pair : impl_->groups) 
-			{
-				auto& g = pair.second;
-				if (g.cg) g.cg->setPaused(false);
+
+
+			if (!impl_->initialized) {
+				PN_CORE_WARN("[FMOD] resumeAll skipped - not initialized");
+				return;
+			}
+			// ANDROID SPECIFIC: Resume the mixer thread
+#ifdef PN_PLATFORM_ANDROID
+			impl_->sys->mixerResume();
+#endif
+			
+			// 2. LOGIC: Unpause Master Group
+			auto it = impl_->groups.find("master");
+			if (it != impl_->groups.end() && it->second.cg) {
+				if (it->second.cg) {
+					it->second.cg->setPaused(false);
+					PN_CORE_INFO("[FMOD] resumeAll() called");
+				}
+				else {
+					PN_CORE_ERROR("[FMOD] Master Group pointer is NULL!");
+				}
+			}
+			else {
+				PN_CORE_ERROR("[FMOD] Could not find 'master' group in map!");
 			}
 		}
 
@@ -598,7 +642,13 @@ namespace PAIN {
 			const std::string& group, float volumeDb, bool looping, bool is3D, 
 			const glm::vec3& pos, float minDist, float maxDist) {
 			
-			if (!impl_->initialized) return std::nullopt;
+			PN_CORE_INFO("[FmodAudio::playFile] Playing: {} (group={}, vol={:.1f}dB, 3D={}, loop={})", 
+				filename, group, volumeDb, is3D, looping);
+			
+			if (!impl_->initialized) {
+				PN_CORE_WARN("[FmodAudio::playFile] FMOD not initialized!");
+				return std::nullopt;
+			}
 
 			// Create sound on-the-fly
 			FMOD_MODE mode = FMOD_DEFAULT;
@@ -608,7 +658,7 @@ namespace PAIN {
 			FMOD::Sound* s = nullptr;
 			FMOD_RESULT r = impl_->sys->createSound(filename.c_str(), mode, nullptr, &s);
 			if (r != FMOD_OK || !s) {
-				PN_CORE_ERROR("[FmodAudio::playFile] Failed to create sound: {}", filename);
+				PN_CORE_ERROR("[FmodAudio::playFile] Failed to create sound: {} (FMOD_RESULT={})", filename, (int)r);
 				return std::nullopt;
 			}
 
@@ -630,6 +680,7 @@ namespace PAIN {
 			FMOD::Channel* ch = nullptr;
 			r = impl_->sys->playSound(s, cg, true, &ch);
 			if (r != FMOD_OK || !ch) {
+				PN_CORE_ERROR("[FmodAudio::playFile] Failed to play sound: {} (FMOD_RESULT={})", filename, (int)r);
 				s->release();
 				return std::nullopt;
 			}
@@ -647,6 +698,7 @@ namespace PAIN {
 			// Track channel
 			int id = impl_->nextId++;
 			impl_->channels.emplace(id, Impl::Chan{ ch });
+			PN_CORE_INFO("[FmodAudio::playFile] Success! Channel ID={}", id);
 			return AudioChannelId{ id };
 		}
 
@@ -679,6 +731,8 @@ namespace PAIN {
 			size_t idx = dist(rng);
 
 			const std::string& selectedFile = files[idx];
+			PN_CORE_INFO("[FmodAudio::playRandomFromList] Selected file {} of {}: {}", 
+				idx + 1, files.size(), selectedFile);
 			return playFile(selectedFile, "sfx", volumeDb, false, is3D, pos, minDist, maxDist);
 		}
 

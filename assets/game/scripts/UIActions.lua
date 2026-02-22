@@ -47,6 +47,37 @@ local Layers = {
     GAME_WIN = 7,
 }
 
+-- ==================== UI SFX ====================
+local UI_SFX_CLICKS = {
+    "game/audio/sfx/ui/clicks/click 1.wav",
+    "game/audio/sfx/ui/clicks/click 2.wav",
+    "game/audio/sfx/ui/clicks/click 3.wav",
+    "game/audio/sfx/ui/clicks/click 4.wav"
+}
+local UI_SFX_MENU_OPEN = "game/audio/sfx/ui/menu/menu open sfx.mp3"
+local UI_SFX_MENU_CLOSE = "game/audio/sfx/ui/menu/menu close sfx.mp3"
+
+-- SFX Volumes
+local VOL_UI_CLICK = -3.0
+local VOL_UI_OPEN = 0.0
+local VOL_UI_CLOSE = 0.0
+
+-- Play random UI click sound (non-spatial)
+local function playUIClick()
+    if audioPlayRandomSFX then
+        audioPlayRandomSFX(UI_SFX_CLICKS, VOL_UI_CLICK)
+    end
+end
+
+-- Play menu open/close sounds
+local function playMenuOpen()
+    if audioPlaySFX then audioPlaySFX(UI_SFX_MENU_OPEN, VOL_UI_OPEN) end
+end
+
+local function playMenuClose()
+    if audioPlaySFX then audioPlaySFX(UI_SFX_MENU_CLOSE, VOL_UI_CLOSE) end
+end
+
 -- Store current level name globally (For Game_PlayerState)
 if G and G.CurrentLevelName then
     _G.CurrentLevelName = G.CurrentLevelName
@@ -197,12 +228,14 @@ local handlers = {
     ----------------------------------------------------------------------
     goto_Pause = function(buttonEntity, payload)
         -- Android touch button callback to pause the game
+        -- playMenuOpen()  -- Play menu open SFX audio dont even fking work 
+        playUIClick()
         if _G_root.TogglePause then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 hideCursor(false)
-                
             end
+
             _G_root.TogglePause()
             printLog("[UI] goto_Pause (Android) -> called TogglePause()")
         else
@@ -215,9 +248,9 @@ local handlers = {
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 hideCursor(true)
-                
             end
-            --SetGamePaused(not IsGamePaused()) 
+            --playMenuClose()  -- Play menu close SFX too fking loud
+            playUIClick()
             _G_root.TogglePause()
             setLayerEnabled(1, not _G_root.IsGamePaused())
             printLog("[UI] pause_Resume -> called TogglePause()")
@@ -229,7 +262,7 @@ local handlers = {
     pause_Restart = function(buttonEntity, payload)
         -- Show restart confirmation popup
         printLog("[UI] pause_Restart -> showing restart confirmation")
-        
+        playUIClick()
         if setLayerEnabled then
             setLayerEnabled(Layers.RESTART, true)  -- Show RestartOverlay layer (layer 5)
             setLayerEnabled(Layers.PAUSE, false) -- Hide PauseMenu
@@ -250,7 +283,7 @@ local handlers = {
     restart_Confirm = function(buttonEntity, payload)
         -- User pressed YES - restart level
         printLog("[UI] restart_Confirm -> restarting")
-        
+        playUIClick()
         -- Unpause first
         if  _G_root.IsGamePaused() then
             _G_root.SetGamePaused(false) 
@@ -284,7 +317,7 @@ local handlers = {
     restart_Cancel = function(buttonEntity, payload)
         -- User pressed NO - close popup
         printLog("[UI] restart_Cancel -> closing restart confirmation")
-        
+        playUIClick()
         if setLayerEnabled then
             setLayerEnabled(Layers.RESTART, false)
 
@@ -310,7 +343,10 @@ local handlers = {
         end
     end,
 
+    -- SHOULDNT BE IN USE DELETE
     pause_Settings = function(buttonEntity, payload)
+        -- playMenuOpen()  -- Play menu open SFX
+        playUIClick()
         local settingsScene = resolveSceneName(payload, G.SettingsSceneName, "settings.scn")
 
         if settingsScene and changeScene then
@@ -325,7 +361,7 @@ local handlers = {
     pause_ReturnToMainMenu = function(buttonEntity, payload)
         -- Show confirmation popup
         printLog("[UI] pause_ReturnToMainMenu -> showing quit confirmation")
-        
+        playUIClick()
         if setLayerEnabled then
             setLayerEnabled(Layers.QUIT, true)  -- Show QuitOverlay layer (layer 4)
 
@@ -350,7 +386,7 @@ local handlers = {
     quit_Confirm = function(buttonEntity, payload)
         -- User pressed YES - quit to main menu
         printLog("[UI] quit_Confirm -> returning to main menu")
-        
+        playUIClick()
         -- Unpause first
         if IsGamePaused() then
             SetGamePaused(false) 
@@ -380,7 +416,7 @@ local handlers = {
     quit_Cancel = function(buttonEntity, payload)
         -- User pressed NO - close popup
         printLog("[UI] quit_Cancel -> closing quit confirmation")
-        
+        playUIClick()
         if setLayerEnabled then
             setLayerEnabled(Layers.QUIT, false)
             -- setLayerEnabled(Layers.PAUSE, true)
@@ -420,7 +456,7 @@ local handlers = {
         -- if _G.ResetThirdPersonCamera then
         --     _G.ResetThirdPersonCamera()
         -- end
-
+        playUIClick()
         if G.CutSceneName and changeScene then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
@@ -434,7 +470,7 @@ local handlers = {
 
     menu_HowToPlay = function(buttonEntity, payload)
         --local howtoplayScene = resolveSceneName(payload or G.HowToPlaySceneName, "howtoplay.scn")
-
+        playUIClick()
         if G.HowToPlaySceneName and changeScene then
             printLog("[UI] menu_HowToPlay -> changeScene("..G.HowToPlaySceneName..")")
             changeSceneWithAudioFade(G.HowToPlaySceneName)
@@ -445,7 +481,7 @@ local handlers = {
 
     menu_Credits = function(buttonEntity, payload)
         --local creditsScene = resolveSceneName(payload or G.CreditsSceneName, "credits.scn")
-
+        playUIClick()
         if G.CreditsSceneName and changeScene then
             printLog("[UI] menu_Credits -> changeScene("..G.CreditsSceneName..")")
             changeSceneWithAudioFade(G.CreditsSceneName)
@@ -455,6 +491,7 @@ local handlers = {
     end,
 
     menu_QuitGame = function(buttonEntity, payload)
+        playUIClick()
         local isMobile = (isAndroid ~= nil and isAndroid())
         if isMobile then
            hideCursor(true)
@@ -469,7 +506,7 @@ local handlers = {
 
     menu_OpenTutorial = function(buttonEntity, payload)
         --local tutorialScene = resolveSceneName(payload or G.TutorialSceneName, "Tutorial.scn")
-
+        playUIClick()
         if G.TutorialSceneName and changeScene then
             printLog("[UI] menu_OpenTutorial -> changeScene("..G.TutorialSceneName..")")
             changeSceneWithAudioFade(G.TutorialSceneName)
@@ -481,7 +518,7 @@ local handlers = {
     menu_BackToMain = function(buttonEntity, payload)
         -- User requested to always go back to Main Menu (avoids loop in HowToPlay scenes)
         local target = G.MainMenuSceneName
-        
+        playUIClick()
         printLog("[UI] menu_BackToMain -> changeScene("..tostring(target)..")")
         if changeScene then
             local isMobile = (isAndroid ~= nil and isAndroid())
@@ -503,6 +540,7 @@ local handlers = {
     howtoplay_ArrowLeft = function(buttonEntity, payload)
         -- Navigate to How To Play Page 1 (no fade - same audio context)
         if G.HowToPlaySceneName and changeScene then
+            playUIClick()
             printLog("[UI] howtoplay_ArrowLeft -> " .. G.HowToPlaySceneName)
             changeSceneWithAudioFade(G.HowToPlaySceneName)  -- Direct change, same global audio continues
         else
@@ -513,6 +551,7 @@ local handlers = {
     howtoplay_ArrowRight = function(buttonEntity, payload)
         -- Navigate to How To Play Page 2 (no fade - same audio context)
         if G.HowToPlaySceneName2 and changeScene then
+            playUIClick()
             printLog("[UI] howtoplay_ArrowRight -> " .. G.HowToPlaySceneName2)
             changeSceneWithAudioFade(G.HowToPlaySceneName2)  -- Direct change, same global audio continues
         else
@@ -526,6 +565,7 @@ local handlers = {
     ----------------------------------------------------------------------
     cutscene_Open_Menu = function(buttonEntity, payload)
         -- Android touch button callback to pause the game
+        playUIClick()
         local isMobile = (isAndroid ~= nil and isAndroid())
         if isMobile then
             hideCursor(false)
@@ -539,6 +579,7 @@ local handlers = {
 
     cutscene_Close_Menu = function(buttonEntity, payload)
         if IsGamePaused() then
+            playUIClick()
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 hideCursor(true)
@@ -555,6 +596,7 @@ local handlers = {
 
     cutscene_Menu_Quit = function(buttonEntity, payload)
         if IsGamePaused() then
+            playUIClick()
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
                 hideCursor(true)
@@ -575,12 +617,14 @@ local handlers = {
         
         -- Unpause first
         if IsGamePaused() then
+            playUIClick()
             SetGamePaused(false) 
             printLog("[UI] Game unpaused before scene change")
         end
         
         -- Hide quit overlay
         if setLayerEnabled then
+            playUIClick()
             setLayerEnabled(Layers.QUIT, false)
             printLog("[UI] QuitOverlay hidden")
         end
@@ -590,6 +634,7 @@ local handlers = {
         if changeScene then
             local isMobile = (isAndroid ~= nil and isAndroid())
             if isMobile then
+                playUIClick()
                 hideCursor(true)
                 
             end
@@ -604,6 +649,7 @@ local handlers = {
         printLog("[UI] cutscene_Quit_Cancel -> closing quit confirmation")
         
         if setLayerEnabled then
+            playUIClick()
             SetGamePaused(false)
 
             setLayerEnabled(3, false)
@@ -625,6 +671,7 @@ local handlers = {
     ----------------------------------------------------------------------
     mainmenu_Quit_Confirm = function(buttonEntity, payload)
         if quitApplication then
+            playUIClick()
             printLog("[UI] cutscene_Quit_Confirm -> quitApplication()")
             quitApplication()
         else
@@ -637,7 +684,7 @@ local handlers = {
         printLog("[UI] mainmenu_Quit_Cancel -> closing quit confirmation")
         
         if setLayerEnabled then
-
+            playUIClick()
             setLayerEnabled(1, true)
             setLayerEnabled(2, false) -- Return to Menu
             local isMobile = (isAndroid ~= nil and isAndroid())
@@ -660,6 +707,7 @@ local handlers = {
     credits_ArrowLeft = function(buttonEntity, payload)
         -- Navigate to How To Play Page 1 (no fade - same audio context)
         if G.CreditsSceneName and changeScene then
+            playUIClick()
             printLog("[UI] credits_ArrowLeft -> " .. G.CreditsSceneName)
             changeSceneWithAudioFade(G.CreditsSceneName)  -- Direct change, same global audio continues
         else
@@ -670,6 +718,7 @@ local handlers = {
     credits_ArrowRight = function(buttonEntity, payload)
         -- Navigate to How To Play Page 2 (no fade - same audio context)
         if G.CreditsSceneName2 and changeScene then
+            playUIClick()
             printLog("[UI] credits_ArrowRight -> " .. G.CreditsSceneName2)
             changeSceneWithAudioFade(G.CreditsSceneName2)  -- Direct change, same global audio continues
         else
@@ -681,6 +730,7 @@ local handlers = {
 function G.UI_OnAction(actionName, buttonEntity, payload)
     local h = handlers[actionName]
     if h then
+        -- Play UI click sound for all button presses
         h(buttonEntity, payload)
     else
         printLog("[UI] No handler for action "..tostring(actionName))

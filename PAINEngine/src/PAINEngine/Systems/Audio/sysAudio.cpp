@@ -78,6 +78,7 @@ namespace PAIN {
             track.targetVolume = targetDb;
             float deltaDb = targetDb - track.currentVolume;
             track.fadeSpeed = deltaDb / durationSeconds;
+            // Note: Removed per-frame logging for performance
         }
         
         void GlobalAudio_StopAll(PAIN::Audio::Audio* audioService) {
@@ -193,7 +194,7 @@ namespace PAIN {
                     // Keep existing tracks playing (muted state continues)
                     if (!hasNewTracks) {
                         if (hasExistingTracks) {
-                            // Sync entity to existing tracks (they stay muted, Lua will fade in if needed)
+                        // Sync entity to existing tracks (they stay muted, Lua will fade in if needed)
                             audioSrc.track_channel_ids.clear();
                             for (const auto& track : s_globalTracks) {
                                 audioSrc.track_channel_ids.push_back(track.channelId);
@@ -224,6 +225,7 @@ namespace PAIN {
                                 tracksToKeep.push_back(existingTrack);
                                 keptTrackGuids.insert(existingTrack.assetGuid);
                             }
+                            // Note: If channel is invalid, track will be restarted below
                         } else {
                             // OLD track - not in new scene, stop it
                             if (existingTrack.channelId.isValid()) {

@@ -231,6 +231,8 @@ namespace PAIN {
 			}
 
 			if (window->isMinimized()) {
+
+
 				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 				continue; // Go back to start of while loop
 			}
@@ -269,14 +271,12 @@ namespace PAIN {
 #ifdef _DEBUG
 			if (!services->get<Scene::SceneManager>()->isPlaying()) {
 				timing.dt = 0.0f;
-				services->get<Audio::Audio>()->pauseAll();
 			}
 			else if (services->get<Scene::SceneManager>()->isGamePaused()) {
 				timing.dt = 0.0f;
 			}
 			else {
 				timing.dt = real_dt;
-				services->get<Audio::Audio>()->resumeAll();
 			}
 #else
 			if (services->get<Scene::SceneManager>()->isGamePaused()) {
