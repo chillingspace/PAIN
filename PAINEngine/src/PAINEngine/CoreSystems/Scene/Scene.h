@@ -99,29 +99,8 @@ namespace PAIN {
             //Scene configuration
             void configScene(SceneAsset const& scn_asset);
 
-            /* =========================================================================== */
-            /*                            ENVIRONMENT                                      */
-            /* =========================================================================== */
-            //Light sources names
-            std::string camera_light_name = "cam";
-            std::string world_light_name = "world";
-
-            //Curr Skybox texure id
-            Assets::GUID curr_skybox_id;
-
-            //Graphics settings
-            GraphicsSettings& gs = GraphicsSettings::get();
-
             // Internal add object used for testing
             entt::entity AddObject(const std::shared_ptr<Assets::Model>& mdl, const std::string& name, const glm::vec3& pos, const glm::quat& quat, const glm::vec3& scale, Assets::GUID const& diff_id = Assets::GUID{}, Assets::GUID const& ao_id = Assets::GUID{});
-
-            /* =========================================================================== */
-            /*                                LAYERS                                       */
-            /* =========================================================================== */
-                    
-            std::vector<Layer> layers;
-            std::vector<std::vector<bool>> mask_matrix;
-
 
         public:
             SceneManager() = default;
@@ -136,6 +115,10 @@ namespace PAIN {
             void onAppPause() override {}
             void onAppResume() override {}
 
+            /* =========================================================================== */
+            /*                             LOADING SCREEN                                  */
+            /* =========================================================================== */
+            std::unique_ptr<LoadingScreen> loadingScreen;
 
             /* =========================================================================== */
             /*                                CAMERAS                                      */
@@ -185,9 +168,6 @@ namespace PAIN {
             bool isGamePaused() const { return is_game_paused;  }
             void setGamePaused(bool paused);
 
-            //Loading screen
-            std::unique_ptr<LoadingScreen> loadingScreen;
-
             /* =========================================================================== */
             /*                            ENVIRONMENT                                      */
             /* =========================================================================== */
@@ -219,9 +199,6 @@ namespace PAIN {
             // Camera collision system
             CameraCollisionSystem* getCameraCollisionSystem() { return m_cameraCollisionSystem.get(); }
             void initCameraCollisionSystem(void* physicsSystem);
-
-            //Loading screen
-            std::unique_ptr<LoadingScreen> loadingScreen;
 
             /* =========================================================================== */
             /*                                LAYERS                                       */
