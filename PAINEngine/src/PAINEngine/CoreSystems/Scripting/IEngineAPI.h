@@ -123,6 +123,7 @@ namespace PAIN {
         virtual Camera* Camera_GetActive() = 0;
         virtual void Camera_SetTransform(const glm::vec3& pos, const glm::vec3& target, const glm::vec3& up) = 0;
         virtual std::pair<glm::vec3, glm::vec3> GetCameraOffsets(entt::entity entityId) = 0;
+        virtual glm::vec3 Camera_ResolveCollision(const glm::vec3& proposedPos, const glm::vec3& currentPos) = 0;
 
         /* =========================================================================== */
         /*                                Particles                                    */

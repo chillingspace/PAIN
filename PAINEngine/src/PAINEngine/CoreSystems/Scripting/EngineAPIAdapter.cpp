@@ -688,6 +688,27 @@ namespace PAIN {
         return { glm::vec3(0.f), glm::vec3(0.f) };
     }
 
+    glm::vec3 EngineAPIAdapter::Camera_ResolveCollision(const glm::vec3& proposedPos, const glm::vec3& currentPos)
+    {
+        if (!scene_) return proposedPos;
+        
+        auto cam = scene_->GetActiveCamera();
+        if (!cam || !cam->collisionEnabled) return proposedPos;
+        
+        auto collisionSystem = scene_->getCameraCollisionSystem();
+        if (!collisionSystem) return proposedPos;
+        
+        return collisionSystem->resolveCollision(
+            proposedPos,
+            currentPos,
+            cam->up,
+            cam->collisionRadius,
+            cam->capsuleHeight,
+            cam->collisionOffset,
+            cam->useCapsuleCollision
+        );
+    }
+
     /* =========================================================================== */
     /*                                Particles                                    */
     /* =========================================================================== */

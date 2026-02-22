@@ -17,23 +17,6 @@ namespace PAIN {
     {
         //get scene
         m_Scene = services->get<Scene::SceneManager>();
-        
-        // Initialize collision system
-        m_collisionSystem = std::make_unique<Scene::CameraCollisionSystem>();
-        
-        // Get physics system for collision queries
-        auto physicsSystem = services->get<ECS::Controller>()->getSystem<Physics::System>();
-        if (physicsSystem) {
-            void* physPtr = physicsSystem->GetPhysicsSystem();
-            if (physPtr) {
-                m_collisionSystem->init(physPtr);
-                PN_CORE_INFO("[CameraController] Camera collision system initialized successfully");
-            } else {
-                PN_CORE_ERROR("[CameraController] Physics system returned null pointer!");
-            }
-        } else {
-            PN_CORE_ERROR("[CameraController] Physics::System not available! Camera collision will not work.");
-        }
     }
 
 #ifdef PN_PLATFORM_ANDROID
@@ -377,18 +360,10 @@ namespace PAIN {
         yOffset = 0.f;
 
         // Apply collision detection and resolution if there's movement
-        if (hasMovement && camera->collisionEnabled && m_collisionSystem) {
-            // DEBUG: Log camera position before collision check
-            static int collisionCheckCount = 0;
-            collisionCheckCount++;
-            if (collisionCheckCount % 60 == 0) {
-                PN_CORE_INFO("[CameraController] Pos({:.2f}, {:.2f}, {:.2f}) -> Proposed({:.2f}, {:.2f}, {:.2f}) radius={:.2f}",
-                    originalPos.x, originalPos.y, originalPos.z,
-                    proposedPos.x, proposedPos.y, proposedPos.z,
-                    camera->collisionRadius);
-            }
+        auto collisionSystem = m_Scene ? m_Scene->getCameraCollisionSystem() : nullptr;
+        if (hasMovement && camera->collisionEnabled && collisionSystem) {
             
-            glm::vec3 resolvedPos = m_collisionSystem->resolveCollision(
+            glm::vec3 resolvedPos = collisionSystem->resolveCollision(
                 proposedPos,
                 originalPos,
                 camera->up,
@@ -398,24 +373,8 @@ namespace PAIN {
                 camera->useCapsuleCollision
             );
             
-            // DEBUG: Log position change after collision
-            if (glm::length(resolvedPos - proposedPos) > 0.001f && collisionCheckCount % 60 == 0) {
-                PN_CORE_WARN("[CameraController] Collision resolved: Proposed({:.2f}, {:.2f}, {:.2f}) -> Final({:.2f}, {:.2f}, {:.2f})",
-                    proposedPos.x, proposedPos.y, proposedPos.z,
-                    resolvedPos.x, resolvedPos.y, resolvedPos.z);
-            }
-            
             camera->pos = resolvedPos;
         } else {
-            if (hasMovement) {
-                // DEBUG: Log why collision was skipped
-                static int skipCount = 0;
-                skipCount++;
-                if (skipCount % 120 == 0) { // Every 2 seconds at 60fps
-                    PN_CORE_WARN("[CameraController] Collision skipped - hasMovement: {}, collisionEnabled: {}, hasSystem: {}",
-                        hasMovement, camera->collisionEnabled, (m_collisionSystem != nullptr));
-                }
-            }
             camera->pos = proposedPos;
         }
     }

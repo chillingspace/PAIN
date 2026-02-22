@@ -139,6 +139,7 @@ namespace PAIN {
         Camera* Camera_GetActive() override;
         void Camera_SetTransform(const glm::vec3& pos, const glm::vec3& target, const glm::vec3& up = { 0.f, 1.f, 0.f }) override;
         std::pair<glm::vec3, glm::vec3> GetCameraOffsets(entt::entity entityId) override;
+        glm::vec3 Camera_ResolveCollision(const glm::vec3& proposedPos, const glm::vec3& currentPos) override;
 
         /* =========================================================================== */
         /*                                Particles                                    */

@@ -5,6 +5,7 @@
 #include "CoreSystems/Renderer/Light.h"
 
 #include "Camera.h"
+#include "CameraCollisionSystem.h"
 
 #include "CoreSystems/Assets/Types/Scene.h"
 
@@ -69,6 +70,11 @@ namespace PAIN {
             bool floor_enabled = true;
             glm::vec3 floor_position{ 0.0f, -1.0f, 0.0f };
             glm::vec3 floor_extents{ 100.0f, 1.0f, 100.0f };
+
+            /* =========================================================================== */
+            /*                            CAMERA COLLISION                                 */
+            /* =========================================================================== */
+            std::unique_ptr<CameraCollisionSystem> m_cameraCollisionSystem;
 
             // Internal methods
             // LOADING
@@ -167,6 +173,10 @@ namespace PAIN {
             void setFloorPosition(const glm::vec3& pos) { floor_position = pos; }
             glm::vec3 getFloorExtents() const { return floor_extents; }
             void setFloorExtents(const glm::vec3& extents) { floor_extents = extents; }
+
+            // Camera collision system
+            CameraCollisionSystem* getCameraCollisionSystem() { return m_cameraCollisionSystem.get(); }
+            void initCameraCollisionSystem(void* physicsSystem);
 
             //Loading screen
             std::unique_ptr<LoadingScreen> loadingScreen;

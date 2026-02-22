@@ -1055,6 +1055,17 @@ namespace PAIN {
 			loadingScreen = std::make_unique<LoadingScreen>();
 			loadingScreen->init(services);
 
+			//Init camera collision system
+			m_cameraCollisionSystem = std::make_unique<CameraCollisionSystem>();
+			auto physicsSystem = ecs->getSystem<Physics::System>();
+			if (physicsSystem) {
+				void* physPtr = physicsSystem->GetPhysicsSystem();
+				if (physPtr) {
+					m_cameraCollisionSystem->init(physPtr);
+					PN_CORE_INFO("[SceneManager] Camera collision system initialized");
+				}
+			}
+
 			//Init skybox here, set texture for skybox in config scene
 			Skybox::get().init(services);
 			std::filesystem::path skybox_path = "engine/textures/skybox2.hdr";
@@ -1165,6 +1176,14 @@ namespace PAIN {
 
 			// Clean up current scene
 			unloadScene();
+		}
+
+		void SceneManager::initCameraCollisionSystem(void* physicsSystem) {
+			if (!m_cameraCollisionSystem) {
+				m_cameraCollisionSystem = std::make_unique<CameraCollisionSystem>();
+			}
+			m_cameraCollisionSystem->init(physicsSystem);
+			PN_CORE_INFO("[SceneManager] Camera collision system initialized");
 		}
 
 		void SceneManager::onUpdate(AppTiming timing) {

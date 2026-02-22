@@ -204,6 +204,14 @@ registerUpdate(function(dt)
     local cy = smoothY + ry
     local cz = smoothZ + rz
 
+    -- Apply camera collision (uses active camera's settings from editor)
+    if cameraResolveCollision then
+        cx, cy, cz = cameraResolveCollision(
+            cx, cy, cz,                    -- proposed position
+            frozenCx or cx, frozenCy or cy, frozenCz or cz  -- current/last valid position
+        )
+    end
+
     -- Always track camera position
     frozenCx, frozenCy, frozenCz = cx, cy, cz
     frozenTx, frozenTy, frozenTz = px, py + 0.1, pz

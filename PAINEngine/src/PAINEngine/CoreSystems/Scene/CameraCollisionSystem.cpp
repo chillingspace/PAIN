@@ -83,10 +83,10 @@ namespace PAIN {
             static int moveCount = 0;
             moveCount++;
             if (moveCount % 60 == 0) {
-                PN_CORE_INFO("[CameraCollision] Movement #{} dist={:.3f} from({:.2f}, {:.2f}, {:.2f}) to({:.2f}, {:.2f}, {:.2f})",
-                    moveCount, movementDist, 
-                    currentPos.x, currentPos.y, currentPos.z,
-                    proposedPos.x, proposedPos.y, proposedPos.z);
+                //PN_CORE_INFO("[CameraCollision] Movement #{} dist={:.3f} from({:.2f}, {:.2f}, {:.2f}) to({:.2f}, {:.2f}, {:.2f})",
+                //    moveCount, movementDist, 
+                //    currentPos.x, currentPos.y, currentPos.z,
+                //    proposedPos.x, proposedPos.y, proposedPos.z);
             }
             
             if (movementDist < 0.0001f) {
@@ -95,7 +95,7 @@ namespace PAIN {
                 float depth;
                 if (performCollisionQuery(currentPos, up, radius, height, useCapsule, normal, depth)) {
                     // Push out of collision
-                    PN_CORE_WARN("[CameraCollision] Currently inside geometry! Pushing out by {:.3f}", depth + offset);
+                    //PN_CORE_WARN("[CameraCollision] Currently inside geometry! Pushing out by {:.3f}", depth + offset);
                     return currentPos + normal * (depth + offset);
                 }
                 return currentPos;
@@ -115,8 +115,8 @@ namespace PAIN {
             // Ensure depth is positive - negative depth means we're within separation distance but not overlapping
             float penetrationDepth = glm::max(depth, 0.0f);
             
-            PN_CORE_INFO("[CameraCollision] Collision at proposed pos (raw depth: {:.3f}, penetration: {:.3f}), attempting to slide...", 
-                depth, penetrationDepth);
+            //PN_CORE_INFO("[CameraCollision] Collision at proposed pos (raw depth: {:.3f}, penetration: {:.3f}), attempting to slide...", 
+            //    depth, penetrationDepth);
             
             // The normal from Jolt points from the collided body toward our camera shape
             // This is the direction we need to move to resolve the collision
@@ -131,7 +131,7 @@ namespace PAIN {
             glm::vec3 pushNormal;
             float pushDepth;
             if (!performCollisionQuery(pushedBackPos, up, radius, height, useCapsule, pushNormal, pushDepth)) {
-                PN_CORE_INFO("[CameraCollision] Push back successful! Moved by {:.3f}", pushBackDist);
+                //PN_CORE_INFO("[CameraCollision] Push back successful! Moved by {:.3f}", pushBackDist);
                 return pushedBackPos;
             }
             
@@ -151,14 +151,14 @@ namespace PAIN {
                     glm::vec3 slideNormal;
                     float slideDepth;
                     if (!performCollisionQuery(slidePos, up, radius, height, useCapsule, slideNormal, slideDepth)) {
-                        PN_CORE_INFO("[CameraCollision] Sliding successful!");
+                        //PN_CORE_INFO("[CameraCollision] Sliding successful!");
                         return slidePos;
                     }
                 }
             }
             
             // Third try: Binary search for valid position along movement path
-            PN_CORE_INFO("[CameraCollision] Slide failed, trying binary search...");
+            //PN_CORE_INFO("[CameraCollision] Slide failed, trying binary search...");
             float tMin = 0.0f;
             float tMax = 1.0f;
             glm::vec3 bestPos = currentPos;
@@ -183,12 +183,12 @@ namespace PAIN {
             }
             
             if (tMin > 0.01f) {
-                PN_CORE_INFO("[CameraCollision] Binary search found valid position at t={:.2f}", tMin);
+                //PN_CORE_INFO("[CameraCollision] Binary search found valid position at t={:.2f}", tMin);
                 return bestPos;
             }
             
             // All positions blocked, stay at current position
-            PN_CORE_WARN("[CameraCollision] All positions blocked! Staying at current position.");
+            //PN_CORE_WARN("[CameraCollision] All positions blocked! Staying at current position.");
             
             // If currently in collision, push out
             glm::vec3 currentNormal;
@@ -196,7 +196,7 @@ namespace PAIN {
             if (performCollisionQuery(currentPos, up, radius, height, useCapsule, currentNormal, currentDepth)) {
                 float currentPenetration = glm::max(currentDepth, 0.0f);
                 if (currentPenetration > 0.0f) {
-                    PN_CORE_WARN("[CameraCollision] Pushing out of geometry by {:.3f}", currentPenetration + offset);
+                    //PN_CORE_WARN("[CameraCollision] Pushing out of geometry by {:.3f}", currentPenetration + offset);
                     return currentPos + currentNormal * (currentPenetration + offset);
                 }
             }
@@ -247,12 +247,12 @@ namespace PAIN {
             JPH::PhysicsSystem* physics = static_cast<JPH::PhysicsSystem*>(m_physicsSystem);
             
             // DEBUG: Log query attempt
-            static int queryCount = 0;
-            queryCount++;
-            if (queryCount % 60 == 0) { // Log every 60 queries (about once per second at 60fps)
-                PN_CORE_INFO("[CameraCollision] Query #{} at pos({:.2f}, {:.2f}, {:.2f}) radius={:.2f} useCapsule={}", 
-                    queryCount, position.x, position.y, position.z, radius, useCapsule);
-            }
+            //static int queryCount = 0;
+            //queryCount++;
+            //if (queryCount % 60 == 0) { // Log every 60 queries (about once per second at 60fps)
+            //    PN_CORE_INFO("[CameraCollision] Query #{} at pos({:.2f}, {:.2f}, {:.2f}) radius={:.2f} useCapsule={}", 
+            //        queryCount, position.x, position.y, position.z, radius, useCapsule);
+            //}
             
             // Create collision shape using proper Jolt API
             JPH::Ref<JPH::Shape> shape;
@@ -319,38 +319,38 @@ namespace PAIN {
                         deepestNormal = result.mPenetrationAxis;
                         hitBodyID = result.mBodyID2; // Store the body we hit
                         
-                        // DEBUG: Log collision details with body ID
-                        PN_CORE_ERROR("[CameraCollision] HIT BodyID={}: Depth={:.3f} Normal=({:.2f}, {:.2f}, {:.2f}) Contact1=({:.2f}, {:.2f}, {:.2f})",
-                            result.mBodyID2.GetIndex(),
-                            result.mPenetrationDepth,
-                            result.mPenetrationAxis.GetX(), result.mPenetrationAxis.GetY(), result.mPenetrationAxis.GetZ(),
-                            result.mContactPointOn1.GetX(), result.mContactPointOn1.GetY(), result.mContactPointOn1.GetZ());
+                        //// DEBUG: Log collision details with body ID
+                        //PN_CORE_ERROR("[CameraCollision] HIT BodyID={}: Depth={:.3f} Normal=({:.2f}, {:.2f}, {:.2f}) Contact1=({:.2f}, {:.2f}, {:.2f})",
+                        //    result.mBodyID2.GetIndex(),
+                        //    result.mPenetrationDepth,
+                        //    result.mPenetrationAxis.GetX(), result.mPenetrationAxis.GetY(), result.mPenetrationAxis.GetZ(),
+                        //    result.mContactPointOn1.GetX(), result.mContactPointOn1.GetY(), result.mContactPointOn1.GetZ());
                     }
                 }
             };
             
             CollisionCollector collector;
             
-            // DEBUG: Log layer filter info
-            static int layerCheckCount = 0;
-            if (layerCheckCount % 60 == 0) {
-                // Log all bodies and their layers
-                JPH::BodyIDVector bodyIDs;
-                physics->GetBodies(bodyIDs);
-                PN_CORE_INFO("[CameraCollision] Total bodies in world: {}", bodyIDs.size());
-                for (const auto& id : bodyIDs) {
-                    auto& lockInterface = physics->GetBodyLockInterface();
-                    JPH::BodyLockRead lock(lockInterface, id);
-                    if (lock.Succeeded()) {
-                        const JPH::Body& body = lock.GetBody();
-                        JPH::ObjectLayer layer = body.GetObjectLayer();
-                        JPH::RVec3 pos = body.GetPosition();
-                        PN_CORE_INFO("[CameraCollision] Body {}: Layer={}, Pos=({:.2f}, {:.2f}, {:.2f})", 
-                            id.GetIndex(), layer, (float)pos.GetX(), (float)pos.GetY(), (float)pos.GetZ());
-                    }
-                }
-            }
-            layerCheckCount++;
+            //// DEBUG: Log layer filter info
+            //static int layerCheckCount = 0;
+            //if (layerCheckCount % 60 == 0) {
+            //    // Log all bodies and their layers
+            //    JPH::BodyIDVector bodyIDs;
+            //    physics->GetBodies(bodyIDs);
+            //    PN_CORE_INFO("[CameraCollision] Total bodies in world: {}", bodyIDs.size());
+            //    for (const auto& id : bodyIDs) {
+            //        auto& lockInterface = physics->GetBodyLockInterface();
+            //        JPH::BodyLockRead lock(lockInterface, id);
+            //        if (lock.Succeeded()) {
+            //            const JPH::Body& body = lock.GetBody();
+            //            JPH::ObjectLayer layer = body.GetObjectLayer();
+            //            JPH::RVec3 pos = body.GetPosition();
+            //            PN_CORE_INFO("[CameraCollision] Body {}: Layer={}, Pos=({:.2f}, {:.2f}, {:.2f})", 
+            //                id.GetIndex(), layer, (float)pos.GetX(), (float)pos.GetY(), (float)pos.GetZ());
+            //        }
+            //    }
+            //}
+            //layerCheckCount++;
             
             // Create layer filters to collide with NON_MOVING (static) and MOVING (dynamic) objects
             // This matches the layer setup in your physics system
@@ -364,12 +364,12 @@ namespace PAIN {
             class CameraObjectLayerFilter : public JPH::ObjectLayerFilter {
             public:
                 virtual bool ShouldCollide(JPH::ObjectLayer inLayer) const override {
-                    // DEBUG: Log what layers are being checked
-                    static int filterCount = 0;
-                    if (filterCount % 300 == 0) {
-                        PN_CORE_INFO("[CameraCollision] ObjectLayerFilter checking layer: {}", inLayer);
-                    }
-                    filterCount++;
+                    //// DEBUG: Log what layers are being checked
+                    //static int filterCount = 0;
+                    //if (filterCount % 300 == 0) {
+                    //    PN_CORE_INFO("[CameraCollision] ObjectLayerFilter checking layer: {}", inLayer);
+                    //}
+                    //filterCount++;
                     // Collide with all object layers except UNUSED ones
                     // Layer::NON_MOVING = 4, Layer::MOVING = 5, Layer::DEBRIS = 6, Layer::SENSOR = 7
                     return inLayer >= 4 && inLayer <= 7;
@@ -379,30 +379,30 @@ namespace PAIN {
             CameraCollisionLayerFilter bpFilter;
             CameraObjectLayerFilter objFilter;
             
-            // DEBUG: Critical position logging
-            PN_CORE_ERROR("[CameraCollision] QUERY: Pos({:.3f}, {:.3f}, {:.3f}) Radius={:.3f}", 
-                position.x, position.y, position.z, radius);
-            
-            // DEBUG: Log all bodies in physics world (once per second)
-            static int bodyLogCounter = 0;
-            if (bodyLogCounter % 60 == 0) {
-                JPH::BodyIDVector allBodies;
-                physics->GetBodies(allBodies);
-                PN_CORE_INFO("[CameraCollision] Total bodies in world: {}", allBodies.size());
-                for (const auto& bodyID : allBodies) {
-                    JPH::BodyLockRead lock(physics->GetBodyLockInterface(), bodyID);
-                    if (lock.Succeeded()) {
-                        const JPH::Body& body = lock.GetBody();
-                        JPH::ObjectLayer layer = body.GetObjectLayer();
-                        JPH::RVec3 pos = body.GetPosition();
-                        PN_CORE_INFO("[CameraCollision]   Body {}: Layer={} Pos=({:.2f}, {:.2f}, {:.2f}) Type={}",
-                            bodyID.GetIndex(), layer, 
-                            (float)pos.GetX(), (float)pos.GetY(), (float)pos.GetZ(),
-                            body.GetMotionType() == JPH::EMotionType::Static ? "Static" : "Dynamic");
-                    }
-                }
-            }
-            bodyLogCounter++;
+            //// DEBUG: Critical position logging
+            //PN_CORE_ERROR("[CameraCollision] QUERY: Pos({:.3f}, {:.3f}, {:.3f}) Radius={:.3f}", 
+            //    position.x, position.y, position.z, radius);
+            //
+            //// DEBUG: Log all bodies in physics world (once per second)
+            //static int bodyLogCounter = 0;
+            //if (bodyLogCounter % 60 == 0) {
+            //    JPH::BodyIDVector allBodies;
+            //    physics->GetBodies(allBodies);
+            //    PN_CORE_INFO("[CameraCollision] Total bodies in world: {}", allBodies.size());
+            //    for (const auto& bodyID : allBodies) {
+            //        JPH::BodyLockRead lock(physics->GetBodyLockInterface(), bodyID);
+            //        if (lock.Succeeded()) {
+            //            const JPH::Body& body = lock.GetBody();
+            //            JPH::ObjectLayer layer = body.GetObjectLayer();
+            //            JPH::RVec3 pos = body.GetPosition();
+            //            PN_CORE_INFO("[CameraCollision]   Body {}: Layer={} Pos=({:.2f}, {:.2f}, {:.2f}) Type={}",
+            //                bodyID.GetIndex(), layer, 
+            //                (float)pos.GetX(), (float)pos.GetY(), (float)pos.GetZ(),
+            //                body.GetMotionType() == JPH::EMotionType::Static ? "Static" : "Dynamic");
+            //        }
+            //    }
+            //}
+            //bodyLogCounter++;
             
             // Create a body filter to exclude specific bodies if needed
             class CameraBodyFilter : public JPH::BodyFilter {
@@ -449,25 +449,25 @@ namespace PAIN {
                 outNormal = glm::vec3(n.GetX(), n.GetY(), n.GetZ());
                 outDepth = collector.deepestDepth;
                 
-                // DEBUG: Log collision detection with more detail
-                PN_CORE_WARN("[CameraCollision] COLLISION DETECTED! Hits: {} Depth: {:.3f} Normal: ({:.2f}, {:.2f}, {:.2f}) at Pos({:.2f}, {:.2f}, {:.2f})",
-                    collector.hitCount, outDepth, outNormal.x, outNormal.y, outNormal.z, position.x, position.y, position.z);
+                //// DEBUG: Log collision detection with more detail
+                //PN_CORE_WARN("[CameraCollision] COLLISION DETECTED! Hits: {} Depth: {:.3f} Normal: ({:.2f}, {:.2f}, {:.2f}) at Pos({:.2f}, {:.2f}, {:.2f})",
+                //    collector.hitCount, outDepth, outNormal.x, outNormal.y, outNormal.z, position.x, position.y, position.z);
                 
-                // Additional debug: if depth is negative, we're within separation distance but not actually colliding
-                if (outDepth < 0.0f) {
-                    PN_CORE_INFO("[CameraCollision] Note: Negative depth ({:.3f}) means within separation distance but not overlapping", outDepth);
-                }
+                //// Additional debug: if depth is negative, we're within separation distance but not actually colliding
+                //if (outDepth < 0.0f) {
+                //    PN_CORE_INFO("[CameraCollision] Note: Negative depth ({:.3f}) means within separation distance but not overlapping", outDepth);
+                //}
                 
                 return true;
             }
             
-            // DEBUG: Log occasional "no collision" at higher frequency for debugging
-            static int noCollisionCount = 0;
-            noCollisionCount++;
-            if (noCollisionCount % 300 == 0) { // Every 5 seconds at 60fps
-                PN_CORE_INFO("[CameraCollision] No collision at Pos({:.2f}, {:.2f}, {:.2f}) Radius={:.2f}",
-                    position.x, position.y, position.z, radius);
-            }
+            //// DEBUG: Log occasional "no collision" at higher frequency for debugging
+            //static int noCollisionCount = 0;
+            //noCollisionCount++;
+            //if (noCollisionCount % 300 == 0) { // Every 5 seconds at 60fps
+            //    PN_CORE_INFO("[CameraCollision] No collision at Pos({:.2f}, {:.2f}, {:.2f}) Radius={:.2f}",
+            //        position.x, position.y, position.z, radius);
+            //}
             
             return false;
         }

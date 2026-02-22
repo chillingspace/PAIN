@@ -1007,6 +1007,18 @@ namespace PAIN {
             return std::make_tuple(t.x, t.y, t.z, r.x, r.y, r.z);
             });
 
+        lua_.set_function("cameraResolveCollision",
+            [this](float px, float py, float pz,
+                   float cx, float cy, float cz) {
+                if (!api_) return std::make_tuple(px, py, pz);
+                
+                glm::vec3 resolved = api_->Camera_ResolveCollision(
+                    glm::vec3(px, py, pz),
+                    glm::vec3(cx, cy, cz)
+                );
+                return std::make_tuple(resolved.x, resolved.y, resolved.z);
+            });
+
         /* =========================================================================== */
         /*                                Particles                                    */
         /* =========================================================================== */
