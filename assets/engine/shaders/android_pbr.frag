@@ -65,7 +65,7 @@ uniform float DEBUG_TYPE;
 float ggxDistribution(float nDotH) {
     float alpha2 = material.rough * material.rough * material.rough * material.rough;
     float d = (nDotH * nDotH) * (alpha2 - 1.0) + 1.0;
-    return alpha2 / (PI * d * d);
+    return alpha2 / (PI * d * d + 0.0001);
 }
 
 float geomSmith(float nDotL) {
@@ -78,7 +78,7 @@ vec3 schlickFresnel(float lDotH) {
     vec3 f0 = vec3(0.04); // Dielectrics
     if (material.metal == 1.0)
         f0 = material.color;
-    return f0 + (1.0 - f0) * pow(1.0 - lDotH, 5.0);
+    return f0 + (1.0 - f0) * pow(clamp(1.0 - lDotH, 0.0, 1.0), 5.0);
 }
 
 // for ibl. schlickFresnel but with roughness
@@ -97,11 +97,12 @@ vec3 microfacetModel(vec3 position, vec3 n, Light light) {
         l = lightPositionInView - position;
         float dist = length(l);
         l = normalize(l);
-        intensity *= 100.0 / (dist * dist);
+        intensity *= 100.0 / max(dist * dist, 0.001);
     }
     else if (int(light.type) == 1) {
         // directional lighting
-        l = normalize((u_V * vec4(light.position, 0.0)).xyz);
+        vec3 lightDirView = mat3(u_V) * normalize(-light.direction);
+        l = normalize(lightDirView);
         // attenuation not required
     }
     else if (int(light.type) == 2) {
@@ -113,7 +114,7 @@ vec3 microfacetModel(vec3 position, vec3 n, Light light) {
         l = normalize(l); // Vector FROM Surface TO Light
         
          // distance attenuation
-        intensity *= 100.0 / (dist * dist);
+        intensity *= 100.0 / max(dist * dist, 0.001);
 
         // cone attenuation
         // have to convert world space to view space
@@ -123,7 +124,7 @@ vec3 microfacetModel(vec3 position, vec3 n, Light light) {
         float theta = dot(-l, spotDirView); 
         
         // clamping to kill the light
-        float epsilon = light.innerCutoff - light.outerCutoff;
+        float epsilon = max(light.innerCutoff - light.outerCutoff, 0.001);
         float spotIntensity = clamp((theta - light.outerCutoff) / epsilon, 0.0, 1.0);
         
         intensity *= spotIntensity;
@@ -133,10 +134,10 @@ vec3 microfacetModel(vec3 position, vec3 n, Light light) {
 
     vec3 v = normalize(-position);
     vec3 h = normalize(v + l);
-    float nDotH = dot(n, h);
-    float lDotH = dot(l, h);
+    float nDotH = max(dot(n, h), 0.0);
+    float lDotH = max(dot(l, h), 0.0);
     float nDotL = max(dot(n, l), 0.0);
-    float nDotV = dot(n, v);
+    float nDotV = max(dot(n, v), 0.0);
     vec3 specBrdf = 0.25 * ggxDistribution(nDotH) * schlickFresnel(lDotH) 
                             * geomSmith(nDotL) * geomSmith(nDotV);
 
@@ -207,7 +208,7 @@ void main() {
     vec3 normal = texture(gNorm, TexCoords).rgb;
     vec3 m = texture(gMaterial, TexCoords).rgb;
 
-    material.rough = m.r;
+    material.rough = max(m.r, 0.04);
     material.metal = m.g;
     material.debugging_geometry = m.b;
 

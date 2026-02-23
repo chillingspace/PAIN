@@ -501,7 +501,7 @@ namespace PAIN {
                             PN_CORE_INFO("[UIInput] Button click detected");
 
                             bool should_process = true;
-                            if (registry.all_of<Entity::Layer>(touch_entity)) {
+                             if (registry.all_of<Entity::Layer>(touch_entity)) {
                                 auto& layer_comp = registry.get<Entity::Layer>(touch_entity);
                                 auto scene = services.lock()->get<Scene::SceneManager>();
                                 if (scene && !scene->isLayerEnabled(layer_comp.layer_id)) {
