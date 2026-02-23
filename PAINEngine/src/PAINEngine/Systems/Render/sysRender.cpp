@@ -243,6 +243,11 @@ namespace PAIN {
 				}
 
 				// Render all passes
+				GraphicsSettings::get().stats.objects_culled = 0;
+				GraphicsSettings::get().stats.objects_rendered = 0;
+				GraphicsSettings::get().stats.shadow_objects_culled = 0;
+				GraphicsSettings::get().stats.shadow_objects_rendered = 0;
+
 				shadowPass(registry);
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
@@ -322,20 +327,32 @@ namespace PAIN {
 			auto renderGroup =
 				registry.group<ModelRenderer>(entt::get<WorldTransform, Entity::Layer>);
 
-			for (const Light& l : LightSources::get().getAll()) {
-				if (l.getShadowType() != Light::SHADOW_TYPES::MAPPED)
-					continue;
+				for (const Light& l : LightSources::get().getAll()) {
+					if (l.getShadowType() != Light::SHADOW_TYPES::MAPPED)
+						continue;
 
-				rendererService->w_renderer->BeginShadowPass(l);
+					rendererService->w_renderer->BeginShadowPass(l);
+					
+					Frustum lightFrustum = l.getFrustum();
 
-				for (auto [entity, model, transform, layer] : renderGroup.each()) {
+					for (auto [entity, model, transform, layer] : renderGroup.each()) {
 
-					glm::mat4 model_xform = transform.matrix;
+						glm::mat4 model_xform = transform.matrix;
 
-					if (model.visible && model.castShadows) {
-						rendererService->w_renderer->DrawShadows(model, model_xform, l);
+						if (model.visible && model.castShadows) {
+							// FRUSTUM CULLING FOR SHADOWS
+							auto* boundingVol = registry.try_get<BoundingVolume>(entity);
+							if (boundingVol && boundingVol->worldAABB.isValid()) {
+								if (!isAABBInFrustum(boundingVol->worldAABB, lightFrustum)) {
+									GraphicsSettings::get().stats.shadow_objects_culled++;
+									continue; // skip shadow casting for this object, outside light frustum
+								}
+							}
+						
+							GraphicsSettings::get().stats.shadow_objects_rendered++;
+							rendererService->w_renderer->DrawShadows(model, model_xform, l);
+						}
 					}
-				}
 
 				rendererService->w_renderer->EndShadowPass();
 			}
@@ -354,6 +371,12 @@ namespace PAIN {
 			auto sceneManager = svc->get<Scene::SceneManager>();
 			if (!sceneManager)
 				return;
+				
+			Camera* activeCam = sceneManager->GetActiveCamera();
+			if (!activeCam)
+				return;
+				
+			Frustum camFrustum = activeCam->getFrustum();
 
 			const auto& layers = sceneManager->getLayers();
 			auto renderGroup =
@@ -387,6 +410,17 @@ namespace PAIN {
 				if (!model.visible) {
 					continue;
 				}
+
+				// FRUSTUM CULLING
+				auto* boundingVol = registry.try_get<BoundingVolume>(entity);
+				if (boundingVol && boundingVol->worldAABB.isValid()) {
+					if (!isAABBInFrustum(boundingVol->worldAABB, camFrustum)) {
+						GraphicsSettings::get().stats.objects_culled++;
+						continue; // skip rendering this object, it's outside the frustum
+					}
+				}
+
+				GraphicsSettings::get().stats.objects_rendered++;
 
 				// Draw geometry, passing animation pointer (may be null)
 				rendererService->w_renderer->DrawGeometry(

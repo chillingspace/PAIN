@@ -19,5 +19,9 @@ namespace PAIN {
 		return glm::perspective(glm::radians(fov), aspect_ratio, near_plane, far_plane);
 	}
 
+	Frustum Camera::getFrustum() const {
+		glm::mat4 vp = projection() * view();
+		return extractFrustum(vp);
+	}
 
 }

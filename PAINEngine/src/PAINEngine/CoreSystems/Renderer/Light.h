@@ -2,6 +2,7 @@
 
 #include "pch.h"
 #include "./CoreSystems/Renderer/GraphicsSettings.h"
+#include "CoreSystems/Scene/Camera.h"
 
 namespace PAIN {
 
@@ -133,6 +134,11 @@ namespace PAIN {
 				near_plane,
 				far_plane
 			);
+		}
+
+		Frustum getFrustum() const {
+			glm::mat4 vp = projection() * view();
+			return extractFrustum(vp);
 		}
 
 		SHADOW_TYPES getShadowType() {
