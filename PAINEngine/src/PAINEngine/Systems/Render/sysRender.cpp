@@ -11,6 +11,7 @@
 #include "Core.h"
 #include "Systems/Particle/sysParticleSystem.h"
 #include "CoreSystems/Assets/Types/Shader.h"
+#include "CoreSystems/Assets/Types/Texture.h"
 
 #ifdef _DEBUG
 #include "LayeredSystems/LevelEditor/Editor.h"
@@ -652,57 +653,6 @@ namespace PAIN {
 				glBindVertexArray(0);
 			}
 
-			// Collect all particle instance data from all particle systems
-			std::vector<float> instanceData;
-			instanceData.reserve(10000 * 8); // Reserve space
-
-			for (auto [entity, ps, transform] : particleView.each()) {
-				auto* psInstance = particleSystem->GetParticleSystem(entity);
-				if (!psInstance)
-					continue;
-
-				auto& pool = psInstance->GetPool();
-				int aliveCount = pool.GetAliveCount();
-				if (aliveCount == 0)
-					continue;
-
-				const auto* particles = pool.GetParticles();
-				const auto& aliveIndices = pool.GetAliveIndices();
-
-				// Get emitter position (world position of the particle system entity)
-				glm::vec3 emitterPos = transform.position;
-
-				for (int idx : aliveIndices) {
-					const auto& p = particles[idx];
-					if (!p.alive)
-						continue;
-
-					// Instance position (world space)
-					instanceData.push_back(p.position.x);
-					instanceData.push_back(p.position.y);
-					instanceData.push_back(p.position.z);
-
-					// Instance color (RGBA)
-					instanceData.push_back(p.color.r);
-					instanceData.push_back(p.color.g);
-					instanceData.push_back(p.color.b);
-					instanceData.push_back(p.color.a);
-
-					// Instance size
-					instanceData.push_back(p.size);
-				}
-			}
-
-			if (instanceData.empty())
-				return;
-
-			const size_t instanceCount = instanceData.size() / 8;
-			if (instanceCount > instanceCapacity) {
-				instanceCapacity = instanceCount;
-				glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-				glBufferData(GL_ARRAY_BUFFER, instanceCapacity * sizeof(float) * 8, nullptr, GL_STREAM_DRAW);
-			}
-
 			// Set up GL state for particles
 			const GLboolean wasBlendEnabled = glIsEnabled(GL_BLEND);
 			const GLboolean wasCullEnabled = glIsEnabled(GL_CULL_FACE);
@@ -716,19 +666,75 @@ namespace PAIN {
 
 			// Use particle shader
 			glUseProgram(particleProgram);
+			glUniform1i(glGetUniformLocation(particleProgram, "tex"), 0);
 
 			// Set view and projection matrices
 			glUniformMatrix4fv(glGetUniformLocation(particleProgram, "u_V"), 1, GL_FALSE, &activeCam->view()[0][0]);
 			glUniformMatrix4fv(glGetUniformLocation(particleProgram, "u_P"), 1, GL_FALSE, &activeCam->projection()[0][0]);
 
-			// Upload instance data
 			glBindVertexArray(quadVAO);
-			glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-			glBufferSubData(GL_ARRAY_BUFFER, 0, instanceData.size() * sizeof(float), instanceData.data());
 
-			// Draw instanced
-			glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, static_cast<GLsizei>(instanceCount));
+			std::vector<float> instanceData;
+			instanceData.reserve(2048);
+			auto assetManager = services.lock()->get<Assets::Manager>();
 
+			for (auto [entity, ps, transform] : particleView.each()) {
+				auto* psInstance = particleSystem->GetParticleSystem(entity);
+				if (!psInstance)
+					continue;
+
+				auto& pool = psInstance->GetPool();
+				if (pool.GetAliveCount() == 0)
+					continue;
+
+				instanceData.clear();
+				const auto* particles = pool.GetParticles();
+				const auto& aliveIndices = pool.GetAliveIndices();
+				for (int idx : aliveIndices) {
+					const auto& p = particles[idx];
+					if (!p.alive)
+						continue;
+
+					instanceData.push_back(p.position.x);
+					instanceData.push_back(p.position.y);
+					instanceData.push_back(p.position.z);
+					instanceData.push_back(p.color.r);
+					instanceData.push_back(p.color.g);
+					instanceData.push_back(p.color.b);
+					instanceData.push_back(p.color.a);
+					instanceData.push_back(p.size);
+				}
+
+				const size_t instanceCount = instanceData.size() / 8;
+				if (instanceCount == 0)
+					continue;
+
+				if (instanceCount > instanceCapacity) {
+					instanceCapacity = instanceCount;
+					glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+					glBufferData(GL_ARRAY_BUFFER, instanceCapacity * sizeof(float) * 8, nullptr, GL_STREAM_DRAW);
+				}
+
+				GLuint particleTextureId = 0;
+				if (assetManager && ps.particleTexture.IsValid()) {
+					auto textureOpt = assetManager->getAsset<Assets::Texture>(ps.particleTexture);
+					if (textureOpt.has_value() && textureOpt.value() && textureOpt.value()->gl_texture != 0) {
+						particleTextureId = textureOpt.value()->gl_texture;
+					}
+				}
+
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, particleTextureId);
+				glUniform1i(glGetUniformLocation(particleProgram, "u_UseTexture"), particleTextureId != 0 ? 1 : 0);
+				glUniform1i(glGetUniformLocation(particleProgram, "u_Shape"), static_cast<int>(ps.renderShape));
+				glUniform1f(glGetUniformLocation(particleProgram, "u_SoftEdge"), glm::clamp(ps.softEdge, 0.0f, 1.0f));
+
+				glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+				glBufferSubData(GL_ARRAY_BUFFER, 0, instanceData.size() * sizeof(float), instanceData.data());
+				glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, static_cast<GLsizei>(instanceCount));
+			}
+
+			glBindTexture(GL_TEXTURE_2D, 0);
 			glBindVertexArray(0);
 			glUseProgram(0);
 

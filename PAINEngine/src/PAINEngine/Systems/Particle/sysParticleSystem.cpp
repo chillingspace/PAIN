@@ -35,7 +35,42 @@ namespace PAIN {
                     psInstance = GetParticleSystem(entity);
                     if (!psInstance) continue;
                 }
-                
+
+                // Live-sync authoring properties from editor to runtime
+                psInstance->ApplyConfig(particleComp);
+
+                // Handle editor playback commands
+                if (particleComp.requestRestart) {
+                    psInstance->Restart();
+                } else if (particleComp.requestPlay) {
+                    psInstance->Play();
+                } else if (particleComp.requestPause) {
+                    psInstance->Pause();
+                } else if (particleComp.requestStop) {
+                    psInstance->Stop();
+                } else {
+                    // Keep runtime state aligned with editor state intent
+                    const auto runtimeState = psInstance->GetConfig().state;
+                    if (particleComp.state != runtimeState) {
+                        switch (particleComp.state) {
+                        case ParticleSystemState::Playing:
+                            psInstance->Play();
+                            break;
+                        case ParticleSystemState::Paused:
+                            psInstance->Pause();
+                            break;
+                        case ParticleSystemState::Stopped:
+                            psInstance->Stop();
+                            break;
+                        }
+                    }
+                }
+
+                particleComp.requestPlay = false;
+                particleComp.requestPause = false;
+                particleComp.requestStop = false;
+                particleComp.requestRestart = false;
+
                 // Update particle system
                 psInstance->Update(timing.dt, transform.position);
                 

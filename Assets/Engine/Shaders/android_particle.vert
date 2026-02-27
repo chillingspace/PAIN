@@ -19,13 +19,12 @@ uniform mat4 u_V;
 uniform mat4 u_P;
 
 void main() {
-    // Billboard quad - scale by instance size
-    vec3 worldPos = aInstancePosition + aPos * aInstanceSize;
-    
     vTexCoords = aTexCoords;
     vColor = aInstanceColor;
-    
-    // Calculate final position
-    vec4 viewPos = u_V * vec4(worldPos, 1.0);
+
+    // Camera-facing billboard in view space
+    vec4 viewCenter = u_V * vec4(aInstancePosition, 1.0);
+    vec2 viewOffset = aPos.xy * aInstanceSize;
+    vec4 viewPos = vec4(viewCenter.xy + viewOffset, viewCenter.z, 1.0);
     gl_Position = u_P * viewPos;
 }

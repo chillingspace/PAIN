@@ -2,6 +2,7 @@
 
 #include "pch.h"
 #include <cmath>
+#include <algorithm>
 #include "ECS/Components/cParticleSystem.h"
 
 namespace PAIN {
@@ -136,9 +137,11 @@ namespace PAIN {
         ParticleSystemInstance() = default;
         
         void Initialize(const ParticleSystemComponent& config) {
-            m_Config = config;
-            m_Pool.Initialize(config.maxParticles);
+            CopyAuthoringFields(config);
+            m_Config.state = ParticleSystemState::Stopped;
+            m_Config.currentPlayTime = 0.0f;
             m_Config.activeParticleCount = 0;
+            m_Pool.Initialize(config.maxParticles);
         }
         
         void Shutdown() {
@@ -174,6 +177,24 @@ namespace PAIN {
         void Restart() {
             Stop();
             Play();
+        }
+
+        void ApplyConfig(const ParticleSystemComponent& config) {
+            const bool poolSizeChanged = (config.maxParticles != m_Config.maxParticles);
+            const auto previousState = m_Config.state;
+            const float previousPlayTime = m_Config.currentPlayTime;
+
+            CopyAuthoringFields(config);
+
+            if (poolSizeChanged) {
+                m_Pool.Shutdown();
+                m_Pool.Initialize(m_Config.maxParticles);
+                m_EmissionAccumulator = 0.0f;
+            }
+
+            m_Config.state = previousState;
+            m_Config.currentPlayTime = previousPlayTime;
+            m_Config.activeParticleCount = m_Pool.GetAliveCount();
         }
         
         // Update the particle system
@@ -215,6 +236,40 @@ namespace PAIN {
         
         // Emission accumulation for fractional particles
         float m_EmissionAccumulator = 0.0f;
+
+        static void SortCurves(ParticleSystemComponent& config) {
+            auto byTimeFloat = [](const FloatKeyframe& a, const FloatKeyframe& b) { return a.time < b.time; };
+            auto byTimeColor = [](const ColorKeyframe& a, const ColorKeyframe& b) { return a.time < b.time; };
+            std::sort(config.sizeOverLifetime.begin(), config.sizeOverLifetime.end(), byTimeFloat);
+            std::sort(config.colorOverLifetime.begin(), config.colorOverLifetime.end(), byTimeColor);
+        }
+
+        void CopyAuthoringFields(const ParticleSystemComponent& config) {
+            m_Config.playDuration = config.playDuration;
+            m_Config.lifetime = config.lifetime;
+            m_Config.lifetimeVariance = config.lifetimeVariance;
+            m_Config.looping = config.looping;
+            m_Config.playOnAwake = config.playOnAwake;
+            m_Config.particleTexture = config.particleTexture;
+            m_Config.renderShape = config.renderShape;
+            m_Config.softEdge = config.softEdge;
+            m_Config.startSize = config.startSize;
+            m_Config.startSizeVariance = config.startSizeVariance;
+            m_Config.startColor = config.startColor;
+            m_Config.startColorVariance = config.startColorVariance;
+            m_Config.emissionRate = config.emissionRate;
+            m_Config.maxParticles = config.maxParticles;
+            m_Config.speed = config.speed;
+            m_Config.speedVariance = config.speedVariance;
+            m_Config.emissionShape = config.emissionShape;
+            m_Config.shapeParams = config.shapeParams;
+            m_Config.emissionDirection = config.emissionDirection;
+            m_Config.emissionSpread = config.emissionSpread;
+            m_Config.sizeOverLifetime = config.sizeOverLifetime;
+            m_Config.sizeOverLifetimeMultiplier = config.sizeOverLifetimeMultiplier;
+            m_Config.colorOverLifetime = config.colorOverLifetime;
+            SortCurves(m_Config);
+        }
         
         void Emit(float deltaTime, const glm::vec3& emitterPosition) {
             // Calculate how many particles to emit this frame
@@ -350,10 +405,11 @@ namespace PAIN {
                 
                 // Update size based on lifetime curve
                 float normalizedAge = p.age / p.lifetime;
-                p.size = EvaluateSizeCurve(normalizedAge) * m_Config.sizeOverLifetimeMultiplier;
+                const float sizeFactor = EvaluateSizeCurve(normalizedAge) * m_Config.sizeOverLifetimeMultiplier;
+                p.size = glm::max(0.0f, m_Config.startSize * sizeFactor);
                 
                 // Update color based on lifetime curve
-                p.color = EvaluateColorCurve(normalizedAge);
+                p.color = m_Config.startColor * EvaluateColorCurve(normalizedAge);
             }
         }
         

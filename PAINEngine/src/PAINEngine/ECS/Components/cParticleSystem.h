@@ -26,6 +26,12 @@ namespace PAIN {
         Paused
     };
 
+    enum class ParticleRenderShape {
+        Square = 0,
+        Circle,
+        SoftCircle
+    };
+
     // ============================================
     // Keyframe for curves
     // ============================================
@@ -90,6 +96,8 @@ namespace PAIN {
         // Visual Settings
         // ========================================
         Assets::GUID particleTexture;     // Texture asset
+        ParticleRenderShape renderShape = ParticleRenderShape::SoftCircle;
+        float softEdge = 0.2f;            // Used by SoftCircle shape
         
         float startSize = 1.0f;
         float startSizeVariance = 0.0f;
@@ -126,6 +134,12 @@ namespace PAIN {
         float currentPlayTime = 0.0f; // Time since system started playing
         int activeParticleCount = 0;
 
+        // Runtime editor commands (DO NOT SERIALIZE)
+        bool requestPlay = false;
+        bool requestPause = false;
+        bool requestStop = false;
+        bool requestRestart = false;
+
         // Constructors
         ParticleSystemComponent() = default;
     };
@@ -142,6 +156,8 @@ REFL_FIELD(lifetimeVariance, PAIN::Editor::Attributes::DisplayName("Lifetime Var
 REFL_FIELD(looping, PAIN::Editor::Attributes::DisplayName("Looping"))
 REFL_FIELD(playOnAwake, PAIN::Editor::Attributes::DisplayName("Play On Awake"))
 REFL_FIELD(particleTexture, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture))
+REFL_FIELD(renderShape, PAIN::Editor::Attributes::DisplayName("Render Shape"))
+REFL_FIELD(softEdge, PAIN::Editor::Attributes::DisplayName("Soft Edge"), PAIN::Editor::Attributes::Range(0.0f, 1.0f))
 REFL_FIELD(startSize, PAIN::Editor::Attributes::DisplayName("Start Size"), PAIN::Editor::Attributes::Range(0.01f, 10.0f))
 REFL_FIELD(startSizeVariance, PAIN::Editor::Attributes::DisplayName("Size Variance"))
 REFL_FIELD(startColor, PAIN::Editor::Attributes::DisplayName("Start Color"))

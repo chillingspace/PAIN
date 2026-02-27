@@ -353,7 +353,7 @@ namespace PAIN {
 							switch (ps.emissionShape) {
 								case PAIN::EmissionShape::Sphere:
 									changed |= ImGui::DragFloat("Radius", &ps.shapeParams.sphereRadius, 0.1f, 0.01f, 100.0f);
-									ImGui::Checkbox("Volume Emission", &ps.shapeParams.volumeEmission);
+									changed |= ImGui::Checkbox("Volume Emission", &ps.shapeParams.volumeEmission);
 									break;
 								case PAIN::EmissionShape::Box:
 									changed |= ImGui::DragFloat3("Half Extents", &ps.shapeParams.boxHalfExtents.x, 0.1f, 0.01f, 100.0f);
@@ -385,7 +385,17 @@ namespace PAIN {
 									panel.services)) {
 								changed = true;
 							}
-							
+
+							const char* renderShapeNames[] = {"Square", "Circle", "Soft Circle"};
+							int renderShapeIdx = static_cast<int>(ps.renderShape);
+							if (ImGui::Combo("Render Shape", &renderShapeIdx, renderShapeNames, IM_ARRAYSIZE(renderShapeNames))) {
+								ps.renderShape = static_cast<PAIN::ParticleRenderShape>(renderShapeIdx);
+								changed = true;
+							}
+							if (ps.renderShape == PAIN::ParticleRenderShape::SoftCircle) {
+								changed |= ImGui::DragFloat("Soft Edge", &ps.softEdge, 0.01f, 0.0f, 1.0f, "%.2f");
+							}
+
 							ImGui::Spacing();
 							
 							// Start Size
@@ -523,9 +533,29 @@ namespace PAIN {
 						
 						ImGui::Spacing();
 						
-						// Playback buttons (these would need script integration to actually control the particle system)
-						ImGui::TextDisabled("Playback controls require script integration");
-						ImGui::TextDisabled("Use Play(), Pause(), Stop(), Restart() methods");
+						if (ImGui::Button("Play##particle")) {
+							ps.requestPlay = true;
+							ps.state = PAIN::ParticleSystemState::Playing;
+							changed = true;
+						}
+						ImGui::SameLine();
+						if (ImGui::Button("Pause##particle")) {
+							ps.requestPause = true;
+							ps.state = PAIN::ParticleSystemState::Paused;
+							changed = true;
+						}
+						ImGui::SameLine();
+						if (ImGui::Button("Stop##particle")) {
+							ps.requestStop = true;
+							ps.state = PAIN::ParticleSystemState::Stopped;
+							changed = true;
+						}
+						ImGui::SameLine();
+						if (ImGui::Button("Restart##particle")) {
+							ps.requestRestart = true;
+							ps.state = PAIN::ParticleSystemState::Playing;
+							changed = true;
+						}
 						
 						ImGui::PopStyleVar();
 						
