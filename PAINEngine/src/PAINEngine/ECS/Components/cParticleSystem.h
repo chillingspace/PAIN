@@ -34,9 +34,7 @@ namespace PAIN {
         float value = 1.0f;
         
         // Serialization
-        float* data() { return &time; }
-        const float* data() const { return &time; }
-        static constexpr size_t member_count = 2;
+        static constexpr bool ShouldSerialize = true;
     };
 
     struct ColorKeyframe {
@@ -44,9 +42,7 @@ namespace PAIN {
         glm::vec4 color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
         
         // Serialization
-        float* data() { return &time; }
-        const float* data() const { return &time; }
-        static constexpr size_t member_count = 4;
+        static constexpr bool ShouldSerialize = true;
     };
 
     // ============================================
@@ -68,12 +64,15 @@ namespace PAIN {
         
         // Common
         bool volumeEmission = false;  // Emit from volume vs surface
+        
+        // Serialization
+        static constexpr bool ShouldSerialize = true;
     };
 
     // ============================================
     // Particle System Component
     // ============================================
-    struct ParticleSystem {
+    struct ParticleSystemComponent {
 
         //Serialization flag
         static constexpr bool ShouldSerialize = true;
@@ -128,36 +127,64 @@ namespace PAIN {
         int activeParticleCount = 0;
 
         // Constructors
-        ParticleSystem() = default;
+        ParticleSystemComponent() = default;
     };
 
-    // ============================================
-    // REFLECTION (Editor Integration)
-    // ============================================
-    REFL_TYPE(PAIN::ParticleSystem)
-    REFL_FIELD(playDuration, PAIN::Editor::Attributes::DisplayName("Duration (s)"), PAIN::Editor::Attributes::Range(0.0f, 60.0f))
-    REFL_FIELD(lifetime, PAIN::Editor::Attributes::DisplayName("Lifetime (s)"), PAIN::Editor::Attributes::Range(0.1f, 30.0f))
-    REFL_FIELD(lifetimeVariance, PAIN::Editor::Attributes::DisplayName("Lifetime Variance"))
-    REFL_FIELD(looping, PAIN::Editor::Attributes::DisplayName("Looping"))
-    REFL_FIELD(playOnAwake, PAIN::Editor::Attributes::DisplayName("Play On Awake"))
-    REFL_FIELD(particleTexture, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture))
-    REFL_FIELD(startSize, PAIN::Editor::Attributes::DisplayName("Start Size"), PAIN::Editor::Attributes::Range(0.01f, 10.0f))
-    REFL_FIELD(startSizeVariance, PAIN::Editor::Attributes::DisplayName("Size Variance"))
-    REFL_FIELD(startColor, PAIN::Editor::Attributes::DisplayName("Start Color"))
-    REFL_FIELD(startColorVariance, PAIN::Editor::Attributes::DisplayName("Color Variance"))
-    REFL_FIELD(emissionRate, PAIN::Editor::Attributes::DisplayName("Emission Rate"), PAIN::Editor::Attributes::Range(0.0f, 1000.0f))
-    REFL_FIELD(maxParticles, PAIN::Editor::Attributes::DisplayName("Max Particles"), PAIN::Editor::Attributes::Range(1, 10000))
-    REFL_FIELD(speed, PAIN::Editor::Attributes::DisplayName("Speed"), PAIN::Editor::Attributes::Range(0.0f, 100.0f))
-    REFL_FIELD(speedVariance, PAIN::Editor::Attributes::DisplayName("Speed Variance"))
-    REFL_FIELD(emissionShape)
-    REFL_FIELD(shapeParams)
-    REFL_FIELD(emissionDirection, PAIN::Editor::Attributes::DisplayName("Emission Direction"))
-    REFL_FIELD(emissionSpread, PAIN::Editor::Attributes::DisplayName("Spread (deg)"), PAIN::Editor::Attributes::Range(0.0f, 180.0f))
-    REFL_FIELD(sizeOverLifetime, PAIN::Editor::Attributes::DisplayName("Size Over Lifetime"))
-    REFL_FIELD(sizeOverLifetimeMultiplier, PAIN::Editor::Attributes::DisplayName("Size Multiplier"), PAIN::Editor::Attributes::Range(0.0f, 10.0f))
-    REFL_FIELD(colorOverLifetime, PAIN::Editor::Attributes::DisplayName("Color Over Lifetime"))
-    REFL_END
-
-    static_assert(refl::trait::is_reflectable_v<PAIN::ParticleSystem>);
-
 } // namespace PAIN
+
+// ============================================
+// REFLECTION (Editor Integration)
+// ============================================
+REFL_TYPE(PAIN::ParticleSystemComponent)
+REFL_FIELD(playDuration, PAIN::Editor::Attributes::DisplayName("Duration (s)"), PAIN::Editor::Attributes::Range(0.0f, 60.0f))
+REFL_FIELD(lifetime, PAIN::Editor::Attributes::DisplayName("Lifetime (s)"), PAIN::Editor::Attributes::Range(0.1f, 30.0f))
+REFL_FIELD(lifetimeVariance, PAIN::Editor::Attributes::DisplayName("Lifetime Variance"))
+REFL_FIELD(looping, PAIN::Editor::Attributes::DisplayName("Looping"))
+REFL_FIELD(playOnAwake, PAIN::Editor::Attributes::DisplayName("Play On Awake"))
+REFL_FIELD(particleTexture, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture))
+REFL_FIELD(startSize, PAIN::Editor::Attributes::DisplayName("Start Size"), PAIN::Editor::Attributes::Range(0.01f, 10.0f))
+REFL_FIELD(startSizeVariance, PAIN::Editor::Attributes::DisplayName("Size Variance"))
+REFL_FIELD(startColor, PAIN::Editor::Attributes::DisplayName("Start Color"))
+REFL_FIELD(startColorVariance, PAIN::Editor::Attributes::DisplayName("Color Variance"))
+REFL_FIELD(emissionRate, PAIN::Editor::Attributes::DisplayName("Emission Rate"), PAIN::Editor::Attributes::Range(0.0f, 1000.0f))
+REFL_FIELD(maxParticles, PAIN::Editor::Attributes::DisplayName("Max Particles"), PAIN::Editor::Attributes::Range(1, 10000))
+REFL_FIELD(speed, PAIN::Editor::Attributes::DisplayName("Speed"), PAIN::Editor::Attributes::Range(0.0f, 100.0f))
+REFL_FIELD(speedVariance, PAIN::Editor::Attributes::DisplayName("Speed Variance"))
+REFL_FIELD(emissionShape)
+REFL_FIELD(shapeParams)
+REFL_FIELD(emissionDirection, PAIN::Editor::Attributes::DisplayName("Emission Direction"))
+REFL_FIELD(emissionSpread, PAIN::Editor::Attributes::DisplayName("Spread (deg)"), PAIN::Editor::Attributes::Range(0.0f, 180.0f))
+REFL_FIELD(sizeOverLifetime, PAIN::Editor::Attributes::DisplayName("Size Over Lifetime"))
+REFL_FIELD(sizeOverLifetimeMultiplier, PAIN::Editor::Attributes::DisplayName("Size Multiplier"), PAIN::Editor::Attributes::Range(0.0f, 10.0f))
+REFL_FIELD(colorOverLifetime, PAIN::Editor::Attributes::DisplayName("Color Over Lifetime"))
+REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::ParticleSystemComponent>);
+
+// REFLECTION for EmissionShapeParams
+REFL_TYPE(PAIN::EmissionShapeParams)
+REFL_FIELD(sphereRadius)
+REFL_FIELD(boxHalfExtents)
+REFL_FIELD(circleRadius)
+REFL_FIELD(circleArc)
+REFL_FIELD(coneAngle)
+REFL_FIELD(volumeEmission)
+REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::EmissionShapeParams>);
+
+// REFLECTION for FloatKeyframe
+REFL_TYPE(PAIN::FloatKeyframe)
+REFL_FIELD(time)
+REFL_FIELD(value)
+REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::FloatKeyframe>);
+
+// REFLECTION for ColorKeyframe
+REFL_TYPE(PAIN::ColorKeyframe)
+REFL_FIELD(time)
+REFL_FIELD(color)
+REFL_END
+
+static_assert(refl::trait::is_reflectable_v<PAIN::ColorKeyframe>);

@@ -38,7 +38,7 @@ namespace PAIN {
 		// Gameplay
 		Cam, LocalTransform, WorldTransform, ModelRenderer, Animation, Texture2D,
 		Lighting, Physics::RigidBody3D, Collision::Collider, CompoundCollider,
-		Joint, BoundingVolume, Audio::AudioSource, Scripts, ParticleSystem,
+		Joint, BoundingVolume, Audio::AudioSource, Scripts, ParticleSystemComponent,
 
 		// UI comps
 		UIRectTransform, UIButton, UIElement, UICanvas, UIAnimation, UIText,
@@ -100,7 +100,7 @@ namespace PAIN {
 			return "AudioSource";
 		else if constexpr (std::is_same_v<T, Scripts>)
 			return "Scripts";
-		else if constexpr (std::is_same_v<T, ParticleSystem>)
+		else if constexpr (std::is_same_v<T, ParticleSystemComponent>)
 			return "ParticleSystem";
 
 		// UI comps

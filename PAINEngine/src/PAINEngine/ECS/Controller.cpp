@@ -18,6 +18,7 @@
 #include "Systems/Logic/sysLogic.h"
 #include "Systems/Physics/sysPhysics.h"
 #include "Systems/Render/sysRender.h"
+#include "Systems/Particle/sysParticleSystem.h"
 #include "Systems/Scripting/GameScriptingSystem.h"
 #include "Systems/Transform/sysTransform.h"
 
@@ -492,7 +493,7 @@ namespace PAIN {
 			registerComponent<BoundingVolume>("BoundingVolume");
 			registerComponent<Audio::AudioSource>("AudioSource");
 			registerComponent<Scripts>("Scripts");
-			registerComponent<ParticleSystem>("ParticleSystem");
+			registerComponent<ParticleSystemComponent>("ParticleSystem");
 			// AI Components
 			registerComponent<AI::Blackboard>("AIBlackboard");
 			registerComponent<AI::Controller>("AIController");
@@ -529,6 +530,7 @@ namespace PAIN {
 			registerSystem<UI::InputSystem>();
 			registerSystem<UI::AnimationSystem>();
 			registerSystem<Render::System>();
+			registerSystem<ParticleSystem::System>();
 		}
 		void Controller::onEvent(Event::Event& e) {
 			dispatchToLayers(e);

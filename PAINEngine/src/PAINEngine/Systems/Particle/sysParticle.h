@@ -118,6 +118,9 @@ namespace PAIN {
         // Get const access to alive particle indices
         const std::vector<int>& GetAliveIndices() const { return m_AliveIndices; }
         
+        // Get raw particle array for GPU rendering
+        const Particle* GetParticles() const { return m_Particles.data(); }
+        
     private:
         int m_MaxParticles = 0;
         std::vector<Particle> m_Particles;
@@ -132,7 +135,7 @@ namespace PAIN {
     public:
         ParticleSystemInstance() = default;
         
-        void Initialize(const ParticleSystem& config) {
+        void Initialize(const ParticleSystemComponent& config) {
             m_Config = config;
             m_Pool.Initialize(config.maxParticles);
             m_Config.activeParticleCount = 0;
@@ -201,10 +204,13 @@ namespace PAIN {
         }
         
         // Get current config (for runtime display)
-        ParticleSystem& GetConfig() { return m_Config; }
+        ParticleSystemComponent& GetConfig() { return m_Config; }
+        
+        // Get particle pool for rendering
+        ParticlePool& GetPool() { return m_Pool; }
         
     private:
-        ParticleSystem m_Config;
+        ParticleSystemComponent m_Config;
         ParticlePool m_Pool;
         
         // Emission accumulation for fractional particles
@@ -310,7 +316,8 @@ namespace PAIN {
             if (m_Config.emissionSpread > 0.0f) {
                 // Generate random offset within spread angle
                 float spreadRad = glm::radians(m_Config.emissionSpread);
-                glm::vec3 randomOffset = RandomUnitVector() * static_cast<float>(rand()) / RAND_MAX * spreadRad;
+                float randomFactor = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                glm::vec3 randomOffset = RandomUnitVector() * randomFactor * spreadRad;
                 dir = glm::normalize(dir + randomOffset);
             }
             

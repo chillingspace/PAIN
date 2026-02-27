@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "particle.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 16049782375140437056
+  },
+  "descriptor_version": 1,
+  "guid": "21dd5d34-4df5-3b4a-9068-ca7ba8f7da01",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\particle.frag"
+  }
+}
