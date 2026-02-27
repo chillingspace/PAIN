@@ -32,6 +32,22 @@ namespace PAIN {
         SoftCircle
     };
 
+    enum class ParticleSimulationSpace {
+        World = 0,
+        Local
+    };
+
+    enum class ParticleBlendMode {
+        Alpha = 0,
+        Additive,
+        Premultiplied
+    };
+
+    enum class ParticleSortMode {
+        None = 0,
+        BackToFront
+    };
+
     // ============================================
     // Keyframe for curves
     // ============================================
@@ -113,6 +129,8 @@ namespace PAIN {
         
         float speed = 1.0f;              // units per second
         float speedVariance = 0.0f;
+        bool velocityOverLifetimeEnabled = false;
+        glm::vec3 velocityOverLifetime = glm::vec3(0.0f);
         
         EmissionShape emissionShape = EmissionShape::Point;
         EmissionShapeParams shapeParams;
@@ -126,6 +144,13 @@ namespace PAIN {
         float sizeOverLifetimeMultiplier = 1.0f;
         
         std::vector<ColorKeyframe> colorOverLifetime;
+
+        // ========================================
+        // Rendering / Simulation Modules
+        // ========================================
+        ParticleSimulationSpace simulationSpace = ParticleSimulationSpace::World;
+        ParticleBlendMode blendMode = ParticleBlendMode::Alpha;
+        ParticleSortMode sortMode = ParticleSortMode::None;
         
         // ========================================
         // Runtime State (DO NOT SERIALIZE)
@@ -166,6 +191,8 @@ REFL_FIELD(emissionRate, PAIN::Editor::Attributes::DisplayName("Emission Rate"),
 REFL_FIELD(maxParticles, PAIN::Editor::Attributes::DisplayName("Max Particles"), PAIN::Editor::Attributes::Range(1, 10000))
 REFL_FIELD(speed, PAIN::Editor::Attributes::DisplayName("Speed"), PAIN::Editor::Attributes::Range(0.0f, 100.0f))
 REFL_FIELD(speedVariance, PAIN::Editor::Attributes::DisplayName("Speed Variance"))
+REFL_FIELD(velocityOverLifetimeEnabled, PAIN::Editor::Attributes::DisplayName("Velocity Over Lifetime"))
+REFL_FIELD(velocityOverLifetime, PAIN::Editor::Attributes::DisplayName("Velocity Delta"))
 REFL_FIELD(emissionShape)
 REFL_FIELD(shapeParams)
 REFL_FIELD(emissionDirection, PAIN::Editor::Attributes::DisplayName("Emission Direction"))
@@ -173,6 +200,9 @@ REFL_FIELD(emissionSpread, PAIN::Editor::Attributes::DisplayName("Spread (deg)")
 REFL_FIELD(sizeOverLifetime, PAIN::Editor::Attributes::DisplayName("Size Over Lifetime"))
 REFL_FIELD(sizeOverLifetimeMultiplier, PAIN::Editor::Attributes::DisplayName("Size Multiplier"), PAIN::Editor::Attributes::Range(0.0f, 10.0f))
 REFL_FIELD(colorOverLifetime, PAIN::Editor::Attributes::DisplayName("Color Over Lifetime"))
+REFL_FIELD(simulationSpace, PAIN::Editor::Attributes::DisplayName("Simulation Space"))
+REFL_FIELD(blendMode, PAIN::Editor::Attributes::DisplayName("Blend Mode"))
+REFL_FIELD(sortMode, PAIN::Editor::Attributes::DisplayName("Sort Mode"))
 REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::ParticleSystemComponent>);

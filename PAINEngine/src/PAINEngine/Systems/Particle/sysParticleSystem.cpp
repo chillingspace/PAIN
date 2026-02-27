@@ -48,22 +48,6 @@ namespace PAIN {
                     psInstance->Pause();
                 } else if (particleComp.requestStop) {
                     psInstance->Stop();
-                } else {
-                    // Keep runtime state aligned with editor state intent
-                    const auto runtimeState = psInstance->GetConfig().state;
-                    if (particleComp.state != runtimeState) {
-                        switch (particleComp.state) {
-                        case ParticleSystemState::Playing:
-                            psInstance->Play();
-                            break;
-                        case ParticleSystemState::Paused:
-                            psInstance->Pause();
-                            break;
-                        case ParticleSystemState::Stopped:
-                            psInstance->Stop();
-                            break;
-                        }
-                    }
                 }
 
                 particleComp.requestPlay = false;

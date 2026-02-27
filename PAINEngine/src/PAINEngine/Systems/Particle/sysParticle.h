@@ -206,6 +206,22 @@ namespace PAIN {
             if (m_Config.state != ParticleSystemState::Playing) {
                 return;
             }
+
+            if (!m_HasPreviousEmitterPosition) {
+                m_PreviousEmitterPosition = emitterPosition;
+                m_HasPreviousEmitterPosition = true;
+            }
+
+            if (m_Config.simulationSpace == ParticleSimulationSpace::Local) {
+                const glm::vec3 delta = emitterPosition - m_PreviousEmitterPosition;
+                if (delta != glm::vec3(0.0f)) {
+                    for (int idx : m_Pool.GetAliveIndices()) {
+                        Particle& p = m_Pool.GetParticle(idx);
+                        p.position += delta;
+                    }
+                }
+            }
+            m_PreviousEmitterPosition = emitterPosition;
             
             // Check play duration
             m_Config.currentPlayTime += deltaTime;
@@ -240,6 +256,8 @@ namespace PAIN {
         
         // Emission accumulation for fractional particles
         float m_EmissionAccumulator = 0.0f;
+        glm::vec3 m_PreviousEmitterPosition = glm::vec3(0.0f);
+        bool m_HasPreviousEmitterPosition = false;
 
         static void SortCurves(ParticleSystemComponent& config) {
             auto byTimeFloat = [](const FloatKeyframe& a, const FloatKeyframe& b) { return a.time < b.time; };
@@ -265,6 +283,8 @@ namespace PAIN {
             m_Config.maxParticles = config.maxParticles;
             m_Config.speed = config.speed;
             m_Config.speedVariance = config.speedVariance;
+            m_Config.velocityOverLifetimeEnabled = config.velocityOverLifetimeEnabled;
+            m_Config.velocityOverLifetime = config.velocityOverLifetime;
             m_Config.emissionShape = config.emissionShape;
             m_Config.shapeParams = config.shapeParams;
             m_Config.emissionDirection = config.emissionDirection;
@@ -272,6 +292,9 @@ namespace PAIN {
             m_Config.sizeOverLifetime = config.sizeOverLifetime;
             m_Config.sizeOverLifetimeMultiplier = config.sizeOverLifetimeMultiplier;
             m_Config.colorOverLifetime = config.colorOverLifetime;
+            m_Config.simulationSpace = config.simulationSpace;
+            m_Config.blendMode = config.blendMode;
+            m_Config.sortMode = config.sortMode;
             SortCurves(m_Config);
         }
         
@@ -358,7 +381,8 @@ namespace PAIN {
                     // Random point in cone
                     float angle = static_cast<float>(rand()) / RAND_MAX * 2.0f * 3.14159f;
                     float h = static_cast<float>(rand()) / RAND_MAX;
-                    float r = h * std::tan(glm::radians(m_Config.shapeParams.coneAngle));
+                    const float coneAngle = glm::clamp(m_Config.shapeParams.coneAngle, 0.0f, 89.0f);
+                    float r = h * std::tan(glm::radians(coneAngle));
                     return emitterPosition + glm::vec3(std::cos(angle) * r, h, std::sin(angle) * r);
                 }
                     
@@ -406,6 +430,10 @@ namespace PAIN {
                 // Apply gravity (simple -Y acceleration)
                 // Could add more force fields here
                 p.velocity.y -= 9.81f * deltaTime; // Simple gravity
+
+                if (m_Config.velocityOverLifetimeEnabled) {
+                    p.velocity += m_Config.velocityOverLifetime * deltaTime;
+                }
                 
                 // Update size based on lifetime curve
                 float normalizedAge = p.age / p.lifetime;

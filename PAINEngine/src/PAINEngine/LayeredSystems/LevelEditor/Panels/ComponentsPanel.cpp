@@ -363,7 +363,7 @@ namespace PAIN {
 									changed |= ImGui::DragFloat("Arc (deg)", &ps.shapeParams.circleArc, 5.0f, 0.0f, 360.0f);
 									break;
 								case PAIN::EmissionShape::Cone:
-									changed |= ImGui::DragFloat("Angle (deg)", &ps.shapeParams.coneAngle, 1.0f, 0.0f, 90.0f);
+									changed |= ImGui::DragFloat("Angle (deg)", &ps.shapeParams.coneAngle, 1.0f, 0.0f, 89.0f);
 									break;
 								default:
 									break;
@@ -413,7 +413,32 @@ namespace PAIN {
 							// Speed
 							changed |= ImGui::DragFloat("Speed", &ps.speed, 0.1f, 0.0f, 100.0f, "%.2f");
 							changed |= ImGui::DragFloat("Speed Variance", &ps.speedVariance, 0.05f, 0.0f, ps.speed, "%.2f");
-							
+							changed |= ImGui::Checkbox("Velocity Over Lifetime", &ps.velocityOverLifetimeEnabled);
+							if (ps.velocityOverLifetimeEnabled) {
+								changed |= ImGui::DragFloat3("Velocity Delta", &ps.velocityOverLifetime.x, 0.05f);
+							}
+
+							const char* simulationSpaceNames[] = {"World", "Local"};
+							int simulationSpaceIdx = static_cast<int>(ps.simulationSpace);
+							if (ImGui::Combo("Simulation Space", &simulationSpaceIdx, simulationSpaceNames, IM_ARRAYSIZE(simulationSpaceNames))) {
+								ps.simulationSpace = static_cast<PAIN::ParticleSimulationSpace>(simulationSpaceIdx);
+								changed = true;
+							}
+
+							const char* blendModeNames[] = {"Alpha", "Additive", "Premultiplied"};
+							int blendModeIdx = static_cast<int>(ps.blendMode);
+							if (ImGui::Combo("Blend Mode", &blendModeIdx, blendModeNames, IM_ARRAYSIZE(blendModeNames))) {
+								ps.blendMode = static_cast<PAIN::ParticleBlendMode>(blendModeIdx);
+								changed = true;
+							}
+
+							const char* sortModeNames[] = {"None", "Back To Front"};
+							int sortModeIdx = static_cast<int>(ps.sortMode);
+							if (ImGui::Combo("Sort Mode", &sortModeIdx, sortModeNames, IM_ARRAYSIZE(sortModeNames))) {
+								ps.sortMode = static_cast<PAIN::ParticleSortMode>(sortModeIdx);
+								changed = true;
+							}
+
 							ImGui::Unindent(10.0f);
 						}
 						

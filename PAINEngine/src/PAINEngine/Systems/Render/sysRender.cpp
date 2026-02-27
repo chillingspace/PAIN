@@ -660,7 +660,6 @@ namespace PAIN {
 			glGetBooleanv(GL_DEPTH_WRITEMASK, &previousDepthMask);
 
 			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glDepthMask(GL_FALSE); // Particles don't write to depth buffer
 			glDisable(GL_CULL_FACE); // Billboard particles face camera
 
@@ -688,21 +687,44 @@ namespace PAIN {
 					continue;
 
 				instanceData.clear();
+				struct ParticleInstance {
+					glm::vec3 position;
+					glm::vec4 color;
+					float size;
+					float distanceSq;
+				};
+				std::vector<ParticleInstance> instances;
+				instances.reserve(pool.GetAliveCount());
 				const auto* particles = pool.GetParticles();
 				const auto& aliveIndices = pool.GetAliveIndices();
 				for (int idx : aliveIndices) {
 					const auto& p = particles[idx];
 					if (!p.alive)
 						continue;
+					ParticleInstance inst{};
+					inst.position = p.position;
+					inst.color = p.color;
+					inst.size = p.size;
+					const glm::vec3 delta = p.position - activeCam->pos;
+					inst.distanceSq = glm::dot(delta, delta);
+					instances.push_back(inst);
+				}
 
-					instanceData.push_back(p.position.x);
-					instanceData.push_back(p.position.y);
-					instanceData.push_back(p.position.z);
-					instanceData.push_back(p.color.r);
-					instanceData.push_back(p.color.g);
-					instanceData.push_back(p.color.b);
-					instanceData.push_back(p.color.a);
-					instanceData.push_back(p.size);
+				if (ps.sortMode == ParticleSortMode::BackToFront) {
+					std::sort(instances.begin(), instances.end(), [](const ParticleInstance& a, const ParticleInstance& b) {
+						return a.distanceSq > b.distanceSq;
+					});
+				}
+
+				for (const auto& inst : instances) {
+					instanceData.push_back(inst.position.x);
+					instanceData.push_back(inst.position.y);
+					instanceData.push_back(inst.position.z);
+					instanceData.push_back(inst.color.r);
+					instanceData.push_back(inst.color.g);
+					instanceData.push_back(inst.color.b);
+					instanceData.push_back(inst.color.a);
+					instanceData.push_back(inst.size);
 				}
 
 				const size_t instanceCount = instanceData.size() / 8;
@@ -725,6 +747,20 @@ namespace PAIN {
 
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, particleTextureId);
+
+				switch (ps.blendMode) {
+				case ParticleBlendMode::Additive:
+					glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+					break;
+				case ParticleBlendMode::Premultiplied:
+					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+					break;
+				case ParticleBlendMode::Alpha:
+				default:
+					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+					break;
+				}
+
 				glUniform1i(glGetUniformLocation(particleProgram, "u_UseTexture"), particleTextureId != 0 ? 1 : 0);
 				glUniform1i(glGetUniformLocation(particleProgram, "u_Shape"), static_cast<int>(ps.renderShape));
 				glUniform1f(glGetUniformLocation(particleProgram, "u_SoftEdge"), glm::clamp(ps.softEdge, 0.0f, 1.0f));
