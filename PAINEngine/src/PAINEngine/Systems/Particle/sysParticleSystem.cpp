@@ -29,10 +29,12 @@ namespace PAIN {
                 
                 // Get or create particle system instance
                 ParticleSystemInstance* psInstance = GetParticleSystem(entity);
-                if (!psInstance) continue;
-                
-                // Check if component was modified (need to reinitialize)
-                // For now, just update
+                if (!psInstance) {
+                    // Create new particle system instance
+                    InitializeParticleSystem(entity, particleComp);
+                    psInstance = GetParticleSystem(entity);
+                    if (!psInstance) continue;
+                }
                 
                 // Update particle system
                 psInstance->Update(timing.dt, transform.position);

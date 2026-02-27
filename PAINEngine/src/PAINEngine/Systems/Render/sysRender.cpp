@@ -578,19 +578,6 @@ namespace PAIN {
 				return;
 			}
 
-			// Set up GL state for particles
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glDepthMask(GL_FALSE); // Particles don't write to depth buffer
-			glDisable(GL_CULL_FACE); // Billboard particles face camera
-
-			// Use particle shader
-			glUseProgram(particleProgram);
-
-			// Set view and projection matrices
-			glUniformMatrix4fv(glGetUniformLocation(particleProgram, "u_V"), 1, GL_FALSE, &activeCam->view()[0][0]);
-			glUniformMatrix4fv(glGetUniformLocation(particleProgram, "u_P"), 1, GL_FALSE, &activeCam->projection()[0][0]);
-
 			// Billboard quad vertices (centered at origin, facing +Z)
 			// These are per-vertex, not per-instance
 			static const float quadVertices[] = {
@@ -611,6 +598,7 @@ namespace PAIN {
 			static GLuint quadVBO = 0;
 			static GLuint quadEBO = 0;
 			static GLuint instanceVBO = 0;
+			static size_t instanceCapacity = 10000;
 
 			if (quadVAO == 0) {
 				// Create quad VAO
@@ -644,7 +632,7 @@ namespace PAIN {
 				// Location 4: aInstanceSize (float)
 				glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
 				// Allocate buffer (will be updated each frame)
-				glBufferData(GL_ARRAY_BUFFER, 10000 * sizeof(float) * 8, nullptr, GL_STREAM_DRAW); // 8 floats per instance: pos(3) + color(4) + size(1)
+				glBufferData(GL_ARRAY_BUFFER, instanceCapacity * sizeof(float) * 8, nullptr, GL_STREAM_DRAW); // 8 floats per instance: pos(3) + color(4) + size(1)
 
 				// Instance position (location 2)
 				glEnableVertexAttribArray(2);
@@ -708,22 +696,52 @@ namespace PAIN {
 			if (instanceData.empty())
 				return;
 
+			const size_t instanceCount = instanceData.size() / 8;
+			if (instanceCount > instanceCapacity) {
+				instanceCapacity = instanceCount;
+				glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+				glBufferData(GL_ARRAY_BUFFER, instanceCapacity * sizeof(float) * 8, nullptr, GL_STREAM_DRAW);
+			}
+
+			// Set up GL state for particles
+			const GLboolean wasBlendEnabled = glIsEnabled(GL_BLEND);
+			const GLboolean wasCullEnabled = glIsEnabled(GL_CULL_FACE);
+			GLboolean previousDepthMask = GL_TRUE;
+			glGetBooleanv(GL_DEPTH_WRITEMASK, &previousDepthMask);
+
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glDepthMask(GL_FALSE); // Particles don't write to depth buffer
+			glDisable(GL_CULL_FACE); // Billboard particles face camera
+
+			// Use particle shader
+			glUseProgram(particleProgram);
+
+			// Set view and projection matrices
+			glUniformMatrix4fv(glGetUniformLocation(particleProgram, "u_V"), 1, GL_FALSE, &activeCam->view()[0][0]);
+			glUniformMatrix4fv(glGetUniformLocation(particleProgram, "u_P"), 1, GL_FALSE, &activeCam->projection()[0][0]);
+
 			// Upload instance data
 			glBindVertexArray(quadVAO);
 			glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
 			glBufferSubData(GL_ARRAY_BUFFER, 0, instanceData.size() * sizeof(float), instanceData.data());
 
 			// Draw instanced
-			int instanceCount = static_cast<int>(instanceData.size() / 8);
-			glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, instanceCount);
+			glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, static_cast<GLsizei>(instanceCount));
 
 			glBindVertexArray(0);
 			glUseProgram(0);
 
 			// Restore GL state
-			glDisable(GL_BLEND);
-			glEnable(GL_DEPTH_TEST);
-			glEnable(GL_CULL_FACE);
+			glDepthMask(previousDepthMask);
+			if (wasBlendEnabled)
+				glEnable(GL_BLEND);
+			else
+				glDisable(GL_BLEND);
+			if (wasCullEnabled)
+				glEnable(GL_CULL_FACE);
+			else
+				glDisable(GL_CULL_FACE);
 		}
 
 		void System::debugPass(entt::registry& registry, int debug_mode) {
