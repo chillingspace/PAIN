@@ -167,11 +167,15 @@ namespace PAIN {
         void Stop() {
             m_Config.state = ParticleSystemState::Stopped;
             m_Config.currentPlayTime = 0.0f;
+            m_EmissionAccumulator = 0.0f;
             
             // Kill all particles
-            for (int idx : m_Pool.GetAliveIndices()) {
-                m_Pool.Kill(idx);
+            while (m_Pool.GetAliveCount() > 0) {
+                const auto& alive = m_Pool.GetAliveIndices();
+                m_Pool.Kill(alive.back());
             }
+
+            m_Config.activeParticleCount = 0;
         }
         
         void Restart() {
