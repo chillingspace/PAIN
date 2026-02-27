@@ -101,32 +101,24 @@ namespace PAIN {
 		game_Hide,
 		game_Collect,
 		game_Move,
+		game_End,
 
 		// pause screen
 		pause_Resume,
 		pause_Restart,
-		pause_Settings,
-		pause_ReturnToMainMenu,
 
-		// main menu screen
-		menu_StartGame,
-		menu_OpenSettings,
-		menu_HowToPlay,
-		menu_Credits,
-		menu_QuitGame,
-
-		menu_OpenTutorial,
-		menu_BackToMain,
-
-		// quit confirmation overlay
-		quit_Confirm,
-		quit_Cancel,
-		goto_Pause,
-
-		howtoplay_ArrowLeft,
-		howtoplay_ArrowRight,
+		// Confirmations for restart
 		restart_Confirm,
 		restart_Cancel,
+
+		// main menu screen
+		menu_QuitGame,
+		quit_Confirm,
+		quit_Cancel,
+
+
+		// Android callback to pause
+		goto_Pause,
 
 		cutscene_Open_Menu,
 		cutscene_Close_Menu,
@@ -136,13 +128,8 @@ namespace PAIN {
 
 		mainmenu_Quit_Confirm,
 		mainmenu_Quit_Cancel,
-
-		credits_ArrowLeft,
-		credits_ArrowRight,
 		
-		// game end next level
-		end_NextLevel,
-		change_Level1,
+		LoadScene,
 	};
 
 	struct UIButton {
@@ -320,29 +307,30 @@ NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::UIAction, {
 	{PAIN::UIAction::game_Hide, "game_Hide"},
 	{PAIN::UIAction::game_Collect, "game_Collect"},
 	{PAIN::UIAction::game_Move, "game_Move"},
+	{PAIN::UIAction::game_End, "game_End"},
 
 	{PAIN::UIAction::pause_Resume, "pause_Resume"},
 	{PAIN::UIAction::pause_Restart, "pause_Restart"},
-	{PAIN::UIAction::pause_Settings, "pause_Settings"},
-	{PAIN::UIAction::pause_ReturnToMainMenu, "pause_ReturnToMainMenu"},
 
-	{PAIN::UIAction::menu_StartGame, "menu_StartGame"},
-	{PAIN::UIAction::menu_OpenSettings, "menu_OpenSettings"},
-	{PAIN::UIAction::menu_HowToPlay, "menu_HowToPlay"},
-	{PAIN::UIAction::menu_Credits, "menu_Credits"},
-	{PAIN::UIAction::menu_QuitGame, "menu_QuitGame"},
-
-	{PAIN::UIAction::menu_OpenTutorial, "menu_OpenTutorial"},
-	{PAIN::UIAction::menu_BackToMain, "menu_BackToMain"},
-
-	{PAIN::UIAction::quit_Confirm, "quit_Confirm"},
-	{PAIN::UIAction::quit_Cancel, "quit_Cancel"},
 	{PAIN::UIAction::restart_Confirm, "restart_Confirm"},
 	{PAIN::UIAction::restart_Cancel, "restart_Cancel"},
+
+	{PAIN::UIAction::menu_QuitGame, "menu_QuitGame"},
+	{PAIN::UIAction::quit_Confirm, "quit_Confirm"},
+	{PAIN::UIAction::quit_Cancel, "quit_Cancel"},
+
 	{PAIN::UIAction::goto_Pause, "goto_Pause"},
 
-	{ PAIN::UIAction::howtoplay_ArrowLeft, "howtoplay_ArrowLeft" },
-	{ PAIN::UIAction::howtoplay_ArrowRight, "howtoplay_ArrowRight" }
+	{PAIN::UIAction::cutscene_Open_Menu, "cutscene_Open_Menu"},
+	{PAIN::UIAction::cutscene_Close_Menu, "cutscene_Close_Menu"},
+	{PAIN::UIAction::cutscene_Menu_Quit, "cutscene_Menu_Quit"},
+	{PAIN::UIAction::cutscene_Quit_Confirm, "cutscene_Quit_Confirm"},
+	{PAIN::UIAction::cutscene_Quit_Cancel, "cutscene_Quit_Cancel"},
+
+	{PAIN::UIAction::mainmenu_Quit_Confirm, "mainmenu_Quit_Confirm"},
+	{PAIN::UIAction::mainmenu_Quit_Cancel, "mainmenu_Quit_Cancel"},
+
+	{PAIN::UIAction::LoadScene, "LoadScene"}
 })
 
 REFL_TYPE(PAIN::UIRectTransform)

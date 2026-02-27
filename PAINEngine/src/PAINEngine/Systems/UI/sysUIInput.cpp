@@ -30,51 +30,33 @@ namespace PAIN {
 		case UIAction::game_Jump:              return "game_Jump";
 		case UIAction::game_Hide:              return "game_Hide";
 		case UIAction::game_Collect:           return "game_Collect";
-        case UIAction::game_Move:              return "game_Move";
+		case UIAction::game_Move:              return "game_Move";
+		case UIAction::game_End:               return "game_End";
 
 		case UIAction::pause_Resume:           return "pause_Resume";
-		case UIAction::pause_Restart:          return "pause_Restart";
-		case UIAction::pause_Settings:         return "pause_Settings";
-		case UIAction::pause_ReturnToMainMenu: return "pause_ReturnToMainMenu";
+		case UIAction::pause_Restart:         return "pause_Restart";
 
-		case UIAction::menu_StartGame:         return "menu_StartGame";
-		case UIAction::menu_OpenSettings:      return "menu_OpenSettings";
-		case UIAction::menu_HowToPlay:         return "menu_HowToPlay";
-		case UIAction::menu_Credits:           return "menu_Credits";
+		case UIAction::restart_Confirm:        return "restart_Confirm";
+		case UIAction::restart_Cancel:         return "restart_Cancel";
+
 		case UIAction::menu_QuitGame:          return "menu_QuitGame";
-
-		case UIAction::menu_OpenTutorial:      return "menu_OpenTutorial";
-		case UIAction::menu_BackToMain:        return "menu_BackToMain";
-
-        case UIAction::howtoplay_ArrowLeft:    return "howtoplay_ArrowLeft";
-        case UIAction::howtoplay_ArrowRight:   return "howtoplay_ArrowRight";
-
 		case UIAction::quit_Confirm:           return "quit_Confirm";
 		case UIAction::quit_Cancel:            return "quit_Cancel";
 
-        case UIAction::goto_Pause:             return "goto_Pause";
-        case UIAction::restart_Confirm:        return "restart_Confirm";
-		case UIAction::restart_Cancel:         return "restart_Cancel";
+		case UIAction::goto_Pause:             return "goto_Pause";
 
-        case UIAction::cutscene_Open_Menu:     return "cutscene_Open_Menu";
-        case UIAction::cutscene_Close_Menu:    return "cutscene_Close_Menu";
-        case UIAction::cutscene_Menu_Quit:     return "cutscene_Menu_Quit";
+		case UIAction::cutscene_Open_Menu:     return "cutscene_Open_Menu";
+		case UIAction::cutscene_Close_Menu:   return "cutscene_Close_Menu";
+		case UIAction::cutscene_Menu_Quit:    return "cutscene_Menu_Quit";
+		case UIAction::cutscene_Quit_Confirm: return "cutscene_Quit_Confirm";
+		case UIAction::cutscene_Quit_Cancel:   return "cutscene_Quit_Cancel";
 
-        case UIAction::cutscene_Quit_Confirm:  return "cutscene_Quit_Confirm";
-        case UIAction::cutscene_Quit_Cancel:   return "cutscene_Quit_Cancel";
+		case UIAction::mainmenu_Quit_Confirm:  return "mainmenu_Quit_Confirm";
+		case UIAction::mainmenu_Quit_Cancel:   return "mainmenu_Quit_Cancel";
 
-        case UIAction::mainmenu_Quit_Confirm:  return "mainmenu_Quit_Confirm";
-        case UIAction::mainmenu_Quit_Cancel:   return "mainmenu_Quit_Cancel";
-
-        case UIAction::credits_ArrowLeft:      return "credits_ArrowLeft";
-        case UIAction::credits_ArrowRight:     return "credits_ArrowRight";
-        
-        case UIAction::end_NextLevel:         return "end_NextLevel";
-
-        case UIAction::change_Level1:         return "change_Level1";
+		case UIAction::LoadScene:              return "LoadScene";
 
 		case UIAction::None:
-
 		default:                               return "None";
 		}
 	}
