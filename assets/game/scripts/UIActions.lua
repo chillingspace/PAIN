@@ -3,9 +3,9 @@
 local G = _G_root
 
 -- scene defaults
--- G.CurrentLevelName    = G.CurrentLevelName   or "game/scenes/Tutorial.scn"
+G.CurrentLevelName    = G.CurrentLevelName   or "game/scenes/Tutorial.scn"
 -- G.FirstLevelScene     = G.FirstLevelScene    or "game/scenes/Level1.scn"
--- G.TutorialSceneName   = G.TutorialSceneName  or "game/scenes/Tutorial.scn"
+G.TutorialSceneName   = G.TutorialSceneName  or "game/scenes/Tutorial.scn"
 -- G.MainMenuSceneName   = G.MainMenuSceneName  or "game/scenes/mainmenu.scn"
 -- G.HowToPlaySceneName  = G.HowToPlaySceneName or "game/scenes/howtoplay.scn"
 -- G.HowToPlaySceneName2 = G.HowToPlaySceneName2 or "game/scenes/howtoplay2.scn"
@@ -14,7 +14,7 @@ local G = _G_root
 -- G.CreditsSceneName2   = G.CreditsSceneName2   or "game/scenes/credits2.scn"
 
 -- -- Placeholder for next level
--- G.NextLevelName       = G.NextLevelName      or "game/scenes/Tutorial.scn"
+G.NextLevelName       = G.NextLevelName      or "game/scenes/Tutorial.scn"
 
 -- ==================== AUDIO-AWARE SCENE CHANGE ====================
 -- Helper to do scene transitions with audio fade-out
