@@ -492,6 +492,7 @@ namespace PAIN {
 			registerComponent<BoundingVolume>("BoundingVolume");
 			registerComponent<Audio::AudioSource>("AudioSource");
 			registerComponent<Scripts>("Scripts");
+			registerComponent<ParticleSystem>("ParticleSystem");
 			// AI Components
 			registerComponent<AI::Blackboard>("AIBlackboard");
 			registerComponent<AI::Controller>("AIController");
