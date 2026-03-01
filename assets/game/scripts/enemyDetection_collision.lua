@@ -8,6 +8,7 @@ registerUpdate(function(dt)
     if (not minimapTagged) and addTag then
         addTag(entityId, "minimap_visible")
         addTag(entityId, "minimap_danger")
+        addTag(entityId, "minimap_danger_collision")
         minimapTagged = true
     end
 

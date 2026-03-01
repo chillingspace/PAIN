@@ -897,9 +897,9 @@ namespace PAIN {
 
                 ImGui::TextDisabled("Recommended position respects minimap size.");
 
-                bool rotateWithPlayer = gs.minimap_rotate_with_player;
-                if (ImGui::Checkbox("Rotate With Player", &rotateWithPlayer)) {
-                    gs.minimap_rotate_with_player = rotateWithPlayer;
+                bool rotateWithCamera = gs.minimap_rotate_with_player;
+                if (ImGui::Checkbox("Rotate With Camera", &rotateWithCamera)) {
+                    gs.minimap_rotate_with_player = rotateWithCamera;
                 }
 
                 ImGui::SliderFloat("Minimap Background Alpha", &gs.minimap_background_alpha, 0.0f, 1.0f, "%.2f");

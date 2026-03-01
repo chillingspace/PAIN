@@ -1276,9 +1276,12 @@ namespace PAIN {
 
 						const float content_x = map_x;
 						const float content_y = map_y;
+						const float map_square = glm::min(map_w, map_h);
+						const float draw_x = content_x + (map_w - map_square) * 0.5f;
+						const float draw_y = content_y + (map_h - map_square) * 0.5f;
 
-						const float center_x_px = content_x + map_w * 0.5f;
-						const float center_y_px = content_y + map_h * 0.5f;
+						const float center_x_px = draw_x + map_square * 0.5f;
+						const float center_y_px = draw_y + map_square * 0.5f;
 
 						glm::vec2 minimap_pos(
 							(center_x_px / fbw) * 2.0f - 1.0f,
@@ -1330,7 +1333,9 @@ namespace PAIN {
 
 						glm::vec3 player_pos(0.0f);
 						glm::vec3 player_forward = glm::vec3(0.0f, 0.0f, -1.0f);
+						glm::vec3 view_forward = glm::vec3(0.0f, 0.0f, -1.0f);
 						bool has_player = false;
+						bool has_view_forward = false;
 
 						if (auto playerEntityOpt = metadata_service->getEntityByName("Player")) {
 							const entt::entity player = playerEntityOpt.value();
@@ -1350,7 +1355,16 @@ namespace PAIN {
 						if (!has_player) {
 							if (auto activeCam = scn_service->GetActiveCamera()) {
 								player_pos = activeCam->pos;
+								view_forward = activeCam->forward;
 								has_player = true;
+								has_view_forward = true;
+							}
+						}
+
+						if (!has_view_forward) {
+							if (auto activeCam = scn_service->GetActiveCamera()) {
+								view_forward = activeCam->forward;
+								has_view_forward = true;
 							}
 						}
 
@@ -1358,20 +1372,25 @@ namespace PAIN {
 							player_pos = glm::vec3(0.0f);
 						}
 
-						player_forward.y = 0.0f;
-						if (glm::dot(player_forward, player_forward) < 0.0001f) {
-							player_forward = glm::vec3(0.0f, 0.0f, -1.0f);
-						} else {
-							player_forward = glm::normalize(player_forward);
+						if (!has_view_forward) {
+							view_forward = player_forward;
 						}
 
-						glm::vec2 forward2(player_forward.x, player_forward.z);
+						view_forward.y = 0.0f;
+						if (glm::dot(view_forward, view_forward) < 0.0001f) {
+							view_forward = glm::vec3(0.0f, 0.0f, -1.0f);
+						} else {
+							view_forward = glm::normalize(view_forward);
+						}
+
+						// Use camera POV basis and invert once to match on-screen intuition.
+						glm::vec2 forward2(-view_forward.x, -view_forward.z);
 						if (glm::dot(forward2, forward2) < 0.0001f) {
 							forward2 = glm::vec2(0.0f, -1.0f);
 						} else {
 							forward2 = glm::normalize(forward2);
 						}
-						const glm::vec2 right2(forward2.y, -forward2.x);
+						const glm::vec2 right2(-forward2.y, forward2.x);
 
 						auto getEntityWorldPos = [&](entt::entity entity, glm::vec3& outPos) {
 							if (!registry.valid(entity)) {
@@ -1395,6 +1414,9 @@ namespace PAIN {
 							if (gs.minimap_rotate_with_player) {
 								local_x = glm::dot(delta, right2);
 								local_y = glm::dot(delta, forward2);
+								// Camera-space orientation correction (both axes)
+								local_x = -local_x;
+								local_y = -local_y;
 							}
 
 							const float radius = glm::max(1.0f, gs.minimap_radius);
@@ -1403,8 +1425,8 @@ namespace PAIN {
 							const float u_draw = clampToEdge ? glm::clamp(u, 0.0f, 1.0f) : u;
 							const float v_draw = clampToEdge ? glm::clamp(v, 0.0f, 1.0f) : v;
 
-							const float px = content_x + u_draw * map_w;
-							const float py = content_y + (1.0f - v_draw) * map_h;
+							const float px = draw_x + u_draw * map_square;
+							const float py = draw_y + (1.0f - v_draw) * map_square;
 
 							return glm::vec2(
 								(px / fbw) * 2.0f - 1.0f,
@@ -1462,9 +1484,19 @@ namespace PAIN {
 
 							float danger_radius = 1.0f;
 							if (metadata_service->hasTag(entity, "minimap_light_cone")) {
-								danger_radius = 9.0f;
+								const float maxDistance = 9.0f;
+								const float coneAngleDeg = 32.0f;
+								const float heightDelta = glm::abs(pos.y - player_pos.y);
+								const float coneRadius = glm::tan(glm::radians(coneAngleDeg)) * heightDelta;
+								const float sphereRadius =
+									heightDelta >= maxDistance
+									? 0.0f
+									: std::sqrt(maxDistance * maxDistance - heightDelta * heightDelta);
+								danger_radius = glm::max(0.25f, glm::min(coneRadius, sphereRadius));
+							} else if (metadata_service->hasTag(entity, "minimap_danger_collision")) {
+								danger_radius = 0.5f;
 							} else if (auto* lt = registry.try_get<LocalTransform>(entity)) {
-								danger_radius = glm::max(1.0f, glm::max(lt->scale.x, lt->scale.z));
+								danger_radius = glm::max(0.25f, glm::max(lt->scale.x, lt->scale.z));
 							}
 
 							const glm::vec3 delta3 = pos - player_pos;
@@ -1474,7 +1506,7 @@ namespace PAIN {
 							}
 
 							const glm::vec2 centerNdc = worldToMinimapNdc(pos, false);
-							const float radiusPx = (danger_radius / (2.0f * glm::max(1.0f, gs.minimap_radius))) * map_w;
+							const float radiusPx = (danger_radius / (2.0f * glm::max(1.0f, gs.minimap_radius))) * map_square;
 							const glm::vec2 radiusNdc((radiusPx / fbw) * 2.0f, (radiusPx / fbh) * 2.0f);
 
 							rendererService->w_renderer->DebugPass2DCircle(
@@ -1495,7 +1527,7 @@ namespace PAIN {
 
 						glm::vec2 arrow_dir(0.0f, -1.0f);
 						if (!gs.minimap_rotate_with_player) {
-							arrow_dir = glm::vec2(player_forward.x, player_forward.z);
+							arrow_dir = -forward2;
 							if (glm::dot(arrow_dir, arrow_dir) < 0.0001f) {
 								arrow_dir = glm::vec2(0.0f, -1.0f);
 							} else {
