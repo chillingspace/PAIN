@@ -1231,44 +1231,102 @@ namespace PAIN {
 						float fbw = glm::max(1.0f, framebuffer.x);
 						float fbh = glm::max(1.0f, framebuffer.y);
 
-						const float map_w = glm::clamp(gs.minimap_size_px.x, 64.0f, fbw);
-						const float map_h = glm::clamp(gs.minimap_size_px.y, 64.0f, fbh);
+						const float border_thickness = glm::max(0.0f, gs.minimap_border_thickness);
 
-						float map_x = gs.minimap_margin_px.x;
-						float map_y = gs.minimap_margin_px.y;
-						if (gs.minimap_anchor_bottom_right) {
-							map_x = fbw - map_w - gs.minimap_margin_px.x;
-							map_y = fbh - map_h - gs.minimap_margin_px.y;
+						const float map_w = glm::clamp(gs.minimap_size_px.x, 32.0f, fbw);
+						const float map_h = glm::clamp(gs.minimap_size_px.y, 32.0f, fbh);
+						const float outer_w = map_w;
+						const float outer_h = map_h;
+
+						float map_x = gs.minimap_pos_px.x;
+						float map_y = gs.minimap_pos_px.y;
+
+						if (!gs.minimap_override_position) {
+							switch (gs.minimap_recommended_position) {
+							case GraphicsSettings::MINIMAP_RECOMMENDED_POSITION::TOP_LEFT:
+								map_x = 20.0f;
+								map_y = 20.0f;
+								break;
+							case GraphicsSettings::MINIMAP_RECOMMENDED_POSITION::TOP_RIGHT:
+								map_x = fbw - outer_w - 20.0f;
+								map_y = 20.0f;
+								break;
+							case GraphicsSettings::MINIMAP_RECOMMENDED_POSITION::BOTTOM_LEFT:
+								map_x = 20.0f;
+								map_y = fbh - outer_h - 20.0f;
+								break;
+							case GraphicsSettings::MINIMAP_RECOMMENDED_POSITION::BOTTOM_RIGHT:
+								map_x = fbw - outer_w - 20.0f;
+								map_y = fbh - outer_h - 20.0f;
+								break;
+							case GraphicsSettings::MINIMAP_RECOMMENDED_POSITION::TOP_MIDDLE:
+								map_x = (fbw - outer_w) * 0.5f;
+								map_y = 20.0f;
+								break;
+							case GraphicsSettings::MINIMAP_RECOMMENDED_POSITION::BOTTOM_MIDDLE:
+							default:
+								map_x = (fbw - outer_w) * 0.5f;
+								map_y = fbh - outer_h - 20.0f;
+								break;
+							}
 						}
 
-						map_x = glm::clamp(map_x, 0.0f, fbw - map_w);
-						map_y = glm::clamp(map_y, 0.0f, fbh - map_h);
+						map_x = glm::clamp(map_x, 0.0f, glm::max(0.0f, fbw - outer_w));
+						map_y = glm::clamp(map_y, 0.0f, glm::max(0.0f, fbh - outer_h));
 
-						const float center_x_px = map_x + map_w * 0.5f;
-						const float center_y_px = map_y + map_h * 0.5f;
+						const float content_x = map_x;
+						const float content_y = map_y;
+
+						const float center_x_px = content_x + map_w * 0.5f;
+						const float center_y_px = content_y + map_h * 0.5f;
 
 						glm::vec2 minimap_pos(
 							(center_x_px / fbw) * 2.0f - 1.0f,
 							1.0f - (center_y_px / fbh) * 2.0f);
 
 						glm::vec2 minimap_scale(
-							(2.0f * map_w / fbh),
-							(2.0f * map_h / fbh));
+							(map_w / fbh),
+							(map_h / fbh));
 
 						rendererService->w_renderer->Render2DTexture(minimapTexture, minimap_pos,
 							minimap_scale);
 
-						const glm::vec2 border_min(
-							(map_x / fbw) * 2.0f - 1.0f,
-							1.0f - ((map_y + map_h) / fbh) * 2.0f);
-						const glm::vec2 border_max(
-							((map_x + map_w) / fbw) * 2.0f - 1.0f,
-							1.0f - (map_y / fbh) * 2.0f);
+						auto toNdc = [&](float px, float py) {
+							return glm::vec2(
+								(px / fbw) * 2.0f - 1.0f,
+								1.0f - (py / fbh) * 2.0f);
+						};
 
-						rendererService->w_renderer->DebugPass2D(
-							border_min,
-							border_max,
-							gs.minimap_border_color);
+						const glm::vec4 border_color(
+							gs.minimap_border_color.r,
+							gs.minimap_border_color.g,
+							gs.minimap_border_color.b,
+							glm::max(0.2f, gs.minimap_border_color.a));
+
+						const int border_layers = static_cast<int>(glm::round(border_thickness));
+						if (border_layers > 0) {
+							for (int i = 0; i < border_layers; ++i) {
+								const float inset = static_cast<float>(i) + 0.5f;
+								const float x0 = map_x + inset;
+								const float y0 = map_y + inset;
+								const float x1 = map_x + outer_w - inset;
+								const float y1 = map_y + outer_h - inset;
+
+								if (x1 <= x0 || y1 <= y0) {
+									break;
+								}
+
+								const glm::vec2 tl = toNdc(x0, y0);
+								const glm::vec2 tr = toNdc(x1, y0);
+								const glm::vec2 br = toNdc(x1, y1);
+								const glm::vec2 bl = toNdc(x0, y1);
+
+								rendererService->w_renderer->DebugPass2DLine(tl, tr, border_color);
+								rendererService->w_renderer->DebugPass2DLine(tr, br, border_color);
+								rendererService->w_renderer->DebugPass2DLine(br, bl, border_color);
+								rendererService->w_renderer->DebugPass2DLine(bl, tl, border_color);
+							}
+						}
 
 						glm::vec3 player_pos(0.0f);
 						glm::vec3 player_forward = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -1330,7 +1388,7 @@ namespace PAIN {
 							return false;
 						};
 
-						auto worldToMinimapNdc = [&](const glm::vec3& worldPos) {
+						auto worldToMinimapNdc = [&](const glm::vec3& worldPos, bool clampToEdge) {
 							const glm::vec2 delta(worldPos.x - player_pos.x, worldPos.z - player_pos.z);
 							float local_x = delta.x;
 							float local_y = -delta.y;
@@ -1342,9 +1400,11 @@ namespace PAIN {
 							const float radius = glm::max(1.0f, gs.minimap_radius);
 							const float u = 0.5f + (local_x / (2.0f * radius));
 							const float v = 0.5f + (local_y / (2.0f * radius));
+							const float u_draw = clampToEdge ? glm::clamp(u, 0.0f, 1.0f) : u;
+							const float v_draw = clampToEdge ? glm::clamp(v, 0.0f, 1.0f) : v;
 
-							const float px = map_x + glm::clamp(u, 0.0f, 1.0f) * map_w;
-							const float py = map_y + (1.0f - glm::clamp(v, 0.0f, 1.0f)) * map_h;
+							const float px = content_x + u_draw * map_w;
+							const float py = content_y + (1.0f - v_draw) * map_h;
 
 							return glm::vec2(
 								(px / fbw) * 2.0f - 1.0f,
@@ -1352,7 +1412,7 @@ namespace PAIN {
 						};
 
 						auto drawDot = [&](const glm::vec3& pos, float radiusPx, const glm::vec4& color) {
-							const glm::vec2 centerNdc = worldToMinimapNdc(pos);
+							const glm::vec2 centerNdc = worldToMinimapNdc(pos, true);
 							const glm::vec2 radiusNdc(
 								(radiusPx / fbw) * 2.0f,
 								(radiusPx / fbh) * 2.0f);
@@ -1407,7 +1467,13 @@ namespace PAIN {
 								danger_radius = glm::max(1.0f, glm::max(lt->scale.x, lt->scale.z));
 							}
 
-							const glm::vec2 centerNdc = worldToMinimapNdc(pos);
+							const glm::vec3 delta3 = pos - player_pos;
+							const float dist_xz = glm::length(glm::vec2(delta3.x, delta3.z));
+							if (dist_xz > glm::max(1.0f, gs.minimap_radius) + danger_radius) {
+								continue;
+							}
+
+							const glm::vec2 centerNdc = worldToMinimapNdc(pos, false);
 							const float radiusPx = (danger_radius / (2.0f * glm::max(1.0f, gs.minimap_radius))) * map_w;
 							const glm::vec2 radiusNdc((radiusPx / fbw) * 2.0f, (radiusPx / fbh) * 2.0f);
 
@@ -1419,8 +1485,8 @@ namespace PAIN {
 						}
 
 						if (has_nearest_objective) {
-							const glm::vec2 p0 = worldToMinimapNdc(player_pos);
-							const glm::vec2 p1 = worldToMinimapNdc(nearest_objective_pos);
+							const glm::vec2 p0 = worldToMinimapNdc(player_pos, true);
+							const glm::vec2 p1 = worldToMinimapNdc(nearest_objective_pos, true);
 							rendererService->w_renderer->DebugPass2DLine(
 								p0,
 								p1,

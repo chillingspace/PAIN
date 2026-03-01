@@ -135,10 +135,19 @@ namespace PAIN {
 
 		// minimap
 		bool minimap_enabled = false;
+		enum MINIMAP_RECOMMENDED_POSITION {
+			TOP_LEFT = 0,
+			TOP_RIGHT,
+			BOTTOM_LEFT,
+			BOTTOM_RIGHT,
+			TOP_MIDDLE,
+			BOTTOM_MIDDLE,
+		};
 		float minimap_radius = 15.0f;
 		glm::vec2 minimap_size_px = glm::vec2(200.0f, 200.0f);
-		glm::vec2 minimap_margin_px = glm::vec2(20.0f, 20.0f);
-		bool minimap_anchor_bottom_right = true;
+		glm::vec2 minimap_pos_px = glm::vec2(20.0f, 20.0f);
+		bool minimap_override_position = false;
+		MINIMAP_RECOMMENDED_POSITION minimap_recommended_position = MINIMAP_RECOMMENDED_POSITION::BOTTOM_RIGHT;
 		bool minimap_rotate_with_player = true;
 		float minimap_background_alpha = 0.5f;
 		float minimap_border_thickness = 2.0f;
