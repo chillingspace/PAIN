@@ -662,6 +662,38 @@ namespace PAIN {
 								   pp2_texture, 0);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+			// minimap framebuffer
+			const glm::vec2 minimap_size = GraphicsSettings::get().minimap_size_px;
+			minimap_width = std::max(64, static_cast<int>(minimap_size.x));
+			minimap_height = std::max(64, static_cast<int>(minimap_size.y));
+
+			glGenFramebuffers(1, &minimap_fbo);
+			glBindFramebuffer(GL_FRAMEBUFFER, minimap_fbo);
+
+			glGenTextures(1, &minimap_texture);
+			glBindTexture(GL_TEXTURE_2D, minimap_texture);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, minimap_width, minimap_height, 0,
+				GL_RGBA, GL_FLOAT, nullptr);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+				minimap_texture, 0);
+
+			glGenRenderbuffers(1, &minimap_rbo);
+			glBindRenderbuffer(GL_RENDERBUFFER, minimap_rbo);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, minimap_width,
+				minimap_height);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+				GL_RENDERBUFFER, minimap_rbo);
+
+			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+				PN_CORE_ERROR("Minimap framebuffer is incomplete");
+			}
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
 
 		// === VAO/VBO For Final Passthrough Texture ===
@@ -1409,6 +1441,66 @@ namespace PAIN {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
+	void WindowsRenderer::BeginMinimapPass(const glm::mat4& view,
+		const glm::mat4& proj) {
+		(void)view;
+		(void)proj;
+
+		const glm::vec2 minimap_size = GraphicsSettings::get().minimap_size_px;
+		const int target_width = std::max(64, static_cast<int>(minimap_size.x));
+		const int target_height = std::max(64, static_cast<int>(minimap_size.y));
+
+		if (target_width != minimap_width || target_height != minimap_height) {
+			minimap_width = target_width;
+			minimap_height = target_height;
+
+			if (minimap_texture != 0) {
+				glDeleteTextures(1, &minimap_texture);
+				minimap_texture = 0;
+			}
+
+			if (minimap_rbo != 0) {
+				glDeleteRenderbuffers(1, &minimap_rbo);
+				minimap_rbo = 0;
+			}
+
+			glBindFramebuffer(GL_FRAMEBUFFER, minimap_fbo);
+
+			glGenTextures(1, &minimap_texture);
+			glBindTexture(GL_TEXTURE_2D, minimap_texture);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, minimap_width, minimap_height, 0,
+				GL_RGBA, GL_FLOAT, nullptr);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+				minimap_texture, 0);
+
+			glGenRenderbuffers(1, &minimap_rbo);
+			glBindRenderbuffer(GL_RENDERBUFFER, minimap_rbo);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, minimap_width,
+				minimap_height);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+				GL_RENDERBUFFER, minimap_rbo);
+		}
+
+		glBindFramebuffer(GL_FRAMEBUFFER, minimap_fbo);
+		glViewport(0, 0, minimap_width, minimap_height);
+		glEnable(GL_DEPTH_TEST);
+
+		const float bg_alpha = glm::clamp(GraphicsSettings::get().minimap_background_alpha,
+			0.0f, 1.0f);
+		glClearColor(0.02f, 0.02f, 0.02f, bg_alpha);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	}
+
+	void WindowsRenderer::EndMinimapPass() {
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, winWidth, winHeight);
+	}
+
 	void WindowsRenderer::ReflectionPass(const ModelRenderer& component) {
 		// if (m.materials[0].reflection_type ==
 		// m.materials[0].REFLECTION_TYPES::NONE) { 	return;
@@ -1744,7 +1836,7 @@ namespace PAIN {
 
 	// DebugPass2D - Draw 2D rectangle outline for UI debugging
 	void WindowsRenderer::DebugPass2D(const glm::vec2& min_p, const glm::vec2& max_p,
-									  const glm::vec4& color) {
+							  const glm::vec4& color) {
 		if (!debug_VAO || !debug_shader)
 			return;
 
@@ -1785,6 +1877,72 @@ namespace PAIN {
 		debug_shader->SetUniform("u_P", ortho_proj);
 
 		glDrawArrays(GL_LINES, 0, 8);
+
+		glBindVertexArray(0);
+	}
+
+	void WindowsRenderer::DebugPass2DLine(const glm::vec2& start_p,
+		const glm::vec2& end_p,
+		const glm::vec4& color) {
+		if (!debug_VAO || !debug_shader)
+			return;
+
+		const std::array<float, 14> verts = {
+			start_p.x, start_p.y, 0.0f, color.r, color.g, color.b, color.a,
+			end_p.x, end_p.y, 0.0f, color.r, color.g, color.b, color.a,
+		};
+
+		glBindVertexArray(debug_VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
+		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(),
+			GL_DYNAMIC_DRAW);
+
+		debug_shader->Bind();
+		glm::mat4 ortho_proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
+		debug_shader->SetUniform("u_V", glm::mat4(1.0f));
+		debug_shader->SetUniform("u_P", ortho_proj);
+
+		glDrawArrays(GL_LINES, 0, 2);
+
+		glBindVertexArray(0);
+	}
+
+	void WindowsRenderer::DebugPass2DCircle(const glm::vec2& center_p,
+		const glm::vec2& radius_ndc,
+		const glm::vec4& color,
+		int segments) {
+		if (!debug_VAO || !debug_shader || segments < 8)
+			return;
+
+		std::vector<float> verts;
+		verts.reserve(static_cast<size_t>(segments) * 14);
+
+		for (int i = 0; i < segments; ++i) {
+			const float a0 = (static_cast<float>(i) / static_cast<float>(segments)) * glm::two_pi<float>();
+			const float a1 = (static_cast<float>(i + 1) / static_cast<float>(segments)) * glm::two_pi<float>();
+
+			const glm::vec2 p0(
+				center_p.x + std::cos(a0) * radius_ndc.x,
+				center_p.y + std::sin(a0) * radius_ndc.y);
+			const glm::vec2 p1(
+				center_p.x + std::cos(a1) * radius_ndc.x,
+				center_p.y + std::sin(a1) * radius_ndc.y);
+
+			verts.insert(verts.end(), {p0.x, p0.y, 0.0f, color.r, color.g, color.b, color.a});
+			verts.insert(verts.end(), {p1.x, p1.y, 0.0f, color.r, color.g, color.b, color.a});
+		}
+
+		glBindVertexArray(debug_VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
+		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(),
+			GL_DYNAMIC_DRAW);
+
+		debug_shader->Bind();
+		glm::mat4 ortho_proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
+		debug_shader->SetUniform("u_V", glm::mat4(1.0f));
+		debug_shader->SetUniform("u_P", ortho_proj);
+
+		glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(verts.size() / 7));
 
 		glBindVertexArray(0);
 	}

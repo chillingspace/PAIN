@@ -11,6 +11,10 @@
 
 #pragma once
 
+#include <unordered_map>
+#include <vector>
+
+#include <glm/glm.hpp>
 
 namespace PAIN {
 	class GraphicsSettings {
@@ -128,5 +132,17 @@ namespace PAIN {
 
 		// optimisation
 		bool use_instanced_rendering = false;
+
+		// minimap
+		bool minimap_enabled = false;
+		float minimap_radius = 15.0f;
+		glm::vec2 minimap_size_px = glm::vec2(200.0f, 200.0f);
+		glm::vec2 minimap_margin_px = glm::vec2(20.0f, 20.0f);
+		bool minimap_anchor_bottom_right = true;
+		bool minimap_rotate_with_player = true;
+		float minimap_background_alpha = 0.5f;
+		float minimap_border_thickness = 2.0f;
+		glm::vec4 minimap_border_color = glm::vec4(1.0f);
+		float minimap_camera_height = 30.0f;
 	};
 }

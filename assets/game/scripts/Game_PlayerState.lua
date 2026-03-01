@@ -216,6 +216,11 @@ function S.init(player)
 
     local oldPlayer = S.player
     S.player = player
+
+    if addTag and S.player then
+        addTag(S.player, "minimap_visible")
+        addTag(S.player, "minimap_player")
+    end
     
     -- reset state if player changed, game ended, or first load
     local shouldReset = (oldPlayer ~= player) or S.gameEnded or S.gameWon

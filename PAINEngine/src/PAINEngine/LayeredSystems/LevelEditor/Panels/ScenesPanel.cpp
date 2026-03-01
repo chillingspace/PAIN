@@ -847,6 +847,40 @@ namespace PAIN {
                         gs.DEBUG_PBR_MAP_TYPE = static_cast<GraphicsSettings::DEBUG_PBR_MAP_TYPES>(selected_pbr_index);
                     }
                 }
+
+            }
+
+            void ScenesPanel::drawMinimapSettingsPanel() {
+                auto& gs = GraphicsSettings::get();
+
+                bool minimapEnabled = gs.minimap_enabled;
+                if (ImGui::Checkbox("Enable Minimap", &minimapEnabled)) {
+                    gs.minimap_enabled = minimapEnabled;
+                }
+
+                ImGui::BeginDisabled(!gs.minimap_enabled);
+
+                ImGui::DragFloat("Minimap Radius", &gs.minimap_radius, 0.25f, 2.0f, 100.0f, "%.1f");
+                ImGui::DragFloat("Minimap Camera Height", &gs.minimap_camera_height, 0.25f, 2.0f, 200.0f, "%.1f");
+
+                ImGui::DragFloat2("Minimap Size (px)", glm::value_ptr(gs.minimap_size_px), 1.0f, 64.0f, 1024.0f, "%.0f");
+                ImGui::DragFloat2("Minimap Margin (px)", glm::value_ptr(gs.minimap_margin_px), 1.0f, 0.0f, 500.0f, "%.0f");
+
+                bool anchorBottomRight = gs.minimap_anchor_bottom_right;
+                if (ImGui::Checkbox("Anchor Bottom Right", &anchorBottomRight)) {
+                    gs.minimap_anchor_bottom_right = anchorBottomRight;
+                }
+
+                bool rotateWithPlayer = gs.minimap_rotate_with_player;
+                if (ImGui::Checkbox("Rotate With Player", &rotateWithPlayer)) {
+                    gs.minimap_rotate_with_player = rotateWithPlayer;
+                }
+
+                ImGui::SliderFloat("Minimap Background Alpha", &gs.minimap_background_alpha, 0.0f, 1.0f, "%.2f");
+                ImGui::DragFloat("Minimap Border Thickness", &gs.minimap_border_thickness, 0.1f, 0.0f, 10.0f, "%.1f");
+                ImGui::ColorEdit4("Minimap Border Color", glm::value_ptr(gs.minimap_border_color));
+
+                ImGui::EndDisabled();
             }
 
             void ScenesPanel::drawFloorSettingsPanel() {
@@ -1544,6 +1578,10 @@ namespace PAIN {
                 //Render graphics settings
                 if (ImGui::CollapsingHeader("Graphics Settings")) {
                     drawGraphicsSettingsPanel();
+                }
+
+                if (ImGui::CollapsingHeader("Minimap Settings")) {
+                    drawMinimapSettingsPanel();
                 }
 
                 //Render Floor settings

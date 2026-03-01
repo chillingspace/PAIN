@@ -111,6 +111,8 @@ namespace PAIN {
 		void DrawGeometry(std::shared_ptr<Scene::SceneManager> scene,
 						  ModelRenderer& component, const glm::mat4& M);
 		void EndGeometryPass();
+		void BeginMinimapPass(const glm::mat4& view, const glm::mat4& proj);
+		void EndMinimapPass();
 
 		void ReflectionPass(const ModelRenderer& component);
 		void LightingPass(std::shared_ptr<Scene::SceneManager> scene,
@@ -122,6 +124,10 @@ namespace PAIN {
 						  std::shared_ptr<Scene::SceneManager> scene);
 		void DebugPass2D(const glm::vec2& min_p, const glm::vec2& max_p,
 						 const glm::vec4& color);
+		void DebugPass2DLine(const glm::vec2& start_p, const glm::vec2& end_p,
+							const glm::vec4& color);
+		void DebugPass2DCircle(const glm::vec2& center_p, const glm::vec2& radius_ndc,
+							  const glm::vec4& color, int segments = 32);
 		void PostProcessPass();
 
 		void Render2DTexture(GLuint texture_id, const glm::vec2& pos,
@@ -139,6 +145,10 @@ namespace PAIN {
 			return final_texture;
 		}
 
+		unsigned int getMinimapTexture() const {
+			return minimap_texture;
+		}
+
 		static constexpr int MAX_VERTICES = 1000000;
 		static constexpr int MAX_INDICES = MAX_VERTICES;
 
@@ -154,6 +164,8 @@ namespace PAIN {
 		// unsigned int shadow_fbo = 0;
 		unsigned int final_fbo = 0;
 		unsigned int final_rbo = 0;
+		unsigned int minimap_fbo = 0;
+		unsigned int minimap_rbo = 0;
 
 		unsigned int pp_fbo = 0;  // post-processing framebuffer (for ping-pong)
 		unsigned int pp2_fbo = 0; // post-processing framebuffer 2 (for ping-pong)
@@ -186,6 +198,9 @@ namespace PAIN {
 		unsigned int final_texture = 0; // for imgui/post-processing/display
 		unsigned int pp_texture = 0;	// for ping-pong for post-processing
 		unsigned int pp2_texture = 0;	// for ping-pong for post-processing (bloom etc)
+		unsigned int minimap_texture = 0;
+		int minimap_width = 0;
+		int minimap_height = 0;
 
 		// === Debug Buffers ===
 		unsigned int debug_VAO = 0;
@@ -206,15 +221,16 @@ namespace PAIN {
 		std::shared_ptr<Assets::Shader> bloom_blend_shader = nullptr;
 
 		// for easy access to clear memory
-		std::array<unsigned int*, 4> fbos{
+		std::array<unsigned int*, 5> fbos{
 			&ds_fbo,
 			//&shadow_fbo,
 			&final_fbo,
 			&pp_fbo,
 			&pp2_fbo,
+			&minimap_fbo,
 		};
-		std::array<unsigned int*, 2> rbos{&ds_rbo, &final_rbo};
-		std::array<unsigned int*, 8> texs{
+		std::array<unsigned int*, 3> rbos{&ds_rbo, &final_rbo, &minimap_rbo};
+		std::array<unsigned int*, 9> texs{
 			&pos_texture,
 			&col_texture,
 			&norm_texture,
@@ -224,6 +240,7 @@ namespace PAIN {
 			&final_texture,
 			&pp_texture,
 			&pp2_texture,
+			&minimap_texture,
 		};
 
 		std::shared_ptr<Services> services;

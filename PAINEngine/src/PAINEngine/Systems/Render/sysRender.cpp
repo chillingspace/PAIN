@@ -261,6 +261,11 @@ namespace PAIN {
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after geometry pass: {}", err);
 				}
+				minimapPass(registry);
+				err = glGetError();
+				if (err != GL_NO_ERROR) {
+					PN_CORE_ERROR("OpenGL err after minimap pass: {}", err);
+				}
 				reflectionPass(registry);
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
@@ -437,6 +442,32 @@ namespace PAIN {
 			}
 
 			rendererService->w_renderer->EndGeometryPass();
+		}
+
+		void System::minimapPass(entt::registry& registry) {
+			(void)registry;
+
+			auto& gs = GraphicsSettings::get();
+			if (!gs.minimap_enabled) {
+				return;
+			}
+
+			auto rendererService = services.lock()->get<sRenderer>();
+			if (!rendererService || !rendererService->w_renderer) {
+				return;
+			}
+
+			auto svc = services.lock();
+			if (!svc) {
+				return;
+			}
+
+			if (!svc->get<Scene::SceneManager>() || !svc->get<MetaData::Service>()) {
+				return;
+			}
+
+			rendererService->w_renderer->BeginMinimapPass(glm::mat4(1.0f), glm::mat4(1.0f));
+			rendererService->w_renderer->EndMinimapPass();
 		}
 
 		void System::reflectionPass(entt::registry& registry) {
@@ -1188,6 +1219,240 @@ namespace PAIN {
 
 					// Draw debug rectangle
 					rendererService->w_renderer->DebugPass2D(rect_min, rect_max, glm::vec4(1.0f, 0.0f, 1.0f, 1.0f)); // Magenta
+				}
+			}
+
+			if (gs.minimap_enabled) {
+				GLuint minimapTexture = rendererService->w_renderer->getMinimapTexture();
+				if (minimapTexture != 0) {
+					auto window = services.lock()->get<Window::Window>();
+					if (window) {
+						glm::vec2 framebuffer = window->getFrameBuffer();
+						float fbw = glm::max(1.0f, framebuffer.x);
+						float fbh = glm::max(1.0f, framebuffer.y);
+
+						const float map_w = glm::clamp(gs.minimap_size_px.x, 64.0f, fbw);
+						const float map_h = glm::clamp(gs.minimap_size_px.y, 64.0f, fbh);
+
+						float map_x = gs.minimap_margin_px.x;
+						float map_y = gs.minimap_margin_px.y;
+						if (gs.minimap_anchor_bottom_right) {
+							map_x = fbw - map_w - gs.minimap_margin_px.x;
+							map_y = fbh - map_h - gs.minimap_margin_px.y;
+						}
+
+						map_x = glm::clamp(map_x, 0.0f, fbw - map_w);
+						map_y = glm::clamp(map_y, 0.0f, fbh - map_h);
+
+						const float center_x_px = map_x + map_w * 0.5f;
+						const float center_y_px = map_y + map_h * 0.5f;
+
+						glm::vec2 minimap_pos(
+							(center_x_px / fbw) * 2.0f - 1.0f,
+							1.0f - (center_y_px / fbh) * 2.0f);
+
+						glm::vec2 minimap_scale(
+							(2.0f * map_w / fbh),
+							(2.0f * map_h / fbh));
+
+						rendererService->w_renderer->Render2DTexture(minimapTexture, minimap_pos,
+							minimap_scale);
+
+						const glm::vec2 border_min(
+							(map_x / fbw) * 2.0f - 1.0f,
+							1.0f - ((map_y + map_h) / fbh) * 2.0f);
+						const glm::vec2 border_max(
+							((map_x + map_w) / fbw) * 2.0f - 1.0f,
+							1.0f - (map_y / fbh) * 2.0f);
+
+						rendererService->w_renderer->DebugPass2D(
+							border_min,
+							border_max,
+							gs.minimap_border_color);
+
+						glm::vec3 player_pos(0.0f);
+						glm::vec3 player_forward = glm::vec3(0.0f, 0.0f, -1.0f);
+						bool has_player = false;
+
+						if (auto playerEntityOpt = metadata_service->getEntityByName("Player")) {
+							const entt::entity player = playerEntityOpt.value();
+							if (registry.valid(player)) {
+								if (auto* wt = registry.try_get<WorldTransform>(player)) {
+									player_pos = glm::vec3(wt->matrix[3]);
+									has_player = true;
+								}
+								if (auto* lt = registry.try_get<LocalTransform>(player)) {
+									player_pos = lt->position;
+									player_forward = lt->rotation * glm::vec3(0.0f, 0.0f, -1.0f);
+									has_player = true;
+								}
+							}
+						}
+
+						if (!has_player) {
+							if (auto activeCam = scn_service->GetActiveCamera()) {
+								player_pos = activeCam->pos;
+								has_player = true;
+							}
+						}
+
+						if (!has_player) {
+							player_pos = glm::vec3(0.0f);
+						}
+
+						player_forward.y = 0.0f;
+						if (glm::dot(player_forward, player_forward) < 0.0001f) {
+							player_forward = glm::vec3(0.0f, 0.0f, -1.0f);
+						} else {
+							player_forward = glm::normalize(player_forward);
+						}
+
+						glm::vec2 forward2(player_forward.x, player_forward.z);
+						if (glm::dot(forward2, forward2) < 0.0001f) {
+							forward2 = glm::vec2(0.0f, -1.0f);
+						} else {
+							forward2 = glm::normalize(forward2);
+						}
+						const glm::vec2 right2(forward2.y, -forward2.x);
+
+						auto getEntityWorldPos = [&](entt::entity entity, glm::vec3& outPos) {
+							if (!registry.valid(entity)) {
+								return false;
+							}
+							if (auto* wt = registry.try_get<WorldTransform>(entity)) {
+								outPos = glm::vec3(wt->matrix[3]);
+								return true;
+							}
+							if (auto* lt = registry.try_get<LocalTransform>(entity)) {
+								outPos = lt->position;
+								return true;
+							}
+							return false;
+						};
+
+						auto worldToMinimapNdc = [&](const glm::vec3& worldPos) {
+							const glm::vec2 delta(worldPos.x - player_pos.x, worldPos.z - player_pos.z);
+							float local_x = delta.x;
+							float local_y = -delta.y;
+							if (gs.minimap_rotate_with_player) {
+								local_x = glm::dot(delta, right2);
+								local_y = glm::dot(delta, forward2);
+							}
+
+							const float radius = glm::max(1.0f, gs.minimap_radius);
+							const float u = 0.5f + (local_x / (2.0f * radius));
+							const float v = 0.5f + (local_y / (2.0f * radius));
+
+							const float px = map_x + glm::clamp(u, 0.0f, 1.0f) * map_w;
+							const float py = map_y + (1.0f - glm::clamp(v, 0.0f, 1.0f)) * map_h;
+
+							return glm::vec2(
+								(px / fbw) * 2.0f - 1.0f,
+								1.0f - (py / fbh) * 2.0f);
+						};
+
+						auto drawDot = [&](const glm::vec3& pos, float radiusPx, const glm::vec4& color) {
+							const glm::vec2 centerNdc = worldToMinimapNdc(pos);
+							const glm::vec2 radiusNdc(
+								(radiusPx / fbw) * 2.0f,
+								(radiusPx / fbh) * 2.0f);
+							rendererService->w_renderer->DebugPass2DCircle(centerNdc, radiusNdc, color, 18);
+						};
+
+						glm::vec3 nearest_objective_pos(0.0f);
+						bool has_nearest_objective = false;
+						float nearest_dist2 = std::numeric_limits<float>::max();
+
+						for (entt::entity entity : metadata_service->getEntitiesByTag("minimap_visible")) {
+							glm::vec3 pos(0.0f);
+							if (!getEntityWorldPos(entity, pos)) {
+								continue;
+							}
+
+							glm::vec4 color(0.75f, 0.75f, 0.75f, 1.0f);
+							float dotRadius = 3.0f;
+
+							if (metadata_service->hasTag(entity, "minimap_player")) {
+								color = glm::vec4(0.2f, 1.0f, 0.2f, 1.0f);
+								dotRadius = 5.0f;
+							} else if (metadata_service->hasTag(entity, "minimap_item")) {
+								color = glm::vec4(1.0f, 0.84f, 0.1f, 1.0f);
+								dotRadius = 4.0f;
+							} else if (metadata_service->hasTag(entity, "minimap_objective")) {
+								color = glm::vec4(0.2f, 0.6f, 1.0f, 1.0f);
+								dotRadius = 4.0f;
+
+								const glm::vec3 delta = pos - player_pos;
+								const float dist2 = glm::dot(delta, delta);
+								if (dist2 < nearest_dist2) {
+									nearest_dist2 = dist2;
+									nearest_objective_pos = pos;
+									has_nearest_objective = true;
+								}
+							}
+
+							drawDot(pos, dotRadius, color);
+						}
+
+						for (entt::entity entity : metadata_service->getEntitiesByTag("minimap_danger")) {
+							glm::vec3 pos(0.0f);
+							if (!getEntityWorldPos(entity, pos)) {
+								continue;
+							}
+
+							float danger_radius = 1.0f;
+							if (metadata_service->hasTag(entity, "minimap_light_cone")) {
+								danger_radius = 9.0f;
+							} else if (auto* lt = registry.try_get<LocalTransform>(entity)) {
+								danger_radius = glm::max(1.0f, glm::max(lt->scale.x, lt->scale.z));
+							}
+
+							const glm::vec2 centerNdc = worldToMinimapNdc(pos);
+							const float radiusPx = (danger_radius / (2.0f * glm::max(1.0f, gs.minimap_radius))) * map_w;
+							const glm::vec2 radiusNdc((radiusPx / fbw) * 2.0f, (radiusPx / fbh) * 2.0f);
+
+							rendererService->w_renderer->DebugPass2DCircle(
+								centerNdc,
+								radiusNdc,
+								glm::vec4(1.0f, 0.15f, 0.15f, 1.0f),
+								24);
+						}
+
+						if (has_nearest_objective) {
+							const glm::vec2 p0 = worldToMinimapNdc(player_pos);
+							const glm::vec2 p1 = worldToMinimapNdc(nearest_objective_pos);
+							rendererService->w_renderer->DebugPass2DLine(
+								p0,
+								p1,
+								glm::vec4(1.0f, 0.9f, 0.2f, 1.0f));
+						}
+
+						glm::vec2 arrow_dir(0.0f, -1.0f);
+						if (!gs.minimap_rotate_with_player) {
+							arrow_dir = glm::vec2(player_forward.x, player_forward.z);
+							if (glm::dot(arrow_dir, arrow_dir) < 0.0001f) {
+								arrow_dir = glm::vec2(0.0f, -1.0f);
+							} else {
+								arrow_dir = glm::normalize(arrow_dir);
+							}
+						}
+
+						const float arrow_len_px = glm::max(8.0f, glm::min(map_w, map_h) * 0.15f);
+						glm::vec2 arrow_start_px(center_x_px, center_y_px);
+						glm::vec2 arrow_end_px = arrow_start_px + arrow_dir * arrow_len_px;
+
+						glm::vec2 arrow_start_ndc(
+							(arrow_start_px.x / fbw) * 2.0f - 1.0f,
+							1.0f - (arrow_start_px.y / fbh) * 2.0f);
+						glm::vec2 arrow_end_ndc(
+							(arrow_end_px.x / fbw) * 2.0f - 1.0f,
+							1.0f - (arrow_end_px.y / fbh) * 2.0f);
+
+						rendererService->w_renderer->DebugPass2DLine(
+							arrow_start_ndc,
+							arrow_end_ndc,
+							glm::vec4(0.2f, 1.0f, 0.2f, 1.0f));
+					}
 				}
 			}
 

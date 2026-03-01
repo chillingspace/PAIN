@@ -15,8 +15,15 @@ local playerCaught = false
 
 -- If the player is being detected (For detection UI)
 local playerDetected = false
+local minimapTagged = false
 
 registerUpdate(function(dt)
+    if (not minimapTagged) and addTag then
+        addTag(entityId, "minimap_visible")
+        addTag(entityId, "minimap_danger")
+        minimapTagged = true
+    end
+
     local p = _G.PlayerEntity
     if not p then
         timeSeen = 0.0
