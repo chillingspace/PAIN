@@ -33,6 +33,10 @@
         "active_game_cam": "Cam",
         "aspectRatioH": 9.0,
         "aspectRatioW": 16.0,
+        "capsuleHeight": 1.7999999523162842,
+        "collisionEnabled": true,
+        "collisionOffset": 0.10000000149011612,
+        "collisionRadius": 0.5,
         "farPlane": 100.0,
         "forward": [
             0.496366024017334,
@@ -47,12 +51,14 @@
             1.0761075019836426
         ],
         "sensitivity": 0.11999999731779099,
+        "showCollisionGizmo": false,
         "speed": 0.10000000149011612,
         "up": [
             0.0,
             1.0,
             0.0
-        ]
+        ],
+        "useCapsuleCollision": false
     },
     "ecs": {
         "Entities": [
@@ -140,7 +146,7 @@
                                 "35373d64-03b6-c84a-be7f-6e33a07f480c"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 0
+                            "siblingIndex": 1
                         },
                         "Layer": {
                             "layer_id": 2,
@@ -250,13 +256,13 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 28,
+                            "action": "mainmenu_Quit_Confirm",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
                             "payload": "",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -392,13 +398,13 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 29,
+                            "action": "mainmenu_Quit_Cancel",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
                             "payload": "",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -472,7 +478,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 1
+                            "siblingIndex": 2
                         },
                         "Layer": {
                             "layer_id": 2,
@@ -575,10 +581,11 @@
                             "childrenGUIDs": [
                                 "7beaa535-462c-7f45-9d6d-4090ca227034",
                                 "07e8316a-68b8-b542-880e-f6c9adbd653e",
-                                "afe62cce-006c-b340-835c-b6fe6075f530"
+                                "afe62cce-006c-b340-835c-b6fe6075f530",
+                                "fa655f6b-e097-5643-9794-1d3c86087914"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 2
+                            "siblingIndex": 3
                         },
                         "Layer": {
                             "layer_id": 1,
@@ -729,13 +736,13 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 9,
+                            "action": "LoadScene",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "payload": "",
+                            "payload": "game/scenes/cutscene.scn",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -871,13 +878,13 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 11,
+                            "action": "LoadScene",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "payload": "",
+                            "payload": "game/scenes/howtoplay.scn",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -1013,13 +1020,13 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 12,
+                            "action": "LoadScene",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "payload": "",
+                            "payload": "game/scenes/credits.scn",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -1087,79 +1094,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "Camera": {
-                            "far_plane": 100.0,
-                            "height_ratio": 9.0,
-                            "near_plane": 0.10000000149011612,
-                            "rot_offset": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "scale_offset": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "trans_offset": [
-                                0.0,
-                                1.2999999523162842,
-                                0.10000000149011612
-                            ],
-                            "width_ratio": 16.0
-                        },
-                        "GUID": {
-                            "guid": "cb54d9a0-38a4-0d40-aadc-6d795ef2096c"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 3
-                        },
-                        "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.3681994676589966,
-                                0.3213023543357849,
-                                0.45718085765838623
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "game manager"
-                        },
-                        "Scripts": {
-                            "scripts": [
-                                {
-                                    "enabled": true,
-                                    "script_asset": "ed87d956-cf59-3c4f-ab23-639f04e53783"
-                                },
-                                {
-                                    "enabled": true,
-                                    "script_asset": "a03605c3-e8d3-a149-9f63-b06f941776a2"
-                                }
-                            ]
-                        }
-                    },
-                    "Name": "game manager"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
                         "CustomHitbox2D": {
                             "max_point": [
                                 206.89999389648438,
@@ -1179,7 +1113,7 @@
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
-                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
                             "siblingIndex": 3
                         },
                         "Layer": {
@@ -1228,13 +1162,13 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 13,
+                            "action": "menu_QuitGame",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
                             "payload": "",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -1302,8 +1236,29 @@
             {
                 "Entity": {
                     "Components": {
+                        "Camera": {
+                            "far_plane": 100.0,
+                            "height_ratio": 9.0,
+                            "near_plane": 0.10000000149011612,
+                            "rot_offset": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "scale_offset": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "trans_offset": [
+                                0.0,
+                                1.2999999523162842,
+                                0.10000000149011612
+                            ],
+                            "width_ratio": 16.0
+                        },
                         "GUID": {
-                            "guid": "1389dd85-40a8-f74c-a6d7-994318217228"
+                            "guid": "cb54d9a0-38a4-0d40-aadc-6d795ef2096c"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
@@ -1316,9 +1271,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                0.0,
-                                0.0,
-                                0.0
+                                0.3681994676589966,
+                                0.3213023543357849,
+                                0.45718085765838623
                             ],
                             "rotation": [
                                 0.0,
@@ -1333,10 +1288,22 @@
                             ]
                         },
                         "Name": {
-                            "name": "end_screen"
+                            "name": "game manager"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "ed87d956-cf59-3c4f-ab23-639f04e53783"
+                                },
+                                {
+                                    "enabled": true,
+                                    "script_asset": "a03605c3-e8d3-a149-9f63-b06f941776a2"
+                                }
+                            ]
                         }
                     },
-                    "Name": "end_screen"
+                    "Name": "game manager"
                 }
             },
             {
@@ -1348,7 +1315,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 4
+                            "siblingIndex": 5
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1445,6 +1412,46 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
+                            "guid": "1389dd85-40a8-f74c-a6d7-994318217228"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 6
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "end_screen"
+                        }
+                    },
+                    "Name": "end_screen"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
                             "guid": "9f011042-939e-cf42-8f82-df08f9023b34"
                         },
                         "Hierarchy": {
@@ -1456,7 +1463,7 @@
                                 "ce700d51-a84c-e24e-970b-f0cc7c63c275"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 5
+                            "siblingIndex": 7
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1719,7 +1726,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 6
+                            "siblingIndex": 8
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1842,7 +1849,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 7
+                            "siblingIndex": 9
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1966,7 +1973,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 8
+                            "siblingIndex": 10
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -2056,7 +2063,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 8
+                                    "siblingIndex": 10
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -2189,7 +2196,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 9
+                            "siblingIndex": 11
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -2279,7 +2286,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 9
+                                    "siblingIndex": 11
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -2412,7 +2419,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 10
+                            "siblingIndex": 12
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -2502,7 +2509,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 10
+                                    "siblingIndex": 12
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -2635,7 +2642,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 11
+                            "siblingIndex": 13
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -2725,7 +2732,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 11
+                                    "siblingIndex": 13
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -2858,7 +2865,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 12
+                            "siblingIndex": 14
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -2948,7 +2955,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 12
+                                    "siblingIndex": 14
                                 },
                                 "Layer": {
                                     "layer_id": 0,

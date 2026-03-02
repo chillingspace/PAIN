@@ -457,7 +457,7 @@ namespace PAIN {
 
             m_currentFrameEntities.insert(entity);
 
-            // Update AABB if transform dirty (Fix #5)
+            // Update AABB if transform dirty 
             if (bvComponent.needsUpdate) {
                 // Calculate new aabb if is dirty
                 AABB oldAABB = bvComponent.worldAABB;

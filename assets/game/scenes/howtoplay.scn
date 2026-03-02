@@ -10,6 +10,10 @@
         "active_game_cam": "Cam",
         "aspectRatioH": 9.0,
         "aspectRatioW": 16.0,
+        "capsuleHeight": 1.7999999523162842,
+        "collisionEnabled": false,
+        "collisionOffset": 0.10000000149011612,
+        "collisionRadius": 0.5,
         "farPlane": 100.0,
         "forward": [
             0.4150110185146332,
@@ -24,12 +28,14 @@
             1.1484932899475098
         ],
         "sensitivity": 0.11999999731779099,
+        "showCollisionGizmo": false,
         "speed": 0.10000000149011612,
         "up": [
             0.0,
             1.0,
             0.0
-        ]
+        ],
+        "useCapsuleCollision": false
     },
     "ecs": {
         "Entities": [
@@ -292,13 +298,13 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 20,
+                            "action": "LoadScene",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "payload": "",
+                            "payload": "game/scenes/howtoplay2.scn",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -452,13 +458,13 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 15,
+                            "action": "LoadScene",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "payload": "",
+                            "payload": "game/scenes/mainmenu.scn",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,

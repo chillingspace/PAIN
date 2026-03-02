@@ -177,6 +177,9 @@ namespace PAIN {
 				ecsController->destroyRegistry(editRegistryID);
 				PN_CORE_INFO("[PrefabEditMode] Destroyed edit registry: {}", editRegistryID);
 
+				// Bef destroying anything, save the ID we are about to destroy
+				ECS::RegistryID oldEditRegistryID = editRegistryID;
+
 				// Reset state
 				isInEditMode = false;
 				currentEditingPrefabGUID = Assets::GUID();
@@ -191,6 +194,15 @@ namespace PAIN {
 				// Set viewport panel
 				services->get<Editor>()->getPanel<ViewportPanel>()->setRegistry(
 					editRegistryID);
+				services->get<Editor>()->getPanel<EntityPanel>()->setRegistry(editRegistryID);
+				services->get<Editor>()->getPanel<ComponentsPanel>()->setRegistry(editRegistryID);
+
+				// Optional: clear selection to avoid stale entt::entity handles
+				services->get<Editor>()->getPanel<EntityPanel>()->unselectEntity();
+
+				// Now safe to destroy the old prefab registry
+				ecsController->setRegistryAutoSimulate(oldEditRegistryID, false);
+				ecsController->destroyRegistry(oldEditRegistryID);
 
 				PN_CORE_INFO("[PrefabEditMode] Successfully exited edit mode");
 				return true;

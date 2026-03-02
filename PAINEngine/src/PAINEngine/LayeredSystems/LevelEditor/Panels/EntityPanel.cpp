@@ -757,15 +757,26 @@ namespace PAIN {
                 auto ecs = PN_ECS_SERVICE;
                 auto& registry = ecs->getRegistry(currentRegistryID);
 
+                // 1. Gather all entities that are actually claimed as children by someone else
+                std::unordered_set<entt::entity> claimed_children;
                 for (const auto& [entity, name] : editor_entities) {
-                    if (auto hierarchy = ecs->getEntityComponent<Entity::Hierarchy>(entity, currentRegistryID)) {
-                        if (!hierarchy.value().get().parentGUID.IsValid()) {
-                            roots.push_back(entity);
-                        }
+                    // Use your existing helper to get valid children
+                    std::vector<entt::entity> children = getEntityChildren(entity);
+                    for (auto child : children) {
+                        claimed_children.insert(child);
                     }
-                    else {
-                        roots.push_back(entity);
+                }
+
+                // 2. Identify actual roots
+                for (const auto& [entity, name] : editor_entities) {
+                    // If another entity in the scene claims this as a child, it CANNOT be a root.
+                    if (claimed_children.find(entity) != claimed_children.end()) {
+                        continue;
                     }
+
+                    // Optional/Fallback: You can still check parentGUID here if you want to be extra safe 
+                    // against orphaned entities, but the above check guarantees it won't be drawn twice.
+                    roots.push_back(entity);
                 }
 
                 return roots;

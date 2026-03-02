@@ -271,24 +271,29 @@ namespace PAIN {
             }
 
             // ---------- enums: default to underlying ----------
+            // We still provide helpers in case anyone explicitly wants the raw value,
+            // but the generic serializer should respect any ADL-specialised
+            // nlohmann::adl_serializer, which is what NLOHMANN_JSON_SERIALIZE_ENUM
+            // generates.  Previously `to_json_value` forced a cast to the underlying
+            // integer, which is why UIButton::state was written as 0/1/.. instead of
+            // "Normal"/"Pressed".
             template <typename E>
-            nlohmann::json enum_to_json(E e, std::true_type /*is_enum*/) {
+            nlohmann::json enum_to_json_raw(E e, std::true_type /*is_enum*/) {
                 using U = std::underlying_type_t<E>;
                 return nlohmann::json(static_cast<U>(e));
             }
             template <typename T>
-            nlohmann::json enum_to_json(const T& v, std::false_type /*not enum*/) {
+            nlohmann::json enum_to_json_raw(const T& v, std::false_type /*not enum*/) {
                 return nlohmann::json(v); // fallback
             }
 
             template <typename E>
-            void enum_from_json(E& out, const nlohmann::json& j, std::true_type /*is_enum*/) {
+            void enum_from_json_raw(E& out, const nlohmann::json& j, std::true_type /*is_enum*/) {
                 using U = std::underlying_type_t<E>;
-                //out = static_cast<E>(j.get<U>());
                 out = static_cast<E>(j.template get<U>());
             }
             template <typename T>
-            void enum_from_json(T& out, const nlohmann::json& j, std::false_type /*not enum*/) {
+            void enum_from_json_raw(T& out, const nlohmann::json& j, std::false_type /*not enum*/) {
                 out = j.get<T>();
             }
 
@@ -299,7 +304,11 @@ namespace PAIN {
                     return ::PAIN::Serialization::to_json_reflected(v);
                 }
                 else if constexpr (std::is_enum_v<std::remove_cv_t<std::remove_reference_t<T>>>) {
-                    return enum_to_json(v, std::true_type{});
+                    // use ADL serializer so that NLOHMANN_JSON_SERIALIZE_ENUM mappings
+                    // are honoured; fall back to underlying if no custom serializer
+                    nlohmann::json j;
+                    nlohmann::adl_serializer<T>::to_json(j, v);
+                    return j;
                 }
                 else {
                     // Let nlohmann handle it (including your GLM adapters and any ADL to_json)
@@ -314,11 +323,12 @@ namespace PAIN {
                     ::PAIN::Serialization::from_json_reflected(out, j);
                 }
                 else if constexpr (std::is_enum_v<std::remove_cv_t<std::remove_reference_t<T>>>) {
-                    enum_from_json(out, j, std::true_type{});
+                    // delegate to ADL serializer so that string enums are parsed
+                    // correctly when NLOHMANN_JSON_SERIALIZE_ENUM was used.
+                    nlohmann::adl_serializer<T>::from_json(j, out);
                 }
                 else {
                     // Fallback to nlohmann's get
-                    //out = j.get<T>();
                     out = j.template get<T>();
                 }
             }

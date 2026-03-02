@@ -762,36 +762,26 @@ namespace PAIN {
 						// -- Action --
 						ImGui::SeparatorText("Action");
 
-						// must match UIAction order
 						static const char* action_names[] = {
 							"None",
 							"game_Jump",
 							"game_Hide",
 							"game_Collect",
 							"game_Move",
+							"game_End",
 
 							"pause_Resume",
 							"pause_Restart",
-							"pause_Settings",
-							"pause_ReturnToMainMenu",
+							"pause_Quit",
 
-							"menu_StartGame",
-							"menu_OpenSettings",
-							"menu_HowToPlay",
-							"menu_Credits",
-							"menu_QuitGame",
-
-							"menu_OpenTutorial",
-							"menu_BackToMain",
-
-							"quit_Confirm",
-							"quit_Cancel",
-							"goto_Pause",
-
-							"howtoplay_ArrowLeft",
-							"howtoplay_ArrowRight",
 							"restart_Confirm",
 							"restart_Cancel",
+
+							"menu_QuitGame",
+							"quit_Confirm",
+							"quit_Cancel",
+
+							"goto_Pause",
 
 							"cutscene_Open_Menu",
 							"cutscene_Close_Menu",
@@ -803,10 +793,7 @@ namespace PAIN {
 							"mainmenu_Quit_Confirm",
 							"mainmenu_Quit_Cancel",
 
-							"credits_ArrowLeft",
-							"credits_ArrowRight",
-							"end_NextLevel",
-							"change_Level1",
+							"LoadScene",
 						};
 
 						int action_idx = static_cast<int>(button.action);
@@ -827,13 +814,42 @@ namespace PAIN {
 						ImGui::SeparatorText("Payload (Optional)");
 						ImGui::TextDisabled("Used by actions like StartGame/Restart/ReturnToMainMenu (e.g. scene path).");
 
-						char payloadBuf[256];
-						strncpy(payloadBuf, button.payload.c_str(), sizeof(payloadBuf) - 1);
-						payloadBuf[sizeof(payloadBuf) - 1] = '\0';
+						if (button.action == PAIN::UIAction::LoadScene) {
+							std::vector<std::string> scenes;
+							try {
+								for (const auto& entry : std::filesystem::recursive_directory_iterator("assets/game/scenes")) {
+									if (entry.is_regular_file() && entry.path().extension() == ".scn") {
+										std::string scene_path = entry.path().lexically_normal().string();
+										std::replace(scene_path.begin(), scene_path.end(), '\\', '/');
+										if (scene_path.substr(0, 7) == "assets/") {
+											scene_path = scene_path.substr(7);
+										}
+										scenes.push_back(scene_path);
+									}
+								}
+							} catch (...) {}
 
-						if (ImGui::InputText("Payload", payloadBuf, sizeof(payloadBuf))) {
-							button.payload = payloadBuf;
-							changed = true;
+							if (ImGui::BeginCombo("Scene", button.payload.empty() ? "Select Scene..." : button.payload.c_str())) {
+								for (const auto& scene_path : scenes) {
+									bool is_selected = (button.payload == scene_path);
+									if (ImGui::Selectable(scene_path.c_str(), is_selected)) {
+										button.payload = scene_path;
+										changed = true;
+									}
+									if (is_selected) ImGui::SetItemDefaultFocus();
+								}
+								ImGui::EndCombo();
+							}
+						}
+						else {
+							char payloadBuf[256];
+							strncpy(payloadBuf, button.payload.c_str(), sizeof(payloadBuf) - 1);
+							payloadBuf[sizeof(payloadBuf) - 1] = '\0';
+
+							if (ImGui::InputText("Payload", payloadBuf, sizeof(payloadBuf))) {
+								button.payload = payloadBuf;
+								changed = true;
+							}
 						}
 
 						//// ── State Colors ──
