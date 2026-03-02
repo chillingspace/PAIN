@@ -902,6 +902,49 @@ namespace PAIN {
                     gs.minimap_rotate_with_player = rotateWithCamera;
                 }
 
+                static const char* routeModes[] = {
+                    "Nearest Target Line",
+                    "Breadcrumb Dots",
+                    "Edge Arrow",
+                    "Line + Edge Arrow"
+                };
+                int routeMode = static_cast<int>(gs.minimap_route_mode);
+                if (ImGui::Combo("Route Mode", &routeMode, routeModes, IM_ARRAYSIZE(routeModes))) {
+                    gs.minimap_route_mode = static_cast<GraphicsSettings::MINIMAP_ROUTE_MODE>(routeMode);
+                }
+
+                ImGui::Separator();
+                ImGui::TextUnformatted("Category Visibility");
+                ImGui::Checkbox("Show Player", &gs.minimap_show_player);
+                ImGui::Checkbox("Show Danger", &gs.minimap_show_danger);
+                ImGui::Checkbox("Show Items", &gs.minimap_show_items);
+                ImGui::Checkbox("Show Objective", &gs.minimap_show_objective);
+                ImGui::Checkbox("Show Walls", &gs.minimap_show_walls);
+                ImGui::Checkbox("Show Route", &gs.minimap_show_route);
+
+                ImGui::Separator();
+                ImGui::TextUnformatted("Icons");
+                ImGui::Checkbox("Use Icon Textures", &gs.minimap_use_icon_textures);
+                ImGui::DragFloat("Icon Scale", &gs.minimap_icon_scale, 0.05f, 0.2f, 4.0f, "%.2f");
+
+                auto drawPathField = [](const char* label, std::string& value) {
+                    char buffer[256]{};
+                    strncpy(buffer, value.c_str(), sizeof(buffer) - 1);
+                    if (ImGui::InputText(label, buffer, IM_ARRAYSIZE(buffer))) {
+                        value = buffer;
+                    }
+                };
+
+                ImGui::BeginDisabled(!gs.minimap_use_icon_textures);
+                drawPathField("Player Icon Path", gs.minimap_icon_player_path);
+                drawPathField("Danger Icon Path", gs.minimap_icon_danger_path);
+                drawPathField("Item Icon Path", gs.minimap_icon_item_path);
+                drawPathField("Objective Icon Path", gs.minimap_icon_objective_path);
+                drawPathField("Wall Icon Path", gs.minimap_icon_wall_path);
+                ImGui::EndDisabled();
+
+                ImGui::Checkbox("Show Legend", &gs.minimap_show_legend);
+
                 ImGui::SliderFloat("Minimap Background Alpha", &gs.minimap_background_alpha, 0.0f, 1.0f, "%.2f");
                 ImGui::DragFloat("Minimap Border Thickness", &gs.minimap_border_thickness, 0.1f, 0.0f, 10.0f, "%.1f");
                 ImGui::ColorEdit4("Minimap Border Color", glm::value_ptr(gs.minimap_border_color));

@@ -12,6 +12,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <string>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -149,6 +150,27 @@ namespace PAIN {
 		bool minimap_override_position = false;
 		MINIMAP_RECOMMENDED_POSITION minimap_recommended_position = MINIMAP_RECOMMENDED_POSITION::BOTTOM_RIGHT;
 		bool minimap_rotate_with_player = true;
+		bool minimap_show_player = true;
+		bool minimap_show_danger = true;
+		bool minimap_show_items = true;
+		bool minimap_show_objective = true;
+		bool minimap_show_walls = true;
+		bool minimap_show_route = true;
+		enum MINIMAP_ROUTE_MODE {
+			ROUTE_NEAREST_LINE = 0,
+			ROUTE_BREADCRUMB_DOTS,
+			ROUTE_EDGE_ARROW,
+			ROUTE_LINE_AND_EDGE_ARROW,
+		};
+		MINIMAP_ROUTE_MODE minimap_route_mode = MINIMAP_ROUTE_MODE::ROUTE_NEAREST_LINE;
+		bool minimap_use_icon_textures = false;
+		float minimap_icon_scale = 1.0f;
+		bool minimap_show_legend = false;
+		std::string minimap_icon_player_path;
+		std::string minimap_icon_danger_path;
+		std::string minimap_icon_item_path;
+		std::string minimap_icon_objective_path;
+		std::string minimap_icon_wall_path;
 		float minimap_background_alpha = 0.5f;
 		float minimap_border_thickness = 2.0f;
 		glm::vec4 minimap_border_color = glm::vec4(1.0f);

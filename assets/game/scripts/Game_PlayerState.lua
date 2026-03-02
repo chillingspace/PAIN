@@ -454,6 +454,30 @@ local function findNearestByTag(tag, px, py, pz, radius)
     return bestEntity
 end
 
+local function ensureMinimapGameplayTags()
+    if not addTag then
+        return
+    end
+
+    local collectibles = getEntitiesByTag("letter_collectible") or {}
+    for _, e in ipairs(collectibles) do
+        addTag(e, "minimap_visible")
+        addTag(e, "minimap_item")
+    end
+
+    local carried = getEntitiesByTag("letter_carried") or {}
+    for _, e in ipairs(carried) do
+        addTag(e, "minimap_visible")
+        addTag(e, "minimap_item")
+    end
+
+    local objectives = getEntitiesByTag("letter_collection") or {}
+    for _, e in ipairs(objectives) do
+        addTag(e, "minimap_visible")
+        addTag(e, "minimap_objective")
+    end
+end
+
 
 -------------------------------------------------
 -- Helper: Apply hide scale factor
@@ -691,6 +715,9 @@ function S.update(dt)
     -- 7. Get player position
     -------------------------------------------------
     local px, py, pz = getPosition(p)
+
+    -- keep gameplay-critical minimap tags in sync
+    ensureMinimapGameplayTags()
 
     -------------------------------------------------
     -- 8. Hide/Unhide logic (H key)

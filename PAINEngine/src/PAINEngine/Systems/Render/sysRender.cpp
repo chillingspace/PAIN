@@ -1225,6 +1225,7 @@ namespace PAIN {
 			if (gs.minimap_enabled) {
 				GLuint minimapTexture = rendererService->w_renderer->getMinimapTexture();
 				if (minimapTexture != 0) {
+					auto assetManager = services.lock()->get<Assets::Manager>();
 					auto window = services.lock()->get<Window::Window>();
 					if (window) {
 						glm::vec2 framebuffer = window->getFrameBuffer();
@@ -1441,11 +1442,56 @@ namespace PAIN {
 							rendererService->w_renderer->DebugPass2DCircle(centerNdc, radiusNdc, color, 18);
 						};
 
-						glm::vec3 nearest_objective_pos(0.0f);
-						bool has_nearest_objective = false;
-						float nearest_dist2 = std::numeric_limits<float>::max();
+						auto drawMarker = [&](const glm::vec3& pos,
+							float radiusPx,
+							const glm::vec4& color,
+							const std::string& iconPath) {
+							if (gs.minimap_use_icon_textures && assetManager && !iconPath.empty()) {
+								auto iconOpt = assetManager->getAsset<Assets::Texture>(iconPath);
+								if (iconOpt.has_value() && iconOpt.value() && iconOpt.value()->gl_texture != 0) {
+									const glm::vec2 iconNdcPos = worldToMinimapNdc(pos, true);
+									const float iconPx = glm::max(4.0f, radiusPx * 2.0f * gs.minimap_icon_scale);
+									glm::vec2 iconNdcScale(iconPx / fbh, iconPx / fbh);
+									rendererService->w_renderer->Render2DTexture(
+										iconOpt.value()->gl_texture,
+										iconNdcPos,
+										iconNdcScale);
+									return;
+								}
+							}
 
-						for (entt::entity entity : metadata_service->getEntitiesByTag("minimap_visible")) {
+							drawDot(pos, radiusPx, color);
+						};
+
+						glm::vec3 nearest_item_pos(0.0f);
+						glm::vec3 nearest_objective_pos(0.0f);
+						bool has_nearest_item = false;
+						bool has_nearest_objective = false;
+						float nearest_item_dist2 = std::numeric_limits<float>::max();
+						float nearest_objective_dist2 = std::numeric_limits<float>::max();
+
+						std::unordered_set<uint32_t> uniqueMarkerEntities;
+						std::vector<entt::entity> markerEntities;
+						auto appendTaggedEntities = [&](const char* tag) {
+							for (entt::entity entity : metadata_service->getEntitiesByTag(tag)) {
+								const uint32_t key = static_cast<uint32_t>(entity);
+								if (uniqueMarkerEntities.insert(key).second) {
+									markerEntities.push_back(entity);
+								}
+							}
+						};
+
+						appendTaggedEntities("minimap_visible");
+						appendTaggedEntities("minimap_wall");
+						appendTaggedEntities("minimap_item");
+						appendTaggedEntities("minimap_objective");
+						appendTaggedEntities("letter_collectible");
+						appendTaggedEntities("letter_carried");
+						appendTaggedEntities("letter_collection");
+
+						const bool has_carried_letter = !metadata_service->getEntitiesByTag("letter_carried").empty();
+
+						for (entt::entity entity : markerEntities) {
 							glm::vec3 pos(0.0f);
 							if (!getEntityWorldPos(entity, pos)) {
 								continue;
@@ -1455,27 +1501,89 @@ namespace PAIN {
 							float dotRadius = 3.0f;
 
 							if (metadata_service->hasTag(entity, "minimap_player")) {
+								if (!gs.minimap_show_player) {
+									continue;
+								}
 								color = glm::vec4(0.2f, 1.0f, 0.2f, 1.0f);
 								dotRadius = 5.0f;
+								drawMarker(pos, dotRadius, color, gs.minimap_icon_player_path);
+								continue;
 							} else if (metadata_service->hasTag(entity, "minimap_item")) {
+								if (!gs.minimap_show_items) {
+									continue;
+								}
 								color = glm::vec4(1.0f, 0.84f, 0.1f, 1.0f);
 								dotRadius = 4.0f;
+								const glm::vec3 delta = pos - player_pos;
+								const float dist2 = glm::dot(delta, delta);
+								if (dist2 < nearest_item_dist2) {
+									nearest_item_dist2 = dist2;
+									nearest_item_pos = pos;
+									has_nearest_item = true;
+								}
+								drawMarker(pos, dotRadius, color, gs.minimap_icon_item_path);
+								continue;
 							} else if (metadata_service->hasTag(entity, "minimap_objective")) {
+								if (!gs.minimap_show_objective) {
+									continue;
+								}
 								color = glm::vec4(0.2f, 0.6f, 1.0f, 1.0f);
 								dotRadius = 4.0f;
 
 								const glm::vec3 delta = pos - player_pos;
 								const float dist2 = glm::dot(delta, delta);
-								if (dist2 < nearest_dist2) {
-									nearest_dist2 = dist2;
+								if (dist2 < nearest_objective_dist2) {
+									nearest_objective_dist2 = dist2;
 									nearest_objective_pos = pos;
 									has_nearest_objective = true;
 								}
+								drawMarker(pos, dotRadius, color, gs.minimap_icon_objective_path);
+								continue;
+							} else if (metadata_service->hasTag(entity, "letter_collectible") ||
+								metadata_service->hasTag(entity, "letter_carried")) {
+								if (!gs.minimap_show_items) {
+									continue;
+								}
+								color = glm::vec4(1.0f, 0.84f, 0.1f, 1.0f);
+								dotRadius = 4.0f;
+								const glm::vec3 delta = pos - player_pos;
+								const float dist2 = glm::dot(delta, delta);
+								if (dist2 < nearest_item_dist2) {
+									nearest_item_dist2 = dist2;
+									nearest_item_pos = pos;
+									has_nearest_item = true;
+								}
+								drawMarker(pos, dotRadius, color, gs.minimap_icon_item_path);
+								continue;
+							} else if (metadata_service->hasTag(entity, "letter_collection")) {
+								if (!gs.minimap_show_objective) {
+									continue;
+								}
+								color = glm::vec4(0.2f, 0.6f, 1.0f, 1.0f);
+								dotRadius = 4.0f;
+								const glm::vec3 delta = pos - player_pos;
+								const float dist2 = glm::dot(delta, delta);
+								if (dist2 < nearest_objective_dist2) {
+									nearest_objective_dist2 = dist2;
+									nearest_objective_pos = pos;
+									has_nearest_objective = true;
+								}
+								drawMarker(pos, dotRadius, color, gs.minimap_icon_objective_path);
+								continue;
+							} else if (metadata_service->hasTag(entity, "minimap_wall")) {
+								if (!gs.minimap_show_walls) {
+									continue;
+								}
+								color = glm::vec4(0.75f, 0.75f, 0.75f, 1.0f);
+								dotRadius = 2.5f;
+								drawMarker(pos, dotRadius, color, gs.minimap_icon_wall_path);
+								continue;
+							} else {
+								continue;
 							}
-
-							drawDot(pos, dotRadius, color);
 						}
 
+						if (gs.minimap_show_danger) {
 						for (entt::entity entity : metadata_service->getEntitiesByTag("minimap_danger")) {
 							glm::vec3 pos(0.0f);
 							if (!getEntityWorldPos(entity, pos)) {
@@ -1509,20 +1617,110 @@ namespace PAIN {
 							const float radiusPx = (danger_radius / (2.0f * glm::max(1.0f, gs.minimap_radius))) * map_square;
 							const glm::vec2 radiusNdc((radiusPx / fbw) * 2.0f, (radiusPx / fbh) * 2.0f);
 
-							rendererService->w_renderer->DebugPass2DCircle(
-								centerNdc,
-								radiusNdc,
-								glm::vec4(1.0f, 0.15f, 0.15f, 1.0f),
-								24);
+								rendererService->w_renderer->DebugPass2DCircle(
+									centerNdc,
+									radiusNdc,
+									glm::vec4(1.0f, 0.15f, 0.15f, 1.0f),
+									24);
+						}
 						}
 
-						if (has_nearest_objective) {
+						glm::vec3 route_target_world(0.0f);
+						bool has_route_target = false;
+						if (has_carried_letter) {
+							if (has_nearest_objective) {
+								route_target_world = nearest_objective_pos;
+								has_route_target = true;
+							} else if (has_nearest_item) {
+								route_target_world = nearest_item_pos;
+								has_route_target = true;
+							}
+						} else {
+							if (has_nearest_item) {
+								route_target_world = nearest_item_pos;
+								has_route_target = true;
+							} else if (has_nearest_objective) {
+								route_target_world = nearest_objective_pos;
+								has_route_target = true;
+							}
+						}
+
+						if (has_route_target && gs.minimap_show_route) {
 							const glm::vec2 p0 = worldToMinimapNdc(player_pos, true);
-							const glm::vec2 p1 = worldToMinimapNdc(nearest_objective_pos, true);
-							rendererService->w_renderer->DebugPass2DLine(
-								p0,
-								p1,
-								glm::vec4(1.0f, 0.9f, 0.2f, 1.0f));
+							const glm::vec2 p1_clamped = worldToMinimapNdc(route_target_world, true);
+							const glm::vec2 p1_unclamped = worldToMinimapNdc(route_target_world, false);
+							const bool off_map = glm::length(p1_unclamped - p1_clamped) > 0.0001f;
+
+							switch (gs.minimap_route_mode) {
+							case GraphicsSettings::MINIMAP_ROUTE_MODE::ROUTE_NEAREST_LINE:
+								rendererService->w_renderer->DebugPass2DLine(
+									p0,
+									p1_clamped,
+									glm::vec4(1.0f, 0.9f, 0.2f, 1.0f));
+								break;
+							case GraphicsSettings::MINIMAP_ROUTE_MODE::ROUTE_BREADCRUMB_DOTS: {
+								for (int i = 1; i <= 6; ++i) {
+									const float t = static_cast<float>(i) / 7.0f;
+									const glm::vec2 p = glm::mix(p0, p1_clamped, t);
+									rendererService->w_renderer->DebugPass2DCircle(
+										p,
+										glm::vec2((2.0f / fbw) * 2.0f, (2.0f / fbh) * 2.0f),
+										glm::vec4(1.0f, 0.9f, 0.2f, 1.0f),
+										12);
+								}
+								break;
+							}
+							case GraphicsSettings::MINIMAP_ROUTE_MODE::ROUTE_EDGE_ARROW:
+							case GraphicsSettings::MINIMAP_ROUTE_MODE::ROUTE_LINE_AND_EDGE_ARROW: {
+								if (gs.minimap_route_mode == GraphicsSettings::MINIMAP_ROUTE_MODE::ROUTE_LINE_AND_EDGE_ARROW) {
+									rendererService->w_renderer->DebugPass2DLine(
+										p0,
+										p1_clamped,
+										glm::vec4(1.0f, 0.9f, 0.2f, 0.7f));
+								}
+
+								if (off_map) {
+									glm::vec2 dir = p1_clamped - p0;
+									if (glm::dot(dir, dir) < 0.0001f) {
+										dir = glm::vec2(0.0f, -1.0f);
+									} else {
+										dir = glm::normalize(dir);
+									}
+
+									const glm::vec2 arrow_tip = p1_clamped;
+									const glm::vec2 arrow_tail = arrow_tip - dir * 0.04f;
+									rendererService->w_renderer->DebugPass2DLine(
+										arrow_tail,
+										arrow_tip,
+										glm::vec4(1.0f, 0.9f, 0.2f, 1.0f));
+								}
+								break;
+							}
+							default:
+								break;
+							}
+						}
+
+						if (gs.minimap_show_legend) {
+							const glm::vec2 legend_base = toNdc(map_x + 10.0f, map_y + 12.0f);
+							const glm::vec2 legend_step(0.0f, -(12.0f / fbh) * 2.0f);
+							const glm::vec2 legend_radius((2.0f / fbw) * 2.0f, (2.0f / fbh) * 2.0f);
+
+							int row = 0;
+							auto drawLegendDot = [&](const glm::vec4& c) {
+								rendererService->w_renderer->DebugPass2DCircle(
+									legend_base + static_cast<float>(row) * legend_step,
+									legend_radius,
+									c,
+									12);
+								row++;
+							};
+
+							if (gs.minimap_show_player) drawLegendDot(glm::vec4(0.2f, 1.0f, 0.2f, 1.0f));
+							if (gs.minimap_show_danger) drawLegendDot(glm::vec4(1.0f, 0.15f, 0.15f, 1.0f));
+							if (gs.minimap_show_items) drawLegendDot(glm::vec4(1.0f, 0.84f, 0.1f, 1.0f));
+							if (gs.minimap_show_objective) drawLegendDot(glm::vec4(0.2f, 0.6f, 1.0f, 1.0f));
+							if (gs.minimap_show_walls) drawLegendDot(glm::vec4(0.75f, 0.75f, 0.75f, 1.0f));
 						}
 
 						glm::vec2 arrow_dir(0.0f, -1.0f);
@@ -1546,10 +1744,12 @@ namespace PAIN {
 							(arrow_end_px.x / fbw) * 2.0f - 1.0f,
 							1.0f - (arrow_end_px.y / fbh) * 2.0f);
 
-						rendererService->w_renderer->DebugPass2DLine(
-							arrow_start_ndc,
-							arrow_end_ndc,
-							glm::vec4(0.2f, 1.0f, 0.2f, 1.0f));
+						if (gs.minimap_show_player) {
+							rendererService->w_renderer->DebugPass2DLine(
+								arrow_start_ndc,
+								arrow_end_ndc,
+								glm::vec4(0.2f, 1.0f, 0.2f, 1.0f));
+						}
 					}
 				}
 			}
