@@ -74,7 +74,7 @@ namespace PAIN {
         // 1. VALIDATE INPUT
         // ========================================
         if (items.empty()) {
-            PN_CORE_INFO("No items to build BVH - resetting");
+            //PN_CORE_INFO("No items to build BVH - resetting");
             m_rootIndex = -1;
             m_nodeCount = 0;
             return;

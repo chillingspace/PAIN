@@ -59,7 +59,9 @@ namespace PAIN {
 			// Recursively update children
 			if (hierarchy) {
 				for (const auto& childGUID : hierarchy->childrenGUIDs) {
-					entt::entity childEntity = services.lock()->get<ECS::Controller>()->getGUIDRegistry().resolveGUID(childGUID);
+					auto ecs = services.lock()->get<ECS::Controller>();
+					ECS::RegistryID regID = getRegistryIDFromRef(registry);
+					entt::entity childEntity = ecs->getGUIDRegistry(regID).resolveGUID(childGUID);
 					if (childEntity != entt::null && registry.valid(childEntity)) {
 						updateRecursive(childEntity, world.matrix, registry);
 					}
@@ -76,7 +78,9 @@ namespace PAIN {
 
 			if (auto* hierarchy = registry.try_get<Entity::Hierarchy>(e)) {
 				for (const auto& childGUID : hierarchy->childrenGUIDs) {
-					entt::entity child = services.lock()->get<ECS::Controller>()->getGUIDRegistry().resolveGUID(childGUID);
+					auto ecs = services.lock()->get<ECS::Controller>();
+					ECS::RegistryID regID = getRegistryIDFromRef(registry);
+					entt::entity child = ecs->getGUIDRegistry(regID).resolveGUID(childGUID);
 					if (child != entt::null && registry.valid(child)) {
 						markDirty(child, registry);
 					}
@@ -91,7 +95,9 @@ namespace PAIN {
 			// Remove from old parent's children if any
 			if (auto* hierarchy = registry.try_get<Entity::Hierarchy>(child)) {
 				if (hierarchy->parentGUID.IsValid()) {
-					entt::entity oldParent = services.lock()->get<ECS::Controller>()->getGUIDRegistry().resolveGUID(hierarchy->parentGUID);
+					auto ecs = services.lock()->get<ECS::Controller>();
+					ECS::RegistryID regID = getRegistryIDFromRef(registry);
+					entt::entity oldParent = ecs->getGUIDRegistry(regID).resolveGUID(hierarchy->parentGUID);
 					if (oldParent != entt::null) {
 						if (auto* oldParentHierarchy = registry.try_get<Entity::Hierarchy>(oldParent)) {
 							auto& v = oldParentHierarchy->childrenGUIDs;
@@ -123,7 +129,9 @@ namespace PAIN {
 
 			// Remove from current parent's children list
 			if (hierarchy->parentGUID.IsValid()) {
-				entt::entity parent = services.lock()->get<ECS::Controller>()->getGUIDRegistry().resolveGUID(hierarchy->parentGUID);
+				auto ecs = services.lock()->get<ECS::Controller>();
+				ECS::RegistryID regID = getRegistryIDFromRef(registry);
+				entt::entity parent = ecs->getGUIDRegistry(regID).resolveGUID(hierarchy->parentGUID);
 				if (parent != entt::null) {
 					if (auto* parentHierarchy = registry.try_get<Entity::Hierarchy>(parent)) {
 						auto& v = parentHierarchy->childrenGUIDs;
@@ -145,7 +153,9 @@ namespace PAIN {
 			//Get hierarchy and propagate to children if exists
 			if (auto* hierarchy = registry.try_get<Entity::Hierarchy>(e)) {
 				for (const auto& childGUID : hierarchy->childrenGUIDs) {
-					entt::entity child = services.lock()->get<ECS::Controller>()->getGUIDRegistry().resolveGUID(childGUID);
+					auto ecs = services.lock()->get<ECS::Controller>();
+					ECS::RegistryID regID = getRegistryIDFromRef(registry);
+					entt::entity child = ecs->getGUIDRegistry(regID).resolveGUID(childGUID);
 					if (child != entt::null && registry.valid(child)) {
 						propagateDirty(child, registry);
 					}
@@ -159,7 +169,9 @@ namespace PAIN {
 				return; // No parent, stop
 			}
 
-			entt::entity parent = services.lock()->get<ECS::Controller>()->getGUIDRegistry().resolveGUID(hierarchy->parentGUID);
+			auto ecs = services.lock()->get<ECS::Controller>();
+			ECS::RegistryID regID = getRegistryIDFromRef(registry);
+			entt::entity parent = ecs->getGUIDRegistry(regID).resolveGUID(hierarchy->parentGUID);
 			if (parent == entt::null || !registry.valid(parent)) {
 				return; // Invalid parent
 			}
@@ -177,7 +189,8 @@ namespace PAIN {
 		void System::findOrphansAHome(entt::entity e, Entity::GUID const& guid, Entity::Hierarchy& hierarchy, entt::registry& registry) {
 			//Get ECS controller to resolve GUID
 			auto ecs = services.lock()->get<ECS::Controller>();
-			entt::entity parentEntity = ecs->getGUIDRegistry().resolveGUID(hierarchy.parentGUID);
+			ECS::RegistryID regID = getRegistryIDFromRef(registry);
+			entt::entity parentEntity = ecs->getGUIDRegistry(regID).resolveGUID(hierarchy.parentGUID);
 
 			if (parentEntity != entt::null && registry.valid(parentEntity)) {
 				//Parent exists - check if parent knows about this child
@@ -208,12 +221,28 @@ namespace PAIN {
 					guid.guid.ToString(),
 					hierarchy.parentGUID.ToString());
 
-				//Clear invalid parent reference
-				hierarchy.parentGUID = Assets::GUID();
+				////Clear invalid parent reference
+				//hierarchy.parentGUID = Assets::GUID();
 
-				//Update as root entity
-				updateRecursive(e, glm::mat4(1.0f), registry);
+				////Update as root entity
+				//updateRecursive(e, glm::mat4(1.0f), registry);
+
+				PN_CORE_WARN("Parent not found for {}, keeping parentGUID={}",
+					guid.guid.ToString(), hierarchy.parentGUID.ToString());
+				return;
 			}
+		}
+		ECS::RegistryID System::getRegistryIDFromRef(entt::registry& targetReg)
+		{
+			auto ecs = services.lock()->get<ECS::Controller>();
+			for (const auto& id : ecs->getAllRegistryIDs()) {
+				if (&ecs->getRegistry(id) == &targetReg) {
+					return id;
+				}
+			}
+			// Fallback to main registry if somehow not found
+			return ECS::MAIN_REGISTRY_ID;
+
 		}
 	}
 }
