@@ -46,8 +46,59 @@ namespace PAIN {
 				// ---- Prefab Instance ----
 				registerCompUIFunc<PAIN::Prefab::PrefabInstance>(
 					"PrefabInstance",
-					[](ComponentsPanel&, PAIN::Prefab::PrefabInstance& as) {
+					[](ComponentsPanel& panel, PAIN::Prefab::PrefabInstance& as) {
 						DrawWithReflection(as);
+
+						// Prefab asset selector
+						DrawAssetSelectorField("Select A Prefab", as.sourcePrefabGUID,
+							PAIN::Editor::Attributes::AssetSelector(
+								PAIN::Assets::Type::Prefabs),
+							panel.services);
+
+						// Get Prefab Asset
+						auto prefabAsset = panel.services->get<Assets::Manager>()->getAsset<Prefab::PrefabAsset>(as.sourcePrefabGUID);
+						if (prefabAsset.has_value()) {
+
+							// Get prefab
+							auto prefab = prefabAsset.value().get();
+
+							// Get all prefabs entities GUID
+							std::unordered_map<std::string, std::string> prefab_entity_names;
+							std::vector<const char*> prefab_entity_names_ccp;
+
+							//Selector pos
+							int eGUIDPos = -1;
+
+							//Iterate through prefab json
+							for (int i = 0; i < prefab->entities.size(); ++i) {
+
+								//Get entity json
+								auto e = prefab->entities[i];
+
+								std::string name;
+								std::string id;
+
+								//Retrieve name
+								if (e.contains("components") && e["components"].contains("Name") && e["components"]["Name"].contains("name")) {
+									name = e["components"]["Name"]["name"].get<std::string>();
+								}
+
+								//Retrieve GUID
+								if (e.contains("entityGUID")) {
+									id = e["entityGUID"].get<std::string>();
+									if (Assets::GUID(id) == as.correspondingPrefabEntityGUID) eGUIDPos = i;
+								}
+
+								//Insert into map and vector
+								auto [it, inserted] = prefab_entity_names.emplace(std::move(name), std::move(id));
+								if (inserted) prefab_entity_names_ccp.push_back(it->first.c_str());
+							}
+
+							//GUID Selector for prefab entity GUID
+							if (ImGui::Combo("Select Prefab Entity GUID", &eGUIDPos, prefab_entity_names_ccp.data(), prefab_entity_names_ccp.size())) {
+								as.correspondingPrefabEntityGUID = Assets::GUID(prefab_entity_names[prefab_entity_names_ccp[eGUIDPos]]);
+							}
+						}
 					});
 
 				// ---- Transform ----
