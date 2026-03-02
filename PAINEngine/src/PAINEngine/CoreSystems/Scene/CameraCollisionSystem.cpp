@@ -448,7 +448,7 @@ namespace PAIN {
             public:
                 bool hasCollision = false;
                 JPH::Vec3 deepestNormal;
-                float deepestDepth = 0.0f;
+                float deepestDepth = -FLT_MAX;
                 int hitCount = 0;
                 JPH::BodyID hitBodyID;
                 

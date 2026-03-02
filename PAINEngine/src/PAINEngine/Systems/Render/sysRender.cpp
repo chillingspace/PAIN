@@ -1,4 +1,4 @@
-﻿#include "sysRender.h"
+#include "sysRender.h"
 #include "pch.h"
 
 #include "CoreSystems/Renderer/Light.h"
@@ -9,6 +9,9 @@
 #include "Systems/Collision/sBVHSystem.h"
 #include "ECS/sMetaData.h"
 #include "Core.h"
+#include "Systems/Particle/sysParticleSystem.h"
+#include "CoreSystems/Assets/Types/Shader.h"
+#include "CoreSystems/Assets/Types/Texture.h"
 
 #ifdef _DEBUG
 #include "LayeredSystems/LevelEditor/Editor.h"
@@ -263,10 +266,15 @@ namespace PAIN {
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after reflection pass: {}", err);
 				}
-				lightingPass(registry);
+			lightingPass(registry);
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after lighting pass: {}", err);
+				}
+				particlePass(registry);
+				err = glGetError();
+				if (err != GL_NO_ERROR) {
+					PN_CORE_ERROR("OpenGL err after particle pass: {}", err);
 				}
 				debugPass(registry, editor_debug_mode);
 				err = glGetError();
@@ -503,6 +511,279 @@ namespace PAIN {
 
 			auto scene = svc->get<Scene::SceneManager>();
 			rendererService->w_renderer->LightingPass(scene, LightSources::get());
+		}
+
+		// ============================================
+		// PARTICLE RENDER PASS - GPU Instanced Rendering
+		// ============================================
+		void System::particlePass(entt::registry& registry) {
+			auto rendererService = services.lock()->get<sRenderer>();
+			if (!rendererService || !rendererService->w_renderer)
+				return;
+
+			auto ecsController = services.lock()->get<ECS::Controller>();
+			if (!ecsController)
+				return;
+
+			// Get particle system
+			auto particleSystem = ecsController->getSystem<PAIN::ParticleSystem::System>();
+			if (!particleSystem)
+				return;
+
+			// Get all entities with ParticleSystemComponent components
+			auto particleView = registry.view<ParticleSystemComponent, LocalTransform>();
+
+			// Check if there are any active particles
+			bool hasActiveParticles = false;
+			for (auto [entity, ps, transform] : particleView.each()) {
+				auto* psInstance = particleSystem->GetParticleSystem(entity);
+				if (psInstance && psInstance->GetPool().GetAliveCount() > 0) {
+					hasActiveParticles = true;
+					break;
+				}
+			}
+
+			if (!hasActiveParticles)
+				return;
+
+			// Get camera for view/projection matrices
+			auto sceneManager = services.lock()->get<Scene::SceneManager>();
+			if (!sceneManager)
+				return;
+			Camera* activeCam = sceneManager->GetActiveCamera();
+			if (!activeCam)
+				return;
+
+			// Get or create particle shader
+			static GLuint particleProgram = 0;
+			static bool shaderLoaded = false;
+
+			if (!shaderLoaded) {
+				// Try to load particle shader - using same pattern as WindowsRenderer
+				auto assetManager = services.lock()->get<Assets::Manager>();
+				if (assetManager) {
+#ifdef PN_PLATFORM_WINDOWS
+					auto shaderOpt = assetManager->getAsset<Assets::Shader>("engine\\shaders\\particle.vert");
+#elif defined(PN_PLATFORM_ANDROID)
+					auto shaderOpt = assetManager->getAsset<Assets::Shader>("engine\\shaders\\android_particle.vert");
+#endif
+					if (shaderOpt.has_value()) {
+						particleProgram = shaderOpt.value()->GetRendererID();
+						shaderLoaded = true;
+					}
+				}
+			}
+
+			if (particleProgram == 0) {
+				// Shader not loaded yet - skip rendering
+				return;
+			}
+
+			// Billboard quad vertices (centered at origin, facing +Z)
+			// These are per-vertex, not per-instance
+			static const float quadVertices[] = {
+				// positions        // texCoords
+				-0.5f, -0.5f, 0.0f,  0.0f, 0.0f,
+				 0.5f, -0.5f, 0.0f,  1.0f, 0.0f,
+				 0.5f,  0.5f, 0.0f,  1.0f, 1.0f,
+				-0.5f,  0.5f, 0.0f,  0.0f, 1.0f
+			};
+
+			static const unsigned int quadIndices[] = {
+				0, 1, 2,
+				2, 3, 0
+			};
+
+			// Create or reuse VAO and buffers
+			static GLuint quadVAO = 0;
+			static GLuint quadVBO = 0;
+			static GLuint quadEBO = 0;
+			static GLuint instanceVBO = 0;
+			static size_t instanceCapacity = 10000;
+
+			if (quadVAO == 0) {
+				// Create quad VAO
+				glGenVertexArrays(1, &quadVAO);
+				glGenBuffers(1, &quadVBO);
+				glGenBuffers(1, &quadEBO);
+				glGenBuffers(1, &instanceVBO);
+
+				// Bind quad VAO
+				glBindVertexArray(quadVAO);
+
+				// Quad vertices (per-vertex)
+				glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+				glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+
+				// Quad indices
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadEBO);
+				glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(quadIndices), quadIndices, GL_STATIC_DRAW);
+
+				// Vertex attributes (position + texcoords)
+				// Location 0: aPos (vec3)
+				glEnableVertexAttribArray(0);
+				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+				// Location 1: aTexCoords (vec2)
+				glEnableVertexAttribArray(1);
+				glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+
+				// Set up instance buffer for per-instance data
+				// Location 2: aInstancePosition (vec3)
+				// Location 3: aInstanceColor (vec4)
+				// Location 4: aInstanceSize (float)
+				glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+				// Allocate buffer (will be updated each frame)
+				glBufferData(GL_ARRAY_BUFFER, instanceCapacity * sizeof(float) * 8, nullptr, GL_STREAM_DRAW); // 8 floats per instance: pos(3) + color(4) + size(1)
+
+				// Instance position (location 2)
+				glEnableVertexAttribArray(2);
+				glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+				glVertexAttribDivisor(2, 1); // Advance once per instance
+
+				// Instance color (location 3)
+				glEnableVertexAttribArray(3);
+				glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+				glVertexAttribDivisor(3, 1); // Advance once per instance
+
+				// Instance size (location 4)
+				glEnableVertexAttribArray(4);
+				glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(7 * sizeof(float)));
+				glVertexAttribDivisor(4, 1); // Advance once per instance
+
+				glBindVertexArray(0);
+			}
+
+			// Set up GL state for particles
+			const GLboolean wasBlendEnabled = glIsEnabled(GL_BLEND);
+			const GLboolean wasCullEnabled = glIsEnabled(GL_CULL_FACE);
+			GLboolean previousDepthMask = GL_TRUE;
+			glGetBooleanv(GL_DEPTH_WRITEMASK, &previousDepthMask);
+
+			glEnable(GL_BLEND);
+			glDepthMask(GL_FALSE); // Particles don't write to depth buffer
+			glDisable(GL_CULL_FACE); // Billboard particles face camera
+
+			// Use particle shader
+			glUseProgram(particleProgram);
+			glUniform1i(glGetUniformLocation(particleProgram, "tex"), 0);
+
+			// Set view and projection matrices
+			glUniformMatrix4fv(glGetUniformLocation(particleProgram, "u_V"), 1, GL_FALSE, &activeCam->view()[0][0]);
+			glUniformMatrix4fv(glGetUniformLocation(particleProgram, "u_P"), 1, GL_FALSE, &activeCam->projection()[0][0]);
+
+			glBindVertexArray(quadVAO);
+
+			std::vector<float> instanceData;
+			instanceData.reserve(2048);
+			auto assetManager = services.lock()->get<Assets::Manager>();
+
+			for (auto [entity, ps, transform] : particleView.each()) {
+				auto* psInstance = particleSystem->GetParticleSystem(entity);
+				if (!psInstance)
+					continue;
+
+				auto& pool = psInstance->GetPool();
+				if (pool.GetAliveCount() == 0)
+					continue;
+
+				instanceData.clear();
+				struct ParticleInstance {
+					glm::vec3 position;
+					glm::vec4 color;
+					float size;
+					float distanceSq;
+				};
+				std::vector<ParticleInstance> instances;
+				instances.reserve(pool.GetAliveCount());
+				const auto* particles = pool.GetParticles();
+				const auto& aliveIndices = pool.GetAliveIndices();
+				for (int idx : aliveIndices) {
+					const auto& p = particles[idx];
+					if (!p.alive)
+						continue;
+					ParticleInstance inst{};
+					inst.position = p.position;
+					inst.color = p.color;
+					inst.size = p.size;
+					const glm::vec3 delta = p.position - activeCam->pos;
+					inst.distanceSq = glm::dot(delta, delta);
+					instances.push_back(inst);
+				}
+
+				if (ps.sortMode == ParticleSortMode::BackToFront) {
+					std::sort(instances.begin(), instances.end(), [](const ParticleInstance& a, const ParticleInstance& b) {
+						return a.distanceSq > b.distanceSq;
+					});
+				}
+
+				for (const auto& inst : instances) {
+					instanceData.push_back(inst.position.x);
+					instanceData.push_back(inst.position.y);
+					instanceData.push_back(inst.position.z);
+					instanceData.push_back(inst.color.r);
+					instanceData.push_back(inst.color.g);
+					instanceData.push_back(inst.color.b);
+					instanceData.push_back(inst.color.a);
+					instanceData.push_back(inst.size);
+				}
+
+				const size_t instanceCount = instanceData.size() / 8;
+				if (instanceCount == 0)
+					continue;
+
+				if (instanceCount > instanceCapacity) {
+					instanceCapacity = instanceCount;
+					glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+					glBufferData(GL_ARRAY_BUFFER, instanceCapacity * sizeof(float) * 8, nullptr, GL_STREAM_DRAW);
+				}
+
+				GLuint particleTextureId = 0;
+				if (assetManager && ps.particleTexture.IsValid()) {
+					auto textureOpt = assetManager->getAsset<Assets::Texture>(ps.particleTexture);
+					if (textureOpt.has_value() && textureOpt.value() && textureOpt.value()->gl_texture != 0) {
+						particleTextureId = textureOpt.value()->gl_texture;
+					}
+				}
+
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, particleTextureId);
+
+				switch (ps.blendMode) {
+				case ParticleBlendMode::Additive:
+					glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+					break;
+				case ParticleBlendMode::Premultiplied:
+					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+					break;
+				case ParticleBlendMode::Alpha:
+				default:
+					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+					break;
+				}
+
+				glUniform1i(glGetUniformLocation(particleProgram, "u_UseTexture"), particleTextureId != 0 ? 1 : 0);
+				glUniform1i(glGetUniformLocation(particleProgram, "u_Shape"), static_cast<int>(ps.renderShape));
+				glUniform1f(glGetUniformLocation(particleProgram, "u_SoftEdge"), glm::clamp(ps.softEdge, 0.0f, 1.0f));
+
+				glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+				glBufferSubData(GL_ARRAY_BUFFER, 0, instanceData.size() * sizeof(float), instanceData.data());
+				glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, static_cast<GLsizei>(instanceCount));
+			}
+
+			glBindTexture(GL_TEXTURE_2D, 0);
+			glBindVertexArray(0);
+			glUseProgram(0);
+
+			// Restore GL state
+			glDepthMask(previousDepthMask);
+			if (wasBlendEnabled)
+				glEnable(GL_BLEND);
+			else
+				glDisable(GL_BLEND);
+			if (wasCullEnabled)
+				glEnable(GL_CULL_FACE);
+			else
+				glDisable(GL_CULL_FACE);
 		}
 
 		void System::debugPass(entt::registry& registry, int debug_mode) {

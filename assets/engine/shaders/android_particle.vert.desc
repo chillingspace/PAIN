@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "android_particle.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 7504140280288708707
+  },
+  "descriptor_version": 1,
+  "guid": "495bba64-da6a-4542-ab28-6d56db39ea66",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_particle.vert"
+  }
+}

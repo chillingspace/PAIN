@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "particle.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 15118995616624657535
+  },
+  "descriptor_version": 1,
+  "guid": "fee9737f-606c-4647-98d3-7847bc1bf92f",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\particle.vert"
+  }
+}

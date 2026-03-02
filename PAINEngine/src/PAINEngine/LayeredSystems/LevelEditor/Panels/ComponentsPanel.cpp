@@ -10,6 +10,7 @@
 #include "Systems/Transform/sysTransform.h"
 
 #include "CoreSystems/Prefabs/sPrefab.h"
+#include "ECS/Components/cParticleSystem.h"
 #include "LayeredSystems/LevelEditor/Panels/ReflectionUI.h"
 
 namespace PAIN {
@@ -296,6 +297,294 @@ namespace PAIN {
 						if (ImGui::Button(anim.isPlaying ? "Pause##Comp" : "Resume##Comp")) {
 							anim.isPlaying = !anim.isPlaying;
 						}
+					});
+
+				// ---- ParticleSystem ----
+				registerCompUIFunc<PAIN::ParticleSystemComponent>(
+					"ParticleSystem", [this](ComponentsPanel& panel, PAIN::ParticleSystemComponent& ps) {
+						bool changed = false;
+						
+						ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
+						
+						// Main Settings Section
+						if (ImGui::CollapsingHeader("Main Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
+							ImGui::Indent(10.0f);
+							
+							changed |= ImGui::Checkbox("Play On Awake", &ps.playOnAwake);
+							changed |= ImGui::Checkbox("Looping", &ps.looping);
+							
+							ImGui::Spacing();
+							changed |= ImGui::DragFloat("Duration (s)", &ps.playDuration, 0.1f, 0.0f, 60.0f, "%.1f");
+							if (ps.playDuration == 0.0f) {
+								ImGui::SameLine();
+								ImGui::TextDisabled("(Infinite)");
+							}
+							
+							ImGui::Spacing();
+							changed |= ImGui::DragFloat("Lifetime (s)", &ps.lifetime, 0.1f, 0.1f, 30.0f, "%.2f");
+							changed |= ImGui::DragFloat("Lifetime Variance", &ps.lifetimeVariance, 0.05f, 0.0f, ps.lifetime, "%.2f");
+							
+							ImGui::Unindent(10.0f);
+						}
+						
+						ImGui::Spacing();
+						
+						// Emission Section
+						if (ImGui::CollapsingHeader("Emission")) {
+							ImGui::Indent(10.0f);
+							
+							changed |= ImGui::DragFloat("Emission Rate", &ps.emissionRate, 1.0f, 0.0f, 1000.0f, "%.0f /sec");
+							changed |= ImGui::DragInt("Max Particles", &ps.maxParticles, 10, 1, 10000);
+							
+							ImGui::Spacing();
+							changed |= ImGui::DragFloat3("Emission Direction", &ps.emissionDirection.x, 0.01f);
+							changed |= ImGui::DragFloat("Spread (deg)", &ps.emissionSpread, 1.0f, 0.0f, 180.0f, "%.1f");
+							
+							ImGui::Spacing();
+							// Emission Shape
+							const char* shapeNames[] = {"Point", "Sphere", "Box", "Circle", "Cone"};
+							int shapeIdx = static_cast<int>(ps.emissionShape);
+							if (ImGui::Combo("Shape", &shapeIdx, shapeNames, IM_ARRAYSIZE(shapeNames))) {
+								ps.emissionShape = static_cast<PAIN::EmissionShape>(shapeIdx);
+								changed = true;
+							}
+							
+							// Shape-specific params
+							switch (ps.emissionShape) {
+								case PAIN::EmissionShape::Sphere:
+									changed |= ImGui::DragFloat("Radius", &ps.shapeParams.sphereRadius, 0.1f, 0.01f, 100.0f);
+									changed |= ImGui::Checkbox("Volume Emission", &ps.shapeParams.volumeEmission);
+									break;
+								case PAIN::EmissionShape::Box:
+									changed |= ImGui::DragFloat3("Half Extents", &ps.shapeParams.boxHalfExtents.x, 0.1f, 0.01f, 100.0f);
+									break;
+								case PAIN::EmissionShape::Circle:
+									changed |= ImGui::DragFloat("Radius", &ps.shapeParams.circleRadius, 0.1f, 0.01f, 100.0f);
+									changed |= ImGui::DragFloat("Arc (deg)", &ps.shapeParams.circleArc, 5.0f, 0.0f, 360.0f);
+									break;
+								case PAIN::EmissionShape::Cone:
+									changed |= ImGui::DragFloat("Angle (deg)", &ps.shapeParams.coneAngle, 1.0f, 0.0f, 89.0f);
+									break;
+								default:
+									break;
+							}
+							
+							ImGui::Unindent(10.0f);
+						}
+						
+						ImGui::Spacing();
+						
+						// Visual Section
+						if (ImGui::CollapsingHeader("Visual")) {
+							ImGui::Indent(10.0f);
+							
+							// Texture
+							if (DrawAssetSelectorField(
+									"Particle Texture", ps.particleTexture,
+									PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+									panel.services)) {
+								changed = true;
+							}
+
+							const char* renderShapeNames[] = {"Square", "Circle", "Soft Circle"};
+							int renderShapeIdx = static_cast<int>(ps.renderShape);
+							if (ImGui::Combo("Render Shape", &renderShapeIdx, renderShapeNames, IM_ARRAYSIZE(renderShapeNames))) {
+								ps.renderShape = static_cast<PAIN::ParticleRenderShape>(renderShapeIdx);
+								changed = true;
+							}
+							if (ps.renderShape == PAIN::ParticleRenderShape::SoftCircle) {
+								changed |= ImGui::DragFloat("Soft Edge", &ps.softEdge, 0.01f, 0.0f, 1.0f, "%.2f");
+							}
+
+							ImGui::Spacing();
+							
+							// Start Size
+							changed |= ImGui::DragFloat("Start Size", &ps.startSize, 0.1f, 0.01f, 100.0f, "%.2f");
+							changed |= ImGui::DragFloat("Size Variance", &ps.startSizeVariance, 0.05f, 0.0f, ps.startSize, "%.2f");
+							
+							ImGui::Spacing();
+							
+							// Start Color
+							changed |= ImGui::ColorEdit4("Start Color", &ps.startColor.x);
+							changed |= ImGui::ColorEdit4("Color Variance", &ps.startColorVariance.x);
+							
+							ImGui::Spacing();
+							
+							// Speed
+							changed |= ImGui::DragFloat("Speed", &ps.speed, 0.1f, 0.0f, 100.0f, "%.2f");
+							changed |= ImGui::DragFloat("Speed Variance", &ps.speedVariance, 0.05f, 0.0f, ps.speed, "%.2f");
+							changed |= ImGui::Checkbox("Velocity Over Lifetime", &ps.velocityOverLifetimeEnabled);
+							if (ps.velocityOverLifetimeEnabled) {
+								changed |= ImGui::DragFloat3("Velocity Delta", &ps.velocityOverLifetime.x, 0.05f);
+							}
+
+							const char* simulationSpaceNames[] = {"World", "Local"};
+							int simulationSpaceIdx = static_cast<int>(ps.simulationSpace);
+							if (ImGui::Combo("Simulation Space", &simulationSpaceIdx, simulationSpaceNames, IM_ARRAYSIZE(simulationSpaceNames))) {
+								ps.simulationSpace = static_cast<PAIN::ParticleSimulationSpace>(simulationSpaceIdx);
+								changed = true;
+							}
+
+							const char* blendModeNames[] = {"Alpha", "Additive", "Premultiplied"};
+							int blendModeIdx = static_cast<int>(ps.blendMode);
+							if (ImGui::Combo("Blend Mode", &blendModeIdx, blendModeNames, IM_ARRAYSIZE(blendModeNames))) {
+								ps.blendMode = static_cast<PAIN::ParticleBlendMode>(blendModeIdx);
+								changed = true;
+							}
+
+							const char* sortModeNames[] = {"None", "Back To Front"};
+							int sortModeIdx = static_cast<int>(ps.sortMode);
+							if (ImGui::Combo("Sort Mode", &sortModeIdx, sortModeNames, IM_ARRAYSIZE(sortModeNames))) {
+								ps.sortMode = static_cast<PAIN::ParticleSortMode>(sortModeIdx);
+								changed = true;
+							}
+
+							ImGui::Unindent(10.0f);
+						}
+						
+						ImGui::Spacing();
+						
+						// Size Over Lifetime Section
+						if (ImGui::CollapsingHeader("Size Over Lifetime")) {
+							ImGui::Indent(10.0f);
+							
+							changed |= ImGui::DragFloat("Size Multiplier", &ps.sizeOverLifetimeMultiplier, 0.1f, 0.0f, 10.0f, "%.2f");
+							
+							ImGui::Spacing();
+							ImGui::Text("Keyframes: %zu", ps.sizeOverLifetime.size());
+							
+							// Add keyframe button
+							if (ImGui::Button("Add Keyframe##Size")) {
+								PAIN::FloatKeyframe kf;
+								kf.time = 0.0f;
+								kf.value = 1.0f;
+								ps.sizeOverLifetime.push_back(kf);
+								changed = true;
+							}
+							
+							// Display keyframes
+							int removeIdx = -1;
+							for (size_t i = 0; i < ps.sizeOverLifetime.size(); ++i) {
+								ImGui::PushID(static_cast<int>(i));
+								ImGui::Text("Keyframe %zu:", i);
+								ImGui::SameLine();
+								ImGui::DragFloat("Time", &ps.sizeOverLifetime[i].time, 0.05f, 0.0f, 1.0f, "%.2f");
+								ImGui::SameLine();
+								ImGui::DragFloat("Value", &ps.sizeOverLifetime[i].value, 0.1f, 0.0f, 10.0f, "%.2f");
+								ImGui::SameLine();
+								if (ImGui::Button("X##size")) {
+									removeIdx = static_cast<int>(i);
+								}
+								ImGui::PopID();
+							}
+							
+							if (removeIdx >= 0) {
+								ps.sizeOverLifetime.erase(ps.sizeOverLifetime.begin() + removeIdx);
+								changed = true;
+							}
+							
+							ImGui::Unindent(10.0f);
+						}
+						
+						ImGui::Spacing();
+						
+						// Color Over Lifetime Section
+						if (ImGui::CollapsingHeader("Color Over Lifetime")) {
+							ImGui::Indent(10.0f);
+							
+							ImGui::Text("Keyframes: %zu", ps.colorOverLifetime.size());
+							
+							// Add keyframe button
+							if (ImGui::Button("Add Keyframe##Color")) {
+								PAIN::ColorKeyframe kf;
+								kf.time = 0.0f;
+								kf.color = glm::vec4(1.0f);
+								ps.colorOverLifetime.push_back(kf);
+								changed = true;
+							}
+							
+							// Display keyframes
+							int removeIdx = -1;
+							for (size_t i = 0; i < ps.colorOverLifetime.size(); ++i) {
+								ImGui::PushID(static_cast<int>(i));
+								ImGui::Text("Keyframe %zu:", i);
+								ImGui::SameLine();
+								ImGui::DragFloat("Time", &ps.colorOverLifetime[i].time, 0.05f, 0.0f, 1.0f, "%.2f");
+								ImGui::SameLine();
+								ImGui::ColorEdit4("Color", &ps.colorOverLifetime[i].color.x, ImGuiColorEditFlags_NoInputs);
+								ImGui::SameLine();
+								if (ImGui::Button("X##color")) {
+									removeIdx = static_cast<int>(i);
+								}
+								ImGui::PopID();
+							}
+							
+							if (removeIdx >= 0) {
+								ps.colorOverLifetime.erase(ps.colorOverLifetime.begin() + removeIdx);
+								changed = true;
+							}
+							
+							ImGui::Unindent(10.0f);
+						}
+						
+						ImGui::Spacing();
+						ImGui::Separator();
+						ImGui::Spacing();
+						
+						// Runtime Controls Section
+						ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "Runtime Controls");
+						
+						// Status display
+						const char* statusText = "Unknown";
+						ImVec4 statusColor = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
+						switch (ps.state) {
+							case PAIN::ParticleSystemState::Playing:
+								statusText = "Playing";
+								statusColor = ImVec4(0.2f, 1.0f, 0.2f, 1.0f);
+								break;
+							case PAIN::ParticleSystemState::Paused:
+								statusText = "Paused";
+								statusColor = ImVec4(1.0f, 1.0f, 0.2f, 1.0f);
+								break;
+							case PAIN::ParticleSystemState::Stopped:
+								statusText = "Stopped";
+								statusColor = ImVec4(1.0f, 0.2f, 0.2f, 1.0f);
+								break;
+						}
+						ImGui::TextColored(statusColor, "Status: %s", statusText);
+						
+						ImGui::Text("Active Particles: %d", ps.activeParticleCount);
+						ImGui::Text("Play Time: %.2f s", ps.currentPlayTime);
+						
+						ImGui::Spacing();
+						
+						if (ImGui::Button("Play##particle")) {
+							ps.requestPlay = true;
+							ps.state = PAIN::ParticleSystemState::Playing;
+							changed = true;
+						}
+						ImGui::SameLine();
+						if (ImGui::Button("Pause##particle")) {
+							ps.requestPause = true;
+							ps.state = PAIN::ParticleSystemState::Paused;
+							changed = true;
+						}
+						ImGui::SameLine();
+						if (ImGui::Button("Stop##particle")) {
+							ps.requestStop = true;
+							ps.state = PAIN::ParticleSystemState::Stopped;
+							changed = true;
+						}
+						ImGui::SameLine();
+						if (ImGui::Button("Restart##particle")) {
+							ps.requestRestart = true;
+							ps.state = PAIN::ParticleSystemState::Playing;
+							changed = true;
+						}
+						
+						ImGui::PopStyleVar();
+						
+						return changed;
 					});
 
 				// UItext comp ui
