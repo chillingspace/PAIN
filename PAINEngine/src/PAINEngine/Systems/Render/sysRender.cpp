@@ -1513,54 +1513,109 @@ namespace PAIN {
 							return false;
 						};
 
-						auto drawWallOccupancyFromMesh = [&](entt::entity entity, const glm::vec4& color) -> bool {
-							auto* model = registry.try_get<ModelRenderer>(entity);
-							auto* wt = registry.try_get<WorldTransform>(entity);
-							if (!model || !wt) {
-								return false;
-							}
+						struct WallMinimapCache {
+							const entt::registry* sourceRegistry = nullptr;
+							size_t wallEntityCount = 0;
+							size_t wallEntitySignature = 0;
+							bool built = false;
+							float cellSize = 4.0f;
+							std::vector<glm::vec2> triangleVerticesXZ;
+							std::unordered_map<int64_t, std::vector<uint32_t>> cellToTriangles;
+							std::vector<uint32_t> triangleStamps;
+							uint32_t frameStamp = 1;
+						};
 
-							if (model->modelGUID != model->prevModelGUID) {
-								InitializeModelRenderer(entity, *model);
-							}
+						static WallMinimapCache wallCache;
 
-							if (!model->cachedModelAsset) {
-								return false;
-							}
+						auto cellKey = [](int x, int y) -> int64_t {
+							return (static_cast<int64_t>(x) << 32) ^ static_cast<uint32_t>(y);
+						};
 
-							const auto& vertices = model->cachedModelAsset->vertices;
-							const auto& indices = model->cachedModelAsset->indices;
-							if (vertices.empty() || indices.size() < 3) {
-								return false;
-							}
+						auto toCellCoord = [&](float v) -> int {
+							return static_cast<int>(std::floor(v / wallCache.cellSize));
+						};
 
-							const glm::mat4 M = wt->matrix;
-							bool drewAny = false;
-							for (size_t i = 0; i + 2 < indices.size(); i += 3) {
-								const uint32_t i0 = indices[i];
-								const uint32_t i1 = indices[i + 1];
-								const uint32_t i2 = indices[i + 2];
-								if (i0 >= vertices.size() || i1 >= vertices.size() || i2 >= vertices.size()) {
+						auto rebuildWallCache = [&](const std::vector<entt::entity>& wallEntities) {
+							wallCache.triangleVerticesXZ.clear();
+							wallCache.cellToTriangles.clear();
+
+							for (const entt::entity entity : wallEntities) {
+								if (!registry.valid(entity)) {
 									continue;
 								}
 
-								const glm::vec3 w0 = glm::vec3(M * glm::vec4(vertices[i0].pos, 1.0f));
-								const glm::vec3 w1 = glm::vec3(M * glm::vec4(vertices[i1].pos, 1.0f));
-								const glm::vec3 w2 = glm::vec3(M * glm::vec4(vertices[i2].pos, 1.0f));
+								auto* model = registry.try_get<ModelRenderer>(entity);
+								auto* wt = registry.try_get<WorldTransform>(entity);
+								if (!model || !wt) {
+									continue;
 
-								const glm::vec2 p0 = worldToMinimapNdc(w0, true);
-								const glm::vec2 p1 = worldToMinimapNdc(w1, true);
-								const glm::vec2 p2 = worldToMinimapNdc(w2, true);
+								}
 
-								rendererService->w_renderer->DebugPass2DTriangleFilled(
-									p0,
-									p1,
-									p2,
-									glm::vec4(color.r, color.g, color.b, 0.35f));
-								drewAny = true;
+								if (model->modelGUID != model->prevModelGUID) {
+									InitializeModelRenderer(entity, *model);
+								}
+
+								if (!model->cachedModelAsset) {
+									continue;
+								}
+
+								const auto& vertices = model->cachedModelAsset->vertices;
+								const auto& indices = model->cachedModelAsset->indices;
+								if (vertices.empty() || indices.size() < 3) {
+									continue;
+								}
+
+								const glm::mat4 M = wt->matrix;
+								for (size_t i = 0; i + 2 < indices.size(); i += 3) {
+									const uint32_t i0 = indices[i];
+									const uint32_t i1 = indices[i + 1];
+									const uint32_t i2 = indices[i + 2];
+									if (i0 >= vertices.size() || i1 >= vertices.size() || i2 >= vertices.size()) {
+										continue;
+									}
+
+									const glm::vec3 w0 = glm::vec3(M * glm::vec4(vertices[i0].pos, 1.0f));
+									const glm::vec3 w1 = glm::vec3(M * glm::vec4(vertices[i1].pos, 1.0f));
+									const glm::vec3 w2 = glm::vec3(M * glm::vec4(vertices[i2].pos, 1.0f));
+
+									const glm::vec2 v0(w0.x, w0.z);
+									const glm::vec2 v1(w1.x, w1.z);
+									const glm::vec2 v2(w2.x, w2.z);
+
+									const uint32_t triangleIndex = static_cast<uint32_t>(wallCache.triangleVerticesXZ.size() / 3);
+									wallCache.triangleVerticesXZ.push_back(v0);
+									wallCache.triangleVerticesXZ.push_back(v1);
+									wallCache.triangleVerticesXZ.push_back(v2);
+
+									const float minX = glm::min(v0.x, glm::min(v1.x, v2.x));
+									const float minY = glm::min(v0.y, glm::min(v1.y, v2.y));
+									const float maxX = glm::max(v0.x, glm::max(v1.x, v2.x));
+									const float maxY = glm::max(v0.y, glm::max(v1.y, v2.y));
+
+									const int x0 = toCellCoord(minX);
+									const int y0 = toCellCoord(minY);
+									const int x1 = toCellCoord(maxX);
+									const int y1 = toCellCoord(maxY);
+
+									for (int cx = x0; cx <= x1; ++cx) {
+										for (int cy = y0; cy <= y1; ++cy) {
+											wallCache.cellToTriangles[cellKey(cx, cy)].push_back(triangleIndex);
+										}
+									}
+								}
 							}
 
-							return drewAny;
+							const size_t triangleCount = wallCache.triangleVerticesXZ.size() / 3;
+							wallCache.triangleStamps.assign(triangleCount, 0u);
+							wallCache.sourceRegistry = &registry;
+							wallCache.wallEntityCount = wallEntities.size();
+							size_t signature = 1469598103934665603ull;
+							for (const entt::entity entity : wallEntities) {
+								signature ^= static_cast<size_t>(static_cast<uint32_t>(entity));
+								signature *= 1099511628211ull;
+							}
+							wallCache.wallEntitySignature = signature;
+							wallCache.built = true;
 						};
 
 						glm::vec3 nearest_item_pos(0.0f);
@@ -1572,6 +1627,7 @@ namespace PAIN {
 
 						std::unordered_set<uint32_t> uniqueMarkerEntities;
 						std::vector<entt::entity> markerEntities;
+						const std::vector<entt::entity> wallEntities = metadata_service->getEntitiesByTag("wall");
 						auto appendTaggedEntities = [&](const char* tag) {
 							for (entt::entity entity : metadata_service->getEntitiesByTag(tag)) {
 								const uint32_t key = static_cast<uint32_t>(entity);
@@ -1583,7 +1639,6 @@ namespace PAIN {
 
 						appendTaggedEntities("Player");
 						appendTaggedEntities("Enemy");
-						appendTaggedEntities("wall");
 						appendTaggedEntities("item");
 						appendTaggedEntities("objective");
 						appendTaggedEntities("letter_collectible");
@@ -1591,6 +1646,85 @@ namespace PAIN {
 						appendTaggedEntities("letter_collection");
 
 						const bool has_carried_letter = !metadata_service->getEntitiesByTag("letter_carried").empty();
+
+						if (gs.minimap_show_walls) {
+							size_t currentWallSignature = 1469598103934665603ull;
+							for (const entt::entity entity : wallEntities) {
+								currentWallSignature ^= static_cast<size_t>(static_cast<uint32_t>(entity));
+								currentWallSignature *= 1099511628211ull;
+							}
+
+							const bool needsRebuild =
+								!wallCache.built ||
+								wallCache.sourceRegistry != &registry ||
+								wallCache.wallEntityCount != wallEntities.size() ||
+								wallCache.wallEntitySignature != currentWallSignature;
+
+							if (needsRebuild) {
+								rebuildWallCache(wallEntities);
+							}
+
+							std::vector<glm::vec2> batchedWallTriangleVertices;
+							if (!wallCache.triangleVerticesXZ.empty()) {
+								if (wallCache.frameStamp == std::numeric_limits<uint32_t>::max()) {
+									std::fill(wallCache.triangleStamps.begin(), wallCache.triangleStamps.end(), 0u);
+									wallCache.frameStamp = 1;
+								} else {
+									++wallCache.frameStamp;
+								}
+
+								const float minimapRadius = glm::max(1.0f, gs.minimap_radius);
+								const int minCellX = toCellCoord(player_pos.x - minimapRadius);
+								const int maxCellX = toCellCoord(player_pos.x + minimapRadius);
+								const int minCellY = toCellCoord(player_pos.z - minimapRadius);
+								const int maxCellY = toCellCoord(player_pos.z + minimapRadius);
+
+								for (int cx = minCellX; cx <= maxCellX; ++cx) {
+									for (int cy = minCellY; cy <= maxCellY; ++cy) {
+										auto cellIt = wallCache.cellToTriangles.find(cellKey(cx, cy));
+										if (cellIt == wallCache.cellToTriangles.end()) {
+											continue;
+										}
+
+										for (const uint32_t triIndex : cellIt->second) {
+											if (triIndex >= wallCache.triangleStamps.size()) {
+												continue;
+											}
+											if (wallCache.triangleStamps[triIndex] == wallCache.frameStamp) {
+												continue;
+											}
+											wallCache.triangleStamps[triIndex] = wallCache.frameStamp;
+
+											const size_t base = static_cast<size_t>(triIndex) * 3;
+											if (base + 2 >= wallCache.triangleVerticesXZ.size()) {
+												continue;
+											}
+
+											const glm::vec2 v0 = wallCache.triangleVerticesXZ[base];
+											const glm::vec2 v1 = wallCache.triangleVerticesXZ[base + 1];
+											const glm::vec2 v2 = wallCache.triangleVerticesXZ[base + 2];
+
+											batchedWallTriangleVertices.push_back(
+												worldToMinimapNdc(glm::vec3(v0.x, player_pos.y, v0.y), true));
+											batchedWallTriangleVertices.push_back(
+												worldToMinimapNdc(glm::vec3(v1.x, player_pos.y, v1.y), true));
+											batchedWallTriangleVertices.push_back(
+												worldToMinimapNdc(glm::vec3(v2.x, player_pos.y, v2.y), true));
+										}
+									}
+								}
+
+								if (!batchedWallTriangleVertices.empty()) {
+									rendererService->w_renderer->DebugPass2DTrianglesFilled(
+										batchedWallTriangleVertices,
+										glm::vec4(0.75f, 0.75f, 0.75f, 0.35f));
+								}
+							} else {
+								for (const entt::entity wallEntity : wallEntities) {
+									drawWallFootprint(wallEntity, glm::vec4(0.75f, 0.75f, 0.75f, 1.0f));
+								}
+							}
+						}
 
 						for (entt::entity entity : markerEntities) {
 							glm::vec3 pos(0.0f);
@@ -1642,15 +1776,6 @@ namespace PAIN {
 									has_nearest_objective = true;
 								}
 								drawMarker(pos, dotRadius, color, gs.minimap_icon_objective_path);
-								continue;
-							} else if (metadata_service->hasTag(entity, "wall")) {
-								if (!gs.minimap_show_walls) {
-									continue;
-								}
-								color = glm::vec4(0.75f, 0.75f, 0.75f, 1.0f);
-								if (!drawWallOccupancyFromMesh(entity, color)) {
-									drawWallFootprint(entity, color);
-								}
 								continue;
 							} else {
 								continue;

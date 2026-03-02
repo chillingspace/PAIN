@@ -1935,6 +1935,36 @@ namespace PAIN {
 		glBindVertexArray(0);
 	}
 
+	void WindowsRenderer::DebugPass2DTrianglesFilled(
+		const std::vector<glm::vec2>& triangleVertices,
+		const glm::vec4& color) {
+		if (!debug_VAO || !debug_shader || triangleVertices.size() < 3)
+			return;
+
+		const size_t vertexCount = triangleVertices.size() - (triangleVertices.size() % 3);
+		std::vector<float> verts;
+		verts.reserve(vertexCount * 7);
+
+		for (size_t i = 0; i < vertexCount; ++i) {
+			const glm::vec2& p = triangleVertices[i];
+			verts.insert(verts.end(), {p.x, p.y, 0.0f, color.r, color.g, color.b, color.a});
+		}
+
+		glBindVertexArray(debug_VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
+		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(),
+			GL_DYNAMIC_DRAW);
+
+		debug_shader->Bind();
+		glm::mat4 ortho_proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
+		debug_shader->SetUniform("u_V", glm::mat4(1.0f));
+		debug_shader->SetUniform("u_P", ortho_proj);
+
+		glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertexCount));
+
+		glBindVertexArray(0);
+	}
+
 	void WindowsRenderer::DebugPass2DCircle(const glm::vec2& center_p,
 		const glm::vec2& radius_ndc,
 		const glm::vec4& color,
