@@ -1677,7 +1677,7 @@ namespace PAIN {
 
 					if (remove_clicked) {
 
-						if (comp_string_ref == "Name" || comp_string_ref == "Tag" ||
+						if (comp_string_ref == "Name" ||
 							comp_string_ref == "Editor Visiblity" ||
 							comp_string_ref == "Relation" || comp_string_ref == "Group") {
 							closePopUp(popup_id);

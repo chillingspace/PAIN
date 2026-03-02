@@ -126,6 +126,10 @@ namespace PAIN {
 						 const glm::vec4& color);
 		void DebugPass2DLine(const glm::vec2& start_p, const glm::vec2& end_p,
 							const glm::vec4& color);
+		void DebugPass2DTriangleFilled(const glm::vec2& a,
+							 const glm::vec2& b,
+							 const glm::vec2& c,
+							 const glm::vec4& color);
 		void DebugPass2DCircle(const glm::vec2& center_p, const glm::vec2& radius_ndc,
 							  const glm::vec4& color, int segments = 32);
 		void PostProcessPass();

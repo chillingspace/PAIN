@@ -1486,6 +1486,83 @@ namespace PAIN {
 							drawDot(pos, radiusPx, color);
 						};
 
+						auto drawWallFootprint = [&](entt::entity entity, const glm::vec4& color) -> bool {
+							if (auto* bv = registry.try_get<BoundingVolume>(entity)) {
+								if (bv->worldAABB.isValid()) {
+									const glm::vec3 minP = bv->worldAABB.min;
+									const glm::vec3 maxP = bv->worldAABB.max;
+
+									const glm::vec3 c0(minP.x, 0.0f, minP.z);
+									const glm::vec3 c1(maxP.x, 0.0f, minP.z);
+									const glm::vec3 c2(maxP.x, 0.0f, maxP.z);
+									const glm::vec3 c3(minP.x, 0.0f, maxP.z);
+
+									const glm::vec2 p0 = worldToMinimapNdc(c0, true);
+									const glm::vec2 p1 = worldToMinimapNdc(c1, true);
+									const glm::vec2 p2 = worldToMinimapNdc(c2, true);
+									const glm::vec2 p3 = worldToMinimapNdc(c3, true);
+
+									rendererService->w_renderer->DebugPass2DLine(p0, p1, color);
+									rendererService->w_renderer->DebugPass2DLine(p1, p2, color);
+									rendererService->w_renderer->DebugPass2DLine(p2, p3, color);
+									rendererService->w_renderer->DebugPass2DLine(p3, p0, color);
+									return true;
+								}
+							}
+
+							return false;
+						};
+
+						auto drawWallOccupancyFromMesh = [&](entt::entity entity, const glm::vec4& color) -> bool {
+							auto* model = registry.try_get<ModelRenderer>(entity);
+							auto* wt = registry.try_get<WorldTransform>(entity);
+							if (!model || !wt) {
+								return false;
+							}
+
+							if (model->modelGUID != model->prevModelGUID) {
+								InitializeModelRenderer(entity, *model);
+							}
+
+							if (!model->cachedModelAsset) {
+								return false;
+							}
+
+							const auto& vertices = model->cachedModelAsset->vertices;
+							const auto& indices = model->cachedModelAsset->indices;
+							if (vertices.empty() || indices.size() < 3) {
+								return false;
+							}
+
+							const glm::mat4 M = wt->matrix;
+							bool drewAny = false;
+							for (size_t i = 0; i + 2 < indices.size(); i += 3) {
+								const uint32_t i0 = indices[i];
+								const uint32_t i1 = indices[i + 1];
+								const uint32_t i2 = indices[i + 2];
+								if (i0 >= vertices.size() || i1 >= vertices.size() || i2 >= vertices.size()) {
+									continue;
+								}
+
+								const glm::vec3 w0 = glm::vec3(M * glm::vec4(vertices[i0].pos, 1.0f));
+								const glm::vec3 w1 = glm::vec3(M * glm::vec4(vertices[i1].pos, 1.0f));
+								const glm::vec3 w2 = glm::vec3(M * glm::vec4(vertices[i2].pos, 1.0f));
+
+								const glm::vec2 p0 = worldToMinimapNdc(w0, true);
+								const glm::vec2 p1 = worldToMinimapNdc(w1, true);
+								const glm::vec2 p2 = worldToMinimapNdc(w2, true);
+
+								rendererService->w_renderer->DebugPass2DTriangleFilled(
+									p0,
+									p1,
+									p2,
+									glm::vec4(color.r, color.g, color.b, 0.35f));
+								drewAny = true;
+							}
+
+							return drewAny;
+						};
+
 						glm::vec3 nearest_item_pos(0.0f);
 						glm::vec3 nearest_objective_pos(0.0f);
 						bool has_nearest_item = false;
@@ -1506,7 +1583,6 @@ namespace PAIN {
 
 						appendTaggedEntities("Player");
 						appendTaggedEntities("Enemy");
-						appendTaggedEntities("Environment");
 						appendTaggedEntities("wall");
 						appendTaggedEntities("item");
 						appendTaggedEntities("objective");
@@ -1567,14 +1643,14 @@ namespace PAIN {
 								}
 								drawMarker(pos, dotRadius, color, gs.minimap_icon_objective_path);
 								continue;
-							} else if (metadata_service->hasTag(entity, "wall") ||
-								metadata_service->hasTag(entity, "Environment")) {
+							} else if (metadata_service->hasTag(entity, "wall")) {
 								if (!gs.minimap_show_walls) {
 									continue;
 								}
 								color = glm::vec4(0.75f, 0.75f, 0.75f, 1.0f);
-								dotRadius = 2.5f;
-								drawMarker(pos, dotRadius, color, gs.minimap_icon_wall_path);
+								if (!drawWallOccupancyFromMesh(entity, color)) {
+									drawWallFootprint(entity, color);
+								}
 								continue;
 							} else {
 								continue;
