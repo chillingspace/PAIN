@@ -256,13 +256,13 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 19,
+                            "action": "mainmenu_Quit_Confirm",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
                             "payload": "",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -398,13 +398,13 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 20,
+                            "action": "mainmenu_Quit_Cancel",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
                             "payload": "",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -736,13 +736,13 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 21,
+                            "action": "LoadScene",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
                             "payload": "game/scenes/cutscene.scn",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -878,13 +878,13 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 21,
+                            "action": "LoadScene",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
                             "payload": "game/scenes/howtoplay.scn",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -1020,13 +1020,13 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 21,
+                            "action": "LoadScene",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
                             "payload": "game/scenes/credits.scn",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -1162,13 +1162,13 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 10,
+                            "action": "menu_QuitGame",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
                             "payload": "",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,

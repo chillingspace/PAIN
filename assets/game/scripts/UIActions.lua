@@ -246,6 +246,27 @@ local handlers = {
         end
     end,
 
+    pause_Quit = function(buttonEntity, payload)
+        -- Show restart confirmation popup
+        printLog("[UI] pause_Quit -> showing restart confirmation")
+        playUIClick()
+        if setLayerEnabled then
+            setLayerEnabled(Layers.QUIT_CONFIRM, true)  -- Show Quit Confirmation layer (layer 6)
+            setLayerEnabled(Layers.PAUSE, false) -- Hide PauseMenu
+
+            setLayerEnabled(Layers.GAME_OVER, false)
+            setLayerEnabled(Layers.GAME_WIN, false)
+
+            local isMobile = (isAndroid ~= nil and isAndroid())
+            if isMobile then
+                hideCursor(false)
+            end
+            printLog("[UI] RestartOverlay (layer 5) shown")
+        else
+            printLog("[UI] setLayerEnabled not available")
+        end
+    end,
+
     restart_Confirm = function(buttonEntity, payload)
         -- User pressed YES - restart level
         printLog("[UI] restart_Confirm -> restarting")

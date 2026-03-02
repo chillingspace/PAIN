@@ -422,7 +422,6 @@ namespace PAIN {
 						// -- Action --
 						ImGui::SeparatorText("Action");
 
-						// must match UIAction order
 						static const char* action_names[] = {
 							"None",
 							"game_Jump",
@@ -433,6 +432,7 @@ namespace PAIN {
 
 							"pause_Resume",
 							"pause_Restart",
+							"pause_Quit"
 
 							"restart_Confirm",
 							"restart_Cancel",

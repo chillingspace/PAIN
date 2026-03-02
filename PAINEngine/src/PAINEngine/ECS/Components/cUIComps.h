@@ -128,8 +128,11 @@ namespace PAIN {
 
 		mainmenu_Quit_Confirm,
 		mainmenu_Quit_Cancel,
-		
+
 		LoadScene,
+
+		// Any additional UI Action goes here
+		pause_Quit,
 	};
 
 	struct UIButton {
@@ -282,56 +285,58 @@ namespace PAIN {
 		bool b_playing = false;          // Is animation playing?
 	};
 
+	// Enum Serializers 
+	NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::UIButtonState, {
+		{PAIN::UIButtonState::Normal, "Normal"},
+		{PAIN::UIButtonState::Highlighted, "Highlighted"},
+		{PAIN::UIButtonState::Pressed, "Pressed"},
+		{PAIN::UIButtonState::Disabled, "Disabled"}
+	})
+
+
+	NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::TextAlignment, {
+	{PAIN::TextAlignment::Left, "Left"},
+	{PAIN::TextAlignment::Center, "Center"},
+	{PAIN::TextAlignment::Right, "Right"} 
+	})
+
+	NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::UIAction, {
+		{PAIN::UIAction::None, "None" },
+		{PAIN::UIAction::game_Jump, "game_Jump"},
+		{PAIN::UIAction::game_Hide, "game_Hide"},
+		{PAIN::UIAction::game_Collect, "game_Collect"},
+		{PAIN::UIAction::game_Move, "game_Move"},
+		{PAIN::UIAction::game_End, "game_End"},
+
+		{PAIN::UIAction::pause_Resume, "pause_Resume"},
+		{PAIN::UIAction::pause_Restart, "pause_Restart"},
+		{PAIN::UIAction::pause_Quit, "pause_Quit"},
+
+		{PAIN::UIAction::restart_Confirm, "restart_Confirm"},
+		{PAIN::UIAction::restart_Cancel, "restart_Cancel"},
+
+		{PAIN::UIAction::menu_QuitGame, "menu_QuitGame"},
+		{PAIN::UIAction::quit_Confirm, "quit_Confirm"},
+		{PAIN::UIAction::quit_Cancel, "quit_Cancel"},
+
+		{PAIN::UIAction::goto_Pause, "goto_Pause"},
+
+		{PAIN::UIAction::cutscene_Open_Menu, "cutscene_Open_Menu"},
+		{PAIN::UIAction::cutscene_Close_Menu, "cutscene_Close_Menu"},
+		{PAIN::UIAction::cutscene_Menu_Quit, "cutscene_Menu_Quit"},
+		{PAIN::UIAction::cutscene_Quit_Confirm, "cutscene_Quit_Confirm"},
+		{PAIN::UIAction::cutscene_Quit_Cancel, "cutscene_Quit_Cancel"},
+
+		{PAIN::UIAction::mainmenu_Quit_Confirm, "mainmenu_Quit_Confirm"},
+		{PAIN::UIAction::mainmenu_Quit_Cancel, "mainmenu_Quit_Cancel"},
+
+		{PAIN::UIAction::LoadScene, "LoadScene"}
+	})
+
 } // namespace PAIN
 
 
 #endif
-
-// Enum Serializers 
-NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::UIButtonState, {
-	{PAIN::UIButtonState::Normal, "Normal"},
-	{PAIN::UIButtonState::Highlighted, "Highlighted"},
-	{PAIN::UIButtonState::Pressed, "Pressed"},
-	{PAIN::UIButtonState::Disabled, "Disabled"}
-	})
-
-
-NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::TextAlignment, {
-{PAIN::TextAlignment::Left, "Left"},
-{PAIN::TextAlignment::Center, "Center"},
-{PAIN::TextAlignment::Right, "Right"} })
-
-NLOHMANN_JSON_SERIALIZE_ENUM(PAIN::UIAction, {
-	{PAIN::UIAction::None, "None" },
-	{PAIN::UIAction::game_Jump, "game_Jump"},
-	{PAIN::UIAction::game_Hide, "game_Hide"},
-	{PAIN::UIAction::game_Collect, "game_Collect"},
-	{PAIN::UIAction::game_Move, "game_Move"},
-	{PAIN::UIAction::game_End, "game_End"},
-
-	{PAIN::UIAction::pause_Resume, "pause_Resume"},
-	{PAIN::UIAction::pause_Restart, "pause_Restart"},
-
-	{PAIN::UIAction::restart_Confirm, "restart_Confirm"},
-	{PAIN::UIAction::restart_Cancel, "restart_Cancel"},
-
-	{PAIN::UIAction::menu_QuitGame, "menu_QuitGame"},
-	{PAIN::UIAction::quit_Confirm, "quit_Confirm"},
-	{PAIN::UIAction::quit_Cancel, "quit_Cancel"},
-
-	{PAIN::UIAction::goto_Pause, "goto_Pause"},
-
-	{PAIN::UIAction::cutscene_Open_Menu, "cutscene_Open_Menu"},
-	{PAIN::UIAction::cutscene_Close_Menu, "cutscene_Close_Menu"},
-	{PAIN::UIAction::cutscene_Menu_Quit, "cutscene_Menu_Quit"},
-	{PAIN::UIAction::cutscene_Quit_Confirm, "cutscene_Quit_Confirm"},
-	{PAIN::UIAction::cutscene_Quit_Cancel, "cutscene_Quit_Cancel"},
-
-	{PAIN::UIAction::mainmenu_Quit_Confirm, "mainmenu_Quit_Confirm"},
-	{PAIN::UIAction::mainmenu_Quit_Cancel, "mainmenu_Quit_Cancel"},
-
-	{PAIN::UIAction::LoadScene, "LoadScene"}
-})
 
 REFL_TYPE(PAIN::UIRectTransform)
 REFL_FIELD(local_position)
