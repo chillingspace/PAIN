@@ -15,6 +15,8 @@ namespace PAIN {
         glm::vec3 velocity = glm::vec3(0.0f);
         glm::vec4 color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
         float size = 1.0f;
+        float rotation = 0.0f;          // radians
+        float angularVelocity = 0.0f;   // radians / sec
         float lifetime = 1.0f;    // Total lifetime
         float age = 0.0f;        // Current age
         bool alive = false;
@@ -202,7 +204,7 @@ namespace PAIN {
         }
         
         // Update the particle system
-        void Update(float deltaTime, const glm::vec3& emitterPosition) {
+        void Update(float deltaTime, const glm::vec3& emitterPosition, const glm::quat& emitterRotation) {
             if (m_Config.state != ParticleSystemState::Playing) {
                 return;
             }
@@ -236,7 +238,7 @@ namespace PAIN {
             }
             
             // Emit new particles
-            Emit(deltaTime, emitterPosition);
+            Emit(deltaTime, emitterPosition, emitterRotation);
             
             // Update existing particles
             UpdateParticles(deltaTime);
@@ -285,10 +287,18 @@ namespace PAIN {
             m_Config.speedVariance = config.speedVariance;
             m_Config.velocityOverLifetimeEnabled = config.velocityOverLifetimeEnabled;
             m_Config.velocityOverLifetime = config.velocityOverLifetime;
+            m_Config.gravityMultiplier = config.gravityMultiplier;
+            m_Config.drag = config.drag;
+            m_Config.startRotation = config.startRotation;
+            m_Config.startRotationVariance = config.startRotationVariance;
+            m_Config.angularVelocity = config.angularVelocity;
+            m_Config.angularVelocityVariance = config.angularVelocityVariance;
             m_Config.emissionShape = config.emissionShape;
             m_Config.shapeParams = config.shapeParams;
             m_Config.emissionDirection = config.emissionDirection;
             m_Config.emissionSpread = config.emissionSpread;
+            m_Config.directionMode = config.directionMode;
+            m_Config.directionSpace = config.directionSpace;
             m_Config.sizeOverLifetime = config.sizeOverLifetime;
             m_Config.sizeOverLifetimeMultiplier = config.sizeOverLifetimeMultiplier;
             m_Config.colorOverLifetime = config.colorOverLifetime;
@@ -298,7 +308,7 @@ namespace PAIN {
             SortCurves(m_Config);
         }
         
-        void Emit(float deltaTime, const glm::vec3& emitterPosition) {
+        void Emit(float deltaTime, const glm::vec3& emitterPosition, const glm::quat& emitterRotation) {
             // Calculate how many particles to emit this frame
             float particlesToEmit = m_Config.emissionRate * deltaTime + m_EmissionAccumulator;
             int emitCount = static_cast<int>(particlesToEmit);
@@ -327,12 +337,19 @@ namespace PAIN {
                 float actualSpeed = m_Config.speed + speedVariance;
                 
                 // Calculate direction with spread
-                glm::vec3 direction = GetEmissionDirection();
+                glm::vec3 direction = GetEmissionDirection(p.position, emitterPosition, emitterRotation);
                 p.velocity = direction * actualSpeed;
                 
                 // Set initial size with variance
                 float sizeVariance = m_Config.startSizeVariance * (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f);
                 p.size = m_Config.startSize + sizeVariance;
+
+                // Set initial rotation and angular velocity
+                float startRotVariance = m_Config.startRotationVariance * (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f);
+                p.rotation = glm::radians(m_Config.startRotation + startRotVariance);
+
+                float angularVelVariance = m_Config.angularVelocityVariance * (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f);
+                p.angularVelocity = glm::radians(m_Config.angularVelocity + angularVelVariance);
                 
                 // Set initial color with variance
                 p.color = m_Config.startColor;
@@ -391,19 +408,42 @@ namespace PAIN {
             }
         }
         
-        glm::vec3 GetEmissionDirection() {
-            // Start with emission direction
-            glm::vec3 dir = glm::normalize(m_Config.emissionDirection);
-            
+        glm::vec3 SafeNormalize(const glm::vec3& v, const glm::vec3& fallback = glm::vec3(0.0f, 1.0f, 0.0f)) {
+            const float len2 = glm::dot(v, v);
+            if (len2 < 0.000001f) {
+                return fallback;
+            }
+            return glm::normalize(v);
+        }
+
+        glm::vec3 GetEmissionDirection(const glm::vec3& spawnPosition, const glm::vec3& emitterPosition, const glm::quat& emitterRotation) {
+            glm::vec3 dir(0.0f, 1.0f, 0.0f);
+
+            switch (m_Config.directionMode) {
+            case ParticleDirectionMode::ShapeNormal:
+                dir = SafeNormalize(spawnPosition - emitterPosition, SafeNormalize(m_Config.emissionDirection));
+                break;
+            case ParticleDirectionMode::Random:
+                dir = RandomUnitVector();
+                break;
+            case ParticleDirectionMode::Custom:
+            default:
+                dir = SafeNormalize(m_Config.emissionDirection);
+                break;
+            }
+
+            if (m_Config.directionSpace == ParticleDirectionSpace::Local) {
+                dir = SafeNormalize(emitterRotation * dir, dir);
+            }
+
             // Apply spread
             if (m_Config.emissionSpread > 0.0f) {
-                // Generate random offset within spread angle
                 float spreadRad = glm::radians(m_Config.emissionSpread);
                 float randomFactor = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
                 glm::vec3 randomOffset = RandomUnitVector() * randomFactor * spreadRad;
-                dir = glm::normalize(dir + randomOffset);
+                dir = SafeNormalize(dir + randomOffset, dir);
             }
-            
+
             return dir;
         }
         
@@ -427,13 +467,16 @@ namespace PAIN {
                 // Update position
                 p.position += p.velocity * deltaTime;
                 
-                // Apply gravity (simple -Y acceleration)
-                // Could add more force fields here
-                p.velocity.y -= 9.81f * deltaTime; // Simple gravity
+                // Apply gravity and drag
+                p.velocity.y -= 9.81f * m_Config.gravityMultiplier * deltaTime;
+                const float dragFactor = glm::max(0.0f, 1.0f - m_Config.drag * deltaTime);
+                p.velocity *= dragFactor;
 
                 if (m_Config.velocityOverLifetimeEnabled) {
                     p.velocity += m_Config.velocityOverLifetime * deltaTime;
                 }
+
+                p.rotation += p.angularVelocity * deltaTime;
                 
                 // Update size based on lifetime curve
                 float normalizedAge = p.age / p.lifetime;

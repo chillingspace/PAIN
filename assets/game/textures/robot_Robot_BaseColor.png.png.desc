@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "robot_Robot_BaseColor.png.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 7552812841751400139
+  },
+  "descriptor_version": 1,
+  "guid": "1c7ce177-d679-a44a-89d0-a718aa172c23",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\robot_Robot_BaseColor.png.png"
+  }
+}

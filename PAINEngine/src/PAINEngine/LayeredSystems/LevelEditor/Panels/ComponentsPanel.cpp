@@ -390,6 +390,20 @@ namespace PAIN {
 							ImGui::Spacing();
 							changed |= ImGui::DragFloat3("Emission Direction", &ps.emissionDirection.x, 0.01f);
 							changed |= ImGui::DragFloat("Spread (deg)", &ps.emissionSpread, 1.0f, 0.0f, 180.0f, "%.1f");
+
+							const char* directionModeNames[] = {"Custom", "Shape Normal", "Random"};
+							int directionModeIdx = static_cast<int>(ps.directionMode);
+							if (ImGui::Combo("Direction Mode", &directionModeIdx, directionModeNames, IM_ARRAYSIZE(directionModeNames))) {
+								ps.directionMode = static_cast<PAIN::ParticleDirectionMode>(directionModeIdx);
+								changed = true;
+							}
+
+							const char* directionSpaceNames[] = {"World", "Local"};
+							int directionSpaceIdx = static_cast<int>(ps.directionSpace);
+							if (ImGui::Combo("Direction Space", &directionSpaceIdx, directionSpaceNames, IM_ARRAYSIZE(directionSpaceNames))) {
+								ps.directionSpace = static_cast<PAIN::ParticleDirectionSpace>(directionSpaceIdx);
+								changed = true;
+							}
 							
 							ImGui::Spacing();
 							// Emission Shape
@@ -464,6 +478,16 @@ namespace PAIN {
 							// Speed
 							changed |= ImGui::DragFloat("Speed", &ps.speed, 0.1f, 0.0f, 100.0f, "%.2f");
 							changed |= ImGui::DragFloat("Speed Variance", &ps.speedVariance, 0.05f, 0.0f, ps.speed, "%.2f");
+							changed |= ImGui::DragFloat("Gravity Multiplier", &ps.gravityMultiplier, 0.05f, -5.0f, 5.0f, "%.2f");
+							changed |= ImGui::DragFloat("Drag", &ps.drag, 0.01f, 0.0f, 10.0f, "%.2f");
+
+							ImGui::Spacing();
+							ImGui::Text("Rotation");
+							changed |= ImGui::DragFloat("Start Rotation", &ps.startRotation, 1.0f, -360.0f, 360.0f, "%.1f deg");
+							changed |= ImGui::DragFloat("Rotation Variance", &ps.startRotationVariance, 1.0f, 0.0f, 360.0f, "%.1f deg");
+							changed |= ImGui::DragFloat("Angular Velocity", &ps.angularVelocity, 1.0f, -720.0f, 720.0f, "%.1f deg/s");
+							changed |= ImGui::DragFloat("Angular Vel Variance", &ps.angularVelocityVariance, 1.0f, 0.0f, 720.0f, "%.1f deg/s");
+
 							changed |= ImGui::Checkbox("Velocity Over Lifetime", &ps.velocityOverLifetimeEnabled);
 							if (ps.velocityOverLifetimeEnabled) {
 								changed |= ImGui::DragFloat3("Velocity Delta", &ps.velocityOverLifetime.x, 0.05f);

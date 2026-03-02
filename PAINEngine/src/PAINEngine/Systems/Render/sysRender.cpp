@@ -662,24 +662,30 @@ namespace PAIN {
 				// Location 2: aInstancePosition (vec3)
 				// Location 3: aInstanceColor (vec4)
 				// Location 4: aInstanceSize (float)
+				// Location 5: aInstanceRotation (float radians)
 				glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
 				// Allocate buffer (will be updated each frame)
-				glBufferData(GL_ARRAY_BUFFER, instanceCapacity * sizeof(float) * 8, nullptr, GL_STREAM_DRAW); // 8 floats per instance: pos(3) + color(4) + size(1)
+				glBufferData(GL_ARRAY_BUFFER, instanceCapacity * sizeof(float) * 9, nullptr, GL_STREAM_DRAW); // 9 floats per instance: pos(3) + color(4) + size(1) + rot(1)
 
 				// Instance position (location 2)
 				glEnableVertexAttribArray(2);
-				glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+				glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)0);
 				glVertexAttribDivisor(2, 1); // Advance once per instance
 
 				// Instance color (location 3)
 				glEnableVertexAttribArray(3);
-				glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+				glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float)));
 				glVertexAttribDivisor(3, 1); // Advance once per instance
 
 				// Instance size (location 4)
 				glEnableVertexAttribArray(4);
-				glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(7 * sizeof(float)));
+				glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(7 * sizeof(float)));
 				glVertexAttribDivisor(4, 1); // Advance once per instance
+
+				// Instance rotation (location 5)
+				glEnableVertexAttribArray(5);
+				glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(8 * sizeof(float)));
+				glVertexAttribDivisor(5, 1); // Advance once per instance
 
 				glBindVertexArray(0);
 			}
@@ -722,6 +728,7 @@ namespace PAIN {
 					glm::vec3 position;
 					glm::vec4 color;
 					float size;
+					float rotation;
 					float distanceSq;
 				};
 				std::vector<ParticleInstance> instances;
@@ -736,6 +743,7 @@ namespace PAIN {
 					inst.position = p.position;
 					inst.color = p.color;
 					inst.size = p.size;
+					inst.rotation = p.rotation;
 					const glm::vec3 delta = p.position - activeCam->pos;
 					inst.distanceSq = glm::dot(delta, delta);
 					instances.push_back(inst);
@@ -756,16 +764,17 @@ namespace PAIN {
 					instanceData.push_back(inst.color.b);
 					instanceData.push_back(inst.color.a);
 					instanceData.push_back(inst.size);
+					instanceData.push_back(inst.rotation);
 				}
 
-				const size_t instanceCount = instanceData.size() / 8;
+				const size_t instanceCount = instanceData.size() / 9;
 				if (instanceCount == 0)
 					continue;
 
 				if (instanceCount > instanceCapacity) {
 					instanceCapacity = instanceCount;
 					glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-					glBufferData(GL_ARRAY_BUFFER, instanceCapacity * sizeof(float) * 8, nullptr, GL_STREAM_DRAW);
+					glBufferData(GL_ARRAY_BUFFER, instanceCapacity * sizeof(float) * 9, nullptr, GL_STREAM_DRAW);
 				}
 
 				GLuint particleTextureId = 0;

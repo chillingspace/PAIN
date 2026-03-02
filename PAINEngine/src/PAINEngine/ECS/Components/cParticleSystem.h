@@ -48,6 +48,17 @@ namespace PAIN {
         BackToFront
     };
 
+    enum class ParticleDirectionMode {
+        Custom = 0,
+        ShapeNormal,
+        Random
+    };
+
+    enum class ParticleDirectionSpace {
+        World = 0,
+        Local
+    };
+
     // ============================================
     // Keyframe for curves
     // ============================================
@@ -131,11 +142,20 @@ namespace PAIN {
         float speedVariance = 0.0f;
         bool velocityOverLifetimeEnabled = false;
         glm::vec3 velocityOverLifetime = glm::vec3(0.0f);
+        float gravityMultiplier = 1.0f;
+        float drag = 0.0f;
+
+        float startRotation = 0.0f;      // degrees
+        float startRotationVariance = 0.0f;
+        float angularVelocity = 0.0f;    // degrees / sec
+        float angularVelocityVariance = 0.0f;
         
         EmissionShape emissionShape = EmissionShape::Point;
         EmissionShapeParams shapeParams;
         glm::vec3 emissionDirection = glm::vec3(0.0f, 1.0f, 0.0f);  // Up by default
         float emissionSpread = 0.0f;      // degrees
+        ParticleDirectionMode directionMode = ParticleDirectionMode::Custom;
+        ParticleDirectionSpace directionSpace = ParticleDirectionSpace::World;
 
         // ========================================
         // Over Lifetime Curves
@@ -193,10 +213,18 @@ REFL_FIELD(speed, PAIN::Editor::Attributes::DisplayName("Speed"), PAIN::Editor::
 REFL_FIELD(speedVariance, PAIN::Editor::Attributes::DisplayName("Speed Variance"))
 REFL_FIELD(velocityOverLifetimeEnabled, PAIN::Editor::Attributes::DisplayName("Velocity Over Lifetime"))
 REFL_FIELD(velocityOverLifetime, PAIN::Editor::Attributes::DisplayName("Velocity Delta"))
+REFL_FIELD(gravityMultiplier, PAIN::Editor::Attributes::DisplayName("Gravity Multiplier"), PAIN::Editor::Attributes::Range(-5.0f, 5.0f))
+REFL_FIELD(drag, PAIN::Editor::Attributes::DisplayName("Drag"), PAIN::Editor::Attributes::Range(0.0f, 10.0f))
+REFL_FIELD(startRotation, PAIN::Editor::Attributes::DisplayName("Start Rotation (deg)"))
+REFL_FIELD(startRotationVariance, PAIN::Editor::Attributes::DisplayName("Start Rotation Variance"))
+REFL_FIELD(angularVelocity, PAIN::Editor::Attributes::DisplayName("Angular Velocity (deg/s)"))
+REFL_FIELD(angularVelocityVariance, PAIN::Editor::Attributes::DisplayName("Angular Velocity Variance"))
 REFL_FIELD(emissionShape)
 REFL_FIELD(shapeParams)
 REFL_FIELD(emissionDirection, PAIN::Editor::Attributes::DisplayName("Emission Direction"))
 REFL_FIELD(emissionSpread, PAIN::Editor::Attributes::DisplayName("Spread (deg)"), PAIN::Editor::Attributes::Range(0.0f, 180.0f))
+REFL_FIELD(directionMode, PAIN::Editor::Attributes::DisplayName("Direction Mode"))
+REFL_FIELD(directionSpace, PAIN::Editor::Attributes::DisplayName("Direction Space"))
 REFL_FIELD(sizeOverLifetime, PAIN::Editor::Attributes::DisplayName("Size Over Lifetime"))
 REFL_FIELD(sizeOverLifetimeMultiplier, PAIN::Editor::Attributes::DisplayName("Size Multiplier"), PAIN::Editor::Attributes::Range(0.0f, 10.0f))
 REFL_FIELD(colorOverLifetime, PAIN::Editor::Attributes::DisplayName("Color Over Lifetime"))
