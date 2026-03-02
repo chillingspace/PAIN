@@ -432,7 +432,7 @@ namespace PAIN {
 
 							"pause_Resume",
 							"pause_Restart",
-							"pause_Quit"
+							"pause_Quit",
 
 							"restart_Confirm",
 							"restart_Cancel",

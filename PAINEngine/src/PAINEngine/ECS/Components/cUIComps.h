@@ -106,6 +106,7 @@ namespace PAIN {
 		// pause screen
 		pause_Resume,
 		pause_Restart,
+		pause_Quit,
 
 		// Confirmations for restart
 		restart_Confirm,
@@ -129,10 +130,7 @@ namespace PAIN {
 		mainmenu_Quit_Confirm,
 		mainmenu_Quit_Cancel,
 
-		LoadScene,
-
-		// Any additional UI Action goes here
-		pause_Quit,
+		LoadScene
 	};
 
 	struct UIButton {

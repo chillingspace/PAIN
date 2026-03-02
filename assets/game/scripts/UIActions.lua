@@ -247,11 +247,11 @@ local handlers = {
     end,
 
     pause_Quit = function(buttonEntity, payload)
-        -- Show restart confirmation popup
-        printLog("[UI] pause_Quit -> showing restart confirmation")
+        -- Show Quit confirmation popup
+        printLog("[UI] pause_Quit -> showing quit confirmation")
         playUIClick()
         if setLayerEnabled then
-            setLayerEnabled(Layers.QUIT_CONFIRM, true)  -- Show Quit Confirmation layer (layer 6)
+            setLayerEnabled(Layers.QUIT, true)  -- Show Quit Confirmation layer (layer 6)
             setLayerEnabled(Layers.PAUSE, false) -- Hide PauseMenu
 
             setLayerEnabled(Layers.GAME_OVER, false)
@@ -261,7 +261,7 @@ local handlers = {
             if isMobile then
                 hideCursor(false)
             end
-            printLog("[UI] RestartOverlay (layer 5) shown")
+            printLog("[UI] QuitOverlay (layer 6) shown")
         else
             printLog("[UI] setLayerEnabled not available")
         end
