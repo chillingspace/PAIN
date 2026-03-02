@@ -123,6 +123,10 @@
         "active_game_cam": "Player",
         "aspectRatioH": 9.0,
         "aspectRatioW": 16.0,
+        "capsuleHeight": 1.7999999523162842,
+        "collisionEnabled": true,
+        "collisionOffset": 0.10000000149011612,
+        "collisionRadius": 0.5,
         "farPlane": 100.0,
         "forward": [
             -0.27839651703834534,
@@ -137,12 +141,14 @@
             -1.0069396495819092
         ],
         "sensitivity": 0.10000000149011612,
+        "showCollisionGizmo": false,
         "speed": 20.0,
         "up": [
             0.0,
             1.0,
             0.0
-        ]
+        ],
+        "useCapsuleCollision": false
     },
     "ecs": {
         "Entities": [
@@ -297,6 +303,15 @@
                                         0.20000000298023224,
                                         0.07999999821186066
                                     ]
+                                },
+                                "UIButton": {
+                                    "action": "restart_Cancel",
+                                    "disabled_color": -10066330,
+                                    "highlighted_color": -3355444,
+                                    "normal_color": -1,
+                                    "payload": "",
+                                    "pressed_color": -5592406,
+                                    "state": "Normal"
                                 }
                             },
                             "correspondingPrefabEntityGUID": "0aafdc40-3450-8143-be1d-2f43ada89af1",
@@ -324,13 +339,13 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 22,
+                            "action": "restart_Cancel",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
                             "payload": "",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -462,6 +477,15 @@
                                         0.20000000298023224,
                                         0.07999999821186066
                                     ]
+                                },
+                                "UIButton": {
+                                    "action": "restart_Confirm",
+                                    "disabled_color": -10066330,
+                                    "highlighted_color": -3355444,
+                                    "normal_color": -1,
+                                    "payload": "",
+                                    "pressed_color": -5592406,
+                                    "state": "Normal"
                                 }
                             },
                             "correspondingPrefabEntityGUID": "dd464bb8-d9f7-a245-9822-3d2644e4bbe2",
@@ -489,13 +513,13 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 21,
+                            "action": "restart_Confirm",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
                             "payload": "",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -711,6 +735,15 @@
                                         0.4000000059604645,
                                         0.09000000357627869
                                     ]
+                                },
+                                "UIButton": {
+                                    "action": "restart_Confirm",
+                                    "disabled_color": -10066330,
+                                    "highlighted_color": -3355444,
+                                    "normal_color": -1,
+                                    "payload": "",
+                                    "pressed_color": -5592406,
+                                    "state": "Normal"
                                 }
                             },
                             "correspondingPrefabEntityGUID": "f180b514-744b-3d42-a07b-2585106fb8e8",
@@ -738,13 +771,13 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 6,
+                            "action": "restart_Confirm",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
                             "payload": "",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -876,6 +909,15 @@
                                         0.30000001192092896,
                                         0.10000000149011612
                                     ]
+                                },
+                                "UIButton": {
+                                    "action": "LoadScene",
+                                    "disabled_color": -10066330,
+                                    "highlighted_color": -3355444,
+                                    "normal_color": -1,
+                                    "payload": "game/scenes/mainmenu.scn",
+                                    "pressed_color": -5592406,
+                                    "state": "Normal"
                                 }
                             },
                             "correspondingPrefabEntityGUID": "2987b941-811b-1846-90ac-69bed20a8ac3",
@@ -903,13 +945,13 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 8,
+                            "action": "LoadScene",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "payload": "",
+                            "payload": "game/scenes/mainmenu.scn",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -1141,13 +1183,13 @@
                                     ]
                                 },
                                 "UIButton": {
-                                    "action": 33,
+                                    "action": "LoadScene",
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
-                                    "payload": "",
+                                    "payload": "game/scenes/Level1.scn",
                                     "pressed_color": -5592406,
-                                    "state": 0
+                                    "state": "Normal"
                                 }
                             },
                             "correspondingPrefabEntityGUID": "6453baf0-385a-7a40-bffb-de0d6288d042",
@@ -1175,13 +1217,13 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 33,
+                            "action": "LoadScene",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "payload": "",
+                            "payload": "game/scenes/Level1.scn",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -1317,6 +1359,15 @@
                                         0.30000001192092896,
                                         0.10000000149011612
                                     ]
+                                },
+                                "UIButton": {
+                                    "action": "LoadScene",
+                                    "disabled_color": -10066330,
+                                    "highlighted_color": -3355444,
+                                    "normal_color": -1,
+                                    "payload": "game/scenes/mainmenu.scn",
+                                    "pressed_color": -5592406,
+                                    "state": "Normal"
                                 }
                             },
                             "correspondingPrefabEntityGUID": "85229db1-9cf5-064e-bd77-71c88e8dbfcc",
@@ -1344,13 +1395,13 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 8,
+                            "action": "LoadScene",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "payload": "",
+                            "payload": "game/scenes/mainmenu.scn",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -8117,13 +8168,13 @@
                                     "total_frames": 2
                                 },
                                 "UIButton": {
-                                    "action": 17,
+                                    "action": "quit_Cancel",
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
                                     "payload": "",
                                     "pressed_color": -5592406,
-                                    "state": 0
+                                    "state": "Normal"
                                 },
                                 "UIElement": {
                                     "b_is_enabled": true,
@@ -8210,13 +8261,13 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 17,
+                            "action": "quit_Cancel",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
                             "payload": "",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -8406,13 +8457,13 @@
                                     "total_frames": 2
                                 },
                                 "UIButton": {
-                                    "action": 16,
+                                    "action": "LoadScene",
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
-                                    "payload": "",
+                                    "payload": "game/scenes/mainmenu.scn",
                                     "pressed_color": -5592406,
-                                    "state": 0
+                                    "state": "Normal"
                                 },
                                 "UIElement": {
                                     "b_is_enabled": true,
@@ -8499,13 +8550,13 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 16,
+                            "action": "LoadScene",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "payload": "",
+                            "payload": "game/scenes/mainmenu.scn",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -8849,13 +8900,13 @@
                                     "total_frames": 2
                                 },
                                 "UIButton": {
-                                    "action": 5,
+                                    "action": "pause_Resume",
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
                                     "payload": "",
                                     "pressed_color": -5592406,
-                                    "state": 0
+                                    "state": "Normal"
                                 },
                                 "UIElement": {
                                     "b_is_enabled": true,
@@ -8942,13 +8993,13 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 5,
+                            "action": "pause_Resume",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
                             "payload": "",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -9138,13 +9189,13 @@
                                     "total_frames": 2
                                 },
                                 "UIButton": {
-                                    "action": 6,
+                                    "action": "pause_Restart",
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
                                     "payload": "",
                                     "pressed_color": -5592406,
-                                    "state": 0
+                                    "state": "Normal"
                                 },
                                 "UIElement": {
                                     "b_is_enabled": true,
@@ -9231,13 +9282,13 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 6,
+                            "action": "pause_Restart",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
                             "payload": "",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -9427,13 +9478,13 @@
                                     "total_frames": 2
                                 },
                                 "UIButton": {
-                                    "action": 8,
+                                    "action": "pause_Quit",
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
                                     "payload": "",
                                     "pressed_color": -5592406,
-                                    "state": 0
+                                    "state": "Normal"
                                 },
                                 "UIElement": {
                                     "b_is_enabled": true,
@@ -9520,13 +9571,13 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": 8,
+                            "action": "pause_Quit",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
                             "payload": "",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -10050,13 +10101,13 @@
                             ]
                         },
                         "UIButton": {
-                            "action": 18,
+                            "action": "None",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
                             "payload": "",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -10180,13 +10231,13 @@
                             ]
                         },
                         "UIButton": {
-                            "action": 4,
+                            "action": "None",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
                             "payload": "",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -10318,13 +10369,13 @@
                             ]
                         },
                         "UIButton": {
-                            "action": 3,
+                            "action": "None",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
                             "payload": "",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -10448,13 +10499,13 @@
                             ]
                         },
                         "UIButton": {
-                            "action": 2,
+                            "action": "None",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
                             "payload": "",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -10578,13 +10629,13 @@
                             ]
                         },
                         "UIButton": {
-                            "action": 1,
+                            "action": "None",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
                             "payload": "",
                             "pressed_color": -5592406,
-                            "state": 0
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
