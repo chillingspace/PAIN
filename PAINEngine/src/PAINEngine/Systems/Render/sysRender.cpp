@@ -1338,9 +1338,12 @@ namespace PAIN {
 						bool has_player = false;
 						bool has_view_forward = false;
 
-						if (auto playerEntityOpt = metadata_service->getEntityByName("Player")) {
-							const entt::entity player = playerEntityOpt.value();
-							if (registry.valid(player)) {
+						{
+							const auto playersByTag = metadata_service->getEntitiesByTag("Player");
+							for (const entt::entity player : playersByTag) {
+								if (!registry.valid(player)) {
+									continue;
+								}
 								if (auto* wt = registry.try_get<WorldTransform>(player)) {
 									player_pos = glm::vec3(wt->matrix[3]);
 									has_player = true;
@@ -1349,6 +1352,26 @@ namespace PAIN {
 									player_pos = lt->position;
 									player_forward = lt->rotation * glm::vec3(0.0f, 0.0f, -1.0f);
 									has_player = true;
+								}
+								if (has_player) {
+									break;
+								}
+							}
+						}
+
+						if (!has_player) {
+							if (auto playerEntityOpt = metadata_service->getEntityByName("Player")) {
+								const entt::entity player = playerEntityOpt.value();
+								if (registry.valid(player)) {
+									if (auto* wt = registry.try_get<WorldTransform>(player)) {
+										player_pos = glm::vec3(wt->matrix[3]);
+										has_player = true;
+									}
+									if (auto* lt = registry.try_get<LocalTransform>(player)) {
+										player_pos = lt->position;
+										player_forward = lt->rotation * glm::vec3(0.0f, 0.0f, -1.0f);
+										has_player = true;
+									}
 								}
 							}
 						}
@@ -1481,10 +1504,12 @@ namespace PAIN {
 							}
 						};
 
-						appendTaggedEntities("minimap_visible");
-						appendTaggedEntities("minimap_wall");
-						appendTaggedEntities("minimap_item");
-						appendTaggedEntities("minimap_objective");
+						appendTaggedEntities("Player");
+						appendTaggedEntities("Enemy");
+						appendTaggedEntities("Environment");
+						appendTaggedEntities("wall");
+						appendTaggedEntities("item");
+						appendTaggedEntities("objective");
 						appendTaggedEntities("letter_collectible");
 						appendTaggedEntities("letter_carried");
 						appendTaggedEntities("letter_collection");
@@ -1500,7 +1525,7 @@ namespace PAIN {
 							glm::vec4 color(0.75f, 0.75f, 0.75f, 1.0f);
 							float dotRadius = 3.0f;
 
-							if (metadata_service->hasTag(entity, "minimap_player")) {
+							if (metadata_service->hasTag(entity, "Player")) {
 								if (!gs.minimap_show_player) {
 									continue;
 								}
@@ -1508,38 +1533,8 @@ namespace PAIN {
 								dotRadius = 5.0f;
 								drawMarker(pos, dotRadius, color, gs.minimap_icon_player_path);
 								continue;
-							} else if (metadata_service->hasTag(entity, "minimap_item")) {
-								if (!gs.minimap_show_items) {
-									continue;
-								}
-								color = glm::vec4(1.0f, 0.84f, 0.1f, 1.0f);
-								dotRadius = 4.0f;
-								const glm::vec3 delta = pos - player_pos;
-								const float dist2 = glm::dot(delta, delta);
-								if (dist2 < nearest_item_dist2) {
-									nearest_item_dist2 = dist2;
-									nearest_item_pos = pos;
-									has_nearest_item = true;
-								}
-								drawMarker(pos, dotRadius, color, gs.minimap_icon_item_path);
-								continue;
-							} else if (metadata_service->hasTag(entity, "minimap_objective")) {
-								if (!gs.minimap_show_objective) {
-									continue;
-								}
-								color = glm::vec4(0.2f, 0.6f, 1.0f, 1.0f);
-								dotRadius = 4.0f;
-
-								const glm::vec3 delta = pos - player_pos;
-								const float dist2 = glm::dot(delta, delta);
-								if (dist2 < nearest_objective_dist2) {
-									nearest_objective_dist2 = dist2;
-									nearest_objective_pos = pos;
-									has_nearest_objective = true;
-								}
-								drawMarker(pos, dotRadius, color, gs.minimap_icon_objective_path);
-								continue;
-							} else if (metadata_service->hasTag(entity, "letter_collectible") ||
+							} else if (metadata_service->hasTag(entity, "item") ||
+								metadata_service->hasTag(entity, "letter_collectible") ||
 								metadata_service->hasTag(entity, "letter_carried")) {
 								if (!gs.minimap_show_items) {
 									continue;
@@ -1555,12 +1550,14 @@ namespace PAIN {
 								}
 								drawMarker(pos, dotRadius, color, gs.minimap_icon_item_path);
 								continue;
-							} else if (metadata_service->hasTag(entity, "letter_collection")) {
+							} else if (metadata_service->hasTag(entity, "objective") ||
+								metadata_service->hasTag(entity, "letter_collection")) {
 								if (!gs.minimap_show_objective) {
 									continue;
 								}
 								color = glm::vec4(0.2f, 0.6f, 1.0f, 1.0f);
 								dotRadius = 4.0f;
+
 								const glm::vec3 delta = pos - player_pos;
 								const float dist2 = glm::dot(delta, delta);
 								if (dist2 < nearest_objective_dist2) {
@@ -1570,7 +1567,8 @@ namespace PAIN {
 								}
 								drawMarker(pos, dotRadius, color, gs.minimap_icon_objective_path);
 								continue;
-							} else if (metadata_service->hasTag(entity, "minimap_wall")) {
+							} else if (metadata_service->hasTag(entity, "wall") ||
+								metadata_service->hasTag(entity, "Environment")) {
 								if (!gs.minimap_show_walls) {
 									continue;
 								}
@@ -1584,14 +1582,27 @@ namespace PAIN {
 						}
 
 						if (gs.minimap_show_danger) {
-						for (entt::entity entity : metadata_service->getEntitiesByTag("minimap_danger")) {
+						std::unordered_set<uint32_t> uniqueDangerEntities;
+						std::vector<entt::entity> dangerEntities;
+						auto appendDangerEntities = [&](const char* tag) {
+							for (entt::entity entity : metadata_service->getEntitiesByTag(tag)) {
+								const uint32_t key = static_cast<uint32_t>(entity);
+								if (uniqueDangerEntities.insert(key).second) {
+									dangerEntities.push_back(entity);
+								}
+							}
+						};
+						appendDangerEntities("danger");
+						appendDangerEntities("Enemy");
+
+						for (entt::entity entity : dangerEntities) {
 							glm::vec3 pos(0.0f);
 							if (!getEntityWorldPos(entity, pos)) {
 								continue;
 							}
 
 							float danger_radius = 1.0f;
-							if (metadata_service->hasTag(entity, "minimap_light_cone")) {
+							if (metadata_service->hasTag(entity, "light_cone")) {
 								const float maxDistance = 9.0f;
 								const float coneAngleDeg = 32.0f;
 								const float heightDelta = glm::abs(pos.y - player_pos.y);
@@ -1601,7 +1612,7 @@ namespace PAIN {
 									? 0.0f
 									: std::sqrt(maxDistance * maxDistance - heightDelta * heightDelta);
 								danger_radius = glm::max(0.25f, glm::min(coneRadius, sphereRadius));
-							} else if (metadata_service->hasTag(entity, "minimap_danger_collision")) {
+							} else if (metadata_service->hasTag(entity, "danger_collision")) {
 								danger_radius = 0.5f;
 							} else if (auto* lt = registry.try_get<LocalTransform>(entity)) {
 								danger_radius = glm::max(0.25f, glm::max(lt->scale.x, lt->scale.z));

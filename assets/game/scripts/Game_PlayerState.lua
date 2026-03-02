@@ -218,8 +218,7 @@ function S.init(player)
     S.player = player
 
     if addTag and S.player then
-        addTag(S.player, "minimap_visible")
-        addTag(S.player, "minimap_player")
+        addTag(S.player, "Player")
     end
     
     -- reset state if player changed, game ended, or first load
@@ -461,20 +460,17 @@ local function ensureMinimapGameplayTags()
 
     local collectibles = getEntitiesByTag("letter_collectible") or {}
     for _, e in ipairs(collectibles) do
-        addTag(e, "minimap_visible")
-        addTag(e, "minimap_item")
+        addTag(e, "item")
     end
 
     local carried = getEntitiesByTag("letter_carried") or {}
     for _, e in ipairs(carried) do
-        addTag(e, "minimap_visible")
-        addTag(e, "minimap_item")
+        addTag(e, "item")
     end
 
     local objectives = getEntitiesByTag("letter_collection") or {}
     for _, e in ipairs(objectives) do
-        addTag(e, "minimap_visible")
-        addTag(e, "minimap_objective")
+        addTag(e, "objective")
     end
 end
 

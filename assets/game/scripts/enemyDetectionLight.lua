@@ -30,9 +30,9 @@ setLightIntensity(enemy, NORMAL_COLOR.r, NORMAL_COLOR.g, NORMAL_COLOR.b)
 
 registerUpdate(function(dt)
     if (not minimapTagged) and addTag then
-        addTag(enemy, "minimap_visible")
-        addTag(enemy, "minimap_danger")
-        addTag(enemy, "minimap_light_cone")
+        addTag(enemy, "Enemy")
+        addTag(enemy, "danger")
+        addTag(enemy, "light_cone")
         minimapTagged = true
     end
 

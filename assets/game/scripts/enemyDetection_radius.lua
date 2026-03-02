@@ -7,9 +7,9 @@ local minimapTagged = false
 
 registerUpdate(function(dt)
     if (not minimapTagged) and addTag then
-        addTag(entityId, "minimap_visible")
-        addTag(entityId, "minimap_danger")
-        addTag(entityId, "minimap_danger_radius")
+        addTag(entityId, "Enemy")
+        addTag(entityId, "danger")
+        addTag(entityId, "danger_radius")
         minimapTagged = true
     end
 
