@@ -39,6 +39,7 @@ else()
             "${CMAKE_SOURCE_DIR}/build/Tools/ffmpeg"
             "$<TARGET_FILE_DIR:Friends-Frog-ever>/ffmpeg"
      COMMENT "Copying cuttlefish, astc, ffmpeg to debug output dir"
+     VERBATIM
      CONFIGURATIONS Debug
    )
 
