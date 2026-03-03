@@ -789,9 +789,8 @@ namespace PAIN {
 		void System::debugPass(entt::registry& registry, int debug_mode) {
 
 			auto rendererService = services.lock()->get<sRenderer>();
-			if (debug_mode == 0 || !rendererService || !rendererService->w_renderer) {
-				return;
-			}
+			if (!rendererService || !rendererService->w_renderer) return;
+
 
 			auto svc = services.lock();
 			if (!svc)
@@ -801,9 +800,43 @@ namespace PAIN {
 			if (!scene)
 				return;
 
-			Camera* camera = scene->GetActiveCamera();
-			if (!camera)
-				return;
+			Camera* active_cam = scene->GetActiveCamera();
+			if (!active_cam) return;
+
+			// --- GAME CAMERA FRUSTUM RENDER ---
+			Camera* game_cam = scene->GetGameCamera();
+
+			if (game_cam && active_cam != game_cam && game_cam->showCollisionGizmo) {
+				// 1. Calculate the Inverse View-Projection Matrix
+				glm::mat4 view = game_cam->view();
+				glm::mat4 proj = game_cam->projection();
+				glm::mat4 invVP = glm::inverse(proj * view);
+
+				// 2. Define the 8 corners of the frustum in NDC
+				// Order matches your DebugPassOBB back/front face layout
+				glm::vec4 ndcCorners[8] = {
+					{-1.0f, -1.0f, -1.0f, 1.0f}, // 0: Near Bottom-Left
+					{ 1.0f, -1.0f, -1.0f, 1.0f}, // 1: Near Bottom-Right
+					{ 1.0f,  1.0f, -1.0f, 1.0f}, // 2: Near Top-Right
+					{-1.0f,  1.0f, -1.0f, 1.0f}, // 3: Near Top-Left
+
+					{-1.0f, -1.0f,  1.0f, 1.0f}, // 4: Far Bottom-Left
+					{ 1.0f, -1.0f,  1.0f, 1.0f}, // 5: Far Bottom-Right
+					{ 1.0f,  1.0f,  1.0f, 1.0f}, // 6: Far Top-Right
+					{-1.0f,  1.0f,  1.0f, 1.0f}  // 7: Far Top-Left
+				};
+
+				// 3. Transform NDC corners into World Space
+				glm::vec3 worldCorners[8];
+				for (int i = 0; i < 8; ++i) {
+					glm::vec4 worldPos = invVP * ndcCorners[i];
+					worldCorners[i] = glm::vec3(worldPos) / worldPos.w; // Perspective divide
+				}
+
+				// 4. Draw Frustum (Yellow)
+				glm::vec4 frustumColor = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
+				rendererService->w_renderer->DebugPassOBB(worldCorners, frustumColor, scene);
+			}
 
 			// Mode 1: Draw Physics Colliders (Cyan for basic, different colors for
 			// compound shapes)

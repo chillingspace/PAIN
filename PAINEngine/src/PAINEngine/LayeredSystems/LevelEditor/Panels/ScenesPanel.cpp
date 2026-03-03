@@ -990,7 +990,13 @@ namespace PAIN {
                             bool collisionEnabled = game_cam->collisionEnabled;
                             if (ImGui::Checkbox("Enable Collision", &collisionEnabled)) {
                                 game_cam->collisionEnabled = collisionEnabled;
+
                             }
+
+							// If collision is disabled, also disable the gizmo 
+                            if (!game_cam->collisionEnabled) {
+                                game_cam->showCollisionGizmo = false;
+							}
 
                             ImGui::BeginDisabled(!collisionEnabled);
 

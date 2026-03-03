@@ -237,8 +237,12 @@ namespace PAIN {
                 // Build docking space
                 buildDockspace();
 
+                auto window = services->get<Window::Window>();
                 auto renderer = services->get<sRenderer>();
                 auto vp = panels->get<Panel::ViewportPanel>();
+
+				// Always unhide cursor when editor is visible
+                window->hideCursor(false);
 
                 if (renderer && vp) {
                     vp->setRenderTexture(renderer->getFramebufferTexture(), renderer->getFramebufferWidth(), renderer->getFramebufferHeight());
