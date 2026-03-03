@@ -1231,6 +1231,9 @@ namespace PAIN {
 				}
 			}
 
+			// ========================================
+			// MINIMAP
+			// ========================================
 			if (gs.minimap_enabled) {
 				GLuint minimapTexture = rendererService->w_renderer->getMinimapTexture();
 				if (minimapTexture != 0) {
@@ -1474,22 +1477,39 @@ namespace PAIN {
 							rendererService->w_renderer->DebugPass2DCircle(centerNdc, radiusNdc, color, 18);
 						};
 
+						GLuint playerIconTex = 0;
+						GLuint itemIconTex = 0;
+						GLuint objectiveIconTex = 0;
+						if (gs.minimap_use_icon_textures && assetManager) {
+							auto resolveIcon = [&](const std::string& path) -> GLuint {
+								if (path.empty()) {
+									return 0;
+								}
+								auto iconOpt = assetManager->getAsset<Assets::Texture>(path);
+								if (!iconOpt.has_value() || !iconOpt.value()) {
+									return 0;
+								}
+								return iconOpt.value()->gl_texture;
+							};
+
+							playerIconTex = resolveIcon(gs.minimap_icon_player_path);
+							itemIconTex = resolveIcon(gs.minimap_icon_item_path);
+							objectiveIconTex = resolveIcon(gs.minimap_icon_objective_path);
+						}
+
 						auto drawMarker = [&](const glm::vec3& pos,
 							float radiusPx,
 							const glm::vec4& color,
-							const std::string& iconPath) {
-							if (gs.minimap_use_icon_textures && assetManager && !iconPath.empty()) {
-								auto iconOpt = assetManager->getAsset<Assets::Texture>(iconPath);
-								if (iconOpt.has_value() && iconOpt.value() && iconOpt.value()->gl_texture != 0) {
-									const glm::vec2 iconNdcPos = worldToMinimapNdc(pos, true);
-									const float iconPx = glm::max(4.0f, radiusPx * 2.0f * gs.minimap_icon_scale);
-									glm::vec2 iconNdcScale(iconPx / fbh, iconPx / fbh);
-									rendererService->w_renderer->Render2DTexture(
-										iconOpt.value()->gl_texture,
-										iconNdcPos,
-										iconNdcScale);
-									return;
-								}
+							GLuint iconTex) {
+							if (gs.minimap_use_icon_textures && iconTex != 0) {
+								const glm::vec2 iconNdcPos = worldToMinimapNdc(pos, true);
+								const float iconPx = glm::max(4.0f, radiusPx * 2.0f * gs.minimap_icon_scale);
+								glm::vec2 iconNdcScale(iconPx / fbh, iconPx / fbh);
+								rendererService->w_renderer->Render2DTexture(
+									iconTex,
+									iconNdcPos,
+									iconNdcScale);
+								return;
 							}
 
 							drawDot(pos, radiusPx, color);
@@ -1750,7 +1770,7 @@ namespace PAIN {
 								}
 								color = glm::vec4(0.2f, 1.0f, 0.2f, 1.0f);
 								dotRadius = 5.0f;
-								drawMarker(pos, dotRadius, color, gs.minimap_icon_player_path);
+								drawMarker(pos, dotRadius, color, playerIconTex);
 								continue;
 							} else if (metadata_service->hasTag(entity, "item") ||
 								metadata_service->hasTag(entity, "letter_collectible") ||
@@ -1767,7 +1787,7 @@ namespace PAIN {
 									nearest_item_pos = pos;
 									has_nearest_item = true;
 								}
-								drawMarker(pos, dotRadius, color, gs.minimap_icon_item_path);
+								drawMarker(pos, dotRadius, color, itemIconTex);
 								continue;
 							} else if (metadata_service->hasTag(entity, "objective") ||
 								metadata_service->hasTag(entity, "letter_collection")) {
@@ -1784,7 +1804,7 @@ namespace PAIN {
 									nearest_objective_pos = pos;
 									has_nearest_objective = true;
 								}
-								drawMarker(pos, dotRadius, color, gs.minimap_icon_objective_path);
+								drawMarker(pos, dotRadius, color, objectiveIconTex);
 								continue;
 							} else {
 								continue;
@@ -1805,6 +1825,8 @@ namespace PAIN {
 						appendDangerEntities("danger");
 						appendDangerEntities("Enemy");
 
+						std::vector<glm::vec2> dangerLineVertices;
+						dangerLineVertices.reserve(dangerEntities.size() * 24 * 2);
 						for (entt::entity entity : dangerEntities) {
 							glm::vec3 pos(0.0f);
 							if (!getEntityWorldPos(entity, pos)) {
@@ -1838,11 +1860,26 @@ namespace PAIN {
 							const float radiusPx = (danger_radius / (2.0f * glm::max(1.0f, gs.minimap_radius))) * map_square;
 							const glm::vec2 radiusNdc((radiusPx / fbw) * 2.0f, (radiusPx / fbh) * 2.0f);
 
-								rendererService->w_renderer->DebugPass2DCircle(
-									centerNdc,
-									radiusNdc,
-									glm::vec4(1.0f, 0.15f, 0.15f, 1.0f),
-									24);
+							for (int i = 0; i < 24; ++i) {
+								const float a0 = (static_cast<float>(i) / 24.0f) * glm::two_pi<float>();
+								const float a1 = (static_cast<float>(i + 1) / 24.0f) * glm::two_pi<float>();
+
+								const glm::vec2 p0(
+									centerNdc.x + std::cos(a0) * radiusNdc.x,
+									centerNdc.y + std::sin(a0) * radiusNdc.y);
+								const glm::vec2 p1(
+									centerNdc.x + std::cos(a1) * radiusNdc.x,
+									centerNdc.y + std::sin(a1) * radiusNdc.y);
+
+								dangerLineVertices.push_back(p0);
+								dangerLineVertices.push_back(p1);
+							}
+						}
+
+						if (!dangerLineVertices.empty()) {
+							rendererService->w_renderer->DebugPass2DLines(
+								dangerLineVertices,
+								glm::vec4(1.0f, 0.15f, 0.15f, 1.0f));
 						}
 						}
 

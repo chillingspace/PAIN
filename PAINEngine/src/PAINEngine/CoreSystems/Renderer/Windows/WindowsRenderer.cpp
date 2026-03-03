@@ -1493,7 +1493,6 @@ namespace PAIN {
 			0.0f, 1.0f);
 		glClearColor(0.02f, 0.02f, 0.02f, bg_alpha);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	}
 
 	void WindowsRenderer::EndMinimapPass() {
@@ -1903,6 +1902,36 @@ namespace PAIN {
 		debug_shader->SetUniform("u_P", ortho_proj);
 
 		glDrawArrays(GL_LINES, 0, 2);
+
+		glBindVertexArray(0);
+	}
+
+	void WindowsRenderer::DebugPass2DLines(
+		const std::vector<glm::vec2>& lineVertices,
+		const glm::vec4& color) {
+		if (!debug_VAO || !debug_shader || lineVertices.size() < 2)
+			return;
+
+		const size_t vertexCount = lineVertices.size() - (lineVertices.size() % 2);
+		std::vector<float> verts;
+		verts.reserve(vertexCount * 7);
+
+		for (size_t i = 0; i < vertexCount; ++i) {
+			const glm::vec2& p = lineVertices[i];
+			verts.insert(verts.end(), {p.x, p.y, 0.0f, color.r, color.g, color.b, color.a});
+		}
+
+		glBindVertexArray(debug_VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
+		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(),
+			GL_DYNAMIC_DRAW);
+
+		debug_shader->Bind();
+		glm::mat4 ortho_proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
+		debug_shader->SetUniform("u_V", glm::mat4(1.0f));
+		debug_shader->SetUniform("u_P", ortho_proj);
+
+		glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(vertexCount));
 
 		glBindVertexArray(0);
 	}
