@@ -25,7 +25,6 @@
         "336c6028-99aa-3946-8822-3af0335aabf1",
         "e8745e08-2f02-b848-b7e4-255cb60bcefa",
         "d0cb3aa0-6188-c142-8316-0b22e254c564",
-        "17761b98-7bc6-5f41-b40b-da7ed15c4f94",
         "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
         "8fb18e50-fe3a-dd4c-889f-62f426ff9d18",
         "4ab9b8a8-4bdc-e046-83a2-24863013c030",
@@ -74,12 +73,11 @@
         "351d0711-28db-d346-81fe-fe5904ff854a",
         "f8f9abf4-39b2-3f41-9e00-4bdfd4476881",
         "d9977322-f31e-bc4c-b298-fbcd6690c4ba",
-        "25c6e2c3-b701-4c43-b049-8c9b21a29441",
-        "31f050fc-b8fd-9f44-9f4c-c2b19a10e63e",
         "a8977689-ded0-fa41-9efb-33354e83dec7",
         "9927db1c-9aff-be47-a5dc-3068b2c9f8f9",
         "d9eeea8a-2cf6-3849-8511-2e6c3be0f011",
         "df12f04f-34c5-644d-980a-c8251d57cd55",
+        "1c7ce177-d679-a44a-89d0-a718aa172c23",
         "0d290cee-b55d-2e45-907d-ae2c745f492f",
         "633f661d-20e5-3b45-b5a5-299f91b71e17",
         "5ccceeb5-887c-db4c-8cae-0efe9e91b198",
@@ -87,6 +85,7 @@
         "41022c20-5591-324d-80ff-f14090e5e9d3",
         "5367dfeb-d87d-fa47-bfb0-d5c8ad9d732a",
         "7d8bffc6-b461-c14a-9401-6124713c0747",
+        "841e487f-5eab-f24d-9eae-9dfbb83fcc02",
         "60d237d0-60e1-c146-86e6-e76c967840d4",
         "c7685566-a3eb-4b4f-a630-7d08fedb36e5",
         "629b1dea-bd33-c44c-968d-ff8b78d7b0ad",
@@ -116,12 +115,9 @@
         "ca65c8fb-c79d-9c4e-b32c-2ce453f01543",
         "b8a2c974-f619-014b-9cb4-6143cbdf7c4b",
         "b3ec7aee-c5ff-af48-9aa1-f912f843a888",
-        "164de26f-1403-e146-8a76-735d5dc42155",
         "c3be7e4a-501e-0744-ac10-55d1b5a38d86",
         "510e3ede-f637-c448-99e8-7dc200d60c8f",
         "ee65299b-47d9-4648-ae3d-7a9e1ae75012",
-        "5d46bba2-ab81-064e-bab5-2517c42f6aca",
-        "6fc0ccbc-ae9d-a948-9557-6140470621c4",
         "e60f5690-3ae8-a142-b726-5ea017a209e9",
         "0b9ad008-e8ad-144b-855d-115dd4683035",
         "b6f7c506-7c21-1847-a0b9-597479e83e13",
@@ -129,7 +125,6 @@
         "79269c4e-addb-ea41-85c6-57e984c24ff3",
         "a77749e3-6c15-7446-a792-5609dd96b391",
         "14377587-a8fe-2b47-9f46-dad6bdad2753",
-        "466ca22c-0eb2-0d49-ac1a-b9d822cc1ce4",
         "c49ebb97-d7ba-f148-9e46-16d6c5543147",
         "38e8f9de-b2dc-0f47-ad64-f0209917e593",
         "3e8dc653-3d17-ab42-bb53-da040f01f965",
@@ -142,9 +137,8 @@
         "a4f0ef0e-e825-fd4c-a9c7-0ca0ace59222",
         "a39ad2ba-5e72-5e44-8d6b-5a7f69340311",
         "cf15ebf1-3c0e-d341-b9c7-44121d571eb4",
-        "c6ffd645-8670-c743-8350-259b8e82ca17",
-        "8c43dc43-e8cd-6342-97a8-98250804f65f",
-        "9cb25762-5d1f-ab4f-9317-5c8a56bdd002"
+        "f1a026ad-3186-2148-a591-76a1e3be2285",
+        "a05364a3-2996-b744-bdee-38b55c1d80af"
     ],
     "camera": {
         "active_game_cam": "Player",
@@ -8057,6 +8051,11 @@
                                 0.0,
                                 0.0
                             ]
+                        },
+                        "Tag": {
+                            "tags": [
+                                "wall"
+                            ]
                         }
                     },
                     "Name": "Container_Blue"
@@ -8241,6 +8240,11 @@
                                 0.0,
                                 0.0
                             ]
+                        },
+                        "Tag": {
+                            "tags": [
+                                "wall"
+                            ]
                         }
                     },
                     "Name": "Container_Blue"
@@ -8424,6 +8428,11 @@
                                 0.0,
                                 0.0,
                                 0.0
+                            ]
+                        },
+                        "Tag": {
+                            "tags": [
+                                "wall"
                             ]
                         }
                     },
@@ -30778,5 +30787,44 @@
             false,
             false
         ]
-    ]
+    ],
+    "minimap": {
+        "background_alpha": 0.5,
+        "border_color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+        ],
+        "border_thickness": 2.0,
+        "camera_height": 30.0,
+        "enabled": true,
+        "icon_danger_path": "",
+        "icon_item_path": "",
+        "icon_objective_path": "",
+        "icon_player_path": "",
+        "icon_scale": 1.0,
+        "icon_wall_path": "",
+        "override_position": false,
+        "pos_px": [
+            20.0,
+            20.0
+        ],
+        "radius": 10.0,
+        "recommended_position": 5,
+        "rotate_with_player": true,
+        "route_mode": 0,
+        "show_danger": true,
+        "show_items": true,
+        "show_legend": false,
+        "show_objective": true,
+        "show_player": true,
+        "show_route": true,
+        "show_walls": true,
+        "size_px": [
+            500.0,
+            200.0
+        ],
+        "use_icon_textures": false
+    }
 }

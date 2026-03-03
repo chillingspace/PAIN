@@ -1546,12 +1546,12 @@ namespace PAIN {
 	}
 
 	void WindowsRenderer::DrawMinimapWalls(const glm::vec2& playerXZ,
-										   const glm::vec2& transformCol0,
-										   const glm::vec2& transformCol1,
-										   float invDoubleRadius,
-										   const glm::vec2& ndcBase,
-										   const glm::vec2& ndcScale,
-										   const glm::vec4& color) {
+									   const glm::vec2& transformCol0,
+									   const glm::vec2& transformCol1,
+									   const glm::vec2& invDoubleRadius,
+									   const glm::vec2& ndcBase,
+									   const glm::vec2& ndcScale,
+									   const glm::vec4& color) {
 		if (!minimap_wall_shader || minimap_wall_vao == 0 || minimap_wall_vertex_count == 0) {
 			return;
 		}

@@ -332,6 +332,7 @@ namespace PAIN {
 
 			//Get environment variables
 			const auto& env = scene_asset.environment;
+			const auto& minimap = scene_asset.minimap;
 
 			//Setup gs
 			gs.world_light = env.useWorldLight;
@@ -384,6 +385,34 @@ namespace PAIN {
 				Skybox::get().setTexture(sb_path);
 				PN_CORE_INFO("[SceneManager] Set default skybox");
 			}
+
+			// Minimap settings
+			gs.minimap_enabled = minimap.enabled;
+			gs.minimap_radius = minimap.radius;
+			gs.minimap_size_px = minimap.size_px;
+			gs.minimap_pos_px = minimap.pos_px;
+			gs.minimap_override_position = minimap.override_position;
+			gs.minimap_recommended_position = minimap.recommended_position;
+			gs.minimap_rotate_with_player = minimap.rotate_with_player;
+			gs.minimap_show_player = minimap.show_player;
+			gs.minimap_show_danger = minimap.show_danger;
+			gs.minimap_show_items = minimap.show_items;
+			gs.minimap_show_objective = minimap.show_objective;
+			gs.minimap_show_walls = minimap.show_walls;
+			gs.minimap_show_route = minimap.show_route;
+			gs.minimap_route_mode = minimap.route_mode;
+			gs.minimap_use_icon_textures = minimap.use_icon_textures;
+			gs.minimap_icon_scale = minimap.icon_scale;
+			gs.minimap_show_legend = minimap.show_legend;
+			gs.minimap_icon_player_path = minimap.icon_player_path;
+			gs.minimap_icon_danger_path = minimap.icon_danger_path;
+			gs.minimap_icon_item_path = minimap.icon_item_path;
+			gs.minimap_icon_objective_path = minimap.icon_objective_path;
+			gs.minimap_icon_wall_path = minimap.icon_wall_path;
+			gs.minimap_background_alpha = minimap.background_alpha;
+			gs.minimap_border_thickness = minimap.border_thickness;
+			gs.minimap_border_color = minimap.border_color;
+			gs.minimap_camera_height = minimap.camera_height;
 
 			PN_CORE_INFO("[SceneManager] Environment setup complete");
 		}
@@ -831,6 +860,34 @@ namespace PAIN {
 				scene_asset.loadingScreen.frameTime = frameTime;
 				scene_asset.loadingScreen.animationEnabled = animEnabled;
 			}
+
+			// Capture minimap settings
+			scene_asset.minimap.enabled = gs.minimap_enabled;
+			scene_asset.minimap.radius = gs.minimap_radius;
+			scene_asset.minimap.size_px = gs.minimap_size_px;
+			scene_asset.minimap.pos_px = gs.minimap_pos_px;
+			scene_asset.minimap.override_position = gs.minimap_override_position;
+			scene_asset.minimap.recommended_position = gs.minimap_recommended_position;
+			scene_asset.minimap.rotate_with_player = gs.minimap_rotate_with_player;
+			scene_asset.minimap.show_player = gs.minimap_show_player;
+			scene_asset.minimap.show_danger = gs.minimap_show_danger;
+			scene_asset.minimap.show_items = gs.minimap_show_items;
+			scene_asset.minimap.show_objective = gs.minimap_show_objective;
+			scene_asset.minimap.show_walls = gs.minimap_show_walls;
+			scene_asset.minimap.show_route = gs.minimap_show_route;
+			scene_asset.minimap.route_mode = gs.minimap_route_mode;
+			scene_asset.minimap.use_icon_textures = gs.minimap_use_icon_textures;
+			scene_asset.minimap.icon_scale = gs.minimap_icon_scale;
+			scene_asset.minimap.show_legend = gs.minimap_show_legend;
+			scene_asset.minimap.icon_player_path = gs.minimap_icon_player_path;
+			scene_asset.minimap.icon_danger_path = gs.minimap_icon_danger_path;
+			scene_asset.minimap.icon_item_path = gs.minimap_icon_item_path;
+			scene_asset.minimap.icon_objective_path = gs.minimap_icon_objective_path;
+			scene_asset.minimap.icon_wall_path = gs.minimap_icon_wall_path;
+			scene_asset.minimap.background_alpha = gs.minimap_background_alpha;
+			scene_asset.minimap.border_thickness = gs.minimap_border_thickness;
+			scene_asset.minimap.border_color = gs.minimap_border_color;
+			scene_asset.minimap.camera_height = gs.minimap_camera_height;
 		}
 
 		nlohmann::json SceneManager::convertSceneToJSON(SceneAsset& scn_asset) {
@@ -899,6 +956,41 @@ namespace PAIN {
 				{"framesPerRow", scn_asset.loadingScreen.framesPerRow},
 				{"frameTime", scn_asset.loadingScreen.frameTime},
 				{"animationEnabled", scn_asset.loadingScreen.animationEnabled}
+			};
+
+			// Minimap settings
+			sceneJson["minimap"] = {
+				{"enabled", scn_asset.minimap.enabled},
+				{"radius", scn_asset.minimap.radius},
+				{"size_px", {scn_asset.minimap.size_px.x, scn_asset.minimap.size_px.y}},
+				{"pos_px", {scn_asset.minimap.pos_px.x, scn_asset.minimap.pos_px.y}},
+				{"override_position", scn_asset.minimap.override_position},
+				{"recommended_position", static_cast<int>(scn_asset.minimap.recommended_position)},
+				{"rotate_with_player", scn_asset.minimap.rotate_with_player},
+				{"show_player", scn_asset.minimap.show_player},
+				{"show_danger", scn_asset.minimap.show_danger},
+				{"show_items", scn_asset.minimap.show_items},
+				{"show_objective", scn_asset.minimap.show_objective},
+				{"show_walls", scn_asset.minimap.show_walls},
+				{"show_route", scn_asset.minimap.show_route},
+				{"route_mode", static_cast<int>(scn_asset.minimap.route_mode)},
+				{"use_icon_textures", scn_asset.minimap.use_icon_textures},
+				{"icon_scale", scn_asset.minimap.icon_scale},
+				{"show_legend", scn_asset.minimap.show_legend},
+				{"icon_player_path", scn_asset.minimap.icon_player_path},
+				{"icon_danger_path", scn_asset.minimap.icon_danger_path},
+				{"icon_item_path", scn_asset.minimap.icon_item_path},
+				{"icon_objective_path", scn_asset.minimap.icon_objective_path},
+				{"icon_wall_path", scn_asset.minimap.icon_wall_path},
+				{"background_alpha", scn_asset.minimap.background_alpha},
+				{"border_thickness", scn_asset.minimap.border_thickness},
+				{"border_color", {
+					scn_asset.minimap.border_color.r,
+					scn_asset.minimap.border_color.g,
+					scn_asset.minimap.border_color.b,
+					scn_asset.minimap.border_color.a
+				}},
+				{"camera_height", scn_asset.minimap.camera_height}
 			};
 
 			// Layers

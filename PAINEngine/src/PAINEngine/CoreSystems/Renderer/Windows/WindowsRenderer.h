@@ -121,7 +121,7 @@ namespace PAIN {
 		void DrawMinimapWalls(const glm::vec2& playerXZ,
 							 const glm::vec2& transformCol0,
 							 const glm::vec2& transformCol1,
-							 float invDoubleRadius,
+							 const glm::vec2& invDoubleRadius,
 							 const glm::vec2& ndcBase,
 							 const glm::vec2& ndcScale,
 							 const glm::vec4& color);

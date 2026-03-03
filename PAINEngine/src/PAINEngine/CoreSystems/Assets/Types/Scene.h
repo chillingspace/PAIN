@@ -98,6 +98,38 @@ namespace PAIN {
                 bool animationEnabled = false;
             } loadingScreen;
 
+            // Minimap settings
+            struct MinimapSettings {
+                bool enabled = false;
+                float radius = 15.0f;
+                glm::vec2 size_px{ 200.0f, 200.0f };
+                glm::vec2 pos_px{ 20.0f, 20.0f };
+                bool override_position = false;
+                GraphicsSettings::MINIMAP_RECOMMENDED_POSITION recommended_position =
+                    GraphicsSettings::MINIMAP_RECOMMENDED_POSITION::BOTTOM_RIGHT;
+                bool rotate_with_player = true;
+                bool show_player = true;
+                bool show_danger = true;
+                bool show_items = true;
+                bool show_objective = true;
+                bool show_walls = true;
+                bool show_route = true;
+                GraphicsSettings::MINIMAP_ROUTE_MODE route_mode =
+                    GraphicsSettings::MINIMAP_ROUTE_MODE::ROUTE_NEAREST_LINE;
+                bool use_icon_textures = false;
+                float icon_scale = 1.0f;
+                bool show_legend = false;
+                std::string icon_player_path;
+                std::string icon_danger_path;
+                std::string icon_item_path;
+                std::string icon_objective_path;
+                std::string icon_wall_path;
+                float background_alpha = 0.5f;
+                float border_thickness = 2.0f;
+                glm::vec4 border_color{ 1.0f, 1.0f, 1.0f, 1.0f };
+                float camera_height = 30.0f;
+            } minimap;
+
             //Layers
             std::vector<Layer> layers;
             std::vector<std::vector<bool>> mask_matrix;

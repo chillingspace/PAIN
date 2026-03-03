@@ -1289,12 +1289,16 @@ namespace PAIN {
 
 						const float content_x = map_x;
 						const float content_y = map_y;
-						const float map_square = glm::min(map_w, map_h);
-						const float draw_x = content_x + (map_w - map_square) * 0.5f;
-						const float draw_y = content_y + (map_h - map_square) * 0.5f;
+						const float draw_x = content_x;
+						const float draw_y = content_y;
+						const float draw_w = map_w;
+						const float draw_h = map_h;
+						const float draw_min = glm::max(1.0f, glm::min(draw_w, draw_h));
+						const float draw_w_safe = glm::max(1.0f, draw_w);
+						const float draw_h_safe = glm::max(1.0f, draw_h);
 
-						const float center_x_px = draw_x + map_square * 0.5f;
-						const float center_y_px = draw_y + map_square * 0.5f;
+						const float center_x_px = draw_x + draw_w * 0.5f;
+						const float center_y_px = draw_y + draw_h * 0.5f;
 
 						glm::vec2 minimap_pos(
 							(center_x_px / fbw) * 2.0f - 1.0f,
@@ -1456,13 +1460,15 @@ namespace PAIN {
 							}
 
 							const float radius = glm::max(1.0f, gs.minimap_radius);
-							const float u = 0.5f + (local_x / (2.0f * radius));
-							const float v = 0.5f + (local_y / (2.0f * radius));
+							const float inv_double_radius_x = (draw_min / draw_w_safe) / (2.0f * radius);
+							const float inv_double_radius_y = (draw_min / draw_h_safe) / (2.0f * radius);
+							const float u = 0.5f + local_x * inv_double_radius_x;
+							const float v = 0.5f + local_y * inv_double_radius_y;
 							const float u_draw = clampToEdge ? glm::clamp(u, 0.0f, 1.0f) : u;
 							const float v_draw = clampToEdge ? glm::clamp(v, 0.0f, 1.0f) : v;
 
-							const float px = draw_x + u_draw * map_square;
-							const float py = draw_y + (1.0f - v_draw) * map_square;
+							const float px = draw_x + u_draw * draw_w;
+							const float py = draw_y + (1.0f - v_draw) * draw_h;
 
 							return glm::vec2(
 								(px / fbw) * 2.0f - 1.0f,
@@ -1680,21 +1686,23 @@ namespace PAIN {
 								transformCol1 = glm::vec2(0.0f, -1.0f);
 							}
 
-							const float invDoubleRadius = 1.0f / (2.0f * minimapRadius);
+							const glm::vec2 invDoubleRadius(
+								(draw_min / draw_w_safe) / (2.0f * minimapRadius),
+								(draw_min / draw_h_safe) / (2.0f * minimapRadius));
 							const glm::vec2 ndcBase(
 								(draw_x / fbw) * 2.0f - 1.0f,
-								1.0f - ((draw_y + map_square) / fbh) * 2.0f);
+								1.0f - ((draw_y + draw_h) / fbh) * 2.0f);
 							const glm::vec2 ndcScale(
-								(map_square / fbw) * 2.0f,
-								(map_square / fbh) * 2.0f);
+								(draw_w / fbw) * 2.0f,
+								(draw_h / fbh) * 2.0f);
 
 							// Scissor to minimap rect (glScissor uses bottom-left origin)
 							glEnable(GL_SCISSOR_TEST);
 							glScissor(
 								static_cast<GLint>(draw_x),
-								static_cast<GLint>(fbh - draw_y - map_square),
-								static_cast<GLsizei>(map_square),
-								static_cast<GLsizei>(map_square));
+								static_cast<GLint>(fbh - draw_y - draw_h),
+								static_cast<GLsizei>(draw_w),
+								static_cast<GLsizei>(draw_h));
 
 							rendererService->w_renderer->DrawMinimapWalls(
 								playerXZ, transformCol0, transformCol1,
@@ -1812,7 +1820,7 @@ namespace PAIN {
 							}
 
 							const glm::vec2 centerNdc = worldToMinimapNdc(pos, false);
-							const float radiusPx = (danger_radius / (2.0f * glm::max(1.0f, gs.minimap_radius))) * map_square;
+							const float radiusPx = (danger_radius / (2.0f * glm::max(1.0f, gs.minimap_radius))) * draw_min;
 							const glm::vec2 radiusNdc((radiusPx / fbw) * 2.0f, (radiusPx / fbh) * 2.0f);
 
 							for (int i = 0; i < 24; ++i) {
