@@ -125,6 +125,7 @@ namespace PAIN {
             /* =========================================================================== */
             Camera* GetActiveCamera();
             Camera* GetGameCamera();
+            Camera* GetEditorCamera();
             void SetActiveCamera(Camera* cam);
             void SetEditorCamera();
             void SetGameCamera();

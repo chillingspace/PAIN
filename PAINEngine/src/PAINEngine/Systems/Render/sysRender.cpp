@@ -261,6 +261,11 @@ namespace PAIN {
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after geometry pass: {}", err);
 				}
+				minimapPass(registry);
+				err = glGetError();
+				if (err != GL_NO_ERROR) {
+					PN_CORE_ERROR("OpenGL err after minimap pass: {}", err);
+				}
 				reflectionPass(registry);
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
@@ -437,6 +442,32 @@ namespace PAIN {
 			}
 
 			rendererService->w_renderer->EndGeometryPass();
+		}
+
+		void System::minimapPass(entt::registry& registry) {
+			(void)registry;
+
+			auto& gs = GraphicsSettings::get();
+			if (!gs.minimap_enabled) {
+				return;
+			}
+
+			auto rendererService = services.lock()->get<sRenderer>();
+			if (!rendererService || !rendererService->w_renderer) {
+				return;
+			}
+
+			auto svc = services.lock();
+			if (!svc) {
+				return;
+			}
+
+			if (!svc->get<Scene::SceneManager>() || !svc->get<MetaData::Service>()) {
+				return;
+			}
+
+			rendererService->w_renderer->BeginMinimapPass(glm::mat4(1.0f), glm::mat4(1.0f));
+			rendererService->w_renderer->EndMinimapPass();
 		}
 
 		void System::reflectionPass(entt::registry& registry) {
@@ -631,24 +662,30 @@ namespace PAIN {
 				// Location 2: aInstancePosition (vec3)
 				// Location 3: aInstanceColor (vec4)
 				// Location 4: aInstanceSize (float)
+				// Location 5: aInstanceRotation (float radians)
 				glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
 				// Allocate buffer (will be updated each frame)
-				glBufferData(GL_ARRAY_BUFFER, instanceCapacity * sizeof(float) * 8, nullptr, GL_STREAM_DRAW); // 8 floats per instance: pos(3) + color(4) + size(1)
+				glBufferData(GL_ARRAY_BUFFER, instanceCapacity * sizeof(float) * 9, nullptr, GL_STREAM_DRAW); // 9 floats per instance: pos(3) + color(4) + size(1) + rot(1)
 
 				// Instance position (location 2)
 				glEnableVertexAttribArray(2);
-				glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+				glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)0);
 				glVertexAttribDivisor(2, 1); // Advance once per instance
 
 				// Instance color (location 3)
 				glEnableVertexAttribArray(3);
-				glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+				glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float)));
 				glVertexAttribDivisor(3, 1); // Advance once per instance
 
 				// Instance size (location 4)
 				glEnableVertexAttribArray(4);
-				glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(7 * sizeof(float)));
+				glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(7 * sizeof(float)));
 				glVertexAttribDivisor(4, 1); // Advance once per instance
+
+				// Instance rotation (location 5)
+				glEnableVertexAttribArray(5);
+				glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(8 * sizeof(float)));
+				glVertexAttribDivisor(5, 1); // Advance once per instance
 
 				glBindVertexArray(0);
 			}
@@ -691,6 +728,7 @@ namespace PAIN {
 					glm::vec3 position;
 					glm::vec4 color;
 					float size;
+					float rotation;
 					float distanceSq;
 				};
 				std::vector<ParticleInstance> instances;
@@ -705,6 +743,7 @@ namespace PAIN {
 					inst.position = p.position;
 					inst.color = p.color;
 					inst.size = p.size;
+					inst.rotation = p.rotation;
 					const glm::vec3 delta = p.position - activeCam->pos;
 					inst.distanceSq = glm::dot(delta, delta);
 					instances.push_back(inst);
@@ -725,16 +764,17 @@ namespace PAIN {
 					instanceData.push_back(inst.color.b);
 					instanceData.push_back(inst.color.a);
 					instanceData.push_back(inst.size);
+					instanceData.push_back(inst.rotation);
 				}
 
-				const size_t instanceCount = instanceData.size() / 8;
+				const size_t instanceCount = instanceData.size() / 9;
 				if (instanceCount == 0)
 					continue;
 
 				if (instanceCount > instanceCapacity) {
 					instanceCapacity = instanceCount;
 					glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-					glBufferData(GL_ARRAY_BUFFER, instanceCapacity * sizeof(float) * 8, nullptr, GL_STREAM_DRAW);
+					glBufferData(GL_ARRAY_BUFFER, instanceCapacity * sizeof(float) * 9, nullptr, GL_STREAM_DRAW);
 				}
 
 				GLuint particleTextureId = 0;
@@ -1188,6 +1228,750 @@ namespace PAIN {
 
 					// Draw debug rectangle
 					rendererService->w_renderer->DebugPass2D(rect_min, rect_max, glm::vec4(1.0f, 0.0f, 1.0f, 1.0f)); // Magenta
+				}
+			}
+
+			if (gs.minimap_enabled) {
+				GLuint minimapTexture = rendererService->w_renderer->getMinimapTexture();
+				if (minimapTexture != 0) {
+					auto assetManager = services.lock()->get<Assets::Manager>();
+					auto window = services.lock()->get<Window::Window>();
+					if (window) {
+						glm::vec2 framebuffer = window->getFrameBuffer();
+						float fbw = glm::max(1.0f, framebuffer.x);
+						float fbh = glm::max(1.0f, framebuffer.y);
+
+						const float border_thickness = glm::max(0.0f, gs.minimap_border_thickness);
+
+						const float map_w = glm::clamp(gs.minimap_size_px.x, 32.0f, fbw);
+						const float map_h = glm::clamp(gs.minimap_size_px.y, 32.0f, fbh);
+						const float outer_w = map_w;
+						const float outer_h = map_h;
+
+						float map_x = gs.minimap_pos_px.x;
+						float map_y = gs.minimap_pos_px.y;
+
+						if (!gs.minimap_override_position) {
+							switch (gs.minimap_recommended_position) {
+							case GraphicsSettings::MINIMAP_RECOMMENDED_POSITION::TOP_LEFT:
+								map_x = 20.0f;
+								map_y = 20.0f;
+								break;
+							case GraphicsSettings::MINIMAP_RECOMMENDED_POSITION::TOP_RIGHT:
+								map_x = fbw - outer_w - 20.0f;
+								map_y = 20.0f;
+								break;
+							case GraphicsSettings::MINIMAP_RECOMMENDED_POSITION::BOTTOM_LEFT:
+								map_x = 20.0f;
+								map_y = fbh - outer_h - 20.0f;
+								break;
+							case GraphicsSettings::MINIMAP_RECOMMENDED_POSITION::BOTTOM_RIGHT:
+								map_x = fbw - outer_w - 20.0f;
+								map_y = fbh - outer_h - 20.0f;
+								break;
+							case GraphicsSettings::MINIMAP_RECOMMENDED_POSITION::TOP_MIDDLE:
+								map_x = (fbw - outer_w) * 0.5f;
+								map_y = 20.0f;
+								break;
+							case GraphicsSettings::MINIMAP_RECOMMENDED_POSITION::BOTTOM_MIDDLE:
+							default:
+								map_x = (fbw - outer_w) * 0.5f;
+								map_y = fbh - outer_h - 20.0f;
+								break;
+							}
+						}
+
+						map_x = glm::clamp(map_x, 0.0f, glm::max(0.0f, fbw - outer_w));
+						map_y = glm::clamp(map_y, 0.0f, glm::max(0.0f, fbh - outer_h));
+
+						const float content_x = map_x;
+						const float content_y = map_y;
+						const float map_square = glm::min(map_w, map_h);
+						const float draw_x = content_x + (map_w - map_square) * 0.5f;
+						const float draw_y = content_y + (map_h - map_square) * 0.5f;
+
+						const float center_x_px = draw_x + map_square * 0.5f;
+						const float center_y_px = draw_y + map_square * 0.5f;
+
+						glm::vec2 minimap_pos(
+							(center_x_px / fbw) * 2.0f - 1.0f,
+							1.0f - (center_y_px / fbh) * 2.0f);
+
+						glm::vec2 minimap_scale(
+							(map_w / fbh),
+							(map_h / fbh));
+
+						rendererService->w_renderer->Render2DTexture(minimapTexture, minimap_pos,
+							minimap_scale);
+
+						auto toNdc = [&](float px, float py) {
+							return glm::vec2(
+								(px / fbw) * 2.0f - 1.0f,
+								1.0f - (py / fbh) * 2.0f);
+						};
+
+						const glm::vec4 border_color(
+							gs.minimap_border_color.r,
+							gs.minimap_border_color.g,
+							gs.minimap_border_color.b,
+							glm::max(0.2f, gs.minimap_border_color.a));
+
+						const int border_layers = static_cast<int>(glm::round(border_thickness));
+						if (border_layers > 0) {
+							for (int i = 0; i < border_layers; ++i) {
+								const float inset = static_cast<float>(i) + 0.5f;
+								const float x0 = map_x + inset;
+								const float y0 = map_y + inset;
+								const float x1 = map_x + outer_w - inset;
+								const float y1 = map_y + outer_h - inset;
+
+								if (x1 <= x0 || y1 <= y0) {
+									break;
+								}
+
+								const glm::vec2 tl = toNdc(x0, y0);
+								const glm::vec2 tr = toNdc(x1, y0);
+								const glm::vec2 br = toNdc(x1, y1);
+								const glm::vec2 bl = toNdc(x0, y1);
+
+								rendererService->w_renderer->DebugPass2DLine(tl, tr, border_color);
+								rendererService->w_renderer->DebugPass2DLine(tr, br, border_color);
+								rendererService->w_renderer->DebugPass2DLine(br, bl, border_color);
+								rendererService->w_renderer->DebugPass2DLine(bl, tl, border_color);
+							}
+						}
+
+						glm::vec3 player_pos(0.0f);
+						glm::vec3 player_forward = glm::vec3(0.0f, 0.0f, -1.0f);
+						glm::vec3 view_forward = glm::vec3(0.0f, 0.0f, -1.0f);
+						bool has_player = false;
+						bool has_view_forward = false;
+
+						{
+							const auto playersByTag = metadata_service->getEntitiesByTag("Player");
+							for (const entt::entity player : playersByTag) {
+								if (!registry.valid(player)) {
+									continue;
+								}
+								if (auto* wt = registry.try_get<WorldTransform>(player)) {
+									player_pos = glm::vec3(wt->matrix[3]);
+									has_player = true;
+								}
+								if (auto* lt = registry.try_get<LocalTransform>(player)) {
+									player_pos = lt->position;
+									player_forward = lt->rotation * glm::vec3(0.0f, 0.0f, -1.0f);
+									has_player = true;
+								}
+								if (has_player) {
+									break;
+								}
+							}
+						}
+
+						if (!has_player) {
+							if (auto playerEntityOpt = metadata_service->getEntityByName("Player")) {
+								const entt::entity player = playerEntityOpt.value();
+								if (registry.valid(player)) {
+									if (auto* wt = registry.try_get<WorldTransform>(player)) {
+										player_pos = glm::vec3(wt->matrix[3]);
+										has_player = true;
+									}
+									if (auto* lt = registry.try_get<LocalTransform>(player)) {
+										player_pos = lt->position;
+										player_forward = lt->rotation * glm::vec3(0.0f, 0.0f, -1.0f);
+										has_player = true;
+									}
+								}
+							}
+						}
+
+						if (!has_player) {
+							if (auto activeCam = scn_service->GetActiveCamera()) {
+								player_pos = activeCam->pos;
+								view_forward = activeCam->forward;
+								has_player = true;
+								has_view_forward = true;
+							}
+						}
+
+						if (!has_view_forward) {
+							if (auto activeCam = scn_service->GetActiveCamera()) {
+								view_forward = activeCam->forward;
+								has_view_forward = true;
+							}
+						}
+
+						if (!has_player) {
+							player_pos = glm::vec3(0.0f);
+						}
+
+						if (!has_view_forward) {
+							view_forward = player_forward;
+						}
+
+						view_forward.y = 0.0f;
+						if (glm::dot(view_forward, view_forward) < 0.0001f) {
+							view_forward = glm::vec3(0.0f, 0.0f, -1.0f);
+						} else {
+							view_forward = glm::normalize(view_forward);
+						}
+
+						// Use camera POV basis and invert once to match on-screen intuition.
+						glm::vec2 forward2(-view_forward.x, -view_forward.z);
+						if (glm::dot(forward2, forward2) < 0.0001f) {
+							forward2 = glm::vec2(0.0f, -1.0f);
+						} else {
+							forward2 = glm::normalize(forward2);
+						}
+						const glm::vec2 right2(-forward2.y, forward2.x);
+
+						auto getEntityWorldPos = [&](entt::entity entity, glm::vec3& outPos) {
+							if (!registry.valid(entity)) {
+								return false;
+							}
+							if (auto* wt = registry.try_get<WorldTransform>(entity)) {
+								outPos = glm::vec3(wt->matrix[3]);
+								return true;
+							}
+							if (auto* lt = registry.try_get<LocalTransform>(entity)) {
+								outPos = lt->position;
+								return true;
+							}
+							return false;
+						};
+
+						auto worldToMinimapNdc = [&](const glm::vec3& worldPos, bool clampToEdge) {
+							const glm::vec2 delta(worldPos.x - player_pos.x, worldPos.z - player_pos.z);
+							float local_x = delta.x;
+							float local_y = -delta.y;
+							if (gs.minimap_rotate_with_player) {
+								local_x = glm::dot(delta, right2);
+								local_y = glm::dot(delta, forward2);
+								// Camera-space orientation correction (both axes)
+								local_x = -local_x;
+								local_y = -local_y;
+							}
+
+							const float radius = glm::max(1.0f, gs.minimap_radius);
+							const float u = 0.5f + (local_x / (2.0f * radius));
+							const float v = 0.5f + (local_y / (2.0f * radius));
+							const float u_draw = clampToEdge ? glm::clamp(u, 0.0f, 1.0f) : u;
+							const float v_draw = clampToEdge ? glm::clamp(v, 0.0f, 1.0f) : v;
+
+							const float px = draw_x + u_draw * map_square;
+							const float py = draw_y + (1.0f - v_draw) * map_square;
+
+							return glm::vec2(
+								(px / fbw) * 2.0f - 1.0f,
+								1.0f - (py / fbh) * 2.0f);
+						};
+
+						auto drawDot = [&](const glm::vec3& pos, float radiusPx, const glm::vec4& color) {
+							const glm::vec2 centerNdc = worldToMinimapNdc(pos, true);
+							const glm::vec2 radiusNdc(
+								(radiusPx / fbw) * 2.0f,
+								(radiusPx / fbh) * 2.0f);
+							rendererService->w_renderer->DebugPass2DCircle(centerNdc, radiusNdc, color, 18);
+						};
+
+						auto drawMarker = [&](const glm::vec3& pos,
+							float radiusPx,
+							const glm::vec4& color,
+							const std::string& iconPath) {
+							if (gs.minimap_use_icon_textures && assetManager && !iconPath.empty()) {
+								auto iconOpt = assetManager->getAsset<Assets::Texture>(iconPath);
+								if (iconOpt.has_value() && iconOpt.value() && iconOpt.value()->gl_texture != 0) {
+									const glm::vec2 iconNdcPos = worldToMinimapNdc(pos, true);
+									const float iconPx = glm::max(4.0f, radiusPx * 2.0f * gs.minimap_icon_scale);
+									glm::vec2 iconNdcScale(iconPx / fbh, iconPx / fbh);
+									rendererService->w_renderer->Render2DTexture(
+										iconOpt.value()->gl_texture,
+										iconNdcPos,
+										iconNdcScale);
+									return;
+								}
+							}
+
+							drawDot(pos, radiusPx, color);
+						};
+
+						auto drawWallFootprint = [&](entt::entity entity, const glm::vec4& color) -> bool {
+							if (auto* bv = registry.try_get<BoundingVolume>(entity)) {
+								if (bv->worldAABB.isValid()) {
+									const glm::vec3 minP = bv->worldAABB.min;
+									const glm::vec3 maxP = bv->worldAABB.max;
+
+									const glm::vec3 c0(minP.x, 0.0f, minP.z);
+									const glm::vec3 c1(maxP.x, 0.0f, minP.z);
+									const glm::vec3 c2(maxP.x, 0.0f, maxP.z);
+									const glm::vec3 c3(minP.x, 0.0f, maxP.z);
+
+									const glm::vec2 p0 = worldToMinimapNdc(c0, true);
+									const glm::vec2 p1 = worldToMinimapNdc(c1, true);
+									const glm::vec2 p2 = worldToMinimapNdc(c2, true);
+									const glm::vec2 p3 = worldToMinimapNdc(c3, true);
+
+									rendererService->w_renderer->DebugPass2DLine(p0, p1, color);
+									rendererService->w_renderer->DebugPass2DLine(p1, p2, color);
+									rendererService->w_renderer->DebugPass2DLine(p2, p3, color);
+									rendererService->w_renderer->DebugPass2DLine(p3, p0, color);
+									return true;
+								}
+							}
+
+							return false;
+						};
+
+						struct WallMinimapCache {
+							const entt::registry* sourceRegistry = nullptr;
+							size_t wallEntityCount = 0;
+							size_t wallEntitySignature = 0;
+							bool built = false;
+							float cellSize = 4.0f;
+							std::vector<glm::vec2> triangleVerticesXZ;
+							std::unordered_map<int64_t, std::vector<uint32_t>> cellToTriangles;
+							std::vector<uint32_t> triangleStamps;
+							uint32_t frameStamp = 1;
+						};
+
+						static WallMinimapCache wallCache;
+
+						auto cellKey = [](int x, int y) -> int64_t {
+							return (static_cast<int64_t>(x) << 32) ^ static_cast<uint32_t>(y);
+						};
+
+						auto toCellCoord = [&](float v) -> int {
+							return static_cast<int>(std::floor(v / wallCache.cellSize));
+						};
+
+						auto rebuildWallCache = [&](const std::vector<entt::entity>& wallEntities) {
+							wallCache.triangleVerticesXZ.clear();
+							wallCache.cellToTriangles.clear();
+
+							for (const entt::entity entity : wallEntities) {
+								if (!registry.valid(entity)) {
+									continue;
+								}
+
+								auto* model = registry.try_get<ModelRenderer>(entity);
+								auto* wt = registry.try_get<WorldTransform>(entity);
+								if (!model || !wt) {
+									continue;
+
+								}
+
+								if (model->modelGUID != model->prevModelGUID) {
+									InitializeModelRenderer(entity, *model);
+								}
+
+								if (!model->cachedModelAsset) {
+									continue;
+								}
+
+								const auto& vertices = model->cachedModelAsset->vertices;
+								const auto& indices = model->cachedModelAsset->indices;
+								if (vertices.empty() || indices.size() < 3) {
+									continue;
+								}
+
+								const glm::mat4 M = wt->matrix;
+								for (size_t i = 0; i + 2 < indices.size(); i += 3) {
+									const uint32_t i0 = indices[i];
+									const uint32_t i1 = indices[i + 1];
+									const uint32_t i2 = indices[i + 2];
+									if (i0 >= vertices.size() || i1 >= vertices.size() || i2 >= vertices.size()) {
+										continue;
+									}
+
+									const glm::vec3 w0 = glm::vec3(M * glm::vec4(vertices[i0].pos, 1.0f));
+									const glm::vec3 w1 = glm::vec3(M * glm::vec4(vertices[i1].pos, 1.0f));
+									const glm::vec3 w2 = glm::vec3(M * glm::vec4(vertices[i2].pos, 1.0f));
+
+									const glm::vec2 v0(w0.x, w0.z);
+									const glm::vec2 v1(w1.x, w1.z);
+									const glm::vec2 v2(w2.x, w2.z);
+
+									const uint32_t triangleIndex = static_cast<uint32_t>(wallCache.triangleVerticesXZ.size() / 3);
+									wallCache.triangleVerticesXZ.push_back(v0);
+									wallCache.triangleVerticesXZ.push_back(v1);
+									wallCache.triangleVerticesXZ.push_back(v2);
+
+									const float minX = glm::min(v0.x, glm::min(v1.x, v2.x));
+									const float minY = glm::min(v0.y, glm::min(v1.y, v2.y));
+									const float maxX = glm::max(v0.x, glm::max(v1.x, v2.x));
+									const float maxY = glm::max(v0.y, glm::max(v1.y, v2.y));
+
+									const int x0 = toCellCoord(minX);
+									const int y0 = toCellCoord(minY);
+									const int x1 = toCellCoord(maxX);
+									const int y1 = toCellCoord(maxY);
+
+									for (int cx = x0; cx <= x1; ++cx) {
+										for (int cy = y0; cy <= y1; ++cy) {
+											wallCache.cellToTriangles[cellKey(cx, cy)].push_back(triangleIndex);
+										}
+									}
+								}
+							}
+
+							const size_t triangleCount = wallCache.triangleVerticesXZ.size() / 3;
+							wallCache.triangleStamps.assign(triangleCount, 0u);
+							wallCache.sourceRegistry = &registry;
+							wallCache.wallEntityCount = wallEntities.size();
+							size_t signature = 1469598103934665603ull;
+							for (const entt::entity entity : wallEntities) {
+								signature ^= static_cast<size_t>(static_cast<uint32_t>(entity));
+								signature *= 1099511628211ull;
+							}
+							wallCache.wallEntitySignature = signature;
+							wallCache.built = true;
+						};
+
+						glm::vec3 nearest_item_pos(0.0f);
+						glm::vec3 nearest_objective_pos(0.0f);
+						bool has_nearest_item = false;
+						bool has_nearest_objective = false;
+						float nearest_item_dist2 = std::numeric_limits<float>::max();
+						float nearest_objective_dist2 = std::numeric_limits<float>::max();
+
+						std::unordered_set<uint32_t> uniqueMarkerEntities;
+						std::vector<entt::entity> markerEntities;
+						const std::vector<entt::entity> wallEntities = metadata_service->getEntitiesByTag("wall");
+						auto appendTaggedEntities = [&](const char* tag) {
+							for (entt::entity entity : metadata_service->getEntitiesByTag(tag)) {
+								const uint32_t key = static_cast<uint32_t>(entity);
+								if (uniqueMarkerEntities.insert(key).second) {
+									markerEntities.push_back(entity);
+								}
+							}
+						};
+
+						appendTaggedEntities("Player");
+						appendTaggedEntities("Enemy");
+						appendTaggedEntities("item");
+						appendTaggedEntities("objective");
+						appendTaggedEntities("letter_collectible");
+						appendTaggedEntities("letter_carried");
+						appendTaggedEntities("letter_collection");
+
+						const bool has_carried_letter = !metadata_service->getEntitiesByTag("letter_carried").empty();
+
+						if (gs.minimap_show_walls) {
+							size_t currentWallSignature = 1469598103934665603ull;
+							for (const entt::entity entity : wallEntities) {
+								currentWallSignature ^= static_cast<size_t>(static_cast<uint32_t>(entity));
+								currentWallSignature *= 1099511628211ull;
+							}
+
+							const bool needsRebuild =
+								!wallCache.built ||
+								wallCache.sourceRegistry != &registry ||
+								wallCache.wallEntityCount != wallEntities.size() ||
+								wallCache.wallEntitySignature != currentWallSignature;
+
+							if (needsRebuild) {
+								rebuildWallCache(wallEntities);
+							}
+
+							std::vector<glm::vec2> batchedWallTriangleVertices;
+							if (!wallCache.triangleVerticesXZ.empty()) {
+								if (wallCache.frameStamp == std::numeric_limits<uint32_t>::max()) {
+									std::fill(wallCache.triangleStamps.begin(), wallCache.triangleStamps.end(), 0u);
+									wallCache.frameStamp = 1;
+								} else {
+									++wallCache.frameStamp;
+								}
+
+								const float minimapRadius = glm::max(1.0f, gs.minimap_radius);
+								const int minCellX = toCellCoord(player_pos.x - minimapRadius);
+								const int maxCellX = toCellCoord(player_pos.x + minimapRadius);
+								const int minCellY = toCellCoord(player_pos.z - minimapRadius);
+								const int maxCellY = toCellCoord(player_pos.z + minimapRadius);
+
+								for (int cx = minCellX; cx <= maxCellX; ++cx) {
+									for (int cy = minCellY; cy <= maxCellY; ++cy) {
+										auto cellIt = wallCache.cellToTriangles.find(cellKey(cx, cy));
+										if (cellIt == wallCache.cellToTriangles.end()) {
+											continue;
+										}
+
+										for (const uint32_t triIndex : cellIt->second) {
+											if (triIndex >= wallCache.triangleStamps.size()) {
+												continue;
+											}
+											if (wallCache.triangleStamps[triIndex] == wallCache.frameStamp) {
+												continue;
+											}
+											wallCache.triangleStamps[triIndex] = wallCache.frameStamp;
+
+											const size_t base = static_cast<size_t>(triIndex) * 3;
+											if (base + 2 >= wallCache.triangleVerticesXZ.size()) {
+												continue;
+											}
+
+											const glm::vec2 v0 = wallCache.triangleVerticesXZ[base];
+											const glm::vec2 v1 = wallCache.triangleVerticesXZ[base + 1];
+											const glm::vec2 v2 = wallCache.triangleVerticesXZ[base + 2];
+
+											batchedWallTriangleVertices.push_back(
+												worldToMinimapNdc(glm::vec3(v0.x, player_pos.y, v0.y), true));
+											batchedWallTriangleVertices.push_back(
+												worldToMinimapNdc(glm::vec3(v1.x, player_pos.y, v1.y), true));
+											batchedWallTriangleVertices.push_back(
+												worldToMinimapNdc(glm::vec3(v2.x, player_pos.y, v2.y), true));
+										}
+									}
+								}
+
+								if (!batchedWallTriangleVertices.empty()) {
+									rendererService->w_renderer->DebugPass2DTrianglesFilled(
+										batchedWallTriangleVertices,
+										glm::vec4(0.75f, 0.75f, 0.75f, 0.35f));
+								}
+							} else {
+								for (const entt::entity wallEntity : wallEntities) {
+									drawWallFootprint(wallEntity, glm::vec4(0.75f, 0.75f, 0.75f, 1.0f));
+								}
+							}
+						}
+
+						for (entt::entity entity : markerEntities) {
+							glm::vec3 pos(0.0f);
+							if (!getEntityWorldPos(entity, pos)) {
+								continue;
+							}
+
+							glm::vec4 color(0.75f, 0.75f, 0.75f, 1.0f);
+							float dotRadius = 3.0f;
+
+							if (metadata_service->hasTag(entity, "Player")) {
+								if (!gs.minimap_show_player) {
+									continue;
+								}
+								color = glm::vec4(0.2f, 1.0f, 0.2f, 1.0f);
+								dotRadius = 5.0f;
+								drawMarker(pos, dotRadius, color, gs.minimap_icon_player_path);
+								continue;
+							} else if (metadata_service->hasTag(entity, "item") ||
+								metadata_service->hasTag(entity, "letter_collectible") ||
+								metadata_service->hasTag(entity, "letter_carried")) {
+								if (!gs.minimap_show_items) {
+									continue;
+								}
+								color = glm::vec4(1.0f, 0.84f, 0.1f, 1.0f);
+								dotRadius = 4.0f;
+								const glm::vec3 delta = pos - player_pos;
+								const float dist2 = glm::dot(delta, delta);
+								if (dist2 < nearest_item_dist2) {
+									nearest_item_dist2 = dist2;
+									nearest_item_pos = pos;
+									has_nearest_item = true;
+								}
+								drawMarker(pos, dotRadius, color, gs.minimap_icon_item_path);
+								continue;
+							} else if (metadata_service->hasTag(entity, "objective") ||
+								metadata_service->hasTag(entity, "letter_collection")) {
+								if (!gs.minimap_show_objective) {
+									continue;
+								}
+								color = glm::vec4(0.2f, 0.6f, 1.0f, 1.0f);
+								dotRadius = 4.0f;
+
+								const glm::vec3 delta = pos - player_pos;
+								const float dist2 = glm::dot(delta, delta);
+								if (dist2 < nearest_objective_dist2) {
+									nearest_objective_dist2 = dist2;
+									nearest_objective_pos = pos;
+									has_nearest_objective = true;
+								}
+								drawMarker(pos, dotRadius, color, gs.minimap_icon_objective_path);
+								continue;
+							} else {
+								continue;
+							}
+						}
+
+						if (gs.minimap_show_danger) {
+						std::unordered_set<uint32_t> uniqueDangerEntities;
+						std::vector<entt::entity> dangerEntities;
+						auto appendDangerEntities = [&](const char* tag) {
+							for (entt::entity entity : metadata_service->getEntitiesByTag(tag)) {
+								const uint32_t key = static_cast<uint32_t>(entity);
+								if (uniqueDangerEntities.insert(key).second) {
+									dangerEntities.push_back(entity);
+								}
+							}
+						};
+						appendDangerEntities("danger");
+						appendDangerEntities("Enemy");
+
+						for (entt::entity entity : dangerEntities) {
+							glm::vec3 pos(0.0f);
+							if (!getEntityWorldPos(entity, pos)) {
+								continue;
+							}
+
+							float danger_radius = 1.0f;
+							if (metadata_service->hasTag(entity, "light_cone")) {
+								const float maxDistance = 9.0f;
+								const float coneAngleDeg = 32.0f;
+								const float heightDelta = glm::abs(pos.y - player_pos.y);
+								const float coneRadius = glm::tan(glm::radians(coneAngleDeg)) * heightDelta;
+								const float sphereRadius =
+									heightDelta >= maxDistance
+									? 0.0f
+									: std::sqrt(maxDistance * maxDistance - heightDelta * heightDelta);
+								danger_radius = glm::max(0.25f, glm::min(coneRadius, sphereRadius));
+							} else if (metadata_service->hasTag(entity, "danger_collision")) {
+								danger_radius = 0.5f;
+							} else if (auto* lt = registry.try_get<LocalTransform>(entity)) {
+								danger_radius = glm::max(0.25f, glm::max(lt->scale.x, lt->scale.z));
+							}
+
+							const glm::vec3 delta3 = pos - player_pos;
+							const float dist_xz = glm::length(glm::vec2(delta3.x, delta3.z));
+							if (dist_xz > glm::max(1.0f, gs.minimap_radius) + danger_radius) {
+								continue;
+							}
+
+							const glm::vec2 centerNdc = worldToMinimapNdc(pos, false);
+							const float radiusPx = (danger_radius / (2.0f * glm::max(1.0f, gs.minimap_radius))) * map_square;
+							const glm::vec2 radiusNdc((radiusPx / fbw) * 2.0f, (radiusPx / fbh) * 2.0f);
+
+								rendererService->w_renderer->DebugPass2DCircle(
+									centerNdc,
+									radiusNdc,
+									glm::vec4(1.0f, 0.15f, 0.15f, 1.0f),
+									24);
+						}
+						}
+
+						glm::vec3 route_target_world(0.0f);
+						bool has_route_target = false;
+						if (has_carried_letter) {
+							if (has_nearest_objective) {
+								route_target_world = nearest_objective_pos;
+								has_route_target = true;
+							} else if (has_nearest_item) {
+								route_target_world = nearest_item_pos;
+								has_route_target = true;
+							}
+						} else {
+							if (has_nearest_item) {
+								route_target_world = nearest_item_pos;
+								has_route_target = true;
+							} else if (has_nearest_objective) {
+								route_target_world = nearest_objective_pos;
+								has_route_target = true;
+							}
+						}
+
+						if (has_route_target && gs.minimap_show_route) {
+							const glm::vec2 p0 = worldToMinimapNdc(player_pos, true);
+							const glm::vec2 p1_clamped = worldToMinimapNdc(route_target_world, true);
+							const glm::vec2 p1_unclamped = worldToMinimapNdc(route_target_world, false);
+							const bool off_map = glm::length(p1_unclamped - p1_clamped) > 0.0001f;
+
+							switch (gs.minimap_route_mode) {
+							case GraphicsSettings::MINIMAP_ROUTE_MODE::ROUTE_NEAREST_LINE:
+								rendererService->w_renderer->DebugPass2DLine(
+									p0,
+									p1_clamped,
+									glm::vec4(1.0f, 0.9f, 0.2f, 1.0f));
+								break;
+							case GraphicsSettings::MINIMAP_ROUTE_MODE::ROUTE_BREADCRUMB_DOTS: {
+								for (int i = 1; i <= 6; ++i) {
+									const float t = static_cast<float>(i) / 7.0f;
+									const glm::vec2 p = glm::mix(p0, p1_clamped, t);
+									rendererService->w_renderer->DebugPass2DCircle(
+										p,
+										glm::vec2((2.0f / fbw) * 2.0f, (2.0f / fbh) * 2.0f),
+										glm::vec4(1.0f, 0.9f, 0.2f, 1.0f),
+										12);
+								}
+								break;
+							}
+							case GraphicsSettings::MINIMAP_ROUTE_MODE::ROUTE_EDGE_ARROW:
+							case GraphicsSettings::MINIMAP_ROUTE_MODE::ROUTE_LINE_AND_EDGE_ARROW: {
+								if (gs.minimap_route_mode == GraphicsSettings::MINIMAP_ROUTE_MODE::ROUTE_LINE_AND_EDGE_ARROW) {
+									rendererService->w_renderer->DebugPass2DLine(
+										p0,
+										p1_clamped,
+										glm::vec4(1.0f, 0.9f, 0.2f, 0.7f));
+								}
+
+								if (off_map) {
+									glm::vec2 dir = p1_clamped - p0;
+									if (glm::dot(dir, dir) < 0.0001f) {
+										dir = glm::vec2(0.0f, -1.0f);
+									} else {
+										dir = glm::normalize(dir);
+									}
+
+									const glm::vec2 arrow_tip = p1_clamped;
+									const glm::vec2 arrow_tail = arrow_tip - dir * 0.04f;
+									rendererService->w_renderer->DebugPass2DLine(
+										arrow_tail,
+										arrow_tip,
+										glm::vec4(1.0f, 0.9f, 0.2f, 1.0f));
+								}
+								break;
+							}
+							default:
+								break;
+							}
+						}
+
+						if (gs.minimap_show_legend) {
+							const glm::vec2 legend_base = toNdc(map_x + 10.0f, map_y + 12.0f);
+							const glm::vec2 legend_step(0.0f, -(12.0f / fbh) * 2.0f);
+							const glm::vec2 legend_radius((2.0f / fbw) * 2.0f, (2.0f / fbh) * 2.0f);
+
+							int row = 0;
+							auto drawLegendDot = [&](const glm::vec4& c) {
+								rendererService->w_renderer->DebugPass2DCircle(
+									legend_base + static_cast<float>(row) * legend_step,
+									legend_radius,
+									c,
+									12);
+								row++;
+							};
+
+							if (gs.minimap_show_player) drawLegendDot(glm::vec4(0.2f, 1.0f, 0.2f, 1.0f));
+							if (gs.minimap_show_danger) drawLegendDot(glm::vec4(1.0f, 0.15f, 0.15f, 1.0f));
+							if (gs.minimap_show_items) drawLegendDot(glm::vec4(1.0f, 0.84f, 0.1f, 1.0f));
+							if (gs.minimap_show_objective) drawLegendDot(glm::vec4(0.2f, 0.6f, 1.0f, 1.0f));
+							if (gs.minimap_show_walls) drawLegendDot(glm::vec4(0.75f, 0.75f, 0.75f, 1.0f));
+						}
+
+						glm::vec2 arrow_dir(0.0f, -1.0f);
+						if (!gs.minimap_rotate_with_player) {
+							arrow_dir = -forward2;
+							if (glm::dot(arrow_dir, arrow_dir) < 0.0001f) {
+								arrow_dir = glm::vec2(0.0f, -1.0f);
+							} else {
+								arrow_dir = glm::normalize(arrow_dir);
+							}
+						}
+
+						const float arrow_len_px = glm::max(8.0f, glm::min(map_w, map_h) * 0.15f);
+						glm::vec2 arrow_start_px(center_x_px, center_y_px);
+						glm::vec2 arrow_end_px = arrow_start_px + arrow_dir * arrow_len_px;
+
+						glm::vec2 arrow_start_ndc(
+							(arrow_start_px.x / fbw) * 2.0f - 1.0f,
+							1.0f - (arrow_start_px.y / fbh) * 2.0f);
+						glm::vec2 arrow_end_ndc(
+							(arrow_end_px.x / fbw) * 2.0f - 1.0f,
+							1.0f - (arrow_end_px.y / fbh) * 2.0f);
+
+						if (gs.minimap_show_player) {
+							rendererService->w_renderer->DebugPass2DLine(
+								arrow_start_ndc,
+								arrow_end_ndc,
+								glm::vec4(0.2f, 1.0f, 0.2f, 1.0f));
+						}
+					}
 				}
 			}
 

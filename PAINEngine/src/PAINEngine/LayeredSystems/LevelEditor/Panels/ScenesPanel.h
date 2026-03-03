@@ -66,6 +66,9 @@ namespace PAIN {
                 // Layer management state
                 void drawGraphicsSettingsPanel();
 
+                // Minimap settings panel
+                void drawMinimapSettingsPanel();
+
                 // Floor Panel
                 void drawFloorSettingsPanel();
 

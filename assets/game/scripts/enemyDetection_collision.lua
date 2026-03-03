@@ -2,8 +2,16 @@
 -- collision-based (enemy detection) script
 
 local player = nil
+local minimapTagged = false
 
 registerUpdate(function(dt)
+    if (not minimapTagged) and addTag then
+        addTag(entityId, "Enemy")
+        addTag(entityId, "danger")
+        addTag(entityId, "danger_collision")
+        minimapTagged = true
+    end
+
     if not player then
         player = findEntity("Player")
         if not player then 

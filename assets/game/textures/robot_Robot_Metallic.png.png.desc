@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "robot_Robot_Metallic.png.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 672977297660454224
+  },
+  "descriptor_version": 1,
+  "guid": "841e487f-5eab-f24d-9eae-9dfbb83fcc02",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\robot_Robot_Metallic.png.png"
+  }
+}

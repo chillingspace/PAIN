@@ -847,6 +847,109 @@ namespace PAIN {
                         gs.DEBUG_PBR_MAP_TYPE = static_cast<GraphicsSettings::DEBUG_PBR_MAP_TYPES>(selected_pbr_index);
                     }
                 }
+
+            }
+
+            void ScenesPanel::drawMinimapSettingsPanel() {
+                auto& gs = GraphicsSettings::get();
+
+                bool minimapEnabled = gs.minimap_enabled;
+                if (ImGui::Checkbox("Enable Minimap", &minimapEnabled)) {
+                    gs.minimap_enabled = minimapEnabled;
+                }
+
+                ImGui::BeginDisabled(!gs.minimap_enabled);
+
+                ImGui::DragFloat("Minimap Radius", &gs.minimap_radius, 0.25f, 2.0f, 100.0f, "%.1f");
+                ImGui::DragFloat("Minimap Camera Height", &gs.minimap_camera_height, 0.25f, 2.0f, 200.0f, "%.1f");
+
+                ImGui::DragFloat2("Minimap Size (px)", glm::value_ptr(gs.minimap_size_px), 1.0f, 64.0f, 1024.0f, "%.0f");
+                static const char* recommendedPositions[] = {
+                    "Top Left",
+                    "Top Right",
+                    "Bottom Left",
+                    "Bottom Right",
+                    "Top Middle",
+                    "Bottom Middle"
+                };
+                int recommendedPos = static_cast<int>(gs.minimap_recommended_position);
+                if (ImGui::Combo("Recommended Position", &recommendedPos, recommendedPositions, IM_ARRAYSIZE(recommendedPositions))) {
+                    gs.minimap_recommended_position = static_cast<GraphicsSettings::MINIMAP_RECOMMENDED_POSITION>(recommendedPos);
+                }
+
+                bool overridePos = gs.minimap_override_position;
+                if (ImGui::Checkbox("Override Position", &overridePos)) {
+                    gs.minimap_override_position = overridePos;
+                }
+
+                ImGui::BeginDisabled(!gs.minimap_override_position);
+                float maxPosX = 8192.0f;
+                float maxPosY = 8192.0f;
+                if (auto window = services->get<Window::Window>()) {
+                    const glm::vec2 framebuffer = window->getFrameBuffer();
+                    maxPosX = glm::max(0.0f, framebuffer.x - gs.minimap_size_px.x);
+                    maxPosY = glm::max(0.0f, framebuffer.y - gs.minimap_size_px.y);
+                }
+
+                ImGui::DragFloat("Minimap Pos X (px)", &gs.minimap_pos_px.x, 1.0f, 0.0f, maxPosX, "%.0f");
+                ImGui::DragFloat("Minimap Pos Y (px)", &gs.minimap_pos_px.y, 1.0f, 0.0f, maxPosY, "%.0f");
+                ImGui::EndDisabled();
+
+                ImGui::TextDisabled("Recommended position respects minimap size.");
+
+                bool rotateWithCamera = gs.minimap_rotate_with_player;
+                if (ImGui::Checkbox("Rotate With Camera", &rotateWithCamera)) {
+                    gs.minimap_rotate_with_player = rotateWithCamera;
+                }
+
+                static const char* routeModes[] = {
+                    "Nearest Target Line",
+                    "Breadcrumb Dots",
+                    "Edge Arrow",
+                    "Line + Edge Arrow"
+                };
+                int routeMode = static_cast<int>(gs.minimap_route_mode);
+                if (ImGui::Combo("Route Mode", &routeMode, routeModes, IM_ARRAYSIZE(routeModes))) {
+                    gs.minimap_route_mode = static_cast<GraphicsSettings::MINIMAP_ROUTE_MODE>(routeMode);
+                }
+
+                ImGui::Separator();
+                ImGui::TextUnformatted("Category Visibility");
+                ImGui::Checkbox("Show Player", &gs.minimap_show_player);
+                ImGui::Checkbox("Show Danger", &gs.minimap_show_danger);
+                ImGui::Checkbox("Show Items", &gs.minimap_show_items);
+                ImGui::Checkbox("Show Objective", &gs.minimap_show_objective);
+                ImGui::Checkbox("Show Walls", &gs.minimap_show_walls);
+                ImGui::Checkbox("Show Route", &gs.minimap_show_route);
+
+                ImGui::Separator();
+                ImGui::TextUnformatted("Icons");
+                ImGui::Checkbox("Use Icon Textures", &gs.minimap_use_icon_textures);
+                ImGui::DragFloat("Icon Scale", &gs.minimap_icon_scale, 0.05f, 0.2f, 4.0f, "%.2f");
+
+                auto drawPathField = [](const char* label, std::string& value) {
+                    char buffer[256]{};
+                    strncpy(buffer, value.c_str(), sizeof(buffer) - 1);
+                    if (ImGui::InputText(label, buffer, IM_ARRAYSIZE(buffer))) {
+                        value = buffer;
+                    }
+                };
+
+                ImGui::BeginDisabled(!gs.minimap_use_icon_textures);
+                drawPathField("Player Icon Path", gs.minimap_icon_player_path);
+                drawPathField("Danger Icon Path", gs.minimap_icon_danger_path);
+                drawPathField("Item Icon Path", gs.minimap_icon_item_path);
+                drawPathField("Objective Icon Path", gs.minimap_icon_objective_path);
+                drawPathField("Wall Icon Path", gs.minimap_icon_wall_path);
+                ImGui::EndDisabled();
+
+                ImGui::Checkbox("Show Legend", &gs.minimap_show_legend);
+
+                ImGui::SliderFloat("Minimap Background Alpha", &gs.minimap_background_alpha, 0.0f, 1.0f, "%.2f");
+                ImGui::DragFloat("Minimap Border Thickness", &gs.minimap_border_thickness, 0.1f, 0.0f, 10.0f, "%.1f");
+                ImGui::ColorEdit4("Minimap Border Color", glm::value_ptr(gs.minimap_border_color));
+
+                ImGui::EndDisabled();
             }
 
             void ScenesPanel::drawFloorSettingsPanel() {
@@ -976,60 +1079,73 @@ namespace PAIN {
                     ImGui::Spacing();
                     
                     // ============================================
-                    // Camera Collision Settings
+                    // Camera Collision Settings (APPLIES TO GAME CAM ONLY)
                     // ============================================
-                    if (ImGui::CollapsingHeader("Camera Collision", ImGuiTreeNodeFlags_DefaultOpen)) {
-                        ImGui::Indent();
-                        
-                        // Enable/disable collision
-                        bool collisionEnabled = cam->collisionEnabled;
-                        if (ImGui::Checkbox("Enable Collision", &collisionEnabled)) {
-                            cam->collisionEnabled = collisionEnabled;
-                        }
-                        
-                        ImGui::BeginDisabled(!collisionEnabled);
-                        
-                        // Collision shape selector
-                        const char* shapes[] = { "Sphere", "Capsule" };
-                        int shapeIdx = cam->useCapsuleCollision ? 1 : 0;
-                        if (ImGui::Combo("Collision Shape", &shapeIdx, shapes, IM_ARRAYSIZE(shapes))) {
-                            cam->useCapsuleCollision = (shapeIdx == 1);
-                        }
-                        
-                        // Radius slider
-                        float radius = cam->collisionRadius;
-                        if (ImGui::DragFloat("Collision Radius", &radius, 0.01f, 0.1f, 2.0f, "%.2f")) {
-                            cam->collisionRadius = radius;
-                        }
-                        if (ImGui::IsItemHovered()) {
-                            ImGui::SetTooltip("Size of camera collision sphere/capsule");
-                        }
-                        
-                        // Capsule height (only visible for capsule)
-                        if (cam->useCapsuleCollision) {
-                            float height = cam->capsuleHeight;
-                            if (ImGui::DragFloat("Capsule Height", &height, 0.01f, 0.5f, 3.0f, "%.2f")) {
-                                cam->capsuleHeight = height;
+                    auto game_cam = scene->GetGameCamera();
+
+                    if (game_cam) {
+
+                        if (ImGui::CollapsingHeader("Camera Collision", ImGuiTreeNodeFlags_DefaultOpen)) {
+                            ImGui::Indent();
+
+
+                            // Enable/disable collision
+                            bool collisionEnabled = game_cam->collisionEnabled;
+                            if (ImGui::Checkbox("Enable Collision", &collisionEnabled)) {
+                                game_cam->collisionEnabled = collisionEnabled;
                             }
+
+                            ImGui::BeginDisabled(!collisionEnabled);
+
+                            // Collision shape selector
+                            const char* shapes[] = { "Sphere", "Capsule" };
+                            int shapeIdx = game_cam->useCapsuleCollision ? 1 : 0;
+                            if (ImGui::Combo("Collision Shape", &shapeIdx, shapes, IM_ARRAYSIZE(shapes))) {
+                                game_cam->useCapsuleCollision = (shapeIdx == 1);
+                            }
+
+                            // Radius slider
+                            float radius = game_cam->collisionRadius;
+                            if (ImGui::DragFloat("Collision Radius", &radius, 0.01f, 0.1f, 2.0f, "%.2f")) {
+                                game_cam->collisionRadius = radius;
+                            }
+                            if (ImGui::IsItemHovered()) {
+                                ImGui::SetTooltip("Size of camera collision sphere/capsule");
+                            }
+
+                            // Capsule height (only visible for capsule)
+                            if (game_cam->useCapsuleCollision) {
+                                float height = game_cam->capsuleHeight;
+                                if (ImGui::DragFloat("Capsule Height", &height, 0.01f, 0.5f, 3.0f, "%.2f")) {
+                                    game_cam->capsuleHeight = height;
+                                }
+                            }
+
+                            // Offset from surfaces
+                            float offset = game_cam->collisionOffset;
+                            if (ImGui::DragFloat("Surface Offset", &offset, 0.01f, 0.0f, 0.5f, "%.2f")) {
+                                game_cam->collisionOffset = offset;
+                            }
+                            if (ImGui::IsItemHovered()) {
+                                ImGui::SetTooltip("Minimum distance camera maintains from surfaces");
+                            }
+
+                            // Show gizmo in editor
+                            bool showGizmo = game_cam->showCollisionGizmo;
+                            if (ImGui::Checkbox("Show Collision Gizmo", &showGizmo)) {
+                                game_cam->showCollisionGizmo = showGizmo;
+                            }
+                            ImGui::EndDisabled();
+
+                            ImGui::Unindent();
                         }
-                        
-                        // Offset from surfaces
-                        float offset = cam->collisionOffset;
-                        if (ImGui::DragFloat("Surface Offset", &offset, 0.01f, 0.0f, 0.5f, "%.2f")) {
-                            cam->collisionOffset = offset;
+                    }
+                    else {
+                        if (ImGui::CollapsingHeader("Game Camera Collision", ImGuiTreeNodeFlags_DefaultOpen)) {
+                            ImGui::Indent();
+                            ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.0f, 1.0f), "No active Game Camera selected.");
+                            ImGui::Unindent();
                         }
-                        if (ImGui::IsItemHovered()) {
-                            ImGui::SetTooltip("Minimum distance camera maintains from surfaces");
-                        }
-                        
-                        // Show gizmo in editor
-                        bool showGizmo = cam->showCollisionGizmo;
-                        if (ImGui::Checkbox("Show Collision Gizmo", &showGizmo)) {
-                            cam->showCollisionGizmo = showGizmo;
-                        }
-                        
-                        ImGui::EndDisabled();
-                        ImGui::Unindent();
                     }
                 }
 
@@ -1544,6 +1660,10 @@ namespace PAIN {
                 //Render graphics settings
                 if (ImGui::CollapsingHeader("Graphics Settings")) {
                     drawGraphicsSettingsPanel();
+                }
+
+                if (ImGui::CollapsingHeader("Minimap Settings")) {
+                    drawMinimapSettingsPanel();
                 }
 
                 //Render Floor settings

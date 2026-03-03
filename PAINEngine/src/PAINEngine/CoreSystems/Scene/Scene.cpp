@@ -50,6 +50,11 @@ namespace PAIN {
 			return nullptr;
 		}
 
+		Camera* SceneManager::GetEditorCamera()
+		{
+			return editor_camera.get();
+		}
+
 		void SceneManager::SetActiveCamera(Camera* cam) {
 			active_camera = cam;
 		}
@@ -309,7 +314,7 @@ namespace PAIN {
 			);
 			
 			// Setup camera collision settings
-			editor_camera->collisionEnabled = camSettings.collisionEnabled;
+			editor_camera->collisionEnabled = false;
 			editor_camera->collisionRadius = camSettings.collisionRadius;
 			editor_camera->collisionOffset = camSettings.collisionOffset;
 			editor_camera->capsuleHeight = camSettings.capsuleHeight;
@@ -1335,14 +1340,6 @@ namespace PAIN {
 					curr_cam->far_plane = far_plane;
 					curr_cam->width_ratio = width_ratio;
 					curr_cam->height_ratio = height_ratio;
-					// Copy collision settings from editor camera
-					if (editor_camera) {
-						curr_cam->collisionEnabled = editor_camera->collisionEnabled;
-						curr_cam->collisionRadius = editor_camera->collisionRadius;
-						curr_cam->collisionOffset = editor_camera->collisionOffset;
-						curr_cam->capsuleHeight = editor_camera->capsuleHeight;
-						curr_cam->useCapsuleCollision = editor_camera->useCapsuleCollision;
-					}
 
 				}
 				else {
