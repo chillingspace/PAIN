@@ -314,7 +314,7 @@ namespace PAIN {
 			);
 			
 			// Setup camera collision settings
-			editor_camera->collisionEnabled = false;
+			editor_camera->collisionEnabled = camSettings.collisionEnabled;
 			editor_camera->collisionRadius = camSettings.collisionRadius;
 			editor_camera->collisionOffset = camSettings.collisionOffset;
 			editor_camera->capsuleHeight = camSettings.capsuleHeight;
@@ -800,13 +800,17 @@ namespace PAIN {
 				scene_asset.camera.speed = active_camera->speed;
 				scene_asset.camera.sensitivity = active_camera->sensitivity;
 				
-				// Camera collision settings
-				scene_asset.camera.collisionEnabled = active_camera->collisionEnabled;
-				scene_asset.camera.collisionRadius = active_camera->collisionRadius;
-				scene_asset.camera.collisionOffset = active_camera->collisionOffset;
-				scene_asset.camera.capsuleHeight = active_camera->capsuleHeight;
-				scene_asset.camera.useCapsuleCollision = active_camera->useCapsuleCollision;
-				scene_asset.camera.showCollisionGizmo = active_camera->showCollisionGizmo;
+				// Camera collision settings (Scene panel edits game camera collision)
+				Camera* collisionSource = GetGameCamera();
+				if (!collisionSource) {
+					collisionSource = active_camera;
+				}
+				scene_asset.camera.collisionEnabled = collisionSource->collisionEnabled;
+				scene_asset.camera.collisionRadius = collisionSource->collisionRadius;
+				scene_asset.camera.collisionOffset = collisionSource->collisionOffset;
+				scene_asset.camera.capsuleHeight = collisionSource->capsuleHeight;
+				scene_asset.camera.useCapsuleCollision = collisionSource->useCapsuleCollision;
+				scene_asset.camera.showCollisionGizmo = collisionSource->showCollisionGizmo;
 
 			}
 
@@ -817,6 +821,7 @@ namespace PAIN {
 
 			//Other graphic settings
 			scene_asset.environment.useWorldLight = gs.world_light;
+			scene_asset.environment.useIBL = gs.ibl;
 			scene_asset.environment.useDiffuseMap = gs.DEBUG_USE_DIFFUSE_MAP;
 			scene_asset.environment.useAOMap = gs.DEBUG_USE_AO_MAP;
 			scene_asset.environment.useNormalMap = gs.DEBUG_USE_NORMAL_MAP;
@@ -1443,6 +1448,7 @@ namespace PAIN {
 						new_cam->collisionOffset = editor_camera->collisionOffset;
 						new_cam->capsuleHeight = editor_camera->capsuleHeight;
 						new_cam->useCapsuleCollision = editor_camera->useCapsuleCollision;
+						new_cam->showCollisionGizmo = editor_camera->showCollisionGizmo;
 					}
 					game_cameras.insert(std::pair<std::string, std::unique_ptr<Camera>>(entity_name, std::move(new_cam)));
 

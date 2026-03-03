@@ -1648,6 +1648,14 @@ namespace PAIN {
 
 						const bool has_carried_letter = !metadata_service->getEntitiesByTag("letter_carried").empty();
 
+						// Clip all minimap overlays (walls, markers, danger, route, legend, arrows)
+						glEnable(GL_SCISSOR_TEST);
+						glScissor(
+							static_cast<GLint>(draw_x),
+							static_cast<GLint>(fbh - draw_y - draw_h),
+							static_cast<GLsizei>(draw_w),
+							static_cast<GLsizei>(draw_h));
+
 						if (gs.minimap_show_walls) {
 							size_t currentWallSignature = 1469598103934665603ull;
 							for (const entt::entity entity : wallEntities) {
@@ -1696,20 +1704,10 @@ namespace PAIN {
 								(draw_w / fbw) * 2.0f,
 								(draw_h / fbh) * 2.0f);
 
-							// Scissor to minimap rect (glScissor uses bottom-left origin)
-							glEnable(GL_SCISSOR_TEST);
-							glScissor(
-								static_cast<GLint>(draw_x),
-								static_cast<GLint>(fbh - draw_y - draw_h),
-								static_cast<GLsizei>(draw_w),
-								static_cast<GLsizei>(draw_h));
-
 							rendererService->w_renderer->DrawMinimapWalls(
 								playerXZ, transformCol0, transformCol1,
 								invDoubleRadius, ndcBase, ndcScale,
 								glm::vec4(0.75f, 0.75f, 0.75f, 0.35f));
-
-							glDisable(GL_SCISSOR_TEST);
 						} else {
 							// Fallback to AABB outline when no triangle data available
 							for (const entt::entity wallEntity : wallEntities) {
@@ -1971,6 +1969,8 @@ namespace PAIN {
 								arrow_end_ndc,
 								glm::vec4(0.2f, 1.0f, 0.2f, 1.0f));
 						}
+
+						glDisable(GL_SCISSOR_TEST);
 					}
 				}
 			}
