@@ -520,6 +520,7 @@ local function handleHideToggle(px, py, pz)
         log("[PlayerState] Player left hiding spot")
         resetInputState()
         log("[PlayerState] Player left hiding spot")
+        enablePhysics(S.player)
         -- NEW: Play hide out sound at the box location
         if S.hiddenIn then
             audioPlaySFXFromEntity(SFX_HIDE_OUT, S.hiddenIn, VOL_HIDE)
@@ -559,6 +560,7 @@ local function handleHideToggle(px, py, pz)
             log("[PlayerState] Player is hiding in a box")
             -- NEW: Play hide in sound at the box location
             audioPlaySFXFromEntity(SFX_HIDE_IN, bestSpot, VOL_HIDE)
+            disablePhysics(S.player)
         end
     end
 end
