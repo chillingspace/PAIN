@@ -64,6 +64,11 @@
                 "Name": {
                     "name": "Container_Blue"
                 },
+                "Tag": {
+                    "tags": [
+                        "wall"
+                    ]
+                },
                 "RigidBody3D": {
                     "angular_velocity": [
                         0.0,

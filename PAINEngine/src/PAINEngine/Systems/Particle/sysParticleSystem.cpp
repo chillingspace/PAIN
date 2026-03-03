@@ -56,7 +56,7 @@ namespace PAIN {
                 particleComp.requestRestart = false;
 
                 // Update particle system
-                psInstance->Update(timing.dt, transform.position);
+                psInstance->Update(timing.dt, transform.position, transform.rotation);
                 
                 // Sync runtime state back to component for display
                 particleComp.state = psInstance->GetConfig().state;

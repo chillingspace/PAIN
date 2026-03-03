@@ -216,6 +216,10 @@ function S.init(player)
 
     local oldPlayer = S.player
     S.player = player
+
+    if addTag and S.player then
+        addTag(S.player, "Player")
+    end
     
     -- reset state if player changed, game ended, or first load
     local shouldReset = (oldPlayer ~= player) or S.gameEnded or S.gameWon
@@ -449,6 +453,27 @@ local function findNearestByTag(tag, px, py, pz, radius)
     return bestEntity
 end
 
+local function ensureMinimapGameplayTags()
+    if not addTag then
+        return
+    end
+
+    local collectibles = getEntitiesByTag("letter_collectible") or {}
+    for _, e in ipairs(collectibles) do
+        addTag(e, "item")
+    end
+
+    local carried = getEntitiesByTag("letter_carried") or {}
+    for _, e in ipairs(carried) do
+        addTag(e, "item")
+    end
+
+    local objectives = getEntitiesByTag("letter_collection") or {}
+    for _, e in ipairs(objectives) do
+        addTag(e, "objective")
+    end
+end
+
 
 -------------------------------------------------
 -- Helper: Apply hide scale factor
@@ -520,6 +545,7 @@ local function handleHideToggle(px, py, pz)
         log("[PlayerState] Player left hiding spot")
         resetInputState()
         log("[PlayerState] Player left hiding spot")
+        enablePhysics(S.player)
         -- NEW: Play hide out sound at the box location
         if S.hiddenIn then
             audioPlaySFXFromEntity(SFX_HIDE_OUT, S.hiddenIn, VOL_HIDE)
@@ -557,6 +583,7 @@ local function handleHideToggle(px, py, pz)
             S.hidden = true
             S.hiddenIn = bestSpot
             log("[PlayerState] Player is hiding in a box")
+            disablePhysics(S.player)
             -- NEW: Play hide in sound at the box location
             audioPlaySFXFromEntity(SFX_HIDE_IN, bestSpot, VOL_HIDE)
         end
@@ -686,6 +713,9 @@ function S.update(dt)
     -- 7. Get player position
     -------------------------------------------------
     local px, py, pz = getPosition(p)
+
+    -- keep gameplay-critical minimap tags in sync
+    ensureMinimapGameplayTags()
 
     -------------------------------------------------
     -- 8. Hide/Unhide logic (H key)

@@ -30,51 +30,34 @@ namespace PAIN {
 		case UIAction::game_Jump:              return "game_Jump";
 		case UIAction::game_Hide:              return "game_Hide";
 		case UIAction::game_Collect:           return "game_Collect";
-        case UIAction::game_Move:              return "game_Move";
+		case UIAction::game_Move:              return "game_Move";
+		case UIAction::game_End:               return "game_End";
 
-		case UIAction::pause_Resume:           return "pause_Resume";
-		case UIAction::pause_Restart:          return "pause_Restart";
-		case UIAction::pause_Settings:         return "pause_Settings";
-		case UIAction::pause_ReturnToMainMenu: return "pause_ReturnToMainMenu";
+		case UIAction::pause_Resume:          return "pause_Resume";
+		case UIAction::pause_Restart:         return "pause_Restart";
+		case UIAction::pause_Quit:            return "pause_Quit";
 
-		case UIAction::menu_StartGame:         return "menu_StartGame";
-		case UIAction::menu_OpenSettings:      return "menu_OpenSettings";
-		case UIAction::menu_HowToPlay:         return "menu_HowToPlay";
-		case UIAction::menu_Credits:           return "menu_Credits";
+		case UIAction::restart_Confirm:        return "restart_Confirm";
+		case UIAction::restart_Cancel:         return "restart_Cancel";
+
 		case UIAction::menu_QuitGame:          return "menu_QuitGame";
-
-		case UIAction::menu_OpenTutorial:      return "menu_OpenTutorial";
-		case UIAction::menu_BackToMain:        return "menu_BackToMain";
-
-        case UIAction::howtoplay_ArrowLeft:    return "howtoplay_ArrowLeft";
-        case UIAction::howtoplay_ArrowRight:   return "howtoplay_ArrowRight";
-
 		case UIAction::quit_Confirm:           return "quit_Confirm";
 		case UIAction::quit_Cancel:            return "quit_Cancel";
 
-        case UIAction::goto_Pause:             return "goto_Pause";
-        case UIAction::restart_Confirm:        return "restart_Confirm";
-		case UIAction::restart_Cancel:         return "restart_Cancel";
+		case UIAction::goto_Pause:             return "goto_Pause";
 
-        case UIAction::cutscene_Open_Menu:     return "cutscene_Open_Menu";
-        case UIAction::cutscene_Close_Menu:    return "cutscene_Close_Menu";
-        case UIAction::cutscene_Menu_Quit:     return "cutscene_Menu_Quit";
+		case UIAction::cutscene_Open_Menu:     return "cutscene_Open_Menu";
+		case UIAction::cutscene_Close_Menu:   return "cutscene_Close_Menu";
+		case UIAction::cutscene_Menu_Quit:    return "cutscene_Menu_Quit";
+		case UIAction::cutscene_Quit_Confirm: return "cutscene_Quit_Confirm";
+		case UIAction::cutscene_Quit_Cancel:   return "cutscene_Quit_Cancel";
 
-        case UIAction::cutscene_Quit_Confirm:  return "cutscene_Quit_Confirm";
-        case UIAction::cutscene_Quit_Cancel:   return "cutscene_Quit_Cancel";
+		case UIAction::mainmenu_Quit_Confirm:  return "mainmenu_Quit_Confirm";
+		case UIAction::mainmenu_Quit_Cancel:   return "mainmenu_Quit_Cancel";
 
-        case UIAction::mainmenu_Quit_Confirm:  return "mainmenu_Quit_Confirm";
-        case UIAction::mainmenu_Quit_Cancel:   return "mainmenu_Quit_Cancel";
-
-        case UIAction::credits_ArrowLeft:      return "credits_ArrowLeft";
-        case UIAction::credits_ArrowRight:     return "credits_ArrowRight";
-        
-        case UIAction::end_NextLevel:         return "end_NextLevel";
-
-        case UIAction::change_Level1:         return "change_Level1";
+		case UIAction::LoadScene:              return "LoadScene";
 
 		case UIAction::None:
-
 		default:                               return "None";
 		}
 	}
@@ -110,476 +93,476 @@ namespace PAIN {
 			}
 		}
 
-        void InputSystem::onEvent(Event::Event& event) {
+		void InputSystem::onEvent(Event::Event& event) {
 #ifdef PN_PLATFORM_WINDOWS
-            // ── Mouse movement ──
-            if (event.getType() == Event::Type::MouseMove) {
-                Event::Dispatcher dispatcher(event);
-                dispatcher.Dispatch<Event::MouseMoved>([&](Event::MouseMoved& e) -> bool {
-                    m_mouse_position = convertToCenterOrigin(e.getWindowPos());
+			// ── Mouse movement ──
+			if (event.getType() == Event::Type::MouseMove) {
+				Event::Dispatcher dispatcher(event);
+				dispatcher.Dispatch<Event::MouseMoved>([&](Event::MouseMoved& e) -> bool {
+					m_mouse_position = convertToCenterOrigin(e.getWindowPos());
 
-                    // Handle joystick drag - ONLY if entity has UIJoystick component
-                    if (m_pressed_entity != entt::null) {
-                        auto ecs = services.lock()->get<ECS::Controller>();
-                        auto& registry = ecs->getRegistry();
+					// Handle joystick drag - ONLY if entity has UIJoystick component
+					if (m_pressed_entity != entt::null) {
+						auto ecs = services.lock()->get<ECS::Controller>();
+						auto& registry = ecs->getRegistry();
 
-                        if (registry.valid(m_pressed_entity) &&
-                            registry.all_of<UIJoystick>(m_pressed_entity)) {
-                            auto& joystick = registry.get<UIJoystick>(m_pressed_entity);
-                            auto& tex = registry.get<Texture2D>(m_pressed_entity);
+						if (registry.valid(m_pressed_entity) &&
+							registry.all_of<UIJoystick>(m_pressed_entity)) {
+							auto& joystick = registry.get<UIJoystick>(m_pressed_entity);
+							auto& tex = registry.get<Texture2D>(m_pressed_entity);
 
-                            glm::vec2 normalized_mouse = normalizeScreenPosition(m_mouse_position);
-                            glm::vec2 drag_offset = normalized_mouse - joystick.center_position;
-                            float distance = glm::length(drag_offset);
+							glm::vec2 normalized_mouse = normalizeScreenPosition(m_mouse_position);
+							glm::vec2 drag_offset = normalized_mouse - joystick.center_position;
+							float distance = glm::length(drag_offset);
 
-                            // Start drag if moved beyond threshold
-                            const float drag_threshold = 0.01f;
-                            if (distance > drag_threshold && !joystick.is_dragging) {
-                                joystick.is_dragging = true;
-                            }
+							// Start drag if moved beyond threshold
+							const float drag_threshold = 0.01f;
+							if (distance > drag_threshold && !joystick.is_dragging) {
+								joystick.is_dragging = true;
+							}
 
-                            // If dragging, update position and call callback
-                            if (joystick.is_dragging) {
-                                // Clamp to max radius
-                                if (distance > joystick.max_radius) {
-                                    drag_offset = glm::normalize(drag_offset) * joystick.max_radius;
-                                    distance = joystick.max_radius;
-                                }
+							// If dragging, update position and call callback
+							if (joystick.is_dragging) {
+								// Clamp to max radius
+								if (distance > joystick.max_radius) {
+									drag_offset = glm::normalize(drag_offset) * joystick.max_radius;
+									distance = joystick.max_radius;
+								}
 
-                                // Update joystick visual position
-                                tex.pos = joystick.center_position + drag_offset;
+								// Update joystick visual position
+								tex.pos = joystick.center_position + drag_offset;
 
-                                // Calculate normalized direction (-1 to 1 range)
-                                glm::vec2 direction(0.f, 0.f);
-                                if (distance > 0.001f) {
-                                    direction = drag_offset / joystick.max_radius;
-                                }
+								// Calculate normalized direction (-1 to 1 range)
+								glm::vec2 direction(0.f, 0.f);
+								if (distance > 0.001f) {
+									direction = drag_offset / joystick.max_radius;
+								}
 
-                                // Call Lua callback with direction
-                                auto& button = registry.get<UIButton>(m_pressed_entity);
-                                if (button.action == UIAction::game_Move) {
-                                    // Payload format: "dirX,dirY"
-                                    button.payload = std::to_string(direction.x) + "," + std::to_string(direction.y);
-                                    dispatchUIAction(m_pressed_entity, registry, UIAction::game_Move);
-                                }
-                            }
-                        }
-                    }
-                    return false;
-                    });
-            }
+								// Call Lua callback with direction
+								auto& button = registry.get<UIButton>(m_pressed_entity);
+								if (button.action == UIAction::game_Move) {
+									// Payload format: "dirX,dirY"
+									button.payload = std::to_string(direction.x) + "," + std::to_string(direction.y);
+									dispatchUIAction(m_pressed_entity, registry, UIAction::game_Move);
+								}
+							}
+						}
+					}
+					return false;
+					});
+			}
 
-            // ── Skip input if editor wants the mouse ──
+			// ── Skip input if editor wants the mouse ──
 #ifdef _DEBUG
-            if (ImGui::GetCurrentContext()) {
-                ImGuiIO& io = ImGui::GetIO();
-                if (io.WantCaptureMouse) return;
-            }
-            if (auto editor = services.lock()->get<Editor::Editor>()) {
-                if (editor->isVisible()) return;
-            }
+			if (ImGui::GetCurrentContext()) {
+				ImGuiIO& io = ImGui::GetIO();
+				if (io.WantCaptureMouse) return;
+			}
+			if (auto editor = services.lock()->get<Editor::Editor>()) {
+				if (editor->isVisible()) return;
+			}
 #endif
 
-            // ── Mouse button press ──
-            if (event.getType() == Event::Type::MouseButtonPress) {
-                Event::Dispatcher dispatcher(event);
-                dispatcher.Dispatch<Event::MouseBtnPressed>([&](Event::MouseBtnPressed& e) -> bool {
-                    if (e.getBtnCode() != 0) return false; // Left click only
+			// ── Mouse button press ──
+			if (event.getType() == Event::Type::MouseButtonPress) {
+				Event::Dispatcher dispatcher(event);
+				dispatcher.Dispatch<Event::MouseBtnPressed>([&](Event::MouseBtnPressed& e) -> bool {
+					if (e.getBtnCode() != 0) return false; // Left click only
 
-                    if (m_hovered_entity != entt::null) {
-                        m_pressed_entity = m_hovered_entity;
-                        auto ecs = services.lock()->get<ECS::Controller>();
-                        auto& registry = ecs->getRegistry();
+					if (m_hovered_entity != entt::null) {
+						m_pressed_entity = m_hovered_entity;
+						auto ecs = services.lock()->get<ECS::Controller>();
+						auto& registry = ecs->getRegistry();
 
-                        // Store center position ONLY if this is a joystick
-                        if (registry.all_of<UIJoystick>(m_pressed_entity)) {
-                            auto& joystick = registry.get<UIJoystick>(m_pressed_entity);
-                            auto& tex = registry.get<Texture2D>(m_pressed_entity);
-                            joystick.center_position = tex.pos;
-                            joystick.is_dragging = false;
-                        }
+						// Store center position ONLY if this is a joystick
+						if (registry.all_of<UIJoystick>(m_pressed_entity)) {
+							auto& joystick = registry.get<UIJoystick>(m_pressed_entity);
+							auto& tex = registry.get<Texture2D>(m_pressed_entity);
+							joystick.center_position = tex.pos;
+							joystick.is_dragging = false;
+						}
 
-                        updateButtonState(m_pressed_entity, registry, UIButtonState::Pressed);
-                        PN_CORE_INFO("[UIInput] MouseDown on UI entity id = {}",
-                            static_cast<uint32_t>(m_pressed_entity));
-                        
-                        // Haptic feedback on button press (Android only, Windows stub does nothing)
-                        if (auto haptics = services.lock()->get<Haptics::Haptics>()) {
-                            if (haptics->hasHaptics()) {
-                                haptics->tick();
-                            }
-                        }
-                        
-                        return true; // UI consumed event
-                    }
-                    return false;
-                    });
-            }
+						updateButtonState(m_pressed_entity, registry, UIButtonState::Pressed);
+						PN_CORE_INFO("[UIInput] MouseDown on UI entity id = {}",
+							static_cast<uint32_t>(m_pressed_entity));
 
-            // ── Mouse button release ──
-            if (event.getType() == Event::Type::MouseButtonRelease) {
-                Event::Dispatcher dispatcher(event);
-                dispatcher.Dispatch<Event::MouseBtnReleased>([&](Event::MouseBtnReleased& e) -> bool {
-                    if (e.getBtnCode() != 0) return false;
+						// Haptic feedback on button press (Android only, Windows stub does nothing)
+						if (auto haptics = services.lock()->get<Haptics::Haptics>()) {
+							if (haptics->hasHaptics()) {
+								haptics->tick();
+							}
+						}
 
-                    if (m_pressed_entity != entt::null) {
-                        auto ecs = services.lock()->get<ECS::Controller>();
-                        auto& registry = ecs->getRegistry();
-                        bool was_joystick_drag = false;
+						return true; // UI consumed event
+					}
+					return false;
+					});
+			}
 
-                        // If this was a joystick, reset it
-                        if (registry.valid(m_pressed_entity) &&
-                            registry.all_of<UIJoystick>(m_pressed_entity)) {
-                            auto& joystick = registry.get<UIJoystick>(m_pressed_entity);
-                            was_joystick_drag = joystick.is_dragging;
+			// ── Mouse button release ──
+			if (event.getType() == Event::Type::MouseButtonRelease) {
+				Event::Dispatcher dispatcher(event);
+				dispatcher.Dispatch<Event::MouseBtnReleased>([&](Event::MouseBtnReleased& e) -> bool {
+					if (e.getBtnCode() != 0) return false;
 
-                            if (was_joystick_drag) {
-                                // Reset joystick to center
-                                auto& tex = registry.get<Texture2D>(m_pressed_entity);
-                                tex.pos = joystick.center_position;
+					if (m_pressed_entity != entt::null) {
+						auto ecs = services.lock()->get<ECS::Controller>();
+						auto& registry = ecs->getRegistry();
+						bool was_joystick_drag = false;
 
-                                // Notify Lua that movement stopped
-                                auto& button = registry.get<UIButton>(m_pressed_entity);
-                                if (button.action == UIAction::game_Move) {
-                                    // CHECK IF BUTTON'S LAYER IS ENABLED
-                                    bool should_process = true;
-                                    if (registry.all_of<Entity::Layer>(m_pressed_entity)) {
-                                        auto& layer_comp = registry.get<Entity::Layer>(m_pressed_entity);
-                                        auto scene = services.lock()->get<Scene::SceneManager>();
-                                        if (scene && !scene->isLayerEnabled(layer_comp.layer_id)) {
-                                            /*PN_CORE_INFO("[UIInput] Joystick on disabled layer {}, ignoring",
-                                                layer_comp.layer);*/
-                                            should_process = false;
-                                        }
-                                    }
+						// If this was a joystick, reset it
+						if (registry.valid(m_pressed_entity) &&
+							registry.all_of<UIJoystick>(m_pressed_entity)) {
+							auto& joystick = registry.get<UIJoystick>(m_pressed_entity);
+							was_joystick_drag = joystick.is_dragging;
 
-                                    // should process - added
-                                    if (should_process) {
-                                        button.payload = "0.0,0.0";
-                                        dispatchUIAction(m_pressed_entity, registry, UIAction::game_Move);
-                                    }
-                                }
-                                joystick.is_dragging = false;
-                            }
-                        }
+							if (was_joystick_drag) {
+								// Reset joystick to center
+								auto& tex = registry.get<Texture2D>(m_pressed_entity);
+								tex.pos = joystick.center_position;
 
-                        // Normal button click: go through activateButton (UIAction + fallback lua callback)
-                        if (!was_joystick_drag &&
-                            m_pressed_entity == m_hovered_entity &&
-                            registry.all_of<UIButton>(m_pressed_entity)) {
+								// Notify Lua that movement stopped
+								auto& button = registry.get<UIButton>(m_pressed_entity);
+								if (button.action == UIAction::game_Move) {
+									// CHECK IF BUTTON'S LAYER IS ENABLED
+									bool should_process = true;
+									if (registry.all_of<Entity::Layer>(m_pressed_entity)) {
+										auto& layer_comp = registry.get<Entity::Layer>(m_pressed_entity);
+										auto scene = services.lock()->get<Scene::SceneManager>();
+										if (scene && !scene->isLayerEnabled(layer_comp.layer_id)) {
+											/*PN_CORE_INFO("[UIInput] Joystick on disabled layer {}, ignoring",
+												layer_comp.layer);*/
+											should_process = false;
+										}
+									}
 
-                            bool should_process = true;
-                            if (registry.all_of<Entity::Layer>(m_pressed_entity)) {
-                                auto& layer_comp = registry.get<Entity::Layer>(m_pressed_entity);
-                                auto scene = services.lock()->get<Scene::SceneManager>();
-                                if (scene && !scene->isLayerEnabled(layer_comp.layer_id)) {
-                                    should_process = false;
-                                }
-                            }
+									// should process - added
+									if (should_process) {
+										button.payload = "0.0,0.0";
+										dispatchUIAction(m_pressed_entity, registry, UIAction::game_Move);
+									}
+								}
+								joystick.is_dragging = false;
+							}
+						}
 
-                            if (should_process) {
-                                auto& button = registry.get<UIButton>(m_pressed_entity);
-                                PN_CORE_INFO("[UIInput] MouseUp: pressed={:08X} hovered={:08X} action={}",
-                                    static_cast<uint32_t>(m_pressed_entity),
-                                    static_cast<uint32_t>(m_hovered_entity),
-                                    ToActionName(button.action));
+						// Normal button click: go through activateButton (UIAction + fallback lua callback)
+						if (!was_joystick_drag &&
+							m_pressed_entity == m_hovered_entity &&
+							registry.all_of<UIButton>(m_pressed_entity)) {
 
-                                activateButton(m_pressed_entity, registry);
-                                
-                                // Haptic feedback on button click
-                                if (auto haptics = services.lock()->get<Haptics::Haptics>()) {
-                                    if (haptics->hasHaptics()) {
-                                        haptics->click();
-                                    }
-                                }
-                            }
-                        }
+							bool should_process = true;
+							if (registry.all_of<Entity::Layer>(m_pressed_entity)) {
+								auto& layer_comp = registry.get<Entity::Layer>(m_pressed_entity);
+								auto scene = services.lock()->get<Scene::SceneManager>();
+								if (scene && !scene->isLayerEnabled(layer_comp.layer_id)) {
+									should_process = false;
+								}
+							}
 
-                        updateButtonState(m_pressed_entity, 
-                                          registry,
-                                          m_pressed_entity == m_hovered_entity ?
-                                          UIButtonState::Highlighted : UIButtonState::Normal
-                        );
-                        m_pressed_entity = entt::null;
-                        return true;
-                    }
-                    return false;
-                });
-            }
+							if (should_process) {
+								auto& button = registry.get<UIButton>(m_pressed_entity);
+								PN_CORE_INFO("[UIInput] MouseUp: pressed={:08X} hovered={:08X} action={}",
+									static_cast<uint32_t>(m_pressed_entity),
+									static_cast<uint32_t>(m_hovered_entity),
+									ToActionName(button.action));
+
+								activateButton(m_pressed_entity, registry);
+
+								// Haptic feedback on button click
+								if (auto haptics = services.lock()->get<Haptics::Haptics>()) {
+									if (haptics->hasHaptics()) {
+										haptics->click();
+									}
+								}
+							}
+						}
+
+						updateButtonState(m_pressed_entity,
+							registry,
+							m_pressed_entity == m_hovered_entity ?
+							UIButtonState::Highlighted : UIButtonState::Normal
+						);
+						m_pressed_entity = entt::null;
+						return true;
+					}
+					return false;
+					});
+			}
 
 #else
-            // ══════════════════════════════════════════════════════════════════
-            // Android Touch Events with Full Multi-Touch Support
-            // ══════════════════════════════════════════════════════════════════
+			// ══════════════════════════════════════════════════════════════════
+			// Android Touch Events with Full Multi-Touch Support
+			// ══════════════════════════════════════════════════════════════════
 
-            // ── TouchMove ──
-            if (event.getType() == Event::Type::TouchMove) {
-                Event::Dispatcher dispatcher(event);
-                dispatcher.Dispatch<Event::TouchMove>([&](Event::TouchMove& e) -> bool {
-                    glm::vec2 raw_touch(e.getX(), e.getY());
-                    m_mouse_position = convertToCenterOrigin(raw_touch);
+			// ── TouchMove ──
+			if (event.getType() == Event::Type::TouchMove) {
+				Event::Dispatcher dispatcher(event);
+				dispatcher.Dispatch<Event::TouchMove>([&](Event::TouchMove& e) -> bool {
+					glm::vec2 raw_touch(e.getX(), e.getY());
+					m_mouse_position = convertToCenterOrigin(raw_touch);
 
-                    int pointer_id = e.getPointerId();
+					int pointer_id = e.getPointerId();
 
-                    // Look up the entity for this pointer ID
-                    auto it = m_active_touches.find(pointer_id);
-                    if (it == m_active_touches.end()) {
-                        return false; // No active touch for this pointer
-                    }
+					// Look up the entity for this pointer ID
+					auto it = m_active_touches.find(pointer_id);
+					if (it == m_active_touches.end()) {
+						return false; // No active touch for this pointer
+					}
 
-                    entt::entity touch_entity = it->second;
-                    auto ecs = services.lock()->get<ECS::Controller>();
-                    auto& registry = ecs->getRegistry();
+					entt::entity touch_entity = it->second;
+					auto ecs = services.lock()->get<ECS::Controller>();
+					auto& registry = ecs->getRegistry();
 
-                    // Check if this entity is still valid
-                    if (!registry.valid(touch_entity)) {
-                        m_active_touches.erase(it);
-                        return false;
-                    }
+					// Check if this entity is still valid
+					if (!registry.valid(touch_entity)) {
+						m_active_touches.erase(it);
+						return false;
+					}
 
-                    // Handle joystick movement
-                    if (registry.all_of<UIJoystick>(touch_entity)) {
-                        auto& joystick = registry.get<UIJoystick>(touch_entity);
-                        auto& tex = registry.get<Texture2D>(touch_entity);
+					// Handle joystick movement
+					if (registry.all_of<UIJoystick>(touch_entity)) {
+						auto& joystick = registry.get<UIJoystick>(touch_entity);
+						auto& tex = registry.get<Texture2D>(touch_entity);
 
-                        glm::vec2 normalized_touch = normalizeScreenPosition(m_mouse_position);
-                        glm::vec2 drag_offset = normalized_touch - joystick.center_position;
-                        float distance = glm::length(drag_offset);
+						glm::vec2 normalized_touch = normalizeScreenPosition(m_mouse_position);
+						glm::vec2 drag_offset = normalized_touch - joystick.center_position;
+						float distance = glm::length(drag_offset);
 
-                        // Start dragging if threshold exceeded
-                        const float drag_threshold = 0.01f;
-                        if (!joystick.is_dragging && distance > drag_threshold) {
-                            joystick.is_dragging = true;
-                            m_joystick_pointer_id = pointer_id;
-                        }
+						// Start dragging if threshold exceeded
+						const float drag_threshold = 0.01f;
+						if (!joystick.is_dragging && distance > drag_threshold) {
+							joystick.is_dragging = true;
+							m_joystick_pointer_id = pointer_id;
+						}
 
-                        // If dragging, update position
-                        if (joystick.is_dragging) {
-                            // Clamp to max radius
-                            if (distance > joystick.max_radius) {
-                                drag_offset = glm::normalize(drag_offset) * joystick.max_radius;
-                                distance = joystick.max_radius;
-                            }
+						// If dragging, update position
+						if (joystick.is_dragging) {
+							// Clamp to max radius
+							if (distance > joystick.max_radius) {
+								drag_offset = glm::normalize(drag_offset) * joystick.max_radius;
+								distance = joystick.max_radius;
+							}
 
-                            // Update joystick visual position
-                            tex.pos = joystick.center_position + drag_offset;
+							// Update joystick visual position
+							tex.pos = joystick.center_position + drag_offset;
 
-                            // Calculate normalized direction
-                            glm::vec2 direction(0.f, 0.f);
-                            if (distance > 0.001f) {
-                                direction = drag_offset / joystick.max_radius;
-                            }
+							// Calculate normalized direction
+							glm::vec2 direction(0.f, 0.f);
+							if (distance > 0.001f) {
+								direction = drag_offset / joystick.max_radius;
+							}
 
-                            // Call Lua callback
-                            auto& button = registry.get<UIButton>(touch_entity);
-                            if (button.action == UIAction::game_Move) {
-                                // Payload format: "dirX,dirY"
-                                button.payload = std::to_string(direction.x) + "," + std::to_string(direction.y);
-                                dispatchUIAction(touch_entity, registry, UIAction::game_Move);
-                            }
-                            return true;
-                        }
-                    }
+							// Call Lua callback
+							auto& button = registry.get<UIButton>(touch_entity);
+							if (button.action == UIAction::game_Move) {
+								// Payload format: "dirX,dirY"
+								button.payload = std::to_string(direction.x) + "," + std::to_string(direction.y);
+								dispatchUIAction(touch_entity, registry, UIAction::game_Move);
+							}
+							return true;
+						}
+					}
 
-                    return false;
-                });
-            }
+					return false;
+					});
+			}
 
-            // ── TouchDown ──
-            if (event.getType() == Event::Type::TouchDown) {
-                Event::Dispatcher dispatcher(event);
-                dispatcher.Dispatch<Event::TouchDown>([&](Event::TouchDown& e) -> bool {
-                    m_mouse_position = convertToCenterOrigin(glm::vec2(e.getX(), e.getY()));
-                    auto ecs = services.lock()->get<ECS::Controller>();
-                    auto& registry = ecs->getRegistry();
-                    auto hit_entity = raycastUI(m_mouse_position, registry);
+			// ── TouchDown ──
+			if (event.getType() == Event::Type::TouchDown) {
+				Event::Dispatcher dispatcher(event);
+				dispatcher.Dispatch<Event::TouchDown>([&](Event::TouchDown& e) -> bool {
+					m_mouse_position = convertToCenterOrigin(glm::vec2(e.getX(), e.getY()));
+					auto ecs = services.lock()->get<ECS::Controller>();
+					auto& registry = ecs->getRegistry();
+					auto hit_entity = raycastUI(m_mouse_position, registry);
 
-                        if (hit_entity.has_value()) {
-                            int pointer_id = e.getPointerId();
-                            entt::entity entity = hit_entity.value();
+					if (hit_entity.has_value()) {
+						int pointer_id = e.getPointerId();
+						entt::entity entity = hit_entity.value();
 
-                            PN_CORE_INFO("[UIInput] TouchDown: pointer={}, entity={}",
-                                pointer_id, static_cast<uint32_t>(entity));
+						PN_CORE_INFO("[UIInput] TouchDown: pointer={}, entity={}",
+							pointer_id, static_cast<uint32_t>(entity));
 
-                            // Store this touch in the map
-                            m_active_touches[pointer_id] = entity;
+						// Store this touch in the map
+						m_active_touches[pointer_id] = entity;
 
-                            // Initialize joystick if this is a joystick entity
-                            if (registry.all_of<UIJoystick>(entity)) {
-                                auto& joystick = registry.get<UIJoystick>(entity);
-                                auto& tex = registry.get<Texture2D>(entity);
-                                joystick.center_position = tex.pos;
-                                joystick.is_dragging = false;
+						// Initialize joystick if this is a joystick entity
+						if (registry.all_of<UIJoystick>(entity)) {
+							auto& joystick = registry.get<UIJoystick>(entity);
+							auto& tex = registry.get<Texture2D>(entity);
+							joystick.center_position = tex.pos;
+							joystick.is_dragging = false;
 
-                                PN_CORE_INFO("[UIInput] Joystick initialized for pointer {}", pointer_id);
-                            }
+							PN_CORE_INFO("[UIInput] Joystick initialized for pointer {}", pointer_id);
+						}
 
-                            updateButtonState(entity, registry, UIButtonState::Pressed);
-                            
-                            // Haptic feedback on button press
-                            if (auto haptics = services.lock()->get<Haptics::Haptics>()) {
-                                if (haptics->hasHaptics()) {
-                                    haptics->tick();
-                                }
-                            }
-                            
-                            return true;
-                        }
-                    return false;
-                    });
-            }
+						updateButtonState(entity, registry, UIButtonState::Pressed);
 
-            // ── TouchUp ──
-            if (event.getType() == Event::Type::TouchUp) {
-                Event::Dispatcher dispatcher(event);
-                dispatcher.Dispatch<Event::TouchUp>([&](Event::TouchUp& e) -> bool {
-                    int pointer_id = e.getPointerId();
+						// Haptic feedback on button press
+						if (auto haptics = services.lock()->get<Haptics::Haptics>()) {
+							if (haptics->hasHaptics()) {
+								haptics->tick();
+							}
+						}
 
-                    // Look up the entity for this pointer
-                    auto it = m_active_touches.find(pointer_id);
-                    if (it == m_active_touches.end()) {
-                        return false; // No active touch for this pointer
-                    }
+						return true;
+					}
+					return false;
+					});
+			}
 
-                    entt::entity touch_entity = it->second;
-                    auto ecs = services.lock()->get<ECS::Controller>();
-                    auto& registry = ecs->getRegistry();
+			// ── TouchUp ──
+			if (event.getType() == Event::Type::TouchUp) {
+				Event::Dispatcher dispatcher(event);
+				dispatcher.Dispatch<Event::TouchUp>([&](Event::TouchUp& e) -> bool {
+					int pointer_id = e.getPointerId();
 
-                    if (!registry.valid(touch_entity)) {
-                        m_active_touches.erase(it);
-                        return false;
-                    }
+					// Look up the entity for this pointer
+					auto it = m_active_touches.find(pointer_id);
+					if (it == m_active_touches.end()) {
+						return false; // No active touch for this pointer
+					}
 
-                    PN_CORE_INFO("[UIInput] TouchUp: pointer={}, entity={}",
-                        pointer_id, static_cast<uint32_t>(touch_entity));
+					entt::entity touch_entity = it->second;
+					auto ecs = services.lock()->get<ECS::Controller>();
+					auto& registry = ecs->getRegistry();
 
-                    // Handle joystick release
-                    if (registry.all_of<UIJoystick>(touch_entity)) {
-                        auto& joystick = registry.get<UIJoystick>(touch_entity);
-                        auto& tex = registry.get<Texture2D>(touch_entity);
+					if (!registry.valid(touch_entity)) {
+						m_active_touches.erase(it);
+						return false;
+					}
 
-                        // Reset joystick to center
-                        tex.pos = joystick.center_position;
+					PN_CORE_INFO("[UIInput] TouchUp: pointer={}, entity={}",
+						pointer_id, static_cast<uint32_t>(touch_entity));
 
-                        // Stop movement - call Lua with zero vector
-                        auto& button = registry.get<UIButton>(touch_entity);
-                        if (button.action == UIAction::game_Move) {
-                            // CHECK IF BUTTON'S LAYER IS ENABLED (Android)
-                            bool should_process = true;
-                            if (registry.all_of<Entity::Layer>(touch_entity)) {
-                                auto& layer_comp = registry.get<Entity::Layer>(touch_entity);
-                                auto scene = services.lock()->get<Scene::SceneManager>();
-                                if (scene && !scene->isLayerEnabled(layer_comp.layer_id)) {
-                                    PN_CORE_INFO("[UIInput] Joystick on disabled layer {}, ignoring",
-                                                 layer_comp.layer_id);
-                                    should_process = false;
-                                }
-                            }
+					// Handle joystick release
+					if (registry.all_of<UIJoystick>(touch_entity)) {
+						auto& joystick = registry.get<UIJoystick>(touch_entity);
+						auto& tex = registry.get<Texture2D>(touch_entity);
 
-                            if (should_process) {
-                                button.payload = "0.0,0.0";
-                                dispatchUIAction(touch_entity, registry, UIAction::game_Move);
-                            }
-                        }
+						// Reset joystick to center
+						tex.pos = joystick.center_position;
 
-                        joystick.is_dragging = false;
+						// Stop movement - call Lua with zero vector
+						auto& button = registry.get<UIButton>(touch_entity);
+						if (button.action == UIAction::game_Move) {
+							// CHECK IF BUTTON'S LAYER IS ENABLED (Android)
+							bool should_process = true;
+							if (registry.all_of<Entity::Layer>(touch_entity)) {
+								auto& layer_comp = registry.get<Entity::Layer>(touch_entity);
+								auto scene = services.lock()->get<Scene::SceneManager>();
+								if (scene && !scene->isLayerEnabled(layer_comp.layer_id)) {
+									PN_CORE_INFO("[UIInput] Joystick on disabled layer {}, ignoring",
+										layer_comp.layer_id);
+									should_process = false;
+								}
+							}
 
-                        // Clear joystick pointer ID if this was the joystick
-                        if (m_joystick_pointer_id == pointer_id) {
-                            m_joystick_pointer_id = -1;
-                        }
+							if (should_process) {
+								button.payload = "0.0,0.0";
+								dispatchUIAction(touch_entity, registry, UIAction::game_Move);
+							}
+						}
 
-                        updateButtonState(touch_entity, registry, UIButtonState::Normal);
-                    }
-                    // Handle regular button click
-                    else if (registry.all_of<UIButton>(touch_entity)) {
-                        m_mouse_position = convertToCenterOrigin(glm::vec2(e.getX(), e.getY()));
-                        auto hit_entity = raycastUI(m_mouse_position, registry);
+						joystick.is_dragging = false;
 
-                        // Only trigger click if finger is still on the button
-                        if (hit_entity.has_value() && hit_entity.value() == touch_entity) {
-                            PN_CORE_INFO("[UIInput] Button click detected");
+						// Clear joystick pointer ID if this was the joystick
+						if (m_joystick_pointer_id == pointer_id) {
+							m_joystick_pointer_id = -1;
+						}
 
-                            bool should_process = true;
-                             if (registry.all_of<Entity::Layer>(touch_entity)) {
-                                auto& layer_comp = registry.get<Entity::Layer>(touch_entity);
-                                auto scene = services.lock()->get<Scene::SceneManager>();
-                                if (scene && !scene->isLayerEnabled(layer_comp.layer_id)) {
-                                    PN_CORE_INFO("[UIInput] Button on disabled layer {}, ignoring click",
-                                        layer_comp.layer_id);
-                                    should_process = false;
-                                }
-                            }
+						updateButtonState(touch_entity, registry, UIButtonState::Normal);
+					}
+					// Handle regular button click
+					else if (registry.all_of<UIButton>(touch_entity)) {
+						m_mouse_position = convertToCenterOrigin(glm::vec2(e.getX(), e.getY()));
+						auto hit_entity = raycastUI(m_mouse_position, registry);
 
-                        if (should_process) {
-                                // go through activateButton so UIAction works + fallback lua works
-                                activateButton(touch_entity, registry);
-                                
-                                // Haptic feedback on button click
-                                if (auto haptics = services.lock()->get<Haptics::Haptics>()) {
-                                    if (haptics->hasHaptics()) {
-                                        haptics->click();
-                                    }
-                                }
-                            }
-                        }
+						// Only trigger click if finger is still on the button
+						if (hit_entity.has_value() && hit_entity.value() == touch_entity) {
+							PN_CORE_INFO("[UIInput] Button click detected");
 
-                        updateButtonState(
-                            touch_entity,
-                            registry,
-                            (hit_entity.has_value() && hit_entity.value() == touch_entity)
-                                ? UIButtonState::Highlighted
-                                : UIButtonState::Normal
-                        );
-                    }
+							bool should_process = true;
+							if (registry.all_of<Entity::Layer>(touch_entity)) {
+								auto& layer_comp = registry.get<Entity::Layer>(touch_entity);
+								auto scene = services.lock()->get<Scene::SceneManager>();
+								if (scene && !scene->isLayerEnabled(layer_comp.layer_id)) {
+									PN_CORE_INFO("[UIInput] Button on disabled layer {}, ignoring click",
+										layer_comp.layer_id);
+									should_process = false;
+								}
+							}
 
-                    // Remove this touch from the map
-                    m_active_touches.erase(it);
-                    return true;
-                });
-            }
+							if (should_process) {
+								// go through activateButton so UIAction works + fallback lua works
+								activateButton(touch_entity, registry);
 
-            // ── TouchCancel ──
-            if (event.getType() == Event::Type::TouchCancel) {
-                Event::Dispatcher dispatcher(event);
-                dispatcher.Dispatch<Event::TouchCancel>([&](Event::TouchCancel& e) -> bool {
-                    int pointer_id = e.getPointerId();
+								// Haptic feedback on button click
+								if (auto haptics = services.lock()->get<Haptics::Haptics>()) {
+									if (haptics->hasHaptics()) {
+										haptics->click();
+									}
+								}
+							}
+						}
 
-                    // Look up the entity for this pointer
-                    auto it = m_active_touches.find(pointer_id);
-                    if (it == m_active_touches.end()) {
-                        return false;
-                    }
+						updateButtonState(
+							touch_entity,
+							registry,
+							(hit_entity.has_value() && hit_entity.value() == touch_entity)
+							? UIButtonState::Highlighted
+							: UIButtonState::Normal
+						);
+					}
 
-                    entt::entity touch_entity = it->second;
-                    auto ecs = services.lock()->get<ECS::Controller>();
-                    auto& registry = ecs->getRegistry();
+					// Remove this touch from the map
+					m_active_touches.erase(it);
+					return true;
+					});
+			}
 
-                    if (registry.valid(touch_entity)) {
-                        // Reset joystick if it was being dragged
-                        if (registry.all_of<UIJoystick>(touch_entity)) {
-                            auto& joystick = registry.get<UIJoystick>(touch_entity);
-                            auto& tex = registry.get<Texture2D>(touch_entity);
-                            tex.pos = joystick.center_position;
-                            joystick.is_dragging = false;
+			// ── TouchCancel ──
+			if (event.getType() == Event::Type::TouchCancel) {
+				Event::Dispatcher dispatcher(event);
+				dispatcher.Dispatch<Event::TouchCancel>([&](Event::TouchCancel& e) -> bool {
+					int pointer_id = e.getPointerId();
 
-                            // Clear joystick pointer if this was it
-                            if (m_joystick_pointer_id == pointer_id) {
-                                m_joystick_pointer_id = -1;
-                            }
-                        }
+					// Look up the entity for this pointer
+					auto it = m_active_touches.find(pointer_id);
+					if (it == m_active_touches.end()) {
+						return false;
+					}
 
-                        updateButtonState(touch_entity, registry, UIButtonState::Normal);
-                    }
+					entt::entity touch_entity = it->second;
+					auto ecs = services.lock()->get<ECS::Controller>();
+					auto& registry = ecs->getRegistry();
 
-                    // Remove from map
-                    m_active_touches.erase(it);
-                    return true;
-                    });
-            }
+					if (registry.valid(touch_entity)) {
+						// Reset joystick if it was being dragged
+						if (registry.all_of<UIJoystick>(touch_entity)) {
+							auto& joystick = registry.get<UIJoystick>(touch_entity);
+							auto& tex = registry.get<Texture2D>(touch_entity);
+							tex.pos = joystick.center_position;
+							joystick.is_dragging = false;
+
+							// Clear joystick pointer if this was it
+							if (m_joystick_pointer_id == pointer_id) {
+								m_joystick_pointer_id = -1;
+							}
+						}
+
+						updateButtonState(touch_entity, registry, UIButtonState::Normal);
+					}
+
+					// Remove from map
+					m_active_touches.erase(it);
+					return true;
+					});
+			}
 
 #endif
-        }
+		}
 
 
 		// ══════════════════════════════════════════════════════════════════
@@ -611,14 +594,14 @@ namespace PAIN {
 				// Check for custom hitbox first
 				if (registry.all_of<CustomHitbox2D>(entity)) {
 					const auto& hitbox = registry.get<CustomHitbox2D>(entity);
-					
+
 					// Hitbox position = texture position + offset
 					glm::vec2 hitbox_center = tex.pos + normalizeSize(hitbox.position_offset, services);
-					
+
 					// Convert hitbox bounds to normalized space
 					glm::vec2 normalized_min = normalizeSize(hitbox.min_point, services);
 					glm::vec2 normalized_max = normalizeSize(hitbox.max_point, services);
-					
+
 					// Calculate absolute bounds
 					rect_min = hitbox_center + normalized_min;
 					rect_max = hitbox_center + normalized_max;

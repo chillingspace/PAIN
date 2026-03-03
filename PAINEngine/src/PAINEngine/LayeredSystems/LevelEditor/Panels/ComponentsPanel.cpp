@@ -46,8 +46,59 @@ namespace PAIN {
 				// ---- Prefab Instance ----
 				registerCompUIFunc<PAIN::Prefab::PrefabInstance>(
 					"PrefabInstance",
-					[](ComponentsPanel&, PAIN::Prefab::PrefabInstance& as) {
+					[](ComponentsPanel& panel, PAIN::Prefab::PrefabInstance& as) {
 						DrawWithReflection(as);
+
+						// Prefab asset selector
+						DrawAssetSelectorField("Select A Prefab", as.sourcePrefabGUID,
+							PAIN::Editor::Attributes::AssetSelector(
+								PAIN::Assets::Type::Prefabs),
+							panel.services);
+
+						// Get Prefab Asset
+						auto prefabAsset = panel.services->get<Assets::Manager>()->getAsset<Prefab::PrefabAsset>(as.sourcePrefabGUID);
+						if (prefabAsset.has_value()) {
+
+							// Get prefab
+							auto prefab = prefabAsset.value().get();
+
+							// Get all prefabs entities GUID
+							std::unordered_map<std::string, std::string> prefab_entity_names;
+							std::vector<const char*> prefab_entity_names_ccp;
+
+							//Selector pos
+							int eGUIDPos = -1;
+
+							//Iterate through prefab json
+							for (int i = 0; i < prefab->entities.size(); ++i) {
+
+								//Get entity json
+								auto e = prefab->entities[i];
+
+								std::string name;
+								std::string id;
+
+								//Retrieve name
+								if (e.contains("components") && e["components"].contains("Name") && e["components"]["Name"].contains("name")) {
+									name = e["components"]["Name"]["name"].get<std::string>();
+								}
+
+								//Retrieve GUID
+								if (e.contains("entityGUID")) {
+									id = e["entityGUID"].get<std::string>();
+									if (Assets::GUID(id) == as.correspondingPrefabEntityGUID) eGUIDPos = i;
+								}
+
+								//Insert into map and vector
+								auto [it, inserted] = prefab_entity_names.emplace(std::move(name), std::move(id));
+								if (inserted) prefab_entity_names_ccp.push_back(it->first.c_str());
+							}
+
+							//GUID Selector for prefab entity GUID
+							if (ImGui::Combo("Select Prefab Entity GUID", &eGUIDPos, prefab_entity_names_ccp.data(), prefab_entity_names_ccp.size())) {
+								as.correspondingPrefabEntityGUID = Assets::GUID(prefab_entity_names[prefab_entity_names_ccp[eGUIDPos]]);
+							}
+						}
 					});
 
 				// ---- Transform ----
@@ -339,6 +390,20 @@ namespace PAIN {
 							ImGui::Spacing();
 							changed |= ImGui::DragFloat3("Emission Direction", &ps.emissionDirection.x, 0.01f);
 							changed |= ImGui::DragFloat("Spread (deg)", &ps.emissionSpread, 1.0f, 0.0f, 180.0f, "%.1f");
+
+							const char* directionModeNames[] = {"Custom", "Shape Normal", "Random"};
+							int directionModeIdx = static_cast<int>(ps.directionMode);
+							if (ImGui::Combo("Direction Mode", &directionModeIdx, directionModeNames, IM_ARRAYSIZE(directionModeNames))) {
+								ps.directionMode = static_cast<PAIN::ParticleDirectionMode>(directionModeIdx);
+								changed = true;
+							}
+
+							const char* directionSpaceNames[] = {"World", "Local"};
+							int directionSpaceIdx = static_cast<int>(ps.directionSpace);
+							if (ImGui::Combo("Direction Space", &directionSpaceIdx, directionSpaceNames, IM_ARRAYSIZE(directionSpaceNames))) {
+								ps.directionSpace = static_cast<PAIN::ParticleDirectionSpace>(directionSpaceIdx);
+								changed = true;
+							}
 							
 							ImGui::Spacing();
 							// Emission Shape
@@ -413,6 +478,16 @@ namespace PAIN {
 							// Speed
 							changed |= ImGui::DragFloat("Speed", &ps.speed, 0.1f, 0.0f, 100.0f, "%.2f");
 							changed |= ImGui::DragFloat("Speed Variance", &ps.speedVariance, 0.05f, 0.0f, ps.speed, "%.2f");
+							changed |= ImGui::DragFloat("Gravity Multiplier", &ps.gravityMultiplier, 0.05f, -5.0f, 5.0f, "%.2f");
+							changed |= ImGui::DragFloat("Drag", &ps.drag, 0.01f, 0.0f, 10.0f, "%.2f");
+
+							ImGui::Spacing();
+							ImGui::Text("Rotation");
+							changed |= ImGui::DragFloat("Start Rotation", &ps.startRotation, 1.0f, -360.0f, 360.0f, "%.1f deg");
+							changed |= ImGui::DragFloat("Rotation Variance", &ps.startRotationVariance, 1.0f, 0.0f, 360.0f, "%.1f deg");
+							changed |= ImGui::DragFloat("Angular Velocity", &ps.angularVelocity, 1.0f, -720.0f, 720.0f, "%.1f deg/s");
+							changed |= ImGui::DragFloat("Angular Vel Variance", &ps.angularVelocityVariance, 1.0f, 0.0f, 720.0f, "%.1f deg/s");
+
 							changed |= ImGui::Checkbox("Velocity Over Lifetime", &ps.velocityOverLifetimeEnabled);
 							if (ps.velocityOverLifetimeEnabled) {
 								changed |= ImGui::DragFloat3("Velocity Delta", &ps.velocityOverLifetime.x, 0.05f);
@@ -711,36 +786,26 @@ namespace PAIN {
 						// -- Action --
 						ImGui::SeparatorText("Action");
 
-						// must match UIAction order
 						static const char* action_names[] = {
 							"None",
 							"game_Jump",
 							"game_Hide",
 							"game_Collect",
 							"game_Move",
+							"game_End",
 
 							"pause_Resume",
 							"pause_Restart",
-							"pause_Settings",
-							"pause_ReturnToMainMenu",
+							"pause_Quit",
 
-							"menu_StartGame",
-							"menu_OpenSettings",
-							"menu_HowToPlay",
-							"menu_Credits",
-							"menu_QuitGame",
-
-							"menu_OpenTutorial",
-							"menu_BackToMain",
-
-							"quit_Confirm",
-							"quit_Cancel",
-							"goto_Pause",
-
-							"howtoplay_ArrowLeft",
-							"howtoplay_ArrowRight",
 							"restart_Confirm",
 							"restart_Cancel",
+
+							"menu_QuitGame",
+							"quit_Confirm",
+							"quit_Cancel",
+
+							"goto_Pause",
 
 							"cutscene_Open_Menu",
 							"cutscene_Close_Menu",
@@ -752,10 +817,7 @@ namespace PAIN {
 							"mainmenu_Quit_Confirm",
 							"mainmenu_Quit_Cancel",
 
-							"credits_ArrowLeft",
-							"credits_ArrowRight",
-							"end_NextLevel",
-							"change_Level1",
+							"LoadScene",
 						};
 
 						int action_idx = static_cast<int>(button.action);
@@ -776,13 +838,42 @@ namespace PAIN {
 						ImGui::SeparatorText("Payload (Optional)");
 						ImGui::TextDisabled("Used by actions like StartGame/Restart/ReturnToMainMenu (e.g. scene path).");
 
-						char payloadBuf[256];
-						strncpy(payloadBuf, button.payload.c_str(), sizeof(payloadBuf) - 1);
-						payloadBuf[sizeof(payloadBuf) - 1] = '\0';
+						if (button.action == PAIN::UIAction::LoadScene) {
+							std::vector<std::string> scenes;
+							try {
+								for (const auto& entry : std::filesystem::recursive_directory_iterator("assets/game/scenes")) {
+									if (entry.is_regular_file() && entry.path().extension() == ".scn") {
+										std::string scene_path = entry.path().lexically_normal().string();
+										std::replace(scene_path.begin(), scene_path.end(), '\\', '/');
+										if (scene_path.substr(0, 7) == "assets/") {
+											scene_path = scene_path.substr(7);
+										}
+										scenes.push_back(scene_path);
+									}
+								}
+							} catch (...) {}
 
-						if (ImGui::InputText("Payload", payloadBuf, sizeof(payloadBuf))) {
-							button.payload = payloadBuf;
-							changed = true;
+							if (ImGui::BeginCombo("Scene", button.payload.empty() ? "Select Scene..." : button.payload.c_str())) {
+								for (const auto& scene_path : scenes) {
+									bool is_selected = (button.payload == scene_path);
+									if (ImGui::Selectable(scene_path.c_str(), is_selected)) {
+										button.payload = scene_path;
+										changed = true;
+									}
+									if (is_selected) ImGui::SetItemDefaultFocus();
+								}
+								ImGui::EndCombo();
+							}
+						}
+						else {
+							char payloadBuf[256];
+							strncpy(payloadBuf, button.payload.c_str(), sizeof(payloadBuf) - 1);
+							payloadBuf[sizeof(payloadBuf) - 1] = '\0';
+
+							if (ImGui::InputText("Payload", payloadBuf, sizeof(payloadBuf))) {
+								button.payload = payloadBuf;
+								changed = true;
+							}
 						}
 
 						//// ── State Colors ──
@@ -1626,7 +1717,7 @@ namespace PAIN {
 
 					if (remove_clicked) {
 
-						if (comp_string_ref == "Name" || comp_string_ref == "Tag" ||
+						if (comp_string_ref == "Name" ||
 							comp_string_ref == "Editor Visiblity" ||
 							comp_string_ref == "Relation" || comp_string_ref == "Group") {
 							closePopUp(popup_id);

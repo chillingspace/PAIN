@@ -3,8 +3,16 @@
  
 
 local player = nil
+local minimapTagged = false
 
 registerUpdate(function(dt)
+    if (not minimapTagged) and addTag then
+        addTag(entityId, "Enemy")
+        addTag(entityId, "danger")
+        addTag(entityId, "danger_radius")
+        minimapTagged = true
+    end
+
     local p = _G.PlayerEntity
     if not p then
         return

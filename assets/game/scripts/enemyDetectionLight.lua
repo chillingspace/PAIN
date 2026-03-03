@@ -4,6 +4,7 @@
 local player = nil
 local enemy = entityId
 local seeingPlayer = false
+local minimapTagged = false
 
 -- match inspector values
 local LIGHT_OFFSET = { x = 0.0, y = 0.0, z = 0.0 }   -- same as Lighting.offset
@@ -28,6 +29,13 @@ end
 setLightIntensity(enemy, NORMAL_COLOR.r, NORMAL_COLOR.g, NORMAL_COLOR.b)
 
 registerUpdate(function(dt)
+    if (not minimapTagged) and addTag then
+        addTag(enemy, "Enemy")
+        addTag(enemy, "danger")
+        addTag(enemy, "light_cone")
+        minimapTagged = true
+    end
+
     -- cache player
     if not player then
         -- if already use _G.PlayerEntity, prefer that

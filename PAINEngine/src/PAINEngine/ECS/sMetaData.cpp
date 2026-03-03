@@ -34,6 +34,15 @@ namespace PAIN {
             registerTag("enemy_patrol_start");
             registerTag("enemy_patrol_end");
             registerTag("android_ui");
+
+            // gameplay extension tags
+            registerTag("danger");
+            registerTag("danger_radius");
+            registerTag("danger_collision");
+            registerTag("light_cone");
+            registerTag("wall");
+            registerTag("item");
+            registerTag("objective");
         }
 
         void Service::onDetach() {
