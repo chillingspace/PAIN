@@ -488,7 +488,7 @@ namespace PAIN {
 			return;
 		}
 
-		// Debug shader
+	// Debug shader
 		shader_opt = assets_loader->getAsset<Assets::Shader>(debug_geometry_path);
 		debug_shader = shader_opt.has_value() ? shader_opt.value() : debug_shader;
 
@@ -496,6 +496,20 @@ namespace PAIN {
 			PN_CORE_ERROR("Failed to create shader program for debug");
 			throw std::runtime_error("");
 			return;
+		}
+
+		// Minimap wall shader
+#ifdef PN_PLATFORM_WINDOWS
+		std::filesystem::path minimap_wall_path = "engine/shaders/minimap_wall.vert";
+#else
+		std::filesystem::path minimap_wall_path = "engine\\shaders\\android_minimap_wall.vert";
+#endif
+		shader_opt = assets_loader->getAsset<Assets::Shader>(minimap_wall_path);
+		minimap_wall_shader = shader_opt.has_value() ? shader_opt.value() : minimap_wall_shader;
+
+		if (!minimap_wall_shader || minimap_wall_shader->GetRendererID() == 0) {
+			PN_CORE_WARN("Failed to create shader program for minimap_wall (non-fatal, will fall back to debug path)");
+			minimap_wall_shader = nullptr;
 		}
 	}
 
@@ -1500,6 +1514,66 @@ namespace PAIN {
 		glViewport(0, 0, winWidth, winHeight);
 	}
 
+	void WindowsRenderer::UploadMinimapWalls(const std::vector<glm::vec2>& worldXZVertices) {
+		// Create VAO/VBO on first call
+		if (minimap_wall_vao == 0) {
+			glGenVertexArrays(1, &minimap_wall_vao);
+			glGenBuffers(1, &minimap_wall_vbo);
+
+			glBindVertexArray(minimap_wall_vao);
+			glBindBuffer(GL_ARRAY_BUFFER, minimap_wall_vbo);
+
+			// layout(location = 0) in vec2 aWorldXZ
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
+
+			glBindVertexArray(0);
+		}
+
+		minimap_wall_vertex_count = static_cast<GLsizei>(worldXZVertices.size());
+
+		if (minimap_wall_vertex_count == 0) {
+			return;
+		}
+
+		// Upload wall XZ data ONCE with GL_STATIC_DRAW (immutable until walls change)
+		glBindBuffer(GL_ARRAY_BUFFER, minimap_wall_vbo);
+		glBufferData(GL_ARRAY_BUFFER,
+			minimap_wall_vertex_count * sizeof(glm::vec2),
+			worldXZVertices.data(),
+			GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+
+	void WindowsRenderer::DrawMinimapWalls(const glm::vec2& playerXZ,
+										   const glm::vec2& transformCol0,
+										   const glm::vec2& transformCol1,
+										   float invDoubleRadius,
+										   const glm::vec2& ndcBase,
+										   const glm::vec2& ndcScale,
+										   const glm::vec4& color) {
+		if (!minimap_wall_shader || minimap_wall_vao == 0 || minimap_wall_vertex_count == 0) {
+			return;
+		}
+
+		minimap_wall_shader->Bind();
+
+		// Set per-frame uniforms (7 uniforms, no per-vertex CPU work)
+		minimap_wall_shader->SetUniform("u_PlayerXZ", playerXZ);
+		minimap_wall_shader->SetUniform("u_TransformCol0", transformCol0);
+		minimap_wall_shader->SetUniform("u_TransformCol1", transformCol1);
+		minimap_wall_shader->SetUniform("u_InvDoubleRadius", invDoubleRadius);
+		minimap_wall_shader->SetUniform("u_NdcBase", ndcBase);
+		minimap_wall_shader->SetUniform("u_NdcScale", ndcScale);
+		minimap_wall_shader->SetUniform("u_Color", color);
+
+		glBindVertexArray(minimap_wall_vao);
+		glDrawArrays(GL_TRIANGLES, 0, minimap_wall_vertex_count);
+		glBindVertexArray(0);
+
+		glUseProgram(0);
+	}
+
 	void WindowsRenderer::ReflectionPass(const ModelRenderer& component) {
 		// if (m.materials[0].reflection_type ==
 		// m.materials[0].REFLECTION_TYPES::NONE) { 	return;
@@ -2308,6 +2382,17 @@ namespace PAIN {
 			glDeleteBuffers(1, &debug_VBO);
 			debug_VBO = 0;
 		}
+
+		if (minimap_wall_vao) {
+			glDeleteVertexArrays(1, &minimap_wall_vao);
+			minimap_wall_vao = 0;
+		}
+
+		if (minimap_wall_vbo) {
+			glDeleteBuffers(1, &minimap_wall_vbo);
+			minimap_wall_vbo = 0;
+		}
+		minimap_wall_vertex_count = 0;
 
 		if (pbr_shader) {
 			pbr_shader.reset();

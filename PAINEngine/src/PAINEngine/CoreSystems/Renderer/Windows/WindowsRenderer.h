@@ -111,8 +111,21 @@ namespace PAIN {
 		void DrawGeometry(std::shared_ptr<Scene::SceneManager> scene,
 						  ModelRenderer& component, const glm::mat4& M);
 		void EndGeometryPass();
-		void BeginMinimapPass(const glm::mat4& view, const glm::mat4& proj);
+	void BeginMinimapPass(const glm::mat4& view, const glm::mat4& proj);
 		void EndMinimapPass();
+
+		// === GPU-accelerated minimap wall rendering ===
+		// Upload wall XZ data once (call only when walls change)
+		void UploadMinimapWalls(const std::vector<glm::vec2>& worldXZVertices);
+		// Draw walls using GPU shader (call every frame with updated uniforms)
+		void DrawMinimapWalls(const glm::vec2& playerXZ,
+							 const glm::vec2& transformCol0,
+							 const glm::vec2& transformCol1,
+							 float invDoubleRadius,
+							 const glm::vec2& ndcBase,
+							 const glm::vec2& ndcScale,
+							 const glm::vec4& color);
+		bool hasMinimapWallData() const { return minimap_wall_vertex_count > 0; }
 
 		void ReflectionPass(const ModelRenderer& component);
 		void LightingPass(std::shared_ptr<Scene::SceneManager> scene,
@@ -214,6 +227,11 @@ namespace PAIN {
 		unsigned int debug_VAO = 0;
 		unsigned int debug_VBO = 0;
 
+		// === Minimap Wall GPU Buffers ===
+		unsigned int minimap_wall_vao = 0;
+		unsigned int minimap_wall_vbo = 0;
+		GLsizei minimap_wall_vertex_count = 0;
+
 		// === Shaders ===
 		std::shared_ptr<Assets::Shader> pbr_shader = nullptr;
 		std::shared_ptr<Assets::Shader> geometry_shader = nullptr;
@@ -227,6 +245,7 @@ namespace PAIN {
 		std::shared_ptr<Assets::Shader> bloom_shader = nullptr;
 		std::shared_ptr<Assets::Shader> tone_shader = nullptr;
 		std::shared_ptr<Assets::Shader> bloom_blend_shader = nullptr;
+		std::shared_ptr<Assets::Shader> minimap_wall_shader = nullptr;
 
 		// for easy access to clear memory
 		std::array<unsigned int*, 5> fbos{
