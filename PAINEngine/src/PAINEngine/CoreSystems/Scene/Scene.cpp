@@ -313,14 +313,6 @@ namespace PAIN {
 				camSettings.sensitivity
 			);
 			
-			// Setup camera collision settings
-			editor_camera->collisionEnabled = camSettings.collisionEnabled;
-			editor_camera->collisionRadius = camSettings.collisionRadius;
-			editor_camera->collisionOffset = camSettings.collisionOffset;
-			editor_camera->capsuleHeight = camSettings.capsuleHeight;
-			editor_camera->useCapsuleCollision = camSettings.useCapsuleCollision;
-			editor_camera->showCollisionGizmo = camSettings.showCollisionGizmo;
-			
 			SetEditorCamera();
 
 			PN_CORE_ERROR("[SceneManager] Camera setup: pos({}, {}, {}), fov={} , speed={}, sens={}",
@@ -799,18 +791,6 @@ namespace PAIN {
 				scene_asset.camera.aspectRatioH = active_camera->height_ratio;
 				scene_asset.camera.speed = active_camera->speed;
 				scene_asset.camera.sensitivity = active_camera->sensitivity;
-				
-				// Camera collision settings (Scene panel edits game camera collision)
-				Camera* collisionSource = GetGameCamera();
-				if (!collisionSource) {
-					collisionSource = active_camera;
-				}
-				scene_asset.camera.collisionEnabled = collisionSource->collisionEnabled;
-				scene_asset.camera.collisionRadius = collisionSource->collisionRadius;
-				scene_asset.camera.collisionOffset = collisionSource->collisionOffset;
-				scene_asset.camera.capsuleHeight = collisionSource->capsuleHeight;
-				scene_asset.camera.useCapsuleCollision = collisionSource->useCapsuleCollision;
-				scene_asset.camera.showCollisionGizmo = collisionSource->showCollisionGizmo;
 
 			}
 
@@ -914,13 +894,6 @@ namespace PAIN {
 				{"aspectRatioH", scn_asset.camera.aspectRatioH},
 				{"speed", scn_asset.camera.speed},
 				{"sensitivity", scn_asset.camera.sensitivity},
-				// Camera collision settings
-				{"collisionEnabled", scn_asset.camera.collisionEnabled},
-				{"collisionRadius", scn_asset.camera.collisionRadius},
-				{"collisionOffset", scn_asset.camera.collisionOffset},
-				{"capsuleHeight", scn_asset.camera.capsuleHeight},
-				{"useCapsuleCollision", scn_asset.camera.useCapsuleCollision},
-				{"showCollisionGizmo", scn_asset.camera.showCollisionGizmo}
 			};
 
 			//Environment settings
@@ -1437,19 +1410,23 @@ namespace PAIN {
 					curr_cam->far_plane = far_plane;
 					curr_cam->width_ratio = width_ratio;
 					curr_cam->height_ratio = height_ratio;
-
+					curr_cam->collisionEnabled = cam->get().collisionEnabled;
+					curr_cam->collisionRadius = cam->get().collisionRadius;
+					curr_cam->collisionOffset = cam->get().collisionOffset;
+					curr_cam->capsuleHeight = cam->get().capsuleHeight;
+					curr_cam->useCapsuleCollision = cam->get().useCapsuleCollision;
+					curr_cam->showCollisionGizmo = cam->get().showCollisionGizmo;
 				}
 				else {
 					auto new_cam = std::make_unique<Camera>(cam_pos, forward, up, GraphicsSettings::get().fov, near_plane, far_plane, width_ratio, height_ratio);
 					// Copy collision settings from editor camera
-					if (editor_camera) {
-						new_cam->collisionEnabled = editor_camera->collisionEnabled;
-						new_cam->collisionRadius = editor_camera->collisionRadius;
-						new_cam->collisionOffset = editor_camera->collisionOffset;
-						new_cam->capsuleHeight = editor_camera->capsuleHeight;
-						new_cam->useCapsuleCollision = editor_camera->useCapsuleCollision;
-						new_cam->showCollisionGizmo = editor_camera->showCollisionGizmo;
-					}
+					new_cam->collisionEnabled = cam->get().collisionEnabled;
+					new_cam->collisionRadius = cam->get().collisionRadius;
+					new_cam->collisionOffset = cam->get().collisionOffset;
+					new_cam->capsuleHeight = cam->get().capsuleHeight;
+					new_cam->useCapsuleCollision = cam->get().useCapsuleCollision;
+					new_cam->showCollisionGizmo = cam->get().showCollisionGizmo;
+
 					game_cameras.insert(std::pair<std::string, std::unique_ptr<Camera>>(entity_name, std::move(new_cam)));
 
 				}

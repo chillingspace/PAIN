@@ -1081,78 +1081,78 @@ namespace PAIN {
                     // ============================================
                     // Camera Collision Settings (APPLIES TO GAME CAM ONLY)
                     // ============================================
-                    auto game_cam = scene->GetGameCamera();
+       //             auto game_cam = scene->GetGameCamera();
 
-                    if (game_cam) {
+       //             if (game_cam) {
 
-                        if (ImGui::CollapsingHeader("Camera Collision", ImGuiTreeNodeFlags_DefaultOpen)) {
-                            ImGui::Indent();
+       //                 if (ImGui::CollapsingHeader("Camera Collision", ImGuiTreeNodeFlags_DefaultOpen)) {
+       //                     ImGui::Indent();
 
 
-                            // Enable/disable collision
-                            bool collisionEnabled = game_cam->collisionEnabled;
-                            if (ImGui::Checkbox("Enable Collision", &collisionEnabled)) {
-                                game_cam->collisionEnabled = collisionEnabled;
+       //                     // Enable/disable collision
+       //                     bool collisionEnabled = game_cam->collisionEnabled;
+       //                     if (ImGui::Checkbox("Enable Collision", &collisionEnabled)) {
+       //                         game_cam->collisionEnabled = collisionEnabled;
 
-                            }
+       //                     }
 
-							// If collision is disabled, also disable the gizmo 
-                            if (!game_cam->collisionEnabled) {
-                                game_cam->showCollisionGizmo = false;
-							}
+							//// If collision is disabled, also disable the gizmo 
+       //                     if (!game_cam->collisionEnabled) {
+       //                         game_cam->showCollisionGizmo = false;
+							//}
 
-                            ImGui::BeginDisabled(!collisionEnabled);
+       //                     ImGui::BeginDisabled(!collisionEnabled);
 
-                            // Collision shape selector
-                            const char* shapes[] = { "Sphere", "Capsule" };
-                            int shapeIdx = game_cam->useCapsuleCollision ? 1 : 0;
-                            if (ImGui::Combo("Collision Shape", &shapeIdx, shapes, IM_ARRAYSIZE(shapes))) {
-                                game_cam->useCapsuleCollision = (shapeIdx == 1);
-                            }
+       //                     // Collision shape selector
+       //                     const char* shapes[] = { "Sphere", "Capsule" };
+       //                     int shapeIdx = game_cam->useCapsuleCollision ? 1 : 0;
+       //                     if (ImGui::Combo("Collision Shape", &shapeIdx, shapes, IM_ARRAYSIZE(shapes))) {
+       //                         game_cam->useCapsuleCollision = (shapeIdx == 1);
+       //                     }
 
-                            // Radius slider
-                            float radius = game_cam->collisionRadius;
-                            if (ImGui::DragFloat("Collision Radius", &radius, 0.01f, 0.1f, 2.0f, "%.2f")) {
-                                game_cam->collisionRadius = radius;
-                            }
-                            if (ImGui::IsItemHovered()) {
-                                ImGui::SetTooltip("Size of camera collision sphere/capsule");
-                            }
+       //                     // Radius slider
+       //                     float radius = game_cam->collisionRadius;
+       //                     if (ImGui::DragFloat("Collision Radius", &radius, 0.01f, 0.1f, 2.0f, "%.2f")) {
+       //                         game_cam->collisionRadius = radius;
+       //                     }
+       //                     if (ImGui::IsItemHovered()) {
+       //                         ImGui::SetTooltip("Size of camera collision sphere/capsule");
+       //                     }
 
-                            // Capsule height (only visible for capsule)
-                            if (game_cam->useCapsuleCollision) {
-                                float height = game_cam->capsuleHeight;
-                                if (ImGui::DragFloat("Capsule Height", &height, 0.01f, 0.5f, 3.0f, "%.2f")) {
-                                    game_cam->capsuleHeight = height;
-                                }
-                            }
+       //                     // Capsule height (only visible for capsule)
+       //                     if (game_cam->useCapsuleCollision) {
+       //                         float height = game_cam->capsuleHeight;
+       //                         if (ImGui::DragFloat("Capsule Height", &height, 0.01f, 0.5f, 3.0f, "%.2f")) {
+       //                             game_cam->capsuleHeight = height;
+       //                         }
+       //                     }
 
-                            // Offset from surfaces
-                            float offset = game_cam->collisionOffset;
-                            if (ImGui::DragFloat("Surface Offset", &offset, 0.01f, 0.0f, 0.5f, "%.2f")) {
-                                game_cam->collisionOffset = offset;
-                            }
-                            if (ImGui::IsItemHovered()) {
-                                ImGui::SetTooltip("Minimum distance camera maintains from surfaces");
-                            }
+       //                     // Offset from surfaces
+       //                     float offset = game_cam->collisionOffset;
+       //                     if (ImGui::DragFloat("Surface Offset", &offset, 0.01f, 0.0f, 0.5f, "%.2f")) {
+       //                         game_cam->collisionOffset = offset;
+       //                     }
+       //                     if (ImGui::IsItemHovered()) {
+       //                         ImGui::SetTooltip("Minimum distance camera maintains from surfaces");
+       //                     }
 
-                            // Show gizmo in editor
-                            bool showGizmo = game_cam->showCollisionGizmo;
-                            if (ImGui::Checkbox("Show Collision Gizmo", &showGizmo)) {
-                                game_cam->showCollisionGizmo = showGizmo;
-                            }
-                            ImGui::EndDisabled();
+       //                     // Show gizmo in editor
+       //                     bool showGizmo = game_cam->showCollisionGizmo;
+       //                     if (ImGui::Checkbox("Show Collision Gizmo", &showGizmo)) {
+       //                         game_cam->showCollisionGizmo = showGizmo;
+       //                     }
+       //                     ImGui::EndDisabled();
 
-                            ImGui::Unindent();
-                        }
-                    }
-                    else {
-                        if (ImGui::CollapsingHeader("Game Camera Collision", ImGuiTreeNodeFlags_DefaultOpen)) {
-                            ImGui::Indent();
-                            ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.0f, 1.0f), "No active Game Camera selected.");
-                            ImGui::Unindent();
-                        }
-                    }
+       //                     ImGui::Unindent();
+       //                 }
+       //             }
+       //             else {
+       //                 if (ImGui::CollapsingHeader("Game Camera Collision", ImGuiTreeNodeFlags_DefaultOpen)) {
+       //                     ImGui::Indent();
+       //                     ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.0f, 1.0f), "No active Game Camera selected.");
+       //                     ImGui::Unindent();
+       //                 }
+       //             }
                 }
 
             }

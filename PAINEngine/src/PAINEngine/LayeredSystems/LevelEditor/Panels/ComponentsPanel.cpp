@@ -945,8 +945,55 @@ namespace PAIN {
 						return changed;
 					});
 
-				registerCompUIFunc<PAIN::Cam>("Camera", [](ComponentsPanel&, PAIN::Cam& as) {
-					DrawWithReflection(as);
+				registerCompUIFunc<PAIN::Cam>("Camera", [](ComponentsPanel&, PAIN::Cam& cam) {
+
+					ImGui::Text("Offsets");
+					ImGui::DragFloat3("Trans Offset", &cam.trans_offset.x, 0.1f);
+					ImGui::DragFloat3("Rot Offset", &cam.rot_offset.x, 0.1f);
+					ImGui::DragFloat3("Scale Offset", &cam.scale_offset.x, 0.1f);
+
+					ImGui::Spacing();
+
+					ImGui::Text("Clipping Planes");
+					ImGui::DragFloat("Near Plane", &cam.near_plane, 0.01f, 0.01f, 10.0f); // Min 0.01
+					ImGui::DragFloat("Far Plane", &cam.far_plane, 1.0f, 10.0f, 10000.0f); // Max 10000
+
+					ImGui::Spacing();
+
+					ImGui::Text("Aspect Ratio");
+					ImGui::DragFloat("Width Ratio", &cam.width_ratio, 0.1f, 1.0f, 100.0f);
+					ImGui::DragFloat("Height Ratio", &cam.height_ratio, 0.1f, 1.0f, 100.0f);
+
+					ImGui::Spacing();
+					ImGui::Separator();
+					ImGui::TextDisabled("Camera Collision"); // Gray text like a header
+					ImGui::Spacing();
+
+					// Checkboxes take a string label and a pointer to a boolean
+					ImGui::Checkbox("Enable Collision", &cam.collisionEnabled);
+					ImGui::Checkbox("Show Gizmo", &cam.showCollisionGizmo);
+
+					// Only show the detailed collision settings IF collision is enabled
+					if (cam.collisionEnabled) {
+						// Indent to show these are sub-settings
+						ImGui::Indent(10.0f);
+
+						ImGui::Checkbox("Use Capsule (Instead of Sphere)", &cam.useCapsuleCollision);
+
+						// DragFloat arguments: Label, pointer, speed, min, max, format
+						ImGui::DragFloat("Collision Radius", &cam.collisionRadius, 0.05f, 0.01f, 5.0f);
+
+						// If capsule is enabled, show the height setting
+						if (cam.useCapsuleCollision) {
+							ImGui::DragFloat("Capsule Height", &cam.capsuleHeight, 0.05f, 0.1f, 10.0f);
+						}
+
+						ImGui::DragFloat("Wall Offset", &cam.collisionOffset, 0.01f, 0.0f, 2.0f);
+
+						ImGui::Unindent(10.0f); // Reset indentation
+					}
+
+					ImGui::Spacing();
 				});
 
 				registerCompUIFunc<PAIN::MetaData::Tag>(

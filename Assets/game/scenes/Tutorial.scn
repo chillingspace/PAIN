@@ -17,7 +17,6 @@
         "14377587-a8fe-2b47-9f46-dad6bdad2753",
         "a67656ca-15a5-d441-b14d-dae036e5245e",
         "1fe8b9a9-f998-cc41-bbaf-d6268f17914b",
-        "17761b98-7bc6-5f41-b40b-da7ed15c4f94",
         "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
         "8fb18e50-fe3a-dd4c-889f-62f426ff9d18",
         "8e26f21e-f0ca-5448-a80f-70f21e165ec6",
@@ -30,7 +29,6 @@
         "df7c04c2-94d4-5347-8dad-6527e853bf94",
         "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
         "ab88a2ae-3d34-3342-b2ed-df719f19b490",
-        "25c6e2c3-b701-4c43-b049-8c9b21a29441",
         "d67f82f6-9682-ba48-a64c-8697034ad488",
         "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
         "ecc50f9b-7cb8-274e-afdf-1ab2b89c6d8c",
@@ -41,7 +39,6 @@
         "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
         "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd",
         "b3ec7aee-c5ff-af48-9aa1-f912f843a888",
-        "164de26f-1403-e146-8a76-735d5dc42155",
         "c3be7e4a-501e-0744-ac10-55d1b5a38d86",
         "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
         "c7685566-a3eb-4b4f-a630-7d08fedb36e5",
@@ -61,10 +58,9 @@
         "351d0711-28db-d346-81fe-fe5904ff854a",
         "f8f9abf4-39b2-3f41-9e00-4bdfd4476881",
         "d9977322-f31e-bc4c-b298-fbcd6690c4ba",
-        "a77749e3-6c15-7446-a792-5609dd96b391",
-        "31f050fc-b8fd-9f44-9f4c-c2b19a10e63e",
         "e01c794e-0add-d542-9860-03f63c3193ab",
         "a8977689-ded0-fa41-9efb-33354e83dec7",
+        "1c7ce177-d679-a44a-89d0-a718aa172c23",
         "0d290cee-b55d-2e45-907d-ae2c745f492f",
         "b4a81861-94f2-584b-9da1-dbb24a91f93c",
         "633f661d-20e5-3b45-b5a5-299f91b71e17",
@@ -78,6 +74,7 @@
         "df12f04f-34c5-644d-980a-c8251d57cd55",
         "4abba89c-2728-1a4b-bf13-c88751021af2",
         "7d8bffc6-b461-c14a-9401-6124713c0747",
+        "841e487f-5eab-f24d-9eae-9dfbb83fcc02",
         "60d237d0-60e1-c146-86e6-e76c967840d4",
         "1708e4d2-69c9-ba43-9ef6-85d417b11f01",
         "ba8ea99f-16b6-da48-9465-54f48d7cd3a7",
@@ -103,7 +100,7 @@
         "0b9ad008-e8ad-144b-855d-115dd4683035",
         "b6f7c506-7c21-1847-a0b9-597479e83e13",
         "9d082b82-72a3-e149-a6bb-b0fa70c02de0",
-        "466ca22c-0eb2-0d49-ac1a-b9d822cc1ce4",
+        "a77749e3-6c15-7446-a792-5609dd96b391",
         "c49ebb97-d7ba-f148-9e46-16d6c5543147",
         "3e8dc653-3d17-ab42-bb53-da040f01f965",
         "06cab9b7-c91a-6948-bb59-426b8032ea12",
@@ -119,40 +116,33 @@
         "ad95c15c-a360-f548-8f9e-f7cab095c869",
         "b1efb887-fc4c-cc45-9de3-74ecb3311e35",
         "cf15ebf1-3c0e-d341-b9c7-44121d571eb4",
-        "c6ffd645-8670-c743-8350-259b8e82ca17",
-        "8c43dc43-e8cd-6342-97a8-98250804f65f",
-        "9cb25762-5d1f-ab4f-9317-5c8a56bdd002"
+        "f1a026ad-3186-2148-a591-76a1e3be2285",
+        "a05364a3-2996-b744-bdee-38b55c1d80af"
     ],
     "camera": {
         "active_game_cam": "Player",
         "aspectRatioH": 9.0,
         "aspectRatioW": 16.0,
-        "capsuleHeight": 1.7999999523162842,
-        "collisionEnabled": false,
-        "collisionOffset": 0.10000000149011612,
-        "collisionRadius": 0.5,
         "farPlane": 100.0,
         "forward": [
-            0.47756192088127136,
-            -0.8149577379226685,
-            -0.32829636335372925
+            -0.010526156984269619,
+            -0.6637076139450073,
+            -0.7479181289672852
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            -10.847746849060059,
-            21.18088150024414,
-            2.027906894683838
+            -0.1612379550933838,
+            4.412954330444336,
+            -10.084939956665039
         ],
         "sensitivity": 0.10000000149011612,
-        "showCollisionGizmo": false,
         "speed": 20.0,
         "up": [
             0.0,
             1.0,
             0.0
-        ],
-        "useCapsuleCollision": false
+        ]
     },
     "ecs": {
         "Entities": [
@@ -193,6 +183,8 @@
                             "name": "Particles"
                         },
                         "ParticleSystem": {
+                            "angularVelocity": 0.0,
+                            "angularVelocityVariance": 0.0,
                             "blendMode": 0,
                             "colorOverLifetime": [
                                 {
@@ -205,6 +197,9 @@
                                     "time": 1.0
                                 }
                             ],
+                            "directionMode": 0,
+                            "directionSpace": 0,
+                            "drag": 0.0,
                             "emissionDirection": [
                                 0.0,
                                 90.0,
@@ -213,6 +208,7 @@
                             "emissionRate": 5.0,
                             "emissionShape": 3,
                             "emissionSpread": 90.0,
+                            "gravityMultiplier": 1.0,
                             "lifetime": 1.0,
                             "lifetimeVariance": 5.0,
                             "looping": true,
@@ -252,6 +248,8 @@
                                 0.5630237460136414,
                                 0.0
                             ],
+                            "startRotation": 0.0,
+                            "startRotationVariance": 0.0,
                             "startSize": 1.0,
                             "startSizeVariance": 1.0,
                             "velocityOverLifetime": [
@@ -12411,8 +12409,8 @@
                             "siblingIndex": 29
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -12451,8 +12449,8 @@
                             "siblingIndex": 0
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -12515,8 +12513,8 @@
                                     "siblingIndex": 0
                                 },
                                 "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -12648,8 +12646,8 @@
                             "siblingIndex": 1
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -12712,8 +12710,8 @@
                                     "siblingIndex": 1
                                 },
                                 "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -12845,8 +12843,8 @@
                             "siblingIndex": 2
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -12909,8 +12907,8 @@
                                     "siblingIndex": 2
                                 },
                                 "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -13042,8 +13040,8 @@
                             "siblingIndex": 3
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -13106,8 +13104,8 @@
                                     "siblingIndex": 3
                                 },
                                 "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -13239,8 +13237,8 @@
                             "siblingIndex": 4
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -13301,6 +13299,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "fb707969-9b8b-184a-83e3-b139e59c62a0",
                                     "siblingIndex": 4
+                                },
+                                "Layer": {
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -13397,8 +13399,8 @@
                             "siblingIndex": 5
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -13459,6 +13461,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "fb707969-9b8b-184a-83e3-b139e59c62a0",
                                     "siblingIndex": 5
+                                },
+                                "Layer": {
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -13555,8 +13561,8 @@
                             "siblingIndex": 6
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -13617,6 +13623,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "fb707969-9b8b-184a-83e3-b139e59c62a0",
                                     "siblingIndex": 6
+                                },
+                                "Layer": {
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -13713,8 +13723,8 @@
                             "siblingIndex": 7
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -13777,8 +13787,8 @@
                                     "siblingIndex": 7
                                 },
                                 "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -13910,8 +13920,8 @@
                             "siblingIndex": 8
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -13972,6 +13982,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "fb707969-9b8b-184a-83e3-b139e59c62a0",
                                     "siblingIndex": 8
+                                },
+                                "Layer": {
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -14068,8 +14082,8 @@
                             "siblingIndex": 9
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -14132,8 +14146,8 @@
                                     "siblingIndex": 9
                                 },
                                 "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -14265,8 +14279,8 @@
                             "siblingIndex": 10
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -14329,8 +14343,8 @@
                                     "siblingIndex": 10
                                 },
                                 "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -14462,8 +14476,8 @@
                             "siblingIndex": 11
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -14550,6 +14564,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "fb707969-9b8b-184a-83e3-b139e59c62a0",
                                     "siblingIndex": 11
+                                },
+                                "Layer": {
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -14646,8 +14664,8 @@
                             "siblingIndex": 12
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -14710,8 +14728,8 @@
                                     "siblingIndex": 12
                                 },
                                 "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -14843,8 +14861,8 @@
                             "siblingIndex": 13
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -14907,8 +14925,8 @@
                                     "siblingIndex": 13
                                 },
                                 "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -15040,8 +15058,8 @@
                             "siblingIndex": 14
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -15104,8 +15122,8 @@
                                     "siblingIndex": 14
                                 },
                                 "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -15237,8 +15255,8 @@
                             "siblingIndex": 15
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -15301,8 +15319,8 @@
                                     "siblingIndex": 15
                                 },
                                 "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -15434,8 +15452,8 @@
                             "siblingIndex": 16
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -15496,6 +15514,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "fb707969-9b8b-184a-83e3-b139e59c62a0",
                                     "siblingIndex": 16
+                                },
+                                "Layer": {
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -15592,8 +15614,8 @@
                             "siblingIndex": 17
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -15656,8 +15678,8 @@
                                     "siblingIndex": 17
                                 },
                                 "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -15789,8 +15811,8 @@
                             "siblingIndex": 18
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -15853,8 +15875,8 @@
                                     "siblingIndex": 18
                                 },
                                 "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -16035,8 +16057,8 @@
                             "siblingIndex": 19
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -16148,8 +16170,8 @@
                                     "siblingIndex": 19
                                 },
                                 "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -16281,8 +16303,8 @@
                             "siblingIndex": 20
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -16345,8 +16367,8 @@
                                     "siblingIndex": 20
                                 },
                                 "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -16478,8 +16500,8 @@
                             "siblingIndex": 21
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -16550,8 +16572,8 @@
                             "siblingIndex": 22
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -16614,8 +16636,8 @@
                                     "siblingIndex": 22
                                 },
                                 "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -16747,8 +16769,8 @@
                             "siblingIndex": 23
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -16811,8 +16833,8 @@
                                     "siblingIndex": 23
                                 },
                                 "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -16944,8 +16966,8 @@
                             "siblingIndex": 24
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -17034,8 +17056,8 @@
                                     "siblingIndex": 24
                                 },
                                 "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -17167,8 +17189,8 @@
                             "siblingIndex": 25
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -17231,8 +17253,8 @@
                                     "siblingIndex": 25
                                 },
                                 "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -17364,8 +17386,8 @@
                             "siblingIndex": 26
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -17428,8 +17450,8 @@
                                     "siblingIndex": 26
                                 },
                                 "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -17561,8 +17583,8 @@
                             "siblingIndex": 27
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -17633,8 +17655,8 @@
                             "siblingIndex": 28
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -17721,6 +17743,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "fb707969-9b8b-184a-83e3-b139e59c62a0",
                                     "siblingIndex": 28
+                                },
+                                "Layer": {
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -17817,8 +17843,8 @@
                             "siblingIndex": 29
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -17905,6 +17931,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "fb707969-9b8b-184a-83e3-b139e59c62a0",
                                     "siblingIndex": 29
+                                },
+                                "Layer": {
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -18001,8 +18031,8 @@
                             "siblingIndex": 30
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -18089,6 +18119,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "fb707969-9b8b-184a-83e3-b139e59c62a0",
                                     "siblingIndex": 30
+                                },
+                                "Layer": {
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -18185,8 +18219,8 @@
                             "siblingIndex": 31
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -18273,6 +18307,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "fb707969-9b8b-184a-83e3-b139e59c62a0",
                                     "siblingIndex": 31
+                                },
+                                "Layer": {
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -18369,8 +18407,8 @@
                             "siblingIndex": 32
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -18457,6 +18495,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "fb707969-9b8b-184a-83e3-b139e59c62a0",
                                     "siblingIndex": 32
+                                },
+                                "Layer": {
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -18553,8 +18595,8 @@
                             "siblingIndex": 33
                         },
                         "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
+                            "layer_id": 3,
+                            "layer_mask": 8
                         },
                         "LocalTransform": {
                             "position": [
@@ -18641,6 +18683,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "fb707969-9b8b-184a-83e3-b139e59c62a0",
                                     "siblingIndex": 33
+                                },
+                                "Layer": {
+                                    "layer_id": 3,
+                                    "layer_mask": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -18808,6 +18854,10 @@
                             "volumeDb": 0.0
                         },
                         "Camera": {
+                            "capsuleHeight": 1.7999999523162842,
+                            "collisionEnabled": true,
+                            "collisionOffset": 0.10000000149011612,
+                            "collisionRadius": 0.5,
                             "far_plane": 100.0,
                             "height_ratio": 9.0,
                             "near_plane": 0.10000000149011612,
@@ -18821,11 +18871,13 @@
                                 0.0,
                                 0.0
                             ],
+                            "showCollisionGizmo": true,
                             "trans_offset": [
                                 0.0,
                                 1.5,
                                 -3.0
                             ],
+                            "useCapsuleCollision": false,
                             "width_ratio": 16.0
                         },
                         "GUID": {
@@ -22895,5 +22947,44 @@
             false,
             false
         ]
-    ]
+    ],
+    "minimap": {
+        "background_alpha": 0.5,
+        "border_color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+        ],
+        "border_thickness": 2.0,
+        "camera_height": 30.0,
+        "enabled": false,
+        "icon_danger_path": "",
+        "icon_item_path": "",
+        "icon_objective_path": "",
+        "icon_player_path": "",
+        "icon_scale": 1.0,
+        "icon_wall_path": "",
+        "override_position": false,
+        "pos_px": [
+            20.0,
+            20.0
+        ],
+        "radius": 15.0,
+        "recommended_position": 3,
+        "rotate_with_player": true,
+        "route_mode": 0,
+        "show_danger": true,
+        "show_items": true,
+        "show_legend": false,
+        "show_objective": true,
+        "show_player": true,
+        "show_route": true,
+        "show_walls": true,
+        "size_px": [
+            200.0,
+            200.0
+        ],
+        "use_icon_textures": false
+    }
 }
