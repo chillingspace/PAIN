@@ -292,112 +292,120 @@ namespace PAIN {
 
         glm::vec3 CameraCollisionSystem::getCameraPositionWithRaycast(const glm::vec3& playerPos,
             const glm::vec3& desiredPos,
-            float collisionRadius, // Add this!
-            float offset,          // Wall offset
+            float collisionRadius,
+            float offset,
+            uint32_t playerBodyID,
             float smoothFactor,
             const glm::vec3& lastValidPos) {
+
             if (!m_initialized) {
                 return desiredPos;
             }
 
             glm::vec3 direction = desiredPos - playerPos;
-            float desiredDist = glm::length(direction);
+            float totalDesiredDist = glm::length(direction);
 
-            // Prevent divide by zero if player and camera are in exact same spot
-            if (desiredDist < 0.001f) {
+            // If camera is basically inside the player already, do nothing
+            if (totalDesiredDist < 0.001f) {
                 return desiredPos;
             }
-            direction = direction / desiredDist;
+            direction = direction / totalDesiredDist;
 
-            // Start the sweep slightly away from the player to avoid hitting the player's own capsule
-            glm::vec3 rayStart = playerPos + (direction * 0.3f);
+            // -------------------------------------------------------------
+            // THE FIX: Start the raycast OUTSIDE the player's capsule.
+            // This entirely avoids hitting the frog character itself, 
+            // even if it has multiple hidden physics bodies/sensors.
+            // -------------------------------------------------------------
+            float startOffset = 0.6f; // Adjust based on your frog's radius. 0.6 is safe for most humanoids.
 
-            // The distance we are actually sweeping
-            float sweepDist = desiredDist - 0.3f;
-            if (sweepDist <= 0.0f) {
-                return desiredPos; // Desired pos is too close to player anyway
+            if (totalDesiredDist <= startOffset) {
+                return desiredPos;
             }
+
+            glm::vec3 rayStartPos = playerPos + (direction * startOffset);
+            float raySweepDist = totalDesiredDist - startOffset;
 
             JPH::PhysicsSystem* physics = static_cast<JPH::PhysicsSystem*>(m_physicsSystem);
 
-            // 1. Create the Sphere Shape (Use radius + offset for extra padding)
-            float paddedRadius = collisionRadius + offset;
-            JPH::SphereShapeSettings sphereSettings(paddedRadius);
-            JPH::ShapeSettings::ShapeResult shapeResult = sphereSettings.Create();
+            // Raycast setup - Shoot from outside the frog to the desired camera pos
+            JPH::RRayCast ray;
+            ray.mOrigin = JPH::RVec3(rayStartPos.x, rayStartPos.y, rayStartPos.z);
+            ray.mDirection = JPH::Vec3(direction.x, direction.y, direction.z) * raySweepDist;
 
-            if (!shapeResult.IsValid()) return desiredPos;
-            JPH::Ref<JPH::Shape> shape = shapeResult.Get();
-
-            // 2. Setup the ShapeCast
-            JPH::RShapeCast shapeCast = JPH::RShapeCast::sFromWorldTransform(
-                shape,
-                JPH::Vec3::sReplicate(1.0f),
-                JPH::RMat44::sTranslation(JPH::RVec3(rayStart.x, rayStart.y, rayStart.z)),
-                JPH::Vec3(direction.x, direction.y, direction.z) * sweepDist
-            );
-
-            JPH::ShapeCastSettings castSettings;
-            castSettings.mBackFaceModeTriangles = JPH::EBackFaceMode::CollideWithBackFaces;
-
-            // 3. Collect the closest hit
-            class CastCollector : public JPH::CastShapeCollector {
-            public:
-                float mFraction = 1.0f;
-                bool mHasHit = false;
-                void AddHit(const JPH::ShapeCastResult& result) override {
-                    if (result.mFraction < mFraction) {
-                        mFraction = result.mFraction;
-                        mHasHit = true;
-                    }
-                }
-            };
-            CastCollector collector;
-
-            // 4. Filters
+            // Filters
             class CameraRayLayerFilter : public JPH::BroadPhaseLayerFilter {
             public: virtual bool ShouldCollide(JPH::BroadPhaseLayer inLayer) const override { return true; }
             };
             class CameraRayObjectFilter : public JPH::ObjectLayerFilter {
             public: virtual bool ShouldCollide(JPH::ObjectLayer inLayer) const override { return inLayer >= 4 && inLayer <= 7; }
             };
-            class CameraRayBodyFilter : public JPH::BodyFilter {
+
+            CameraRayLayerFilter bpFilter;
+            CameraRayObjectFilter objFilter;
+
+            // We still try to filter the playerID just in case, but the startOffset is the real hero
+            JPH::BodyID ignoreID(playerBodyID);
+            JPH::IgnoreSingleBodyFilter ignoreFilter(ignoreID);
+
+            class DefaultBodyFilter : public JPH::BodyFilter {
             public:
                 virtual bool ShouldCollideLocked(const JPH::Body& inBody) const override { return true; }
                 virtual bool ShouldCollide(const JPH::BodyID& inBodyID) const override { return true; }
             };
+            DefaultBodyFilter defaultFilter;
 
-            CameraRayLayerFilter bpFilter;
-            CameraRayObjectFilter objFilter;
-            CameraRayBodyFilter bodyFilter;
+            JPH::BodyFilter& activeBodyFilter = (!ignoreID.IsInvalid())
+                ? static_cast<JPH::BodyFilter&>(ignoreFilter)
+                : static_cast<JPH::BodyFilter&>(defaultFilter);
 
-            // 5. Perform the sweep
-            physics->GetNarrowPhaseQuery().CastShape(
-                shapeCast, castSettings, JPH::RVec3(0, 0, 0), collector,
-                bpFilter, objFilter, bodyFilter
+            // Result object
+            JPH::RayCastResult hitResult;
+
+            // Perform Raycast
+            bool hasHit = physics->GetNarrowPhaseQuery().CastRay(
+                ray, hitResult, bpFilter, objFilter, activeBodyFilter
             );
 
-            // 6. Calculate Final Position
-            if (collector.mHasHit) {
-                // The fraction represents how far along the ray the sphere hit.
-                // We multiply by sweepDist, and add back the 0.3f starting offset.
-                float hitDistFromPlayer = (collector.mFraction * sweepDist) + 0.3f;
+            // Process Hit
+            if (hasHit) {
 
-                // Place the camera exactly where the sweep stopped.
-                // Because the sphere's radius was artificially inflated by 'offset', 
-                // the camera center is guaranteed to be 'radius + offset' away from the wall!
-                glm::vec3 blockedPos = playerPos + (direction * hitDistFromPlayer);
+                float hitFraction = hitResult.mFraction;
+                if (hitFraction < 0.0f) hitFraction = 0.0f;
+                if (hitFraction > 1.0f) hitFraction = 1.0f;
+
+                // How far from the START OF THE RAY is the wall?
+                float distToWallFromRayStart = raySweepDist * hitFraction;
+
+                // The total distance from the PLAYER to the wall
+                float distToWallFromPlayer = startOffset + distToWallFromRayStart;
+
+                // Pull the camera STRAIGHT FORWARD along the look-line to prevent near-clip plane issues.
+                float pullForwardDist = collisionRadius + offset;
+                float finalDistFromPlayer = distToWallFromPlayer - pullForwardDist;
+
+                // Minimum distance to prevent clipping into the frog's head
+                float minCameraDist = startOffset + 0.1f;
+                if (finalDistFromPlayer < minCameraDist) {
+                    finalDistFromPlayer = minCameraDist;
+                }
+
+                // Calculate final position
+                glm::vec3 finalPos = playerPos + (direction * finalDistFromPlayer);
 
                 // Optional smooth interpolation
                 if (smoothFactor > 0.0f && lastValidPos != glm::vec3(0.0f)) {
-                    return lastValidPos + (blockedPos - lastValidPos) * smoothFactor;
+                    return lastValidPos + (finalPos - lastValidPos) * smoothFactor;
                 }
 
-                return blockedPos;
+                return finalPos;
             }
 
-            // No hit, return desired
+            // No hit, safe to return desired position
             return desiredPos;
         }
+
+
+
 
 
         bool CameraCollisionSystem::performCollisionQuery(const glm::vec3& position,

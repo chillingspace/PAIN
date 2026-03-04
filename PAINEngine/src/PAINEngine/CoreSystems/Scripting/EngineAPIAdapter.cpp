@@ -664,7 +664,7 @@ namespace PAIN {
         );
     }
 
-    glm::vec3 EngineAPIAdapter::Camera_GetPositionWithCollision(const glm::vec3& playerPos, const glm::vec3& desiredPos)
+    glm::vec3 EngineAPIAdapter::Camera_GetPositionWithCollision(const glm::vec3& playerPos, const glm::vec3& desiredPos, const entt::entity& e)
     {
         if (!scene_) return desiredPos;
         
@@ -680,13 +680,29 @@ namespace PAIN {
         
         // Get last valid camera position for smooth interpolation
         glm::vec3 lastValidPos = cam->pos;
+
+        // Default to invalid ID
+        uint32_t rawBodyID = JPH::BodyID::cInvalidBodyID;
+
+
+        auto& registry = ecs_.getRegistry();
+
+        // Ensure entity is valid and has a RigidBody3D
+        if (registry.valid(e) && registry.all_of<Physics::RigidBody3D>(e)) {
+            auto& rb = registry.get<Physics::RigidBody3D>(e);
+            if (!rb.bodyID.IsInvalid()) {
+                rawBodyID = rb.bodyID.GetIndexAndSequenceNumber();
+            }
+        }
         
+
         // Use raycast-based camera positioning
         return collisionSystem->getCameraPositionWithRaycast(
             playerPos,
             desiredPos,
             radius,
             offset,
+            rawBodyID,
             0.0f, // No smooth interpolation - instant response for responsiveness
             lastValidPos
         );

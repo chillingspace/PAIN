@@ -56,6 +56,7 @@ namespace PAIN {
                                                     const glm::vec3& desiredPos,
                                                     float collisionRadius,
                                                     float offset,
+                                                    uint32_t playerBodyID,
                                                     float smoothFactor = 0.0f,
                                                     const glm::vec3& lastValidPos = glm::vec3(0.0f));
             
