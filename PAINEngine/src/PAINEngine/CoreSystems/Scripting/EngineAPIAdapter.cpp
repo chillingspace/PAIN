@@ -676,6 +676,7 @@ namespace PAIN {
         
         // Use the camera's collision offset setting
         float offset = cam->collisionOffset;
+		float radius = cam->collisionRadius;
         
         // Get last valid camera position for smooth interpolation
         glm::vec3 lastValidPos = cam->pos;
@@ -684,6 +685,7 @@ namespace PAIN {
         return collisionSystem->getCameraPositionWithRaycast(
             playerPos,
             desiredPos,
+            radius,
             offset,
             0.0f, // No smooth interpolation - instant response for responsiveness
             lastValidPos

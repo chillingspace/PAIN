@@ -25,6 +25,7 @@ namespace PAIN {
                             const glm::vec3& up,
                             float radius, 
                             float height,
+                            float offset,
                             bool useCapsule);
             
             // Get adjusted position with sliding along surfaces
@@ -53,6 +54,7 @@ namespace PAIN {
             // smoothFactor: 0 = snap to hit point, 1 = full interpolation
             glm::vec3 getCameraPositionWithRaycast(const glm::vec3& playerPos,
                                                     const glm::vec3& desiredPos,
+                                                    float collisionRadius,
                                                     float offset,
                                                     float smoothFactor = 0.0f,
                                                     const glm::vec3& lastValidPos = glm::vec3(0.0f));
@@ -75,6 +77,7 @@ namespace PAIN {
                                       const glm::vec3& up,
                                       float radius,
                                       float height,
+                                      float offset,
                                       bool useCapsule,
                                       glm::vec3& outNormal,
                                       float& outDepth);

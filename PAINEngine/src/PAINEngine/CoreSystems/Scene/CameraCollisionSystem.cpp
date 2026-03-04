@@ -14,6 +14,7 @@
 #include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
 #include <Jolt/Physics/Collision/CollideShape.h>
 #include <Jolt/Physics/Collision/RayCast.h>
+#include <Jolt/Physics/Collision/ShapeCast.h>
 #include <Jolt/Physics/Collision/CastResult.h>
 #include <Jolt/Physics/PhysicsSystem.h>
 #include <Jolt/Physics/Body/BodyLock.h>
@@ -43,12 +44,13 @@ namespace PAIN {
                                                 const glm::vec3& up,
                                                 float radius,
                                                 float height,
+                                                float offset,
                                                 bool useCapsule) {
             if (!m_initialized) return false;
             
             glm::vec3 normal;
             float depth;
-            bool collides = performCollisionQuery(position, up, radius, height, useCapsule, normal, depth);
+            bool collides = performCollisionQuery(position, up, radius, height, offset, useCapsule, normal, depth);
             
             // DEBUG: Log when no collision detected
             static int noHitCount = 0;
@@ -93,7 +95,7 @@ namespace PAIN {
                 // No movement, just check if current position is valid
                 glm::vec3 normal;
                 float depth;
-                if (performCollisionQuery(currentPos, up, radius, height, useCapsule, normal, depth)) {
+                if (performCollisionQuery(currentPos, up, radius, height, offset, useCapsule, normal, depth)) {
                     // Push out of collision
                     //PN_CORE_WARN("[CameraCollision] Currently inside geometry! Pushing out by {:.3f}", depth + offset);
                     return currentPos + normal * (depth + offset);
@@ -106,14 +108,13 @@ namespace PAIN {
             // First try: Check if proposed position is clear
             glm::vec3 normal;
             float depth;
-            if (!performCollisionQuery(proposedPos, up, radius, height, useCapsule, normal, depth)) {
+            if (!performCollisionQuery(proposedPos, up, radius, height, offset, useCapsule, normal, depth)) {
                 // No collision, can move freely
                 return proposedPos;
             }
             
             // Collision detected - calculate slide vector
             // Ensure depth is positive - negative depth means we're within separation distance but not overlapping
-            float penetrationDepth = glm::max(depth, 0.0f);
             
             //PN_CORE_INFO("[CameraCollision] Collision at proposed pos (raw depth: {:.3f}, penetration: {:.3f}), attempting to slide...", 
             //    depth, penetrationDepth);
@@ -123,14 +124,14 @@ namespace PAIN {
             // No need to flip - Jolt's mPenetrationAxis already points from shape1 (world) to shape2 (camera)
             
             // Calculate how much we need to push back
-            float pushBackDist = penetrationDepth + offset;
+            float pushBackDist = depth + offset;
             
             // First try: Push back from proposed position along normal
             glm::vec3 pushedBackPos = proposedPos + normal * pushBackDist;
             
             glm::vec3 pushNormal;
             float pushDepth;
-            if (!performCollisionQuery(pushedBackPos, up, radius, height, useCapsule, pushNormal, pushDepth)) {
+            if (!performCollisionQuery(pushedBackPos, up, radius, height, offset, useCapsule, pushNormal, pushDepth)) {
                 //PN_CORE_INFO("[CameraCollision] Push back successful! Moved by {:.3f}", pushBackDist);
                 return pushedBackPos;
             }
@@ -150,7 +151,7 @@ namespace PAIN {
                     
                     glm::vec3 slideNormal;
                     float slideDepth;
-                    if (!performCollisionQuery(slidePos, up, radius, height, useCapsule, slideNormal, slideDepth)) {
+                    if (!performCollisionQuery(slidePos, up, radius, height, offset, useCapsule, slideNormal, slideDepth)) {
                         //PN_CORE_INFO("[CameraCollision] Sliding successful!");
                         return slidePos;
                     }
@@ -172,7 +173,7 @@ namespace PAIN {
                 
                 glm::vec3 testNormal;
                 float testDepth;
-                if (performCollisionQuery(testPos, up, radius, height, useCapsule, testNormal, testDepth)) {
+                if (performCollisionQuery(testPos, up, radius, height, offset, useCapsule, testNormal, testDepth)) {
                     // Collision, reduce max
                     tMax = t;
                 } else {
@@ -193,7 +194,7 @@ namespace PAIN {
             // If currently in collision, push out
             glm::vec3 currentNormal;
             float currentDepth;
-            if (performCollisionQuery(currentPos, up, radius, height, useCapsule, currentNormal, currentDepth)) {
+            if (performCollisionQuery(currentPos, up, radius, height, offset, useCapsule, currentNormal, currentDepth)) {
                 float currentPenetration = glm::max(currentDepth, 0.0f);
                 if (currentPenetration > 0.0f) {
                     //PN_CORE_WARN("[CameraCollision] Pushing out of geometry by {:.3f}", currentPenetration + offset);
@@ -290,100 +291,120 @@ namespace PAIN {
         }
 
         glm::vec3 CameraCollisionSystem::getCameraPositionWithRaycast(const glm::vec3& playerPos,
-                                                                       const glm::vec3& desiredPos,
-                                                                       float offset,
-                                                                       float smoothFactor,
-                                                                       const glm::vec3& lastValidPos) {
+            const glm::vec3& desiredPos,
+            float collisionRadius, // Add this!
+            float offset,          // Wall offset
+            float smoothFactor,
+            const glm::vec3& lastValidPos) {
             if (!m_initialized) {
                 return desiredPos;
             }
-            
-            // Work with a local copy to allow modification
-            glm::vec3 finalDesiredPos = desiredPos;
-            
-            glm::vec3 direction = finalDesiredPos - playerPos;
+
+            glm::vec3 direction = desiredPos - playerPos;
             float desiredDist = glm::length(direction);
-            
-            // Enforce minimum camera distance - camera should never be too close to player
-            float minCameraDist = 1.0f; // Minimum 1 unit from player
-            float minDistThreshold = 1.2f; // Threshold to start blocking - slightly above min to create a buffer zone
-            
-            // Track if we're in the "danger zone" where mouse is trying to push camera too close
-            bool approachingMinLimit = (desiredDist < minDistThreshold);
-            
-            if (desiredDist < minCameraDist) {
-                // Recalculate desired position to be at minimum distance
-                if (desiredDist > 0.001f) {
-                    direction = direction / desiredDist;
-                } else {
-                    direction = glm::vec3(0.0f, 1.0f, 0.0f); // Default up
-                }
-                finalDesiredPos = playerPos + direction * minCameraDist;
-                desiredDist = minCameraDist;
-            }
-            
+
+            // Prevent divide by zero if player and camera are in exact same spot
             if (desiredDist < 0.001f) {
-                return finalDesiredPos;
+                return desiredPos;
             }
-            
             direction = direction / desiredDist;
-            
-            // Cast ray from player towards desired camera position
-            // Start ray slightly outside player position to avoid hitting player's own collider
-            glm::vec3 rayStart = playerPos + direction * 0.3f;
-            float hitDist = raycastToPosition(rayStart, finalDesiredPos);
-            
-            // Adjust hitDist to account for the ray start offset
-            if (hitDist > 0.0f) {
-                hitDist += 0.3f;
+
+            // Start the sweep slightly away from the player to avoid hitting the player's own capsule
+            glm::vec3 rayStart = playerPos + (direction * 0.3f);
+
+            // The distance we are actually sweeping
+            float sweepDist = desiredDist - 0.3f;
+            if (sweepDist <= 0.0f) {
+                return desiredPos; // Desired pos is too close to player anyway
             }
-            
-            // No obstacle OR hit is beyond desired position minus offset
-            if (hitDist < 0.0f) {
-                // No hit - return desired camera position
-                return finalDesiredPos;
-            }
-            
-            // Add small tolerance to prevent phasing - require hit to be at least this much before camera
-            float toleranceBuffer = 0.05f; // 5cm buffer to prevent phasing
-            
-            // Check if we're approaching the minimum distance limit AND there's a collision
-            // In this case, block the movement entirely to prevent phasing
-            if (approachingMinLimit && hitDist < minDistThreshold) {
-                // We're trying to move into the minimum distance zone AND there's an obstacle
-                // Block movement - stay at last valid position or push out slightly
-                if (lastValidPos != glm::vec3(0.0f) && smoothFactor > 0.0f) {
-                    return lastValidPos;
+
+            JPH::PhysicsSystem* physics = static_cast<JPH::PhysicsSystem*>(m_physicsSystem);
+
+            // 1. Create the Sphere Shape (Use radius + offset for extra padding)
+            float paddedRadius = collisionRadius + offset;
+            JPH::SphereShapeSettings sphereSettings(paddedRadius);
+            JPH::ShapeSettings::ShapeResult shapeResult = sphereSettings.Create();
+
+            if (!shapeResult.IsValid()) return desiredPos;
+            JPH::Ref<JPH::Shape> shape = shapeResult.Get();
+
+            // 2. Setup the ShapeCast
+            JPH::RShapeCast shapeCast = JPH::RShapeCast::sFromWorldTransform(
+                shape,
+                JPH::Vec3::sReplicate(1.0f),
+                JPH::RMat44::sTranslation(JPH::RVec3(rayStart.x, rayStart.y, rayStart.z)),
+                JPH::Vec3(direction.x, direction.y, direction.z) * sweepDist
+            );
+
+            JPH::ShapeCastSettings castSettings;
+            castSettings.mBackFaceModeTriangles = JPH::EBackFaceMode::CollideWithBackFaces;
+
+            // 3. Collect the closest hit
+            class CastCollector : public JPH::CastShapeCollector {
+            public:
+                float mFraction = 1.0f;
+                bool mHasHit = false;
+                void AddHit(const JPH::ShapeCastResult& result) override {
+                    if (result.mFraction < mFraction) {
+                        mFraction = result.mFraction;
+                        mHasHit = true;
+                    }
                 }
-                // If no last valid position, use minimum distance position
-                glm::vec3 minPos = playerPos + direction * minCameraDist;
-                return minPos;
+            };
+            CastCollector collector;
+
+            // 4. Filters
+            class CameraRayLayerFilter : public JPH::BroadPhaseLayerFilter {
+            public: virtual bool ShouldCollide(JPH::BroadPhaseLayer inLayer) const override { return true; }
+            };
+            class CameraRayObjectFilter : public JPH::ObjectLayerFilter {
+            public: virtual bool ShouldCollide(JPH::ObjectLayer inLayer) const override { return inLayer >= 4 && inLayer <= 7; }
+            };
+            class CameraRayBodyFilter : public JPH::BodyFilter {
+            public:
+                virtual bool ShouldCollideLocked(const JPH::Body& inBody) const override { return true; }
+                virtual bool ShouldCollide(const JPH::BodyID& inBodyID) const override { return true; }
+            };
+
+            CameraRayLayerFilter bpFilter;
+            CameraRayObjectFilter objFilter;
+            CameraRayBodyFilter bodyFilter;
+
+            // 5. Perform the sweep
+            physics->GetNarrowPhaseQuery().CastShape(
+                shapeCast, castSettings, JPH::RVec3(0, 0, 0), collector,
+                bpFilter, objFilter, bodyFilter
+            );
+
+            // 6. Calculate Final Position
+            if (collector.mHasHit) {
+                // The fraction represents how far along the ray the sphere hit.
+                // We multiply by sweepDist, and add back the 0.3f starting offset.
+                float hitDistFromPlayer = (collector.mFraction * sweepDist) + 0.3f;
+
+                // Place the camera exactly where the sweep stopped.
+                // Because the sphere's radius was artificially inflated by 'offset', 
+                // the camera center is guaranteed to be 'radius + offset' away from the wall!
+                glm::vec3 blockedPos = playerPos + (direction * hitDistFromPlayer);
+
+                // Optional smooth interpolation
+                if (smoothFactor > 0.0f && lastValidPos != glm::vec3(0.0f)) {
+                    return lastValidPos + (blockedPos - lastValidPos) * smoothFactor;
+                }
+
+                return blockedPos;
             }
-            
-            if (hitDist >= desiredDist - offset - toleranceBuffer) {
-                // Hit is beyond desired camera position (with tolerance) - no collision
-                return finalDesiredPos;
-            }
-            
-            // Obstacle detected between player and desired camera position
-            // Place camera at hit point minus offset (with extra tolerance), but never closer than minimum distance
-            float cameraDist = glm::max(minCameraDist, hitDist - offset - toleranceBuffer);
-            glm::vec3 hitPoint = playerPos + direction * hitDist;
-            glm::vec3 blockedPos = playerPos + direction * cameraDist;
-            
-            // Apply smooth interpolation if requested
-            if (smoothFactor > 0.0f && lastValidPos != glm::vec3(0.0f)) {
-                // Blend between last valid position and blocked position
-                return lastValidPos + (blockedPos - lastValidPos) * smoothFactor;
-            }
-            
-            return blockedPos;
+
+            // No hit, return desired
+            return desiredPos;
         }
+
 
         bool CameraCollisionSystem::performCollisionQuery(const glm::vec3& position,
                                                          const glm::vec3& up,
                                                          float radius,
                                                          float height,
+                                                         float offset,
                                                          bool useCapsule,
                                                          glm::vec3& outNormal,
                                                          float& outDepth) {
@@ -438,7 +459,7 @@ namespace PAIN {
             JPH::CollideShapeSettings settings;
             // IMPORTANT: Set separation distance to 0 to only detect actual overlaps
             // Non-zero values cause collisions to be reported before shapes actually touch
-            settings.mMaxSeparationDistance = 0.0f;
+            settings.mMaxSeparationDistance = offset;
             settings.mBackFaceMode = JPH::EBackFaceMode::CollideWithBackFaces;
             // Enable active edge detection for better normal calculation  
             settings.mActiveEdgeMode = JPH::EActiveEdgeMode::CollideOnlyWithActive;
