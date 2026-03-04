@@ -14,20 +14,16 @@ namespace PAIN {
 				flags = ImGuiWindowFlags_None;
 			}
 
-			void DebugPanel::nextWindowSettings() {
-			}
-
-			void DebugPanel::onAttach() {
-			}
+			void DebugPanel::nextWindowSettings() {}
+			void DebugPanel::onAttach() {}
 
 			void DebugPanel::onUpdate(AppTiming timing) {
 				ImGui::Begin(name.c_str(), nullptr, flags);
 
-				// ===== 1. Performance Visualizer =====
+				// ===== 1. Performance Metrics =====
 				if (ImGui::CollapsingHeader("Performance Metrics", ImGuiTreeNodeFlags_DefaultOpen)) {
-					// Keep a rolling history of frame times (100 samples)
 					const int MAX_SAMPLES = 100;
-					frameTimes.push_back(timing.dt * 1000.0f); // ms
+					frameTimes.push_back(timing.dt * 1000.0f);
 					if (frameTimes.size() > MAX_SAMPLES)
 						frameTimes.erase(frameTimes.begin());
 
@@ -43,54 +39,44 @@ namespace PAIN {
 
 				ImGui::Separator();
 
-				// ===== 2. Command History View =====
+				// ===== 2. Command History =====
 				if (ImGui::CollapsingHeader("Command History", ImGuiTreeNodeFlags_DefaultOpen)) {
 
 					if (!command_manager) {
 						ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f), "Command Manager not available");
 					}
 					else {
-						// Display stack information
 						size_t undo_count = command_manager->getUndoCount();
 						size_t redo_count = command_manager->getRedoCount();
 
-						ImGui::Text("Undo Stack: %zu action(s)", undo_count);
-						ImGui::Text("Redo Stack: %zu action(s)", redo_count);
+						// Summary bar
+						ImGui::Text("Undo Stack: %zu / %zu", undo_count, command_manager->getMaxStackSize());
+						ImGui::SameLine(200);
+						ImGui::Text("Redo Stack: %zu", redo_count);
 
 						ImGui::Spacing();
-
-						// Keyboard shortcuts note
-						ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Use Ctrl+Z to Undo | Ctrl+Y to Redo");
-
+						ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f),
+							"Ctrl+Z to Undo  |  Ctrl+Y to Redo");
 						ImGui::Spacing();
 						ImGui::Separator();
+						ImGui::Spacing();
 
-						// Display next action descriptions
+						// Next action previews
 						if (command_manager->canUndo()) {
-							std::string next_undo = command_manager->getNextUndoDescription();
-							if (!next_undo.empty()) {
-								ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 1.0f, 0.4f, 1.0f));
-								ImGui::Text("Next Undo: %s", next_undo.c_str());
-								ImGui::PopStyleColor();
-							}
-							else {
-								ImGui::TextDisabled("Next Undo: [Unnamed Action]");
-							}
+							std::string desc = command_manager->getNextUndoDescription();
+							ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 1.0f, 0.4f, 1.0f));
+							ImGui::Text("Next Undo: %s", desc.empty() ? "[Unnamed]" : desc.c_str());
+							ImGui::PopStyleColor();
 						}
 						else {
 							ImGui::TextDisabled("Next Undo: N/A");
 						}
 
 						if (command_manager->canRedo()) {
-							std::string next_redo = command_manager->getNextRedoDescription();
-							if (!next_redo.empty()) {
-								ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.7f, 1.0f, 1.0f));
-								ImGui::Text("Next Redo: %s", next_redo.c_str());
-								ImGui::PopStyleColor();
-							}
-							else {
-								ImGui::TextDisabled("Next Redo: [Unnamed Action]");
-							}
+							std::string desc = command_manager->getNextRedoDescription();
+							ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.7f, 1.0f, 1.0f));
+							ImGui::Text("Next Redo: %s", desc.empty() ? "[Unnamed]" : desc.c_str());
+							ImGui::PopStyleColor();
 						}
 						else {
 							ImGui::TextDisabled("Next Redo: N/A");
@@ -98,32 +84,40 @@ namespace PAIN {
 
 						ImGui::Spacing();
 
-						// Optional: Visual representation
-						if (ImGui::TreeNode("Visual Stack View")) {
-							ImGui::BeginChild("StackView", ImVec2(0, 200), true);
+						// ---- Full history view ----
+						if (ImGui::TreeNode("Full History")) {
+							ImGui::BeginChild("##HistoryView", ImVec2(0, 250), true);
 
-							// Undo stack visualization
-							ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "Undo Stack (Top -> Bottom):");
+							// -- Undo stack --
+							// Deque: front = oldest, back = most recent (next to undo)
+							const auto& undoHistory = command_manager->getUndoHistory();
 
-							if (undo_count == 0) {
+							ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f),
+								"Undo Stack (%zu)  [newest at top]", undoHistory.size());
+							ImGui::Separator();
+
+							if (undoHistory.empty()) {
 								ImGui::TextDisabled("  [Empty]");
 							}
 							else {
-								// Show limited items (top 15)
-								size_t display_count = std::min(undo_count, (size_t)15);
-								for (size_t i = 0; i < display_count; ++i) {
-									if (i == 0) {
-										ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.4f, 1.0f));
-										ImGui::BulletText("[NEXT] Position %zu", undo_count - i);
+								// Iterate back-to-front so newest appears at the top of the UI
+								for (int i = (int)undoHistory.size() - 1; i >= 0; --i) {
+									const auto& action = undoHistory[i];
+									const std::string& desc = action.description.empty()
+										? "[Unnamed Action]"
+										: action.description;
+
+									bool isNext = (i == (int)undoHistory.size() - 1);
+
+									if (isNext) {
+										// Highlight the action that would be undone next
+										ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.3f, 1.0f));
+										ImGui::BulletText("[NEXT] %s", desc.c_str());
 										ImGui::PopStyleColor();
 									}
 									else {
-										ImGui::BulletText("Position %zu", undo_count - i);
+										ImGui::BulletText("%s", desc.c_str());
 									}
-								}
-
-								if (undo_count > 15) {
-									ImGui::TextDisabled("  ... and %zu more", undo_count - 15);
 								}
 							}
 
@@ -131,28 +125,34 @@ namespace PAIN {
 							ImGui::Separator();
 							ImGui::Spacing();
 
-							// Redo stack visualization
-							ImGui::TextColored(ImVec4(0.4f, 0.7f, 1.0f, 1.0f), "Redo Stack (Top -> Bottom):");
+							// -- Redo stack --
+							const auto& redoHistory = command_manager->getRedoHistory();
 
-							if (redo_count == 0) {
+							ImGui::TextColored(ImVec4(0.4f, 0.7f, 1.0f, 1.0f),
+								"Redo Stack (%zu)  [newest at top]", redoHistory.size());
+							ImGui::Separator();
+
+							if (redoHistory.empty()) {
 								ImGui::TextDisabled("  [Empty]");
 							}
 							else {
-								// Show limited items (top 15)
-								size_t display_count = std::min(redo_count, (size_t)15);
-								for (size_t i = 0; i < display_count; ++i) {
-									if (i == 0) {
-										ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.4f, 1.0f));
-										ImGui::BulletText("[NEXT] Position %zu", redo_count - i);
+								// Same — back-to-front so next redo is at the top
+								for (int i = (int)redoHistory.size() - 1; i >= 0; --i) {
+									const auto& action = redoHistory[i];
+									const std::string& desc = action.description.empty()
+										? "[Unnamed Action]"
+										: action.description;
+
+									bool isNext = (i == (int)redoHistory.size() - 1);
+
+									if (isNext) {
+										ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.3f, 1.0f));
+										ImGui::BulletText("[NEXT] %s", desc.c_str());
 										ImGui::PopStyleColor();
 									}
 									else {
-										ImGui::BulletText("Position %zu", redo_count - i);
+										ImGui::BulletText("%s", desc.c_str());
 									}
-								}
-
-								if (redo_count > 15) {
-									ImGui::TextDisabled("  ... and %zu more", redo_count - 15);
 								}
 							}
 
