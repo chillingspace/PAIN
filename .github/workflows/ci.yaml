@@ -100,8 +100,19 @@ jobs:
         run: .\build.bat
         env:
           CMAKE_BUILD_PARALLEL_LEVEL: 8
-      - name: Build Android app (x86_64)
+      - name: Build Android app (Debug x86_64)
         working-directory: android
         env:
           CI_ABI: x86_64
-        run: .\gradlew.bat assembleDebug --quiet
+        run: .\gradlew.bat assembleDebug --stacktrace
+      - name: Build Release APK (Check)
+        working-directory: android 
+        run: .\gradlew.bat assembleRelease --stacktrace
+        env:          
+          # We might not have the signing keys in CI, so this check ensures the release build can succeed without signing
+          SKIP_SIGNING: true 
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: android/app/build/outputs/apk/release/*.apk  
