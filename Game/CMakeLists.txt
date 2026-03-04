@@ -31,17 +31,16 @@ else()
             "$<TARGET_FILE_DIR:Friends-Frog-ever>"
     COMMENT "Copying FMOD runtime DLL...")
 
-   add_custom_command(TARGET Friends-Frog-ever POST_BUILD
-     COMMAND ${CMAKE_COMMAND} -E copy_directory
+  add_custom_command(TARGET Friends-Frog-ever POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
             "${CMAKE_SOURCE_DIR}/build/Tools/cuttlefish"
             "$<TARGET_FILE_DIR:Friends-Frog-ever>/cuttlefish"
-     COMMAND ${CMAKE_COMMAND} -E copy_directory
+    COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
             "${CMAKE_SOURCE_DIR}/build/Tools/ffmpeg"
             "$<TARGET_FILE_DIR:Friends-Frog-ever>/ffmpeg"
-     COMMENT "Copying cuttlefish, astc, ffmpeg to debug output dir"
-     VERBATIM
-     CONFIGURATIONS Debug
-   )
+    COMMENT "Copying cuttlefish, astc, ffmpeg to debug output dir"
+    VERBATIM
+  )
 
   # VS debugger working directory
   set_target_properties(Friends-Frog-ever PROPERTIES
