@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "menu button sp new.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 2968962832464535033
+  },
+  "descriptor_version": 1,
+  "guid": "160bdf18-e114-7f4b-a579-c7c726750734",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\menu button sp new.png"
+  }
+}

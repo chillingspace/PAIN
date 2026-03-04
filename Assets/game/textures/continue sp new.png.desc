@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "continue sp new.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 17637303023092404415
+  },
+  "descriptor_version": 1,
+  "guid": "fff544a7-09f9-c946-b707-89944788f9d6",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\continue sp new.png"
+  }
+}
