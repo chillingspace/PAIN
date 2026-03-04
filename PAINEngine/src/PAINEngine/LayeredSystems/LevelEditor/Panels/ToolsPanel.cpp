@@ -443,6 +443,21 @@ namespace PAIN {
 			// onUpdate — menu bar + toolbar
 			// ----------------------------------------------------------------
 			void Tools::onUpdate(AppTiming timing) {
+
+				// ---- Keyboard shortcuts (Ctrl+Z / Ctrl+Y) ----
+				// Only fire when no ImGui widget is actively capturing keyboard input
+				if (!ImGui::GetIO().WantCaptureKeyboard) {
+					bool ctrl = ImGui::GetIO().KeyCtrl;
+
+					if (ctrl && ImGui::IsKeyPressed(ImGuiKey_Z, false)) {
+						command_manager->undo();
+					}
+					if (ctrl && ImGui::IsKeyPressed(ImGuiKey_Y, false)) {
+						command_manager->redo();
+					}
+				}
+
+
 				if (ImGui::BeginMenuBar()) {
 
 					// ---- File ----
@@ -475,8 +490,29 @@ namespace PAIN {
 
 					// ---- Edit ----
 					if (ImGui::BeginMenu("Edit")) {
-						ImGui::MenuItem("Undo", "Ctrl+Z");
-						ImGui::MenuItem("Redo", "Ctrl+Y");
+						bool canUndo = command_manager->canUndo();
+						bool canRedo = command_manager->canRedo();
+
+						// Undo
+						ImGui::BeginDisabled(!canUndo);
+						if (ImGui::MenuItem("Undo", "Ctrl+Z")) {
+							command_manager->undo();
+						}
+						if (canUndo && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+							ImGui::SetTooltip("Undo: %s", command_manager->getNextUndoDescription().c_str());
+						}
+						ImGui::EndDisabled();
+
+						// Redo
+						ImGui::BeginDisabled(!canRedo);
+						if (ImGui::MenuItem("Redo", "Ctrl+Y")) {
+							command_manager->redo();
+						}
+						if (canRedo && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+							ImGui::SetTooltip("Redo: %s", command_manager->getNextRedoDescription().c_str());
+						}
+						ImGui::EndDisabled();
+
 						ImGui::Separator();
 						ImGui::MenuItem("Preferences...");
 						ImGui::EndMenu();
