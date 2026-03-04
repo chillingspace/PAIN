@@ -1360,6 +1360,103 @@ namespace PAIN {
                 }
             }
 
+            // Parse minimap settings
+            if (sceneJson.contains("minimap")) {
+                auto& minimap = sceneJson["minimap"];
+
+                if (minimap.contains("enabled")) {
+                    sceneAsset->minimap.enabled = minimap["enabled"].get<bool>();
+                }
+                if (minimap.contains("radius")) {
+                    sceneAsset->minimap.radius = minimap["radius"].get<float>();
+                }
+                if (minimap.contains("size_px") && minimap["size_px"].is_array() && minimap["size_px"].size() >= 2) {
+                    sceneAsset->minimap.size_px = glm::vec2(
+                        minimap["size_px"][0].get<float>(),
+                        minimap["size_px"][1].get<float>()
+                    );
+                }
+                if (minimap.contains("pos_px") && minimap["pos_px"].is_array() && minimap["pos_px"].size() >= 2) {
+                    sceneAsset->minimap.pos_px = glm::vec2(
+                        minimap["pos_px"][0].get<float>(),
+                        minimap["pos_px"][1].get<float>()
+                    );
+                }
+                if (minimap.contains("override_position")) {
+                    sceneAsset->minimap.override_position = minimap["override_position"].get<bool>();
+                }
+                if (minimap.contains("recommended_position")) {
+                    sceneAsset->minimap.recommended_position =
+                        static_cast<GraphicsSettings::MINIMAP_RECOMMENDED_POSITION>(minimap["recommended_position"].get<int>());
+                }
+                if (minimap.contains("rotate_with_player")) {
+                    sceneAsset->minimap.rotate_with_player = minimap["rotate_with_player"].get<bool>();
+                }
+                if (minimap.contains("show_player")) {
+                    sceneAsset->minimap.show_player = minimap["show_player"].get<bool>();
+                }
+                if (minimap.contains("show_danger")) {
+                    sceneAsset->minimap.show_danger = minimap["show_danger"].get<bool>();
+                }
+                if (minimap.contains("show_items")) {
+                    sceneAsset->minimap.show_items = minimap["show_items"].get<bool>();
+                }
+                if (minimap.contains("show_objective")) {
+                    sceneAsset->minimap.show_objective = minimap["show_objective"].get<bool>();
+                }
+                if (minimap.contains("show_walls")) {
+                    sceneAsset->minimap.show_walls = minimap["show_walls"].get<bool>();
+                }
+                if (minimap.contains("show_route")) {
+                    sceneAsset->minimap.show_route = minimap["show_route"].get<bool>();
+                }
+                if (minimap.contains("route_mode")) {
+                    sceneAsset->minimap.route_mode =
+                        static_cast<GraphicsSettings::MINIMAP_ROUTE_MODE>(minimap["route_mode"].get<int>());
+                }
+                if (minimap.contains("use_icon_textures")) {
+                    sceneAsset->minimap.use_icon_textures = minimap["use_icon_textures"].get<bool>();
+                }
+                if (minimap.contains("icon_scale")) {
+                    sceneAsset->minimap.icon_scale = minimap["icon_scale"].get<float>();
+                }
+                if (minimap.contains("show_legend")) {
+                    sceneAsset->minimap.show_legend = minimap["show_legend"].get<bool>();
+                }
+                if (minimap.contains("icon_player_path")) {
+                    sceneAsset->minimap.icon_player_path = minimap["icon_player_path"].get<std::string>();
+                }
+                if (minimap.contains("icon_danger_path")) {
+                    sceneAsset->minimap.icon_danger_path = minimap["icon_danger_path"].get<std::string>();
+                }
+                if (minimap.contains("icon_item_path")) {
+                    sceneAsset->minimap.icon_item_path = minimap["icon_item_path"].get<std::string>();
+                }
+                if (minimap.contains("icon_objective_path")) {
+                    sceneAsset->minimap.icon_objective_path = minimap["icon_objective_path"].get<std::string>();
+                }
+                if (minimap.contains("icon_wall_path")) {
+                    sceneAsset->minimap.icon_wall_path = minimap["icon_wall_path"].get<std::string>();
+                }
+                if (minimap.contains("background_alpha")) {
+                    sceneAsset->minimap.background_alpha = minimap["background_alpha"].get<float>();
+                }
+                if (minimap.contains("border_thickness")) {
+                    sceneAsset->minimap.border_thickness = minimap["border_thickness"].get<float>();
+                }
+                if (minimap.contains("border_color") && minimap["border_color"].is_array() && minimap["border_color"].size() >= 4) {
+                    sceneAsset->minimap.border_color = glm::vec4(
+                        minimap["border_color"][0].get<float>(),
+                        minimap["border_color"][1].get<float>(),
+                        minimap["border_color"][2].get<float>(),
+                        minimap["border_color"][3].get<float>()
+                    );
+                }
+                if (minimap.contains("camera_height")) {
+                    sceneAsset->minimap.camera_height = minimap["camera_height"].get<float>();
+                }
+            }
+
             // Parse layers
             if (sceneJson.contains("layers") && sceneJson["layers"].is_array()) {
                 sceneAsset->layers.clear();

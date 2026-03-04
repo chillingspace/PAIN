@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "android_minimap_wall.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 15674507952799593472
+  },
+  "descriptor_version": 1,
+  "guid": "a09fa8a0-4c4c-5c4b-90d5-5521e2b8e3fd",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_minimap_wall.frag"
+  }
+}

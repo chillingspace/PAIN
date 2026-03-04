@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "minimap_wall.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 5464722535388632637
+  },
+  "descriptor_version": 1,
+  "guid": "131e4bc5-bd98-b143-8fdc-6ea0a3101c4d",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\minimap_wall.frag"
+  }
+}
