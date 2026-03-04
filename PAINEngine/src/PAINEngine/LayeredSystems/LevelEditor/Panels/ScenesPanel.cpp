@@ -991,8 +991,7 @@ namespace PAIN {
                         }
 
                         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.55f, 0.55f, 0.55f, 1.0f));
-                        ImGui::TextWrapped("Bar at (%.0f, %.0f)  —  Resolution: %.0f x %.0f",
-                            bp.x, bp.y, sw, sh);
+                        ImGui::TextWrapped("Bar at (%.0f, %.0f) - Resolution: %.0f x %.0f", bp.x, bp.y, sw, sh);
                         ImGui::PopStyleColor();
                     }
 
