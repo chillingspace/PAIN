@@ -1,8 +1,6 @@
-
 #ifdef _DEBUG
 #include "pch.h"
 #include "Command.h"
-
 
 namespace PAIN {
 	namespace Editor {
@@ -13,13 +11,12 @@ namespace PAIN {
 				return;
 			}
 
-			Action& action = undo_stack.top();
+			Action& action = undo_stack.back(); // back = top
 
 			if (!action.description.empty()) {
 				PN_CORE_INFO("Undoing: {}", action.description);
 			}
 
-			// RAII guard to ensure flag is reset
 			struct Guard {
 				bool& flag;
 				Guard(bool& f) : flag(f) { flag = true; }
@@ -36,10 +33,8 @@ namespace PAIN {
 			}
 #endif
 
-			redo_stack.push(std::move(action));
-			undo_stack.pop();
-
-			// Flag is automatically reset when guard goes out of scope
+			redo_stack.push_back(std::move(action)); // push to back = top
+			undo_stack.pop_back();                   // pop from back = top
 		}
 
 		void CommandManager::redo() {
@@ -48,13 +43,12 @@ namespace PAIN {
 				return;
 			}
 
-			Action& action = redo_stack.top();
+			Action& action = redo_stack.back(); // back = top
 
 			if (!action.description.empty()) {
 				PN_CORE_INFO("Redoing: {}", action.description);
 			}
 
-			// RAII guard to ensure flag is reset
 			struct Guard {
 				bool& flag;
 				Guard(bool& f) : flag(f) { flag = true; }
@@ -64,77 +58,50 @@ namespace PAIN {
 			action.do_action();
 
 #ifdef PN_PLATFORM_WINDOWS
-            if (services) {
+			if (services) {
 				if (auto ser = services->get<Serialization::Service>()) {
 					ser->modifyScene();
 				}
 			}
 #endif
 
-			undo_stack.push(std::move(action));
-			redo_stack.pop();
-
-			// Flag is automatically reset when guard goes out of scope
+			undo_stack.push_back(std::move(action)); // push to back = top
+			redo_stack.pop_back();                   // pop from back = top
 		}
 
-
-
 		void CommandManager::executeAction(Action&& action) {
-			// Log the action
 			if (!action.description.empty()) {
 				PN_CORE_INFO("Executing: {}", action.description);
 			}
 
-			// Execute action immediately
 			action.do_action();
 
 #ifdef PN_PLATFORM_WINDOWS
-            if (services) {
+			if (services) {
 				if (auto ser = services->get<Serialization::Service>()) {
 					ser->modifyScene();
 				}
 			}
 #endif
 
-			// Push executed action onto the undo action stack
-			undo_stack.push(std::move(action));
+			undo_stack.push_back(std::move(action)); // push to back = top
 
-			// Limit stack size to prevent memory overflow
+			// Enforce max stack size by dropping the oldest (front)
 			if (undo_stack.size() > max_stack_size) {
-				// Remove oldest action (bottom of stack)
-				std::stack<Action> temp_stack;
-				while (undo_stack.size() > 1) {
-					temp_stack.push(std::move(undo_stack.top()));
-					undo_stack.pop();
-				}
-				undo_stack.pop(); // Remove the oldest
-
-				while (!temp_stack.empty()) {
-					undo_stack.push(std::move(temp_stack.top()));
-					temp_stack.pop();
-				}
+				undo_stack.pop_front();
 			}
 
-			// Clear redo stack (reset upon new action)
-			while (!redo_stack.empty()) {
-				redo_stack.pop();
-			}
+			// Clear redo stack on new action
+			redo_stack.clear();
 		}
 
 		void CommandManager::clearStacks() {
 			PN_CORE_INFO("Clearing command history ({} undo, {} redo)",
 				undo_stack.size(), redo_stack.size());
-
-			// Clear redo stack
-			while (!redo_stack.empty()) {
-				redo_stack.pop();
-			}
-
-			// Clear undo stack
-			while (!undo_stack.empty()) {
-				undo_stack.pop();
-			}
+			undo_stack.clear();
+			redo_stack.clear();
 		}
+
 	}
 }
 #endif

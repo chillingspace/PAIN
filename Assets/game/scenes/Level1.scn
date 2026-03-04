@@ -144,10 +144,6 @@
         "active_game_cam": "Player",
         "aspectRatioH": 9.0,
         "aspectRatioW": 16.0,
-        "capsuleHeight": 1.7999999523162842,
-        "collisionEnabled": true,
-        "collisionOffset": 0.10000000149011612,
-        "collisionRadius": 0.5,
         "farPlane": 100.0,
         "forward": [
             -0.10140328109264374,
@@ -162,14 +158,12 @@
             -2.093564033508301
         ],
         "sensitivity": 0.10000000149011612,
-        "showCollisionGizmo": false,
         "speed": 31.100000381469727,
         "up": [
             0.0,
             1.0,
             0.0
-        ],
-        "useCapsuleCollision": false
+        ]
     },
     "ecs": {
         "Entities": [
@@ -11082,7 +11076,7 @@
                                         0.25,
                                         -0.15000000596046448
                                     ],
-                                    "texture_guid": "7fdfa6e4-cca0-6144-9aa0-9e18470ae75a",
+                                    "texture_guid": "b77039aa-0434-8241-88d1-912fecf7ccbe",
                                     "texture_scale": [
                                         0.20000000298023224,
                                         0.07999999821186066
@@ -11107,7 +11101,7 @@
                                 0.25,
                                 -0.15000000596046448
                             ],
-                            "texture_guid": "7fdfa6e4-cca0-6144-9aa0-9e18470ae75a",
+                            "texture_guid": "b77039aa-0434-8241-88d1-912fecf7ccbe",
                             "texture_scale": [
                                 0.20000000298023224,
                                 0.07999999821186066
@@ -11256,7 +11250,7 @@
                                         -0.3499999940395355,
                                         -0.15000000596046448
                                     ],
-                                    "texture_guid": "0b7423ec-97fe-dc4b-ae96-4aa5a9bed448",
+                                    "texture_guid": "33eb95de-2918-f546-98d7-6337bb88083f",
                                     "texture_scale": [
                                         0.20000000298023224,
                                         0.07999999821186066
@@ -11281,7 +11275,7 @@
                                 -0.3499999940395355,
                                 -0.15000000596046448
                             ],
-                            "texture_guid": "0b7423ec-97fe-dc4b-ae96-4aa5a9bed448",
+                            "texture_guid": "33eb95de-2918-f546-98d7-6337bb88083f",
                             "texture_scale": [
                                 0.20000000298023224,
                                 0.07999999821186066
@@ -11822,7 +11816,7 @@
                                         -0.07999999821186066,
                                         -0.4000000059604645
                                     ],
-                                    "texture_guid": "c3bf7110-7bea-8e4d-8ac3-e97081eee4a9",
+                                    "texture_guid": "b5e31ae4-5d04-e64d-8370-609d0b060a90",
                                     "texture_scale": [
                                         0.30000001192092896,
                                         0.10000000149011612
@@ -11915,7 +11909,7 @@
                                 -0.07999999821186066,
                                 -0.4000000059604645
                             ],
-                            "texture_guid": "c3bf7110-7bea-8e4d-8ac3-e97081eee4a9",
+                            "texture_guid": "b5e31ae4-5d04-e64d-8370-609d0b060a90",
                             "texture_scale": [
                                 0.30000001192092896,
                                 0.10000000149011612
@@ -12111,7 +12105,7 @@
                                         -0.05000000074505806,
                                         0.20000000298023224
                                     ],
-                                    "texture_guid": "6989da0a-a6d0-3448-a662-8eccc81f78b7",
+                                    "texture_guid": "fff544a7-09f9-c946-b707-89944788f9d6",
                                     "texture_scale": [
                                         0.44999998807907104,
                                         0.09000000357627869
@@ -12204,7 +12198,7 @@
                                 -0.05000000074505806,
                                 0.20000000298023224
                             ],
-                            "texture_guid": "6989da0a-a6d0-3448-a662-8eccc81f78b7",
+                            "texture_guid": "fff544a7-09f9-c946-b707-89944788f9d6",
                             "texture_scale": [
                                 0.44999998807907104,
                                 0.09000000357627869
@@ -12400,7 +12394,7 @@
                                         -0.05000000074505806,
                                         -0.10000000149011612
                                     ],
-                                    "texture_guid": "6d12a8ac-ad22-794c-a7e9-2fe32d9f6b57",
+                                    "texture_guid": "2f7e48db-385a-534f-badb-8cbc413f0201",
                                     "texture_scale": [
                                         0.4000000059604645,
                                         0.09000000357627869
@@ -12493,7 +12487,7 @@
                                 -0.05000000074505806,
                                 -0.10000000149011612
                             ],
-                            "texture_guid": "6d12a8ac-ad22-794c-a7e9-2fe32d9f6b57",
+                            "texture_guid": "2f7e48db-385a-534f-badb-8cbc413f0201",
                             "texture_scale": [
                                 0.4000000059604645,
                                 0.09000000357627869
@@ -25993,6 +25987,10 @@
                             "volumeDb": 0.0
                         },
                         "Camera": {
+                            "capsuleHeight": 1.7999999523162842,
+                            "collisionEnabled": false,
+                            "collisionOffset": 0.10000000149011612,
+                            "collisionRadius": 0.5,
                             "far_plane": 100.0,
                             "height_ratio": 9.0,
                             "near_plane": 0.10000000149011612,
@@ -26006,11 +26004,13 @@
                                 0.0,
                                 0.0
                             ],
+                            "showCollisionGizmo": false,
                             "trans_offset": [
                                 0.0,
                                 1.5,
                                 -3.0
                             ],
+                            "useCapsuleCollision": false,
                             "width_ratio": 16.0
                         },
                         "GUID": {

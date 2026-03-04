@@ -10,10 +10,6 @@
         "active_game_cam": "Cam",
         "aspectRatioH": 9.0,
         "aspectRatioW": 16.0,
-        "capsuleHeight": 1.7999999523162842,
-        "collisionEnabled": false,
-        "collisionOffset": 0.10000000149011612,
-        "collisionRadius": 0.5,
         "farPlane": 100.0,
         "forward": [
             0.4150110185146332,
@@ -28,14 +24,12 @@
             1.1484932899475098
         ],
         "sensitivity": 0.11999999731779099,
-        "showCollisionGizmo": false,
         "speed": 0.10000000149011612,
         "up": [
             0.0,
             1.0,
             0.0
-        ],
-        "useCapsuleCollision": false
+        ]
     },
     "ecs": {
         "Entities": [
@@ -260,7 +254,7 @@
                                 0.8799999952316284,
                                 0.0
                             ],
-                            "texture_guid": "5d5a177c-a015-344d-9b30-9cd9ada4c265",
+                            "texture_guid": "0e6ffec3-c31c-4f43-ac01-a1b4707d8bf8",
                             "texture_scale": [
                                 0.10000000149011612,
                                 0.10000000149011612
@@ -420,7 +414,7 @@
                                 -0.05000000074505806,
                                 -0.800000011920929
                             ],
-                            "texture_guid": "533c564c-c86b-d147-b38a-6cd5f982dbe0",
+                            "texture_guid": "2d8e7a6a-fa7e-e84a-b602-13bb753a0bae",
                             "texture_scale": [
                                 0.30000001192092896,
                                 0.10000000149011612
@@ -613,6 +607,10 @@
                 "Entity": {
                     "Components": {
                         "Camera": {
+                            "capsuleHeight": 1.7999999523162842,
+                            "collisionEnabled": false,
+                            "collisionOffset": 0.10000000149011612,
+                            "collisionRadius": 0.5,
                             "far_plane": 100.0,
                             "height_ratio": 9.0,
                             "near_plane": 0.10000000149011612,
@@ -626,11 +624,13 @@
                                 1.0,
                                 1.0
                             ],
+                            "showCollisionGizmo": false,
                             "trans_offset": [
                                 0.0,
                                 1.2999999523162842,
                                 0.10000000149011612
                             ],
+                            "useCapsuleCollision": false,
                             "width_ratio": 16.0
                         },
                         "GUID": {
@@ -1086,5 +1086,44 @@
             false,
             false
         ]
-    ]
+    ],
+    "minimap": {
+        "background_alpha": 0.5,
+        "border_color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+        ],
+        "border_thickness": 2.0,
+        "camera_height": 30.0,
+        "enabled": false,
+        "icon_danger_path": "",
+        "icon_item_path": "",
+        "icon_objective_path": "",
+        "icon_player_path": "",
+        "icon_scale": 1.0,
+        "icon_wall_path": "",
+        "override_position": false,
+        "pos_px": [
+            20.0,
+            20.0
+        ],
+        "radius": 15.0,
+        "recommended_position": 3,
+        "rotate_with_player": true,
+        "route_mode": 0,
+        "show_danger": true,
+        "show_items": true,
+        "show_legend": false,
+        "show_objective": true,
+        "show_player": true,
+        "show_route": true,
+        "show_walls": true,
+        "size_px": [
+            200.0,
+            200.0
+        ],
+        "use_icon_textures": false
+    }
 }
