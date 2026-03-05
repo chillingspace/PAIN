@@ -483,6 +483,7 @@ local function applyHideScale(entity, baseScale)
     setScale(entity, baseScale.x * f, baseScale.y * f, baseScale.z * f)
 end
 
+
 -------------------------------------------------
 -- Helper: Deliver carried letter
 -------------------------------------------------
@@ -531,22 +532,19 @@ local function handleHideToggle(px, py, pz)
         S.hidden = false
         S.hiddenIn = nil
 
-        -- Restore player scale
-        if S.playerBaseScale then
-            setScale(S.player, S.playerBaseScale.x, S.playerBaseScale.y, S.playerBaseScale.z)
+        -- Make the player visible again
+        setVisibility(S.player, true)
+
+        -- Make the carried letter visible again, if there is one
+        if S.carriedLetter then
+            setVisibility(S.carriedLetter, true)
         end
 
-        -- Restore letter scale
-        if S.carriedLetter and S.letterBaseScale then
-            setScale(S.carriedLetter, S.letterBaseScale.x, S.letterBaseScale.y, S.letterBaseScale.z)
-        end
-
-        resetInputState()
-        log("[PlayerState] Player left hiding spot")
         resetInputState()
         log("[PlayerState] Player left hiding spot")
         enablePhysics(S.player)
-        -- NEW: Play hide out sound at the box location
+        
+        -- Play hide out sound at the box location
         if S.hiddenIn then
             audioPlaySFXFromEntity(SFX_HIDE_OUT, S.hiddenIn, VOL_HIDE)
         end
@@ -559,36 +557,30 @@ local function handleHideToggle(px, py, pz)
             setPosition(S.player, bx, by, bz)
             setVelocity(S.player, 0.0, 0.0, 0.0)
             log("[PlayerState] SET VEL TO 0")
-            -- Cache and apply hide scale
-            if not S.playerBaseScale then
-                local sx, sy, sz = getScale(S.player)
-                S.playerBaseScale = { x = sx, y = sy, z = sz }
-            end
-
-            applyHideScale(S.player, S.playerBaseScale)
             
-            -- Also scale carried letter
+            -- Make the player invisible
+            setVisibility(S.player, false)
+            
+            -- Make the carried letter invisible
             if S.carriedLetter then
-                if not S.letterBaseScale then
-                    local lx, ly, lz = getScale(S.carriedLetter)
-                    S.letterBaseScale = { x = lx, y = ly, z = lz }
-                end
-                applyHideScale(S.carriedLetter, S.letterBaseScale)
+                setVisibility(S.carriedLetter, false)
             end
             
             resetInputState()
+            
+            -- Update state variables
             S.hidden = true
             S.hiddenIn = bestSpot
-            log("[PlayerState] Player is hiding in a box")
-            S.hidden = true
-            S.hiddenIn = bestSpot
+            
             log("[PlayerState] Player is hiding in a box")
             disablePhysics(S.player)
-            -- NEW: Play hide in sound at the box location
+            
+            -- Play hide in sound at the box location
             audioPlaySFXFromEntity(SFX_HIDE_IN, bestSpot, VOL_HIDE)
         end
     end
 end
+
 
 
 -------------------------------------------------

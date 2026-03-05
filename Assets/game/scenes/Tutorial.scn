@@ -10212,7 +10212,7 @@
                             ]
                         },
                         "UIButton": {
-                            "action": "None",
+                            "action": "goto_Pause",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
@@ -10342,7 +10342,7 @@
                             ]
                         },
                         "UIButton": {
-                            "action": "None",
+                            "action": "game_Move",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
@@ -10480,7 +10480,7 @@
                             ]
                         },
                         "UIButton": {
-                            "action": "None",
+                            "action": "game_Collect",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
@@ -10610,7 +10610,7 @@
                             ]
                         },
                         "UIButton": {
-                            "action": "None",
+                            "action": "game_Hide",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
@@ -10740,7 +10740,7 @@
                             ]
                         },
                         "UIButton": {
-                            "action": "None",
+                            "action": "game_Jump",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,

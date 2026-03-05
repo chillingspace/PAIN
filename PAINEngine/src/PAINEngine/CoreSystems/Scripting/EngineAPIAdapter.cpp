@@ -260,6 +260,7 @@ namespace PAIN {
     void EngineAPIAdapter::AddTag(entt::entity entityId, std::string tag) { meta_.addTag(entityId, tag); }
     void EngineAPIAdapter::RemoveTag(entt::entity entityId, std::string tag) { meta_.removeTag(entityId, tag); }
     bool EngineAPIAdapter::HasTag(entt::entity entityId, std::string tag) { return meta_.hasTag(entityId, tag); }
+
     /*void EngineAPIAdapter::AssignGroup(entt::entity entityId, std::string g) { meta_.assignToGroup(entityId, g); }
     void EngineAPIAdapter::UnassignGroup(entt::entity entityId) { meta_.unassignFromGroup(entityId); }
     std::optional<std::string> EngineAPIAdapter::GetGroup(entt::entity entityId) { return meta_.getEntityGroup(entityId); }*/
@@ -915,6 +916,14 @@ namespace PAIN {
         auto& reg = ecs_.getRegistry();
         if (!reg.all_of<Texture2D>(e)) return { 1.f, 1.f };
         return reg.get<Texture2D>(e).texture_scale;
+    }
+
+    void EngineAPIAdapter::SetVisibility(entt::entity entityId, bool visible)
+    {
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<PAIN::ModelRenderer>(entityId)) return;
+
+		reg.get<PAIN::ModelRenderer>(entityId).visible = visible;
     }
 
     /* =========================================================================== */
