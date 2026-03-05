@@ -548,7 +548,6 @@ namespace PAIN {
             return api_->GetEntitiesByTag(tag);
             });
 
-
         /* =========================================================================== */
         /*                                Transform                                    */
         /* =========================================================================== */
@@ -1262,6 +1261,7 @@ namespace PAIN {
         lua_.set_function("setUITextureScale", [this](entt::entity e, float x, float y) {
             api_->SetUITextureScale(e, { x, y });
             });
+        lua_.set_function("setVisibility", [this](entt::entity entityId, bool visible) { if (api_) api_->SetVisibility(entityId, visible); });
 
         /* =========================================================================== */
         /*                                  Lighting                                   */

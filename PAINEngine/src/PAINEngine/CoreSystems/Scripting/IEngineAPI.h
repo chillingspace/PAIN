@@ -64,6 +64,7 @@ namespace PAIN {
         virtual void UnassignGroup(entt::entity entityId) = 0;
         virtual std::optional<std::string> GetGroup(entt::entity entityId) = 0;*/
         virtual std::vector<entt::entity> GetEntitiesByTag(const std::string& tag) = 0;
+		virtual void SetVisibility(entt::entity entityId, bool visible) = 0;
 
         /* =========================================================================== */
         /*                                Transform                                    */

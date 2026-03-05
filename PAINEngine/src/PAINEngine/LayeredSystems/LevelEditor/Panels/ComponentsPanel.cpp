@@ -2124,10 +2124,14 @@ namespace PAIN {
 				}
 
 				// Checkbox
-				static bool checkbox = true;
+				auto metadata = services->get<MetaData::Service>();
+				bool isChecked = metadata->isVisible(selected);
+
 				ImGui::PushID("Chkbox");
-				if (ImGui::Checkbox("", &checkbox)) {
-					// logic for checkbox here
+
+				if (ImGui::Checkbox("", &isChecked)) {
+					// 3. Write the new state back to the metadata
+					metadata->setVisible(selected, isChecked);
 				}
 				ImGui::PopID();
 				ImGui::SameLine(0, 8);

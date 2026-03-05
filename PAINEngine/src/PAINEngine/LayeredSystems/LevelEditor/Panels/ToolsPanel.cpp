@@ -440,7 +440,7 @@ namespace PAIN {
 			void Tools::onAttach() {}
 
 			// ----------------------------------------------------------------
-			// onUpdate — menu bar + toolbar
+			// onUpdate - menu bar + toolbar
 			// ----------------------------------------------------------------
 			void Tools::onUpdate(AppTiming timing) {
 
@@ -563,7 +563,7 @@ namespace PAIN {
 						ImGui::EndMenu();
 					}
 
-					// FPS counter — right-aligned
+					// FPS counter - right-aligned
 					float fps = 1.0f / timing.dt;
 					float text_width = 150.0f;
 					ImGui::SetCursorPosX(ImGui::GetWindowWidth() - text_width);

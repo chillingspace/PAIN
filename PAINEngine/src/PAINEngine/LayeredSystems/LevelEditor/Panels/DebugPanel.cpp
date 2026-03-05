@@ -136,7 +136,7 @@ namespace PAIN {
 								ImGui::TextDisabled("  [Empty]");
 							}
 							else {
-								// Same — back-to-front so next redo is at the top
+								// Same - back-to-front so next redo is at the top
 								for (int i = (int)redoHistory.size() - 1; i >= 0; --i) {
 									const auto& action = redoHistory[i];
 									const std::string& desc = action.description.empty()
