@@ -548,6 +548,16 @@ namespace PAIN {
 		// PARTICLE RENDER PASS - GPU Instanced Rendering
 		// ============================================
 		void System::particlePass(entt::registry& registry) {
+			auto logParticleGLError = [](const char* stage) {
+				GLenum err = glGetError();
+				while (err != GL_NO_ERROR) {
+					PN_CORE_ERROR("ParticlePass GL error at {}: {}", stage, err);
+					err = glGetError();
+				}
+			};
+
+			while (glGetError() != GL_NO_ERROR) {}
+
 			auto rendererService = services.lock()->get<sRenderer>();
 			if (!rendererService || !rendererService->w_renderer)
 				return;
@@ -586,8 +596,15 @@ namespace PAIN {
 				return;
 
 			// Get or create particle shader
+			static std::shared_ptr<Assets::Shader> particleShader;
 			static GLuint particleProgram = 0;
 			static bool shaderLoaded = false;
+
+			if (shaderLoaded && (!particleShader || !glIsProgram(particleProgram))) {
+				shaderLoaded = false;
+				particleProgram = 0;
+				particleShader.reset();
+			}
 
 			if (!shaderLoaded) {
 				// Try to load particle shader - using same pattern as WindowsRenderer
@@ -599,14 +616,31 @@ namespace PAIN {
 					auto shaderOpt = assetManager->getAsset<Assets::Shader>("engine\\shaders\\android_particle.vert");
 #endif
 					if (shaderOpt.has_value()) {
-						particleProgram = shaderOpt.value()->GetRendererID();
+						particleShader = shaderOpt.value();
+						particleProgram = particleShader->GetRendererID();
 						shaderLoaded = true;
 					}
 				}
 			}
 
-			if (particleProgram == 0) {
+			GLint linkStatus = GL_FALSE;
+			if (particleProgram != 0 && glIsProgram(particleProgram)) {
+				glGetProgramiv(particleProgram, GL_LINK_STATUS, &linkStatus);
+			}
+
+			if (particleProgram == 0 || !glIsProgram(particleProgram) || linkStatus != GL_TRUE) {
+				if (particleProgram != 0 && glIsProgram(particleProgram)) {
+					GLint logLen = 0;
+					glGetProgramiv(particleProgram, GL_INFO_LOG_LENGTH, &logLen);
+					if (logLen > 1) {
+						std::string log(static_cast<size_t>(logLen), '\0');
+						GLsizei written = 0;
+						glGetProgramInfoLog(particleProgram, logLen, &written, log.data());
+						PN_CORE_ERROR("ParticlePass shader link log: {}", log);
+					}
+				}
 				// Shader not loaded yet - skip rendering
+				PN_CORE_ERROR("ParticlePass shader program invalid/unlinked: {}", particleProgram);
 				return;
 			}
 
@@ -620,7 +654,7 @@ namespace PAIN {
 				-0.5f,  0.5f, 0.0f,  0.0f, 1.0f
 			};
 
-			static const unsigned int quadIndices[] = {
+			static const unsigned short quadIndices[] = {
 				0, 1, 2,
 				2, 3, 0
 			};
@@ -688,6 +722,7 @@ namespace PAIN {
 				glVertexAttribDivisor(5, 1); // Advance once per instance
 
 				glBindVertexArray(0);
+				logParticleGLError("init vao/vbo/ibo");
 			}
 
 			// Set up GL state for particles
@@ -699,16 +734,21 @@ namespace PAIN {
 			glEnable(GL_BLEND);
 			glDepthMask(GL_FALSE); // Particles don't write to depth buffer
 			glDisable(GL_CULL_FACE); // Billboard particles face camera
+			logParticleGLError("set blend/depth/cull state");
 
 			// Use particle shader
 			glUseProgram(particleProgram);
+			logParticleGLError("use program");
 			glUniform1i(glGetUniformLocation(particleProgram, "tex"), 0);
+			logParticleGLError("set tex uniform");
 
 			// Set view and projection matrices
 			glUniformMatrix4fv(glGetUniformLocation(particleProgram, "u_V"), 1, GL_FALSE, &activeCam->view()[0][0]);
 			glUniformMatrix4fv(glGetUniformLocation(particleProgram, "u_P"), 1, GL_FALSE, &activeCam->projection()[0][0]);
+			logParticleGLError("set VP uniforms");
 
 			glBindVertexArray(quadVAO);
+			logParticleGLError("bind particle vao");
 
 			std::vector<float> instanceData;
 			instanceData.reserve(2048);
@@ -773,8 +813,26 @@ namespace PAIN {
 
 				if (instanceCount > instanceCapacity) {
 					instanceCapacity = instanceCount;
+					glBindVertexArray(quadVAO);
 					glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
 					glBufferData(GL_ARRAY_BUFFER, instanceCapacity * sizeof(float) * 9, nullptr, GL_STREAM_DRAW);
+
+					glEnableVertexAttribArray(2);
+					glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)0);
+					glVertexAttribDivisor(2, 1);
+
+					glEnableVertexAttribArray(3);
+					glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float)));
+					glVertexAttribDivisor(3, 1);
+
+					glEnableVertexAttribArray(4);
+					glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(7 * sizeof(float)));
+					glVertexAttribDivisor(4, 1);
+
+					glEnableVertexAttribArray(5);
+					glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(8 * sizeof(float)));
+					glVertexAttribDivisor(5, 1);
+					logParticleGLError("realloc instance buffer + rebind attribs");
 				}
 
 				GLuint particleTextureId = 0;
@@ -804,15 +862,19 @@ namespace PAIN {
 				glUniform1i(glGetUniformLocation(particleProgram, "u_UseTexture"), particleTextureId != 0 ? 1 : 0);
 				glUniform1i(glGetUniformLocation(particleProgram, "u_Shape"), static_cast<int>(ps.renderShape));
 				glUniform1f(glGetUniformLocation(particleProgram, "u_SoftEdge"), glm::clamp(ps.softEdge, 0.0f, 1.0f));
+				logParticleGLError("set particle uniforms");
 
 				glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
 				glBufferSubData(GL_ARRAY_BUFFER, 0, instanceData.size() * sizeof(float), instanceData.data());
-				glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, static_cast<GLsizei>(instanceCount));
+				logParticleGLError("upload instance data");
+				glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0, static_cast<GLsizei>(instanceCount));
+				logParticleGLError("draw instanced particles");
 			}
 
 			glBindTexture(GL_TEXTURE_2D, 0);
 			glBindVertexArray(0);
 			glUseProgram(0);
+			logParticleGLError("cleanup bindings");
 
 			// Restore GL state
 			glDepthMask(previousDepthMask);
@@ -824,6 +886,7 @@ namespace PAIN {
 				glEnable(GL_CULL_FACE);
 			else
 				glDisable(GL_CULL_FACE);
+			logParticleGLError("restore state");
 		}
 
 		void System::debugPass(entt::registry& registry, int debug_mode) {

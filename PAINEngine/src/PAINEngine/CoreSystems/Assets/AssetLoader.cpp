@@ -854,8 +854,8 @@ namespace PAIN {
 #else
                 PN_CORE_ERROR("Shader Compilation Failed ({0}): {1}", type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT", infoLog);
 #endif
-
-                assert(false);
+				glDeleteShader(shader);
+				return 0;
             }
 
             return shader;
@@ -864,6 +864,11 @@ namespace PAIN {
 
         uint32_t Loader::LinkProgram(unsigned int vert_shader, unsigned int frag_shader) const
         {
+			if (vert_shader == 0 || frag_shader == 0) {
+				PN_CORE_ERROR("Program link skipped due to invalid shader handles. vert={}, frag={}", vert_shader, frag_shader);
+				return 0;
+			}
+
             GLuint program = glCreateProgram();
             glAttachShader(program, vert_shader);
             glAttachShader(program, frag_shader);

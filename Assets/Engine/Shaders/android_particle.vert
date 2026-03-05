@@ -1,7 +1,6 @@
-// android_particle.vert
-
 #version 300 es
 precision highp float;
+precision highp int;
 
 // Per-vertex input (quad vertices)
 layout(location = 0) in vec3 aPos;
