@@ -66,12 +66,11 @@ android {
         create("release") {
             val storeFilePath = keystoreProperties["storeFile"] as String?
             if (!storeFilePath.isNullOrBlank()) {
-                // Use rootProject.file() to resolve from android/ folder
                 storeFile = rootProject.file(storeFilePath)
+                storePassword = keystoreProperties["storePassword"] as String?
+                keyAlias = keystoreProperties["keyAlias"] as String?
+                keyPassword = keystoreProperties["keyPassword"] as String?
             }
-            storePassword = keystoreProperties["storePassword"] as String?
-            keyAlias = keystoreProperties["keyAlias"] as String?
-            keyPassword = keystoreProperties["keyPassword"] as String?
         }
     }
 
@@ -108,7 +107,15 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("release")
+
+            // ONLY apply signing if storeFile was actually set
+            if (signingConfigs.getByName("release").storeFile != null) {
+                signingConfig = signingConfigs.getByName("release")
+            } else {
+                // Fallback to debug signing for CI/Testing if release keys are missing
+                signingConfig = signingConfigs.getByName("debug")
+            }
+
             
             // Production app name
             manifestPlaceholders["appName"] = "Ribbit Express"
