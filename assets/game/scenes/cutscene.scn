@@ -244,11 +244,11 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": "None",
+                            "action": "LoadScene",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "payload": "",
+                            "payload": "game/scenes/mainmenu.scn",
                             "pressed_color": -5592406,
                             "state": "Normal"
                         },
@@ -404,7 +404,7 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": "None",
+                            "action": "mainmenu_Quit_Cancel",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
@@ -719,11 +719,11 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": "None",
+                            "action": "LoadScene",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "payload": "",
+                            "payload": "game/scenes/mainmenu.scn",
                             "pressed_color": -5592406,
                             "state": "Normal"
                         },
@@ -1039,11 +1039,11 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": "None",
+                            "action": "LoadScene",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "payload": "",
+                            "payload": "game/scenes/Tutorial.scn",
                             "pressed_color": -5592406,
                             "state": "Normal"
                         },
