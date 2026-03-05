@@ -57,6 +57,52 @@ namespace PAIN {
         return localAABB;
     }
 
+    AABB sBVHSystem::calculateSkinnedLocalAABB(const std::shared_ptr<Assets::Model>& model, const std::vector<glm::mat4>& boneTransforms) {
+        AABB localAABB;
+        if (!model || model->vertices.empty()) {
+            localAABB.min = glm::vec3(-0.01f);
+            localAABB.max = glm::vec3(0.01f);
+            return localAABB;
+        }
+
+        const float minWeight = 1e-6f;
+
+        for (const auto& vertex : model->vertices) {
+            glm::vec3 skinnedPos(0.0f);
+            float totalWeight = 0.0f;
+
+            for (int i = 0; i < 4; ++i) {
+                const int boneIndex = vertex.boneIndices[i];
+                const float weight = vertex.boneWeights[i];
+
+                if (weight <= minWeight || boneIndex < 0 || boneIndex >= static_cast<int>(boneTransforms.size())) {
+                    continue;
+                }
+
+                const glm::vec4 transformed = boneTransforms[boneIndex] * glm::vec4(vertex.pos, 1.0f);
+                skinnedPos += glm::vec3(transformed) * weight;
+                totalWeight += weight;
+            }
+
+            if (totalWeight > minWeight) {
+                skinnedPos /= totalWeight;
+            }
+            else {
+                skinnedPos = vertex.pos;
+            }
+
+            localAABB.expand(skinnedPos);
+        }
+
+        glm::vec3 extents = localAABB.getExtents();
+        const float minExtent = 0.01f;
+        if (extents.x < minExtent) { localAABB.min.x -= minExtent; localAABB.max.x += minExtent; }
+        if (extents.y < minExtent) { localAABB.min.y -= minExtent; localAABB.max.y += minExtent; }
+        if (extents.z < minExtent) { localAABB.min.z -= minExtent; localAABB.max.z += minExtent; }
+
+        return localAABB;
+    }
+
     // CoreSystems/BVH/sBVHSystem.cpp
 
     std::vector<entt::entity> sBVHSystem::queryAABB(
@@ -459,6 +505,25 @@ namespace PAIN {
 
             // Update AABB if transform dirty 
             if (bvComponent.needsUpdate) {
+
+                if (auto* modelRenderer = registry.try_get<ModelRenderer>(entity)) {
+                    std::shared_ptr<Assets::Model> modelForBounds;
+
+                    if (modelRenderer->cachedModelAsset) {
+                        modelForBounds = std::const_pointer_cast<Assets::Model>(modelRenderer->cachedModelAsset);
+                    }
+                    else if (modelRenderer->modelGUID.IsValid()) {
+                        auto modelOpt = getServices()->get<Assets::Manager>()->getAsset<Assets::Model>(modelRenderer->modelGUID);
+                        if (modelOpt.has_value()) {
+                            modelForBounds = modelOpt.value();
+                        }
+                    }
+
+                    if (modelForBounds && !modelRenderer->boneTransforms.empty()) {
+                        bvComponent.localAABB = calculateSkinnedLocalAABB(modelForBounds, modelRenderer->boneTransforms);
+                    }
+                }
+
                 // Calculate new aabb if is dirty
                 AABB oldAABB = bvComponent.worldAABB;
                 AABB newWorldAABB = bvComponent.localAABB.transform(transform.matrix);
