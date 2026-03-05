@@ -105,11 +105,14 @@ registerUpdate(function(dt)
     if inCone then
         if not seeingPlayer then
             seeingPlayer = true
-            _G.EnemyFrozen[enemy] = true 
+            _G.EnemyFrozen[enemy] = true
             if DetectionUI and DetectionUI.begin then
                 DetectionUI.begin(enemy)
             end
             setLightIntensity(enemy, ALERT_COLOR.r, ALERT_COLOR.g, ALERT_COLOR.b)
+        elseif DetectionUI and not DetectionUI.active then
+            _G.EnemyFrozen[enemy] = true
+            if DetectionUI.begin then DetectionUI.begin(enemy) end
         end
     else
         if seeingPlayer then

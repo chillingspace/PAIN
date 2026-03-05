@@ -95,6 +95,7 @@ end
 function ui.begin(enemyEntity)
     if ui.active then
         ui.sourceEnemy = enemyEntity
+        ui.isDetected  = true
         return
     end
 
