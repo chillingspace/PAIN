@@ -803,6 +803,10 @@ function S.update(dt)
             -- Stop Game Over loop BEFORE changeScene (script reload would lose the channel ID)
             S.stopGameOverAudio()
 
+            -- Stop all tracked looping SFX (direct changeScene bypasses fadeOutAllTracks)
+            if _G.GlobalAudio and _G.GlobalAudio.stopAllSFXChannels then
+                _G.GlobalAudio.stopAllSFXChannels()
+            end
             if S.gameWon then 
                 -- Player win, go to next level
                 changeScene(NEXT_SCENE_PATH)
