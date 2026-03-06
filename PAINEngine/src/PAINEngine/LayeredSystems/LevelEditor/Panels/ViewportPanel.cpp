@@ -190,6 +190,8 @@ namespace PAIN {
 					ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
 					ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
 					ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground;
+
+				memset(camera_bookmarks, 0, sizeof(camera_bookmarks));
 			}
 
 			void ViewportPanel::nextWindowSettings() {
@@ -403,7 +405,8 @@ namespace PAIN {
 
 
 			entt::entity ViewportPanel::findEntityAtMousePos(ImVec2 localMousePos, ImVec2 viewportSize) {
-				auto scene = services->get<Scene::SceneManager>();
+				auto scene = services->get<Scene::SceneManager>();;
+
 				auto ecs = services->get<ECS::Controller>();
 				auto bvhSystem = ecs->getSystem<sBVHSystem>();
 
@@ -565,6 +568,12 @@ namespace PAIN {
 					auto scene = services->get<Scene::SceneManager>();
 					auto ecs = services->get<ECS::Controller>();
 
+					// Clear camera bookmarks when scene changes
+					auto ser = services->get<Serialization::Service>();
+					if (ser && ser->consumeSceneChanged()) {
+						memset(camera_bookmarks, 0, sizeof(camera_bookmarks));
+					}
+
 					// Toolbar
 					ImGui::BeginChild("##ViewportToolbar", ImVec2(0, 30), true, ImGuiWindowFlags_NoScrollbar);
 					{
@@ -594,6 +603,50 @@ namespace PAIN {
 						ImGui::SameLine();
 						if (ImGui::RadioButton("Local", m_GizmoMode == ImGuizmo::LOCAL))
 							m_GizmoMode = ImGuizmo::LOCAL;
+
+						ImGui::SameLine();
+						ImGui::Spacing();
+						ImGui::SameLine();
+						ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
+						ImGui::Text("Cam:");
+						ImGui::PopStyleColor();
+						for (int i = 0; i < 5; ++i) {
+							ImGui::SameLine(0, 2);
+							if (camera_bookmarks[i].occupied) {
+								ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.55f, 1.0f, 0.8f));
+								ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.7f, 1.0f, 1.0f));
+							}
+							else {
+								ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.2f, 0.2f, 0.5f));
+								ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.3f, 0.3f, 0.8f));
+							}
+							std::string label = std::to_string(i + 1) + "##bm";
+							if (ImGui::SmallButton(label.c_str())) {
+								// Left click = recall
+								if (camera_bookmarks[i].occupied) {
+									auto cam = scene->GetActiveCamera();
+									if (cam) {
+										cam->pos = camera_bookmarks[i].pos;
+										cam->forward = camera_bookmarks[i].forward;
+										cam->up = camera_bookmarks[i].up;
+									}
+								}
+							}
+							if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+								// Right click = save
+								auto cam = scene->GetActiveCamera();
+								if (cam) {
+									camera_bookmarks[i] = { cam->pos, cam->forward, cam->up, true };
+								}
+							}
+							if (ImGui::IsItemHovered()) {
+								if (camera_bookmarks[i].occupied)
+									ImGui::SetTooltip("Slot %d: Left click to jump\nRight click to overwrite\nCtrl+%d to save, %d to recall", i + 1, i + 1, i + 1);
+								else
+									ImGui::SetTooltip("Slot %d: Empty\nRight click or Ctrl+%d to save", i + 1, i + 1);
+							}
+							ImGui::PopStyleColor(2);
+						}
 
 #ifdef PN_PLATFORM_WINDOWS
 
@@ -760,6 +813,32 @@ namespace PAIN {
 								PN_CORE_INFO("NO ENTITY TO FOCUS ON");
 							}
 
+						}
+
+						
+						if (!ImGui::GetIO().WantTextInput) {
+							for (int i = 0; i < 5; ++i) {
+								if (ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed((ImGuiKey)(ImGuiKey_1 + i), false)) {
+									// Ctrl+1-5 = save
+									auto cam = scene->GetActiveCamera();
+									if (cam) {
+										camera_bookmarks[i] = { cam->pos, cam->forward, cam->up, true };
+										PN_CORE_INFO("[Viewport] Saved camera bookmark {}", i + 1);
+									}
+								}
+								else if (!ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed((ImGuiKey)(ImGuiKey_1 + i), false)) {
+									// 1-5 = recall
+									if (camera_bookmarks[i].occupied) {
+										auto cam = scene->GetActiveCamera();
+										if (cam) {
+											cam->pos = camera_bookmarks[i].pos;
+											cam->forward = camera_bookmarks[i].forward;
+											cam->up = camera_bookmarks[i].up;
+											PN_CORE_INFO("[Viewport] Recalled camera bookmark {}", i + 1);
+										}
+									}
+								}
+							}
 						}
 
 					}

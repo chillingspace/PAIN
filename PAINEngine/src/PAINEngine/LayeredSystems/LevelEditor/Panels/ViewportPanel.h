@@ -87,6 +87,15 @@ namespace PAIN {
                 void handleMaterialDrop(File* materialFile,
                     ImVec2 localMousePos,
                     ImVec2 viewportSize);
+
+                // Camera bookmarks
+                struct CameraBookmark {
+                    glm::vec3 pos;
+                    glm::vec3 forward;
+                    glm::vec3 up;
+                    bool occupied = false;
+                };
+                CameraBookmark camera_bookmarks[5];
             };
 
         } // namespace Panel
