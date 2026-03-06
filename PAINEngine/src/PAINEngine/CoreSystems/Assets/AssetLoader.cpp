@@ -1164,6 +1164,19 @@ namespace PAIN {
                 if (cam.contains("showCollisionGizmo")) {
                     sceneAsset->camera.showCollisionGizmo = cam["showCollisionGizmo"].get<bool>();
                 }
+
+                // Parse camera bookmarks
+                if (auto bmIt = cam.find("bookmarks"); bmIt != cam.end() && bmIt->is_array()) {
+                    int i = 0;
+                    for (const auto& bm : *bmIt) {
+                        if (i >= 5) break;
+                        auto& b = sceneAsset->cameraBookmarks[i++];
+                        b.occupied = bm.value("occupied", false);
+                        b.pos = { bm["pos"][0],     bm["pos"][1],     bm["pos"][2] };
+                        b.forward = { bm["forward"][0], bm["forward"][1], bm["forward"][2] };
+                        b.up = { bm["up"][0],      bm["up"][1],      bm["up"][2] };
+                    }
+                }
             }
 
             // Parse environment settings

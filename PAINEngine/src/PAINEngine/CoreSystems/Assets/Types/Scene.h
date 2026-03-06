@@ -21,6 +21,13 @@ namespace PAIN {
 
         };
 
+        struct CameraBookmark {
+            glm::vec3 pos = {};
+            glm::vec3 forward = {};
+            glm::vec3 up = {};
+            bool occupied = false;
+        };
+
         struct SceneAsset : public Assets::IAsset {
 
             //Default camera settings
@@ -46,6 +53,9 @@ namespace PAIN {
                 bool useCapsuleCollision = false;
                 bool showCollisionGizmo = false;
             } camera;
+
+            // Camera bookmarks (editor only)
+            std::array<CameraBookmark, 5> cameraBookmarks = {};
 
             //Floor settings
             struct FloorSettings {

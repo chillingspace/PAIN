@@ -30,6 +30,8 @@ namespace PAIN {
             std::unordered_set<std::string> active_cameras;
             std::string active_game_cam;
 
+            std::array<CameraBookmark, 5> m_cameraBookmarks = {};
+
             /* =========================================================================== */
             /*                                SCENES                                       */
             /* =========================================================================== */
@@ -132,6 +134,12 @@ namespace PAIN {
             void ChangeGameCamera(std::string cam_name);
             const std::string& GetActiveGameCamera();
             const std::unordered_map<std::string, std::unique_ptr<Camera>>& GetAllGameCamera() const;
+
+            // Camera bookmarks
+            CameraBookmark& getCameraBookmark(int i) { return m_cameraBookmarks[i]; }
+            const std::array<CameraBookmark, 5>& getCameraBookmarks() const { return m_cameraBookmarks; }
+            void setCameraBookmark(int i, const CameraBookmark& bm) { m_cameraBookmarks[i] = bm; }
+            void clearCameraBookmarks() { m_cameraBookmarks = {}; }
 
             /* =========================================================================== */
             /*                                SCENES                                       */

@@ -318,6 +318,8 @@ namespace PAIN {
 			PN_CORE_ERROR("[SceneManager] Camera setup: pos({}, {}, {}), fov={} , speed={}, sens={}",
 				camSettings.position.x, camSettings.position.y, camSettings.position.z,
 				camSettings.fov, camSettings.speed, camSettings.sensitivity);
+
+			m_cameraBookmarks = scene_asset.cameraBookmarks;
 		}
 
 		void SceneManager::setupEnvironment(SceneAsset const& scene_asset) {
@@ -873,6 +875,9 @@ namespace PAIN {
 			scene_asset.minimap.border_thickness = gs.minimap_border_thickness;
 			scene_asset.minimap.border_color = gs.minimap_border_color;
 			scene_asset.minimap.camera_height = gs.minimap_camera_height;
+
+			// camera bookmark
+			scene_asset.cameraBookmarks = m_cameraBookmarks;
 		}
 
 		nlohmann::json SceneManager::convertSceneToJSON(SceneAsset& scn_asset) {
@@ -991,6 +996,17 @@ namespace PAIN {
 
 			// Entity data
 			sceneJson["ecs"] = scn_asset.entityData;
+
+			nlohmann::json bookmarksJson = nlohmann::json::array();
+			for (const auto& bm : scn_asset.cameraBookmarks) {
+				bookmarksJson.push_back({
+					{"occupied", bm.occupied},
+					{"pos",     {bm.pos.x,     bm.pos.y,     bm.pos.z}},
+					{"forward", {bm.forward.x, bm.forward.y, bm.forward.z}},
+					{"up",      {bm.up.x,      bm.up.y,      bm.up.z}}
+					});
+			}
+			sceneJson["camera"]["bookmarks"] = bookmarksJson;
 
 			return sceneJson;
 		}
@@ -1734,6 +1750,8 @@ namespace PAIN {
 			
 			// Clear scene asset reference (but keep the object if we're reloading)
 			// currentSceneAsset.reset();
+
+			m_cameraBookmarks = {};
 		}
 
 		void SceneManager::onPlay()
