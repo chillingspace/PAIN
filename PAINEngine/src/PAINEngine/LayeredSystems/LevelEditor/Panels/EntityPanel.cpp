@@ -29,6 +29,18 @@ namespace PAIN {
 #define PN_ECS_SERVICE services->get<ECS::Controller>()
 #define PN_SERI_SERVICE services->get<Serialization::Service>()
 
+            static const ImU32 DEPTH_LINE_COLORS[] = {
+            IM_COL32(86,  156, 214, 180),  // blue
+            IM_COL32(78,  201, 176, 180),  // teal
+            IM_COL32(181, 206, 168, 180),  // green
+            IM_COL32(220, 220, 170, 180),  // yellow
+            IM_COL32(206, 145, 120, 180),  // orange
+            IM_COL32(197, 134, 192, 180),  // purple
+            };
+            static constexpr int DEPTH_LINE_COLOR_COUNT = 6;
+
+            static int row_counter = 0;
+
             EntityPanel::EntityPanel() {
                 name = "Entity Panel";
                 flags = ImGuiWindowFlags_None;
@@ -333,15 +345,12 @@ namespace PAIN {
                 // Auto-add required components to all entities
                 auto view_all = registry.view<Entity::Name>();
                 for (auto entity : view_all) {
-                    if (!registry.all_of<Entity::Hierarchy>(entity)) {
+                    if (!registry.all_of<Entity::Hierarchy>(entity))
                         ecs->addEntityComponent(entity, Entity::Hierarchy{}, currentRegistryID);
-                    }
-                    if (!registry.all_of<LocalTransform>(entity)) {
+                    if (!registry.all_of<LocalTransform>(entity))
                         ecs->addEntityComponent(entity, LocalTransform{}, currentRegistryID);
-                    }
-                    if (!registry.all_of<WorldTransform>(entity)) {
+                    if (!registry.all_of<WorldTransform>(entity))
                         ecs->addEntityComponent(entity, WorldTransform{}, currentRegistryID);
-                    }
                 }
 
                 // Detect scene changes
@@ -363,65 +372,74 @@ namespace PAIN {
 
                     auto view = registry.view<Entity::Name>();
                     for (auto entity : view) {
-                        auto& name_comp = view.get<Entity::Name>(entity);
-                        editor_entities.push_back({ entity, name_comp.name });
+                        editor_entities.push_back({ entity, view.get<Entity::Name>(entity).name });
                     }
                 }
 
-                // Begin ImGui window
+                // ---- Window ----
                 ImGui::Begin(name.c_str());
                 dock_id = ImGui::GetWindowDockID();
+
+                // ---- Header: entity count + search on one line ----
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.55f, 0.55f, 0.55f, 1.0f));
+                ImGui::Text("%d entities", total_entities);
+                ImGui::PopStyleColor();
+                ImGui::SameLine();
+                ImGui::SetNextItemWidth(-1);
+                ImGui::InputTextWithHint("##EntitySearch", "Search...", search_buffer, sizeof(search_buffer));
+
                 ImGui::Spacing();
 
-                ImGui::Text("Number of entities in level: %d", total_entities);
-                ImGui::Spacing();
-                ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "Drag entities to group them");
-                ImGui::Spacing();
+                // ---- Utility buttons ----
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.55f, 0.55f, 0.55f, 1.0f));
 
-                if (ImGui::Checkbox("Sort A-Z", &sort_alphabetically)) {
+                if (ImGui::SmallButton(sort_alphabetically ? "A-Z [on]" : "A-Z")) {
+                    sort_alphabetically = !sort_alphabetically;
                     force_refresh = true;
                 }
-                if (ImGui::Button("Normalize Sibling Indices")) {
-                    std::function<void(entt::entity)> recursiveNormalize = [&](entt::entity parent) {
-                        // 1. Get children of this parent
-                        std::vector<entt::entity> children = getEntityChildren(parent);
+                if (ImGui::IsItemHovered())
+                    ImGui::SetTooltip(sort_alphabetically ? "Sorting A-Z (click to disable)" : "Sort A-Z");
 
-                        // 2. Use your helper function to sort & fix indices
-                        normalizeSiblings(children);
-
-                        // 3. Recurse down
-                        for (auto child : children) {
-                            recursiveNormalize(child);
-                        }
-                    };
-
-                    std::vector<entt::entity> roots = getRootEntities();
+                ImGui::SameLine();
+                if (ImGui::SmallButton("Fix Order")) {
+                    std::function<void(entt::entity)> rec = [&](entt::entity parent) {
+                        auto ch = getEntityChildren(parent);
+                        normalizeSiblings(ch);
+                        for (auto c : ch) rec(c);
+                        };
+                    auto roots = getRootEntities();
                     normalizeSiblings(roots);
-
-                    for (auto root : roots) {
-                        recursiveNormalize(root);
-                    }
-
+                    for (auto r : roots) rec(r);
                     PN_CORE_INFO("Sibling indices normalized!");
                     force_refresh = true;
                 }
-                ImGui::Spacing();
-                
-                // Search bar
-                ImGui::Text("Search:");
-                ImGui::SameLine();
-                ImGui::SetNextItemWidth(-1);
-                if (ImGui::InputText("##EntitySearch", search_buffer, sizeof(search_buffer))) {
-                    // Search changed - will filter on next frame
-                }
-                ImGui::Spacing();
-                ImGui::Separator();
-                ImGui::Spacing();
+                if (ImGui::IsItemHovered()) ImGui::SetTooltip("Normalize sibling indices");
 
-                // Get root entities
+                ImGui::SameLine();
+                if (ImGui::SmallButton("Expand All"))
+                    collapsed_groups.clear();
+
+                ImGui::SameLine();
+                if (ImGui::SmallButton("Collapse All")) {
+                    std::function<void(entt::entity)> collapseAll = [&](entt::entity e) {
+                        auto ch = getEntityChildren(e);
+                        if (!ch.empty()) {
+                            collapsed_groups.insert(e);
+                            for (auto c : ch) collapseAll(c);
+                        }
+                        };
+                    for (auto r : getRootEntities()) collapseAll(r);
+                }
+
+                ImGui::PopStyleColor();
+                ImGui::Separator();
+
+                // ---- Entity hierarchy ----
+                std::string search_filter = search_buffer;
+                std::transform(search_filter.begin(), search_filter.end(), search_filter.begin(), ::tolower);
+
                 std::vector<entt::entity> root_entities = getRootEntities();
 
-                // Sort if enabled
                 if (sort_alphabetically) {
                     std::sort(root_entities.begin(), root_entities.end(), [&](entt::entity a, entt::entity b) {
                         return getEntityName(a) < getEntityName(b);
@@ -433,44 +451,30 @@ namespace PAIN {
                         auto hB = ecs->getEntityComponent<Entity::Hierarchy>(b);
                         int idxA = hA ? hA->get().siblingIndex : 0;
                         int idxB = hB ? hB->get().siblingIndex : 0;
-
                         return idxA < idxB;
                         });
                 }
 
-                // Get search filter (convert to lowercase for case-insensitive search)
-                std::string search_filter = search_buffer;
-                std::transform(search_filter.begin(), search_filter.end(), search_filter.begin(), ::tolower);
+                row_counter = 0;
 
-                // Render hierarchy (filter if search is active)
                 for (auto entity : root_entities) {
-                    if (search_filter.empty()) {
+                    if (search_filter.empty() || entityMatchesSearch(entity, search_filter))
                         drawEntityHierarchy(entity, 0, search_filter);
-                    } else {
-                        // Check if this entity or any of its children match the search
-                        if (entityMatchesSearch(entity, search_filter)) {
-                            drawEntityHierarchy(entity, 0, search_filter);
-                        }
-                    }
                 }
 
+                // ---- Footer ----
                 ImGui::Spacing();
                 ImGui::Separator();
+                ImGui::Spacing();
 
-                if (ImGui::Button("Add Entity", ImVec2(-1, 0))) {
+                if (ImGui::Button("Add Entity", ImVec2(-1, 0)))
                     openPopUp("Create Entity");
-                }
 
-                // Show ungroup button for entities with children
                 if (ecs->checkEntity(selected_entity, currentRegistryID)) {
-                    std::vector<entt::entity> children = getEntityChildren(selected_entity);
-                    if (!children.empty()) {
+                    if (!getEntityChildren(selected_entity).empty()) {
                         ImGui::Spacing();
-                        ImGui::Separator();
-                        ImGui::Spacing();
-                        if (ImGui::Button("Ungroup Children", ImVec2(-1, 0))) {
+                        if (ImGui::Button("Ungroup Children", ImVec2(-1, 0)))
                             ungroupEntity(selected_entity);
-                        }
                     }
                 }
 
@@ -485,270 +489,241 @@ namespace PAIN {
 
             void EntityPanel::drawEntityHierarchy(entt::entity entity, int depth, const std::string& search_filter) {
                 auto ecs = PN_ECS_SERVICE;
-
                 if (!ecs->checkEntity(entity, currentRegistryID)) return;
 
                 std::string entity_name = getEntityName(entity);
                 bool is_selected = (selected_entity == entity);
-                std::vector<entt::entity> children = getEntityChildren(entity);
+                auto children = getEntityChildren(entity);
                 bool has_children = !children.empty();
 
+                // Sort children
                 if (!sort_alphabetically) {
                     std::sort(children.begin(), children.end(), [&](entt::entity a, entt::entity b) {
                         auto hA = ecs->getEntityComponent<Entity::Hierarchy>(a, currentRegistryID);
                         auto hB = ecs->getEntityComponent<Entity::Hierarchy>(b, currentRegistryID);
-                        int idxA = hA ? hA->get().siblingIndex : 0;
-                        int idxB = hB ? hB->get().siblingIndex : 0;
-                        return idxA < idxB;
+                        return (hA ? hA->get().siblingIndex : 0) < (hB ? hB->get().siblingIndex : 0);
                         });
                 }
-                // Check if this entity matches the search filter
-                std::string entity_name_lower = entity_name;
-                std::transform(entity_name_lower.begin(), entity_name_lower.end(), entity_name_lower.begin(), ::tolower);
-                bool matches_search = search_filter.empty() || entity_name_lower.rfind(search_filter, 0) == 0;
 
-                // Check if entity is a prefab instance
-                bool is_prefab_instance = services->get<ECS::Controller>()->getRegistry(currentRegistryID).any_of<Prefab::PrefabInstance>(entity);
-                
-                // Check if this group is collapsed
-                bool is_collapsed = collapsed_groups.find(entity) != collapsed_groups.end();
+                bool is_prefab = ecs->getRegistry(currentRegistryID).any_of<Prefab::PrefabInstance>(entity);
+                bool is_collapsed = collapsed_groups.count(entity) > 0;
 
-                // Create indentation
-                float indent_width = depth * 20.0f;
-                ImGui::Dummy(ImVec2(indent_width, 0));
-                ImGui::SameLine(0, 0);
+                std::string name_lower = entity_name;
+                std::transform(name_lower.begin(), name_lower.end(), name_lower.begin(), ::tolower);
+                bool matches_search = search_filter.empty() || name_lower.find(search_filter) != std::string::npos;
 
-                // Draw collapse toggle for entities with children
-                if (has_children) {
-                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.3f, 0.3f, 0.5f));
-                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.4f, 0.4f, 0.4f, 0.5f));
-                    
-                    std::string arrow_label = std::string(is_collapsed ? ">" : "v") + "##toggle" + std::to_string(static_cast<uint32_t>(entity));
-                    if (ImGui::SmallButton(arrow_label.c_str())) {
-                        if (is_collapsed) {
-                            collapsed_groups.erase(entity);
-                        } else {
-                            collapsed_groups.insert(entity);
-                        }
-                    }
-                    ImGui::PopStyleColor(3);
-                    ImGui::SameLine();
-                } else if (depth > 0) {
-                    // Add spacing to align with siblings that have toggle buttons
-                    ImGui::Dummy(ImVec2(20.0f, 0));
-                    ImGui::SameLine(0, 0);
+                // ---- Row geometry ----
+                const float ROW_H = 20.0f;
+                const float INDENT = 16.0f;
+                float full_w = ImGui::GetContentRegionAvail().x;
+                ImVec2 row_min = ImGui::GetCursorScreenPos();
+                ImVec2 row_max = ImVec2(row_min.x + full_w, row_min.y + ROW_H);
+                ImDrawList* dl = ImGui::GetWindowDrawList();
+
+                // Alternating row tint
+                static int row_counter = 0;
+                bool odd = (row_counter++ % 2) == 0;
+                dl->AddRectFilled(row_min, row_max,
+                    odd ? IM_COL32(45, 47, 52, 255) : IM_COL32(40, 42, 46, 255));
+
+                // Selected highlight
+                if (is_selected) {
+                    dl->AddRectFilled(row_min, row_max, IM_COL32(44, 93, 135, 220));
+                    dl->AddRectFilled(row_min, ImVec2(row_min.x + 2, row_max.y), IM_COL32(76, 156, 214, 255));
                 }
 
-                // Build display label
-                std::string prefix = "";
-                if (has_children) prefix += "[G] ";
-                if (is_prefab_instance) prefix = "[P] " + prefix;
-
-                std::string display_label = prefix + entity_name;
-                std::string unique_label = display_label + "##" + std::to_string(static_cast<uint32_t>(entity));
-
-                // Apply color styling (search match takes priority for highlighting)
-                bool color_pushed = false;
-                if (!search_filter.empty() && matches_search) {
-                    // Highlight matching entities in yellow/gold color
-                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.9f, 0.3f, 1.0f));
-                    color_pushed = true;
+                // Depth lines
+                for (int d = 1; d <= depth; ++d) {
+                    float lx = row_min.x + d * INDENT - INDENT * 0.5f;
+                    ImU32 col = DEPTH_LINE_COLORS[(d - 1) % DEPTH_LINE_COLOR_COUNT];
+                    dl->AddLine(ImVec2(lx, row_min.y), ImVec2(lx, row_max.y), col, 1.5f);
                 }
-                else if (is_prefab_instance) {
-                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.7f, 1.0f, 1.0f));
-                    color_pushed = true;
-                }
-                else if (depth > 0) {
-                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.9f, 1.0f, 1.0f));
-                    color_pushed = true;
+                // Horizontal tick at current depth
+                if (depth > 0) {
+                    float lx = row_min.x + depth * INDENT - INDENT * 0.5f;
+                    float mid = row_min.y + ROW_H * 0.5f;
+                    ImU32 col = DEPTH_LINE_COLORS[(depth - 1) % DEPTH_LINE_COLOR_COUNT];
+                    dl->AddLine(ImVec2(lx, mid), ImVec2(lx + INDENT * 0.5f, mid), col, 1.5f);
                 }
 
-                // Render selectable
-                if (ImGui::Selectable(unique_label.c_str(), is_selected)) {
+                // ---- Invisible button for click / hover ----
+                ImGui::PushID(static_cast<int>(entity));
+                ImGui::SetCursorScreenPos(row_min);
+                ImGui::InvisibleButton("##row", ImVec2(full_w, ROW_H));
+
+                if (ImGui::IsItemHovered() && !is_selected)
+                    dl->AddRectFilled(row_min, row_max, IM_COL32(255, 255, 255, 15));
+
+                if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
                     selected_entity = is_selected ? entt::null : entity;
                     selectedEntityIndex = is_selected ? -1 : 0;
                     b_entity_changed = true;
                 }
 
-                if (color_pushed) {
-                    ImGui::PopStyleColor();
-                }
-
-                // Drag & Drop: Start dragging
-                if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
+                // Drag source
+                if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
                     ImGui::SetDragDropPayload("ENTITY_DRAG", &entity, sizeof(entt::entity));
-                    ImGui::Text("Dragging: %s", entity_name.c_str());
+                    ImGui::Text("Move: %s", entity_name.c_str());
                     ImGui::EndDragDropSource();
                 }
-
-                // Drag & Drop: Accept as parent
+                // Drop target
                 if (ImGui::BeginDragDropTarget()) {
-                    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_DRAG")) {
-                        entt::entity dragged_entity = *(const entt::entity*)payload->Data;
-
-                        if (dragged_entity != entity && !isAncestor(dragged_entity, entity)) {
-                            setEntityParent(dragged_entity, entity);
+                    if (const ImGuiPayload* p = ImGui::AcceptDragDropPayload("ENTITY_DRAG")) {
+                        entt::entity dragged = *(const entt::entity*)p->Data;
+                        if (dragged != entity && !isAncestor(dragged, entity)) {
+                            setEntityParent(dragged, entity);
                             force_refresh = true;
                         }
                     }
                     ImGui::EndDragDropTarget();
                 }
 
-                // Right-click context menu
-                if (ImGui::BeginPopupContextItem()) {
+                // ---- Draw row content ----
+                float content_x = row_min.x + depth * INDENT;
+
+                // Arrow button
+                if (has_children) {
+                    ImGui::SetCursorScreenPos(ImVec2(content_x, row_min.y + 2));
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1, 1, 1, 0.1f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1, 1, 1, 0.2f));
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.75f, 0.75f, 0.75f, 1.0f));
+                    std::string arrow_id = (is_collapsed ? ">" : "v") + std::string("##a") + std::to_string((uint32_t)entity);
+                    if (ImGui::SmallButton(arrow_id.c_str())) {
+                        if (is_collapsed)
+                            collapsed_groups.erase(entity);
+                        else
+                            collapsed_groups.insert(entity);
+                        is_collapsed = !is_collapsed; // keep local state in sync
+                    }
+                    ImGui::PopStyleColor(4);
+                    content_x += 18.0f;
+                }
+                else {
+                    content_x += 18.0f; // keep names aligned
+                }
+
+                // Label text color
+                ImVec4 text_col = ImVec4(0.9f, 0.9f, 0.9f, 1.0f);
+                if (!search_filter.empty() && matches_search)
+                    text_col = ImVec4(1.0f, 0.85f, 0.2f, 1.0f);   // yellow — search hit
+                else if (is_prefab)
+                    text_col = ImVec4(0.45f, 0.75f, 1.0f, 1.0f);  // blue — prefab
+                else if (depth > 0) {
+                    float dim = glm::max(0.65f, 1.0f - depth * 0.06f);
+                    text_col = ImVec4(dim, dim, dim, 1.0f);
+                }
+
+                // Prefix
+                std::string prefix;
+                if (has_children) prefix += "[G] ";
+                if (is_prefab)    prefix = "[P] " + prefix;
+
+                ImGui::SetCursorScreenPos(ImVec2(content_x, row_min.y + 3));
+                ImGui::PushStyleColor(ImGuiCol_Text, text_col);
+                ImGui::Text("%s%s", prefix.c_str(), entity_name.c_str());
+                ImGui::PopStyleColor();
+
+                // ---- Right-click context menu ----
+                ImGui::SetCursorScreenPos(row_min);
+                ImGui::InvisibleButton("##ctx", ImVec2(full_w, ROW_H));
+                if (ImGui::BeginPopupContextItem("##ctxmenu")) {
                     selected_entity = entity;
                     b_entity_changed = true;
 
+                    ImGui::TextColored(ImVec4(0.6f, 0.85f, 1.0f, 1.0f), "%s", entity_name.c_str());
+                    ImGui::Separator();
+
                     if (ImGui::MenuItem("Move Up")) {
-                        std::vector<entt::entity> siblings = getSiblings(entity);
-
+                        auto siblings = getSiblings(entity);
                         normalizeSiblings(siblings);
-
-                        // find current entity index in the SORTED list
                         auto it = std::find(siblings.begin(), siblings.end(), entity);
                         if (it != siblings.end() && it != siblings.begin()) {
-
-                            // Swap values in the ECS components
-                            entt::entity other = *std::prev(it);
-                            auto hCurrent = ecs->getEntityComponent<Entity::Hierarchy>(entity, currentRegistryID);
-                            auto hOther = ecs->getEntityComponent<Entity::Hierarchy>(other, currentRegistryID);
-
-                            // Simple swap
-                            std::swap(hCurrent->get().siblingIndex, hOther->get().siblingIndex);
-
+                            auto hC = ecs->getEntityComponent<Entity::Hierarchy>(entity, currentRegistryID);
+                            auto hO = ecs->getEntityComponent<Entity::Hierarchy>(*std::prev(it), currentRegistryID);
+                            std::swap(hC->get().siblingIndex, hO->get().siblingIndex);
                             force_refresh = true;
                         }
                     }
                     if (ImGui::MenuItem("Move Down")) {
-                        std::vector<entt::entity> siblings = getSiblings(entity);
-
+                        auto siblings = getSiblings(entity);
                         normalizeSiblings(siblings);
-
-                        // find current entity index in the SORTED list
                         auto it = std::find(siblings.begin(), siblings.end(), entity);
                         if (it != siblings.end() && std::next(it) != siblings.end()) {
-                            // Swap with the one after it
-                            entt::entity other = *std::next(it);
-
-                            auto hCurrent = ecs->getEntityComponent<Entity::Hierarchy>(entity, currentRegistryID);
-                            auto hOther = ecs->getEntityComponent<Entity::Hierarchy>(other, currentRegistryID);
-
-                            // SWAP INDICES
-                            std::swap(hCurrent->get().siblingIndex, hOther->get().siblingIndex);
-
+                            auto hC = ecs->getEntityComponent<Entity::Hierarchy>(entity, currentRegistryID);
+                            auto hO = ecs->getEntityComponent<Entity::Hierarchy>(*std::next(it), currentRegistryID);
+                            std::swap(hC->get().siblingIndex, hO->get().siblingIndex);
                             force_refresh = true;
                         }
                     }
 
-                    if (ImGui::MenuItem("Clone")) {
-                        openPopUp("Clone Entity");
-                    }
+                    ImGui::Separator();
+                    if (ImGui::MenuItem("Clone"))    openPopUp("Clone Entity");
 
 #ifdef PN_PLATFORM_WINDOWS
-                    if (ImGui::MenuItem("Create Prefab")) {
-                        if (selected_entity != entt::null) {
-                            // Get prefab service
-                            auto prefab_service = services->get<Prefab::Service>();
+                    if (ImGui::MenuItem("Create Prefab") && selected_entity != entt::null)
+                        services->get<Prefab::Service>()->createPrefab(
+                            selected_entity, generateUniquePrefabName(entity_name), currentRegistryID);
 
-                            // Generate unique name
-                            std::string prefab_name = generateUniquePrefabName(getEntityName(selected_entity));
-
-                            // Create prefab
-                            prefab_service->createPrefab(selected_entity, prefab_name, currentRegistryID);
-
-                            PN_CORE_INFO("Created prefab: {}", prefab_name);
-                        }
-                    }
-
-                    if (ImGui::MenuItem("Create Template")) {
-                        if (selected_entity != entt::null) {
-                            // Get prefab service
-                            auto template_service = services->get<EntityTemplate::Service>();
-
-                            // Generate unique name
-                            std::string template_name = generateUniqueTemplateName(getEntityName(selected_entity));
-
-                            // Create prefab
-                            template_service->createFromEntity(selected_entity, template_name, currentRegistryID);
-
-                            PN_CORE_INFO("Created template: {}", template_name);
-                        }
-                    }
+                    if (ImGui::MenuItem("Create Template") && selected_entity != entt::null)
+                        services->get<EntityTemplate::Service>()->createFromEntity(
+                            selected_entity, generateUniqueTemplateName(entity_name), currentRegistryID);
 #endif
 
                     ImGui::Separator();
-
-                    if (has_children && ImGui::MenuItem("Ungroup")) {
+                    if (has_children && ImGui::MenuItem("Ungroup"))
                         ungroupEntity(entity);
-                    }
 
-                    if (auto hierarchy = ecs->getEntityComponent<Entity::Hierarchy>(entity, currentRegistryID)) {
-                        if (hierarchy.value().get().parentGUID.IsValid() && ImGui::MenuItem("Move to Root")) {
+                    if (auto h = ecs->getEntityComponent<Entity::Hierarchy>(entity, currentRegistryID))
+                        if (h->get().parentGUID.IsValid() && ImGui::MenuItem("Move to Root")) {
                             removeParent(entity);
                             force_refresh = true;
                         }
-                    }
 
                     ImGui::Separator();
-
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.35f, 0.35f, 1.0f));
                     if (ImGui::MenuItem("Delete", "Del")) {
-                        entt::entity entity_to_delete = entity;
-                        std::string delete_name = entity_name;
-
+                        entt::entity to_del = entity;
+                        std::string  del_name = entity_name;
                         command_manager->executeAction(Action{
-                            [this, entity_to_delete]() {
-                                removeEntityWithChildren(entity_to_delete);
-                                if (selected_entity == entity_to_delete) {
-                                    selected_entity = entt::null;
-                                }
+                            [this, to_del]() {
+                                removeEntityWithChildren(to_del);
+                                if (selected_entity == to_del) selected_entity = entt::null;
                                 force_refresh = true;
                             },
                             []() { PN_CORE_WARN("Undo for entity deletion not yet implemented"); },
-                            "Delete Entity: " + delete_name
+                            "Delete Entity: " + del_name
                             });
                     }
-
+                    ImGui::PopStyleColor();
                     ImGui::EndPopup();
                 }
 
-                // Recursively draw children (filter if search is active)
+                ImGui::PopID();
+
+                // Advance cursor past the row
+                ImGui::SetCursorScreenPos(ImVec2(row_min.x, row_max.y));
+
+                // ---- Recurse into children ----
                 if (has_children && (!is_collapsed || !search_filter.empty())) {
                     for (auto child : children) {
-                        if (search_filter.empty()) {
+                        if (search_filter.empty() || entityMatchesSearch(child, search_filter))
                             drawEntityHierarchy(child, depth + 1, search_filter);
-                        } else {
-                            // Only draw children that match the search or have matching descendants
-                            if (entityMatchesSearch(child, search_filter)) {
-                                drawEntityHierarchy(child, depth + 1, search_filter);
-                            }
-                        }
                     }
                 }
             }
 
             bool EntityPanel::entityMatchesSearch(entt::entity entity, const std::string& search_filter) {
                 auto ecs = PN_ECS_SERVICE;
-                
                 if (!ecs->checkEntity(entity, currentRegistryID)) return false;
-                
-                // Check if this entity's name matches
-                std::string entity_name = getEntityName(entity);
-                std::string entity_name_lower = entity_name;
-                std::transform(entity_name_lower.begin(), entity_name_lower.end(), entity_name_lower.begin(), ::tolower);
-                
-                if (entity_name_lower.rfind(search_filter, 0) == 0) {
-                    return true;
-                }
-                
-                // Check if any children match
-                std::vector<entt::entity> children = getEntityChildren(entity);
-                for (auto child : children) {
-                    if (entityMatchesSearch(child, search_filter)) {
-                        return true;
-                    }
-                }
-                
+
+                std::string n = getEntityName(entity);
+                std::transform(n.begin(), n.end(), n.begin(), ::tolower);
+                if (n.find(search_filter) != std::string::npos) return true;
+
+                for (auto child : getEntityChildren(entity))
+                    if (entityMatchesSearch(child, search_filter)) return true;
+
                 return false;
             }
 
