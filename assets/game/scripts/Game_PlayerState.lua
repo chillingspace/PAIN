@@ -128,6 +128,11 @@ local function triggerGameOver()
     -- Play Game Over SFX: hit sound once, then looping background
     audioPlaySFX(SFX_GAMEOVER_HIT, VOL_GAMEOVER_HIT)
     gameOverLoopChannel = audioPlaySFX(SFX_GAMEOVER_LOOP, VOL_GAMEOVER_LOOP, true)
+    -- Register in global SFX registry for scene-change cleanup
+    if gameOverLoopChannel >= 0 then
+        _G.SFXChannels = _G.SFXChannels or {}
+        _G.SFXChannels[gameOverLoopChannel] = true
+    end
 
     -- Duck Global BGM
     if _G.GlobalAudio and _G.GlobalAudio.setGameOver then
@@ -142,6 +147,20 @@ local function triggerGameWin()
     S.gameEnded = true
     S.gameWon   = true
     requestEndOverlay("win")
+end
+
+-- Global cleanup: stop game-over loop SFX and restore BGM ducking.
+-- Called from UIActions.lua before scene changes, and from S.init as failsafe.
+function S.stopGameOverAudio()
+    if gameOverLoopChannel >= 0 then
+        if audioStopChannel then audioStopChannel(gameOverLoopChannel) end
+        -- Unregister from global SFX registry
+        if _G.SFXChannels then _G.SFXChannels[gameOverLoopChannel] = nil end
+        gameOverLoopChannel = -1
+    end
+    if _G.GlobalAudio and _G.GlobalAudio.setGameOver then
+        _G.GlobalAudio.setGameOver(false)
+    end
 end
 
 -- guard so keys arent registered twice if script reloads
@@ -271,15 +290,7 @@ function S.init(player)
         end
 
         -- Stop Game Over loop if it's playing
-        if gameOverLoopChannel >= 0 then
-            if audioStopChannel then audioStopChannel(gameOverLoopChannel) end
-            gameOverLoopChannel = -1
-        end
-
-        -- Restore Global BGM volume check (failsafe)
-        if _G.GlobalAudio and _G.GlobalAudio.setGameOver then
-            _G.GlobalAudio.setGameOver(false)
-        end
+        S.stopGameOverAudio()
     end
 
      -- cache start position
@@ -788,6 +799,9 @@ function S.update(dt)
         if restartPressed and changeScene then
             restartPressed = false
             resetInputState()
+
+            -- Stop Game Over loop BEFORE changeScene (script reload would lose the channel ID)
+            S.stopGameOverAudio()
 
             if S.gameWon then 
                 -- Player win, go to next level

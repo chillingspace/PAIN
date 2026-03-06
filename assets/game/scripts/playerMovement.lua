@@ -113,6 +113,7 @@ local idleInterval = 5.0 + math.random() * 3.0  -- Random 5-8 seconds
 local S = nil
 
 local maxGroundCheckDist = 0.1
+local jumpCooldown = 0.0
 
 -- Player SFX file paths
 local SFX_PLAYER_HOPS = {
@@ -272,6 +273,10 @@ registerUpdate(function(dt)
 
     local isMoving = (dx ~= 0.0 or dz ~= 0.0)
 
+    -- Tick jump cooldown
+    if jumpCooldown > 0 then
+        jumpCooldown = jumpCooldown - dt
+    end
 
     if isMoving then
         Animation.SetSpeed(id, 1)
@@ -282,16 +287,18 @@ registerUpdate(function(dt)
         end
 
         if not wasMoving then
-            -- Play hop sound when starting to move
-            audioPlayRandomSFXFromEntity(SFX_PLAYER_HOPS, id, VOL_PLAYER_HOP)
+            -- Play hop sound when starting to move (skip if airborne or just landed from jump)
+            if isGrounded and jumpCooldown <= 0 then
+                audioPlayRandomSFXFromEntity(SFX_PLAYER_HOPS, id, VOL_PLAYER_HOP)
+            end
             lastAnimTime = 0.0
         
         -- LOOP: play hop sound at animation loop point
         elseif Animation and Animation.GetTime then
             local t = Animation.GetTime(id)
             
-            -- Play audio at the start of the walk cycle
-            if t < lastAnimTime and t < 0.2 then
+            -- Play audio at the start of the walk cycle (skip if airborne or during jump cooldown)
+            if t < lastAnimTime and t < 0.2 and isGrounded and jumpCooldown <= 0 then
                 audioPlayRandomSFXFromEntity(SFX_PLAYER_HOPS, id, VOL_PLAYER_HOP)
             end
             
@@ -385,6 +392,10 @@ registerUpdate(function(dt)
 
         -- Play random hop sound for jump
         audioPlayRandomSFXFromEntity(SFX_PLAYER_HOPS, id, VOL_PLAYER_HOP)
+
+        -- Prevent walk-cycle hop from double-playing on landing
+        jumpCooldown = 0.35
+        lastAnimTime = 0.0
         
         -- consume jump
         jumpPressed = false

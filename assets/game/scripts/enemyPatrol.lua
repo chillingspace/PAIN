@@ -30,6 +30,16 @@ local SFX_ENEMY_WALK = "game/audio/sfx/enemy/Ball enemy walking.wav"
 local walkChannel = -1  -- Track channel for position updates and stopping
 local VOL_ENEMY_WALK = 0.0  -- Decibel modifier
 
+-- Helper: stop walk SFX and unregister from global registry
+local function stopWalkSFX()
+    if walkChannel >= 0 then
+        audioStopChannel(walkChannel)
+        -- Unregister from global SFX registry
+        if _G.SFXChannels then _G.SFXChannels[walkChannel] = nil end
+        walkChannel = -1
+    end
+end
+
 local function findNearestByTag(originX, originY, originZ, tag, maxDistSq)
     local candidates = getEntitiesByTag(tag)
     if not candidates or #candidates == 0 then
@@ -58,13 +68,16 @@ end
 registerUpdate(function(dt)
     local id = entityId
 
+    -- EARLY EXIT: If game is paused, stop walk SFX
+    if IsGamePaused and IsGamePaused() then
+        stopWalkSFX()
+        return
+    end
+
     -- freeze while detecting
     if _G.EnemyFrozen and _G.EnemyFrozen[id] then
         -- Stop walking sound when frozen
-        if walkChannel >= 0 then
-            audioStopChannel(walkChannel)
-            walkChannel = -1
-        end
+        stopWalkSFX()
         return
     end
 
@@ -154,10 +167,7 @@ registerUpdate(function(dt)
         end
 
         -- stop movement sound while waiting
-        if walkChannel >= 0 then
-            audioStopChannel(walkChannel)
-            walkChannel = -1
-        end
+        stopWalkSFX()
 
         -- keep the stored facing during wait
         if waitYaw and setRotation then
@@ -200,10 +210,7 @@ registerUpdate(function(dt)
         end
 
         -- stop movement sound while waiting
-        if walkChannel >= 0 then
-            audioStopChannel(walkChannel)
-            walkChannel = -1
-        end
+        stopWalkSFX()
 
         return
     end
@@ -227,6 +234,11 @@ registerUpdate(function(dt)
     if walkChannel < 0 then
         -- Start new looping walk sound attached to enemy entity (initial pos)
         walkChannel = audioPlaySFXFromEntity(SFX_ENEMY_WALK, id, VOL_ENEMY_WALK, true)
+        -- Register in global SFX registry for scene-change cleanup
+        if walkChannel >= 0 then
+            _G.SFXChannels = _G.SFXChannels or {}
+            _G.SFXChannels[walkChannel] = true
+        end
     else
         -- Update position of existing walk sound
         audioSetChannelPosition(walkChannel, x, y, z)

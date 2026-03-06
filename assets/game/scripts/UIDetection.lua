@@ -51,6 +51,10 @@ ui.duration    = DURATION
 ui.sourceEnemy = nil
 ui.isDetected  = false
 
+-- SFX cooldown: prevents alert sounds from spamming at detection edge
+local ALERT_SFX_COOLDOWN_TIME = 1.0   -- seconds between alert SFX re-triggers (configurable)
+local alertSfxCooldown = 0.0
+
 -- helpers -------------------------------------------------------
 
 local function hideUI()
@@ -82,6 +86,8 @@ local function stopAudio()
     -- Stop looping alert sound using stored channel ID
     if alertLoopChannel >= 0 then
         audioStopChannel(alertLoopChannel)
+        -- Unregister from global SFX registry
+        if _G.SFXChannels then _G.SFXChannels[alertLoopChannel] = nil end
         alertLoopChannel = -1
     end
     -- Combat BGM now controlled via GlobalAudio.setCombat(false)
@@ -106,15 +112,21 @@ function ui.begin(enemyEntity)
 
     showUI()
 
-    -- Enemy alert SFX: hit sound once, then start looping alert
-    -- Both need to be spatial from the enemy entity
-    if enemyEntity then
-        audioPlaySFXFromEntity(SFX_ALERT_HIT, enemyEntity, VOL_ALERT_HIT)
-        alertLoopChannel = audioPlaySFXFromEntity(SFX_ALERT_LOOP, enemyEntity, VOL_ALERT_LOOP, true)
-    else
-        -- Fallback if no entity provided (shouldn't happen based on usage)
-        audioPlaySFX(SFX_ALERT_HIT, VOL_ALERT_HIT)
-        alertLoopChannel = audioPlaySFX(SFX_ALERT_LOOP, VOL_ALERT_LOOP, true)
+    -- Enemy alert SFX: only fire if cooldown has expired (prevents spam)
+    if alertSfxCooldown <= 0 then
+        if enemyEntity then
+            audioPlaySFXFromEntity(SFX_ALERT_HIT, enemyEntity, VOL_ALERT_HIT)
+            alertLoopChannel = audioPlaySFXFromEntity(SFX_ALERT_LOOP, enemyEntity, VOL_ALERT_LOOP, true)
+        else
+            audioPlaySFX(SFX_ALERT_HIT, VOL_ALERT_HIT)
+            alertLoopChannel = audioPlaySFX(SFX_ALERT_LOOP, VOL_ALERT_LOOP, true)
+        end
+        alertSfxCooldown = ALERT_SFX_COOLDOWN_TIME
+        -- Register alert loop in global SFX registry for scene-change cleanup
+        if alertLoopChannel >= 0 then
+            _G.SFXChannels = _G.SFXChannels or {}
+            _G.SFXChannels[alertLoopChannel] = true
+        end
     end
 
     -- Start combat BGM layer via GlobalAudio
@@ -153,6 +165,11 @@ end
 -- per-frame update ----------------------------------------------
 
 local function update(dt)
+    -- Tick SFX cooldown
+    if alertSfxCooldown > 0 then
+        alertSfxCooldown = alertSfxCooldown - dt
+    end
+
     if preloadStage < 5 then
         preloadStage = preloadStage + 1
         
