@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "back sp new.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 8032157521807815083
+  },
+  "descriptor_version": 1,
+  "guid": "2d8e7a6a-fa7e-e84a-b602-13bb753a0bae",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\back sp new.png"
+  }
+}

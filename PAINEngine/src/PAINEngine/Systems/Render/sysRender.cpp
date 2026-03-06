@@ -548,6 +548,16 @@ namespace PAIN {
 		// PARTICLE RENDER PASS - GPU Instanced Rendering
 		// ============================================
 		void System::particlePass(entt::registry& registry) {
+			auto logParticleGLError = [](const char* stage) {
+				GLenum err = glGetError();
+				while (err != GL_NO_ERROR) {
+					PN_CORE_ERROR("ParticlePass GL error at {}: {}", stage, err);
+					err = glGetError();
+				}
+			};
+
+			while (glGetError() != GL_NO_ERROR) {}
+
 			auto rendererService = services.lock()->get<sRenderer>();
 			if (!rendererService || !rendererService->w_renderer)
 				return;
@@ -586,8 +596,15 @@ namespace PAIN {
 				return;
 
 			// Get or create particle shader
+			static std::shared_ptr<Assets::Shader> particleShader;
 			static GLuint particleProgram = 0;
 			static bool shaderLoaded = false;
+
+			if (shaderLoaded && (!particleShader || !glIsProgram(particleProgram))) {
+				shaderLoaded = false;
+				particleProgram = 0;
+				particleShader.reset();
+			}
 
 			if (!shaderLoaded) {
 				// Try to load particle shader - using same pattern as WindowsRenderer
@@ -599,14 +616,31 @@ namespace PAIN {
 					auto shaderOpt = assetManager->getAsset<Assets::Shader>("engine\\shaders\\android_particle.vert");
 #endif
 					if (shaderOpt.has_value()) {
-						particleProgram = shaderOpt.value()->GetRendererID();
+						particleShader = shaderOpt.value();
+						particleProgram = particleShader->GetRendererID();
 						shaderLoaded = true;
 					}
 				}
 			}
 
-			if (particleProgram == 0) {
+			GLint linkStatus = GL_FALSE;
+			if (particleProgram != 0 && glIsProgram(particleProgram)) {
+				glGetProgramiv(particleProgram, GL_LINK_STATUS, &linkStatus);
+			}
+
+			if (particleProgram == 0 || !glIsProgram(particleProgram) || linkStatus != GL_TRUE) {
+				if (particleProgram != 0 && glIsProgram(particleProgram)) {
+					GLint logLen = 0;
+					glGetProgramiv(particleProgram, GL_INFO_LOG_LENGTH, &logLen);
+					if (logLen > 1) {
+						std::string log(static_cast<size_t>(logLen), '\0');
+						GLsizei written = 0;
+						glGetProgramInfoLog(particleProgram, logLen, &written, log.data());
+						PN_CORE_ERROR("ParticlePass shader link log: {}", log);
+					}
+				}
 				// Shader not loaded yet - skip rendering
+				PN_CORE_ERROR("ParticlePass shader program invalid/unlinked: {}", particleProgram);
 				return;
 			}
 
@@ -620,7 +654,7 @@ namespace PAIN {
 				-0.5f,  0.5f, 0.0f,  0.0f, 1.0f
 			};
 
-			static const unsigned int quadIndices[] = {
+			static const unsigned short quadIndices[] = {
 				0, 1, 2,
 				2, 3, 0
 			};
@@ -688,6 +722,7 @@ namespace PAIN {
 				glVertexAttribDivisor(5, 1); // Advance once per instance
 
 				glBindVertexArray(0);
+				logParticleGLError("init vao/vbo/ibo");
 			}
 
 			// Set up GL state for particles
@@ -699,16 +734,21 @@ namespace PAIN {
 			glEnable(GL_BLEND);
 			glDepthMask(GL_FALSE); // Particles don't write to depth buffer
 			glDisable(GL_CULL_FACE); // Billboard particles face camera
+			logParticleGLError("set blend/depth/cull state");
 
 			// Use particle shader
 			glUseProgram(particleProgram);
+			logParticleGLError("use program");
 			glUniform1i(glGetUniformLocation(particleProgram, "tex"), 0);
+			logParticleGLError("set tex uniform");
 
 			// Set view and projection matrices
 			glUniformMatrix4fv(glGetUniformLocation(particleProgram, "u_V"), 1, GL_FALSE, &activeCam->view()[0][0]);
 			glUniformMatrix4fv(glGetUniformLocation(particleProgram, "u_P"), 1, GL_FALSE, &activeCam->projection()[0][0]);
+			logParticleGLError("set VP uniforms");
 
 			glBindVertexArray(quadVAO);
+			logParticleGLError("bind particle vao");
 
 			std::vector<float> instanceData;
 			instanceData.reserve(2048);
@@ -773,8 +813,26 @@ namespace PAIN {
 
 				if (instanceCount > instanceCapacity) {
 					instanceCapacity = instanceCount;
+					glBindVertexArray(quadVAO);
 					glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
 					glBufferData(GL_ARRAY_BUFFER, instanceCapacity * sizeof(float) * 9, nullptr, GL_STREAM_DRAW);
+
+					glEnableVertexAttribArray(2);
+					glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)0);
+					glVertexAttribDivisor(2, 1);
+
+					glEnableVertexAttribArray(3);
+					glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float)));
+					glVertexAttribDivisor(3, 1);
+
+					glEnableVertexAttribArray(4);
+					glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(7 * sizeof(float)));
+					glVertexAttribDivisor(4, 1);
+
+					glEnableVertexAttribArray(5);
+					glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(8 * sizeof(float)));
+					glVertexAttribDivisor(5, 1);
+					logParticleGLError("realloc instance buffer + rebind attribs");
 				}
 
 				GLuint particleTextureId = 0;
@@ -804,15 +862,19 @@ namespace PAIN {
 				glUniform1i(glGetUniformLocation(particleProgram, "u_UseTexture"), particleTextureId != 0 ? 1 : 0);
 				glUniform1i(glGetUniformLocation(particleProgram, "u_Shape"), static_cast<int>(ps.renderShape));
 				glUniform1f(glGetUniformLocation(particleProgram, "u_SoftEdge"), glm::clamp(ps.softEdge, 0.0f, 1.0f));
+				logParticleGLError("set particle uniforms");
 
 				glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
 				glBufferSubData(GL_ARRAY_BUFFER, 0, instanceData.size() * sizeof(float), instanceData.data());
-				glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, static_cast<GLsizei>(instanceCount));
+				logParticleGLError("upload instance data");
+				glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0, static_cast<GLsizei>(instanceCount));
+				logParticleGLError("draw instanced particles");
 			}
 
 			glBindTexture(GL_TEXTURE_2D, 0);
 			glBindVertexArray(0);
 			glUseProgram(0);
+			logParticleGLError("cleanup bindings");
 
 			// Restore GL state
 			glDepthMask(previousDepthMask);
@@ -824,14 +886,14 @@ namespace PAIN {
 				glEnable(GL_CULL_FACE);
 			else
 				glDisable(GL_CULL_FACE);
+			logParticleGLError("restore state");
 		}
 
 		void System::debugPass(entt::registry& registry, int debug_mode) {
 
 			auto rendererService = services.lock()->get<sRenderer>();
-			if (debug_mode == 0 || !rendererService || !rendererService->w_renderer) {
-				return;
-			}
+			if (!rendererService || !rendererService->w_renderer) return;
+
 
 			auto svc = services.lock();
 			if (!svc)
@@ -841,9 +903,43 @@ namespace PAIN {
 			if (!scene)
 				return;
 
-			Camera* camera = scene->GetActiveCamera();
-			if (!camera)
-				return;
+			Camera* active_cam = scene->GetActiveCamera();
+			if (!active_cam) return;
+
+			// --- GAME CAMERA FRUSTUM RENDER ---
+			Camera* game_cam = scene->GetGameCamera();
+
+			if (game_cam && active_cam != game_cam && game_cam->showCollisionGizmo) {
+				// 1. Calculate the Inverse View-Projection Matrix
+				glm::mat4 view = game_cam->view();
+				glm::mat4 proj = game_cam->projection();
+				glm::mat4 invVP = glm::inverse(proj * view);
+
+				// 2. Define the 8 corners of the frustum in NDC
+				// Order matches your DebugPassOBB back/front face layout
+				glm::vec4 ndcCorners[8] = {
+					{-1.0f, -1.0f, -1.0f, 1.0f}, // 0: Near Bottom-Left
+					{ 1.0f, -1.0f, -1.0f, 1.0f}, // 1: Near Bottom-Right
+					{ 1.0f,  1.0f, -1.0f, 1.0f}, // 2: Near Top-Right
+					{-1.0f,  1.0f, -1.0f, 1.0f}, // 3: Near Top-Left
+
+					{-1.0f, -1.0f,  1.0f, 1.0f}, // 4: Far Bottom-Left
+					{ 1.0f, -1.0f,  1.0f, 1.0f}, // 5: Far Bottom-Right
+					{ 1.0f,  1.0f,  1.0f, 1.0f}, // 6: Far Top-Right
+					{-1.0f,  1.0f,  1.0f, 1.0f}  // 7: Far Top-Left
+				};
+
+				// 3. Transform NDC corners into World Space
+				glm::vec3 worldCorners[8];
+				for (int i = 0; i < 8; ++i) {
+					glm::vec4 worldPos = invVP * ndcCorners[i];
+					worldCorners[i] = glm::vec3(worldPos) / worldPos.w; // Perspective divide
+				}
+
+				// 4. Draw Frustum (Yellow)
+				glm::vec4 frustumColor = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
+				rendererService->w_renderer->DebugPassOBB(worldCorners, frustumColor, scene);
+			}
 
 			// Mode 1: Draw Physics Colliders (Cyan for basic, different colors for
 			// compound shapes)
@@ -1231,6 +1327,9 @@ namespace PAIN {
 				}
 			}
 
+			// ========================================
+			// MINIMAP
+			// ========================================
 			if (gs.minimap_enabled) {
 				GLuint minimapTexture = rendererService->w_renderer->getMinimapTexture();
 				if (minimapTexture != 0) {
@@ -1286,12 +1385,16 @@ namespace PAIN {
 
 						const float content_x = map_x;
 						const float content_y = map_y;
-						const float map_square = glm::min(map_w, map_h);
-						const float draw_x = content_x + (map_w - map_square) * 0.5f;
-						const float draw_y = content_y + (map_h - map_square) * 0.5f;
+						const float draw_x = content_x;
+						const float draw_y = content_y;
+						const float draw_w = map_w;
+						const float draw_h = map_h;
+						const float draw_min = glm::max(1.0f, glm::min(draw_w, draw_h));
+						const float draw_w_safe = glm::max(1.0f, draw_w);
+						const float draw_h_safe = glm::max(1.0f, draw_h);
 
-						const float center_x_px = draw_x + map_square * 0.5f;
-						const float center_y_px = draw_y + map_square * 0.5f;
+						const float center_x_px = draw_x + draw_w * 0.5f;
+						const float center_y_px = draw_y + draw_h * 0.5f;
 
 						glm::vec2 minimap_pos(
 							(center_x_px / fbw) * 2.0f - 1.0f,
@@ -1453,13 +1556,15 @@ namespace PAIN {
 							}
 
 							const float radius = glm::max(1.0f, gs.minimap_radius);
-							const float u = 0.5f + (local_x / (2.0f * radius));
-							const float v = 0.5f + (local_y / (2.0f * radius));
+							const float inv_double_radius_x = (draw_min / draw_w_safe) / (2.0f * radius);
+							const float inv_double_radius_y = (draw_min / draw_h_safe) / (2.0f * radius);
+							const float u = 0.5f + local_x * inv_double_radius_x;
+							const float v = 0.5f + local_y * inv_double_radius_y;
 							const float u_draw = clampToEdge ? glm::clamp(u, 0.0f, 1.0f) : u;
 							const float v_draw = clampToEdge ? glm::clamp(v, 0.0f, 1.0f) : v;
 
-							const float px = draw_x + u_draw * map_square;
-							const float py = draw_y + (1.0f - v_draw) * map_square;
+							const float px = draw_x + u_draw * draw_w;
+							const float py = draw_y + (1.0f - v_draw) * draw_h;
 
 							return glm::vec2(
 								(px / fbw) * 2.0f - 1.0f,
@@ -1474,22 +1579,39 @@ namespace PAIN {
 							rendererService->w_renderer->DebugPass2DCircle(centerNdc, radiusNdc, color, 18);
 						};
 
+						GLuint playerIconTex = 0;
+						GLuint itemIconTex = 0;
+						GLuint objectiveIconTex = 0;
+						if (gs.minimap_use_icon_textures && assetManager) {
+							auto resolveIcon = [&](const std::string& path) -> GLuint {
+								if (path.empty()) {
+									return 0;
+								}
+								auto iconOpt = assetManager->getAsset<Assets::Texture>(path);
+								if (!iconOpt.has_value() || !iconOpt.value()) {
+									return 0;
+								}
+								return iconOpt.value()->gl_texture;
+							};
+
+							playerIconTex = resolveIcon(gs.minimap_icon_player_path);
+							itemIconTex = resolveIcon(gs.minimap_icon_item_path);
+							objectiveIconTex = resolveIcon(gs.minimap_icon_objective_path);
+						}
+
 						auto drawMarker = [&](const glm::vec3& pos,
 							float radiusPx,
 							const glm::vec4& color,
-							const std::string& iconPath) {
-							if (gs.minimap_use_icon_textures && assetManager && !iconPath.empty()) {
-								auto iconOpt = assetManager->getAsset<Assets::Texture>(iconPath);
-								if (iconOpt.has_value() && iconOpt.value() && iconOpt.value()->gl_texture != 0) {
-									const glm::vec2 iconNdcPos = worldToMinimapNdc(pos, true);
-									const float iconPx = glm::max(4.0f, radiusPx * 2.0f * gs.minimap_icon_scale);
-									glm::vec2 iconNdcScale(iconPx / fbh, iconPx / fbh);
-									rendererService->w_renderer->Render2DTexture(
-										iconOpt.value()->gl_texture,
-										iconNdcPos,
-										iconNdcScale);
-									return;
-								}
+							GLuint iconTex) {
+							if (gs.minimap_use_icon_textures && iconTex != 0) {
+								const glm::vec2 iconNdcPos = worldToMinimapNdc(pos, true);
+								const float iconPx = glm::max(4.0f, radiusPx * 2.0f * gs.minimap_icon_scale);
+								glm::vec2 iconNdcScale(iconPx / fbh, iconPx / fbh);
+								rendererService->w_renderer->Render2DTexture(
+									iconTex,
+									iconNdcPos,
+									iconNdcScale);
+								return;
 							}
 
 							drawDot(pos, radiusPx, color);
@@ -1522,31 +1644,19 @@ namespace PAIN {
 							return false;
 						};
 
-						struct WallMinimapCache {
-							const entt::registry* sourceRegistry = nullptr;
-							size_t wallEntityCount = 0;
-							size_t wallEntitySignature = 0;
-							bool built = false;
-							float cellSize = 4.0f;
-							std::vector<glm::vec2> triangleVerticesXZ;
-							std::unordered_map<int64_t, std::vector<uint32_t>> cellToTriangles;
-							std::vector<uint32_t> triangleStamps;
-							uint32_t frameStamp = 1;
-						};
+				struct WallMinimapCache {
+					const entt::registry* sourceRegistry = nullptr;
+					size_t wallEntityCount = 0;
+					size_t wallEntitySignature = 0;
+					bool built = false;
+					bool gpuDirty = false; // true when triangleVerticesXZ changed and needs GPU re-upload
+					std::vector<glm::vec2> triangleVerticesXZ;
+				};
 
 						static WallMinimapCache wallCache;
 
-						auto cellKey = [](int x, int y) -> int64_t {
-							return (static_cast<int64_t>(x) << 32) ^ static_cast<uint32_t>(y);
-						};
-
-						auto toCellCoord = [&](float v) -> int {
-							return static_cast<int>(std::floor(v / wallCache.cellSize));
-						};
-
 						auto rebuildWallCache = [&](const std::vector<entt::entity>& wallEntities) {
 							wallCache.triangleVerticesXZ.clear();
-							wallCache.cellToTriangles.clear();
 
 							for (const entt::entity entity : wallEntities) {
 								if (!registry.valid(entity)) {
@@ -1587,35 +1697,12 @@ namespace PAIN {
 									const glm::vec3 w1 = glm::vec3(M * glm::vec4(vertices[i1].pos, 1.0f));
 									const glm::vec3 w2 = glm::vec3(M * glm::vec4(vertices[i2].pos, 1.0f));
 
-									const glm::vec2 v0(w0.x, w0.z);
-									const glm::vec2 v1(w1.x, w1.z);
-									const glm::vec2 v2(w2.x, w2.z);
-
-									const uint32_t triangleIndex = static_cast<uint32_t>(wallCache.triangleVerticesXZ.size() / 3);
-									wallCache.triangleVerticesXZ.push_back(v0);
-									wallCache.triangleVerticesXZ.push_back(v1);
-									wallCache.triangleVerticesXZ.push_back(v2);
-
-									const float minX = glm::min(v0.x, glm::min(v1.x, v2.x));
-									const float minY = glm::min(v0.y, glm::min(v1.y, v2.y));
-									const float maxX = glm::max(v0.x, glm::max(v1.x, v2.x));
-									const float maxY = glm::max(v0.y, glm::max(v1.y, v2.y));
-
-									const int x0 = toCellCoord(minX);
-									const int y0 = toCellCoord(minY);
-									const int x1 = toCellCoord(maxX);
-									const int y1 = toCellCoord(maxY);
-
-									for (int cx = x0; cx <= x1; ++cx) {
-										for (int cy = y0; cy <= y1; ++cy) {
-											wallCache.cellToTriangles[cellKey(cx, cy)].push_back(triangleIndex);
-										}
-									}
+									wallCache.triangleVerticesXZ.emplace_back(w0.x, w0.z);
+									wallCache.triangleVerticesXZ.emplace_back(w1.x, w1.z);
+									wallCache.triangleVerticesXZ.emplace_back(w2.x, w2.z);
 								}
 							}
 
-							const size_t triangleCount = wallCache.triangleVerticesXZ.size() / 3;
-							wallCache.triangleStamps.assign(triangleCount, 0u);
 							wallCache.sourceRegistry = &registry;
 							wallCache.wallEntityCount = wallEntities.size();
 							size_t signature = 1469598103934665603ull;
@@ -1625,6 +1712,7 @@ namespace PAIN {
 							}
 							wallCache.wallEntitySignature = signature;
 							wallCache.built = true;
+							wallCache.gpuDirty = true;
 						};
 
 						glm::vec3 nearest_item_pos(0.0f);
@@ -1656,6 +1744,14 @@ namespace PAIN {
 
 						const bool has_carried_letter = !metadata_service->getEntitiesByTag("letter_carried").empty();
 
+						// Clip all minimap overlays (walls, markers, danger, route, legend, arrows)
+						glEnable(GL_SCISSOR_TEST);
+						glScissor(
+							static_cast<GLint>(draw_x),
+							static_cast<GLint>(fbh - draw_y - draw_h),
+							static_cast<GLsizei>(draw_w),
+							static_cast<GLsizei>(draw_h));
+
 						if (gs.minimap_show_walls) {
 							size_t currentWallSignature = 1469598103934665603ull;
 							for (const entt::entity entity : wallEntities) {
@@ -1669,71 +1765,52 @@ namespace PAIN {
 								wallCache.wallEntityCount != wallEntities.size() ||
 								wallCache.wallEntitySignature != currentWallSignature;
 
-							if (needsRebuild) {
-								rebuildWallCache(wallEntities);
+						if (needsRebuild) {
+							rebuildWallCache(wallEntities);
+						}
+
+						// Upload wall vertices to GPU when cache was rebuilt
+						if (wallCache.gpuDirty) {
+							rendererService->w_renderer->UploadMinimapWalls(wallCache.triangleVerticesXZ);
+							wallCache.gpuDirty = false;
+						}
+
+						// GPU draw path: single draw call with scissor clipping
+						if (rendererService->w_renderer->hasMinimapWallData()) {
+							const float minimapRadius = glm::max(1.0f, gs.minimap_radius);
+							const glm::vec2 playerXZ(player_pos.x, player_pos.z);
+
+							// Build 2x2 orientation matrix for vertex shader
+							glm::vec2 transformCol0, transformCol1;
+							if (gs.minimap_rotate_with_player) {
+								transformCol0 = glm::vec2(-right2.x, -forward2.x);
+								transformCol1 = glm::vec2(-right2.y, -forward2.y);
+							} else {
+								transformCol0 = glm::vec2(1.0f, 0.0f);
+								transformCol1 = glm::vec2(0.0f, -1.0f);
 							}
 
-							std::vector<glm::vec2> batchedWallTriangleVertices;
-							if (!wallCache.triangleVerticesXZ.empty()) {
-								if (wallCache.frameStamp == std::numeric_limits<uint32_t>::max()) {
-									std::fill(wallCache.triangleStamps.begin(), wallCache.triangleStamps.end(), 0u);
-									wallCache.frameStamp = 1;
-								} else {
-									++wallCache.frameStamp;
-								}
+							const glm::vec2 invDoubleRadius(
+								(draw_min / draw_w_safe) / (2.0f * minimapRadius),
+								(draw_min / draw_h_safe) / (2.0f * minimapRadius));
+							const glm::vec2 ndcBase(
+								(draw_x / fbw) * 2.0f - 1.0f,
+								1.0f - ((draw_y + draw_h) / fbh) * 2.0f);
+							const glm::vec2 ndcScale(
+								(draw_w / fbw) * 2.0f,
+								(draw_h / fbh) * 2.0f);
 
-								const float minimapRadius = glm::max(1.0f, gs.minimap_radius);
-								const int minCellX = toCellCoord(player_pos.x - minimapRadius);
-								const int maxCellX = toCellCoord(player_pos.x + minimapRadius);
-								const int minCellY = toCellCoord(player_pos.z - minimapRadius);
-								const int maxCellY = toCellCoord(player_pos.z + minimapRadius);
-
-								for (int cx = minCellX; cx <= maxCellX; ++cx) {
-									for (int cy = minCellY; cy <= maxCellY; ++cy) {
-										auto cellIt = wallCache.cellToTriangles.find(cellKey(cx, cy));
-										if (cellIt == wallCache.cellToTriangles.end()) {
-											continue;
-										}
-
-										for (const uint32_t triIndex : cellIt->second) {
-											if (triIndex >= wallCache.triangleStamps.size()) {
-												continue;
-											}
-											if (wallCache.triangleStamps[triIndex] == wallCache.frameStamp) {
-												continue;
-											}
-											wallCache.triangleStamps[triIndex] = wallCache.frameStamp;
-
-											const size_t base = static_cast<size_t>(triIndex) * 3;
-											if (base + 2 >= wallCache.triangleVerticesXZ.size()) {
-												continue;
-											}
-
-											const glm::vec2 v0 = wallCache.triangleVerticesXZ[base];
-											const glm::vec2 v1 = wallCache.triangleVerticesXZ[base + 1];
-											const glm::vec2 v2 = wallCache.triangleVerticesXZ[base + 2];
-
-											batchedWallTriangleVertices.push_back(
-												worldToMinimapNdc(glm::vec3(v0.x, player_pos.y, v0.y), true));
-											batchedWallTriangleVertices.push_back(
-												worldToMinimapNdc(glm::vec3(v1.x, player_pos.y, v1.y), true));
-											batchedWallTriangleVertices.push_back(
-												worldToMinimapNdc(glm::vec3(v2.x, player_pos.y, v2.y), true));
-										}
-									}
-								}
-
-								if (!batchedWallTriangleVertices.empty()) {
-									rendererService->w_renderer->DebugPass2DTrianglesFilled(
-										batchedWallTriangleVertices,
-										glm::vec4(0.75f, 0.75f, 0.75f, 0.35f));
-								}
-							} else {
-								for (const entt::entity wallEntity : wallEntities) {
-									drawWallFootprint(wallEntity, glm::vec4(0.75f, 0.75f, 0.75f, 1.0f));
-								}
+							rendererService->w_renderer->DrawMinimapWalls(
+								playerXZ, transformCol0, transformCol1,
+								invDoubleRadius, ndcBase, ndcScale,
+								glm::vec4(0.75f, 0.75f, 0.75f, 0.35f));
+						} else {
+							// Fallback to AABB outline when no triangle data available
+							for (const entt::entity wallEntity : wallEntities) {
+								drawWallFootprint(wallEntity, glm::vec4(0.75f, 0.75f, 0.75f, 1.0f));
 							}
 						}
+					}
 
 						for (entt::entity entity : markerEntities) {
 							glm::vec3 pos(0.0f);
@@ -1750,7 +1827,7 @@ namespace PAIN {
 								}
 								color = glm::vec4(0.2f, 1.0f, 0.2f, 1.0f);
 								dotRadius = 5.0f;
-								drawMarker(pos, dotRadius, color, gs.minimap_icon_player_path);
+								drawMarker(pos, dotRadius, color, playerIconTex);
 								continue;
 							} else if (metadata_service->hasTag(entity, "item") ||
 								metadata_service->hasTag(entity, "letter_collectible") ||
@@ -1767,7 +1844,7 @@ namespace PAIN {
 									nearest_item_pos = pos;
 									has_nearest_item = true;
 								}
-								drawMarker(pos, dotRadius, color, gs.minimap_icon_item_path);
+								drawMarker(pos, dotRadius, color, itemIconTex);
 								continue;
 							} else if (metadata_service->hasTag(entity, "objective") ||
 								metadata_service->hasTag(entity, "letter_collection")) {
@@ -1784,7 +1861,7 @@ namespace PAIN {
 									nearest_objective_pos = pos;
 									has_nearest_objective = true;
 								}
-								drawMarker(pos, dotRadius, color, gs.minimap_icon_objective_path);
+								drawMarker(pos, dotRadius, color, objectiveIconTex);
 								continue;
 							} else {
 								continue;
@@ -1805,6 +1882,8 @@ namespace PAIN {
 						appendDangerEntities("danger");
 						appendDangerEntities("Enemy");
 
+						std::vector<glm::vec2> dangerLineVertices;
+						dangerLineVertices.reserve(dangerEntities.size() * 24 * 2);
 						for (entt::entity entity : dangerEntities) {
 							glm::vec3 pos(0.0f);
 							if (!getEntityWorldPos(entity, pos)) {
@@ -1835,14 +1914,29 @@ namespace PAIN {
 							}
 
 							const glm::vec2 centerNdc = worldToMinimapNdc(pos, false);
-							const float radiusPx = (danger_radius / (2.0f * glm::max(1.0f, gs.minimap_radius))) * map_square;
+							const float radiusPx = (danger_radius / (2.0f * glm::max(1.0f, gs.minimap_radius))) * draw_min;
 							const glm::vec2 radiusNdc((radiusPx / fbw) * 2.0f, (radiusPx / fbh) * 2.0f);
 
-								rendererService->w_renderer->DebugPass2DCircle(
-									centerNdc,
-									radiusNdc,
-									glm::vec4(1.0f, 0.15f, 0.15f, 1.0f),
-									24);
+							for (int i = 0; i < 24; ++i) {
+								const float a0 = (static_cast<float>(i) / 24.0f) * glm::two_pi<float>();
+								const float a1 = (static_cast<float>(i + 1) / 24.0f) * glm::two_pi<float>();
+
+								const glm::vec2 p0(
+									centerNdc.x + std::cos(a0) * radiusNdc.x,
+									centerNdc.y + std::sin(a0) * radiusNdc.y);
+								const glm::vec2 p1(
+									centerNdc.x + std::cos(a1) * radiusNdc.x,
+									centerNdc.y + std::sin(a1) * radiusNdc.y);
+
+								dangerLineVertices.push_back(p0);
+								dangerLineVertices.push_back(p1);
+							}
+						}
+
+						if (!dangerLineVertices.empty()) {
+							rendererService->w_renderer->DebugPass2DLines(
+								dangerLineVertices,
+								glm::vec4(1.0f, 0.15f, 0.15f, 1.0f));
 						}
 						}
 
@@ -1971,6 +2065,8 @@ namespace PAIN {
 								arrow_end_ndc,
 								glm::vec4(0.2f, 1.0f, 0.2f, 1.0f));
 						}
+
+						glDisable(GL_SCISSOR_TEST);
 					}
 				}
 			}

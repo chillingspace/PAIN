@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "credits sp new.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 2094905594177871996
+  },
+  "descriptor_version": 1,
+  "guid": "057511b0-a4f3-b44f-9662-f58e59868364",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\credits sp new.png"
+  }
+}

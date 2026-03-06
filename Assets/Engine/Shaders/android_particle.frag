@@ -1,7 +1,6 @@
-// android_particle.frag
-
 #version 300 es
 precision highp float;
+precision mediump int;
 
 in vec2 vTexCoords;
 in vec4 vColor;

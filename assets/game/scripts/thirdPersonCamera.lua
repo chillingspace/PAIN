@@ -209,7 +209,8 @@ registerUpdate(function(dt)
     if cameraGetPositionWithCollision then
         cx, cy, cz = cameraGetPositionWithCollision(
             smoothX, smoothY, smoothZ,  -- player position (smoothed)
-            cx, cy, cz                  -- desired camera position
+            cx, cy, cz,                  -- desired camera position
+            playerId
         )
     end
 

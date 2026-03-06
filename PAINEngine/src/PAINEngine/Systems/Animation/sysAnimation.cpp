@@ -12,6 +12,7 @@
 #include "sysAnimation.h"
 #include "ECS/Controller.h"
 #include "ECS/Components/cAnimation.h"
+#include "ECS/Components/cBoundingVolume.h"
 #include "ECS/Components/cMeshRenderer.h"
 
 namespace PAIN {
@@ -148,6 +149,10 @@ namespace PAIN {
 
 				// set bones in renderer
 				renderer.boneTransforms = anim.boneTransforms;
+
+				if (auto* bv = reg.try_get<BoundingVolume>(entity)) {
+					bv->needsUpdate = true;
+				}
 			}
 		}
 

@@ -117,12 +117,26 @@ local function applySceneVolumes()
     end
 end
 
+-- ==================== GLOBAL SFX CLEANUP ====================
+-- Stops all tracked SFX channels (looping sounds registered by scripts)
+local function stopAllSFXChannels()
+    if _G.SFXChannels and audioStopChannel then
+        for channelId, _ in pairs(_G.SFXChannels) do
+            audioStopChannel(channelId)
+        end
+        _G.SFXChannels = {}
+    end
+    log("[GlobalAudio] Stopped all tracked SFX channels")
+end
+
 -- ==================== FADE OUT ALL TRACKS ====================
 local function fadeOutAllTracks()
     local trackCount = globalBGMGetTrackCount()
     for i = 0, trackCount - 1 do
         globalBGMFade(i, CONFIG.mutedVolume, CONFIG.sceneTransitionDelay - 0.2)
     end
+    -- Stop all SFX on scene transition
+    stopAllSFXChannels()
 end
 
 -- ==================== DELAYED SCENE CHANGE ====================
@@ -199,6 +213,7 @@ _G.GlobalAudio.setCombat = GlobalAudio_SetCombat
 _G.GlobalAudio.setGameOver = GlobalAudio_SetGameOver
 _G.GlobalAudio.changeSceneWithFade = changeSceneWithFade
 _G.GlobalAudio.fadeOutAllTracks = fadeOutAllTracks
+_G.GlobalAudio.stopAllSFXChannels = stopAllSFXChannels
 _G.GlobalAudio.getConfig = function() return CONFIG end
 _G.GlobalAudio.getCurrentScene = function() return currentScene end
 _G.GlobalAudio.isInCombat = function() return inCombat end

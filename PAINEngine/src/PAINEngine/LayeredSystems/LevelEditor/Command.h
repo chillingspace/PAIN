@@ -1,7 +1,7 @@
 #pragma once
 
 #include <functional>
-#include <stack>
+#include <deque>
 #include <string>
 #include <memory>
 
@@ -12,12 +12,10 @@ namespace PAIN {
 		struct Action {
 			std::function<void()> do_action;
 			std::function<void()> undo_action;
-			std::string description;  // For debugging and UI display
+			std::string description;
 
-			// Default constructor (required for std::stack operations)
 			Action() = default;
 
-			// Parameterized constructor
 			Action(std::function<void()> do_fn,
 				std::function<void()> undo_fn,
 				const std::string& desc = "")
@@ -30,18 +28,13 @@ namespace PAIN {
 		// Undo & Redo Level Editor Manager
 		class CommandManager {
 		private:
-			// Undo stack actions
-			std::stack<Action> undo_stack;
+			// Using deque so the debug panel can iterate the full history
+			// Back = top (most recent), Front = oldest
+			std::deque<Action> undo_stack;
+			std::deque<Action> redo_stack;
 
-			// Redo stack actions
-			std::stack<Action> redo_stack;
-
-			// Optional: limit stack size to prevent memory issues
 			size_t max_stack_size = 100;
-
-			// NEW: Flag to prevent recording during undo/redo
 			bool is_executing_undo_redo = false;
-
 			int modification_count = 0;
 
 			std::shared_ptr<Services> services;
@@ -50,52 +43,40 @@ namespace PAIN {
 			CommandManager(std::shared_ptr<Services> s) : services(s) {}
 			~CommandManager() = default;
 
-			// Undo action
 			void undo();
-
-			// Redo action
 			void redo();
-
-			// Execute action
 			void executeAction(Action&& action);
-
-			// Clear Undo & Redo Stack
 			void clearStacks();
 
-			// Query stack states
+			// Stack state queries
 			bool canUndo() const { return !undo_stack.empty(); }
 			bool canRedo() const { return !redo_stack.empty(); }
 
-			// Get stack sizes (useful for UI)
+			// Stack sizes
 			size_t getUndoCount() const { return undo_stack.size(); }
 			size_t getRedoCount() const { return redo_stack.size(); }
 
-			// Set maximum stack size
-			void setMaxStackSize(size_t size) { max_stack_size = size; }
+			// Next action descriptions (top = back of deque)
+			std::string getNextUndoDescription() const {
+				return undo_stack.empty() ? "" : undo_stack.back().description;
+			}
+			std::string getNextRedoDescription() const {
+				return redo_stack.empty() ? "" : redo_stack.back().description;
+			}
 
-			// Get maximum stack size
+			// Full history access for debug panel (index 0 = oldest, back = most recent)
+			const std::deque<Action>& getUndoHistory() const { return undo_stack; }
+			const std::deque<Action>& getRedoHistory() const { return redo_stack; }
+
+			void setMaxStackSize(size_t size) { max_stack_size = size; }
 			size_t getMaxStackSize() const { return max_stack_size; }
 
-			// Get description of next undo/redo action (for UI tooltips)
-			std::string getNextUndoDescription() const {
-				return undo_stack.empty() ? "" : undo_stack.top().description;
-			}
-
-			std::string getNextRedoDescription() const {
-				return redo_stack.empty() ? "" : redo_stack.top().description;
-			}
-
-			// Check if currently executing undo/redo
 			bool isExecutingUndoRedo() const { return is_executing_undo_redo; }
-
-			// Get modification counter
 			int getModificationCount() const { return modification_count; }
-				 
 		};
 
-		// Helper macro for creating actions with less boilerplate
 #define CREATE_ACTION(do_code, undo_code, desc) \
-			PAIN::Editor::Action([=]() { do_code; }, [=]() { undo_code; }, desc)
+		PAIN::Editor::Action([=]() { do_code; }, [=]() { undo_code; }, desc)
 
 	}
 }

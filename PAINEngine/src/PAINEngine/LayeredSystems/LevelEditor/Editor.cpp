@@ -90,9 +90,9 @@ namespace PAIN {
             // Set ImGui ini file path during initialization (before first ImGui::NewFrame())
 
 #ifdef PN_PLATFORM_WINDOWS
-            m_imgui_ini_path = services->get<Path::Path>()->resolvePath("documents://imgui_layout.ini");
+            m_imgui_ini_path = services->get<Path::Path>()->resolvePath("documents://imgui.ini");
 #else
-            m_imgui_ini_path = services->get<Path::Path>()->resolvePath("internal://imgui_layout.ini");
+            m_imgui_ini_path = services->get<Path::Path>()->resolvePath("internal://imgui.ini");
 #endif
 
             // Check if user's ini file mesh_id; if not, copy default from config folder
@@ -237,8 +237,12 @@ namespace PAIN {
                 // Build docking space
                 buildDockspace();
 
+                auto window = services->get<Window::Window>();
                 auto renderer = services->get<sRenderer>();
                 auto vp = panels->get<Panel::ViewportPanel>();
+
+				// Always unhide cursor when editor is visible
+                window->hideCursor(false);
 
                 if (renderer && vp) {
                     vp->setRenderTexture(renderer->getFramebufferTexture(), renderer->getFramebufferWidth(), renderer->getFramebufferHeight());

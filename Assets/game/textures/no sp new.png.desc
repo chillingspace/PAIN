@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "no sp new.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 18123710909486361282
+  },
+  "descriptor_version": 1,
+  "guid": "b77039aa-0434-8241-88d1-912fecf7ccbe",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\no sp new.png"
+  }
+}

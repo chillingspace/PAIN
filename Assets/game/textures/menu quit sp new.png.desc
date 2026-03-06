@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "menu quit sp new.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 17659620841232580889
+  },
+  "descriptor_version": 1,
+  "guid": "f104b244-4bae-e54e-bcad-506269dce1bd",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\menu quit sp new.png"
+  }
+}

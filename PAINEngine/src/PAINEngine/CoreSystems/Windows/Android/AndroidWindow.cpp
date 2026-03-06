@@ -332,6 +332,15 @@ namespace PAIN {
                 int32_t action = AKeyEvent_getAction(event);
                 int32_t meta_state = AKeyEvent_getMetaState(event);
 
+                const bool isSystemVolumeKey =
+                    key_code == AKEYCODE_VOLUME_UP ||
+                    key_code == AKEYCODE_VOLUME_DOWN ||
+                    key_code == AKEYCODE_VOLUME_MUTE;
+
+                if (isSystemVolumeKey) {
+                    return 0;
+                }
+
 
 
                 // Special handling for back button

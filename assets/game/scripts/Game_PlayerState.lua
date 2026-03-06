@@ -13,9 +13,15 @@ local SFX_GAMEOVER_LOOP = "game/audio/bgm/gameover bgm/GameOver Loop.wav"
 local gameOverLoopChannel = -1  -- Track looping channel for stopping on restart
 
 -- New SFX Paths
-local SFX_RESPAWN = "game/audio/sfx/player/Player_Respawn_01.wav"
-local SFX_HIDE_IN = "game/audio/sfx/player/hide/Box In.wav"
-local SFX_HIDE_OUT = "game/audio/sfx/player/hide/Box Out.wav"
+local SFX_RESPAWN   = "game/audio/sfx/player/Player_Respawn_01.wav"
+local SFX_HIDE_IN   = "game/audio/sfx/player/hide/Box In.wav"
+local SFX_HIDE_OUT  = "game/audio/sfx/player/hide/Box Out.wav"
+local SFX_PIPE_IN   = "game/audio/sfx/player/hide/Box In.wav"   -- swap pipe sfx later if have
+local SFX_PIPE_OUT  = "game/audio/sfx/player/hide/Box Out.wav"
+
+-- Pipe group suffixes — tag pipe ends as "pipe_entrance_A" / "pipe_exit_A", etc.
+local PIPE_GROUPS = { "A","B","C","D","E","F","G","H","I","J","K","L","M","N","O",
+                      "P","Q","R","S","T","U","V","W","X","Y","Z" }
 
 -- SFX Volumes (decibel modifers)
 local VOL_GAMEOVER_HIT = 0.0
@@ -50,7 +56,17 @@ _G.PlayerState = _G.PlayerState or {
     hideRadius = 1,  -- how close to hide
     playerBaseScale = nil,   -- original scale of player
     letterBaseScale = nil,
-    hideScaleFactor = 0.1,   -- how small when hiding 
+    hideScaleFactor = 0.1,   -- how small when hiding
+
+    -- pipe traversal state
+    inPipe          = false,
+    pipeEntrancePos = nil,   -- { x, y, z } of the entrance end
+    pipeExitPos     = nil,   -- { x, y, z } of the exit end
+    pipeDirX        = 0.0,   -- unit vector from entrance → exit
+    pipeDirY        = 0.0,
+    pipeDirZ        = 0.0,
+    pipeLen         = 0.0,   -- world-space length of pipe
+    pipeEnterRadius = 1.5,   -- how close the player must be to enter a pipe
 
     -- SFX entities (Legacy entities removed)
     -- sfxHideIn  = nil,
@@ -112,6 +128,11 @@ local function triggerGameOver()
     -- Play Game Over SFX: hit sound once, then looping background
     audioPlaySFX(SFX_GAMEOVER_HIT, VOL_GAMEOVER_HIT)
     gameOverLoopChannel = audioPlaySFX(SFX_GAMEOVER_LOOP, VOL_GAMEOVER_LOOP, true)
+    -- Register in global SFX registry for scene-change cleanup
+    if gameOverLoopChannel >= 0 then
+        _G.SFXChannels = _G.SFXChannels or {}
+        _G.SFXChannels[gameOverLoopChannel] = true
+    end
 
     -- Duck Global BGM
     if _G.GlobalAudio and _G.GlobalAudio.setGameOver then
@@ -126,6 +147,20 @@ local function triggerGameWin()
     S.gameEnded = true
     S.gameWon   = true
     requestEndOverlay("win")
+end
+
+-- Global cleanup: stop game-over loop SFX and restore BGM ducking.
+-- Called from UIActions.lua before scene changes, and from S.init as failsafe.
+function S.stopGameOverAudio()
+    if gameOverLoopChannel >= 0 then
+        if audioStopChannel then audioStopChannel(gameOverLoopChannel) end
+        -- Unregister from global SFX registry
+        if _G.SFXChannels then _G.SFXChannels[gameOverLoopChannel] = nil end
+        gameOverLoopChannel = -1
+    end
+    if _G.GlobalAudio and _G.GlobalAudio.setGameOver then
+        _G.GlobalAudio.setGameOver(false)
+    end
 end
 
 -- guard so keys arent registered twice if script reloads
@@ -231,6 +266,9 @@ function S.init(player)
         S.carriedLetter = nil
         S.hidden = false
         S.hiddenIn = nil
+        S.inPipe = false
+        S.pipeEntrancePos = nil
+        S.pipeExitPos = nil
         S.respawnCooldown = 0.0
         S.pendingRespawn = nil
         S.gameEnded = false
@@ -252,15 +290,7 @@ function S.init(player)
         end
 
         -- Stop Game Over loop if it's playing
-        if gameOverLoopChannel >= 0 then
-            if audioStopChannel then audioStopChannel(gameOverLoopChannel) end
-            gameOverLoopChannel = -1
-        end
-
-        -- Restore Global BGM volume check (failsafe)
-        if _G.GlobalAudio and _G.GlobalAudio.setGameOver then
-            _G.GlobalAudio.setGameOver(false)
-        end
+        S.stopGameOverAudio()
     end
 
      -- cache start position
@@ -344,7 +374,15 @@ function S.onActionButton()
     local px, py, pz = getPosition(S.player)
 
     ----------------------------------------------------------------
-    -- 1) If already hidden, always treat as "unhide"
+    -- 1) Exit pipe
+    ----------------------------------------------------------------
+    if S.inPipe then
+        hidePressed = true
+        return
+    end
+
+    ----------------------------------------------------------------
+    -- 2) If already hidden in a box, unhide
     ----------------------------------------------------------------
     if S.hidden then
         hidePressed = true
@@ -352,21 +390,26 @@ function S.onActionButton()
     end
 
     ----------------------------------------------------------------
-    -- 2) Check if we're close enough to a hiding_spot
+    -- 3) Near a pipe entrance → enter pipe
+    ----------------------------------------------------------------
+    if findNearestPipeEntrance(px, py, pz) then
+        hidePressed = true
+        return
+    end
+
+    ----------------------------------------------------------------
+    -- 4) Near a hiding spot → hide
     ----------------------------------------------------------------
     local nearHideSpot = false
     local spots = getEntitiesByTag("hiding_spot")
     if spots and #spots > 0 then
         local bestDistSq = S.hideRadius * S.hideRadius
-
         for _, spot in ipairs(spots) do
             local bx, by, bz = getPosition(spot)
             local dx = px - bx
             local dy = py - by
             local dz = pz - bz
-            local distSq = dx*dx + dy*dy + dz*dz
-
-            if distSq <= bestDistSq then
+            if dx*dx + dy*dy + dz*dz <= bestDistSq then
                 nearHideSpot = true
                 break
             end
@@ -374,13 +417,10 @@ function S.onActionButton()
     end
 
     if nearHideSpot then
-        ----------------------------------------------------------------
-        -- 3) If near a hiding spot, treat this press as "hide"
-        ----------------------------------------------------------------
         hidePressed = true
     else
         ----------------------------------------------------------------
-        -- 4) Otherwise, treat this press as "collect / deliver letter"
+        -- 5) Otherwise collect / deliver letter
         ----------------------------------------------------------------
         collectPressed = true
     end
@@ -483,6 +523,7 @@ local function applyHideScale(entity, baseScale)
     setScale(entity, baseScale.x * f, baseScale.y * f, baseScale.z * f)
 end
 
+
 -------------------------------------------------
 -- Helper: Deliver carried letter
 -------------------------------------------------
@@ -523,66 +564,133 @@ end
 
 
 -------------------------------------------------
+-- Pipe helpers
+-------------------------------------------------
+
+-- Returns { entrancePos, exitPos, entranceEntity } if the player is within
+-- pipeEnterRadius of either end of any pipe group, nil otherwise.
+-- The returned entrancePos is always the end the player is standing at,
+-- so direction of travel is always away from them.
+local function findNearestPipeEntrance(px, py, pz)
+    local radSq = S.pipeEnterRadius * S.pipeEnterRadius
+    for _, group in ipairs(PIPE_GROUPS) do
+        local entrances = getEntitiesByTag("pipe_entrance_" .. group)
+        local exits     = getEntitiesByTag("pipe_exit_"     .. group)
+        if entrances and #entrances > 0 and exits and #exits > 0 then
+            local entEnt = entrances[1]
+            local extEnt = exits[1]
+            local ex, ey, ez = getPosition(entEnt)
+            local xx, xy, xz = getPosition(extEnt)
+
+            -- Check entrance end
+            local dex, dey, dez = px - ex, py - ey, pz - ez
+            if dex*dex + dey*dey + dez*dez <= radSq then
+                return {
+                    entrancePos    = { x = ex, y = ey, z = ez },
+                    exitPos        = { x = xx, y = xy, z = xz },
+                    entranceEntity = entEnt,
+                }
+            end
+
+            -- Check exit end (player enters from this side - swap direction)
+            local dxx, dxy, dxz = px - xx, py - xy, pz - xz
+            if dxx*dxx + dxy*dxy + dxz*dxz <= radSq then
+                return {
+                    entrancePos    = { x = xx, y = xy, z = xz },
+                    exitPos        = { x = ex, y = ey, z = ez },
+                    entranceEntity = extEnt,
+                }
+            end
+        end
+    end
+    return nil
+end
+
+local function enterPipe(pipeData)
+    local ep = pipeData.entrancePos
+    local xp = pipeData.exitPos
+    local vx = xp.x - ep.x
+    local vy = xp.y - ep.y
+    local vz = xp.z - ep.z
+    local len = math.sqrt(vx*vx + vy*vy + vz*vz)
+    if len < 0.001 then return end   -- degenerate pipe, skip
+
+    S.inPipe          = true
+    S.pipeEntrancePos = ep
+    S.pipeExitPos     = xp
+    S.pipeDirX        = vx / len
+    S.pipeDirY        = vy / len
+    S.pipeDirZ        = vz / len
+    S.pipeLen         = len
+
+    setPosition(S.player, ep.x, ep.y, ep.z)
+    setVelocity(S.player, 0.0, 0.0, 0.0)
+    setVisibility(S.player, false)
+    if S.carriedLetter then setVisibility(S.carriedLetter, false) end
+    disablePhysics(S.player)
+
+    audioPlaySFXFromEntity(SFX_PIPE_IN, pipeData.entranceEntity, VOL_HIDE)
+    log("[PlayerState] Player entered pipe")
+end
+
+local function exitPipe()
+    S.inPipe = false
+    setVisibility(S.player, true)
+    if S.carriedLetter then setVisibility(S.carriedLetter, true) end
+    enablePhysics(S.player)
+    audioPlaySFXFromEntity(SFX_PIPE_OUT, S.player, VOL_HIDE)
+    log("[PlayerState] Player exited pipe")
+end
+
+
+-------------------------------------------------
 -- Helper: Handle hide/unhide toggle
 -------------------------------------------------
 local function handleHideToggle(px, py, pz)
+    -- Exit pipe
+    if S.inPipe then
+        exitPipe()
+        resetInputState()
+        return
+    end
+
     if S.hidden then
-        -- Unhide
+        -- Unhide from box
+        local spot = S.hiddenIn
         S.hidden = false
         S.hiddenIn = nil
 
-        -- Restore player scale
-        if S.playerBaseScale then
-            setScale(S.player, S.playerBaseScale.x, S.playerBaseScale.y, S.playerBaseScale.z)
-        end
+        setVisibility(S.player, true)
+        if S.carriedLetter then setVisibility(S.carriedLetter, true) end
 
-        -- Restore letter scale
-        if S.carriedLetter and S.letterBaseScale then
-            setScale(S.carriedLetter, S.letterBaseScale.x, S.letterBaseScale.y, S.letterBaseScale.z)
-        end
-
-        resetInputState()
-        log("[PlayerState] Player left hiding spot")
         resetInputState()
         log("[PlayerState] Player left hiding spot")
         enablePhysics(S.player)
-        -- NEW: Play hide out sound at the box location
-        if S.hiddenIn then
-            audioPlaySFXFromEntity(SFX_HIDE_OUT, S.hiddenIn, VOL_HIDE)
+
+        if spot then
+            audioPlaySFXFromEntity(SFX_HIDE_OUT, spot, VOL_HIDE)
         end
     else
-        -- Try to hide
-        local bestSpot = findNearestByTag("hiding_spot", px, py, pz, S.hideRadius)
+        -- Check pipe entrance first, then hiding spot
+        local pipeData = findNearestPipeEntrance(px, py, pz)
+        if pipeData then
+            enterPipe(pipeData)
+            resetInputState()
+            return
+        end
 
+        local bestSpot = findNearestByTag("hiding_spot", px, py, pz, S.hideRadius)
         if bestSpot then
             local bx, by, bz = getPosition(bestSpot)
             setPosition(S.player, bx, by, bz)
             setVelocity(S.player, 0.0, 0.0, 0.0)
-            log("[PlayerState] SET VEL TO 0")
-            -- Cache and apply hide scale
-            if not S.playerBaseScale then
-                local sx, sy, sz = getScale(S.player)
-                S.playerBaseScale = { x = sx, y = sy, z = sz }
-            end
-
-            applyHideScale(S.player, S.playerBaseScale)
-            
-            -- Also scale carried letter
-            if S.carriedLetter then
-                if not S.letterBaseScale then
-                    local lx, ly, lz = getScale(S.carriedLetter)
-                    S.letterBaseScale = { x = lx, y = ly, z = lz }
-                end
-                applyHideScale(S.carriedLetter, S.letterBaseScale)
-            end
-            
+            setVisibility(S.player, false)
+            if S.carriedLetter then setVisibility(S.carriedLetter, false) end
             resetInputState()
             S.hidden = true
             S.hiddenIn = bestSpot
             log("[PlayerState] Player is hiding in a box")
-            S.hidden = true
-            S.hiddenIn = bestSpot
-            log("[PlayerState] Player is hiding in a box")
+            disablePhysics(S.player)
             -- NEW: Play hide in sound at the box location
             audioPlaySFXFromEntity(SFX_HIDE_IN, bestSpot, VOL_HIDE)
             disablePhysics(S.player)
@@ -591,10 +699,14 @@ local function handleHideToggle(px, py, pz)
 end
 
 
+
 -------------------------------------------------
 -- Helper: Handle letter carry/deliver/pickup
 -------------------------------------------------
 local function handleLetterLogic(px, py, pz)
+    -- No letter interaction while inside a pipe
+    if S.inPipe then return end
+
     -- If carrying a letter
     if S.carriedLetter then
         -- Keep letter on player's back
@@ -690,6 +802,13 @@ function S.update(dt)
             restartPressed = false
             resetInputState()
 
+            -- Stop Game Over loop BEFORE changeScene (script reload would lose the channel ID)
+            S.stopGameOverAudio()
+
+            -- Stop all tracked looping SFX (direct changeScene bypasses fadeOutAllTracks)
+            if _G.GlobalAudio and _G.GlobalAudio.stopAllSFXChannels then
+                _G.GlobalAudio.stopAllSFXChannels()
+            end
             if S.gameWon then 
                 -- Player win, go to next level
                 changeScene(NEXT_SCENE_PATH)
@@ -743,9 +862,13 @@ function S.isHidden()
     return false
 end
 
+function S.isInPipe()
+    return S.inPipe == true
+end
+
 function S.canBeCaught()
-    -- cannot be caught while hiding
-    if S.hidden then
+    -- cannot be caught while hiding or inside a pipe
+    if S.hidden or S.inPipe then
         return false
     end
 

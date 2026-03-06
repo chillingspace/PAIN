@@ -154,7 +154,7 @@ namespace PAIN {
 		// ============================================
 		// Camera Collision Settings
 		// ============================================
-		bool collisionEnabled = true;           // Toggle collision on/off
+		bool collisionEnabled = false;           // Toggle collision on/off
 		float collisionRadius = 0.5f;           // Sphere/capsule radius
 		float collisionOffset = 0.1f;           // Minimum distance from surfaces
 		float capsuleHeight = 1.8f;             // Height for capsule collision

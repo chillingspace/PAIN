@@ -10,6 +10,7 @@
 
 #include "ViewportPanel.h"
 #include "ImGuizmo.h"
+#include <algorithm>
 #include <cmath>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -47,6 +48,133 @@ namespace PAIN {
 		if (auto phys = ecs->getSystem<Physics::System>()) {
 			phys->teleportBodyToTransform(e, t, rb);
 		}
+	}
+
+	static void mapMouseToFramebufferSpace(
+		const ImVec2& localMousePos,
+		const ImVec2& displayedViewportSize,
+		int framebufferWidth,
+		int framebufferHeight,
+		ImVec2& outMousePos,
+		ImVec2& outViewportSize
+	) {
+		outMousePos = localMousePos;
+		outViewportSize = displayedViewportSize;
+
+		if (displayedViewportSize.x <= 0.0f || displayedViewportSize.y <= 0.0f) {
+			return;
+		}
+
+		if (framebufferWidth <= 0 || framebufferHeight <= 0) {
+			return;
+		}
+
+		const float scaleX = static_cast<float>(framebufferWidth) / displayedViewportSize.x;
+		const float scaleY = static_cast<float>(framebufferHeight) / displayedViewportSize.y;
+
+		outMousePos.x = localMousePos.x * scaleX;
+		outMousePos.y = localMousePos.y * scaleY;
+		outViewportSize = ImVec2(static_cast<float>(framebufferWidth), static_cast<float>(framebufferHeight));
+
+		outMousePos.x = std::clamp(outMousePos.x, 0.0f, std::max(0.0f, outViewportSize.x - 1.0f));
+		outMousePos.y = std::clamp(outMousePos.y, 0.0f, std::max(0.0f, outViewportSize.y - 1.0f));
+	}
+
+	static bool rayIntersectsTriangle(
+		const glm::vec3& rayOrigin,
+		const glm::vec3& rayDirection,
+		const glm::vec3& v0,
+		const glm::vec3& v1,
+		const glm::vec3& v2,
+		float& outT
+	) {
+		constexpr float epsilon = 1e-6f;
+
+		const glm::vec3 edge1 = v1 - v0;
+		const glm::vec3 edge2 = v2 - v0;
+		const glm::vec3 pVec = glm::cross(rayDirection, edge2);
+		const float det = glm::dot(edge1, pVec);
+
+		if (std::abs(det) < epsilon) {
+			return false;
+		}
+
+		const float invDet = 1.0f / det;
+		const glm::vec3 tVec = rayOrigin - v0;
+		const float u = glm::dot(tVec, pVec) * invDet;
+		if (u < 0.0f || u > 1.0f) {
+			return false;
+		}
+
+		const glm::vec3 qVec = glm::cross(tVec, edge1);
+		const float v = glm::dot(rayDirection, qVec) * invDet;
+		if (v < 0.0f || (u + v) > 1.0f) {
+			return false;
+		}
+
+		const float t = glm::dot(edge2, qVec) * invDet;
+		if (t <= epsilon) {
+			return false;
+		}
+
+		outT = t;
+		return true;
+	}
+
+	static std::optional<float> raycastModelMeshDistance(
+		const glm::vec3& worldRayOrigin,
+		const glm::vec3& worldRayDirection,
+		const WorldTransform& worldTransform,
+		const std::shared_ptr<Assets::Model>& model
+	) {
+		if (!model || model->vertices.empty()) {
+			return std::nullopt;
+		}
+
+		if (model->indices.size() < 3) {
+			return std::nullopt;
+		}
+
+		const glm::mat4 invWorld = glm::inverse(worldTransform.matrix);
+		const glm::vec3 localRayOrigin = glm::vec3(invWorld * glm::vec4(worldRayOrigin, 1.0f));
+		const glm::vec3 localRayDirection = glm::normalize(glm::vec3(invWorld * glm::vec4(worldRayDirection, 0.0f)));
+
+		bool foundHit = false;
+		float closestWorldDistance = std::numeric_limits<float>::max();
+
+		for (size_t i = 0; i + 2 < model->indices.size(); i += 3) {
+			const unsigned int i0 = model->indices[i];
+			const unsigned int i1 = model->indices[i + 1];
+			const unsigned int i2 = model->indices[i + 2];
+
+			if (i0 >= model->vertices.size() || i1 >= model->vertices.size() || i2 >= model->vertices.size()) {
+				continue;
+			}
+
+			const glm::vec3& v0 = model->vertices[i0].pos;
+			const glm::vec3& v1 = model->vertices[i1].pos;
+			const glm::vec3& v2 = model->vertices[i2].pos;
+
+			float localT = 0.0f;
+			if (!rayIntersectsTriangle(localRayOrigin, localRayDirection, v0, v1, v2, localT)) {
+				continue;
+			}
+
+			const glm::vec3 localHitPoint = localRayOrigin + (localRayDirection * localT);
+			const glm::vec3 worldHitPoint = glm::vec3(worldTransform.matrix * glm::vec4(localHitPoint, 1.0f));
+			const float worldDistance = glm::length(worldHitPoint - worldRayOrigin);
+
+			if (worldDistance < closestWorldDistance) {
+				closestWorldDistance = worldDistance;
+				foundHit = true;
+			}
+		}
+
+		if (!foundHit) {
+			return std::nullopt;
+		}
+
+		return closestWorldDistance;
 	}
 
 	namespace Editor {
@@ -88,9 +216,13 @@ namespace PAIN {
 				glm::mat4 viewMatrix = camera->view();
 				glm::mat4 projMatrix = camera->projection();
 
+				ImVec2 rayMousePos;
+				ImVec2 rayViewportSize;
+				mapMouseToFramebufferSpace(localMousePos, viewportSize, texWidth, texHeight, rayMousePos, rayViewportSize);
+
 				// Get ray
 				glm::vec3 rayOrigin = getCameraPosition(viewMatrix);
-				glm::vec3 rayDirection = screenToWorldRay(localMousePos, viewportSize, viewMatrix, projMatrix);
+				glm::vec3 rayDirection = screenToWorldRay(rayMousePos, rayViewportSize, viewMatrix, projMatrix);
 
 				//PN_CORE_TRACE("[Raycast] Origin: ({}, {}, {}) Dir: ({}, {}, {})",
 				//	rayOrigin.x, rayOrigin.y, rayOrigin.z,
@@ -287,8 +419,12 @@ namespace PAIN {
 				glm::mat4 viewMatrix = camera->view();
 				glm::mat4 projMatrix = camera->projection();
 
+				ImVec2 rayMousePos;
+				ImVec2 rayViewportSize;
+				mapMouseToFramebufferSpace(localMousePos, viewportSize, texWidth, texHeight, rayMousePos, rayViewportSize);
+
 				glm::vec3 rayOrigin = getCameraPosition(viewMatrix);
-				glm::vec3 rayDirection = screenToWorldRay(localMousePos, viewportSize, viewMatrix, projMatrix);
+				glm::vec3 rayDirection = screenToWorldRay(rayMousePos, rayViewportSize, viewMatrix, projMatrix);
 
 				 //PN_CORE_TRACE("Pick Ray - Origin: ({},{},{}) Dir: ({},{},{})", 
 				 //   rayOrigin.x, rayOrigin.y, rayOrigin.z,
@@ -298,11 +434,48 @@ namespace PAIN {
 				float maxDist = 1000.0f;
 				auto& registry = ecs->getRegistry(currentRegistryID);
 				int mask = scene->getPickingMask(); 
-				auto hitResult = bvhSystem->raycast(rayOrigin, rayDirection, maxDist, registry, mask);
+				auto hitResults = bvhSystem->raycastAll(rayOrigin, rayDirection, maxDist, registry, mask);
 
-				if (hitResult.has_value()) {
-					//PN_CORE_INFO("Raycast Hit Entity: {}", (uint32_t)hitResult->entity);
-					return hitResult->entity;
+				if (!hitResults.empty()) {
+					auto assetManager = services->get<Assets::Manager>();
+					entt::entity bestPreciseEntity = entt::null;
+					float bestPreciseDistance = std::numeric_limits<float>::max();
+
+					if (assetManager) {
+						for (const auto& candidate : hitResults) {
+							if (!registry.valid(candidate.entity)) {
+								continue;
+							}
+
+							auto* modelRenderer = registry.try_get<ModelRenderer>(candidate.entity);
+							auto* worldTransform = registry.try_get<WorldTransform>(candidate.entity);
+
+							if (!modelRenderer || !worldTransform || !modelRenderer->modelGUID.IsValid()) {
+								continue;
+							}
+
+							auto modelOpt = assetManager->getAsset<Assets::Model>(modelRenderer->modelGUID);
+							if (!modelOpt.has_value()) {
+								continue;
+							}
+
+							auto preciseDistance = raycastModelMeshDistance(rayOrigin, rayDirection, *worldTransform, modelOpt.value());
+							if (!preciseDistance.has_value()) {
+								continue;
+							}
+
+							if (preciseDistance.value() < bestPreciseDistance) {
+								bestPreciseDistance = preciseDistance.value();
+								bestPreciseEntity = candidate.entity;
+							}
+						}
+					}
+
+					if (bestPreciseEntity != entt::null) {
+						return bestPreciseEntity;
+					}
+
+					return hitResults.front().entity;
 				}
 
 				PN_CORE_TRACE("Raycast Missed");
@@ -1100,107 +1273,107 @@ namespace PAIN {
 					// ========================================
 					// === Camera Collision Visualization ===
 					// ========================================
-					if (camera->showCollisionGizmo && camera->collisionEnabled) {
-						// Use the same viewport position and size as the rendered image
-						// These were set earlier at line ~480 before ImGui::Image
-						ImVec2 imagePos = viewportPos;
-						ImVec2 imageSize = size;
-						
-						// Project camera position to screen space for visualization
-						glm::mat4 viewProj = camera->projection() * camera->view();
-						
-						// Draw wireframe sphere/capsule around camera
-						glm::vec3 camPos = camera->pos;
-						float radius = camera->collisionRadius;
-						
-						// Simple visualization: draw circles in different planes
-						ImDrawList* drawList = ImGui::GetWindowDrawList();
-						ImU32 color = IM_COL32(0, 255, 0, 200); // Green for collision
-						
-						// Project 3D points to 2D screen space using the actual rendered viewport
-						auto projectToScreen = [&](const glm::vec3& worldPos) -> ImVec2 {
-							glm::vec4 clip = viewProj * glm::vec4(worldPos, 1.0f);
-							if (clip.w > 0.001f) {
-								glm::vec3 ndc = glm::vec3(clip) / clip.w;
-								return ImVec2(
-									imagePos.x + (ndc.x * 0.5f + 0.5f) * imageSize.x,
-									imagePos.y + (1.0f - (ndc.y * 0.5f + 0.5f)) * imageSize.y
-								);
-							}
-							return ImVec2(-1000, -1000); // Off-screen
-						};
-						
-						// Draw circle in XY plane
-						const int segments = 32;
-						for (int i = 0; i < segments; ++i) {
-							float angle1 = (float(i) / segments) * 2.0f * 3.14159f;
-							float angle2 = (float(i + 1) / segments) * 2.0f * 3.14159f;
-							
-							glm::vec3 p1 = camPos + glm::vec3(cos(angle1) * radius, sin(angle1) * radius, 0);
-							glm::vec3 p2 = camPos + glm::vec3(cos(angle2) * radius, sin(angle2) * radius, 0);
-							
-							ImVec2 screen1 = projectToScreen(p1);
-							ImVec2 screen2 = projectToScreen(p2);
-							
-							if (screen1.x > -100 && screen2.x > -100) {
-								drawList->AddLine(screen1, screen2, color, 2.0f);
-							}
-						}
-						
-						// Draw circle in XZ plane
-						for (int i = 0; i < segments; ++i) {
-							float angle1 = (float(i) / segments) * 2.0f * 3.14159f;
-							float angle2 = (float(i + 1) / segments) * 2.0f * 3.14159f;
-							
-							glm::vec3 p1 = camPos + glm::vec3(cos(angle1) * radius, 0, sin(angle1) * radius);
-							glm::vec3 p2 = camPos + glm::vec3(cos(angle2) * radius, 0, sin(angle2) * radius);
-							
-							ImVec2 screen1 = projectToScreen(p1);
-							ImVec2 screen2 = projectToScreen(p2);
-							
-							if (screen1.x > -100 && screen2.x > -100) {
-								drawList->AddLine(screen1, screen2, color, 2.0f);
-							}
-						}
-						
-						// Draw circle in YZ plane
-						for (int i = 0; i < segments; ++i) {
-							float angle1 = (float(i) / segments) * 2.0f * 3.14159f;
-							float angle2 = (float(i + 1) / segments) * 2.0f * 3.14159f;
-							
-							glm::vec3 p1 = camPos + glm::vec3(0, cos(angle1) * radius, sin(angle1) * radius);
-							glm::vec3 p2 = camPos + glm::vec3(0, cos(angle2) * radius, sin(angle2) * radius);
-							
-							ImVec2 screen1 = projectToScreen(p1);
-							ImVec2 screen2 = projectToScreen(p2);
-							
-							if (screen1.x > -100 && screen2.x > -100) {
-								drawList->AddLine(screen1, screen2, color, 2.0f);
-							}
-						}
-						
-						// For capsule, draw lines showing height
-						if (camera->useCapsuleCollision) {
-							float halfHeight = (camera->capsuleHeight - 2.0f * radius) * 0.5f;
-							if (halfHeight > 0) {
-								glm::vec3 top = camPos + glm::vec3(0, halfHeight, 0);
-								glm::vec3 bottom = camPos - glm::vec3(0, halfHeight, 0);
-								
-								// Draw vertical lines to show capsule extent
-								for (int i = 0; i < 8; ++i) {
-									float angle = (float(i) / 8) * 2.0f * 3.14159f;
-									glm::vec3 offset(cos(angle) * radius, 0, sin(angle) * radius);
-									
-									ImVec2 screenTop = projectToScreen(top + offset);
-									ImVec2 screenBottom = projectToScreen(bottom + offset);
-									
-									if (screenTop.x > -100 && screenBottom.x > -100) {
-										drawList->AddLine(screenTop, screenBottom, color, 1.0f);
-									}
-								}
-							}
-						}
-					}
+					//if (camera->showCollisionGizmo && camera->collisionEnabled) {
+					//	// Use the same viewport position and size as the rendered image
+					//	// These were set earlier at line ~480 before ImGui::Image
+					//	ImVec2 imagePos = viewportPos;
+					//	ImVec2 imageSize = size;
+					//	
+					//	// Project camera position to screen space for visualization
+					//	glm::mat4 viewProj = camera->projection() * camera->view();
+					//	
+					//	// Draw wireframe sphere/capsule around camera
+					//	glm::vec3 camPos = camera->pos;
+					//	float radius = camera->collisionRadius;
+					//	
+					//	// Simple visualization: draw circles in different planes
+					//	ImDrawList* drawList = ImGui::GetWindowDrawList();
+					//	ImU32 color = IM_COL32(0, 255, 0, 200); // Green for collision
+					//	
+					//	// Project 3D points to 2D screen space using the actual rendered viewport
+					//	auto projectToScreen = [&](const glm::vec3& worldPos) -> ImVec2 {
+					//		glm::vec4 clip = viewProj * glm::vec4(worldPos, 1.0f);
+					//		if (clip.w > 0.001f) {
+					//			glm::vec3 ndc = glm::vec3(clip) / clip.w;
+					//			return ImVec2(
+					//				imagePos.x + (ndc.x * 0.5f + 0.5f) * imageSize.x,
+					//				imagePos.y + (1.0f - (ndc.y * 0.5f + 0.5f)) * imageSize.y
+					//			);
+					//		}
+					//		return ImVec2(-1000, -1000); // Off-screen
+					//	};
+					//	
+					//	// Draw circle in XY plane
+					//	const int segments = 32;
+					//	for (int i = 0; i < segments; ++i) {
+					//		float angle1 = (float(i) / segments) * 2.0f * 3.14159f;
+					//		float angle2 = (float(i + 1) / segments) * 2.0f * 3.14159f;
+					//		
+					//		glm::vec3 p1 = camPos + glm::vec3(cos(angle1) * radius, sin(angle1) * radius, 0);
+					//		glm::vec3 p2 = camPos + glm::vec3(cos(angle2) * radius, sin(angle2) * radius, 0);
+					//		
+					//		ImVec2 screen1 = projectToScreen(p1);
+					//		ImVec2 screen2 = projectToScreen(p2);
+					//		
+					//		if (screen1.x > -100 && screen2.x > -100) {
+					//			drawList->AddLine(screen1, screen2, color, 2.0f);
+					//		}
+					//	}
+					//	
+					//	// Draw circle in XZ plane
+					//	for (int i = 0; i < segments; ++i) {
+					//		float angle1 = (float(i) / segments) * 2.0f * 3.14159f;
+					//		float angle2 = (float(i + 1) / segments) * 2.0f * 3.14159f;
+					//		
+					//		glm::vec3 p1 = camPos + glm::vec3(cos(angle1) * radius, 0, sin(angle1) * radius);
+					//		glm::vec3 p2 = camPos + glm::vec3(cos(angle2) * radius, 0, sin(angle2) * radius);
+					//		
+					//		ImVec2 screen1 = projectToScreen(p1);
+					//		ImVec2 screen2 = projectToScreen(p2);
+					//		
+					//		if (screen1.x > -100 && screen2.x > -100) {
+					//			drawList->AddLine(screen1, screen2, color, 2.0f);
+					//		}
+					//	}
+					//	
+					//	// Draw circle in YZ plane
+					//	for (int i = 0; i < segments; ++i) {
+					//		float angle1 = (float(i) / segments) * 2.0f * 3.14159f;
+					//		float angle2 = (float(i + 1) / segments) * 2.0f * 3.14159f;
+					//		
+					//		glm::vec3 p1 = camPos + glm::vec3(0, cos(angle1) * radius, sin(angle1) * radius);
+					//		glm::vec3 p2 = camPos + glm::vec3(0, cos(angle2) * radius, sin(angle2) * radius);
+					//		
+					//		ImVec2 screen1 = projectToScreen(p1);
+					//		ImVec2 screen2 = projectToScreen(p2);
+					//		
+					//		if (screen1.x > -100 && screen2.x > -100) {
+					//			drawList->AddLine(screen1, screen2, color, 2.0f);
+					//		}
+					//	}
+					//	
+					//	// For capsule, draw lines showing height
+					//	if (camera->useCapsuleCollision) {
+					//		float halfHeight = (camera->capsuleHeight - 2.0f * radius) * 0.5f;
+					//		if (halfHeight > 0) {
+					//			glm::vec3 top = camPos + glm::vec3(0, halfHeight, 0);
+					//			glm::vec3 bottom = camPos - glm::vec3(0, halfHeight, 0);
+					//			
+					//			// Draw vertical lines to show capsule extent
+					//			for (int i = 0; i < 8; ++i) {
+					//				float angle = (float(i) / 8) * 2.0f * 3.14159f;
+					//				glm::vec3 offset(cos(angle) * radius, 0, sin(angle) * radius);
+					//				
+					//				ImVec2 screenTop = projectToScreen(top + offset);
+					//				ImVec2 screenBottom = projectToScreen(bottom + offset);
+					//				
+					//				if (screenTop.x > -100 && screenBottom.x > -100) {
+					//					drawList->AddLine(screenTop, screenBottom, color, 1.0f);
+					//				}
+					//			}
+					//		}
+					//	}
+					//}
 
 					// ========================================
 					 // === Mouse Picking - AFTER GIZMO ===

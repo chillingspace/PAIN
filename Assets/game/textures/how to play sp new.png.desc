@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "how to play sp new.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 4082179034002123450
+  },
+  "descriptor_version": 1,
+  "guid": "96da43bc-20d7-d14e-90d2-db6ead150d74",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\how to play sp new.png"
+  }
+}

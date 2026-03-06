@@ -113,6 +113,7 @@ local idleInterval = 5.0 + math.random() * 3.0  -- Random 5-8 seconds
 local S = nil
 
 local maxGroundCheckDist = 0.1
+local jumpCooldown = 0.0
 
 -- Player SFX file paths
 local SFX_PLAYER_HOPS = {
@@ -181,13 +182,55 @@ registerUpdate(function(dt)
         return
     end
 
-    -- while hiding: stop movement + stop audio 
+    -- while hiding: stop movement + stop audio
     if PlayerState and PlayerState.isHidden and PlayerState.isHidden() then
         jumpPressed = false
 
         if audioStop then
             audioStop(id)
         end
+        return
+    end
+
+    -- pipe traversal: constrained 1D movement along the pipe axis
+    if S and S.isInPipe and S.isInPipe() then
+        jumpPressed = false
+
+        -- WASD or joystick (W / joystick up is toward exit)
+        local fwd = 0.0
+        if moveUp   then fwd = fwd + 1.0 end
+        if moveDown then fwd = fwd - 1.0 end
+        fwd = fwd + joystickDirY
+        fwd = math.max(-1.0, math.min(1.0, fwd))
+
+        local px, py, pz = getPosition(id)
+        local ep = S.pipeEntrancePos
+
+        -- project player's current position onto the pipe axis
+        local toCurX = px - ep.x
+        local toCurY = py - ep.y
+        local toCurZ = pz - ep.z
+        local currentT = toCurX * S.pipeDirX + toCurY * S.pipeDirY + toCurZ * S.pipeDirZ
+
+        -- advance and clamp within [0, pipeLen]
+        local newT = math.max(0.0, math.min(S.pipeLen, currentT + fwd * speed * dt))
+
+        setPosition(id,
+            ep.x + S.pipeDirX * newT,
+            ep.y + S.pipeDirY * newT,
+            ep.z + S.pipeDirZ * newT)
+        setVelocity(id, 0.0, 0.0, 0.0)
+
+        -- face direction of travel
+        if fwd ~= 0.0 then
+            local sign = fwd > 0.0 and 1.0 or -1.0
+            local fdx = S.pipeDirX * sign
+            local fdz = S.pipeDirZ * sign
+            if fdx*fdx + fdz*fdz > 0.0001 then
+                currentYaw = math.atan(fdx, fdz)
+            end
+        end
+        setRotation(id, baseRx, currentYaw, baseRz)
         return
     end
 
@@ -230,6 +273,10 @@ registerUpdate(function(dt)
 
     local isMoving = (dx ~= 0.0 or dz ~= 0.0)
 
+    -- Tick jump cooldown
+    if jumpCooldown > 0 then
+        jumpCooldown = jumpCooldown - dt
+    end
 
     if isMoving then
         Animation.SetSpeed(id, 1)
@@ -240,16 +287,18 @@ registerUpdate(function(dt)
         end
 
         if not wasMoving then
-            -- Play hop sound when starting to move
-            audioPlayRandomSFXFromEntity(SFX_PLAYER_HOPS, id, VOL_PLAYER_HOP)
+            -- Play hop sound when starting to move (skip if airborne or just landed from jump)
+            if isGrounded and jumpCooldown <= 0 then
+                audioPlayRandomSFXFromEntity(SFX_PLAYER_HOPS, id, VOL_PLAYER_HOP)
+            end
             lastAnimTime = 0.0
         
         -- LOOP: play hop sound at animation loop point
         elseif Animation and Animation.GetTime then
             local t = Animation.GetTime(id)
             
-            -- Play audio at the start of the walk cycle
-            if t < lastAnimTime and t < 0.2 then
+            -- Play audio at the start of the walk cycle (skip if airborne or during jump cooldown)
+            if t < lastAnimTime and t < 0.2 and isGrounded and jumpCooldown <= 0 then
                 audioPlayRandomSFXFromEntity(SFX_PLAYER_HOPS, id, VOL_PLAYER_HOP)
             end
             
@@ -343,6 +392,10 @@ registerUpdate(function(dt)
 
         -- Play random hop sound for jump
         audioPlayRandomSFXFromEntity(SFX_PLAYER_HOPS, id, VOL_PLAYER_HOP)
+
+        -- Prevent walk-cycle hop from double-playing on landing
+        jumpCooldown = 0.35
+        lastAnimTime = 0.0
         
         -- consume jump
         jumpPressed = false

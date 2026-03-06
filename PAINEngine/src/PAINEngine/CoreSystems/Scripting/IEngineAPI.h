@@ -64,6 +64,7 @@ namespace PAIN {
         virtual void UnassignGroup(entt::entity entityId) = 0;
         virtual std::optional<std::string> GetGroup(entt::entity entityId) = 0;*/
         virtual std::vector<entt::entity> GetEntitiesByTag(const std::string& tag) = 0;
+		virtual void SetVisibility(entt::entity entityId, bool visible) = 0;
 
         /* =========================================================================== */
         /*                                Transform                                    */
@@ -124,7 +125,7 @@ namespace PAIN {
         virtual void Camera_SetTransform(const glm::vec3& pos, const glm::vec3& target, const glm::vec3& up) = 0;
         virtual std::pair<glm::vec3, glm::vec3> GetCameraOffsets(entt::entity entityId) = 0;
         virtual glm::vec3 Camera_ResolveCollision(const glm::vec3& proposedPos, const glm::vec3& currentPos) = 0;
-        virtual glm::vec3 Camera_GetPositionWithCollision(const glm::vec3& playerPos, const glm::vec3& desiredPos) = 0;
+        virtual glm::vec3 Camera_GetPositionWithCollision(const glm::vec3& playerPos, const glm::vec3& desiredPos, const entt::entity& e) = 0;
 
         /* =========================================================================== */
         /*                                Particles                                    */

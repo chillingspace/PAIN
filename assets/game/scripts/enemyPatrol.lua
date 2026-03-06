@@ -1,13 +1,23 @@
 
--- enemyPatrol.lua 
+-- enemyPatrol.lua
 -- moves from one end to another end
+--
+-- Patrol group tagging:
+--   Tag the enemy with "patrol_group_X" (e.g. "patrol_group_A") and place
+--   two waypoint entities tagged "enemy_patrol_start_X" / "enemy_patrol_end_X".
+--   If no patrol_group tag is found, falls back to finding the nearest
+--   "enemy_patrol_start" / "enemy_patrol_end" entity within searchRadius.
 
-local speed       = 2.5   
+local speed       = 2.5
 local waitTime    = 1.0 -- pause at each end
 local startTag    = "enemy_patrol_start"
 local endTag      = "enemy_patrol_end"
-local searchRadius = 15.0 -- how far to look for waypoints
+local searchRadius = 15.0 -- how far to look for waypoints (fallback only)
 local patrolInset  = 1.5 -- how far in each endpoint so it doesnt slam into walls etc
+
+-- Suffix letters/names to check for patrol groups 
+local PATROL_GROUPS = { "A","B","C","D","E","F","G","H","I","J","K","L","M","N","O",
+                        "P","Q","R","S","T","U","V","W","X","Y","Z" }
 
 local pointA = nil
 local pointB = nil
@@ -19,6 +29,16 @@ local waitYaw = nil
 local SFX_ENEMY_WALK = "game/audio/sfx/enemy/Ball enemy walking.wav"
 local walkChannel = -1  -- Track channel for position updates and stopping
 local VOL_ENEMY_WALK = 0.0  -- Decibel modifier
+
+-- Helper: stop walk SFX and unregister from global registry
+local function stopWalkSFX()
+    if walkChannel >= 0 then
+        audioStopChannel(walkChannel)
+        -- Unregister from global SFX registry
+        if _G.SFXChannels then _G.SFXChannels[walkChannel] = nil end
+        walkChannel = -1
+    end
+end
 
 local function findNearestByTag(originX, originY, originZ, tag, maxDistSq)
     local candidates = getEntitiesByTag(tag)
@@ -48,30 +68,62 @@ end
 registerUpdate(function(dt)
     local id = entityId
 
+    -- EARLY EXIT: If game is paused, stop walk SFX
+    if IsGamePaused and IsGamePaused() then
+        stopWalkSFX()
+        return
+    end
+
     -- freeze while detecting
     if _G.EnemyFrozen and _G.EnemyFrozen[id] then
         -- Stop walking sound when frozen
-        if walkChannel >= 0 then
-            audioStopChannel(walkChannel)
-            walkChannel = -1
-        end
+        stopWalkSFX()
         return
     end
 
     if not pointA or not pointB then
         local ex, ey, ez = getPosition(id)
 
-        -- 1. try to find a nearby "start" waypoint
-        local startWp = findNearestByTag(ex, ey, ez, startTag, searchRadius * searchRadius)
+        -- 1. Check if this enemy belongs to a named patrol group ("patrol_group_A", etc.)
+        --    and look for matching tagged waypoints first.
+        local startWp, endWp
+
+        for _, group in ipairs(PATROL_GROUPS) do
+            if hasTag(id, "patrol_group_" .. group) then
+                local groupStartTag = startTag .. "_" .. group  -- e.g. "enemy_patrol_start_A"
+                local groupEndTag   = endTag   .. "_" .. group  -- e.g. "enemy_patrol_end_A"
+
+                local candidates = getEntitiesByTag(groupStartTag)
+                if candidates and #candidates > 0 then
+                    local e = candidates[1]
+                    local x, y, z = getPosition(e)
+                    startWp = { x = x, y = y, z = z }
+                end
+
+                candidates = getEntitiesByTag(groupEndTag)
+                if candidates and #candidates > 0 then
+                    local e = candidates[1]
+                    local x, y, z = getPosition(e)
+                    endWp = { x = x, y = y, z = z }
+                end
+
+                break
+            end
+        end
+
+        -- 2. Fall back to nearest-in-radius search when no group tag found
+        if not startWp then
+            startWp = findNearestByTag(ex, ey, ez, startTag, searchRadius * searchRadius)
+        end
+        if not endWp then
+            endWp = findNearestByTag(ex, ey, ez, endTag, searchRadius * searchRadius)
+        end
 
         if startWp then
             pointA = { x = startWp.x, y = startWp.y, z = startWp.z }
         else
             pointA = { x = ex, y = ey, z = ez } -- fallback use enemys own position as start
         end
-
-        -- 2. try to find a nearby "end" waypoint
-        local endWp = findNearestByTag(ex, ey, ez, endTag, searchRadius * searchRadius)
 
         if endWp then
             pointB = { x = endWp.x, y = endWp.y, z = endWp.z }
@@ -115,10 +167,7 @@ registerUpdate(function(dt)
         end
 
         -- stop movement sound while waiting
-        if walkChannel >= 0 then
-            audioStopChannel(walkChannel)
-            walkChannel = -1
-        end
+        stopWalkSFX()
 
         -- keep the stored facing during wait
         if waitYaw and setRotation then
@@ -161,10 +210,7 @@ registerUpdate(function(dt)
         end
 
         -- stop movement sound while waiting
-        if walkChannel >= 0 then
-            audioStopChannel(walkChannel)
-            walkChannel = -1
-        end
+        stopWalkSFX()
 
         return
     end
@@ -188,6 +234,11 @@ registerUpdate(function(dt)
     if walkChannel < 0 then
         -- Start new looping walk sound attached to enemy entity (initial pos)
         walkChannel = audioPlaySFXFromEntity(SFX_ENEMY_WALK, id, VOL_ENEMY_WALK, true)
+        -- Register in global SFX registry for scene-change cleanup
+        if walkChannel >= 0 then
+            _G.SFXChannels = _G.SFXChannels or {}
+            _G.SFXChannels[walkChannel] = true
+        end
     else
         -- Update position of existing walk sound
         audioSetChannelPosition(walkChannel, x, y, z)

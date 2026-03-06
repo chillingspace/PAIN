@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "minimap_wall.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 1295601021203660422
+  },
+  "descriptor_version": 1,
+  "guid": "f0cf0129-b330-404f-b374-78e079f33fdb",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\minimap_wall.vert"
+  }
+}

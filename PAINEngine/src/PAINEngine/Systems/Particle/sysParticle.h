@@ -325,7 +325,7 @@ namespace PAIN {
                 Particle& p = m_Pool.GetParticle(idx);
                 
                 // Set lifetime with variance
-                p.lifetime = m_Config.lifetime + m_Config.lifetimeVariance * (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f);
+                p.lifetime = m_Config.lifetime + m_Config.lifetimeVariance * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
                 p.age = 0.0f;
                 p.alive = true;
                 
@@ -333,7 +333,7 @@ namespace PAIN {
                 p.position = GetEmissionPosition(emitterPosition);
                 
                 // Set initial velocity based on direction and speed
-                float speedVariance = m_Config.speedVariance * (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f);
+                float speedVariance = m_Config.speedVariance * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
                 float actualSpeed = m_Config.speed + speedVariance;
                 
                 // Calculate direction with spread
@@ -341,22 +341,22 @@ namespace PAIN {
                 p.velocity = direction * actualSpeed;
                 
                 // Set initial size with variance
-                float sizeVariance = m_Config.startSizeVariance * (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f);
+                float sizeVariance = m_Config.startSizeVariance * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
                 p.size = m_Config.startSize + sizeVariance;
 
                 // Set initial rotation and angular velocity
-                float startRotVariance = m_Config.startRotationVariance * (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f);
+                float startRotVariance = m_Config.startRotationVariance * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
                 p.rotation = glm::radians(m_Config.startRotation + startRotVariance);
 
-                float angularVelVariance = m_Config.angularVelocityVariance * (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f);
+                float angularVelVariance = m_Config.angularVelocityVariance * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
                 p.angularVelocity = glm::radians(m_Config.angularVelocity + angularVelVariance);
                 
                 // Set initial color with variance
                 p.color = m_Config.startColor;
-                p.color.r += m_Config.startColorVariance.r * (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f);
-                p.color.g += m_Config.startColorVariance.g * (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f);
-                p.color.b += m_Config.startColorVariance.b * (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f);
-                p.color.a += m_Config.startColorVariance.a * (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f);
+                p.color.r += m_Config.startColorVariance.r * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
+                p.color.g += m_Config.startColorVariance.g * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
+                p.color.b += m_Config.startColorVariance.b * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
+                p.color.a += m_Config.startColorVariance.a * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
             }
         }
         
@@ -370,7 +370,7 @@ namespace PAIN {
                     glm::vec3 randomDir = RandomUnitVector();
                     if (m_Config.shapeParams.volumeEmission) {
                         // Inside sphere
-                        float r = m_Config.shapeParams.sphereRadius * std::cbrt(static_cast<float>(rand()) / RAND_MAX);
+                        float r = m_Config.shapeParams.sphereRadius * std::cbrt(static_cast<float>(rand()) / static_cast<float>(RAND_MAX));
                         return emitterPosition + randomDir * r;
                     } else {
                         // On surface
@@ -381,23 +381,23 @@ namespace PAIN {
                 case EmissionShape::Box: {
                     // Random point inside box
                     glm::vec3 randomPoint;
-                    randomPoint.x = (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f) * m_Config.shapeParams.boxHalfExtents.x;
-                    randomPoint.y = (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f) * m_Config.shapeParams.boxHalfExtents.y;
-                    randomPoint.z = (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f) * m_Config.shapeParams.boxHalfExtents.z;
+                    randomPoint.x = (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f) * m_Config.shapeParams.boxHalfExtents.x;
+                    randomPoint.y = (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f) * m_Config.shapeParams.boxHalfExtents.y;
+                    randomPoint.z = (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f) * m_Config.shapeParams.boxHalfExtents.z;
                     return emitterPosition + randomPoint;
                 }
                     
                 case EmissionShape::Circle: {
                     // Random point in circle (on XZ plane)
-                    float angle = static_cast<float>(rand()) / RAND_MAX * glm::radians(m_Config.shapeParams.circleArc);
-                    float r = std::sqrt(static_cast<float>(rand()) / RAND_MAX) * m_Config.shapeParams.circleRadius;
+                    float angle = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * glm::radians(m_Config.shapeParams.circleArc);
+                    float r = std::sqrt(static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * m_Config.shapeParams.circleRadius;
                     return emitterPosition + glm::vec3(std::cos(angle) * r, 0.0f, std::sin(angle) * r);
                 }
                     
                 case EmissionShape::Cone: {
                     // Random point in cone
-                    float angle = static_cast<float>(rand()) / RAND_MAX * 2.0f * 3.14159f;
-                    float h = static_cast<float>(rand()) / RAND_MAX;
+                    float angle = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f * 3.14159f;
+                    float h = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
                     const float coneAngle = glm::clamp(m_Config.shapeParams.coneAngle, 0.0f, 89.0f);
                     float r = h * std::tan(glm::radians(coneAngle));
                     return emitterPosition + glm::vec3(std::cos(angle) * r, h, std::sin(angle) * r);
@@ -448,8 +448,8 @@ namespace PAIN {
         }
         
         glm::vec3 RandomUnitVector() {
-            float theta = static_cast<float>(rand()) / RAND_MAX * 2.0f * 3.14159f;
-            float phi = std::acos(2.0f * static_cast<float>(rand()) / RAND_MAX - 1.0f);
+            float theta = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f * 3.14159f;
+            float phi = std::acos(2.0f * static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1.0f);
             
             return glm::vec3(
                 std::sin(phi) * std::cos(theta),

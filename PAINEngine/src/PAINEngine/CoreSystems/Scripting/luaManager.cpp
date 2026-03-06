@@ -548,7 +548,6 @@ namespace PAIN {
             return api_->GetEntitiesByTag(tag);
             });
 
-
         /* =========================================================================== */
         /*                                Transform                                    */
         /* =========================================================================== */
@@ -1202,12 +1201,15 @@ namespace PAIN {
 
         lua_.set_function("cameraGetPositionWithCollision",
             [this](float playerX, float playerY, float playerZ,
-                   float desiredX, float desiredY, float desiredZ) {
+                   float desiredX, float desiredY, float desiredZ,
+                   entt::entity e
+                ) {
                 if (!api_) return std::make_tuple(desiredX, desiredY, desiredZ);
                 
                 glm::vec3 result = api_->Camera_GetPositionWithCollision(
                     glm::vec3(playerX, playerY, playerZ),
-                    glm::vec3(desiredX, desiredY, desiredZ)
+                    glm::vec3(desiredX, desiredY, desiredZ),
+                    e
                 );
                 return std::make_tuple(result.x, result.y, result.z);
             });
@@ -1259,6 +1261,7 @@ namespace PAIN {
         lua_.set_function("setUITextureScale", [this](entt::entity e, float x, float y) {
             api_->SetUITextureScale(e, { x, y });
             });
+        lua_.set_function("setVisibility", [this](entt::entity entityId, bool visible) { if (api_) api_->SetVisibility(entityId, visible); });
 
         /* =========================================================================== */
         /*                                  Lighting                                   */

@@ -283,6 +283,11 @@ local handlers = {
             printLog("[UI] RestartOverlay hidden")
         end
         
+        -- Stop game-over audio before scene change
+        if PlayerState and PlayerState.stopGameOverAudio then
+            PlayerState.stopGameOverAudio()
+        end
+
         -- Restart Scene
         if changeScene then
             local isMobile = (isAndroid ~= nil and isAndroid())
@@ -349,6 +354,11 @@ local handlers = {
             printLog("[UI] QuitOverlay hidden")
         end
         
+        -- Stop game-over audio before scene change
+        if PlayerState and PlayerState.stopGameOverAudio then
+            PlayerState.stopGameOverAudio()
+        end
+
         -- Load main menu 
         printLog("[UI] quit_Confirm -> changeScene(" .. G.MainMenuSceneName .. ")")
         if changeScene then
@@ -589,6 +599,11 @@ local handlers = {
             end
         end
         
+        -- Stop game-over audio before scene change
+        if PlayerState and PlayerState.stopGameOverAudio then
+            PlayerState.stopGameOverAudio()
+        end
+
         changeSceneWithAudioFade(payload)
     end,
 

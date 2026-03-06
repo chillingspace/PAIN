@@ -76,6 +76,7 @@ private:
 
     // Helper to compute AABB from model vertices
     AABB calculateLocalAABB(const std::shared_ptr<Assets::Model>& model);
+    AABB calculateSkinnedLocalAABB(const std::shared_ptr<Assets::Model>& model, const std::vector<glm::mat4>& boneTransforms);
 
     // Check if collision should happen based on layers
     bool shouldCollide(

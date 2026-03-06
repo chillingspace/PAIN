@@ -260,6 +260,7 @@ namespace PAIN {
     void EngineAPIAdapter::AddTag(entt::entity entityId, std::string tag) { meta_.addTag(entityId, tag); }
     void EngineAPIAdapter::RemoveTag(entt::entity entityId, std::string tag) { meta_.removeTag(entityId, tag); }
     bool EngineAPIAdapter::HasTag(entt::entity entityId, std::string tag) { return meta_.hasTag(entityId, tag); }
+
     /*void EngineAPIAdapter::AssignGroup(entt::entity entityId, std::string g) { meta_.assignToGroup(entityId, g); }
     void EngineAPIAdapter::UnassignGroup(entt::entity entityId) { meta_.unassignFromGroup(entityId); }
     std::optional<std::string> EngineAPIAdapter::GetGroup(entt::entity entityId) { return meta_.getEntityGroup(entityId); }*/
@@ -664,7 +665,7 @@ namespace PAIN {
         );
     }
 
-    glm::vec3 EngineAPIAdapter::Camera_GetPositionWithCollision(const glm::vec3& playerPos, const glm::vec3& desiredPos)
+    glm::vec3 EngineAPIAdapter::Camera_GetPositionWithCollision(const glm::vec3& playerPos, const glm::vec3& desiredPos, const entt::entity& e)
     {
         if (!scene_) return desiredPos;
         
@@ -676,15 +677,33 @@ namespace PAIN {
         
         // Use the camera's collision offset setting
         float offset = cam->collisionOffset;
+		float radius = cam->collisionRadius;
         
         // Get last valid camera position for smooth interpolation
         glm::vec3 lastValidPos = cam->pos;
+
+        // Default to invalid ID
+        uint32_t rawBodyID = JPH::BodyID::cInvalidBodyID;
+
+
+        auto& registry = ecs_.getRegistry();
+
+        // Ensure entity is valid and has a RigidBody3D
+        if (registry.valid(e) && registry.all_of<Physics::RigidBody3D>(e)) {
+            auto& rb = registry.get<Physics::RigidBody3D>(e);
+            if (!rb.bodyID.IsInvalid()) {
+                rawBodyID = rb.bodyID.GetIndexAndSequenceNumber();
+            }
+        }
         
+
         // Use raycast-based camera positioning
         return collisionSystem->getCameraPositionWithRaycast(
             playerPos,
             desiredPos,
+            radius,
             offset,
+            rawBodyID,
             0.0f, // No smooth interpolation - instant response for responsiveness
             lastValidPos
         );
@@ -897,6 +916,14 @@ namespace PAIN {
         auto& reg = ecs_.getRegistry();
         if (!reg.all_of<Texture2D>(e)) return { 1.f, 1.f };
         return reg.get<Texture2D>(e).texture_scale;
+    }
+
+    void EngineAPIAdapter::SetVisibility(entt::entity entityId, bool visible)
+    {
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<PAIN::ModelRenderer>(entityId)) return;
+
+		reg.get<PAIN::ModelRenderer>(entityId).visible = visible;
     }
 
     /* =========================================================================== */
