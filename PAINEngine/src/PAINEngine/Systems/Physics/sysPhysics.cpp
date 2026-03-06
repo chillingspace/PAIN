@@ -918,16 +918,21 @@ namespace PAIN {
 
 				if (jolt_physics->GetNarrowPhaseQuery().CastRay(ray, result)) {
 					JPH::Vec3 hitNormal;
-
 					const JPH::BodyLockRead lock(jolt_physics->GetBodyLockInterface(), result.mBodyID);
 					if (lock.Succeeded()) {
 						const JPH::Body& hitBody = lock.GetBody();
 						const JPH::Shape* hitShape = hitBody.GetShape();
 
-						JPH::RVec3 hitPos = ray.mOrigin + JPH::Vec3(ray.mDirection * result.mFraction);
+						JPH::RVec3 hitPos = ray.mOrigin + ray.mDirection * result.mFraction;
 
-						hitNormal = hitShape->GetSurfaceNormal(result.mSubShapeID2,
-							hitPos - hitBody.GetPosition());
+						JPH::Vec3 localPos = hitBody.GetInverseCenterOfMassTransform() * hitPos;
+
+						hitNormal = hitShape->GetSurfaceNormal(
+							result.mSubShapeID2,
+							localPos
+						);
+
+						hitNormal = hitBody.GetRotation() * hitNormal;
 					}
 
 					if (hitNormal.GetY() > 0.7f) {
