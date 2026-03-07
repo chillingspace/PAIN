@@ -818,6 +818,9 @@ namespace PAIN {
 							"mainmenu_Quit_Cancel",
 
 							"LoadScene",
+
+							"howtoplay_Right",
+							"howtoplay_Left",
 						};
 
 						int action_idx = static_cast<int>(button.action);

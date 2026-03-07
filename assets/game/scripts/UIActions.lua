@@ -422,11 +422,6 @@ local handlers = {
 
 
     ----------------------------------------------------------------------
-    -- HOW TO PLAY
-    ----------------------------------------------------------------------
-
-
-    ----------------------------------------------------------------------
     -- CUT SCENE
     ----------------------------------------------------------------------
     cutscene_Open_Menu = function(buttonEntity, payload)
@@ -605,6 +600,46 @@ local handlers = {
         end
 
         changeSceneWithAudioFade(payload)
+    end,
+
+
+    ----------------------------------------------------------------------
+    -- HOW TO PLAY
+    ----------------------------------------------------------------------
+
+    howtoplay_Right = function(buttonEntity, payload)
+        printLog("[UI] howtoplay_Right -> how to play page 2")
+        
+        if setLayerEnabled then
+
+            setLayerEnabled(1, false)
+            setLayerEnabled(2, true)
+            local isMobile = (isAndroid ~= nil and isAndroid())
+            if isMobile then
+                hideCursor(false)
+            end
+            --_G_root.TogglePause()
+        else
+            printLog("[UI] setLayerEnabled not available")
+        end
+    end,
+
+
+    howtoplay_Left = function(buttonEntity, payload)
+        printLog("[UI] howtoplay_Left -> how to play page 1")
+        
+        if setLayerEnabled then
+
+            setLayerEnabled(1, true)
+            setLayerEnabled(2, false)
+            local isMobile = (isAndroid ~= nil and isAndroid())
+            if isMobile then
+                hideCursor(false)
+            end
+            --_G_root.TogglePause()
+        else
+            printLog("[UI] setLayerEnabled not available")
+        end
     end,
 
 

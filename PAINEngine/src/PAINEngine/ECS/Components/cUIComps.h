@@ -130,7 +130,10 @@ namespace PAIN {
 		mainmenu_Quit_Confirm,
 		mainmenu_Quit_Cancel,
 
-		LoadScene
+		LoadScene,
+
+		howtoplay_Right,
+		howtoplay_Left
 	};
 
 	struct UIButton {
@@ -328,7 +331,10 @@ namespace PAIN {
 		{PAIN::UIAction::mainmenu_Quit_Confirm, "mainmenu_Quit_Confirm"},
 		{PAIN::UIAction::mainmenu_Quit_Cancel, "mainmenu_Quit_Cancel"},
 
-		{PAIN::UIAction::LoadScene, "LoadScene"}
+		{PAIN::UIAction::LoadScene, "LoadScene"},
+
+		{PAIN::UIAction::howtoplay_Right, "howtoplay_Right"},
+		{PAIN::UIAction::howtoplay_Left, "howtoplay_Left"}
 	})
 
 } // namespace PAIN

@@ -47,15 +47,18 @@ namespace PAIN {
 		case UIAction::goto_Pause:             return "goto_Pause";
 
 		case UIAction::cutscene_Open_Menu:     return "cutscene_Open_Menu";
-		case UIAction::cutscene_Close_Menu:   return "cutscene_Close_Menu";
-		case UIAction::cutscene_Menu_Quit:    return "cutscene_Menu_Quit";
-		case UIAction::cutscene_Quit_Confirm: return "cutscene_Quit_Confirm";
+		case UIAction::cutscene_Close_Menu:    return "cutscene_Close_Menu";
+		case UIAction::cutscene_Menu_Quit:     return "cutscene_Menu_Quit";
+		case UIAction::cutscene_Quit_Confirm:  return "cutscene_Quit_Confirm";
 		case UIAction::cutscene_Quit_Cancel:   return "cutscene_Quit_Cancel";
 
 		case UIAction::mainmenu_Quit_Confirm:  return "mainmenu_Quit_Confirm";
 		case UIAction::mainmenu_Quit_Cancel:   return "mainmenu_Quit_Cancel";
 
 		case UIAction::LoadScene:              return "LoadScene";
+
+		case UIAction::howtoplay_Right:		   return "howtoplay_Right";
+		case UIAction::howtoplay_Left:		   return "howtoplay_Left";
 
 		case UIAction::None:
 		default:                               return "None";
