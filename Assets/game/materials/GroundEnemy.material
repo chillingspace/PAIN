@@ -1,0 +1,27 @@
+{
+    "flags": {
+        "doubleSided": true,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "emissive": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "metallic": 1.0,
+        "roughness": 1.0
+    },
+    "textures": {
+        "albedo": "game\\textures\\GroundEnemyBlend_GroundEnemy_BaseColor.png",
+        "emissive": "game\\textures\\GroundEnemyBlend_GroundEnemy_Emissive.png",
+        "metallic": "game\\textures\\GroundEnemyBlend_GroundEnemy_Metallic-GroundEnemyBlend_GroundEnemy_Roughness.png",
+        "normal": "game\\textures\\GroundEnemyBlend_GroundEnemy_Normal.png",
+        "roughness": "game\\textures\\GroundEnemyBlend_GroundEnemy_Metallic-GroundEnemyBlend_GroundEnemy_Roughness.png"
+    }
+}
