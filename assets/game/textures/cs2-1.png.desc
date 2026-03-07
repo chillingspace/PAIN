@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "cs2-1.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 7893095192094587745
+  },
+  "descriptor_version": 1,
+  "guid": "8d3faccf-ec71-d944-9920-b81c054ed8fe",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\cs2-1.png"
+  }
+}
