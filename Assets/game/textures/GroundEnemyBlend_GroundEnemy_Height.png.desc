@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "GroundEnemyBlend_GroundEnemy_Height.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 14005080650680612442
+  },
+  "descriptor_version": 1,
+  "guid": "94b0d165-f266-9c42-9846-954c6831347f",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\GroundEnemyBlend_GroundEnemy_Height.png"
+  }
+}

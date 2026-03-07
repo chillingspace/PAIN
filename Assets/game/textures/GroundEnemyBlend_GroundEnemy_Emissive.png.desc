@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "GroundEnemyBlend_GroundEnemy_Emissive.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 2301813785361203675
+  },
+  "descriptor_version": 1,
+  "guid": "ffd57a3d-b8b4-2b40-94a5-52ecd82a5a5f",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\GroundEnemyBlend_GroundEnemy_Emissive.png"
+  }
+}

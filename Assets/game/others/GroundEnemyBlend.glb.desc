@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "GroundEnemyBlend.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 2647613848083756303
+  },
+  "descriptor_version": 1,
+  "guid": "b8fc6288-e8b6-8640-97ee-181186d2357d",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\GroundEnemyBlend.glb"
+  }
+}

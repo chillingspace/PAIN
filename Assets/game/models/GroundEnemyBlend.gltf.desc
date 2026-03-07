@@ -1,20 +1,20 @@
 {
   "asset_info": {
-    "name": "Cube.gltf",
+    "name": "GroundEnemyBlend.gltf",
     "type": "Model"
   },
   "build_data": {
-    "hash": 13489141898285819278
+    "hash": 1297206349237301134
   },
   "descriptor_version": 1,
-  "guid": "b52c18d6-0dcb-454a-b7b0-b9cb830eaee7",
+  "guid": "186005f2-dcbb-9f4b-af50-d2d4b98041da",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
     "generate_normals": false,
     "generate_tangents": true,
-    "import_animations": false,
-    "import_skeleton": false,
+    "import_animations": true,
+    "import_skeleton": true,
     "improve_cache_locality": true,
     "join_identical_vertices": true,
     "lod_levels": 3,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "engine\\models\\Cube.gltf"
+    "source_file": "game\\models\\GroundEnemyBlend.gltf"
   }
 }

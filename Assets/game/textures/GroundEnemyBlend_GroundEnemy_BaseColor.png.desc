@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "GroundEnemyBlend_GroundEnemy_BaseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 11276473684891235151
+  },
+  "descriptor_version": 1,
+  "guid": "d54d96e7-2dc0-c947-8f1a-bab6892ff688",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\GroundEnemyBlend_GroundEnemy_BaseColor.png"
+  }
+}
