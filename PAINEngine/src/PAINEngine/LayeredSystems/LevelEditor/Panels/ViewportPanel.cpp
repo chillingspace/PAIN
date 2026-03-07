@@ -689,6 +689,10 @@ namespace PAIN {
 
 					// Viewport rendering
 					ImVec2 avail = ImGui::GetContentRegionAvail();
+					if (avail.x <= 0.0f || avail.y <= 0.0f || texWidth <= 0 || texHeight <= 0) {
+						ImGui::End();
+						return;
+					}
 					float aspect = (float)texWidth / (float)texHeight;
 					ImVec2 size = avail;
 
