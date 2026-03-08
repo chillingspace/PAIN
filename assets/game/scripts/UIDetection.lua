@@ -9,8 +9,8 @@ local HIDE_X   = -2000  -- off-screen position to hide UI
 local HIDE_Y   = -2000
 
 local barBG       = findEntity("UI_DetectBar_BG")
-local barFillL   = findEntity("UI_DetectBar_Fill_L")
-local barFillR   = findEntity("UI_DetectBar_Fill_R")
+local barFillL    = findEntity("UI_DetectBar_Fill_L")
+local barFillR    = findEntity("UI_DetectBar_Fill_R")
 local overlay     = findEntity("UI_DetectOverlay")
 
 local cached = false
@@ -18,10 +18,10 @@ local bgX, bgY = 0, 0
 local fillLX, fillLY = 0, 0
 local fillRX, fillRY = 0, 0
 local ovX, ovY = 0, 0
-local FILL_HALF_WIDTH = 0.055 -- was 0.05
+local FILL_HALF_WIDTH = 0.055
 
 local preloadStage = 0
-local PRELOAD_X = -1000  -- different from HIDE_X to force a position change
+local PRELOAD_X = -1000
 local PRELOAD_Y = -1000
 
 local INNER_OFFSET = 0.006
@@ -36,33 +36,34 @@ local function cachePositions()
 end
 
 -- SFX file paths (no entity required)
-local SFX_ALERT_HIT = "game/audio/sfx/enemy/Enemy_Alert_Hit_v1.wav"
+local SFX_ALERT_HIT  = "game/audio/sfx/enemy/Enemy_Alert_Hit_v1.wav"
 local SFX_ALERT_LOOP = "game/audio/sfx/enemy/Enemy_Alert_Loop_v1.wav"
-local alertLoopChannel = -1  -- Track looping channel for stopping later
+local alertLoopChannel = -1
 
--- SFX volumes (decibel modifers)
-local VOL_ALERT_HIT = 0.0
+-- SFX volumes
+local VOL_ALERT_HIT  = 0.0
 local VOL_ALERT_LOOP = 0.0
 
 -- internal state
-ui.active      = false
-ui.timer       = 0.0
-ui.duration    = DURATION
-ui.sourceEnemy = nil
-ui.isDetected  = false
+ui.active         = false
+ui.timer          = 0.0
+ui.duration       = DURATION
+ui.sourceEnemy    = nil
+ui.isDetected     = false
+ui.autoConfirmHit = true   -- NEW: true = old light-enemy behavior
 
--- SFX cooldown: prevents alert sounds from spamming at detection edge
-local ALERT_SFX_COOLDOWN_TIME = 1.0   -- seconds between alert SFX re-triggers (configurable)
+-- SFX cooldown
+local ALERT_SFX_COOLDOWN_TIME = 1.0
 local alertSfxCooldown = 0.0
 
 -- helpers -------------------------------------------------------
 
 local function hideUI()
     cachePositions()
-    if barBG then    set2DPosition(barBG,   HIDE_X, HIDE_Y)  end
+    if barBG then    set2DPosition(barBG, HIDE_X, HIDE_Y) end
     if barFillL then set2DPosition(barFillL, HIDE_X, HIDE_Y) end
     if barFillR then set2DPosition(barFillR, HIDE_X, HIDE_Y) end
-    if overlay then  set2DPosition(overlay, HIDE_X, HIDE_Y)  end
+    if overlay then  set2DPosition(overlay, HIDE_X, HIDE_Y) end
 end
 
 local function showUI()
@@ -83,14 +84,12 @@ local function showUI()
 end
 
 local function stopAudio()
-    -- Stop looping alert sound using stored channel ID
     if alertLoopChannel >= 0 then
         audioStopChannel(alertLoopChannel)
-        -- Unregister from global SFX registry
         if _G.SFXChannels then _G.SFXChannels[alertLoopChannel] = nil end
         alertLoopChannel = -1
     end
-    -- Combat BGM now controlled via GlobalAudio.setCombat(false)
+
     if _G.GlobalAudio and _G.GlobalAudio.setCombat then
         _G.GlobalAudio.setCombat(false)
     end
@@ -98,21 +97,29 @@ end
 
 -- public API called from enemy scripts --------------------------
 
-function ui.begin(enemyEntity)
+-- autoConfirmHit:
+--   true/nil  -> old behavior (fill bar, confirm hit after duration)
+--   false     -> feedback only (overlay/audio, no auto damage)
+function ui.begin(enemyEntity, autoConfirmHit)
+    if autoConfirmHit == nil then
+        autoConfirmHit = true
+    end
+
     if ui.active then
-        ui.sourceEnemy = enemyEntity
-        ui.isDetected  = true
+        ui.sourceEnemy    = enemyEntity
+        ui.isDetected     = true
+        ui.autoConfirmHit = autoConfirmHit
         return
     end
 
-    ui.active      = true
-    ui.isDetected  = true
-    ui.timer       = 0.0
-    ui.sourceEnemy = enemyEntity
+    ui.active         = true
+    ui.isDetected     = true
+    ui.timer          = 0.0
+    ui.sourceEnemy    = enemyEntity
+    ui.autoConfirmHit = autoConfirmHit
 
     showUI()
 
-    -- Enemy alert SFX: only fire if cooldown has expired (prevents spam)
     if alertSfxCooldown <= 0 then
         if enemyEntity then
             audioPlaySFXFromEntity(SFX_ALERT_HIT, enemyEntity, VOL_ALERT_HIT)
@@ -122,21 +129,19 @@ function ui.begin(enemyEntity)
             alertLoopChannel = audioPlaySFX(SFX_ALERT_LOOP, VOL_ALERT_LOOP, true)
         end
         alertSfxCooldown = ALERT_SFX_COOLDOWN_TIME
-        -- Register alert loop in global SFX registry for scene-change cleanup
+
         if alertLoopChannel >= 0 then
             _G.SFXChannels = _G.SFXChannels or {}
             _G.SFXChannels[alertLoopChannel] = true
         end
     end
 
-    -- Start combat BGM layer via GlobalAudio
     if _G.GlobalAudio and _G.GlobalAudio.setCombat then
         _G.GlobalAudio.setCombat(true)
     end
 end
 
 function ui.cancel(enemyEntity)
-    -- only cancel if the same enemy that started it
     if enemyEntity and ui.sourceEnemy and enemyEntity ~= ui.sourceEnemy then
         return
     end
@@ -146,7 +151,6 @@ function ui.cancel(enemyEntity)
     ui.sourceEnemy = nil
 end
 
--- When the bar fully fills
 function ui.confirmHit()
     if not ui.active then return end
     ui.active     = false
@@ -156,7 +160,6 @@ function ui.confirmHit()
     hideUI()
     stopAudio()
 
-    -- tell global player state script that player got caught
     if _G.PlayerState and _G.PlayerState.onCaught and _G.PlayerState.player then
         _G.PlayerState.onCaught(_G.PlayerState.player)
     end
@@ -165,16 +168,14 @@ end
 -- per-frame update ----------------------------------------------
 
 local function update(dt)
-    -- Tick SFX cooldown
     if alertSfxCooldown > 0 then
         alertSfxCooldown = alertSfxCooldown - dt
     end
 
     if preloadStage < 5 then
         preloadStage = preloadStage + 1
-        
+
         if preloadStage == 1 then
-            -- Frame 1: preload audio
             if sfxAlertOnce then
                 audioSetVolumeDb(sfxAlertOnce, -80.0)
                 audioPlay(sfxAlertOnce)
@@ -183,102 +184,109 @@ local function update(dt)
                 audioSetVolumeDb(sfxAlertLoop, -80.0)
                 audioPlay(sfxAlertLoop)
             end
+
         elseif preloadStage == 2 then
-            -- Frame 2: stop audio
             if sfxAlertOnce then audioStop(sfxAlertOnce) end
             if sfxAlertLoop then audioStop(sfxAlertLoop) end
-        
+
         elseif preloadStage == 3 then
-            -- Frame 3: move UI to a preload position (still off-screen)
             cachePositions()
             if barBG then set2DPosition(barBG, PRELOAD_X, PRELOAD_Y) end
-            if barFillL then 
-                set2DPosition(barFillL, PRELOAD_X, PRELOAD_Y)
-            end
-            if barFillR then 
-                set2DPosition(barFillR, PRELOAD_X, PRELOAD_Y) 
-            end
+            if barFillL then set2DPosition(barFillL, PRELOAD_X, PRELOAD_Y) end
+            if barFillR then set2DPosition(barFillR, PRELOAD_X, PRELOAD_Y) end
             if overlay then set2DPosition(overlay, PRELOAD_X, PRELOAD_Y) end
 
         elseif preloadStage == 4 then
-            -- Frame 4: let textures render
+            -- let textures render
 
         elseif preloadStage == 5 then
-            -- Frame 5: hide properly and reset scales
             hideUI()
-            -- Reset texture scales to 0 so they're ready for first detection
             if barFillL then setScale(barFillL, 0.0, 1.0, 1.0) end
             if barFillR then setScale(barFillR, 0.0, 1.0, 1.0) end
         end
-        
+
         return
     end
-
 
     if not ui.active then
         return
     end
 
-    -- Charge up while detected, drain down when not
-    if ui.isDetected then
-        ui.timer = ui.timer + dt
-        if ui.timer >= ui.duration then
-            ui.timer = ui.duration
-            ui.confirmHit()
-            return
+    -- auto-confirm mode: old light enemy behavior
+    if ui.autoConfirmHit then
+        if ui.isDetected then
+            ui.timer = ui.timer + dt
+            if ui.timer >= ui.duration then
+                ui.timer = ui.duration
+                ui.confirmHit()
+                return
+            end
+        else
+            ui.timer = ui.timer - dt
+            if ui.timer <= 0.0 then
+                ui.timer  = 0.0
+                ui.active = false
+                hideUI()
+                stopAudio()
+                return
+            end
         end
     else
-        ui.timer = ui.timer - dt
-        if ui.timer <= 0.0 then
-            ui.timer  = 0.0
+        -- feedback-only mode: no auto hit, no bar charge logic
+        if not ui.isDetected then
             ui.active = false
+            ui.timer  = 0.0
             hideUI()
             stopAudio()
             return
         end
+
+        ui.timer = 0.0
     end
 
     local t = ui.timer / ui.duration
+    local clamped = math.max(0.0, math.min(0.88, t))
 
-    local clamped = math.max(0.0, math.min(0.88, t)) 
-    -- if barFillL then setScale(barFillL, clamped, 1.0, 1.0) end
-    -- if barFillR then setScale(barFillR, clamped, 1.0, 1.0) end
+    if ui.autoConfirmHit then
+        if barFillL then
+            local sx, sy = getUITextureScale(barFillL)
+            setUITextureScale(barFillL, clamped, sy)
 
-    if barFillL then
-        local sx, sy = getUITextureScale(barFillL)
-        setUITextureScale(barFillL, clamped, sy)
+            local shift = (1.0 - clamped) * FILL_HALF_WIDTH
+            set2DPosition(barFillL, fillLX - shift + INNER_OFFSET, fillLY)
+        end
 
-        local shift = (1.0 - clamped) * FILL_HALF_WIDTH
-        set2DPosition(barFillL, fillLX - shift + INNER_OFFSET, fillLY)
+        if barFillR then
+            local sx, sy = getUITextureScale(barFillR)
+            setUITextureScale(barFillR, clamped, sy)
+
+            local shift = (1.0 - clamped) * FILL_HALF_WIDTH
+            set2DPosition(barFillR, fillRX + shift - INNER_OFFSET, fillRY)
+        end
+    else
+        -- feedback-only mode: keep bar empty
+        if barFillL then
+            local sx, sy = getUITextureScale(barFillL)
+            setUITextureScale(barFillL, 0.0, sy)
+        end
+
+        if barFillR then
+            local sx, sy = getUITextureScale(barFillR)
+            setUITextureScale(barFillR, 0.0, sy)
+        end
     end
 
-    if barFillR then
-        local sx, sy = getUITextureScale(barFillR)
-        setUITextureScale(barFillR, clamped, sy)
-
-        local shift = (1.0 - clamped) * FILL_HALF_WIDTH
-        set2DPosition(barFillR, fillRX + shift - INNER_OFFSET, fillRY)
-    end
-
-
-    -- Update position of the looping alert sound to follow the enemy
     if alertLoopChannel >= 0 and ui.sourceEnemy then
         local ex, ey, ez = getPosition(ui.sourceEnemy)
         if audioSetChannelPosition then
             audioSetChannelPosition(alertLoopChannel, ex, ey, ez)
         end
     end
-
-    -- Combat BGM is now controlled via GlobalAudio.setCombat, no per-frame fade needed here
 end
 
 registerUpdate(update)
 
--- -- start hidden on scene load
--- hideUI()
-
--- make this table globally accessible to other scripts
-DetectionUI = ui -- normal global
+DetectionUI = ui
 if _G_root then
     _G_root.DetectionUI = ui
 end
