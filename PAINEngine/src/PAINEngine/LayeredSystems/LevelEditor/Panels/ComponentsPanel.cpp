@@ -1829,7 +1829,8 @@ namespace PAIN {
 				};
 			}
 
-			void ComponentsPanel::renderEntityComponents(entt::entity entity) {
+			void ComponentsPanel::renderEntityComponents(entt::entity entity, const char* filter) {
+				
 				auto ecs = services->get<ECS::Controller>();
 
 				if (!ecs || !ecs->checkEntity(entity, currentRegistryID)) {
@@ -1853,6 +1854,15 @@ namespace PAIN {
 						comp_name == getComponentName<Entity::Layer>() ||
 						comp_name == getComponentName<MetaData::EditorVisible>()) {
 						continue;
+					}
+
+					if (filter && filter[0] != '\0') {
+						std::string comp_lower = comp_name;
+						std::string filter_lower = filter;
+						std::transform(comp_lower.begin(), comp_lower.end(), comp_lower.begin(), ::tolower);
+						std::transform(filter_lower.begin(), filter_lower.end(), filter_lower.begin(), ::tolower);
+						if (comp_lower.find(filter_lower) == std::string::npos)
+							continue;
 					}
 
 					ImGui::PushID(comp_name.c_str());
@@ -2305,7 +2315,22 @@ namespace PAIN {
 				// }
 				// ImGui::Spacing();
 
-				renderEntityComponents(selected);
+				// Component search bar
+				ImGui::SetNextItemWidth(-1);
+				ImGui::InputTextWithHint("##CompFilter", "Search components...", comp_filter, sizeof(comp_filter));
+				if (ImGui::IsItemHovered())
+					ImGui::SetTooltip("Filter components by name");
+
+				// Clear button
+				if (comp_filter[0] != '\0') {
+					ImGui::SameLine(0, 4);
+					if (ImGui::SmallButton("x##clearfilter"))
+						comp_filter[0] = '\0';
+				}
+
+				ImGui::Spacing();
+
+				renderEntityComponents(selected, comp_filter);
 
 				ImGui::Spacing();
 				ImGui::Separator();
