@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Tank_normal.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 16144292965866173930
+  },
+  "descriptor_version": 1,
+  "guid": "ceaca03d-cd4f-b546-b889-64ee89a0d1e0",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Tank_normal.png"
+  }
+}

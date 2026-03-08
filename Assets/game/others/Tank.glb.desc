@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Tank.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 12183801522657393831
+  },
+  "descriptor_version": 1,
+  "guid": "1495b096-5c97-b342-83e5-01388b2ce746",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\Tank.glb"
+  }
+}

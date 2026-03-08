@@ -1,0 +1,101 @@
+{
+    "entities": [
+        {
+            "components": {
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        24.472625732421875,
+                        0.0,
+                        -4.405209064483643
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "3fd9c353-23d4-e84a-ab6d-d4eea163ad9b",
+                            "aoTextureOverride": "af95e0ee-f1ac-1d45-88e1-e7bbd2979f36",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "e8a9c8c9-3faf-e046-abbb-27ff8f28b3d4",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "af95e0ee-f1ac-1d45-88e1-e7bbd2979f36",
+                            "normalTextureOverride": "ceaca03d-cd4f-b546-b889-64ee89a0d1e0",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "af95e0ee-f1ac-1d45-88e1-e7bbd2979f36",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "146f4e3b-5c24-624f-80c8-d74159ed9f41",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "Tank"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        1.0,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        3.0999999046325684,
+                        4.0,
+                        0.699999988079071
+                    ],
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 0
+                    },
+                    "physics_enabled": true,
+                    "use_gravity": true,
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "336ba010-8390-bf47-8d9e-040eeffa0e76"
+        }
+    ],
+    "prefabName": "Tank",
+    "rootEntityGUID": "336ba010-8390-bf47-8d9e-040eeffa0e76"
+}

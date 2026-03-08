@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Windmill.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 16211136988516655925
+  },
+  "descriptor_version": 1,
+  "guid": "49d7ac6d-d4e0-d349-b827-1216277cf07e",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Windmill.material"
+  }
+}

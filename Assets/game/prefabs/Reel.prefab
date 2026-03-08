@@ -1,0 +1,101 @@
+{
+    "entities": [
+        {
+            "components": {
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        49.44008255004883,
+                        0.0,
+                        11.950794219970703
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "6f3aeae1-f4e9-2d45-9b24-b2277f3607a8",
+                            "aoTextureOverride": "08527159-b243-d742-a313-9001198b2097",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "b264fed7-6c6f-8344-a856-9d4094c5f8c5",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "08527159-b243-d742-a313-9001198b2097",
+                            "normalTextureOverride": "6f5d22ac-86ff-ed4e-978c-55ceb1b59a3f",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "08527159-b243-d742-a313-9001198b2097",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "0955a106-00fb-8040-8ce5-9402d6bd1c59",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "Reel"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        0.8999999761581421,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        0.800000011920929,
+                        1.7999999523162842,
+                        1.7999999523162842
+                    ],
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 0
+                    },
+                    "physics_enabled": true,
+                    "use_gravity": true,
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "558167f7-78e1-b246-9935-32005840e7b1"
+        }
+    ],
+    "prefabName": "Reel",
+    "rootEntityGUID": "558167f7-78e1-b246-9935-32005840e7b1"
+}

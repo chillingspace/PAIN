@@ -29,11 +29,13 @@ namespace PAIN {
             auto scene_service = svc->get<Scene::SceneManager>();
 
             Camera* cam = scene_service->GetActiveCamera();
+            
             glm::mat4 view = cam->view();
             glm::mat4 projection = cam->projection();
             glm::vec2 viewport = window_service->getFrameBuffer();
 
             // ── Update floating labels (UIFollowsWorldEntity) ──
+            // Note: updateFloatingLabels rebuilds view/projection from live game camera data
             updateFloatingLabels(registry, view, projection, viewport);
 
             // ── Process canvas hierarchies ──
@@ -123,27 +125,47 @@ namespace PAIN {
             auto svc = services.lock();
             auto ecs = svc->get<ECS::Controller>();
             auto scene_service = svc->get<Scene::SceneManager>();
-            Camera* cam = scene_service->GetActiveCamera();
-            glm::vec3 cam_pos = cam->pos;
+            
+            // Get the active game camera (updated by Lua thirdPersonCamera.lua every frame)
+            Camera* player_camera = scene_service->GetGameCamera();
+            if (!player_camera) {
+                player_camera = scene_service->GetActiveCamera(); // fallback
+                if (!player_camera) return;
+            }
+            
+            // Use camera's current position, forward, and up vectors
+            glm::vec3 cam_pos = player_camera->pos;
+            glm::vec3 cam_forward = player_camera->forward;
+            glm::vec3 cam_up = player_camera->up;
+            
+            // Rebuild view and projection matrices from the live camera data
+            glm::mat4 live_view = glm::lookAt(cam_pos, cam_pos + cam_forward, cam_up);
+            glm::mat4 live_proj = glm::perspective(
+                glm::radians(player_camera->fov),
+                player_camera->aspect_ratio,
+                player_camera->near_plane,
+                player_camera->far_plane
+            );
 
             for (auto&& [entity, follows, rect, elem] : view_floating.each()) {
                 entt::entity target = ecs->resolveGUID(follows.entity_target_guid);
 
                 if (target == entt::null || !registry.valid(target) ||
                     !registry.all_of<WorldTransform>(target)) {
+                    PN_CORE_WARN("[UIFollowsWorldEntity] Invalid or missing target entity for UIFollowsWorldEntity - disabling");
                     elem.b_is_enabled = false;
                     continue;
                 }
 
                 const auto& world_transform = registry.get<WorldTransform>(target);
                 glm::vec3 world_pos = getEntityWorldPosition(world_transform, follows.world_offset);
-                glm::vec4 clip = worldToClipSpace(world_pos, view, proj);
+                glm::vec4 clip = worldToClipSpace(world_pos, live_view, live_proj);
 
                 // Check visibility
-                if (isPositionBehindCamera(clip)) {
-                    elem.b_is_enabled = false;
-                    continue;
-                }
+                 if (isPositionBehindCamera(clip)) {
+                     elem.b_is_enabled = false;
+                     continue;
+                 }
 
                 glm::vec3 ndc = clipToNDC(clip);
                 if (!isInCameraFrustum(ndc)) {
@@ -151,20 +173,34 @@ namespace PAIN {
                     continue;
                 }
 
-                glm::vec2 screen_pos = ndcToScreen(ndc, viewport);
-                if (!isScreenPosVisible(screen_pos, viewport, 50.0f)) {
-                    elem.b_is_enabled = false;
-                    continue;
-                }
-
                 elem.b_is_enabled = true;
-                rect.calculated_world_position = screen_pos;
+                rect.calculated_world_position = glm::vec2(ndc.x, ndc.y);
+
+                // Line of Sight check
+                auto collision_sys = scene_service->getCameraCollisionSystem();
+                if (collision_sys) {
+                    float target_dist = glm::length(world_pos - cam_pos);
+                    float hit_dist = collision_sys->raycastToPosition(cam_pos, world_pos);
+
+                    // Hit_dist >= 0 means something was hit
+                    // If it hit something closer than the target, LOS is blocked
+                    if (hit_dist >= 0.0f && hit_dist < target_dist - 0.5f) {
+                        elem.b_is_enabled = false;
+                        continue;
+                    }
+                }
 
                 // Distance-based scaling
                 float distance = glm::length(world_pos - cam_pos);
                 const float reference_distance = 10.0f;
                 float scale_factor = glm::clamp(reference_distance / distance, 0.2f, 3.0f);
-                rect.scale = glm::vec3(scale_factor, scale_factor, 1.0f);
+                // In updateFloatingLabels, after setting calculated_world_position:
+                float ndc_scale_y = (rect.size_delta.y * scale_factor) / viewport.y;
+                float ndc_scale_x = (rect.size_delta.x * scale_factor) / viewport.x;
+                rect.scale = glm::vec3(ndc_scale_x, ndc_scale_y, 1.0f);
+                
+                // Signal render system to apply these changes to Texture2D and UIText
+                rect.layout_dirty = true;
             }
         }
 
@@ -184,7 +220,7 @@ namespace PAIN {
         glm::vec2 LayoutSystem::ndcToScreen(const glm::vec3& ndc, const glm::vec2& viewport) {
             glm::vec2 screen;
             screen.x = (ndc.x + 1.0f) * 0.5f * viewport.x;
-            screen.y = (ndc.y + 1.0f) * 0.5f * viewport.y;
+            screen.y = (1.0f - ndc.y) * 0.5f * viewport.y;
             return screen;
         }
 
@@ -212,7 +248,8 @@ namespace PAIN {
         }
 
         glm::vec3 LayoutSystem::getEntityWorldPosition(const WorldTransform& transform, const glm::vec3& offset) {
-            return glm::vec3(transform.matrix * glm::vec4(offset, 1.0f));
+            glm::vec3 world_pos = glm::vec3(transform.matrix[3]); 
+            return world_pos + offset;
         }
 
     } // namespace UI

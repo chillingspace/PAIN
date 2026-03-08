@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Fence2.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 2121895330350918773
+  },
+  "descriptor_version": 1,
+  "guid": "83fde808-f21f-5346-9e51-21b131001bec",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Fence2.prefab"
+  }
+}

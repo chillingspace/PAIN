@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Fence.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 12013733864746031276
+  },
+  "descriptor_version": 1,
+  "guid": "0377d90f-9de9-5a42-8583-17b17904b178",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Fence.material"
+  }
+}
