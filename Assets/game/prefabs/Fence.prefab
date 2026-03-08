@@ -47,7 +47,7 @@
                             ],
                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "materialGUID": "dfbc1217-b60c-aa46-b40b-93c842e00125",
+                            "materialGUID": "2c91baa3-e9ab-ca4f-beb5-784f192e6c63",
                             "metallicOverride": 1.0,
                             "metallicTextureOverride": "1d8df71b-3423-c54b-b6d8-58f6247fdf61",
                             "normalTextureOverride": "cc05c05a-47eb-ca46-bf3d-c398644e58e1",
@@ -57,7 +57,7 @@
                             "useOverrides": false
                         }
                     ],
-                    "modelGUID": "ac2343be-59dd-6c43-9f92-82bc15670d26",
+                    "modelGUID": "0ea159b8-c1e5-c346-ae32-da33184512c1",
                     "receiveShadows": true,
                     "visible": true
                 },
