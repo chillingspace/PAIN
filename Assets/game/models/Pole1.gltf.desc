@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "BigGround.obj",
+    "name": "Pole1.gltf",
     "type": "Model"
   },
   "build_data": {
-    "hash": 9863714308950123273
+    "hash": 4388736527326050235
   },
   "descriptor_version": 1,
-  "guid": "efff96ab-9011-d248-a0e3-56bb0e76f8e6",
+  "guid": "89e040b6-c439-7c45-a630-000c72698fcf",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "game\\models\\BigGround.obj"
+    "source_file": "game\\models\\Pole1.gltf"
   }
 }

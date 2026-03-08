@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Pole1.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 800745081962810280
+  },
+  "descriptor_version": 1,
+  "guid": "c6f76d7f-0e3a-3241-8a02-79673012bc59",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Pole1.prefab"
+  }
+}

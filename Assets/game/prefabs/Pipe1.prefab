@@ -72,18 +72,19 @@
                     ],
                     "collider_offset": [
                         0.0,
-                        0.0,
+                        0.4000000059604645,
                         0.0
                     ],
                     "collider_scale": [
-                        5.300000190734863,
-                        1.399999976158142,
-                        1.0
+                        5.199999809265137,
+                        0.699999988079071,
+                        0.800000011920929
                     ],
                     "motion_type": 0,
                     "physics_behavior": {
                         "behavior": 0
                     },
+                    "physics_enabled": true,
                     "use_gravity": true,
                     "velocity": [
                         0.0,
