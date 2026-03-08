@@ -13,15 +13,15 @@
                 },
                 "LocalTransform": {
                     "position": [
-                        33.87270736694336,
+                        30.54522705078125,
                         0.0,
-                        -6.127702236175537
+                        -2.9150829315185547
                     ],
                     "rotation": [
                         0.0,
-                        0.7071067690849304,
                         0.0,
-                        0.7071067690849304
+                        0.0,
+                        1.0
                     ],
                     "scale": [
                         1.0,
@@ -33,8 +33,8 @@
                     "castShadows": true,
                     "materials": [
                         {
-                            "albedoTextureOverride": "37c45efa-c7de-8241-9b1a-b26220fd197b",
-                            "aoTextureOverride": "1d8df71b-3423-c54b-b6d8-58f6247fdf61",
+                            "albedoTextureOverride": "d58ec965-4a8b-2446-955b-707274af2082",
+                            "aoTextureOverride": "9a2fc438-1e78-3d47-be1b-4284d567444c",
                             "baseColorOverride": [
                                 1.0,
                                 1.0,
@@ -47,22 +47,22 @@
                             ],
                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "materialGUID": "97e7f4eb-281a-4e4b-9409-00bf03ab26a6",
+                            "materialGUID": "afdab715-37bc-5b43-80d3-5acf798bb7b4",
                             "metallicOverride": 1.0,
-                            "metallicTextureOverride": "1d8df71b-3423-c54b-b6d8-58f6247fdf61",
-                            "normalTextureOverride": "cc05c05a-47eb-ca46-bf3d-c398644e58e1",
+                            "metallicTextureOverride": "9a2fc438-1e78-3d47-be1b-4284d567444c",
+                            "normalTextureOverride": "0132f5dd-1a15-e546-adf5-cbada70fb446",
                             "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "roughnessOverride": 1.0,
-                            "roughnessTextureOverride": "1d8df71b-3423-c54b-b6d8-58f6247fdf61",
+                            "roughnessTextureOverride": "9a2fc438-1e78-3d47-be1b-4284d567444c",
                             "useOverrides": false
                         }
                     ],
-                    "modelGUID": "f4ffeb9f-0956-f640-83f0-1f186bcc45b3",
+                    "modelGUID": "259d9f3b-aa62-7148-8f9b-2377b7ba1ddd",
                     "receiveShadows": true,
                     "visible": true
                 },
                 "Name": {
-                    "name": "Fence"
+                    "name": "Bathtub"
                 },
                 "RigidBody3D": {
                     "angular_velocity": [
@@ -72,13 +72,13 @@
                     ],
                     "collider_offset": [
                         0.0,
-                        0.8999999761581421,
+                        0.0,
                         0.0
                     ],
                     "collider_scale": [
-                        2.9000000953674316,
-                        2.4000000953674316,
-                        0.30000001192092896
+                        1.0,
+                        1.0,
+                        2.200000047683716
                     ],
                     "motion_type": 0,
                     "physics_behavior": {
@@ -93,9 +93,9 @@
                     ]
                 }
             },
-            "entityGUID": "79645da4-aba9-d849-90c6-464be1064aa7"
+            "entityGUID": "24846e14-2af9-7842-8541-4ad0a19d47d9"
         }
     ],
-    "prefabName": "Fence",
-    "rootEntityGUID": "79645da4-aba9-d849-90c6-464be1064aa7"
+    "prefabName": "Bathtub",
+    "rootEntityGUID": "24846e14-2af9-7842-8541-4ad0a19d47d9"
 }

@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Bathtub_normal.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 3240672681549337819
+  },
+  "descriptor_version": 1,
+  "guid": "0132f5dd-1a15-e546-adf5-cbada70fb446",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Bathtub_normal.png"
+  }
+}

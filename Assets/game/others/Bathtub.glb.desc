@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Bathtub.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 13131121185705345702
+  },
+  "descriptor_version": 1,
+  "guid": "67bd78d6-58f9-4a49-9584-8711abf24b1d",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\Bathtub.glb"
+  }
+}

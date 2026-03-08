@@ -1,0 +1,29 @@
+{
+    "flags": {
+        "doubleSided": false,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "emissive": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "metallic": 1.0,
+        "roughness": 1.0
+    },
+    "textures": {
+        "albedo": "game\\textures\\Bathtub_baseColor.png",
+        "ao": "game\\textures\\Bathtub_occlusionRoughnessMetallic.png",
+        "emissive": "game\\textures\\Bathtub_emissive.png",
+        "lightmap": "game\\textures\\Bathtub_occlusionRoughnessMetallic.png",
+        "metallic": "game\\textures\\Bathtub_occlusionRoughnessMetallic.png",
+        "normal": "game\\textures\\Bathtub_normal.png",
+        "roughness": "game\\textures\\Bathtub_occlusionRoughnessMetallic.png"
+    }
+}

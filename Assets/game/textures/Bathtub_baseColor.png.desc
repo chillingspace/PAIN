@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Bathtub_baseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 6267280654456629867
+  },
+  "descriptor_version": 1,
+  "guid": "d58ec965-4a8b-2446-955b-707274af2082",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Bathtub_baseColor.png"
+  }
+}
