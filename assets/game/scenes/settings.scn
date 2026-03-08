@@ -585,6 +585,14 @@
                         "Name": {
                             "name": "master_handle"
                         },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "a3228277-a976-1a4a-b247-e09d061d40d8"
+                                }
+                            ]
+                        },
                         "Texture2D": {
                             "pos": [
                                 0.3199999928474426,
