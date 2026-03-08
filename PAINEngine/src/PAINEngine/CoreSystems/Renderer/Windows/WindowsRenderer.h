@@ -96,6 +96,7 @@ namespace PAIN {
 		// vbo data for instanced rendering
 		bool vboDirty = false;
 		bool needsFullRebuild = false;
+		bool resizeDirty = false;
 
 		inline static int winWidth = 0;
 		inline static int winHeight = 0;
@@ -106,6 +107,8 @@ namespace PAIN {
 		void Init(std::shared_ptr<Services> app_services);
 		void uploadTexture(std::shared_ptr<Assets::Texture> tex);
 		void initSceneVbo();
+		void _initDeferredShadingBuffers();
+		void _initGeometryBuffers();
 		void clearBuffers();
 
 		// PASSES
@@ -118,7 +121,8 @@ namespace PAIN {
 		void DrawGeometry(std::shared_ptr<Scene::SceneManager> scene,
 						  ModelRenderer& component, const glm::mat4& M);
 		void EndGeometryPass();
-	void BeginMinimapPass(const glm::mat4& view, const glm::mat4& proj);
+
+		void BeginMinimapPass(const glm::mat4& view, const glm::mat4& proj);
 		void EndMinimapPass();
 
 		// === GPU-accelerated minimap wall rendering ===
@@ -281,16 +285,16 @@ namespace PAIN {
 		void initShaders();
 
 		/**
-   * .
-   *
-   * \param tex
-   * \param num_i channels
-   * \param gl_color_attachment THIS IS NOT YOUR NORMAL ID. USE GL_ATTACHMENT`n`
-   * HERE.
-   */
+		* .
+		*
+		* \param tex
+		* \param num_i channels
+		* \param gl_color_attachment THIS IS NOT YOUR NORMAL ID. USE GL_ATTACHMENT`n`
+		* HERE.
+		*/
 		void _createDeferredShadingBuffer(unsigned int& tex, int num_channels,
 										  int gl_color_attachment);
-		void _initDeferredShadingBuffers();
+
 	};
 } // namespace PAIN
 

@@ -56,7 +56,10 @@ namespace PAIN {
 	}
 
 	void sRenderer::onUpdate(AppTiming timing) {
-
+		if (w_renderer->resizeDirty) {
+			w_renderer->resizeDirty = false;
+			w_renderer->_initDeferredShadingBuffers();
+		}
 		//Upload textures
 		if(getPendingTexUploadCount() > 0) processUploads();
 	}
@@ -98,31 +101,21 @@ namespace PAIN {
 	void sRenderer::onEvent(Event::Event& e) {
 #ifdef PN_PLATFORM_WINDOWS
 		if (e.getType() == Event::Type::WindowResize) {
-			//PN_CORE_INFO("window resized");
-
-			//glfwGetWindowSize(Window::GLFW_Window::getWindow(), &WindowsRenderer::winWidth, &WindowsRenderer::winHeight);
-
-			//w_renderer->Cleanup();
-			//w_renderer->Init(services);
-
-			//auto ecs = services->get<ECS::Controller>();
 			auto window_sys = services->get<Window::Window>();
 			void* void_p_window = window_sys->getNativeWindow();
 
 			if (void_p_window) {
 				GLFWwindow* p_window = reinterpret_cast<GLFWwindow*>(void_p_window);
+				int w, h;
+				glfwGetFramebufferSize(p_window, &w, &h);
+				if (w == 0 || h == 0) return;
 
-				glfwGetWindowSize(p_window, &WindowsRenderer::winWidth, &WindowsRenderer::winHeight);
-
-				w_renderer->Cleanup();
-				w_renderer->Init(services);
-
-				if (!GS.use_instanced_rendering) {
-					w_renderer->initSceneVbo();
-				}
+				WindowsRenderer::winWidth = w;
+				WindowsRenderer::winHeight = h;
+				w_renderer->resizeDirty = true;
 			}
 			else {
-				PN_CORE_ERROR("Cannot get wwindow pointer on window resize in sRender::onEvent!");
+				PN_CORE_ERROR("Cannot get window pointer on window resize in sRender::onEvent!");
 				throw std::runtime_error("");
 			}
 
