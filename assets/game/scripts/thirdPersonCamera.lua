@@ -26,7 +26,7 @@ local smoothFactor = 15.0 -- Higher = tighter, Lower = smoother (and more lag)
 local currentCamDist   = nil
 local minSafeDist      = nil
 local CAM_PULL_IN_SPEED  = 5.0  -- fast snap-in when a wall is hit
-local CAM_PULL_OUT_SPEED =  1.0  -- slow ease-out when the wall clears
+local CAM_PULL_OUT_SPEED =  2.0  -- slow ease-out when the wall clears
 local CAM_FORGET_SPEED   =  1.0  -- how fast minSafeDist recovers after clearing (lower, less jitter)
 
 _G.CameraState = { yaw = yaw, pitch = pitch }

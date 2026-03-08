@@ -1300,6 +1300,10 @@ namespace PAIN {
             if (api_) return api_->Animation_IsPlaying(entityId, name);
                 return false;
         });
+        animTable.set_function("HasFinished", [this](entt::entity entityId) {
+            if (api_) return api_->Animation_HasFinished(entityId);
+            return false;
+            });
         animTable.set_function("GetTime", [this](entt::entity entityId) {
             if (api_) return api_->GetAnimationTime(entityId);
             return 0.0f;

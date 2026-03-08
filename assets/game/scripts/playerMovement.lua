@@ -109,7 +109,8 @@ local currentYaw = baseRy or 0.0
 local playerStateInited = false
 
 local idleTimer = 0.0
-local idleInterval = 5.0 + math.random() * 3.0  -- Random 5-8 seconds
+local hopTimer = 0.0
+local idleInterval = 5.0 + math.random() * 2.0  -- Random 5-8 seconds
 local S = nil
 
 local maxGroundCheckDist = 0.1
@@ -279,18 +280,16 @@ registerUpdate(function(dt)
     end
 
     if isMoving then
-        Animation.SetSpeed(id, 1)
-        -- PLAY walk Animation
+        Animation.SetSpeed(id, 1.8)
+        -- PLAY walking Animation
         if isGrounded then
             PlayAnim(id, ANIM_WALK, 0.1, true) -- on the ground
             Animation.SetLoop(id, true)
         end
-
+        -- Play hop sound when starting to move
         if not wasMoving then
-            -- Play hop sound when starting to move (skip if airborne or just landed from jump)
-            if isGrounded and jumpCooldown <= 0 then
-                audioPlayRandomSFXFromEntity(SFX_PLAYER_HOPS, id, VOL_PLAYER_HOP)
-            end
+            
+            audioPlayRandomSFXFromEntity(SFX_PLAYER_HOPS, id, VOL_PLAYER_HOP)
             lastAnimTime = 0.0
         
         -- LOOP: play hop sound at animation loop point
@@ -314,7 +313,7 @@ registerUpdate(function(dt)
         
         -- Make sure animation is not looping
         if isGrounded then 
-            Animation.SetSpeed(id, 1.8)
+            Animation.SetSpeed(id, 2)
             Animation.SetLoop(id, false)
          end
     end
@@ -324,7 +323,7 @@ registerUpdate(function(dt)
         idleTimer = idleTimer + dt
         if idleTimer >= idleInterval then
             idleTimer = 0.0
-            idleInterval = 5.0 + math.random() * 3.0  -- Randomize next interval
+            idleInterval = 5.0 + math.random() * 2.0  -- Randomize next interval
             
             -- Play random idle sound at player position
             audioPlayRandomSFXFromEntity(SFX_PLAYER_IDLES, id, VOL_PLAYER_IDLE)
