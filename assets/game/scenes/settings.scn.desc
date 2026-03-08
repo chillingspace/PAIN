@@ -4,10 +4,10 @@
     "type": "Scenes"
   },
   "build_data": {
-    "hash": 18382627103299120400
+    "hash": 2445640810295173063
   },
   "descriptor_version": 1,
-  "guid": "a71a951c-3fb8-b843-9c6a-b6939bf75319",
+  "guid": "ae754773-4ec2-2247-8158-cbfcba460acd",
   "import_settings": null,
   "meta_data": {
     "source_file": "game\\scenes\\settings.scn"

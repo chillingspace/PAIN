@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "settings_volume_spritesheet.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 9828791736204193842
+  },
+  "descriptor_version": 1,
+  "guid": "78b30b97-edf8-c04a-8974-4c1fdebedb69",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\settings_volume_spritesheet.png"
+  }
+}

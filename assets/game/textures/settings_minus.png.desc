@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "settings_minus.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 16080879519489092209
+  },
+  "descriptor_version": 1,
+  "guid": "6b552878-5312-184c-b2bd-db0fcf59e586",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\settings_minus.png"
+  }
+}

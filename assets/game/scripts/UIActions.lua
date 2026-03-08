@@ -590,7 +590,8 @@ local handlers = {
             local isMenuScene = string.find(sceneName, "menu") or 
                                  string.find(sceneName, "howtoplay") or 
                                  string.find(sceneName, "credits") or
-                                 string.find(sceneName, "cutscene")
+                                 string.find(sceneName, "cutscene") or
+                                 string.find(sceneName, "settings")
             
             if isMenuScene then
                 hideCursor(false)  -- Show cursor for menus
