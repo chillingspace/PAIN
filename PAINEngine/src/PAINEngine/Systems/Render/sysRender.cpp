@@ -37,7 +37,7 @@ namespace PAIN {
 				return;
 
 			// Initiate scene VBO update
-			services.lock()->get<sRenderer>()->initSceneVbo();
+			services.lock()->get<sRenderer>()->w_renderer->vboDirty = true;
 
 			// Set prev GUID
 			component.prevModelGUID = component.modelGUID;
@@ -380,6 +380,11 @@ namespace PAIN {
 			auto svc = services.lock();
 			if (!svc)
 				return;
+
+			if (rendererService->w_renderer->vboDirty) {
+				rendererService->w_renderer->vboDirty = false;
+				rendererService->initSceneVbo();
+			}
 
 			auto sceneManager = svc->get<Scene::SceneManager>();
 			if (!sceneManager)

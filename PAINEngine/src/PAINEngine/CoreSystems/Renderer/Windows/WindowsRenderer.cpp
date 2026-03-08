@@ -191,114 +191,149 @@ namespace PAIN {
 	}
 
 	void WindowsRenderer::initSceneVbo() {
-
-
 		if (!geometry_vbo) return;
 
-		// Initialize Buffers
-		PN_CORE_INFO("Initializing New Buffers");
+		// Full rebuild path: triggered on delete or scene load/clear
+		if (needsFullRebuild) {
+			needsFullRebuild = false;
+			currentVertexCount = 0;
+			currentIndexCount = 0;
+			clearBuffers(); // clears instanced_offsets too
 
-		// Clear buffers before building
-		clearBuffers();
+			// Pre-allocate with GL_DYNAMIC_DRAW since we'll be appending
+			glBindVertexArray(geometry_vao);
+			glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
+			glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_DYNAMIC_DRAW);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, 0, nullptr, GL_DYNAMIC_DRAW);
 
-		glBindVertexArray(geometry_vao);
+			glBindVertexArray(shadow_vao);
+			glBindBuffer(GL_ARRAY_BUFFER, shadow_vbo);
+			glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_DYNAMIC_DRAW);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shadow_ebo);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, 0, nullptr, GL_DYNAMIC_DRAW);
 
-		// ========================================
-		// UNIFIED GEOMETRY UPLOAD (Instancing-Compatible)
-		// ========================================
-		// Both instanced and non-instanced rendering now upload ALL geometry ONCE
-		// This eliminates per-frame glBufferSubData calls and uses GL_STATIC_DRAW
+			glBindVertexArray(0);
+		}
 
-		unsigned int vertexOffset = 0;
-		unsigned int indexOffset = 0;
-		std::vector<Assets::Vertex> allVertices;
-		std::vector<unsigned int> allIndices;
-		std::unordered_set<std::string> uploaded;
+		// Collect ONLY new models not yet in instanced_offsets
+		std::vector<Assets::Vertex>  newVertices;
+		std::vector<unsigned int>    newIndices;
 
-		// Get ECS controller to iterate ALL registries (including prefab edit
-		// registries)
+		unsigned int vertexOffset = currentVertexCount;
+		unsigned int indexOffset = currentIndexCount;
+
 		auto ecs = services->get<ECS::Controller>();
 
-		// Iterate ALL registries to collect models (fixes prefab editor rendering)
 		for (auto registryId : ecs->getAllRegistryIDs()) {
 			auto& registry = ecs->getRegistry(registryId);
 			auto view = registry.view<ModelRenderer>();
 
-			// Collect all unique models and build combined vertex/index buffers
 			for (auto e : view) {
-
-				// Get mdl asset
 				auto mdl = ecs->getEntityComponent<ModelRenderer>(e, registryId);
 				if (!mdl.has_value())
 					continue;
 
-				// Invalidate Cached Buffer Offsets
-				mdl.value().get().bufferOffset.isUploaded = false;
-
-				// Retrieve model asset with validation
 				auto mdl_opt = services->get<Assets::Manager>()->getAsset<Assets::Model>(
 					mdl.value().get().modelGUID);
 				if (!mdl_opt.has_value() || mdl_opt.value()->type != Assets::Type::Model)
 					continue;
 				const auto& modelAsset = mdl_opt.value();
 
-				// Skip if already uploaded (deduplicate by model path)
-				if (uploaded.find(modelAsset->vpath) != uploaded.end())
+				// SKIP if already on GPU
+				if (instanced_offsets.find(modelAsset->vpath) != instanced_offsets.end())
 					continue;
-				uploaded.insert(modelAsset->vpath);
 
-				// Store offset for this model in the map (used by both rendering paths)
+				// Register offset BEFORE appending so it's atomic
 				instanced_offsets[modelAsset->vpath] = {
-					indexOffset, (unsigned int)modelAsset->indices.size()};
+					indexOffset, (unsigned int)modelAsset->indices.size() };
 
-				// Add vertices
-				allVertices.insert(allVertices.end(), modelAsset->vertices.begin(),
-								   modelAsset->vertices.end());
+				for (const auto& v : modelAsset->vertices)
+					newVertices.push_back(v);
 
-				// Add indices with vertex offset applied
-				for (unsigned int idx : modelAsset->indices) {
-					allIndices.push_back(vertexOffset + idx);
-				}
+				for (unsigned int idx : modelAsset->indices)
+					newIndices.push_back(vertexOffset + idx);
 
-				vertexOffset += modelAsset->vertices.size();
-				indexOffset += modelAsset->indices.size();
+				vertexOffset += (unsigned int)modelAsset->vertices.size();
+				indexOffset += (unsigned int)modelAsset->indices.size();
 			}
 		}
 
-		// Upload ALL geometry ONCE to main geometry buffers
-		glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
-		glBufferData(GL_ARRAY_BUFFER, allVertices.size() * sizeof(Assets::Vertex),
-					 allVertices.data(),
-					 GL_STATIC_DRAW); // STATIC_DRAW for immutable geometry
+		// Nothing new to upload - exit early, no GPU calls
+		if (newVertices.empty()) {
+			PN_CORE_INFO("initSceneVbo: nothing new to upload, skipping.");
+			return;
+		}
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-					 allIndices.size() * sizeof(unsigned int), allIndices.data(),
-					 GL_STATIC_DRAW);
+		PN_CORE_INFO("initSceneVbo: appending {} vertices, {} indices",
+			newVertices.size(), newIndices.size());
 
-		// Also upload to shadow buffers (same geometry)
+		// Resize GPU buffers first, then sub-upload the new slice
+		auto appendToBuffer = [](GLuint buf, GLenum target,
+			unsigned int existingBytes,
+			const void* newData, unsigned int newBytes) {
+				glBindBuffer(target, buf);
+
+				// Get current size
+				GLint currentSize = 0;
+				glGetBufferParameteriv(target, GL_BUFFER_SIZE, &currentSize);
+
+				unsigned int totalBytes = existingBytes + newBytes;
+
+				if ((unsigned int)currentSize < totalBytes) {
+					// Orphan + resize: copy old data into a temp, re-upload everything
+					std::vector<uint8_t> temp(currentSize);
+					if (currentSize > 0) {
+						void* ptr = glMapBufferRange(target, 0, currentSize, GL_MAP_READ_BIT);
+						if (ptr) {
+							memcpy(temp.data(), ptr, currentSize);
+							glUnmapBuffer(target);
+						}
+					}
+					glBufferData(target, totalBytes, nullptr, GL_DYNAMIC_DRAW); // orphan
+					if (currentSize > 0)
+						glBufferSubData(target, 0, currentSize, temp.data());
+				}
+
+				// Append new data at the end
+				glBufferSubData(target, existingBytes, newBytes, newData);
+			};
+
+		unsigned int existingVertexBytes = currentVertexCount * sizeof(Assets::Vertex);
+		unsigned int newVertexBytes = (unsigned int)(newVertices.size() * sizeof(Assets::Vertex));
+		unsigned int existingIndexBytes = currentIndexCount * sizeof(unsigned int);
+		unsigned int newIndexBytes = (unsigned int)(newIndices.size() * sizeof(unsigned int));
+
+		// Append to geometry buffers
+		glBindVertexArray(geometry_vao);
+		appendToBuffer(geometry_vbo, GL_ARRAY_BUFFER,
+			existingVertexBytes, newVertices.data(), newVertexBytes);
+		appendToBuffer(geometry_ebo, GL_ELEMENT_ARRAY_BUFFER,
+			existingIndexBytes, newIndices.data(), newIndexBytes);
+
+		// Append to shadow buffers
 		glBindVertexArray(shadow_vao);
-		glBindBuffer(GL_ARRAY_BUFFER, shadow_vbo);
-		glBufferData(GL_ARRAY_BUFFER, allVertices.size() * sizeof(Assets::Vertex),
-					 allVertices.data(), GL_STATIC_DRAW);
+		appendToBuffer(shadow_vbo, GL_ARRAY_BUFFER,
+			existingVertexBytes, newVertices.data(), newVertexBytes);
+		appendToBuffer(shadow_ebo, GL_ELEMENT_ARRAY_BUFFER,
+			existingIndexBytes, newIndices.data(), newIndexBytes);
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shadow_ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-					 allIndices.size() * sizeof(unsigned int), allIndices.data(),
-					 GL_STATIC_DRAW);
-
-		// If instancing is enabled, create instance buffer for per-instance data
-		if (GS.use_instanced_rendering) {
-			glGenBuffers(1, &geometry_ibo);
+		// Update IBO if instancing enabled
+		if (GS.use_instanced_rendering && geometry_ibo) {
 			glBindBuffer(GL_ARRAY_BUFFER, geometry_ibo);
-			glBufferData(GL_ARRAY_BUFFER, uploaded.size() * sizeof(IBOData), nullptr,
-						 GL_DYNAMIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER,
+				instanced_offsets.size() * sizeof(IBOData),
+				nullptr, GL_DYNAMIC_DRAW);
 		}
 
 		glBindVertexArray(0);
 
-		// End log
-		PN_CORE_INFO("New buffers initialized!");
+		// Commit new counts
+		currentVertexCount = vertexOffset;
+		currentIndexCount = indexOffset;
+
+		PN_CORE_INFO("initSceneVbo: done. Total: {} vertices, {} indices",
+			currentVertexCount, currentIndexCount);
 	}
 
 	void WindowsRenderer::clearBuffers() {

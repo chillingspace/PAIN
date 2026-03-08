@@ -1131,7 +1131,11 @@ namespace PAIN {
 			loadingScreen->setStatus("Building Model's VBO...");
 			loadingScreen->setProgress(0.98f);
 			loadingScreen->render();
-			services->get<sRenderer>()->initSceneVbo();
+
+			// Full rebuild of scene vbo
+			auto renderer = services->get<sRenderer>();
+			renderer->w_renderer->needsFullRebuild = true;
+			renderer->w_renderer->vboDirty = true;
 
 #ifdef _DEBUG
 #ifdef PN_PLATFORM_WINDOWS
@@ -1797,7 +1801,7 @@ namespace PAIN {
 
 			// Rebuild entites from snapshot
 			buildEntitiesFromAsset(scene_snapshot);	
-
+			services->get<sRenderer>()->initSceneVbo();
 			services->get<Serialization::Service>()->markSceneChanged();
 
 			setPlaying(false);
@@ -1842,6 +1846,10 @@ namespace PAIN {
 			ModelRenderer mr = ModelRenderer{ mdl->guid };
 			mr.cachedModelAsset = mdl;  // ← ADD THIS LINE!
 			ecs->addEntityComponent(entity, static_cast<ModelRenderer>(mr));
+
+			auto renderer = services->get<sRenderer>();
+			if (renderer && renderer->w_renderer)
+				renderer->w_renderer->vboDirty = true;
 
 			// Add Animation component if model has animations
 			if (mdl->animations.size()) {

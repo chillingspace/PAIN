@@ -42,6 +42,9 @@ namespace PAIN {
 			unsigned int idx_offset{};
 			unsigned int idx_count{};
 		};
+		unsigned int currentVertexCount = 0;
+		unsigned int currentIndexCount = 0;
+
 
 		std::unordered_map<std::string, SceneVboOffset> instanced_offsets{};
 
@@ -89,6 +92,10 @@ namespace PAIN {
 
 	public:
 		static constexpr float ao = 1.f; // ambient occlusion	(1 = no occlusion)
+
+		// vbo data for instanced rendering
+		bool vboDirty = false;
+		bool needsFullRebuild = false;
 
 		inline static int winWidth = 0;
 		inline static int winHeight = 0;
