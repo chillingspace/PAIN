@@ -1830,6 +1830,52 @@ namespace PAIN {
 			}
 
 			void ComponentsPanel::renderEntityComponents(entt::entity entity, const char* filter) {
+
+				static const std::unordered_map<std::string, ImU32> comp_category_colors = {
+					// Transform / Hierarchy
+					{ "LocalTransform",     IM_COL32(255, 220,  80, 255) }, // yellow
+					{ "WorldTransform",     IM_COL32(255, 220,  80, 255) },
+					{ "Hierarchy",          IM_COL32(255, 220,  80, 255) },
+					{ "GUID",               IM_COL32(180, 180, 180, 255) }, // grey
+					// Rendering
+					{ "ModelRenderer",      IM_COL32(80, 160, 255, 255) }, // blue
+					{ "Texture2D",          IM_COL32(80, 160, 255, 255) },
+					{ "Lighting",           IM_COL32(255, 200,  80, 255) }, // warm yellow
+					{ "BoundingVolume",     IM_COL32(120, 200, 120, 255) }, // green
+					// Physics
+					{ "RigidBody3D",        IM_COL32(255, 140,  40, 255) }, // orange
+					{ "CompoundCollider",   IM_COL32(255, 140,  40, 255) },
+					{ "Joint",              IM_COL32(255, 140,  40, 255) },
+					// Animation
+					{ "Animation",          IM_COL32(180,  80, 255, 255) }, // purple
+					// Audio
+					{ "AudioSource",        IM_COL32(80, 220, 200, 255) }, // teal
+					// AI
+					{ "AIController",       IM_COL32(255,  80,  80, 255) }, // red
+					{ "AISensors",          IM_COL32(255,  80,  80, 255) },
+					{ "AINavAgent",         IM_COL32(255,  80,  80, 255) },
+					{ "AISteering",         IM_COL32(255,  80,  80, 255) },
+					{ "AIBlackboard",       IM_COL32(255,  80,  80, 255) },
+					{ "AICommandQueue",     IM_COL32(255,  80,  80, 255) },
+					// Particles
+					{ "ParticleSystem",     IM_COL32(255, 160, 200, 255) }, // pink
+					// UI
+					{ "UIText",             IM_COL32(80, 200, 255, 255) }, // light blue
+					{ "UIButton",           IM_COL32(80, 200, 255, 255) },
+					{ "UICanvas",           IM_COL32(80, 200, 255, 255) },
+					{ "UIElement",          IM_COL32(80, 200, 255, 255) },
+					{ "UIRectTransform",    IM_COL32(80, 200, 255, 255) },
+					{ "UIAnimation",        IM_COL32(80, 200, 255, 255) },
+					{ "UIJoystick",         IM_COL32(80, 200, 255, 255) },
+					{ "UIFollowsWorldEntity", IM_COL32(80, 200, 255, 255) },
+					// Scripts
+					{ "Scripts",            IM_COL32(120, 220, 120, 255) }, // green
+					// Misc
+					{ "Tag",                IM_COL32(180, 180, 180, 255) },
+					{ "PrefabInstance",     IM_COL32(100, 180, 255, 255) },
+					{ "Camera",             IM_COL32(255, 220,  80, 255) },
+					{ "CustomHitbox2D",     IM_COL32(255, 140,  40, 255) },
+				};
 				
 				auto ecs = services->get<ECS::Controller>();
 
@@ -1895,9 +1941,39 @@ namespace PAIN {
 						ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed |
 						ImGuiTreeNodeFlags_SpanAvailWidth |
 						ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
+
+					// Apply collapse/expand request
+					if (collapse_all_requested)
+						comp_open_states[comp_name] = false;
+					if (expand_all_requested)
+						comp_open_states[comp_name] = true;
+
+					// Set open state for next draw if we have one stored
+					if (comp_open_states.count(comp_name))
+						ImGui::SetNextItemOpen(comp_open_states[comp_name], ImGuiCond_Always);
+
 					ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
+
+					// Draw color dot before the tree node
+					{
+						ImU32 dot_color = IM_COL32(160, 160, 160, 255); // default grey
+						auto it = comp_category_colors.find(comp_name);
+						if (it != comp_category_colors.end())
+							dot_color = it->second;
+
+						ImVec2 cursor = ImGui::GetCursorScreenPos();
+						float dot_radius = 4.0f;
+						float dot_offset_x = 6.0f;
+						float dot_offset_y = ImGui::GetFrameHeight() * 0.5f;
+						ImGui::GetWindowDrawList()->AddCircleFilled(
+							ImVec2(cursor.x + dot_offset_x, cursor.y + dot_offset_y),
+							dot_radius, dot_color);
+						ImGui::SetCursorScreenPos(ImVec2(cursor.x + dot_offset_x * 2.5f, cursor.y));
+					}
+
 					bool node_open = ImGui::TreeNodeEx(comp_name.c_str(), node_flags);
 					ImGui::PopStyleVar();
+					comp_open_states[comp_name] = node_open; // track state
 					// ========================================
 					// Pop override colors
 					// ========================================
@@ -2115,9 +2191,28 @@ namespace PAIN {
 				}
 
 				ImGui::Spacing();
+
 				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.9f, 1.0f, 1.0f));
-				ImGui::Text("Entity Properties");
+				ImGui::Text("Entity Components");
 				ImGui::PopStyleColor();
+
+				ImGui::SameLine();
+				float available = ImGui::GetContentRegionAvail().x;
+				float scrollbar_width = ImGui::GetStyle().ScrollbarSize;
+				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + available - 130.0f - scrollbar_width);
+
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.2f, 0.2f, 0.6f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.3f, 0.3f, 0.8f));
+				if (ImGui::SmallButton("Collapse All")) {
+					collapse_all_requested = true;
+					expand_all_requested = false;
+				}
+				ImGui::SameLine(0, 4);
+				if (ImGui::SmallButton("Expand All")) {
+					expand_all_requested = true;
+					collapse_all_requested = false;
+				}
+				ImGui::PopStyleColor(2);
 
 				ImGui::Spacing();
 
@@ -2331,6 +2426,9 @@ namespace PAIN {
 				ImGui::Spacing();
 
 				renderEntityComponents(selected, comp_filter);
+				// consume flags after render
+				collapse_all_requested = false;
+				expand_all_requested = false;
 
 				ImGui::Spacing();
 				ImGui::Separator();

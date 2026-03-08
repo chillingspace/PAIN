@@ -96,6 +96,10 @@ namespace PAIN {
 
 				char comp_filter[128] = {};
 
+				std::unordered_map<std::string, bool> comp_open_states;
+				bool collapse_all_requested = false;
+				bool expand_all_requested = false;
+
 			};
 
 
