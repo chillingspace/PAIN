@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Fence1.gltf",
+    "name": "Windmill.gltf",
     "type": "Model"
   },
   "build_data": {
-    "hash": 354040667111602858
+    "hash": 15062862898622046083
   },
   "descriptor_version": 1,
-  "guid": "45fa720b-bdbf-b249-9c9b-961773316633",
+  "guid": "9ef7daa0-a9f9-4342-b301-c4dbaf9926f4",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "game\\models\\Fence1.gltf"
+    "source_file": "game\\models\\Windmill.gltf"
   }
 }

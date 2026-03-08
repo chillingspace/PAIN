@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Fence_baseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 1655249296909096056
+  },
+  "descriptor_version": 1,
+  "guid": "b27dcc69-a3d9-0440-9d50-5885f3230eba",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Fence_baseColor.png"
+  }
+}

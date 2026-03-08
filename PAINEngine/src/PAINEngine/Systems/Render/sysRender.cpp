@@ -1264,14 +1264,29 @@ namespace PAIN {
 					uv_transform = glm::vec4(width, height, uv_comp->uv.x, uv_comp->uv.y);
 				}
 
-				rendererService->w_renderer->Render2DTexture(
-					texture_opt.value()->gl_texture, texture_comp.pos,
-					texture_comp.texture_scale, uv_transform);
+			// Only sync position/scale from UIRectTransform for entities that follow world entities
+			glm::vec2 render_pos = texture_comp.pos;
+			glm::vec2 render_scale = texture_comp.texture_scale;
+			
+			if (registry.all_of<UIFollowsWorldEntity>(entity)) {
+				if (rect_comp.layout_dirty) {
+					// Write back so pos stays valid even when not dirty
+					texture_comp.pos = rect_comp.calculated_world_position;
+					texture_comp.texture_scale = glm::vec2(rect_comp.scale.x, rect_comp.scale.y);
+					rect_comp.layout_dirty = false;
+				}
+				render_pos = texture_comp.pos;
+				render_scale = texture_comp.texture_scale;
 			}
 
-			// ========================================
-			// RENDER TEXT
-			// ========================================
+			rendererService->w_renderer->Render2DTexture(
+				texture_opt.value()->gl_texture, render_pos,
+				render_scale, uv_transform);
+		}
+
+		// ========================================
+		// RENDER TEXT
+		// ========================================
 			for (auto [entity, ui_elem, text_comp, rect_comp] : text_group.each()) {
 				// Layer check
 				auto layerComp = registry.try_get<Entity::Layer>(entity);
@@ -1293,7 +1308,15 @@ namespace PAIN {
 				// font_opt.value()->name);
 
 				// Only recalculate text_pos when layout changes
-				if (rect_comp.layout_dirty) {
+				if (registry.all_of<UIFollowsWorldEntity>(entity)) {
+					if (rect_comp.layout_dirty) {
+						text_comp.text_pos = rect_comp.calculated_world_position;
+						text_comp.scale_factor = rect_comp.scale.x;
+						rect_comp.layout_dirty = false;
+					}
+					// text_comp.text_pos is now always valid even without dirty
+				}
+				else if (rect_comp.layout_dirty) {
 					text_comp.text_pos = rect_comp.calculated_world_position;
 					text_comp.scale_factor = rect_comp.scale.x;
 					rect_comp.layout_dirty = false;
