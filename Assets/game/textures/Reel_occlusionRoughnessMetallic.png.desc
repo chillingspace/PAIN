@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Reel_occlusionRoughnessMetallic.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 830803945611019119
+  },
+  "descriptor_version": 1,
+  "guid": "08527159-b243-d742-a313-9001198b2097",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Reel_occlusionRoughnessMetallic.png"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Tank.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 2053373284570106402
+  },
+  "descriptor_version": 1,
+  "guid": "b61f9233-3433-df42-bd11-067f5e76043a",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Tank.prefab"
+  }
+}

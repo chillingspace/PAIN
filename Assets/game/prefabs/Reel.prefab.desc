@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Reel.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 7380865684917681632
+  },
+  "descriptor_version": 1,
+  "guid": "e0a060ae-839b-9c46-bb3b-1af7ddf11639",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Reel.prefab"
+  }
+}

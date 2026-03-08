@@ -1,0 +1,29 @@
+{
+    "flags": {
+        "doubleSided": false,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "emissive": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "metallic": 1.0,
+        "roughness": 1.0
+    },
+    "textures": {
+        "albedo": "game\\textures\\Fence2_baseColor.png",
+        "ao": "game\\textures\\Fence2_occlusionRoughnessMetallic.png",
+        "emissive": "game\\textures\\Fence2_emissive.png",
+        "lightmap": "game\\textures\\Fence2_occlusionRoughnessMetallic.png",
+        "metallic": "game\\textures\\Fence2_occlusionRoughnessMetallic.png",
+        "normal": "game\\textures\\Fence2_normal.png",
+        "roughness": "game\\textures\\Fence2_occlusionRoughnessMetallic.png"
+    }
+}

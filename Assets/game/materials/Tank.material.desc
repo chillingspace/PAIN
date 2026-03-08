@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Tank.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 14021275443504646165
+  },
+  "descriptor_version": 1,
+  "guid": "e8a9c8c9-3faf-e046-abbb-27ff8f28b3d4",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Tank.material"
+  }
+}
