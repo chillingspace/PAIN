@@ -37,7 +37,7 @@ namespace PAIN {
 				return;
 
 			// Initiate scene VBO update
-			if (component.prevModelGUID.IsValid()) services.lock()->get<sRenderer>()->initSceneVbo();
+			services.lock()->get<sRenderer>()->initSceneVbo();
 
 			// Set prev GUID
 			component.prevModelGUID = component.modelGUID;

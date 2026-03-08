@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "sysTransform.h"
 
+
 namespace PAIN {
 	namespace Transform {
 
@@ -89,6 +90,30 @@ namespace PAIN {
 		}
 
 		void System::setParent(entt::entity child, entt::entity parent, entt::registry& registry) {
+			// 1. Grab the child's CURRENT world position/rotation/scale BEFORE reparenting
+			auto* childWorld = registry.try_get<WorldTransform>(child);
+			auto* parentWorld = registry.try_get<WorldTransform>(parent);
+			auto* childLocal = registry.try_get<LocalTransform>(child);
+
+			if (childWorld && parentWorld && childLocal)
+			{
+				// 2. Compute inverse of parent's world matrix
+				glm::mat4 invParentWorld = glm::inverse(parentWorld->matrix);
+
+				// 3. New local matrix = invParent * childWorld
+				glm::mat4 newLocalMatrix = invParentWorld * childWorld->matrix;
+
+				// 4. Decompose new local matrix back into position/rotation/scale
+				glm::vec3 newPos, newScale, skew;
+				glm::vec4 perspective;
+				glm::quat newRot;
+				glm::decompose(newLocalMatrix, newScale, newRot, newPos, skew, perspective);
+
+				childLocal->position = newPos;
+				childLocal->rotation = glm::normalize(newRot);
+				childLocal->scale = newScale;
+			}
+
 			auto& guidParent = registry.get<Entity::GUID>(parent);
 			auto& guidChild = registry.get<Entity::GUID>(child);
 
