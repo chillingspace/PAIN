@@ -1,0 +1,29 @@
+{
+    "flags": {
+        "doubleSided": false,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "emissive": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "metallic": 1.0,
+        "roughness": 1.0
+    },
+    "textures": {
+        "albedo": "game\\textures\\Tank_baseColor.png",
+        "ao": "game\\textures\\Tank_occlusionRoughnessMetallic.png",
+        "emissive": "game\\textures\\Tank_emissive.png",
+        "lightmap": "game\\textures\\Tank_occlusionRoughnessMetallic.png",
+        "metallic": "game\\textures\\Tank_occlusionRoughnessMetallic.png",
+        "normal": "game\\textures\\Tank_normal.png",
+        "roughness": "game\\textures\\Tank_occlusionRoughnessMetallic.png"
+    }
+}

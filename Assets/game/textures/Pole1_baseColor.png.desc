@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Pole1_baseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 3614020702379741304
+  },
+  "descriptor_version": 1,
+  "guid": "27878181-a46a-494c-91d4-953c69e3a1d3",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Pole1_baseColor.png"
+  }
+}

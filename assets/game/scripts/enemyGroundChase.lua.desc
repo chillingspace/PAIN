@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "enemyGroundChase.lua",
+    "type": "Script"
+  },
+  "build_data": {
+    "hash": 16289575566655519464
+  },
+  "descriptor_version": 1,
+  "guid": "0a4f7553-2e41-5a4d-8963-c52675eac7b8",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scripts\\enemyGroundChase.lua"
+  }
+}

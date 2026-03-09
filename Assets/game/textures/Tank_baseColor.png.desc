@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Tank_baseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 6772493209124754850
+  },
+  "descriptor_version": 1,
+  "guid": "3fd9c353-23d4-e84a-ab6d-d4eea163ad9b",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Tank_baseColor.png"
+  }
+}

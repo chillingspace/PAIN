@@ -64,11 +64,6 @@
                 "Name": {
                     "name": "Container_Blue"
                 },
-                "Tag": {
-                    "tags": [
-                        "wall"
-                    ]
-                },
                 "RigidBody3D": {
                     "angular_velocity": [
                         0.0,
@@ -77,23 +72,29 @@
                     ],
                     "collider_offset": [
                         0.0,
-                        0.0,
+                        1.600000023841858,
                         0.0
                     ],
                     "collider_scale": [
-                        2.799999952316284,
-                        6.900000095367432,
-                        5.900000095367432
+                        2.700000047683716,
+                        3.0,
+                        5.599999904632568
                     ],
                     "motion_type": 0,
                     "physics_behavior": {
                         "behavior": 0
                     },
+                    "physics_enabled": true,
                     "use_gravity": true,
                     "velocity": [
                         0.0,
                         0.0,
                         0.0
+                    ]
+                },
+                "Tag": {
+                    "tags": [
+                        "wall"
                     ]
                 }
             },

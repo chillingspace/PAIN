@@ -1,0 +1,101 @@
+{
+    "entities": [
+        {
+            "components": {
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        63.071563720703125,
+                        0.0,
+                        14.352049827575684
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.7071067690849304,
+                        0.0,
+                        0.7071067690849304
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "b69713e8-1a99-d847-af13-c7ae989c3977",
+                            "aoTextureOverride": "aa276de3-edb3-6541-bdd3-535c8fce0f35",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "38832c5f-2033-d84b-af32-fc539fb29e5a",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "aa276de3-edb3-6541-bdd3-535c8fce0f35",
+                            "normalTextureOverride": "40ee8b7e-1c90-1a4a-b198-9bf31be1b08e",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "aa276de3-edb3-6541-bdd3-535c8fce0f35",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "7c5862ff-4362-aa4e-be35-6f29c3cc08e2",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "Fence2"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        0.8999999761581421,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        2.9000000953674316,
+                        2.4000000953674316,
+                        0.30000001192092896
+                    ],
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 0
+                    },
+                    "physics_enabled": true,
+                    "use_gravity": true,
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "1def7059-caae-6945-b4a5-97775bc333a2"
+        }
+    ],
+    "prefabName": "Fence2",
+    "rootEntityGUID": "1def7059-caae-6945-b4a5-97775bc333a2"
+}

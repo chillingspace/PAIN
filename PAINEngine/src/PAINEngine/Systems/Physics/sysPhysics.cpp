@@ -435,7 +435,7 @@ namespace PAIN {
 					// Invalidate the ID
 					rb.bodyID = JPH::BodyID(JPH::BodyID::cInvalidBodyID);
 
-					PN_CORE_TRACE("Destroyed Jolt body for entity {}", (uint32_t)entity);
+					//PN_CORE_TRACE("Destroyed Jolt body for entity {}", (uint32_t)entity);
 				}
 			}
 		}

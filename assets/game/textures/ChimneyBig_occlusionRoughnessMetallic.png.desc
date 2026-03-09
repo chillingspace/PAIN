@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "ChimneyBig_occlusionRoughnessMetallic.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 3234283025564306124
+  },
+  "descriptor_version": 1,
+  "guid": "cc7cf0ec-222f-b74a-83d8-6f9c9df32364",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\ChimneyBig_occlusionRoughnessMetallic.png"
+  }
+}

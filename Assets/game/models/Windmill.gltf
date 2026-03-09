@@ -1,0 +1,214 @@
+{
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5125,
+      "count": 918,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 707,
+      "max": [
+        249.110046386719,
+        270.961364746094,
+        1581.12731933594
+      ],
+      "min": [
+        -249.110061645508,
+        -270.961364746094,
+        0.0
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 707,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 707,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5126,
+      "count": 707,
+      "type": "VEC2"
+    }
+  ],
+  "asset": {
+    "generator": "Adobe Substance 3D Painter 11.0.3",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 3672,
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 8484,
+      "byteOffset": 3672,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 8484,
+      "byteOffset": 12156,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 11312,
+      "byteOffset": 20640,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 5656,
+      "byteOffset": 31952,
+      "target": 34962
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 37608,
+      "uri": "Windmill.bin"
+    }
+  ],
+  "images": [
+    {
+      "uri": "Windmill_baseColor.png"
+    },
+    {
+      "uri": "Windmill_occlusionRoughnessMetallic.png"
+    },
+    {
+      "uri": "Windmill_normal.png"
+    },
+    {
+      "uri": "Windmill_emissive.png"
+    }
+  ],
+  "materials": [
+    {
+      "alphaMode": "BLEND",
+      "emissiveFactor": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emissiveTexture": {
+        "index": 3
+      },
+      "name": "Windmill",
+      "normalTexture": {
+        "index": 2
+      },
+      "occlusionTexture": {
+        "index": 1
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicRoughnessTexture": {
+          "index": 1
+        }
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Windmill",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 2,
+            "POSITION": 1,
+            "TANGENT": 3,
+            "TEXCOORD_0": 4
+          },
+          "indices": 0,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "children": [
+        1
+      ],
+      "name": "RootNode"
+    },
+    {
+      "children": [
+        2
+      ],
+      "name": "Windmill",
+      "rotation": [
+        -0.500000059604645,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "scale": [
+        0.00999999977648258,
+        0.00999999977648258,
+        0.00999999977648258
+      ],
+      "translation": [
+        -2.52435489670724e-29,
+        -0.0,
+        -2.28199315973321e-36
+      ]
+    },
+    {
+      "mesh": 0,
+      "name": "Windmill"
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9985,
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    },
+    {
+      "sampler": 0,
+      "source": 1
+    },
+    {
+      "sampler": 0,
+      "source": 2
+    },
+    {
+      "sampler": 0,
+      "source": 3
+    }
+  ]
+}

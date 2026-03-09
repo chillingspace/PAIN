@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Windmill.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 2244301791574698859
+  },
+  "descriptor_version": 1,
+  "guid": "adc91144-4d6d-5145-b20e-65b8b9c119aa",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Windmill.prefab"
+  }
+}

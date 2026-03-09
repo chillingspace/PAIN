@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Reel.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 4237066275940588045
+  },
+  "descriptor_version": 1,
+  "guid": "b264fed7-6c6f-8344-a856-9d4094c5f8c5",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Reel.material"
+  }
+}

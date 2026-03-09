@@ -23,6 +23,12 @@ local firstFrame = true  -- Force reset on first frame
 local smoothX, smoothY, smoothZ = nil, nil, nil
 local smoothFactor = 15.0 -- Higher = tighter, Lower = smoother (and more lag)
 
+local currentCamDist   = nil
+local minSafeDist      = nil
+local CAM_PULL_IN_SPEED  = 5.0  -- fast snap-in when a wall is hit
+local CAM_PULL_OUT_SPEED =  2.0  -- slow ease-out when the wall clears
+local CAM_FORGET_SPEED   =  1.0  -- how fast minSafeDist recovers after clearing (lower, less jitter)
+
 _G.CameraState = { yaw = yaw, pitch = pitch }
 local frozenCx, frozenCy, frozenCz = nil, nil, nil
 local frozenTx, frozenTy, frozenTz = nil, nil, nil
@@ -36,6 +42,8 @@ function _G.ResetThirdPersonCamera()
     pitch = DEFAULT_PITCH
     lastMouseX = nil
     lastMouseY = nil
+    currentCamDist = nil
+    minSafeDist    = nil
     log("[Camera] Camera reset called externally")
 end
 
@@ -200,18 +208,58 @@ registerUpdate(function(dt)
     smoothY = smoothY + (py - smoothY) * smoothFactor * dt
     smoothZ = smoothZ + (pz - smoothZ) * smoothFactor * dt
 
-    local cx = smoothX + rx
-    local cy = smoothY + ry
-    local cz = smoothZ + rz
+    -- Desired camera offset distance from the smoothed player position
+    local desiredDist = math.sqrt(rx*rx + ry*ry + rz*rz)
 
-    -- Apply camera collision using raycast (player position -> desired camera position)
-    -- This naturally handles sliding: as player moves, camera follows and adjusts if blocked
-    if cameraGetPositionWithCollision then
-        cx, cy, cz = cameraGetPositionWithCollision(
-            smoothX, smoothY, smoothZ,  -- player position (smoothed)
-            cx, cy, cz,                  -- desired camera position
+    -- Init on first valid frame
+    if not currentCamDist then currentCamDist = desiredDist end
+    if not minSafeDist    then minSafeDist    = desiredDist end
+
+    -- Raw safe distance from the collision system this frame
+    local safeDist = desiredDist
+    if cameraGetPositionWithCollision and desiredDist > 0.001 then
+        local colX, colY, colZ = cameraGetPositionWithCollision(
+            smoothX, smoothY, smoothZ,
+            smoothX + rx, smoothY + ry, smoothZ + rz,
             playerId
         )
+        local cdx = colX - smoothX
+        local cdy = colY - smoothY
+        local cdz = colZ - smoothZ
+        safeDist = math.sqrt(cdx*cdx + cdy*cdy + cdz*cdz)
+    end
+
+    -- Layer 1 – minSafeDist pre-filter
+    -- Snaps immediately to any new minimum, prevents clipping
+    -- Decays slowly toward desiredDist when the wall is clear (less jitter)
+    minSafeDist = minSafeDist + (desiredDist - minSafeDist) * math.min(1.0, CAM_FORGET_SPEED * dt)
+    if safeDist < minSafeDist then
+        minSafeDist = safeDist
+    end
+
+    -- Layer 2 – currentCamDist asymmetric lerp
+    -- Pulls toward minSafeDist fast, recovers toward desiredDist slowly
+    if minSafeDist < currentCamDist then
+        local t = math.min(1.0, CAM_PULL_IN_SPEED * dt)
+        currentCamDist = currentCamDist + (minSafeDist - currentCamDist) * t
+    else
+        local t = math.min(1.0, CAM_PULL_OUT_SPEED * dt)
+        currentCamDist = currentCamDist + (desiredDist - currentCamDist) * t
+    end
+
+    -- final camera position along the desired direction at the smoothed distance
+    local cx, cy, cz
+    if desiredDist > 0.001 then
+        local ux = rx / desiredDist
+        local uy = ry / desiredDist
+        local uz = rz / desiredDist
+        cx = smoothX + ux * currentCamDist
+        cy = smoothY + uy * currentCamDist
+        cz = smoothZ + uz * currentCamDist
+    else
+        cx = smoothX + rx
+        cy = smoothY + ry
+        cz = smoothZ + rz
     end
 
     -- Always track camera position

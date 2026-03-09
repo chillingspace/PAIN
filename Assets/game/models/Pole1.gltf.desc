@@ -1,0 +1,35 @@
+{
+  "asset_info": {
+    "name": "Pole1.gltf",
+    "type": "Model"
+  },
+  "build_data": {
+    "hash": 4388736527326050235
+  },
+  "descriptor_version": 1,
+  "guid": "89e040b6-c439-7c45-a630-000c72698fcf",
+  "import_settings": {
+    "extension": ".mesh",
+    "generate_lods": false,
+    "generate_normals": false,
+    "generate_tangents": true,
+    "import_animations": false,
+    "import_skeleton": false,
+    "improve_cache_locality": true,
+    "join_identical_vertices": true,
+    "lod_levels": 3,
+    "lod_reduction": 0.5,
+    "max_bone_weights": 4,
+    "optimize_meshes": true,
+    "optimize_vertices": true,
+    "quantize_normals": false,
+    "quantize_positions": false,
+    "quantize_uvs": false,
+    "remove_redundant_materials": true,
+    "triangulate": true,
+    "weld_threshold": 0.0010000000474974513
+  },
+  "meta_data": {
+    "source_file": "game\\models\\Pole1.gltf"
+  }
+}

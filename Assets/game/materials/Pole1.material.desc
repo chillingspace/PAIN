@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Pole1.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 9221868479901205756
+  },
+  "descriptor_version": 1,
+  "guid": "37866613-e4bf-e54f-bad7-60f6f99f0c98",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Pole1.material"
+  }
+}

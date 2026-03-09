@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "ChimneyBig.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 4411500770963249924
+  },
+  "descriptor_version": 1,
+  "guid": "f9b89bff-8f25-b946-895b-ceff50e8dbae",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\ChimneyBig.material"
+  }
+}

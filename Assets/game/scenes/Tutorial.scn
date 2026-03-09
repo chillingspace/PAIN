@@ -123,6 +123,98 @@
         "active_game_cam": "Player",
         "aspectRatioH": 9.0,
         "aspectRatioW": 16.0,
+        "bookmarks": [
+            {
+                "forward": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "occupied": false,
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "up": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            {
+                "forward": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "occupied": false,
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "up": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            {
+                "forward": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "occupied": false,
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "up": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            {
+                "forward": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "occupied": false,
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "up": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            {
+                "forward": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "occupied": false,
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "up": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            }
+        ],
         "farPlane": 100.0,
         "forward": [
             -0.010526156984269619,
@@ -1298,7 +1390,7 @@
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
-                                    "payload": "game/scenes/Level1.scn",
+                                    "payload": "game/scenes/cutscene2.scn",
                                     "pressed_color": -5592406,
                                     "state": "Normal"
                                 }
@@ -1332,7 +1424,7 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "payload": "game/scenes/Level1.scn",
+                            "payload": "game/scenes/cutscene2.scn",
                             "pressed_color": -5592406,
                             "state": "Normal"
                         },

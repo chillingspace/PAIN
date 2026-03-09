@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Pole1_occlusionRoughnessMetallic.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 9700167066121883150
+  },
+  "descriptor_version": 1,
+  "guid": "db504491-476b-9442-8649-25cd5de072a3",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Pole1_occlusionRoughnessMetallic.png"
+  }
+}

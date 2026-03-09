@@ -1,0 +1,29 @@
+{
+    "flags": {
+        "doubleSided": false,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "emissive": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "metallic": 1.0,
+        "roughness": 1.0
+    },
+    "textures": {
+        "albedo": "game\\textures\\Pole1_baseColor.png",
+        "ao": "game\\textures\\Pole1_occlusionRoughnessMetallic.png",
+        "emissive": "game\\textures\\Pole1_emissive.png",
+        "lightmap": "game\\textures\\Pole1_occlusionRoughnessMetallic.png",
+        "metallic": "game\\textures\\Pole1_occlusionRoughnessMetallic.png",
+        "normal": "game\\textures\\Pole1_normal.png",
+        "roughness": "game\\textures\\Pole1_occlusionRoughnessMetallic.png"
+    }
+}

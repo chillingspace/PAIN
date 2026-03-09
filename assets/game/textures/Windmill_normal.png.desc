@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Windmill_normal.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 5534455692901042511
+  },
+  "descriptor_version": 1,
+  "guid": "f0a3d787-fa47-9c42-9b50-e8ee35bbcb26",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Windmill_normal.png"
+  }
+}

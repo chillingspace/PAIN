@@ -51,7 +51,7 @@ namespace PAIN {
 						});
 				}
 
-				void renderEntityComponents(entt::entity entity);
+				void renderEntityComponents(entt::entity entity, const char* filter = nullptr);
 
 				//Expose services
 				std::shared_ptr<Services> services;
@@ -63,6 +63,7 @@ namespace PAIN {
 				ECS::RegistryID getCurrentRegistry() const {
 					return currentRegistryID;
 				}
+
 
 			private:
 
@@ -92,6 +93,13 @@ namespace PAIN {
 				std::weak_ptr<EntityPanel> entities_panel;
 
 				// Transform tracking removed - now handled as static in .cpp
+
+				char comp_filter[128] = {};
+
+				std::unordered_map<std::string, bool> comp_open_states;
+				bool collapse_all_requested = false;
+				bool expand_all_requested = false;
+
 			};
 
 

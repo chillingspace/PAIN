@@ -1,0 +1,101 @@
+{
+    "entities": [
+        {
+            "components": {
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        30.54522705078125,
+                        0.0,
+                        -2.9150829315185547
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "d58ec965-4a8b-2446-955b-707274af2082",
+                            "aoTextureOverride": "9a2fc438-1e78-3d47-be1b-4284d567444c",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "afdab715-37bc-5b43-80d3-5acf798bb7b4",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "9a2fc438-1e78-3d47-be1b-4284d567444c",
+                            "normalTextureOverride": "0132f5dd-1a15-e546-adf5-cbada70fb446",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "9a2fc438-1e78-3d47-be1b-4284d567444c",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "259d9f3b-aa62-7148-8f9b-2377b7ba1ddd",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "Bathtub"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        1.0,
+                        1.0,
+                        2.200000047683716
+                    ],
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 0
+                    },
+                    "physics_enabled": true,
+                    "use_gravity": true,
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "24846e14-2af9-7842-8541-4ad0a19d47d9"
+        }
+    ],
+    "prefabName": "Bathtub",
+    "rootEntityGUID": "24846e14-2af9-7842-8541-4ad0a19d47d9"
+}

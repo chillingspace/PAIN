@@ -1,0 +1,29 @@
+{
+    "flags": {
+        "doubleSided": false,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "emissive": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "metallic": 1.0,
+        "roughness": 1.0
+    },
+    "textures": {
+        "albedo": "game\\textures\\Reel_baseColor.png",
+        "ao": "game\\textures\\Reel_occlusionRoughnessMetallic.png",
+        "emissive": "game\\textures\\Reel_emissive.png",
+        "lightmap": "game\\textures\\Reel_occlusionRoughnessMetallic.png",
+        "metallic": "game\\textures\\Reel_occlusionRoughnessMetallic.png",
+        "normal": "game\\textures\\Reel_normal.png",
+        "roughness": "game\\textures\\Reel_occlusionRoughnessMetallic.png"
+    }
+}

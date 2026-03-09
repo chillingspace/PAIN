@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Bathtub.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 3910659844279770037
+  },
+  "descriptor_version": 1,
+  "guid": "afdab715-37bc-5b43-80d3-5acf798bb7b4",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Bathtub.material"
+  }
+}

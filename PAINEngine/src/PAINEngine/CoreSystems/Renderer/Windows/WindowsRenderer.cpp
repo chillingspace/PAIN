@@ -191,114 +191,149 @@ namespace PAIN {
 	}
 
 	void WindowsRenderer::initSceneVbo() {
-
-
 		if (!geometry_vbo) return;
 
-		// Initialize Buffers
-		PN_CORE_INFO("Initializing New Buffers");
+		// Full rebuild path: triggered on delete or scene load/clear
+		if (needsFullRebuild) {
+			needsFullRebuild = false;
+			currentVertexCount = 0;
+			currentIndexCount = 0;
+			clearBuffers(); // clears instanced_offsets too
 
-		// Clear buffers before building
-		clearBuffers();
+			// Pre-allocate with GL_DYNAMIC_DRAW since we'll be appending
+			glBindVertexArray(geometry_vao);
+			glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
+			glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_DYNAMIC_DRAW);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, 0, nullptr, GL_DYNAMIC_DRAW);
 
-		glBindVertexArray(geometry_vao);
+			glBindVertexArray(shadow_vao);
+			glBindBuffer(GL_ARRAY_BUFFER, shadow_vbo);
+			glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_DYNAMIC_DRAW);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shadow_ebo);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, 0, nullptr, GL_DYNAMIC_DRAW);
 
-		// ========================================
-		// UNIFIED GEOMETRY UPLOAD (Instancing-Compatible)
-		// ========================================
-		// Both instanced and non-instanced rendering now upload ALL geometry ONCE
-		// This eliminates per-frame glBufferSubData calls and uses GL_STATIC_DRAW
+			glBindVertexArray(0);
+		}
 
-		unsigned int vertexOffset = 0;
-		unsigned int indexOffset = 0;
-		std::vector<Assets::Vertex> allVertices;
-		std::vector<unsigned int> allIndices;
-		std::unordered_set<std::string> uploaded;
+		// Collect ONLY new models not yet in instanced_offsets
+		std::vector<Assets::Vertex>  newVertices;
+		std::vector<unsigned int>    newIndices;
 
-		// Get ECS controller to iterate ALL registries (including prefab edit
-		// registries)
+		unsigned int vertexOffset = currentVertexCount;
+		unsigned int indexOffset = currentIndexCount;
+
 		auto ecs = services->get<ECS::Controller>();
 
-		// Iterate ALL registries to collect models (fixes prefab editor rendering)
 		for (auto registryId : ecs->getAllRegistryIDs()) {
 			auto& registry = ecs->getRegistry(registryId);
 			auto view = registry.view<ModelRenderer>();
 
-			// Collect all unique models and build combined vertex/index buffers
 			for (auto e : view) {
-
-				// Get mdl asset
 				auto mdl = ecs->getEntityComponent<ModelRenderer>(e, registryId);
 				if (!mdl.has_value())
 					continue;
 
-				// Invalidate Cached Buffer Offsets
-				mdl.value().get().bufferOffset.isUploaded = false;
-
-				// Retrieve model asset with validation
 				auto mdl_opt = services->get<Assets::Manager>()->getAsset<Assets::Model>(
 					mdl.value().get().modelGUID);
 				if (!mdl_opt.has_value() || mdl_opt.value()->type != Assets::Type::Model)
 					continue;
 				const auto& modelAsset = mdl_opt.value();
 
-				// Skip if already uploaded (deduplicate by model path)
-				if (uploaded.find(modelAsset->vpath) != uploaded.end())
+				// SKIP if already on GPU
+				if (instanced_offsets.find(modelAsset->vpath) != instanced_offsets.end())
 					continue;
-				uploaded.insert(modelAsset->vpath);
 
-				// Store offset for this model in the map (used by both rendering paths)
+				// Register offset BEFORE appending so it's atomic
 				instanced_offsets[modelAsset->vpath] = {
-					indexOffset, (unsigned int)modelAsset->indices.size()};
+					indexOffset, (unsigned int)modelAsset->indices.size() };
 
-				// Add vertices
-				allVertices.insert(allVertices.end(), modelAsset->vertices.begin(),
-								   modelAsset->vertices.end());
+				for (const auto& v : modelAsset->vertices)
+					newVertices.push_back(v);
 
-				// Add indices with vertex offset applied
-				for (unsigned int idx : modelAsset->indices) {
-					allIndices.push_back(vertexOffset + idx);
-				}
+				for (unsigned int idx : modelAsset->indices)
+					newIndices.push_back(vertexOffset + idx);
 
-				vertexOffset += modelAsset->vertices.size();
-				indexOffset += modelAsset->indices.size();
+				vertexOffset += (unsigned int)modelAsset->vertices.size();
+				indexOffset += (unsigned int)modelAsset->indices.size();
 			}
 		}
 
-		// Upload ALL geometry ONCE to main geometry buffers
-		glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
-		glBufferData(GL_ARRAY_BUFFER, allVertices.size() * sizeof(Assets::Vertex),
-					 allVertices.data(),
-					 GL_STATIC_DRAW); // STATIC_DRAW for immutable geometry
+		// Nothing new to upload - exit early, no GPU calls
+		if (newVertices.empty()) {
+			PN_CORE_INFO("initSceneVbo: nothing new to upload, skipping.");
+			return;
+		}
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-					 allIndices.size() * sizeof(unsigned int), allIndices.data(),
-					 GL_STATIC_DRAW);
+		PN_CORE_INFO("initSceneVbo: appending {} vertices, {} indices",
+			newVertices.size(), newIndices.size());
 
-		// Also upload to shadow buffers (same geometry)
+		// Resize GPU buffers first, then sub-upload the new slice
+		auto appendToBuffer = [](GLuint buf, GLenum target,
+			unsigned int existingBytes,
+			const void* newData, unsigned int newBytes) {
+				glBindBuffer(target, buf);
+
+				// Get current size
+				GLint currentSize = 0;
+				glGetBufferParameteriv(target, GL_BUFFER_SIZE, &currentSize);
+
+				unsigned int totalBytes = existingBytes + newBytes;
+
+				if ((unsigned int)currentSize < totalBytes) {
+					// Orphan + resize: copy old data into a temp, re-upload everything
+					std::vector<uint8_t> temp(currentSize);
+					if (currentSize > 0) {
+						void* ptr = glMapBufferRange(target, 0, currentSize, GL_MAP_READ_BIT);
+						if (ptr) {
+							memcpy(temp.data(), ptr, currentSize);
+							glUnmapBuffer(target);
+						}
+					}
+					glBufferData(target, totalBytes, nullptr, GL_DYNAMIC_DRAW); // orphan
+					if (currentSize > 0)
+						glBufferSubData(target, 0, currentSize, temp.data());
+				}
+
+				// Append new data at the end
+				glBufferSubData(target, existingBytes, newBytes, newData);
+			};
+
+		unsigned int existingVertexBytes = currentVertexCount * sizeof(Assets::Vertex);
+		unsigned int newVertexBytes = (unsigned int)(newVertices.size() * sizeof(Assets::Vertex));
+		unsigned int existingIndexBytes = currentIndexCount * sizeof(unsigned int);
+		unsigned int newIndexBytes = (unsigned int)(newIndices.size() * sizeof(unsigned int));
+
+		// Append to geometry buffers
+		glBindVertexArray(geometry_vao);
+		appendToBuffer(geometry_vbo, GL_ARRAY_BUFFER,
+			existingVertexBytes, newVertices.data(), newVertexBytes);
+		appendToBuffer(geometry_ebo, GL_ELEMENT_ARRAY_BUFFER,
+			existingIndexBytes, newIndices.data(), newIndexBytes);
+
+		// Append to shadow buffers
 		glBindVertexArray(shadow_vao);
-		glBindBuffer(GL_ARRAY_BUFFER, shadow_vbo);
-		glBufferData(GL_ARRAY_BUFFER, allVertices.size() * sizeof(Assets::Vertex),
-					 allVertices.data(), GL_STATIC_DRAW);
+		appendToBuffer(shadow_vbo, GL_ARRAY_BUFFER,
+			existingVertexBytes, newVertices.data(), newVertexBytes);
+		appendToBuffer(shadow_ebo, GL_ELEMENT_ARRAY_BUFFER,
+			existingIndexBytes, newIndices.data(), newIndexBytes);
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shadow_ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-					 allIndices.size() * sizeof(unsigned int), allIndices.data(),
-					 GL_STATIC_DRAW);
-
-		// If instancing is enabled, create instance buffer for per-instance data
-		if (GS.use_instanced_rendering) {
-			glGenBuffers(1, &geometry_ibo);
+		// Update IBO if instancing enabled
+		if (GS.use_instanced_rendering && geometry_ibo) {
 			glBindBuffer(GL_ARRAY_BUFFER, geometry_ibo);
-			glBufferData(GL_ARRAY_BUFFER, uploaded.size() * sizeof(IBOData), nullptr,
-						 GL_DYNAMIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER,
+				instanced_offsets.size() * sizeof(IBOData),
+				nullptr, GL_DYNAMIC_DRAW);
 		}
 
 		glBindVertexArray(0);
 
-		// End log
-		PN_CORE_INFO("New buffers initialized!");
+		// Commit new counts
+		currentVertexCount = vertexOffset;
+		currentIndexCount = indexOffset;
+
+		PN_CORE_INFO("initSceneVbo: done. Total: {} vertices, {} indices",
+			currentVertexCount, currentIndexCount);
 	}
 
 	void WindowsRenderer::clearBuffers() {
@@ -513,7 +548,6 @@ namespace PAIN {
 		}
 	}
 
-	// TO BE MOVED
 	void WindowsRenderer::_createDeferredShadingBuffer(unsigned int& tex,
 													   int num_channels,
 													   int gl_color_attachment) {
@@ -555,10 +589,30 @@ namespace PAIN {
 							   tex, 0);
 	}
 
-	// TO BE MOVED
 	void WindowsRenderer::_initDeferredShadingBuffers() {
 		PN_CORE_INFO("Initializing deferred shading buffers with size: {}x{}",
 					 winWidth, winHeight);
+
+		// DELETE OLD RESOURCES FIRST
+		if (ds_fbo) { glDeleteFramebuffers(1, &ds_fbo);   ds_fbo = 0; }
+		if (final_fbo) { glDeleteFramebuffers(1, &final_fbo); final_fbo = 0; }
+		if (pp_fbo) { glDeleteFramebuffers(1, &pp_fbo);   pp_fbo = 0; }
+		if (pp2_fbo) { glDeleteFramebuffers(1, &pp2_fbo);  pp2_fbo = 0; }
+		if (minimap_fbo) { glDeleteFramebuffers(1, &minimap_fbo);      minimap_fbo = 0; }
+		if (minimap_texture) { glDeleteTextures(1, &minimap_texture);      minimap_texture = 0; }
+		if (minimap_rbo) { glDeleteRenderbuffers(1, &minimap_rbo);     minimap_rbo = 0; }
+
+		// Delete all G-buffer textures
+		GLuint textures[] = { pos_texture, col_texture, norm_texture,
+							  material_properties_texture, emission_texture,
+							  final_texture, pp_texture, pp2_texture };
+		glDeleteTextures(8, textures);
+		pos_texture = col_texture = norm_texture = material_properties_texture
+			= emission_texture = final_texture = pp_texture = pp2_texture = 0;
+
+		// Delete renderbuffers
+		if (ds_rbo) { glDeleteRenderbuffers(1, &ds_rbo);    ds_rbo = 0; }
+		if (final_rbo) { glDeleteRenderbuffers(1, &final_rbo); final_rbo = 0; }
 
 		if (winWidth == 0 || winHeight == 0) {
 			PN_CORE_ERROR("Invalid window dimensions: {}x{}", winWidth, winHeight);
@@ -566,7 +620,6 @@ namespace PAIN {
 		}
 
 		// === Final FBO/Texture For Deffered Shading ===
-		// !TODO: resize when window resizes
 		{
 			glGenFramebuffers(1, &ds_fbo);
 			glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
@@ -710,146 +763,97 @@ namespace PAIN {
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
 
-		// === VAO/VBO For Final Passthrough Texture ===
+		
+	}
+
+	void WindowsRenderer::_initGeometryBuffers()
+	{
+		// === Passthrough quad VAO/VBO ===
 		{
 			static constexpr float quadVertices[] = {
-				// positions    // texCoords
-				-1.0f, 1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
-				1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 1.0f,
-				1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+				-1.0f,  1.0f, 0.0f, 1.0f,
+				-1.0f, -1.0f, 0.0f, 0.0f,
+				 1.0f, -1.0f, 1.0f, 0.0f,
+				-1.0f,  1.0f, 0.0f, 1.0f,
+				 1.0f, -1.0f, 1.0f, 0.0f,
+				 1.0f,  1.0f, 1.0f, 1.0f
+			};
 
 			glGenVertexArrays(1, &passthrough_vao);
 			glGenBuffers(1, &passthrough_vbo);
-
 			glBindVertexArray(passthrough_vao);
 			glBindBuffer(GL_ARRAY_BUFFER, passthrough_vbo);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices,
-						 GL_STATIC_DRAW);
-
+			glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
-
 			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
-								  (void*)(2 * sizeof(float)));
-
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 			glBindVertexArray(0);
 		}
 
-		// === VAO/VBO For Geometry Shaders ===
+		// === Geometry VAO/VBO/EBO ===
 		{
-			// Generate and bind VAO
 			glGenVertexArrays(1, &geometry_vao);
 			glBindVertexArray(geometry_vao);
 
-			// Generate and bind VBO
 			glGenBuffers(1, &geometry_vbo);
 			glBindBuffer(GL_ARRAY_BUFFER, geometry_vbo);
-			// glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * sizeof(Assets::Vertex),
-			// nullptr, GL_DYNAMIC_DRAW);
 
-			// Generate and bind EBO (index buffer)
 			glGenBuffers(1, &geometry_ebo);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry_ebo);
-			// glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_INDICES * sizeof(unsigned int),
-			// nullptr, GL_DYNAMIC_DRAW);
 
-			// Position attribute, layout(location = 0)
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
-								  (void*)offsetof(Assets::Vertex, pos));
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, pos));
 			glEnableVertexAttribArray(0);
-
-			// Normal attribute, layout(location = 1)
-			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
-								  (void*)offsetof(Assets::Vertex, normal));
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, normal));
 			glEnableVertexAttribArray(1);
-
-			// texcoords attribute, layout(location = 2)
-			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
-								  (void*)offsetof(Assets::Vertex, uv));
+			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, uv));
 			glEnableVertexAttribArray(2);
-
-			// bone indices
 			glVertexAttribIPointer(3, 4, GL_INT, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, boneIndices));
 			glEnableVertexAttribArray(3);
-
-			// bone weights
-			glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
-								  (void*)offsetof(Assets::Vertex, boneWeights));
+			glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, boneWeights));
 			glEnableVertexAttribArray(4);
-
-			// tangent
-			glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
-								  (void*)offsetof(Assets::Vertex, tangent));
+			glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, tangent));
 			glEnableVertexAttribArray(5);
-
-			// bitangent
-			glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
-								  (void*)offsetof(Assets::Vertex, bitangent));
+			glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, bitangent));
 			glEnableVertexAttribArray(6);
 
-			// Unbind VAO
 			glBindVertexArray(0);
 		}
 
-		// for shadow
+		// === Shadow VAO/VBO/EBO ===
 		{
-			// Generate and bind VAO
 			glGenVertexArrays(1, &shadow_vao);
 			glBindVertexArray(shadow_vao);
 
-			// Generate and bind VBO
 			glGenBuffers(1, &shadow_vbo);
 			glBindBuffer(GL_ARRAY_BUFFER, shadow_vbo);
-			// glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * sizeof(Assets::Vertex),
-			// nullptr, GL_DYNAMIC_DRAW);
 
-			// Generate and bind EBO (index buffer)
 			glGenBuffers(1, &shadow_ebo);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shadow_ebo);
-			// glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_INDICES * sizeof(unsigned int),
-			// nullptr, GL_DYNAMIC_DRAW);
 
-			// Position attribute, layout(location = 0)
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
-								  (void*)offsetof(Assets::Vertex, pos));
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, pos));
 			glEnableVertexAttribArray(0);
-
-			// Normal attribute, layout(location = 1)
-			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
-								  (void*)offsetof(Assets::Vertex, normal));
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, normal));
 			glEnableVertexAttribArray(1);
-
-			// texcoords attribute, layout(location = 2)
-			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex),
-								  (void*)offsetof(Assets::Vertex, uv));
+			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, uv));
 			glEnableVertexAttribArray(2);
 
-			// Unbind VAO
 			glBindVertexArray(0);
 		}
 
-		// === VAO/VBO For Debug Shaders ===
+		// === Debug VAO/VBO ===
 		{
-			// Generate and bind VAO
 			glGenVertexArrays(1, &debug_VAO);
 			glBindVertexArray(debug_VAO);
 
-			// Generate and bind VBO
 			glGenBuffers(1, &debug_VBO);
 			glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
-			// glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * 7 * sizeof(float), nullptr,
-			// GL_DYNAMIC_DRAW);
 
-			// Position attribute, layout(location = 0)
 			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float),
-								  (void*)0);
-
-			// Color attribute, layout(location = 1)
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
 			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float),
-								  (void*)(3 * sizeof(float)));
+			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+
 			glBindVertexArray(0);
 		}
 	}
@@ -857,21 +861,20 @@ namespace PAIN {
 	void WindowsRenderer::Init(std::shared_ptr<Services> app_services) {
 		services = app_services;
 
-		// Set win width and height
 		auto window_service = services->get<Window::Window>();
 		winWidth = window_service->getFrameBuffer().x;
 		winHeight = window_service->getFrameBuffer().y;
 
 		initShaders();
 
-		// fallback or placeholder VAO to avoid OpenGL errors
 		glGenVertexArrays(1, &empty_vao);
 		if (empty_vao == 0) {
 			PN_CORE_ERROR("Failed to create empty VAO");
 			return;
 		}
 
-		_initDeferredShadingBuffers();
+		_initDeferredShadingBuffers(); // FBOs/textures only
+		_initGeometryBuffers();        // VAOs/VBOs — called ONCE, never on resize
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);

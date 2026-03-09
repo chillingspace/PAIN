@@ -1,0 +1,101 @@
+{
+    "entities": [
+        {
+            "components": {
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        36.93427276611328,
+                        0.0,
+                        -4.052935600280762
+                    ],
+                    "rotation": [
+                        -5.188576324144378e-07,
+                        0.6897572875022888,
+                        -5.545125532080419e-07,
+                        0.724040687084198
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "80cef293-fc5c-1e40-8cf7-ab34988b1030",
+                            "aoTextureOverride": "db4ab3ca-29ee-154e-8817-a8192ed003a1",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "88717658-b881-ea40-b700-1e62b14221c7",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "db4ab3ca-29ee-154e-8817-a8192ed003a1",
+                            "normalTextureOverride": "c66f73ed-84f2-964b-bd66-b18f9654504a",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "db4ab3ca-29ee-154e-8817-a8192ed003a1",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "5fafa8d4-546e-7e41-8833-ecfae96fa189",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "Windmill"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        1.2999999523162842,
+                        4.5,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        2.9000000953674316,
+                        9.100000381469727,
+                        2.700000047683716
+                    ],
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 0
+                    },
+                    "physics_enabled": true,
+                    "use_gravity": true,
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "b2d5339b-23e1-9841-b94e-07a48b5d4586"
+        }
+    ],
+    "prefabName": "Windmill",
+    "rootEntityGUID": "b2d5339b-23e1-9841-b94e-07a48b5d4586"
+}

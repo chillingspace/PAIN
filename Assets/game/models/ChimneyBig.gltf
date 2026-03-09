@@ -3,41 +3,41 @@
     {
       "bufferView": 0,
       "componentType": 5125,
-      "count": 4116,
+      "count": 636,
       "type": "SCALAR"
     },
     {
       "bufferView": 1,
       "componentType": 5126,
-      "count": 997,
+      "count": 214,
       "max": [
-        123.539947509766,
-        242.994293212891,
-        28.9769878387451
+        327.922698974609,
+        1114.93725585938,
+        327.922698974609
       ],
       "min": [
-        -123.539947509766,
-        7.62939453125e-06,
-        -28.9769897460938
+        -327.922698974609,
+        0.0,
+        -327.922698974609
       ],
       "type": "VEC3"
     },
     {
       "bufferView": 2,
       "componentType": 5126,
-      "count": 997,
+      "count": 214,
       "type": "VEC3"
     },
     {
       "bufferView": 3,
       "componentType": 5126,
-      "count": 997,
+      "count": 214,
       "type": "VEC4"
     },
     {
       "bufferView": 4,
       "componentType": 5126,
-      "count": 997,
+      "count": 214,
       "type": "VEC2"
     }
   ],
@@ -48,52 +48,52 @@
   "bufferViews": [
     {
       "buffer": 0,
-      "byteLength": 16464,
+      "byteLength": 2544,
       "target": 34963
     },
     {
       "buffer": 0,
-      "byteLength": 11964,
-      "byteOffset": 16464,
+      "byteLength": 2568,
+      "byteOffset": 2544,
       "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 11964,
-      "byteOffset": 28428,
+      "byteLength": 2568,
+      "byteOffset": 5112,
       "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 15952,
-      "byteOffset": 40392,
+      "byteLength": 3424,
+      "byteOffset": 7680,
       "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 7976,
-      "byteOffset": 56344,
+      "byteLength": 1712,
+      "byteOffset": 11104,
       "target": 34962
     }
   ],
   "buffers": [
     {
-      "byteLength": 64320,
-      "uri": "Fence1.bin"
+      "byteLength": 12816,
+      "uri": "ChimneyBig.bin"
     }
   ],
   "images": [
     {
-      "uri": "Fence_baseColor_1001.png"
+      "uri": "ChimneyBig_baseColor.png"
     },
     {
-      "uri": "Fence_occlusionRoughnessMetallic_1001.png"
+      "uri": "ChimneyBig_occlusionRoughnessMetallic.png"
     },
     {
-      "uri": "Fence_normal_1001.png"
+      "uri": "ChimneyBig_normal.png"
     },
     {
-      "uri": "Fence_emissive_1001.png"
+      "uri": "ChimneyBig_emissive.png"
     }
   ],
   "materials": [
@@ -107,7 +107,7 @@
       "emissiveTexture": {
         "index": 3
       },
-      "name": "Fence_1001",
+      "name": "ChimneyBig",
       "normalTexture": {
         "index": 2
       },
@@ -126,7 +126,7 @@
   ],
   "meshes": [
     {
-      "name": "Grilled_Fence2",
+      "name": "ChimneyBig",
       "primitives": [
         {
           "attributes": {
@@ -147,7 +147,13 @@
       "children": [
         1
       ],
-      "name": "RootNode",
+      "name": "RootNode"
+    },
+    {
+      "children": [
+        2
+      ],
+      "name": "ChimneyBig",
       "scale": [
         0.00999999977648258,
         0.00999999977648258,
@@ -155,14 +161,8 @@
       ]
     },
     {
-      "children": [
-        2
-      ],
-      "name": "Grilled_Fence2"
-    },
-    {
       "mesh": 0,
-      "name": "Grilled_Fence2"
+      "name": "ChimneyBig"
     }
   ],
   "samplers": [
