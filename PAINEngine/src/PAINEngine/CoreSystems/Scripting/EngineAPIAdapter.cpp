@@ -229,6 +229,10 @@ namespace PAIN {
         texComp.texture_guid = PAIN::Assets::GUID(guidStr);
     }
 
+    glm::uvec2 EngineAPIAdapter::GetFrameBufferSize() const {
+        return window_->getFrameBuffer();
+    }
+
     //int EngineAPIAdapter::guidToInt(const PAIN::Assets::GUID& id) {
     //    uint32_t v = 0; std::memcpy(&v, id.bytes, sizeof(uint32_t));
     //    return static_cast<int>(v);

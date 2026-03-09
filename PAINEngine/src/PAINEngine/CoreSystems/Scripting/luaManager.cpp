@@ -1131,6 +1131,13 @@ namespace PAIN {
         lua_.set_function("setDeltaTimeMultiplier", [this](float m) { if (api_) api_->SetDeltaMultiplier(m); });
         lua_.set_function("getDeltaTimeMultiplier", [this] { return api_ ? api_->GetDeltaMultiplier() : 1.0f; });
 
+        lua_.set_function("getFrameBufferSize", [this]() {
+            if (!api_) return std::make_tuple(1920.0f, 1080.0f);
+
+            glm::uvec2 fb = api_->GetFrameBufferSize();
+            return std::make_tuple((float)fb.x, (float)fb.y);
+            });
+
         /* =========================================================================== */
         /*                              Layer Control                                  */
         /* =========================================================================== */

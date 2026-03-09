@@ -19,6 +19,19 @@ local function clamp(v, lo, hi)
     return v
 end
 
+-- Converts mouse position to UI Position
+local function mouseToUI(mx, my)
+    local fbW, fbH = getFrameBufferSize()
+
+    if not fbW or not fbH or fbW == 0 or fbH == 0 then
+        return 0.0, 0.0
+    end
+
+    local uiX = (mx / fbW) * 2.0 - 1.0
+    local uiY = 1.0 - (my / fbH) * 2.0
+    return uiX, uiY
+end
+
 -- Checks if mouse x,y is over selected x,y
 local function isMouseOver(mx, my, x, y)
     return mx >= (x - hitHalfWidth) and mx <= (x + hitHalfWidth)
@@ -36,22 +49,18 @@ end
 registerUpdate(function(dt)
     local x, y = get2DPosition(entityId)
 
-    -- DEBUG
-    local mx, my = getMousePos()
-    log("[UISlider dbg] mouse=", tostring(mx), tostring(my), " knob=", tostring(x), tostring(y))
-
     if not knobY then
         knobY = y
     end
 
     local mx, my = getMousePos()
+    local uiMouseX, uiMouseY = mouseToUI(mx, my)
 
-    -- if wasMousePressed(0) and isMouseOver(mx, my, x, y) then
-    --     dragging = true
-    --     log("[ui_slider] drag start", tostring(entityId))
-    -- end
+    -- log("[UISlider dbg] mouse=", tostring(mx), tostring(my),
+    --     " uiMouse=", tostring(uiMouseX), tostring(uiMouseY),
+    --     " knob=", tostring(x), tostring(y))
 
-    if not dragging and isMouseDown(0) and isMouseOver(mx, my, x, y) then
+    if not dragging and isMouseDown(0) and isMouseOver(uiMouseX, uiMouseY, x, y) then
         dragging = true
         log("[UISlider] drag start")
     end
@@ -62,12 +71,12 @@ registerUpdate(function(dt)
     end
 
     if dragging and isMouseDown(0) then
-        local newX = clamp(mx, minX, maxX)
+        local newX = clamp(uiMouseX, minX, maxX)
         set2DPosition(entityId, newX, knobY)
 
         local value = positionToValue(newX)
         _G.SliderUI[settingKey] = value
 
-        log(string.format("[ui_slider] %s = %.2f", settingKey, value))
+        log(string.format("[UISlider] %s = %.2f", settingKey, value))
     end
 end)

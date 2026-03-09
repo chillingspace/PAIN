@@ -52,6 +52,8 @@ namespace PAIN {
         virtual std::string GetEntityTexture(entt::entity entityId) = 0;
         virtual void SetEntityTexture(entt::entity entity, const std::string& guidStr) = 0;
 
+        virtual glm::uvec2 GetFrameBufferSize() const = 0;
+
         /* =========================================================================== */
         /*                     Metadata (name / tags / groups)                         */
         /* =========================================================================== */
