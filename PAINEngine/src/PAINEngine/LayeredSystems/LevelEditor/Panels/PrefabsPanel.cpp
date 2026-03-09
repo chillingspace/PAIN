@@ -123,6 +123,8 @@ namespace PAIN {
 				// Set viewport panel
 				services->get<Editor>()->getPanel<ViewportPanel>()->setRegistry(
 					editRegistryID);
+				services->get<Editor>()->getPanel<EntityPanel>()->setRegistry(editRegistryID);
+				services->get<Editor>()->getPanel<ComponentsPanel>()->setRegistry(editRegistryID);
 
 				// Re-initialize scene VBO to include prefab's model geometry
 				auto renderer = services->get<sRenderer>();

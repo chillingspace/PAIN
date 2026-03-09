@@ -678,9 +678,14 @@ namespace PAIN {
 				return;
 			}
 			auto ecs_controller = services.lock()->get<ECS::Controller>();
-			// Apply fresh prefab component data
+			// Apply fresh prefab component data, but skip Entity::Hierarchy and Entity::GUID.
+			// Hierarchy GUIDs are remapped per-instance during instantiation and must not be
+			// overwritten with stale prefab GUIDs (which would reset child entity references).
+			auto componentsJson = (*entityData)["components"];
+			componentsJson.erase(getComponentName<Entity::Hierarchy>());
+			componentsJson.erase(getComponentName<Entity::GUID>());
 			ecs_controller->loadAllComponentsFromJson(
-				instanceRoot, (*entityData)["components"], registry_id);
+				instanceRoot, componentsJson, registry_id);
 			// Re-apply overrides if requested
 			if (preserveOverrides && !savedOverrides.empty()) {
 				for (const auto& [componentName, overrideData] : savedOverrides) {
