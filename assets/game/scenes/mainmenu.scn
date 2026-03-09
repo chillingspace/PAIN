@@ -10,7 +10,7 @@
         "a67656ca-15a5-d441-b14d-dae036e5245e",
         "14377587-a8fe-2b47-9f46-dad6bdad2753",
         "c49ebb97-d7ba-f148-9e46-16d6c5543147",
-        "2eec9e49-61a9-fd40-b4e5-921f9a33df10",
+        "7a103339-0d12-f947-9fd7-2b2c420c79c0",
         "3e8dc653-3d17-ab42-bb53-da040f01f965",
         "c7685566-a3eb-4b4f-a630-7d08fedb36e5",
         "9aac41f9-737d-d540-a485-7155b0011394",
@@ -33,6 +33,98 @@
         "active_game_cam": "Cam",
         "aspectRatioH": 9.0,
         "aspectRatioW": 16.0,
+        "bookmarks": [
+            {
+                "forward": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "occupied": false,
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "up": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            {
+                "forward": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "occupied": false,
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "up": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            {
+                "forward": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "occupied": false,
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "up": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            {
+                "forward": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "occupied": false,
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "up": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            {
+                "forward": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "occupied": false,
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "up": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            }
+        ],
         "farPlane": 100.0,
         "forward": [
             0.496366024017334,
@@ -1925,7 +2017,7 @@
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "2eec9e49-61a9-fd40-b4e5-921f9a33df10",
+                            "modelGUID": "7a103339-0d12-f947-9fd7-2b2c420c79c0",
                             "receiveShadows": true,
                             "visible": true
                         },
