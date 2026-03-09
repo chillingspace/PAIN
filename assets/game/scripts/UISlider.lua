@@ -10,24 +10,67 @@ local hitHalfHeight = 0.05
 
 local dragging = false
 local knobY = nil
+local initialized = false
+
+-- ==================== Volume helpers ====================
+
+-- Convert linear 0.0-1.0 to decibels (0.0 -> silence, 1.0 -> 0 dB)
+local function linearToDb(v)
+    if v <= 0.001 then return -80.0 end
+    return 20.0 * math.log(v) / math.log(10)
+end
+
+-- Convert a 0.0-1.0 value to slider X position
+local function valueToPosition(v)
+    return minX + v * (maxX - minX)
+end
+
+-- Test SFX played when the SFX volume slider is released
+local SFX_TEST_FILE = "game/audio/sfx/Gear Pick Up.wav"
+
+-- Settings key mapping (slider entity name -> settings file key)
+local SETTINGS_KEYS = {
+    master_handle = "vol_master",
+    bgm_handle    = "vol_bgm",
+    sfx_handle    = "vol_sfx",
+}
+
+-- Global volume state (persists across scenes via _G)
+_G.VolumeSettings = _G.VolumeSettings or {
+    master = 1.0,
+    bgm    = 1.0,
+    sfx    = 1.0,
+}
+
+-- ==================== Slider -> volume mapping ====================
 
 -- Place functions to update volume here
 local volumeFunctions = {
     master_handle = function(v)
-        -- !TODO: These are example functions; replace them with your binded volume update functions
-        -- globalBGMSetVolume(0, v)
+        _G.VolumeSettings.master = v
+        if audioSetGroupVolumeDb then
+            audioSetGroupVolumeDb("master", linearToDb(v))
+        end
     end,
 
     bgm_handle = function(v)
-        -- globalBGMSetVolume(1, v)
+        _G.VolumeSettings.bgm = v
+        if audioSetGroupVolumeDb then
+            audioSetGroupVolumeDb("music", linearToDb(v))
+        end
     end,
 
     sfx_handle = function(v)
-        -- globalBGMSetVolume(2, v)
+        _G.VolumeSettings.sfx = v
+        if audioSetGroupVolumeDb then
+            audioSetGroupVolumeDb("sfx", linearToDb(v))
+        end
     end
 }
 
 _G.SliderUI = _G.SliderUI or {}
+
+-- ==================== Utility ====================
 
 -- Prevents the slider from going out of bounds
 local function clamp(v, lo, hi)
@@ -70,25 +113,53 @@ registerUpdate(function(dt)
         knobY = y
     end
 
+    -- ==================== INIT: Restore slider from saved settings ====================
+    if not initialized then
+        initialized = true
+        local fileKey = SETTINGS_KEYS[settingKey]
+        if fileKey and settingsLoad then
+            local saved = settingsLoad(fileKey, "")
+            if saved ~= "" then
+                local val = tonumber(saved)
+                if val then
+                    val = clamp(val, 0.0, 1.0)
+                    -- Move the slider knob to the saved position
+                    local newX = valueToPosition(val)
+                    set2DPosition(entityId, newX, knobY)
+                    -- Apply the volume immediately
+                    _G.SliderUI[settingKey] = val
+                    local fn = volumeFunctions[settingKey]
+                    if fn then fn(val) end
+                    log(string.format("[UISlider] Restored %s = %.2f from settings", settingKey, val))
+                end
+            end
+        end
+    end
+
     local mx, my = getMousePos()
     local uiMouseX, uiMouseY = mouseToUI(mx, my)
-
-    -- log("[UISlider dbg] mouse=", tostring(mx), tostring(my),
-    --     " uiMouse=", tostring(uiMouseX), tostring(uiMouseY),
-    --     " knob=", tostring(x), tostring(y))
 
     -- When slider is dragged
     if not dragging and isMouseDown(0) and isMouseOver(uiMouseX, uiMouseY, x, y) then
         dragging = true
-        -- log("[UISlider] drag start")
-
-        -- log("[UISlider] drag start, entityId=", tostring(entityId), " name=", tostring(sliderName))
     end
 
     -- When slider is released
-    if wasMouseReleased(0) then
+    if dragging and wasMouseReleased(0) then
         dragging = false
-        -- log("[UISlider] drag end")
+
+        -- Save the current value to disk
+        local finalValue = _G.SliderUI[settingKey]
+        local fileKey = SETTINGS_KEYS[settingKey]
+        if finalValue and fileKey and settingsSave then
+            settingsSave(fileKey, string.format("%.4f", finalValue))
+            log(string.format("[UISlider] Saved %s = %.4f to settings", fileKey, finalValue))
+        end
+
+        -- Play test SFX when the SFX volume slider is released
+        if settingKey == "sfx_handle" and audioPlaySFX then
+            audioPlaySFX(SFX_TEST_FILE, 0.0)
+        end
     end
 
     -- Update slider position

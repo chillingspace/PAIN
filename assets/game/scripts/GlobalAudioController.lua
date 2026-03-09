@@ -232,6 +232,28 @@ registerUpdate(function(dt)
         if frameCount >= FRAMES_TO_WAIT then
             initialized = true
             applySceneVolumes()
+
+            -- Apply saved volume settings from disk (runs once on game startup)
+            if settingsLoad and audioSetGroupVolumeDb then
+                local function loadAndApply(fileKey, group, globalKey)
+                    local saved = settingsLoad(fileKey, "")
+                    if saved ~= "" then
+                        local val = tonumber(saved)
+                        if val then
+                            if val <= 0.001 then val = 0.001 end  -- clamp minimum
+                            local db = 20.0 * math.log(val) / math.log(10)
+                            if val <= 0.001 then db = -80.0 end
+                            audioSetGroupVolumeDb(group, db)
+                            _G.VolumeSettings = _G.VolumeSettings or {}
+                            _G.VolumeSettings[globalKey] = val
+                            log("[GlobalAudio] Loaded " .. fileKey .. " = " .. tostring(val))
+                        end
+                    end
+                end
+                loadAndApply("vol_master", "master", "master")
+                loadAndApply("vol_bgm",    "music",  "bgm")
+                loadAndApply("vol_sfx",    "sfx",    "sfx")
+            end
         end
     end
 end)
