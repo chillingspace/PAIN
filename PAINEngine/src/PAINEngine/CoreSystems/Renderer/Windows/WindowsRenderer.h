@@ -48,22 +48,6 @@ namespace PAIN {
 
 		std::unordered_map<std::string, SceneVboOffset> instanced_offsets{};
 
-		struct PendingInstance {
-			ModelRenderer* component;
-			glm::mat4 M;
-		};
-		// Keyed by model asset raw pointer — same model file = same cached asset = same pointer.
-		// Zero allocations, O(1) hash, equivalent to keying by model path.
-		std::unordered_map<const void*, std::vector<PendingInstance>> pending_instances;
-		GLsizeiptr ibo_capacity = 0; // track allocated IBO size to avoid unnecessary reallocs
-
-		struct PendingShadowInstance {
-			const ModelRenderer* component;
-			glm::mat4 M;
-		};
-		std::unordered_map<const void*, std::vector<PendingShadowInstance>> pending_shadow_instances;
-		const Light* pending_light = nullptr;
-
 		struct IBOData {
 			glm::mat4 model_xform;
 

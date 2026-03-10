@@ -838,17 +838,6 @@ namespace PAIN {
 			glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, bitangent));
 			glEnableVertexAttribArray(6);
 
-			// IBO: per-instance model matrix (locations 7-10)
-			glGenBuffers(1, &geometry_ibo);
-			glBindBuffer(GL_ARRAY_BUFFER, geometry_ibo);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4), nullptr, GL_DYNAMIC_DRAW);
-			for (int col = 0; col < 4; ++col) {
-				glEnableVertexAttribArray(7 + col);
-				glVertexAttribPointer(7 + col, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4),
-					(void*)(col * sizeof(glm::vec4)));
-				glVertexAttribDivisor(7 + col, 1);
-			}
-
 			glBindVertexArray(0);
 		}
 
@@ -869,15 +858,6 @@ namespace PAIN {
 			glEnableVertexAttribArray(1);
 			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, uv));
 			glEnableVertexAttribArray(2);
-
-			// Shared IBO for per-instance model matrices (same buffer as geometry_vao)
-			glBindBuffer(GL_ARRAY_BUFFER, geometry_ibo);
-			for (int col = 0; col < 4; ++col) {
-				glEnableVertexAttribArray(7 + col);
-				glVertexAttribPointer(7 + col, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4),
-					(void*)(col * sizeof(glm::vec4)));
-				glVertexAttribDivisor(7 + col, 1);
-			}
 
 			glBindVertexArray(0);
 		}
@@ -1004,9 +984,6 @@ namespace PAIN {
 	}
 
 	void WindowsRenderer::BeginShadowPass(const Light& l) {
-		pending_light = &l;
-		if (GS.use_instanced_rendering) pending_shadow_instances.clear();
-
 		glBindFramebuffer(GL_FRAMEBUFFER, l.getShadowFbo());
 		// glClearDepth(1.0f);  // Explicitly set clear value
 
@@ -1033,17 +1010,10 @@ namespace PAIN {
 			return; // Model not yet uploaded to buffers
 		}
 
-		// Queue for instanced shadow rendering
-		if (GS.use_instanced_rendering) {
-			pending_shadow_instances[component.cachedModelAsset.get()].push_back({&component, M});
-			return;
-		}
-
 		shadow_shader->Bind();
 		shadow_shader->SetUniform("u_M", M);
 		shadow_shader->SetUniform("u_V", l.view());
 		shadow_shader->SetUniform("u_P", l.projection());
-		shadow_shader->SetUniform("u_UseInstancing", 0.f);
 
 		// Bind shared shadow VAO (geometry already uploaded)
 		glBindVertexArray(shadow_vao);
@@ -1075,69 +1045,6 @@ namespace PAIN {
 	}
 
 	void WindowsRenderer::EndShadowPass() {
-		// Flush instanced shadow draw queue
-		if (GS.use_instanced_rendering && !pending_shadow_instances.empty() && pending_light) {
-			shadow_shader->Bind();
-			shadow_shader->SetUniform("u_V", pending_light->view());
-			shadow_shader->SetUniform("u_P", pending_light->projection());
-			shadow_shader->SetUniform("u_UseInstancing", 1.f);
-
-			glBindVertexArray(shadow_vao);
-
-			for (auto& [modelPtr, instances] : pending_shadow_instances) {
-				if (instances.empty()) continue;
-
-				const ModelRenderer* first = instances[0].component;
-				const auto& modelAsset = first->cachedModelAsset;
-				if (!modelAsset || !first->bufferOffset.isUploaded) continue;
-
-				GLsizei instanceCount = (GLsizei)instances.size();
-
-				if (instanceCount == 1) {
-					shadow_shader->SetUniform("u_UseInstancing", 0.f);
-					shadow_shader->SetUniform("u_M", instances[0].M);
-				} else {
-					shadow_shader->SetUniform("u_UseInstancing", 1.f);
-					GLsizeiptr needed = (GLsizeiptr)(instances.size() * sizeof(glm::mat4));
-					glBindBuffer(GL_ARRAY_BUFFER, geometry_ibo);
-					if (needed > ibo_capacity) {
-						glBufferData(GL_ARRAY_BUFFER, needed, nullptr, GL_DYNAMIC_DRAW);
-						ibo_capacity = needed;
-					}
-					glm::mat4* ptr = (glm::mat4*)glMapBufferRange(GL_ARRAY_BUFFER, 0, needed,
-						GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
-					if (ptr) {
-						for (size_t ii = 0; ii < instances.size(); ++ii) ptr[ii] = instances[ii].M;
-						glUnmapBuffer(GL_ARRAY_BUFFER);
-					}
-				}
-
-				if (modelAsset->submeshes.empty()) {
-					if (instanceCount == 1) {
-						glDrawElements(GL_TRIANGLES, first->bufferOffset.indexCount, GL_UNSIGNED_INT,
-							(void*)(first->bufferOffset.indexOffset * sizeof(unsigned int)));
-					} else {
-						glDrawElementsInstanced(GL_TRIANGLES, first->bufferOffset.indexCount, GL_UNSIGNED_INT,
-							(void*)(first->bufferOffset.indexOffset * sizeof(unsigned int)), instanceCount);
-					}
-				} else {
-					for (const auto& submesh : modelAsset->submeshes) {
-						if (instanceCount == 1) {
-							glDrawElements(GL_TRIANGLES, submesh.indexCount, GL_UNSIGNED_INT,
-								(void*)((first->bufferOffset.indexOffset + submesh.firstIndex) * sizeof(unsigned int)));
-						} else {
-							glDrawElementsInstanced(GL_TRIANGLES, submesh.indexCount, GL_UNSIGNED_INT,
-								(void*)((first->bufferOffset.indexOffset + submesh.firstIndex) * sizeof(unsigned int)),
-								instanceCount);
-						}
-					}
-				}
-			}
-
-			pending_shadow_instances.clear();
-			glBindVertexArray(0);
-		}
-
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 #ifdef PN_PLATFORM_ANDROID
@@ -1193,8 +1100,6 @@ namespace PAIN {
 		geometry_shader->Bind();
 		geometry_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
 		geometry_shader->SetUniform("u_P", scene->GetActiveCamera()->projection());
-		geometry_shader->SetUniform("u_UseInstancing", 0.f);
-		if (GS.use_instanced_rendering) pending_instances.clear();
 	}
 
 	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene::SceneManager> scene,
@@ -1213,20 +1118,6 @@ namespace PAIN {
 		auto assetManager = services->get<Assets::Manager>();
 
 		const auto& modelAsset = component.cachedModelAsset;
-
-		// Queue for instanced rendering (non-animated only)
-		if (GS.use_instanced_rendering && component.boneTransforms.empty()) {
-			if (!component.bufferOffset.isUploaded) {
-				auto it = instanced_offsets.find(modelAsset->vpath);
-				if (it == instanced_offsets.end()) return;
-				component.bufferOffset.indexOffset = it->second.idx_offset;
-				component.bufferOffset.indexCount  = it->second.idx_count;
-				component.bufferOffset.isUploaded  = true;
-			}
-			// Raw pointer key: zero allocation, same model asset = same pointer
-			pending_instances[modelAsset.get()].push_back({&component, M});
-			return;
-		}
 
 		geometry_shader->SetUniform("u_M", M);
 		geometry_shader->SetUniform("u_InvertUvY", 0.f);
@@ -1585,167 +1476,6 @@ namespace PAIN {
 	}
 
 	void WindowsRenderer::EndGeometryPass() {
-		// Flush instanced draw queue
-		if (GS.use_instanced_rendering && !pending_instances.empty()) {
-			auto assetManager = services->get<Assets::Manager>();
-
-			// geometry_shader is still bound from BeginGeometryPass
-			geometry_shader->SetUniform("u_Animated", 0.f);
-			geometry_shader->SetUniform("u_InvertUvY", 0.f);
-			geometry_shader->SetUniform("DEBUG_TYPE", (float)GS.DEBUG_PBR_MAP_TYPE);
-			geometry_shader->SetUniform("u_UseEmissionOverride", 0.f);
-
-			glBindVertexArray(geometry_vao);
-
-			for (auto& [modelPath, instances] : pending_instances) {
-				if (instances.empty()) continue;
-
-				ModelRenderer* first = instances[0].component;
-				const auto& modelAsset = first->cachedModelAsset;
-				if (!modelAsset) continue;
-
-				// Singleton: draw immediately with the uniform path — no IBO overhead
-				if (instances.size() == 1) {
-					geometry_shader->SetUniform("u_UseInstancing", 0.f);
-					geometry_shader->SetUniform("u_M", instances[0].M);
-				} else {
-					geometry_shader->SetUniform("u_UseInstancing", 1.f);
-				}
-
-				// Upload model matrices to IBO (only for multi-instance groups)
-				if (instances.size() > 1) {
-					GLsizeiptr needed = (GLsizeiptr)(instances.size() * sizeof(glm::mat4));
-					glBindBuffer(GL_ARRAY_BUFFER, geometry_ibo);
-					if (needed > ibo_capacity) {
-						glBufferData(GL_ARRAY_BUFFER, needed, nullptr, GL_DYNAMIC_DRAW);
-						ibo_capacity = needed;
-					}
-					glm::mat4* ptr = (glm::mat4*)glMapBufferRange(GL_ARRAY_BUFFER, 0, needed,
-						GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
-					if (ptr) {
-						for (size_t ii = 0; ii < instances.size(); ++ii) ptr[ii] = instances[ii].M;
-						glUnmapBuffer(GL_ARRAY_BUFFER);
-					}
-				}
-
-				GLsizei instanceCount = (GLsizei)instances.size();
-
-				for (size_t si = 0; si < modelAsset->submeshes.size(); ++si) {
-					const auto& submesh = modelAsset->submeshes[si];
-					if (submesh.materialIndex >= first->materials.size()) continue;
-
-					MaterialInstance* mat = &first->materials[submesh.materialIndex];
-
-					unsigned int albedoTexture = 0, normalTexture = 0, metallicTexture = 0;
-					unsigned int roughnessTexture = 0, aoTexture = 0, emissiveTexture = 0;
-
-					auto matAssetOpt = assetManager->getAsset<Assets::Material>(mat->materialGUID);
-					auto matAsset = matAssetOpt.has_value() ? matAssetOpt.value() : nullptr;
-
-					if (matAsset) {
-						{
-							auto tex = mat->useOverrides ? assetManager->getAsset<Assets::Texture>(mat->albedoTextureOverride)
-							                             : assetManager->getAsset<Assets::Texture>(matAsset->albedoTexturePath);
-							if (tex.has_value() && GS.DEBUG_USE_DIFFUSE_MAP) albedoTexture = tex.value()->gl_texture;
-						}
-						{
-							auto tex = mat->useOverrides ? assetManager->getAsset<Assets::Texture>(mat->normalTextureOverride)
-							                             : assetManager->getAsset<Assets::Texture>(matAsset->normalTexturePath);
-							if (tex.has_value() && GS.DEBUG_USE_NORMAL_MAP) normalTexture = tex.value()->gl_texture;
-						}
-						{
-							auto tex = mat->useOverrides ? assetManager->getAsset<Assets::Texture>(mat->metallicTextureOverride)
-							                             : assetManager->getAsset<Assets::Texture>(matAsset->metallicTexturePath);
-							if (tex.has_value() && GS.DEBUG_USE_ROUGHNESSMETALLIC_MAP) metallicTexture = tex.value()->gl_texture;
-						}
-						{
-							auto tex = mat->useOverrides ? assetManager->getAsset<Assets::Texture>(mat->roughnessTextureOverride)
-							                             : assetManager->getAsset<Assets::Texture>(matAsset->roughnessTexturePath);
-							if (tex.has_value() && GS.DEBUG_USE_ROUGHNESSMETALLIC_MAP) roughnessTexture = tex.value()->gl_texture;
-						}
-						{
-							auto tex = mat->useOverrides ? assetManager->getAsset<Assets::Texture>(mat->aoTextureOverride)
-							                             : assetManager->getAsset<Assets::Texture>(matAsset->aoTexturePath);
-							if (tex.has_value() && GS.DEBUG_USE_AO_MAP) aoTexture = tex.value()->gl_texture;
-						}
-						{
-							auto tex = mat->useOverrides ? assetManager->getAsset<Assets::Texture>(mat->emissiveTextureOverride)
-							                             : assetManager->getAsset<Assets::Texture>(matAsset->emissiveTexturePath);
-							if (tex.has_value() && GS.DEBUG_USE_EMISSION_MAP) emissiveTexture = tex.value()->gl_texture;
-						}
-
-						glm::vec3 baseColor = mat->useOverrides ? mat->baseColorOverride : matAsset->baseColor;
-						float metallic      = mat->useOverrides ? mat->metallicOverride   : matAsset->metallic;
-						float roughness     = mat->useOverrides ? mat->roughnessOverride  : matAsset->roughness;
-
-						geometry_shader->SetUniform("material.rough", roughness);
-						geometry_shader->SetUniform("material.metal", metallic);
-						geometry_shader->SetUniform("material.color", baseColor);
-
-						if (mat->useOverrides) {
-							geometry_shader->SetUniform("u_UseEmissionOverride", 1.f);
-							geometry_shader->SetUniform("u_EmissionOverride", mat->emissiveOverride);
-						} else {
-							geometry_shader->SetUniform("u_UseEmissionOverride", 0.f);
-						}
-					}
-
-					bool hasTexture = albedoTexture != 0;
-					geometry_shader->SetUniform("material.useTex", (hasTexture && GS.DEBUG_USE_DIFFUSE_MAP) ? 1.f : 0.f);
-					if (hasTexture && GS.DEBUG_USE_DIFFUSE_MAP) {
-						glActiveTexture(GL_TEXTURE6);
-						glBindTexture(GL_TEXTURE_2D, albedoTexture);
-						geometry_shader->SetUniform("material.tex", 6);
-					}
-					if (GS.DEBUG_USE_AO_MAP && aoTexture) {
-						glActiveTexture(GL_TEXTURE7);
-						glBindTexture(GL_TEXTURE_2D, aoTexture);
-						geometry_shader->SetUniform("material.ao_map", 7);
-						geometry_shader->SetUniform("material.use_ao", 1.f);
-					} else {
-						geometry_shader->SetUniform("material.use_ao", 0.f);
-					}
-					if (GS.DEBUG_USE_NORMAL_MAP && normalTexture) {
-						glActiveTexture(GL_TEXTURE8);
-						glBindTexture(GL_TEXTURE_2D, normalTexture);
-						geometry_shader->SetUniform("material.normal_map", 8);
-						geometry_shader->SetUniform("material.use_normal", 1.f);
-					} else {
-						geometry_shader->SetUniform("material.use_normal", 0.f);
-					}
-					if (GS.DEBUG_USE_ROUGHNESSMETALLIC_MAP && roughnessTexture) {
-						glActiveTexture(GL_TEXTURE9);
-						glBindTexture(GL_TEXTURE_2D, roughnessTexture);
-						geometry_shader->SetUniform("material.roughnessmetallic_map", 9);
-						geometry_shader->SetUniform("material.use_roughnessmetallic", 1.f);
-					} else {
-						geometry_shader->SetUniform("material.use_roughnessmetallic", 0.f);
-					}
-					if (GS.DEBUG_USE_EMISSION_MAP && emissiveTexture) {
-						glActiveTexture(GL_TEXTURE10);
-						glBindTexture(GL_TEXTURE_2D, emissiveTexture);
-						geometry_shader->SetUniform("material.use_emission", 1.f);
-						geometry_shader->SetUniform("material.emission_map", 10);
-					} else {
-						geometry_shader->SetUniform("material.use_emission", 0.f);
-					}
-
-					if (instanceCount == 1) {
-						glDrawElements(GL_TRIANGLES, submesh.indexCount, GL_UNSIGNED_INT,
-							(void*)((first->bufferOffset.indexOffset + submesh.firstIndex) * sizeof(unsigned int)));
-					} else {
-						glDrawElementsInstanced(GL_TRIANGLES, submesh.indexCount, GL_UNSIGNED_INT,
-							(void*)((first->bufferOffset.indexOffset + submesh.firstIndex) * sizeof(unsigned int)),
-							instanceCount);
-					}
-				}
-			}
-
-			pending_instances.clear();
-			geometry_shader->SetUniform("u_UseInstancing", 0.f);
-			glBindVertexArray(0);
-		}
-
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
