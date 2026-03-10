@@ -1604,7 +1604,7 @@ namespace PAIN {
 
 							wallCache.sourceRegistry = &registry;
 							wallCache.wallEntityCount = wallEntities.size();
-							size_t signature = 1469598103934665603ull;
+                            uint64_t signature = 1469598103934665603ull;
 							for (const entt::entity entity : wallEntities) {
 								signature ^= static_cast<uint64_t>(entity);
 								signature *= 1099511628211ull;
@@ -1652,9 +1652,9 @@ namespace PAIN {
 							static_cast<GLsizei>(draw_h));
 
 						if (gs.minimap_show_walls) {
-							size_t currentWallSignature = 1469598103934665603ull;
+                            uint64_t currentWallSignature = 1469598103934665603ull;
 							for (const entt::entity entity : wallEntities) {
-								currentWallSignature ^= static_cast<size_t>(static_cast<uint32_t>(entity));
+								currentWallSignature ^= static_cast<uint64_t>(entity);
 								currentWallSignature *= 1099511628211ull;
 							}
 

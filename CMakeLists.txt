@@ -42,7 +42,7 @@ if (ANDROID)
 add_compile_definitions(
     JPH_DISABLE_ASSERTS
     JPH_PROFILE_ENABLED=1
-    JPH_DEBUG_RENDERER=0
+    JPH_DEBUG_RENDERER=1
     NDEBUG
   )
 
