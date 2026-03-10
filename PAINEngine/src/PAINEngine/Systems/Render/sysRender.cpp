@@ -1211,149 +1211,8 @@ namespace PAIN {
 				PN_CORE_ERROR("[UI Pass] Error setting initial GL state: 0x{:X}", err);
 			}
 
-
-			for (auto [entity, texture_comp, ui_elem, rect_comp] : texture_group.each()) {
-				// Layer check
-				auto layerComp = registry.try_get<Entity::Layer>(entity);
-				if (layerComp && !scn_service->isLayerEnabled(layerComp->layer_id)) {
-					continue;
-				}
-
-#ifdef PN_PLATFORM_WINDOWS
-#ifndef _DEBUG
-				// Skip android UI
-				if (metadata_service->hasTag(entity, "android_ui")) { continue; }
-#endif
-#endif
-
-				if (!ui_elem.b_is_enabled)
-					continue;
-
-				auto texture_opt =
-					services.lock()->get<Assets::Manager>()->getAsset<Assets::Texture>(
-						texture_comp.texture_guid);
-				if (!texture_opt.has_value())
-					continue;
-
-				// Only auto-set size_delta if it's not already set
-				if (rect_comp.size_delta.x == 0.0f || rect_comp.size_delta.y == 0.0f) {
-					float width = static_cast<float>(texture_opt.value().get()->width);
-					float height = static_cast<float>(texture_opt.value().get()->height);
-
-					// If spritesheet, divide by columns/rows to get FRAME size
-					if (registry.all_of<UIAnimation>(entity)) {
-						const auto& anim = registry.get<UIAnimation>(entity);
-						if (anim.spritesheet_columns > 0)
-							width /= anim.spritesheet_columns;
-						if (anim.spritesheet_rows > 0)
-							height /= anim.spritesheet_rows;
-					}
-
-					rect_comp.size_delta.x = width;
-					rect_comp.size_delta.y = height;
-				}
-
-				// Calculate UV transform
-				glm::vec4 uv_transform(1.0f, 1.0f, 0.0f,
-									   0.0f); // Default: scale(1,1), offset(0,0)
-
-				auto uv_comp = registry.try_get<UVCoordinates>(entity);
-				if (uv_comp) {
-					float width = uv_comp->uv.z - uv_comp->uv.x;
-					float height = uv_comp->uv.w - uv_comp->uv.y;
-					uv_transform = glm::vec4(width, height, uv_comp->uv.x, uv_comp->uv.y);
-				}
-
-			// Only sync position/scale from UIRectTransform for entities that follow world entities
-			glm::vec2 render_pos = texture_comp.pos;
-			glm::vec2 render_scale = texture_comp.texture_scale;
-			
-			if (registry.all_of<UIFollowsWorldEntity>(entity)) {
-				if (rect_comp.layout_dirty) {
-					// Write back so pos stays valid even when not dirty
-					texture_comp.pos = rect_comp.calculated_world_position;
-					texture_comp.texture_scale = glm::vec2(rect_comp.scale.x, rect_comp.scale.y);
-					rect_comp.layout_dirty = false;
-				}
-				render_pos = texture_comp.pos;
-				render_scale = texture_comp.texture_scale;
-			}
-
-			rendererService->w_renderer->Render2DTexture(
-				texture_opt.value()->gl_texture, render_pos,
-				render_scale, uv_transform);
-		}
-
-		// ========================================
-		// RENDER TEXT
-		// ========================================
-			for (auto [entity, ui_elem, text_comp, rect_comp] : text_group.each()) {
-				// Layer check
-				auto layerComp = registry.try_get<Entity::Layer>(entity);
-				if (layerComp && !scn_service->isLayerEnabled(layerComp->layer_id)) {
-					continue;
-				}
-
-				if (!ui_elem.b_is_enabled)
-					continue;
-
-				auto font_opt =
-					services.lock()
-						->get<Assets::Manager>()
-						->getAsset<Assets::Fonts::FontFace>(text_comp.font_guid);
-				if (!font_opt.has_value())
-					continue;
-
-				// PN_CORE_INFO("[Render System] Rendering Font: {}",
-				// font_opt.value()->name);
-
-				// Only recalculate text_pos when layout changes
-				if (registry.all_of<UIFollowsWorldEntity>(entity)) {
-					if (rect_comp.layout_dirty) {
-						text_comp.text_pos = rect_comp.calculated_world_position;
-						text_comp.scale_factor = rect_comp.scale.x;
-						rect_comp.layout_dirty = false;
-					}
-					// text_comp.text_pos is now always valid even without dirty
-				}
-				else if (rect_comp.layout_dirty) {
-					text_comp.text_pos = rect_comp.calculated_world_position;
-					text_comp.scale_factor = rect_comp.scale.x;
-					rect_comp.layout_dirty = false;
-				}
-
-				TextRenderer::get().renderText(text_comp);
-
-				// CHECK FOR ERRORS AFTER EACH TEXT RENDER
-				err = glGetError();
-				if (err != GL_NO_ERROR) {
-					PN_CORE_ERROR(
-						"[Render System] GL error after rendering font '{}': 0x{:X}",
-						font_opt.value()->name, err);
-				}
-			}
-
-			// ========================================
-			// DEBUG UI HITBOXES
-			// ========================================
+			//Graphics settings
 			auto& gs = GraphicsSettings::get();
-			if (gs.DEBUG_DRAW_UI_HITBOXES) {
-				// Draw hitboxes for entities with CustomHitbox2D
-				auto hitbox_view = registry.view<CustomHitbox2D, Texture2D, UIElement, UIRectTransform>();
-				for (auto [entity, hitbox, tex, element, rect] : hitbox_view.each()) {
-					if (!element.b_is_enabled) continue;
-
-					// Calculate hitbox bounds (same logic as in raycastUI)
-					glm::vec2 hitbox_center = tex.pos + UI::normalizeSize(hitbox.position_offset, services);
-					glm::vec2 normalized_min = UI::normalizeSize(hitbox.min_point, services);
-					glm::vec2 normalized_max = UI::normalizeSize(hitbox.max_point, services);
-					glm::vec2 rect_min = hitbox_center + normalized_min;
-					glm::vec2 rect_max = hitbox_center + normalized_max;
-
-					// Draw debug rectangle
-					rendererService->w_renderer->DebugPass2D(rect_min, rect_max, glm::vec4(1.0f, 0.0f, 1.0f, 1.0f)); // Magenta
-				}
-			}
 
 			// ========================================
 			// MINIMAP
@@ -1439,7 +1298,7 @@ namespace PAIN {
 							return glm::vec2(
 								(px / fbw) * 2.0f - 1.0f,
 								1.0f - (py / fbh) * 2.0f);
-						};
+							};
 
 						const glm::vec4 border_color(
 							gs.minimap_border_color.r,
@@ -1543,7 +1402,8 @@ namespace PAIN {
 						view_forward.y = 0.0f;
 						if (glm::dot(view_forward, view_forward) < 0.0001f) {
 							view_forward = glm::vec3(0.0f, 0.0f, -1.0f);
-						} else {
+						}
+						else {
 							view_forward = glm::normalize(view_forward);
 						}
 
@@ -1551,7 +1411,8 @@ namespace PAIN {
 						glm::vec2 forward2(-view_forward.x, -view_forward.z);
 						if (glm::dot(forward2, forward2) < 0.0001f) {
 							forward2 = glm::vec2(0.0f, -1.0f);
-						} else {
+						}
+						else {
 							forward2 = glm::normalize(forward2);
 						}
 						const glm::vec2 right2(-forward2.y, forward2.x);
@@ -1569,7 +1430,7 @@ namespace PAIN {
 								return true;
 							}
 							return false;
-						};
+							};
 
 						auto worldToMinimapNdc = [&](const glm::vec3& worldPos, bool clampToEdge) {
 							const glm::vec2 delta(worldPos.x - player_pos.x, worldPos.z - player_pos.z);
@@ -1597,7 +1458,7 @@ namespace PAIN {
 							return glm::vec2(
 								(px / fbw) * 2.0f - 1.0f,
 								1.0f - (py / fbh) * 2.0f);
-						};
+							};
 
 						auto drawDot = [&](const glm::vec3& pos, float radiusPx, const glm::vec4& color) {
 							const glm::vec2 centerNdc = worldToMinimapNdc(pos, true);
@@ -1605,7 +1466,7 @@ namespace PAIN {
 								(radiusPx / fbw) * 2.0f,
 								(radiusPx / fbh) * 2.0f);
 							rendererService->w_renderer->DebugPass2DCircle(centerNdc, radiusNdc, color, 18);
-						};
+							};
 
 						GLuint playerIconTex = 0;
 						GLuint itemIconTex = 0;
@@ -1620,7 +1481,7 @@ namespace PAIN {
 									return 0;
 								}
 								return iconOpt.value()->gl_texture;
-							};
+								};
 
 							playerIconTex = resolveIcon(gs.minimap_icon_player_path);
 							itemIconTex = resolveIcon(gs.minimap_icon_item_path);
@@ -1631,19 +1492,19 @@ namespace PAIN {
 							float radiusPx,
 							const glm::vec4& color,
 							GLuint iconTex) {
-							if (gs.minimap_use_icon_textures && iconTex != 0) {
-								const glm::vec2 iconNdcPos = worldToMinimapNdc(pos, true);
-								const float iconPx = glm::max(4.0f, radiusPx * 2.0f * gs.minimap_icon_scale);
-								glm::vec2 iconNdcScale(iconPx / fbh, iconPx / fbh);
-								rendererService->w_renderer->Render2DTexture(
-									iconTex,
-									iconNdcPos,
-									iconNdcScale);
-								return;
-							}
+								if (gs.minimap_use_icon_textures && iconTex != 0) {
+									const glm::vec2 iconNdcPos = worldToMinimapNdc(pos, true);
+									const float iconPx = glm::max(4.0f, radiusPx * 2.0f * gs.minimap_icon_scale);
+									glm::vec2 iconNdcScale(iconPx / fbh, iconPx / fbh);
+									rendererService->w_renderer->Render2DTexture(
+										iconTex,
+										iconNdcPos,
+										iconNdcScale);
+									return;
+								}
 
-							drawDot(pos, radiusPx, color);
-						};
+								drawDot(pos, radiusPx, color);
+							};
 
 						auto drawWallFootprint = [&](entt::entity entity, const glm::vec4& color) -> bool {
 							if (auto* bv = registry.try_get<BoundingVolume>(entity)) {
@@ -1670,16 +1531,16 @@ namespace PAIN {
 							}
 
 							return false;
-						};
+							};
 
-				struct WallMinimapCache {
-					const entt::registry* sourceRegistry = nullptr;
-					size_t wallEntityCount = 0;
-					size_t wallEntitySignature = 0;
-					bool built = false;
-					bool gpuDirty = false; // true when triangleVerticesXZ changed and needs GPU re-upload
-					std::vector<glm::vec2> triangleVerticesXZ;
-				};
+						struct WallMinimapCache {
+							const entt::registry* sourceRegistry = nullptr;
+							size_t wallEntityCount = 0;
+							size_t wallEntitySignature = 0;
+							bool built = false;
+							bool gpuDirty = false; // true when triangleVerticesXZ changed and needs GPU re-upload
+							std::vector<glm::vec2> triangleVerticesXZ;
+						};
 
 						static WallMinimapCache wallCache;
 
@@ -1741,7 +1602,7 @@ namespace PAIN {
 							wallCache.wallEntitySignature = signature;
 							wallCache.built = true;
 							wallCache.gpuDirty = true;
-						};
+							};
 
 						glm::vec3 nearest_item_pos(0.0f);
 						glm::vec3 nearest_objective_pos(0.0f);
@@ -1760,7 +1621,7 @@ namespace PAIN {
 									markerEntities.push_back(entity);
 								}
 							}
-						};
+							};
 
 						appendTaggedEntities("Player");
 						appendTaggedEntities("Enemy");
@@ -1793,52 +1654,54 @@ namespace PAIN {
 								wallCache.wallEntityCount != wallEntities.size() ||
 								wallCache.wallEntitySignature != currentWallSignature;
 
-						if (needsRebuild) {
-							rebuildWallCache(wallEntities);
-						}
-
-						// Upload wall vertices to GPU when cache was rebuilt
-						if (wallCache.gpuDirty) {
-							rendererService->w_renderer->UploadMinimapWalls(wallCache.triangleVerticesXZ);
-							wallCache.gpuDirty = false;
-						}
-
-						// GPU draw path: single draw call with scissor clipping
-						if (rendererService->w_renderer->hasMinimapWallData()) {
-							const float minimapRadius = glm::max(1.0f, gs.minimap_radius);
-							const glm::vec2 playerXZ(player_pos.x, player_pos.z);
-
-							// Build 2x2 orientation matrix for vertex shader
-							glm::vec2 transformCol0, transformCol1;
-							if (gs.minimap_rotate_with_player) {
-								transformCol0 = glm::vec2(-right2.x, -forward2.x);
-								transformCol1 = glm::vec2(-right2.y, -forward2.y);
-							} else {
-								transformCol0 = glm::vec2(1.0f, 0.0f);
-								transformCol1 = glm::vec2(0.0f, -1.0f);
+							if (needsRebuild) {
+								rebuildWallCache(wallEntities);
 							}
 
-							const glm::vec2 invDoubleRadius(
-								(draw_min / draw_w_safe) / (2.0f * minimapRadius),
-								(draw_min / draw_h_safe) / (2.0f * minimapRadius));
-							const glm::vec2 ndcBase(
-								(draw_x / fbw) * 2.0f - 1.0f,
-								1.0f - ((draw_y + draw_h) / fbh) * 2.0f);
-							const glm::vec2 ndcScale(
-								(draw_w / fbw) * 2.0f,
-								(draw_h / fbh) * 2.0f);
+							// Upload wall vertices to GPU when cache was rebuilt
+							if (wallCache.gpuDirty) {
+								rendererService->w_renderer->UploadMinimapWalls(wallCache.triangleVerticesXZ);
+								wallCache.gpuDirty = false;
+							}
 
-							rendererService->w_renderer->DrawMinimapWalls(
-								playerXZ, transformCol0, transformCol1,
-								invDoubleRadius, ndcBase, ndcScale,
-								glm::vec4(0.75f, 0.75f, 0.75f, 0.35f));
-						} else {
-							// Fallback to AABB outline when no triangle data available
-							for (const entt::entity wallEntity : wallEntities) {
-								drawWallFootprint(wallEntity, glm::vec4(0.75f, 0.75f, 0.75f, 1.0f));
+							// GPU draw path: single draw call with scissor clipping
+							if (rendererService->w_renderer->hasMinimapWallData()) {
+								const float minimapRadius = glm::max(1.0f, gs.minimap_radius);
+								const glm::vec2 playerXZ(player_pos.x, player_pos.z);
+
+								// Build 2x2 orientation matrix for vertex shader
+								glm::vec2 transformCol0, transformCol1;
+								if (gs.minimap_rotate_with_player) {
+									transformCol0 = glm::vec2(-right2.x, -forward2.x);
+									transformCol1 = glm::vec2(-right2.y, -forward2.y);
+								}
+								else {
+									transformCol0 = glm::vec2(1.0f, 0.0f);
+									transformCol1 = glm::vec2(0.0f, -1.0f);
+								}
+
+								const glm::vec2 invDoubleRadius(
+									(draw_min / draw_w_safe) / (2.0f * minimapRadius),
+									(draw_min / draw_h_safe) / (2.0f * minimapRadius));
+								const glm::vec2 ndcBase(
+									(draw_x / fbw) * 2.0f - 1.0f,
+									1.0f - ((draw_y + draw_h) / fbh) * 2.0f);
+								const glm::vec2 ndcScale(
+									(draw_w / fbw) * 2.0f,
+									(draw_h / fbh) * 2.0f);
+
+								rendererService->w_renderer->DrawMinimapWalls(
+									playerXZ, transformCol0, transformCol1,
+									invDoubleRadius, ndcBase, ndcScale,
+									glm::vec4(0.75f, 0.75f, 0.75f, 0.35f));
+							}
+							else {
+								// Fallback to AABB outline when no triangle data available
+								for (const entt::entity wallEntity : wallEntities) {
+									drawWallFootprint(wallEntity, glm::vec4(0.75f, 0.75f, 0.75f, 1.0f));
+								}
 							}
 						}
-					}
 
 						for (entt::entity entity : markerEntities) {
 							glm::vec3 pos(0.0f);
@@ -1857,7 +1720,8 @@ namespace PAIN {
 								dotRadius = 5.0f;
 								drawMarker(pos, dotRadius, color, playerIconTex);
 								continue;
-							} else if (metadata_service->hasTag(entity, "item") ||
+							}
+							else if (metadata_service->hasTag(entity, "item") ||
 								metadata_service->hasTag(entity, "letter_collectible") ||
 								metadata_service->hasTag(entity, "letter_carried")) {
 								if (!gs.minimap_show_items) {
@@ -1874,7 +1738,8 @@ namespace PAIN {
 								}
 								drawMarker(pos, dotRadius, color, itemIconTex);
 								continue;
-							} else if (metadata_service->hasTag(entity, "objective") ||
+							}
+							else if (metadata_service->hasTag(entity, "objective") ||
 								metadata_service->hasTag(entity, "letter_collection")) {
 								if (!gs.minimap_show_objective) {
 									continue;
@@ -1891,81 +1756,84 @@ namespace PAIN {
 								}
 								drawMarker(pos, dotRadius, color, objectiveIconTex);
 								continue;
-							} else {
+							}
+							else {
 								continue;
 							}
 						}
 
 						if (gs.minimap_show_danger) {
-						std::unordered_set<uint32_t> uniqueDangerEntities;
-						std::vector<entt::entity> dangerEntities;
-						auto appendDangerEntities = [&](const char* tag) {
-							for (entt::entity entity : metadata_service->getEntitiesByTag(tag)) {
-								const uint32_t key = static_cast<uint32_t>(entity);
-								if (uniqueDangerEntities.insert(key).second) {
-									dangerEntities.push_back(entity);
+							std::unordered_set<uint32_t> uniqueDangerEntities;
+							std::vector<entt::entity> dangerEntities;
+							auto appendDangerEntities = [&](const char* tag) {
+								for (entt::entity entity : metadata_service->getEntitiesByTag(tag)) {
+									const uint32_t key = static_cast<uint32_t>(entity);
+									if (uniqueDangerEntities.insert(key).second) {
+										dangerEntities.push_back(entity);
+									}
+								}
+								};
+							appendDangerEntities("danger");
+							appendDangerEntities("Enemy");
+
+							std::vector<glm::vec2> dangerLineVertices;
+							dangerLineVertices.reserve(dangerEntities.size() * 24 * 2);
+							for (entt::entity entity : dangerEntities) {
+								glm::vec3 pos(0.0f);
+								if (!getEntityWorldPos(entity, pos)) {
+									continue;
+								}
+
+								float danger_radius = 1.0f;
+								if (metadata_service->hasTag(entity, "light_cone")) {
+									const float maxDistance = 9.0f;
+									const float coneAngleDeg = 32.0f;
+									const float heightDelta = glm::abs(pos.y - player_pos.y);
+									const float coneRadius = glm::tan(glm::radians(coneAngleDeg)) * heightDelta;
+									const float sphereRadius =
+										heightDelta >= maxDistance
+										? 0.0f
+										: std::sqrt(maxDistance * maxDistance - heightDelta * heightDelta);
+									danger_radius = glm::max(0.25f, glm::min(coneRadius, sphereRadius));
+								}
+								else if (metadata_service->hasTag(entity, "danger_collision")) {
+									danger_radius = 0.5f;
+								}
+								else if (auto* lt = registry.try_get<LocalTransform>(entity)) {
+									danger_radius = glm::max(0.25f, glm::max(lt->scale.x, lt->scale.z));
+								}
+
+								const glm::vec3 delta3 = pos - player_pos;
+								const float dist_xz = glm::length(glm::vec2(delta3.x, delta3.z));
+								if (dist_xz > glm::max(1.0f, gs.minimap_radius) + danger_radius) {
+									continue;
+								}
+
+								const glm::vec2 centerNdc = worldToMinimapNdc(pos, false);
+								const float radiusPx = (danger_radius / (2.0f * glm::max(1.0f, gs.minimap_radius))) * draw_min;
+								const glm::vec2 radiusNdc((radiusPx / fbw) * 2.0f, (radiusPx / fbh) * 2.0f);
+
+								for (int i = 0; i < 24; ++i) {
+									const float a0 = (static_cast<float>(i) / 24.0f) * glm::two_pi<float>();
+									const float a1 = (static_cast<float>(i + 1) / 24.0f) * glm::two_pi<float>();
+
+									const glm::vec2 p0(
+										centerNdc.x + std::cos(a0) * radiusNdc.x,
+										centerNdc.y + std::sin(a0) * radiusNdc.y);
+									const glm::vec2 p1(
+										centerNdc.x + std::cos(a1) * radiusNdc.x,
+										centerNdc.y + std::sin(a1) * radiusNdc.y);
+
+									dangerLineVertices.push_back(p0);
+									dangerLineVertices.push_back(p1);
 								}
 							}
-						};
-						appendDangerEntities("danger");
-						appendDangerEntities("Enemy");
 
-						std::vector<glm::vec2> dangerLineVertices;
-						dangerLineVertices.reserve(dangerEntities.size() * 24 * 2);
-						for (entt::entity entity : dangerEntities) {
-							glm::vec3 pos(0.0f);
-							if (!getEntityWorldPos(entity, pos)) {
-								continue;
+							if (!dangerLineVertices.empty()) {
+								rendererService->w_renderer->DebugPass2DLines(
+									dangerLineVertices,
+									glm::vec4(1.0f, 0.15f, 0.15f, 1.0f));
 							}
-
-							float danger_radius = 1.0f;
-							if (metadata_service->hasTag(entity, "light_cone")) {
-								const float maxDistance = 9.0f;
-								const float coneAngleDeg = 32.0f;
-								const float heightDelta = glm::abs(pos.y - player_pos.y);
-								const float coneRadius = glm::tan(glm::radians(coneAngleDeg)) * heightDelta;
-								const float sphereRadius =
-									heightDelta >= maxDistance
-									? 0.0f
-									: std::sqrt(maxDistance * maxDistance - heightDelta * heightDelta);
-								danger_radius = glm::max(0.25f, glm::min(coneRadius, sphereRadius));
-							} else if (metadata_service->hasTag(entity, "danger_collision")) {
-								danger_radius = 0.5f;
-							} else if (auto* lt = registry.try_get<LocalTransform>(entity)) {
-								danger_radius = glm::max(0.25f, glm::max(lt->scale.x, lt->scale.z));
-							}
-
-							const glm::vec3 delta3 = pos - player_pos;
-							const float dist_xz = glm::length(glm::vec2(delta3.x, delta3.z));
-							if (dist_xz > glm::max(1.0f, gs.minimap_radius) + danger_radius) {
-								continue;
-							}
-
-							const glm::vec2 centerNdc = worldToMinimapNdc(pos, false);
-							const float radiusPx = (danger_radius / (2.0f * glm::max(1.0f, gs.minimap_radius))) * draw_min;
-							const glm::vec2 radiusNdc((radiusPx / fbw) * 2.0f, (radiusPx / fbh) * 2.0f);
-
-							for (int i = 0; i < 24; ++i) {
-								const float a0 = (static_cast<float>(i) / 24.0f) * glm::two_pi<float>();
-								const float a1 = (static_cast<float>(i + 1) / 24.0f) * glm::two_pi<float>();
-
-								const glm::vec2 p0(
-									centerNdc.x + std::cos(a0) * radiusNdc.x,
-									centerNdc.y + std::sin(a0) * radiusNdc.y);
-								const glm::vec2 p1(
-									centerNdc.x + std::cos(a1) * radiusNdc.x,
-									centerNdc.y + std::sin(a1) * radiusNdc.y);
-
-								dangerLineVertices.push_back(p0);
-								dangerLineVertices.push_back(p1);
-							}
-						}
-
-						if (!dangerLineVertices.empty()) {
-							rendererService->w_renderer->DebugPass2DLines(
-								dangerLineVertices,
-								glm::vec4(1.0f, 0.15f, 0.15f, 1.0f));
-						}
 						}
 
 						glm::vec3 route_target_world(0.0f);
@@ -1974,15 +1842,18 @@ namespace PAIN {
 							if (has_nearest_objective) {
 								route_target_world = nearest_objective_pos;
 								has_route_target = true;
-							} else if (has_nearest_item) {
+							}
+							else if (has_nearest_item) {
 								route_target_world = nearest_item_pos;
 								has_route_target = true;
 							}
-						} else {
+						}
+						else {
 							if (has_nearest_item) {
 								route_target_world = nearest_item_pos;
 								has_route_target = true;
-							} else if (has_nearest_objective) {
+							}
+							else if (has_nearest_objective) {
 								route_target_world = nearest_objective_pos;
 								has_route_target = true;
 							}
@@ -2026,7 +1897,8 @@ namespace PAIN {
 									glm::vec2 dir = p1_clamped - p0;
 									if (glm::dot(dir, dir) < 0.0001f) {
 										dir = glm::vec2(0.0f, -1.0f);
-									} else {
+									}
+									else {
 										dir = glm::normalize(dir);
 									}
 
@@ -2057,7 +1929,7 @@ namespace PAIN {
 									c,
 									12);
 								row++;
-							};
+								};
 
 							if (gs.minimap_show_player) drawLegendDot(glm::vec4(0.2f, 1.0f, 0.2f, 1.0f));
 							if (gs.minimap_show_danger) drawLegendDot(glm::vec4(1.0f, 0.15f, 0.15f, 1.0f));
@@ -2071,7 +1943,8 @@ namespace PAIN {
 							arrow_dir = -forward2;
 							if (glm::dot(arrow_dir, arrow_dir) < 0.0001f) {
 								arrow_dir = glm::vec2(0.0f, -1.0f);
-							} else {
+							}
+							else {
 								arrow_dir = glm::normalize(arrow_dir);
 							}
 						}
@@ -2096,6 +1969,149 @@ namespace PAIN {
 
 						glDisable(GL_SCISSOR_TEST);
 					}
+				}
+			}
+
+
+			for (auto [entity, texture_comp, ui_elem, rect_comp] : texture_group.each()) {
+				// Layer check
+				auto layerComp = registry.try_get<Entity::Layer>(entity);
+				if (layerComp && !scn_service->isLayerEnabled(layerComp->layer_id)) {
+					continue;
+				}
+
+#ifdef PN_PLATFORM_WINDOWS
+#ifndef _DEBUG
+				// Skip android UI
+				if (metadata_service->hasTag(entity, "android_ui")) { continue; }
+#endif
+#endif
+
+				if (!ui_elem.b_is_enabled)
+					continue;
+
+				auto texture_opt =
+					services.lock()->get<Assets::Manager>()->getAsset<Assets::Texture>(
+						texture_comp.texture_guid);
+				if (!texture_opt.has_value())
+					continue;
+
+				// Only auto-set size_delta if it's not already set
+				if (rect_comp.size_delta.x == 0.0f || rect_comp.size_delta.y == 0.0f) {
+					float width = static_cast<float>(texture_opt.value().get()->width);
+					float height = static_cast<float>(texture_opt.value().get()->height);
+
+					// If spritesheet, divide by columns/rows to get FRAME size
+					if (registry.all_of<UIAnimation>(entity)) {
+						const auto& anim = registry.get<UIAnimation>(entity);
+						if (anim.spritesheet_columns > 0)
+							width /= anim.spritesheet_columns;
+						if (anim.spritesheet_rows > 0)
+							height /= anim.spritesheet_rows;
+					}
+
+					rect_comp.size_delta.x = width;
+					rect_comp.size_delta.y = height;
+				}
+
+				// Calculate UV transform
+				glm::vec4 uv_transform(1.0f, 1.0f, 0.0f,
+									   0.0f); // Default: scale(1,1), offset(0,0)
+
+				auto uv_comp = registry.try_get<UVCoordinates>(entity);
+				if (uv_comp) {
+					float width = uv_comp->uv.z - uv_comp->uv.x;
+					float height = uv_comp->uv.w - uv_comp->uv.y;
+					uv_transform = glm::vec4(width, height, uv_comp->uv.x, uv_comp->uv.y);
+				}
+
+			// Only sync position/scale from UIRectTransform for entities that follow world entities
+			glm::vec2 render_pos = texture_comp.pos;
+			glm::vec2 render_scale = texture_comp.texture_scale;
+			
+			if (registry.all_of<UIFollowsWorldEntity>(entity)) {
+				if (rect_comp.layout_dirty) {
+					// Write back so pos stays valid even when not dirty
+					texture_comp.pos = rect_comp.calculated_world_position;
+					texture_comp.texture_scale = glm::vec2(rect_comp.scale.x, rect_comp.scale.y);
+					rect_comp.layout_dirty = false;
+				}
+				render_pos = texture_comp.pos;
+				render_scale = texture_comp.texture_scale;
+			}
+
+			rendererService->w_renderer->Render2DTexture(
+				texture_opt.value()->gl_texture, render_pos,
+				render_scale, uv_transform);
+		}
+
+			// ========================================
+			// RENDER TEXT
+			// ========================================
+			for (auto [entity, ui_elem, text_comp, rect_comp] : text_group.each()) {
+				// Layer check
+				auto layerComp = registry.try_get<Entity::Layer>(entity);
+				if (layerComp && !scn_service->isLayerEnabled(layerComp->layer_id)) {
+					continue;
+				}
+
+				if (!ui_elem.b_is_enabled)
+					continue;
+
+				auto font_opt =
+					services.lock()
+						->get<Assets::Manager>()
+						->getAsset<Assets::Fonts::FontFace>(text_comp.font_guid);
+				if (!font_opt.has_value())
+					continue;
+
+				// PN_CORE_INFO("[Render System] Rendering Font: {}",
+				// font_opt.value()->name);
+
+				// Only recalculate text_pos when layout changes
+				if (registry.all_of<UIFollowsWorldEntity>(entity)) {
+					if (rect_comp.layout_dirty) {
+						text_comp.text_pos = rect_comp.calculated_world_position;
+						text_comp.scale_factor = rect_comp.scale.x;
+						rect_comp.layout_dirty = false;
+					}
+					// text_comp.text_pos is now always valid even without dirty
+				}
+				else if (rect_comp.layout_dirty) {
+					text_comp.text_pos = rect_comp.calculated_world_position;
+					text_comp.scale_factor = rect_comp.scale.x;
+					rect_comp.layout_dirty = false;
+				}
+
+				TextRenderer::get().renderText(text_comp);
+
+				// CHECK FOR ERRORS AFTER EACH TEXT RENDER
+				err = glGetError();
+				if (err != GL_NO_ERROR) {
+					PN_CORE_ERROR(
+						"[Render System] GL error after rendering font '{}': 0x{:X}",
+						font_opt.value()->name, err);
+				}
+			}
+
+			// ========================================
+			// DEBUG UI HITBOXES
+			// ========================================
+			if (gs.DEBUG_DRAW_UI_HITBOXES) {
+				// Draw hitboxes for entities with CustomHitbox2D
+				auto hitbox_view = registry.view<CustomHitbox2D, Texture2D, UIElement, UIRectTransform>();
+				for (auto [entity, hitbox, tex, element, rect] : hitbox_view.each()) {
+					if (!element.b_is_enabled) continue;
+
+					// Calculate hitbox bounds (same logic as in raycastUI)
+					glm::vec2 hitbox_center = tex.pos + UI::normalizeSize(hitbox.position_offset, services);
+					glm::vec2 normalized_min = UI::normalizeSize(hitbox.min_point, services);
+					glm::vec2 normalized_max = UI::normalizeSize(hitbox.max_point, services);
+					glm::vec2 rect_min = hitbox_center + normalized_min;
+					glm::vec2 rect_max = hitbox_center + normalized_max;
+
+					// Draw debug rectangle
+					rendererService->w_renderer->DebugPass2D(rect_min, rect_max, glm::vec4(1.0f, 0.0f, 1.0f, 1.0f)); // Magenta
 				}
 			}
 
