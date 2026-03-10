@@ -668,7 +668,8 @@
                                 "7beaa535-462c-7f45-9d6d-4090ca227034",
                                 "07e8316a-68b8-b542-880e-f6c9adbd653e",
                                 "afe62cce-006c-b340-835c-b6fe6075f530",
-                                "fa655f6b-e097-5643-9794-1d3c86087914"
+                                "fa655f6b-e097-5643-9794-1d3c86087914",
+                                "5b122174-1450-0846-a734-4a72d918f052"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 3
@@ -1053,12 +1054,154 @@
                             ]
                         },
                         "GUID": {
-                            "guid": "afe62cce-006c-b340-835c-b6fe6075f530"
+                            "guid": "5b122174-1450-0846-a734-4a72d918f052"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
                             "siblingIndex": 2
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "settings_button"
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                -0.5,
+                                -0.4000000059604645
+                            ],
+                            "texture_guid": "1eefb2b8-05e8-a344-a447-ab28c8a803b2",
+                            "texture_scale": [
+                                0.3499999940395355,
+                                0.09000000357627869
+                            ]
+                        },
+                        "UIAnimation": {
+                            "b_loop": true,
+                            "b_playing": false,
+                            "duration": 0.20000000298023224,
+                            "frame_duration": 0.10000000149011612,
+                            "spritesheet_columns": 2,
+                            "spritesheet_rows": 1,
+                            "total_frames": 2
+                        },
+                        "UIButton": {
+                            "action": "LoadScene",
+                            "disabled_color": -10066330,
+                            "highlighted_color": -3355444,
+                            "normal_color": -1,
+                            "payload": "game/scenes/settings.scn",
+                            "pressed_color": -5592406,
+                            "state": "Normal"
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                1024.0,
+                                88.0
+                            ]
+                        },
+                        "UVCoordinates": {
+                            "uv": [
+                                0.001207729452289641,
+                                0.009615384973585606,
+                                0.49879226088523865,
+                                0.9903846383094788
+                            ]
+                        }
+                    },
+                    "Name": "settings_button"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "CustomHitbox2D": {
+                            "max_point": [
+                                272.79998779296875,
+                                45.900001525878906
+                            ],
+                            "min_point": [
+                                -131.6999969482422,
+                                -47.400001525878906
+                            ],
+                            "position_offset": [
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        "GUID": {
+                            "guid": "afe62cce-006c-b340-835c-b6fe6075f530"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
+                            "siblingIndex": 3
                         },
                         "Layer": {
                             "layer_id": 1,
@@ -1088,7 +1231,7 @@
                         "Texture2D": {
                             "pos": [
                                 -0.5,
-                                -0.4000000059604645
+                                -0.6499999761581421
                             ],
                             "texture_guid": "057511b0-a4f3-b44f-9662-f58e59868364",
                             "texture_scale": [
@@ -1200,7 +1343,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 3
+                            "siblingIndex": 4
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1230,7 +1373,7 @@
                         "Texture2D": {
                             "pos": [
                                 -0.5199999809265137,
-                                -0.6499999761581421
+                                -0.8999999761581421
                             ],
                             "texture_guid": "b5e31ae4-5d04-e64d-8370-609d0b060a90",
                             "texture_scale": [

@@ -162,6 +162,67 @@ namespace PAIN {
 					}
 				}
 
+				ImGui::Separator();
+
+				// ===== 3. Log Console =====
+				if (ImGui::CollapsingHeader("Log Console", ImGuiTreeNodeFlags_DefaultOpen)) {
+
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.6f, 0.6f, 0.6f, 1.0f));
+					ImGui::Checkbox("Trace##logfilter", &log_filter_trace);
+					ImGui::PopStyleColor();
+					ImGui::SameLine();
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.9f, 0.4f, 1.0f));
+					ImGui::Checkbox("Info##logfilter", &log_filter_info);
+					ImGui::PopStyleColor();
+					ImGui::SameLine();
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.8f, 0.0f, 1.0f));
+					ImGui::Checkbox("Warn##logfilter", &log_filter_warn);
+					ImGui::PopStyleColor();
+					ImGui::SameLine();
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.3f, 0.3f, 1.0f));
+					ImGui::Checkbox("Error##logfilter", &log_filter_error);
+					ImGui::PopStyleColor();
+					ImGui::SameLine();
+					if (ImGui::SmallButton("Clear"))
+						DebugConsoleSink::clear();
+					ImGui::SameLine();
+					ImGui::Checkbox("Auto-scroll", &log_scroll_to_bottom);
+
+					ImGui::Separator();
+
+					if (ImGui::BeginChild("##LogConsole", ImVec2(0, 200), true,
+						ImGuiWindowFlags_HorizontalScrollbar)) {
+
+						std::lock_guard<std::mutex> lock(DebugConsoleSink::getEntriesMutex());
+						for (const auto& entry : DebugConsoleSink::getEntries()) {
+
+							if (entry.level == spdlog::level::trace && !log_filter_trace) continue;
+							if (entry.level == spdlog::level::info && !log_filter_info)  continue;
+							if (entry.level == spdlog::level::warn && !log_filter_warn)  continue;
+							if ((entry.level == spdlog::level::err ||
+								entry.level == spdlog::level::critical) && !log_filter_error) continue;
+
+							ImVec4 color;
+							switch (entry.level) {
+							case spdlog::level::trace:    color = ImVec4(0.6f, 0.6f, 0.6f, 1.0f); break;
+							case spdlog::level::info:     color = ImVec4(0.4f, 0.9f, 0.4f, 1.0f); break;
+							case spdlog::level::warn:     color = ImVec4(1.0f, 0.8f, 0.0f, 1.0f); break;
+							case spdlog::level::err:      color = ImVec4(1.0f, 0.3f, 0.3f, 1.0f); break;
+							case spdlog::level::critical: color = ImVec4(1.0f, 0.0f, 0.5f, 1.0f); break;
+							default:                      color = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); break;
+							}
+
+							ImGui::PushStyleColor(ImGuiCol_Text, color);
+							ImGui::TextUnformatted(entry.message.c_str());
+							ImGui::PopStyleColor();
+						}
+
+						if (log_scroll_to_bottom)
+							ImGui::SetScrollHereY(1.0f);
+					}
+					ImGui::EndChild();
+				}
+
 				ImGui::End();
 			}
 

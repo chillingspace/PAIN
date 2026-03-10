@@ -14,6 +14,7 @@
 #include "Utility/Log.h"
 
 #include <fstream>
+#include <filesystem>
 #include <chrono>
 #include <deque>
 #include <queue>
@@ -1043,6 +1044,96 @@ namespace PAIN {
             audio->stop(Audio::AudioChannelId{channelId});
             });
 
+        // ==================== Channel Group Volume Control ====================
+        // These control FMOD channel groups (master, sfx, music) for settings sliders
+
+        // audioSetGroupVolumeDb(groupName, volumeDb) - Set a channel group's volume
+        lua_.set_function("audioSetGroupVolumeDb", [this](const std::string& group, float db) {
+            if (!services_) return;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return;
+            audio->setGroupVolumeDb(group.c_str(), db);
+            });
+
+        // audioGetGroupVolumeDb(groupName) -> float - Get a channel group's current volume
+        lua_.set_function("audioGetGroupVolumeDb", [this](const std::string& group) -> float {
+            if (!services_) return 0.0f;
+            auto audio = services_->get<Audio::Audio>();
+            if (!audio) return 0.0f;
+            return audio->getGroupVolumeDb(group.c_str());
+            });
+
+        // ==================== Settings Persistence ====================
+        // Simple key=value file I/O for user settings (volume, etc.)
+        // Uses Path service for cross-platform writable paths:
+        //   Windows: documents://settings.cfg  -> C:\Users\<User>\Documents\Pain Engine\settings.cfg
+        //   Android: internal://settings.cfg   -> app internal storage
+
+        static const char* SETTINGS_VPATH =
+#ifdef PN_PLATFORM_ANDROID
+            "internal://settings.cfg";
+#else
+            "documents://settings.cfg";
+#endif
+
+        // settingsSave(key, value) - Save a setting to disk
+        lua_.set_function("settingsSave", [this](const std::string& key, const std::string& value) {
+            if (!services_) return;
+            auto pathSvc = services_->get<Path::Path>();
+            if (!pathSvc) return;
+            std::string filePath = pathSvc->resolvePath(SETTINGS_VPATH);
+            if (filePath.empty()) return;
+
+            // Ensure parent directory exists
+            {
+                auto lastSlash = filePath.find_last_of("/\\");
+                if (lastSlash != std::string::npos) {
+                    std::string dir = filePath.substr(0, lastSlash);
+                    std::filesystem::create_directories(dir);
+                }
+            }
+
+            // Read existing settings
+            std::unordered_map<std::string, std::string> settings;
+            {
+                std::ifstream in(filePath);
+                std::string line;
+                while (std::getline(in, line)) {
+                    auto eq = line.find('=');
+                    if (eq != std::string::npos) {
+                        settings[line.substr(0, eq)] = line.substr(eq + 1);
+                    }
+                }
+            }
+            // Update the key
+            settings[key] = value;
+            // Write back all settings
+            std::ofstream out(filePath, std::ios::trunc);
+            for (auto& [k, v] : settings) {
+                out << k << "=" << v << "\n";
+            }
+            PN_CORE_INFO("[Settings] Saved {}={} to {}", key, value, filePath);
+            });
+
+        // settingsLoad(key, defaultValue?) -> string - Load a setting from disk
+        lua_.set_function("settingsLoad", [this](const std::string& key, sol::optional<std::string> defaultVal) -> std::string {
+            if (!services_) return defaultVal.value_or("");
+            auto pathSvc = services_->get<Path::Path>();
+            if (!pathSvc) return defaultVal.value_or("");
+            std::string filePath = pathSvc->resolvePath(SETTINGS_VPATH);
+            if (filePath.empty()) return defaultVal.value_or("");
+
+            std::ifstream in(filePath);
+            std::string line;
+            while (std::getline(in, line)) {
+                auto eq = line.find('=');
+                if (eq != std::string::npos && line.substr(0, eq) == key) {
+                    return line.substr(eq + 1);
+                }
+            }
+            return defaultVal.value_or("");
+            });
+
         // ==================== Global Audio Multi-Track Control ====================
         // These functions control persistent global audio that survives scene changes
         // Uses static storage in sysAudio.cpp
@@ -1130,6 +1221,13 @@ namespace PAIN {
         lua_.set_function("getFPS", [this] { return api_ ? api_->GetFps() : 0.0f; });
         lua_.set_function("setDeltaTimeMultiplier", [this](float m) { if (api_) api_->SetDeltaMultiplier(m); });
         lua_.set_function("getDeltaTimeMultiplier", [this] { return api_ ? api_->GetDeltaMultiplier() : 1.0f; });
+
+        lua_.set_function("getFrameBufferSize", [this]() {
+            if (!api_) return std::make_tuple(1920.0f, 1080.0f);
+
+            glm::uvec2 fb = api_->GetFrameBufferSize();
+            return std::make_tuple((float)fb.x, (float)fb.y);
+            });
 
         /* =========================================================================== */
         /*                              Layer Control                                  */

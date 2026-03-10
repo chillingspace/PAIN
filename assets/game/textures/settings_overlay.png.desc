@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "settings_overlay.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 4731276118893101956
+  },
+  "descriptor_version": 1,
+  "guid": "a32e9b08-c3ba-db41-a4d9-3122731c4fcd",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\settings_overlay.png"
+  }
+}

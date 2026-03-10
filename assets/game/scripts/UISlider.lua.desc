@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "UISlider.lua",
+    "type": "Script"
+  },
+  "build_data": {
+    "hash": 16179128287735874775
+  },
+  "descriptor_version": 1,
+  "guid": "a3228277-a976-1a4a-b247-e09d061d40d8",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scripts\\UISlider.lua"
+  }
+}

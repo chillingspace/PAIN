@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "settings_slider_bar.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 7952827505601805732
+  },
+  "descriptor_version": 1,
+  "guid": "d68c31eb-4037-d241-9d51-29c2edb8179f",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\settings_slider_bar.png"
+  }
+}

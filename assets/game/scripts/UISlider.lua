@@ -1,0 +1,192 @@
+-- UISlider.lua
+-- Attach to slider handle entity
+
+-- local sliderName = getEntityName(entityId)
+local settingKey = getEntityName(entityId)
+local minX = -0.32
+local maxX = 0.32
+local hitHalfWidth = 0.05
+local hitHalfHeight = 0.05
+
+local dragging = false
+local knobY = nil
+local initialized = false
+
+-- ==================== Volume helpers ====================
+
+-- Convert linear 0.0-1.0 to decibels (0.0 -> silence, 1.0 -> 0 dB)
+local function linearToDb(v)
+    if v <= 0.001 then return -80.0 end
+    return 20.0 * math.log(v) / math.log(10)
+end
+
+-- Convert a 0.0-1.0 value to slider X position
+local function valueToPosition(v)
+    return minX + v * (maxX - minX)
+end
+
+-- Test SFX played when the SFX volume slider is released
+local SFX_TEST_FILE = "game/audio/sfx/Gear Pick Up.wav"
+
+-- Settings key mapping (slider entity name -> settings file key)
+local SETTINGS_KEYS = {
+    master_handle = "vol_master",
+    bgm_handle    = "vol_bgm",
+    sfx_handle    = "vol_sfx",
+}
+
+-- Global volume state (persists across scenes via _G)
+_G.VolumeSettings = _G.VolumeSettings or {
+    master = 1.0,
+    bgm    = 1.0,
+    sfx    = 1.0,
+}
+
+-- ==================== Slider -> volume mapping ====================
+
+-- Place functions to update volume here
+local volumeFunctions = {
+    master_handle = function(v)
+        _G.VolumeSettings.master = v
+        if audioSetGroupVolumeDb then
+            audioSetGroupVolumeDb("master", linearToDb(v))
+        end
+    end,
+
+    bgm_handle = function(v)
+        _G.VolumeSettings.bgm = v
+        if audioSetGroupVolumeDb then
+            audioSetGroupVolumeDb("music", linearToDb(v))
+        end
+    end,
+
+    sfx_handle = function(v)
+        _G.VolumeSettings.sfx = v
+        if audioSetGroupVolumeDb then
+            audioSetGroupVolumeDb("sfx", linearToDb(v))
+        end
+    end
+}
+
+_G.SliderUI = _G.SliderUI or {}
+
+-- ==================== Utility ====================
+
+-- Prevents the slider from going out of bounds
+local function clamp(v, lo, hi)
+    if v < lo then return lo end
+    if v > hi then return hi end
+    return v
+end
+
+-- Converts mouse position to UI Position
+local function mouseToUI(mx, my)
+    local fbW, fbH = getFrameBufferSize()
+
+    if not fbW or not fbH or fbW == 0 or fbH == 0 then
+        return 0.0, 0.0
+    end
+
+    local uiX = (mx / fbW) * 2.0 - 1.0
+    local uiY = 1.0 - (my / fbH) * 2.0
+    return uiX, uiY
+end
+
+-- Checks if mouse x,y (mx, my) is over selected x,y
+local function isMouseOver(mx, my, x, y)
+    return mx >= (x - hitHalfWidth) and mx <= (x + hitHalfWidth)
+       and my >= (y - hitHalfHeight) and my <= (y + hitHalfHeight)
+end
+
+-- Checks distance between current position and selected value
+local function positionToValue(x)
+    if maxX == minX then
+        return 0.0
+    end
+    return clamp((x - minX) / (maxX - minX), 0.0, 1.0)
+end
+
+registerUpdate(function(dt)
+    local x, y = get2DPosition(entityId)
+
+    if not knobY then
+        knobY = y
+    end
+
+    -- ==================== INIT: Restore slider from saved settings ====================
+    if not initialized then
+        initialized = true
+        local fileKey = SETTINGS_KEYS[settingKey]
+        if fileKey and settingsLoad then
+            local saved = settingsLoad(fileKey, "")
+            if saved ~= "" then
+                local val = tonumber(saved)
+                if val then
+                    val = clamp(val, 0.0, 1.0)
+                    -- Move the slider knob to the saved position
+                    local newX = valueToPosition(val)
+                    set2DPosition(entityId, newX, knobY)
+                    -- Apply the volume immediately
+                    _G.SliderUI[settingKey] = val
+                    local fn = volumeFunctions[settingKey]
+                    if fn then fn(val) end
+                    log(string.format("[UISlider] Restored %s = %.2f from settings", settingKey, val))
+                end
+            end
+        end
+    end
+
+    local mx, my = getMousePos()
+    local uiMouseX, uiMouseY = mouseToUI(mx, my)
+
+    -- When slider is dragged
+    if not dragging and isMouseDown(0) and isMouseOver(uiMouseX, uiMouseY, x, y) then
+        dragging = true
+    end
+
+    -- When slider is released
+    if dragging and wasMouseReleased(0) then
+        dragging = false
+
+        -- Save the current value to disk
+        local finalValue = _G.SliderUI[settingKey]
+        local fileKey = SETTINGS_KEYS[settingKey]
+        if finalValue and fileKey and settingsSave then
+            settingsSave(fileKey, string.format("%.4f", finalValue))
+            log(string.format("[UISlider] Saved %s = %.4f to settings", fileKey, finalValue))
+        end
+
+        -- Play test SFX when the SFX volume slider is released
+        if settingKey == "sfx_handle" and audioPlaySFX then
+            audioPlaySFX(SFX_TEST_FILE, 0.0)
+        end
+    end
+
+    -- Update slider position
+    if dragging and isMouseDown(0) then
+        local newX = clamp(uiMouseX, minX, maxX)
+        set2DPosition(entityId, newX, knobY)
+
+        local value = positionToValue(newX)
+        _G.SliderUI[settingKey] = value
+
+        log(string.format("[UISlider] %s = %.2f", settingKey, value))
+
+        -- Calls the volume function according to the slider
+        local fn = volumeFunctions[settingKey]
+        if fn then
+            fn(value)
+        end
+
+        -- !TODO: Code below not used unless things go wrong. Remove this code otherwise.
+        -- Update volume here
+        -- if sliderName == "master_handle" then
+        --     -- Set master volume to value
+        -- elseif sliderName == "bgm_handle" then
+        --     -- Set bgm volume to value
+        -- elseif sliderName == "sfx_handle" then
+        --     -- Set sfx volume to value
+        -- end
+
+    end
+end)

@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "settings_master.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 10792061203001579927
+  },
+  "descriptor_version": 1,
+  "guid": "02b14dea-f665-da4d-b8b6-0827fef26eac",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\settings_master.png"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "settings_slider_handle.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 10953604869398693875
+  },
+  "descriptor_version": 1,
+  "guid": "9269dae6-5f24-4f48-80f8-1995722646d2",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\settings_slider_handle.png"
+  }
+}

@@ -1,6 +1,10 @@
 #include "pch.h"
 #include "Log.h"
 
+#ifdef _DEBUG
+#include "../LayeredSystems/LevelEditor/Panels/DebugPanel.h"
+#endif
+
 #ifdef PN_PLATFORM_WINDOWS
 #include <windows.h>
 #include <psapi.h>
@@ -160,6 +164,12 @@ namespace PAIN {
 
         spdlog::set_default_logger(s_CoreLogger);
         spdlog::flush_on(spdlog::level::warn);
+
+#ifdef _DEBUG
+        auto debug_sink = std::make_shared<PAIN::DebugConsoleSink>();
+        s_CoreLogger->sinks().push_back(debug_sink);
+        s_ClientLogger->sinks().push_back(debug_sink);
+#endif
 
 	}
 

@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "settings_bgm.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 3161429203027998022
+  },
+  "descriptor_version": 1,
+  "guid": "8362f73b-7f63-6345-b6ed-2af366aa4a79",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\settings_bgm.png"
+  }
+}

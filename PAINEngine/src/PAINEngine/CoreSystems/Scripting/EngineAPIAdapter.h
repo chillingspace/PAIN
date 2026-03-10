@@ -66,6 +66,8 @@ namespace PAIN {
         std::string GetEntityTexture(entt::entity entityId) override;
         void SetEntityTexture(entt::entity entity, const std::string& guidStr) override;
 
+        glm::uvec2 GetFrameBufferSize() const override;
+
         /* =========================================================================== */
         /*                     Metadata (name / tags / groups)                         */
         /* =========================================================================== */
