@@ -224,9 +224,9 @@
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            -0.1612379550933838,
+            -0.1612379401922226,
             4.412954330444336,
-            -10.084939956665039
+            -10.084941864013672
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 20.0,
@@ -23050,7 +23050,7 @@
         ],
         "border_thickness": 2.0,
         "camera_height": 30.0,
-        "enabled": false,
+        "enabled": true,
         "icon_danger_path": "",
         "icon_item_path": "",
         "icon_objective_path": "",
@@ -23063,7 +23063,7 @@
             20.0
         ],
         "radius": 15.0,
-        "recommended_position": 3,
+        "recommended_position": 5,
         "rotate_with_player": true,
         "route_mode": 0,
         "show_danger": true,
@@ -23074,7 +23074,7 @@
         "show_route": true,
         "show_walls": true,
         "size_px": [
-            200.0,
+            500.0,
             200.0
         ],
         "use_icon_textures": false
