@@ -171,11 +171,11 @@ if not S._keysRegistered then
     registerKeyDown("C", function() collectPressed = true end)
     registerKeyUp("C", function() collectPressed = false end)
 
-    registerKeyDown("H", function() 
-        --log("[PlayerState] H keydown fired")
+    registerKeyDown("E", function() 
+        --log("[PlayerState] E keydown fired")
         hidePressed = true 
     end)
-    registerKeyUp("H",   function() hidePressed = false end)
+    registerKeyUp("E",   function() hidePressed = false end)
     registerKeyDown("R", function() restartPressed = true end)
 
     -- mouse click and press (android) treated as a generic action
