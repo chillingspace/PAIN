@@ -234,6 +234,12 @@ namespace PAIN {
 		int minimap_width = 0;
 		int minimap_height = 0;
 
+		GLint minimap_prev_fbo = 0;
+		GLint minimap_prev_viewport[4] = {0, 0, 0, 0};
+		GLfloat minimap_prev_clear_color[4] = {0.f, 0.f, 0.f, 0.f};
+		GLboolean minimap_prev_depth_test = GL_FALSE;
+		bool minimap_state_saved = false;
+
 		// === Debug Buffers ===
 		unsigned int debug_VAO = 0;
 		unsigned int debug_VBO = 0;
