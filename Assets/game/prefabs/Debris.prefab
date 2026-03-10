@@ -13,15 +13,15 @@
                 },
                 "LocalTransform": {
                     "position": [
-                        33.87270736694336,
+                        52.480079650878906,
                         0.0,
-                        -6.127702236175537
+                        9.042099952697754
                     ],
                     "rotation": [
                         0.0,
-                        0.7071067690849304,
                         0.0,
-                        0.7071067690849304
+                        0.0,
+                        1.0
                     ],
                     "scale": [
                         1.0,
@@ -33,8 +33,8 @@
                     "castShadows": true,
                     "materials": [
                         {
-                            "albedoTextureOverride": "37c45efa-c7de-8241-9b1a-b26220fd197b",
-                            "aoTextureOverride": "1d8df71b-3423-c54b-b6d8-58f6247fdf61",
+                            "albedoTextureOverride": "9bf3ceeb-5736-2743-9d95-e1a34ab40882",
+                            "aoTextureOverride": "366edb10-25c3-e24c-8c2f-44e4be46953b",
                             "baseColorOverride": [
                                 1.0,
                                 1.0,
@@ -47,22 +47,22 @@
                             ],
                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "materialGUID": "0377d90f-9de9-5a42-8583-17b17904b178",
+                            "materialGUID": "182d27d8-ab48-7a4b-b015-645117085d0e",
                             "metallicOverride": 1.0,
-                            "metallicTextureOverride": "1d8df71b-3423-c54b-b6d8-58f6247fdf61",
-                            "normalTextureOverride": "cc05c05a-47eb-ca46-bf3d-c398644e58e1",
+                            "metallicTextureOverride": "366edb10-25c3-e24c-8c2f-44e4be46953b",
+                            "normalTextureOverride": "d7e85790-e5af-0d4b-92e0-05aa2c94aed5",
                             "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "roughnessOverride": 1.0,
-                            "roughnessTextureOverride": "1d8df71b-3423-c54b-b6d8-58f6247fdf61",
+                            "roughnessTextureOverride": "366edb10-25c3-e24c-8c2f-44e4be46953b",
                             "useOverrides": false
                         }
                     ],
-                    "modelGUID": "3b99f393-1f31-b847-933d-0f10509c199a",
+                    "modelGUID": "df160745-bc2d-d949-a8c3-e7181514ac0a",
                     "receiveShadows": true,
                     "visible": true
                 },
                 "Name": {
-                    "name": "Fence"
+                    "name": "Debris"
                 },
                 "RigidBody3D": {
                     "angular_velocity": [
@@ -71,14 +71,14 @@
                         0.0
                     ],
                     "collider_offset": [
-                        0.0,
-                        0.8999999761581421,
-                        0.0
+                        0.10000000149011612,
+                        -0.10000000149011612,
+                        -0.4000000059604645
                     ],
                     "collider_scale": [
                         2.9000000953674316,
-                        2.4000000953674316,
-                        0.30000001192092896
+                        1.100000023841858,
+                        1.899999976158142
                     ],
                     "motion_type": 0,
                     "physics_behavior": {
@@ -93,9 +93,9 @@
                     ]
                 }
             },
-            "entityGUID": "79645da4-aba9-d849-90c6-464be1064aa7"
+            "entityGUID": "efed9826-4b91-024d-9aa7-a31e6d2e74cb"
         }
     ],
-    "prefabName": "Fence",
-    "rootEntityGUID": "79645da4-aba9-d849-90c6-464be1064aa7"
+    "prefabName": "Debris",
+    "rootEntityGUID": "efed9826-4b91-024d-9aa7-a31e6d2e74cb"
 }

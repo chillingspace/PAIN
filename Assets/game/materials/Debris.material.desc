@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Debris.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 15187864714505042464
+  },
+  "descriptor_version": 1,
+  "guid": "182d27d8-ab48-7a4b-b015-645117085d0e",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Debris.material"
+  }
+}

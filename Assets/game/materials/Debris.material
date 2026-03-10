@@ -1,0 +1,29 @@
+{
+    "flags": {
+        "doubleSided": false,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "emissive": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "metallic": 1.0,
+        "roughness": 1.0
+    },
+    "textures": {
+        "albedo": "game\\textures\\Debris_baseColor.png",
+        "ao": "game\\textures\\Debris_occlusionRoughnessMetallic.png",
+        "emissive": "game\\textures\\Debris_emissive.png",
+        "lightmap": "game\\textures\\Debris_occlusionRoughnessMetallic.png",
+        "metallic": "game\\textures\\Debris_occlusionRoughnessMetallic.png",
+        "normal": "game\\textures\\Debris_normal.png",
+        "roughness": "game\\textures\\Debris_occlusionRoughnessMetallic.png"
+    }
+}

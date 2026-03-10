@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Debris.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 15943773793491039340
+  },
+  "descriptor_version": 1,
+  "guid": "ce075831-453c-c647-9eda-def9819dc0ec",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Debris.prefab"
+  }
+}
