@@ -1,17 +1,5 @@
 {
     "assets": [
-        "ea2431c4-c2c5-724e-a713-daf897030244",
-        "14c2b2ac-66d8-104e-98f3-96bbd5bc18b6",
-        "186005f2-dcbb-9f4b-af50-d2d4b98041da",
-        "873cf380-02f6-d44e-bec4-6e483e1b69ca",
-        "38a421a9-1ffc-3c47-a8e2-f0af50f2e2c2",
-        "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
-        "d54d96e7-2dc0-c947-8f1a-bab6892ff688",
-        "466ca22c-0eb2-0d49-ac1a-b9d822cc1ce4",
-        "4727438d-9c1f-ea47-91e0-8911d3412588",
-        "5d46bba2-ab81-064e-bab5-2517c42f6aca",
-        "08527159-b243-d742-a313-9001198b2097",
-        "ffd57a3d-b8b4-2b40-94a5-52ecd82a5a5f",
         "df7c04c2-94d4-5347-8dad-6527e853bf94",
         "6f3aeae1-f4e9-2d45-9b24-b2277f3607a8",
         "15808cf2-db36-c04b-8954-48d10ebaf528",
@@ -24,6 +12,18 @@
         "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
         "ecc50f9b-7cb8-274e-afdf-1ab2b89c6d8c",
         "5dbc2f57-64e8-d242-8aaa-e4244c67e866",
+        "ea2431c4-c2c5-724e-a713-daf897030244",
+        "14c2b2ac-66d8-104e-98f3-96bbd5bc18b6",
+        "186005f2-dcbb-9f4b-af50-d2d4b98041da",
+        "873cf380-02f6-d44e-bec4-6e483e1b69ca",
+        "38a421a9-1ffc-3c47-a8e2-f0af50f2e2c2",
+        "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
+        "d54d96e7-2dc0-c947-8f1a-bab6892ff688",
+        "466ca22c-0eb2-0d49-ac1a-b9d822cc1ce4",
+        "4727438d-9c1f-ea47-91e0-8911d3412588",
+        "5d46bba2-ab81-064e-bab5-2517c42f6aca",
+        "08527159-b243-d742-a313-9001198b2097",
+        "ffd57a3d-b8b4-2b40-94a5-52ecd82a5a5f",
         "d9977322-f31e-bc4c-b298-fbcd6690c4ba",
         "4b1f318e-49f7-1545-bb84-b9c6608f3471",
         "6a6e7d67-82c1-f846-96c5-4c5338a9a7ec",
@@ -37,11 +37,32 @@
         "7d8bffc6-b461-c14a-9401-6124713c0747",
         "841e487f-5eab-f24d-9eae-9dfbb83fcc02",
         "60d237d0-60e1-c146-86e6-e76c967840d4",
+        "9bc1e511-f6a7-9d48-9723-5cd1200ca942",
         "efff96ab-9011-d248-a0e3-56bb0e76f8e6",
         "c0baaed2-d818-9d47-84ad-339768d40e62",
         "1708e4d2-69c9-ba43-9ef6-85d417b11f01",
         "df160745-bc2d-d949-a8c3-e7181514ac0a",
         "ba8ea99f-16b6-da48-9465-54f48d7cd3a7",
+        "c7685566-a3eb-4b4f-a630-7d08fedb36e5",
+        "b69713e8-1a99-d847-af13-c7ae989c3977",
+        "629b1dea-bd33-c44c-968d-ff8b78d7b0ad",
+        "6f80f4ba-d003-2c41-aa74-2535221b1df7",
+        "6b40a756-36a9-e84f-9472-7f429f1e0a32",
+        "9679f581-d33b-d44d-ae70-30f076c3dca3",
+        "6094d6ab-f4b7-054d-b7ef-f0cfc76d7718",
+        "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
+        "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
+        "91e02ba2-c6b8-184f-bd48-b59674946972",
+        "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
+        "e01c794e-0add-d542-9860-03f63c3193ab",
+        "496c08af-d9df-cc45-898c-20cc692a2e08",
+        "d9a10e76-3db1-0c41-9368-c476a1845c40",
+        "afdab715-37bc-5b43-80d3-5acf798bb7b4",
+        "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+        "259d9f3b-aa62-7148-8f9b-2377b7ba1ddd",
+        "d58ec965-4a8b-2446-955b-707274af2082",
+        "0132f5dd-1a15-e546-adf5-cbada70fb446",
+        "9a2fc438-1e78-3d47-be1b-4284d567444c",
         "182d27d8-ab48-7a4b-b015-645117085d0e",
         "9bf3ceeb-5736-2743-9d95-e1a34ab40882",
         "d7e85790-e5af-0d4b-92e0-05aa2c94aed5",
@@ -56,12 +77,6 @@
         "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
         "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
         "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-        "259d9f3b-aa62-7148-8f9b-2377b7ba1ddd",
-        "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-        "afdab715-37bc-5b43-80d3-5acf798bb7b4",
-        "d58ec965-4a8b-2446-955b-707274af2082",
-        "0132f5dd-1a15-e546-adf5-cbada70fb446",
-        "9a2fc438-1e78-3d47-be1b-4284d567444c",
         "3fd9c353-23d4-e84a-ab6d-d4eea163ad9b",
         "4abba89c-2728-1a4b-bf13-c88751021af2",
         "04a181ef-234c-2045-945f-0053f79a7033",
@@ -69,25 +84,12 @@
         "37866613-e4bf-e54f-bad7-60f6f99f0c98",
         "5aa8f938-deee-7048-9a6b-33482dd8252b",
         "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
-        "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
-        "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
-        "e01c794e-0add-d542-9860-03f63c3193ab",
-        "496c08af-d9df-cc45-898c-20cc692a2e08",
-        "d9a10e76-3db1-0c41-9368-c476a1845c40",
         "be682648-fcd7-2b47-b7bf-3faea372c733",
         "9d1b2d15-958b-3d45-ba13-0d338dafa591",
         "5936ba72-6cad-7a4a-8039-d1614e5a9719",
         "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
         "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd",
         "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
-        "c7685566-a3eb-4b4f-a630-7d08fedb36e5",
-        "b69713e8-1a99-d847-af13-c7ae989c3977",
-        "629b1dea-bd33-c44c-968d-ff8b78d7b0ad",
-        "6f80f4ba-d003-2c41-aa74-2535221b1df7",
-        "6b40a756-36a9-e84f-9472-7f429f1e0a32",
-        "9679f581-d33b-d44d-ae70-30f076c3dca3",
-        "6094d6ab-f4b7-054d-b7ef-f0cfc76d7718",
-        "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
         "a8a9e677-4cd6-524b-b77b-0227fe39f7a2",
         "cb4f12f2-ee24-f145-8c48-9cab6179e963",
         "3688e05d-7434-b849-8904-1d7884ad053f",
@@ -101,6 +103,7 @@
         "148002de-981f-c14e-8ee0-a0c654bfe4c8",
         "0ff82290-b7e5-3549-a21b-006d1e00f0ab",
         "d9eeea8a-2cf6-3849-8511-2e6c3be0f011",
+        "df12f04f-34c5-644d-980a-c8251d57cd55",
         "7c5862ff-4362-aa4e-be35-6f29c3cc08e2",
         "38832c5f-2033-d84b-af32-fc539fb29e5a",
         "40ee8b7e-1c90-1a4a-b198-9bf31be1b08e",
@@ -151,6 +154,7 @@
         "8c17feda-975a-5d41-b7d1-687bfcb88afd",
         "70fbb33a-74e7-a641-90d5-3a6255b9d413",
         "f02f0a71-8e9c-1843-9873-8e636f4ad324",
+        "dd9ec25f-57d2-bf41-be2d-95dd1f1eddcd",
         "336c6028-99aa-3946-8822-3af0335aabf1",
         "e8745e08-2f02-b848-b7e4-255cb60bcefa",
         "d0cb3aa0-6188-c142-8316-0b22e254c564",
@@ -162,6 +166,7 @@
         "476662dc-9a7b-2243-97be-6e01bceeb854",
         "351d0711-28db-d346-81fe-fe5904ff854a",
         "f8f9abf4-39b2-3f41-9e00-4bdfd4476881",
+        "9927db1c-9aff-be47-a5dc-3068b2c9f8f9",
         "1c7ce177-d679-a44a-89d0-a718aa172c23",
         "0d290cee-b55d-2e45-907d-ae2c745f492f",
         "5ccceeb5-887c-db4c-8cae-0efe9e91b198",
@@ -281,16 +286,16 @@
         ],
         "farPlane": 100.0,
         "forward": [
-            -0.0022215114440768957,
-            -0.9775736331939697,
-            0.21058210730552673
+            0.5382699966430664,
+            -0.5994329452514648,
+            -0.5924065709114075
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            7.421949863433838,
-            25.773143768310547,
-            -8.025933265686035
+            44.30065155029297,
+            9.204692840576172,
+            31.943561553955078
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 31.100000381469727,
@@ -305,6 +310,123 @@
             {
                 "Entity": {
                     "Components": {
+                        "CompoundCollider": {
+                            "shapes": [
+                                {
+                                    "boxHalfExtents": [
+                                        2.2200000286102295,
+                                        2.509999990463257,
+                                        2.4800000190734863
+                                    ],
+                                    "capsuleHalfHeight": 0.5,
+                                    "capsuleRadius": 0.25,
+                                    "offset": [
+                                        0.14000000059604645,
+                                        1.75,
+                                        3.319999933242798
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "sphereRadius": 0.5,
+                                    "type": 0
+                                },
+                                {
+                                    "boxHalfExtents": [
+                                        1.1399999856948853,
+                                        2.490000009536743,
+                                        2.3399999141693115
+                                    ],
+                                    "capsuleHalfHeight": 0.5,
+                                    "capsuleRadius": 0.25,
+                                    "offset": [
+                                        -2.7799999713897705,
+                                        2.3299999237060547,
+                                        -5.150000095367432
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "sphereRadius": 0.5,
+                                    "type": 0
+                                }
+                            ],
+                            "useCompoundCollider": true
+                        },
+                        "GUID": {
+                            "guid": "1eb9a7c8-8c6e-af49-b4d7-d222693e40c6"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                -4.502777576446533
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "InvisibleWall"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collider_offset": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collider_scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 0
+                            },
+                            "physics_enabled": true,
+                            "use_gravity": true,
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    },
+                    "Name": "InvisibleWall"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
                         "GUID": {
                             "guid": "aee25d6a-c13d-f043-895a-ae6c392d3092"
                         },
@@ -316,7 +438,7 @@
                                 "006c8aa5-f985-4d45-80fd-94fbf87c4292"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 0
+                            "siblingIndex": 1
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1410,7 +1532,7 @@
                                 "5dcd8df7-64c1-c648-986c-3941c7c66454"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 1
+                            "siblingIndex": 2
                         },
                         "Layer": {
                             "layer_id": 8,
@@ -1583,9 +1705,17 @@
                             "loopAnimation": true,
                             "playbackSpeed": 1.0
                         },
-                        "CompoundCollider": {
-                            "shapes": [],
-                            "useCompoundCollider": false
+                        "Collider": {
+                            "box_size": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collision_layer": 0,
+                            "friction": 0.5,
+                            "is_trigger": false,
+                            "restitution": 0.10000000149011612,
+                            "shape": 0
                         },
                         "GUID": {
                             "guid": "53f5f39c-0319-5d41-811c-caa4029dec5e"
@@ -1749,9 +1879,17 @@
                             "loopAnimation": true,
                             "playbackSpeed": 1.0
                         },
-                        "CompoundCollider": {
-                            "shapes": [],
-                            "useCompoundCollider": false
+                        "Collider": {
+                            "box_size": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collision_layer": 0,
+                            "friction": 0.5,
+                            "is_trigger": false,
+                            "restitution": 0.10000000149011612,
+                            "shape": 0
                         },
                         "GUID": {
                             "guid": "3050efaa-50a2-aa41-874d-36a165da9836"
@@ -2558,6 +2696,18 @@
                             "loopAnimation": true,
                             "playbackSpeed": 1.0
                         },
+                        "Collider": {
+                            "box_size": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collision_layer": 0,
+                            "friction": 0.5,
+                            "is_trigger": false,
+                            "restitution": 0.10000000149011612,
+                            "shape": 0
+                        },
                         "GUID": {
                             "guid": "2c1a7c84-5b95-cd43-b7d1-c2f888fdebab"
                         },
@@ -2744,7 +2894,7 @@
                                 "c56841ac-f9ea-b546-8553-df0b25b85cdd"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 2
+                            "siblingIndex": 3
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -4995,10 +5145,18 @@
                                 "d855481d-f4c6-7243-805c-875498fef1b0",
                                 "39d330e9-8b28-2a44-b3c6-54d34a0b2aba",
                                 "8035df1d-8b7c-ed41-bdcb-09c13adb3ae3",
-                                "bfeac97c-6f44-3045-ad26-68984fbf8789"
+                                "bfeac97c-6f44-3045-ad26-68984fbf8789",
+                                "0c345562-9342-5841-ad27-23700bd1107f",
+                                "7f69a03c-7b21-b149-b661-df3941d6f428",
+                                "dfc1c47a-18ce-2a46-94fc-ac789c4abae3",
+                                "b23f4c8d-7b03-1e46-8bad-f7ab009c6a9e",
+                                "9f4b188e-5149-a743-9e53-2f7f95e17290",
+                                "011d93f2-30ab-d14f-b703-0ce27db24321",
+                                "30c6db91-de1b-1b40-808c-3842759bd7f8",
+                                "b6e1ce6c-17d3-c147-9b5f-2d1750c6b186"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 3
+                            "siblingIndex": 4
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -5033,12 +5191,922 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
-                            "guid": "1fc85239-8dd9-ce44-9947-534f53924f22"
+                            "guid": "0c345562-9342-5841-ad27-23700bd1107f"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
                             "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                29.312053680419922,
+                                0.0,
+                                -6.057435989379883
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.6699999570846558,
+                                1.6699999570846558,
+                                1.6699999570846558
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "6f80f4ba-d003-2c41-aa74-2535221b1df7",
+                                    "aoTextureOverride": "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "41022c20-5591-324d-80ff-f14090e5e9d3",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
+                                    "normalTextureOverride": "9679f581-d33b-d44d-ae70-30f076c3dca3",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "629b1dea-bd33-c44c-968d-ff8b78d7b0ad",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Tires"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
+                                    "siblingIndex": 0
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        29.312053680419922,
+                                        0.0,
+                                        -6.057435989379883
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "scale": [
+                                        1.6699999570846558,
+                                        1.6699999570846558,
+                                        1.6699999570846558
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "a5ad821c-eaba-464c-966c-efa99b7757be",
+                            "instanceRootGUID": "0c345562-9342-5841-ad27-23700bd1107f",
+                            "sourcePrefabGUID": "620891ed-69b0-d649-a6ce-577a1b6b496c"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collider_offset": [
+                                0.0,
+                                0.4000000059604645,
+                                0.0
+                            ],
+                            "collider_scale": [
+                                1.0,
+                                0.6000000238418579,
+                                0.8999999761581421
+                            ],
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 0
+                            },
+                            "physics_enabled": true,
+                            "use_gravity": true,
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    },
+                    "Name": "Tires"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "b6e1ce6c-17d3-c147-9b5f-2d1750c6b186"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
+                            "siblingIndex": 1
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                43.017154693603516,
+                                1.8146350383758545,
+                                6.763839244842529
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.7029997110366821,
+                                1.7029997110366821,
+                                1.7029997110366821
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "e01c794e-0add-d542-9860-03f63c3193ab",
+                                    "aoTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "normalTextureOverride": "d9a10e76-3db1-0c41-9368-c476a1845c40",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Crate"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
+                                    "siblingIndex": 1
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        43.017154693603516,
+                                        1.8146350383758545,
+                                        6.763839244842529
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "scale": [
+                                        1.7029997110366821,
+                                        1.7029997110366821,
+                                        1.7029997110366821
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "2fc12db1-dc23-944a-a2e6-9b1fc43f948e",
+                            "instanceRootGUID": "b6e1ce6c-17d3-c147-9b5f-2d1750c6b186",
+                            "sourcePrefabGUID": "f679979d-9d97-6345-825e-212f3c0dac1c"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collider_offset": [
+                                0.0,
+                                0.30000001192092896,
+                                0.0
+                            ],
+                            "collider_scale": [
+                                0.699999988079071,
+                                0.6000000238418579,
+                                0.6000000238418579
+                            ],
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 0
+                            },
+                            "physics_enabled": true,
+                            "use_gravity": true,
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    },
+                    "Name": "Crate"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "30c6db91-de1b-1b40-808c-3842759bd7f8"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
+                            "siblingIndex": 2
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                42.64622116088867,
+                                0.0,
+                                7.115794658660889
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                3.0999999046325684,
+                                3.0999999046325684,
+                                3.0999999046325684
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "e01c794e-0add-d542-9860-03f63c3193ab",
+                                    "aoTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "normalTextureOverride": "d9a10e76-3db1-0c41-9368-c476a1845c40",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Crate"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
+                                    "siblingIndex": 2
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        42.64622116088867,
+                                        0.0,
+                                        7.115794658660889
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "scale": [
+                                        3.0999999046325684,
+                                        3.0999999046325684,
+                                        3.0999999046325684
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "2fc12db1-dc23-944a-a2e6-9b1fc43f948e",
+                            "instanceRootGUID": "30c6db91-de1b-1b40-808c-3842759bd7f8",
+                            "sourcePrefabGUID": "f679979d-9d97-6345-825e-212f3c0dac1c"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collider_offset": [
+                                0.0,
+                                0.30000001192092896,
+                                0.0
+                            ],
+                            "collider_scale": [
+                                0.699999988079071,
+                                0.6000000238418579,
+                                0.6000000238418579
+                            ],
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 0
+                            },
+                            "physics_enabled": true,
+                            "use_gravity": true,
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    },
+                    "Name": "Crate"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "011d93f2-30ab-d14f-b703-0ce27db24321"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
+                            "siblingIndex": 3
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                48.1499137878418,
+                                0.0,
+                                20.840913772583008
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.2941271960735321,
+                                0.0,
+                                0.9557663202285767
+                            ],
+                            "scale": [
+                                1.709999918937683,
+                                1.7100000381469727,
+                                1.709999918937683
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "6f80f4ba-d003-2c41-aa74-2535221b1df7",
+                                    "aoTextureOverride": "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "41022c20-5591-324d-80ff-f14090e5e9d3",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
+                                    "normalTextureOverride": "9679f581-d33b-d44d-ae70-30f076c3dca3",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "629b1dea-bd33-c44c-968d-ff8b78d7b0ad",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Tires"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
+                                    "siblingIndex": 3
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        48.1499137878418,
+                                        0.0,
+                                        20.840913772583008
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.2941271960735321,
+                                        0.0,
+                                        0.9557663202285767
+                                    ],
+                                    "scale": [
+                                        1.709999918937683,
+                                        1.7100000381469727,
+                                        1.709999918937683
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "a5ad821c-eaba-464c-966c-efa99b7757be",
+                            "instanceRootGUID": "011d93f2-30ab-d14f-b703-0ce27db24321",
+                            "sourcePrefabGUID": "620891ed-69b0-d649-a6ce-577a1b6b496c"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collider_offset": [
+                                0.0,
+                                0.4000000059604645,
+                                0.0
+                            ],
+                            "collider_scale": [
+                                1.0,
+                                0.6000000238418579,
+                                0.8999999761581421
+                            ],
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 0
+                            },
+                            "physics_enabled": true,
+                            "use_gravity": true,
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    },
+                    "Name": "Tires"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "7f69a03c-7b21-b149-b661-df3941d6f428"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
+                            "siblingIndex": 4
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                40.48675537109375,
+                                0.0,
+                                7.4653120040893555
+                            ],
+                            "rotation": [
+                                0.12910057604312897,
+                                0.3080434203147888,
+                                0.3643281161785126,
+                                0.8693143129348755
+                            ],
+                            "scale": [
+                                0.9999999403953552,
+                                0.9999999403953552,
+                                1.0
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "d58ec965-4a8b-2446-955b-707274af2082",
+                                    "aoTextureOverride": "9a2fc438-1e78-3d47-be1b-4284d567444c",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "afdab715-37bc-5b43-80d3-5acf798bb7b4",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "9a2fc438-1e78-3d47-be1b-4284d567444c",
+                                    "normalTextureOverride": "0132f5dd-1a15-e546-adf5-cbada70fb446",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "9a2fc438-1e78-3d47-be1b-4284d567444c",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "259d9f3b-aa62-7148-8f9b-2377b7ba1ddd",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Bathtub"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
+                                    "siblingIndex": 4
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        40.48675537109375,
+                                        0.0,
+                                        7.4653120040893555
+                                    ],
+                                    "rotation": [
+                                        0.12910057604312897,
+                                        0.3080434203147888,
+                                        0.3643281161785126,
+                                        0.8693143129348755
+                                    ],
+                                    "scale": [
+                                        0.9999999403953552,
+                                        0.9999999403953552,
+                                        1.0
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "24846e14-2af9-7842-8541-4ad0a19d47d9",
+                            "instanceRootGUID": "7f69a03c-7b21-b149-b661-df3941d6f428",
+                            "sourcePrefabGUID": "734bb21e-af55-b24d-b21b-9475bee37178"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collider_offset": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collider_scale": [
+                                1.0,
+                                1.0,
+                                2.200000047683716
+                            ],
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 0
+                            },
+                            "physics_enabled": true,
+                            "use_gravity": true,
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    },
+                    "Name": "Bathtub"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "b23f4c8d-7b03-1e46-8bad-f7ab009c6a9e"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
+                            "siblingIndex": 5
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                42.96942138671875,
+                                0.0,
+                                9.408954620361328
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                2.1500000953674316,
+                                2.1500000953674316,
+                                2.1500000953674316
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "e01c794e-0add-d542-9860-03f63c3193ab",
+                                    "aoTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "normalTextureOverride": "d9a10e76-3db1-0c41-9368-c476a1845c40",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Crate"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
+                                    "siblingIndex": 5
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        42.96942138671875,
+                                        0.0,
+                                        9.408954620361328
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "scale": [
+                                        2.1500000953674316,
+                                        2.1500000953674316,
+                                        2.1500000953674316
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "2fc12db1-dc23-944a-a2e6-9b1fc43f948e",
+                            "instanceRootGUID": "b23f4c8d-7b03-1e46-8bad-f7ab009c6a9e",
+                            "sourcePrefabGUID": "f679979d-9d97-6345-825e-212f3c0dac1c"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collider_offset": [
+                                0.0,
+                                0.30000001192092896,
+                                0.0
+                            ],
+                            "collider_scale": [
+                                0.699999988079071,
+                                0.6000000238418579,
+                                0.6000000238418579
+                            ],
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 0
+                            },
+                            "physics_enabled": true,
+                            "use_gravity": true,
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    },
+                    "Name": "Crate"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "9f4b188e-5149-a743-9e53-2f7f95e17290"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
+                            "siblingIndex": 6
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                43.36052322387695,
+                                1.2413628101348877,
+                                9.14607048034668
+                            ],
+                            "rotation": [
+                                2.8450358513509855e-08,
+                                0.7010712027549744,
+                                2.9042666938039474e-08,
+                                0.7130913138389587
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "6f80f4ba-d003-2c41-aa74-2535221b1df7",
+                                    "aoTextureOverride": "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "41022c20-5591-324d-80ff-f14090e5e9d3",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
+                                    "normalTextureOverride": "9679f581-d33b-d44d-ae70-30f076c3dca3",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "629b1dea-bd33-c44c-968d-ff8b78d7b0ad",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Tires"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
+                                    "siblingIndex": 6
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        43.36052322387695,
+                                        1.2413628101348877,
+                                        9.14607048034668
+                                    ],
+                                    "rotation": [
+                                        2.8450358513509855e-08,
+                                        0.7010712027549744,
+                                        2.9042666938039474e-08,
+                                        0.7130913138389587
+                                    ],
+                                    "scale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "a5ad821c-eaba-464c-966c-efa99b7757be",
+                            "instanceRootGUID": "9f4b188e-5149-a743-9e53-2f7f95e17290",
+                            "sourcePrefabGUID": "620891ed-69b0-d649-a6ce-577a1b6b496c"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collider_offset": [
+                                0.0,
+                                0.4000000059604645,
+                                0.0
+                            ],
+                            "collider_scale": [
+                                1.0,
+                                0.6000000238418579,
+                                0.8999999761581421
+                            ],
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 0
+                            },
+                            "physics_enabled": true,
+                            "use_gravity": true,
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    },
+                    "Name": "Tires"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "1fc85239-8dd9-ce44-9947-534f53924f22"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
+                            "siblingIndex": 7
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -5102,7 +6170,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 0
+                                    "siblingIndex": 7
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -5163,12 +6231,142 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
+                            "guid": "dfc1c47a-18ce-2a46-94fc-ac789c4abae3"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
+                            "siblingIndex": 8
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                41.790706634521484,
+                                0.0,
+                                8.64081859588623
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.4700000286102295,
+                                1.4700000286102295,
+                                1.4700000286102295
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "e01c794e-0add-d542-9860-03f63c3193ab",
+                                    "aoTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "normalTextureOverride": "d9a10e76-3db1-0c41-9368-c476a1845c40",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Crate"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
+                                    "siblingIndex": 8
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        41.790706634521484,
+                                        0.0,
+                                        8.64081859588623
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "scale": [
+                                        1.4700000286102295,
+                                        1.4700000286102295,
+                                        1.4700000286102295
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "2fc12db1-dc23-944a-a2e6-9b1fc43f948e",
+                            "instanceRootGUID": "dfc1c47a-18ce-2a46-94fc-ac789c4abae3",
+                            "sourcePrefabGUID": "f679979d-9d97-6345-825e-212f3c0dac1c"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collider_offset": [
+                                0.0,
+                                0.30000001192092896,
+                                0.0
+                            ],
+                            "collider_scale": [
+                                0.699999988079071,
+                                0.6000000238418579,
+                                0.6000000238418579
+                            ],
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 0
+                            },
+                            "physics_enabled": true,
+                            "use_gravity": true,
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    },
+                    "Name": "Crate"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
                             "guid": "8035df1d-8b7c-ed41-bdcb-09c13adb3ae3"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 1
+                            "siblingIndex": 9
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -5232,7 +6430,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 1
+                                    "siblingIndex": 9
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -5298,7 +6496,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 2
+                            "siblingIndex": 10
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -5362,7 +6560,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 2
+                                    "siblingIndex": 10
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -5456,7 +6654,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 3
+                            "siblingIndex": 11
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -5520,7 +6718,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 3
+                                    "siblingIndex": 11
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -5586,7 +6784,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 4
+                            "siblingIndex": 12
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -5650,7 +6848,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 4
+                                    "siblingIndex": 12
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -5716,7 +6914,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 5
+                            "siblingIndex": 13
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -5780,7 +6978,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 5
+                                    "siblingIndex": 13
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -5846,7 +7044,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 6
+                            "siblingIndex": 14
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -5910,7 +7108,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 6
+                                    "siblingIndex": 14
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -5976,7 +7174,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 7
+                            "siblingIndex": 15
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -6040,7 +7238,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 7
+                                    "siblingIndex": 15
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -6106,7 +7304,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 8
+                            "siblingIndex": 16
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -6170,7 +7368,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 8
+                                    "siblingIndex": 16
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -6236,7 +7434,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 9
+                            "siblingIndex": 17
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -6300,7 +7498,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 9
+                                    "siblingIndex": 17
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -6366,7 +7564,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 10
+                            "siblingIndex": 18
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -6456,7 +7654,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 10
+                                    "siblingIndex": 18
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -6589,7 +7787,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 11
+                            "siblingIndex": 19
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -6653,7 +7851,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 11
+                                    "siblingIndex": 19
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -6719,7 +7917,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 12
+                            "siblingIndex": 20
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -6783,7 +7981,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 12
+                                    "siblingIndex": 20
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -6849,7 +8047,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 13
+                            "siblingIndex": 21
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -6913,7 +8111,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 13
+                                    "siblingIndex": 21
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -6979,7 +8177,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 14
+                            "siblingIndex": 22
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -7043,7 +8241,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 14
+                                    "siblingIndex": 22
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -7109,7 +8307,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 15
+                            "siblingIndex": 23
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -7173,7 +8371,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 15
+                                    "siblingIndex": 23
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -7267,7 +8465,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 16
+                            "siblingIndex": 24
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -7331,7 +8529,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 16
+                                    "siblingIndex": 24
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -7397,7 +8595,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 17
+                            "siblingIndex": 25
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -7461,7 +8659,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 17
+                                    "siblingIndex": 25
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -7527,7 +8725,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 18
+                            "siblingIndex": 26
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -7591,7 +8789,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 18
+                                    "siblingIndex": 26
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -7657,7 +8855,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 19
+                            "siblingIndex": 27
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -7721,7 +8919,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 19
+                                    "siblingIndex": 27
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -7787,7 +8985,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 20
+                            "siblingIndex": 28
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -7851,7 +9049,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 20
+                                    "siblingIndex": 28
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -7945,7 +9143,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 21
+                            "siblingIndex": 29
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -8009,7 +9207,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 21
+                                    "siblingIndex": 29
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -8075,7 +9273,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 22
+                            "siblingIndex": 30
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -8139,7 +9337,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 22
+                                    "siblingIndex": 30
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -8272,7 +9470,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 23
+                            "siblingIndex": 31
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -8336,7 +9534,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 23
+                                    "siblingIndex": 31
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -8402,7 +9600,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 24
+                            "siblingIndex": 32
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -8466,7 +9664,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 24
+                                    "siblingIndex": 32
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -8532,7 +9730,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 25
+                            "siblingIndex": 33
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -8596,7 +9794,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 25
+                                    "siblingIndex": 33
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -8729,7 +9927,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 26
+                            "siblingIndex": 34
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -8793,7 +9991,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 26
+                                    "siblingIndex": 34
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -8887,7 +10085,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 27
+                            "siblingIndex": 35
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -8951,7 +10149,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 27
+                                    "siblingIndex": 35
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -9022,7 +10220,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 28
+                            "siblingIndex": 36
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -9086,7 +10284,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 28
+                                    "siblingIndex": 36
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -9157,7 +10355,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 29
+                            "siblingIndex": 37
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -9221,7 +10419,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 29
+                                    "siblingIndex": 37
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -9292,7 +10490,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 30
+                            "siblingIndex": 38
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -9356,7 +10554,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 30
+                                    "siblingIndex": 38
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -9450,7 +10648,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 31
+                            "siblingIndex": 39
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -9514,7 +10712,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 31
+                                    "siblingIndex": 39
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -9608,7 +10806,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 32
+                            "siblingIndex": 40
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -9672,7 +10870,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 32
+                                    "siblingIndex": 40
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -9738,7 +10936,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 33
+                            "siblingIndex": 41
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -9802,7 +11000,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 33
+                                    "siblingIndex": 41
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -9896,7 +11094,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 34
+                            "siblingIndex": 42
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -9960,7 +11158,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 34
+                                    "siblingIndex": 42
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -10026,7 +11224,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 35
+                            "siblingIndex": 43
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -10090,7 +11288,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 35
+                                    "siblingIndex": 43
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -10156,7 +11354,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 36
+                            "siblingIndex": 44
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -10220,7 +11418,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 36
+                                    "siblingIndex": 44
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -10423,7 +11621,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 37
+                            "siblingIndex": 45
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -10487,7 +11685,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 37
+                                    "siblingIndex": 45
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -10553,7 +11751,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 38
+                            "siblingIndex": 46
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -10617,7 +11815,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 38
+                                    "siblingIndex": 46
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -10688,7 +11886,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 39
+                            "siblingIndex": 47
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -10752,7 +11950,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 39
+                                    "siblingIndex": 47
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -10823,7 +12021,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 40
+                            "siblingIndex": 48
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -10887,7 +12085,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 40
+                                    "siblingIndex": 48
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -10953,7 +12151,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 41
+                            "siblingIndex": 49
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -11017,7 +12215,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 41
+                                    "siblingIndex": 49
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -11150,7 +12348,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 42
+                            "siblingIndex": 50
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -11214,7 +12412,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 42
+                                    "siblingIndex": 50
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -11347,7 +12545,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 43
+                            "siblingIndex": 51
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -11411,7 +12609,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 43
+                                    "siblingIndex": 51
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -11477,7 +12675,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 44
+                            "siblingIndex": 52
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -11541,7 +12739,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 44
+                                    "siblingIndex": 52
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -11612,7 +12810,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 45
+                            "siblingIndex": 53
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -11676,7 +12874,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 45
+                                    "siblingIndex": 53
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -11884,7 +13082,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 46
+                            "siblingIndex": 54
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -11948,7 +13146,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 46
+                                    "siblingIndex": 54
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -12014,7 +13212,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 47
+                            "siblingIndex": 55
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -12078,7 +13276,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 47
+                                    "siblingIndex": 55
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -12149,7 +13347,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 48
+                            "siblingIndex": 56
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -12213,7 +13411,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 48
+                                    "siblingIndex": 56
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -12279,7 +13477,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 49
+                            "siblingIndex": 57
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -12343,7 +13541,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 49
+                                    "siblingIndex": 57
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -12437,7 +13635,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 50
+                            "siblingIndex": 58
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -12501,7 +13699,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 50
+                                    "siblingIndex": 58
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -12732,7 +13930,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 51
+                            "siblingIndex": 59
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -12796,7 +13994,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 51
+                                    "siblingIndex": 59
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -12862,7 +14060,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 52
+                            "siblingIndex": 60
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -12926,7 +14124,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 52
+                                    "siblingIndex": 60
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -13020,7 +14218,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 53
+                            "siblingIndex": 61
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -13084,7 +14282,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 53
+                                    "siblingIndex": 61
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -13178,7 +14376,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 54
+                            "siblingIndex": 62
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -13242,7 +14440,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 54
+                                    "siblingIndex": 62
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -13473,7 +14671,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 55
+                            "siblingIndex": 63
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -13537,7 +14735,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 55
+                                    "siblingIndex": 63
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -13603,7 +14801,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 56
+                            "siblingIndex": 64
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -13667,7 +14865,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 56
+                                    "siblingIndex": 64
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -13738,7 +14936,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 57
+                            "siblingIndex": 65
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -13802,7 +15000,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 57
+                                    "siblingIndex": 65
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -13896,7 +15094,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 58
+                            "siblingIndex": 66
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -13960,7 +15158,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 58
+                                    "siblingIndex": 66
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -14031,7 +15229,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 59
+                            "siblingIndex": 67
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -14095,7 +15293,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 59
+                                    "siblingIndex": 67
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -14238,7 +15436,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 60
+                            "siblingIndex": 68
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -14302,7 +15500,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 60
+                                    "siblingIndex": 68
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -14396,7 +15594,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 61
+                            "siblingIndex": 69
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -14460,7 +15658,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 61
+                                    "siblingIndex": 69
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -14554,7 +15752,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 62
+                            "siblingIndex": 70
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -14618,7 +15816,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 62
+                                    "siblingIndex": 70
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -14712,7 +15910,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 63
+                            "siblingIndex": 71
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -14776,7 +15974,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 63
+                                    "siblingIndex": 71
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -14870,7 +16068,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 64
+                            "siblingIndex": 72
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -14934,7 +16132,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 64
+                                    "siblingIndex": 72
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -15000,7 +16198,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 65
+                            "siblingIndex": 73
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -15064,7 +16262,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 65
+                                    "siblingIndex": 73
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -15135,7 +16333,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 66
+                            "siblingIndex": 74
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -15199,7 +16397,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 66
+                                    "siblingIndex": 74
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -15265,7 +16463,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 67
+                            "siblingIndex": 75
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -15329,7 +16527,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 67
+                                    "siblingIndex": 75
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -15395,7 +16593,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 68
+                            "siblingIndex": 76
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -15459,7 +16657,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 68
+                                    "siblingIndex": 76
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -15553,7 +16751,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 69
+                            "siblingIndex": 77
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -15617,7 +16815,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 69
+                                    "siblingIndex": 77
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -15750,7 +16948,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 70
+                            "siblingIndex": 78
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -15814,7 +17012,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 70
+                                    "siblingIndex": 78
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -15947,7 +17145,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 71
+                            "siblingIndex": 79
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -16011,7 +17209,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 71
+                                    "siblingIndex": 79
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -16105,7 +17303,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 72
+                            "siblingIndex": 80
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -16169,7 +17367,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 72
+                                    "siblingIndex": 80
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -16263,7 +17461,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 73
+                            "siblingIndex": 81
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -16327,7 +17525,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 73
+                                    "siblingIndex": 81
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -16421,7 +17619,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 74
+                            "siblingIndex": 82
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -16493,7 +17691,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 75
+                            "siblingIndex": 83
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -16557,7 +17755,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 75
+                                    "siblingIndex": 83
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -16628,7 +17826,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 76
+                            "siblingIndex": 84
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -16692,7 +17890,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 76
+                                    "siblingIndex": 84
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -16786,7 +17984,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 77
+                            "siblingIndex": 85
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -16850,7 +18048,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 77
+                                    "siblingIndex": 85
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -16916,7 +18114,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 78
+                            "siblingIndex": 86
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -16980,7 +18178,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 78
+                                    "siblingIndex": 86
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -17051,7 +18249,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 79
+                            "siblingIndex": 87
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -17115,7 +18313,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 79
+                                    "siblingIndex": 87
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -17209,7 +18407,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 80
+                            "siblingIndex": 88
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -17273,7 +18471,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 80
+                                    "siblingIndex": 88
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -17367,7 +18565,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 81
+                            "siblingIndex": 89
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -17431,7 +18629,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 81
+                                    "siblingIndex": 89
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -17497,7 +18695,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 82
+                            "siblingIndex": 90
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -17561,7 +18759,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 82
+                                    "siblingIndex": 90
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -17627,7 +18825,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 83
+                            "siblingIndex": 91
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -17691,7 +18889,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 83
+                                    "siblingIndex": 91
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -17824,7 +19022,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 84
+                            "siblingIndex": 92
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -17888,7 +19086,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 84
+                                    "siblingIndex": 92
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -18021,7 +19219,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 85
+                            "siblingIndex": 93
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -18085,7 +19283,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 85
+                                    "siblingIndex": 93
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -18179,7 +19377,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 86
+                            "siblingIndex": 94
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -18243,7 +19441,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 86
+                                    "siblingIndex": 94
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -18337,7 +19535,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 87
+                            "siblingIndex": 95
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -18401,7 +19599,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 87
+                                    "siblingIndex": 95
                                 },
                                 "Layer": {
                                     "layer_id": 0,
@@ -18534,7 +19732,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 88
+                            "siblingIndex": 96
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -18598,7 +19796,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 88
+                                    "siblingIndex": 96
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -18669,7 +19867,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 89
+                            "siblingIndex": 97
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -18733,7 +19931,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 89
+                                    "siblingIndex": 97
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -18830,7 +20028,7 @@
                                 "dd464bb8-d9f7-a245-9822-3d2644e4bbe2"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 4
+                            "siblingIndex": 5
                         },
                         "Layer": {
                             "layer_id": 5,
@@ -18865,7 +20063,7 @@
                                         "dd464bb8-d9f7-a245-9822-3d2644e4bbe2"
                                     ],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 4
+                                    "siblingIndex": 5
                                 },
                                 "Layer": {
                                     "layer_id": 5,
@@ -19277,7 +20475,7 @@
                                 "324a94f3-0c7b-664a-9619-95b48f8c0d09"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 5
+                            "siblingIndex": 6
                         },
                         "Layer": {
                             "layer_id": 6,
@@ -19312,7 +20510,7 @@
                                         "324a94f3-0c7b-664a-9619-95b48f8c0d09"
                                     ],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 5
+                                    "siblingIndex": 6
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -19709,7 +20907,7 @@
                                 "d4d60ee0-4ec7-9d41-b7a3-b856d41d3471"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 6
+                            "siblingIndex": 7
                         },
                         "Layer": {
                             "layer_id": 7,
@@ -19744,7 +20942,7 @@
                                         "d4d60ee0-4ec7-9d41-b7a3-b856d41d3471"
                                     ],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 6
+                                    "siblingIndex": 7
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -20153,7 +21351,7 @@
                                 "ab5e1d78-c736-0649-97f6-30e44102c0cf"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 7
+                            "siblingIndex": 8
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -21623,7 +22821,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 8
+                            "siblingIndex": 9
                         },
                         "Layer": {
                             "layer_id": 6,
@@ -21655,7 +22853,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 8
+                                    "siblingIndex": 9
                                 },
                                 "Layer": {
                                     "layer_id": 6,
@@ -21759,7 +22957,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 9
+                            "siblingIndex": 10
                         },
                         "Layer": {
                             "layer_id": 7,
@@ -21791,7 +22989,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 9
+                                    "siblingIndex": 10
                                 },
                                 "Layer": {
                                     "layer_id": 7,
@@ -21898,7 +23096,7 @@
                                 "675345f8-21f4-d84c-a928-f9bcdd48cb9f"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 10
+                            "siblingIndex": 11
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -22797,7 +23995,7 @@
                                 "6ab9c0ad-0050-ed49-8499-b6b60d2c3a57"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 11
+                            "siblingIndex": 12
                         },
                         "Layer": {
                             "layer_id": 3,
@@ -23016,7 +24214,7 @@
                                 "7793f64e-0c39-a64b-8aff-3cb5abaa0837"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 12
+                            "siblingIndex": 13
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -24428,7 +25626,7 @@
                                 "8c5cd650-8149-b84e-8886-1cd25c307250"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 13
+                            "siblingIndex": 14
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -25009,7 +26207,7 @@
                                 "a7a16103-310b-e04f-b079-8217f74a16b9"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 14
+                            "siblingIndex": 15
                         },
                         "Layer": {
                             "layer_id": 4,
@@ -25044,7 +26242,7 @@
                                         "a7a16103-310b-e04f-b079-8217f74a16b9"
                                     ],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 14
+                                    "siblingIndex": 15
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -25438,7 +26636,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 15
+                            "siblingIndex": 16
                         },
                         "Layer": {
                             "layer_id": 4,
@@ -25470,7 +26668,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 15
+                                    "siblingIndex": 16
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -25581,7 +26779,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 16
+                            "siblingIndex": 17
                         },
                         "Layer": {
                             "layer_id": 5,
@@ -25613,7 +26811,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 16
+                                    "siblingIndex": 17
                                 },
                                 "Layer": {
                                     "layer_id": 5,
@@ -25735,7 +26933,7 @@
                                 "830683d6-d837-f040-87c2-dc1c24baeb72"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 17
+                            "siblingIndex": 18
                         },
                         "Layer": {
                             "layer_id": 2,
@@ -26650,7 +27848,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 18
+                            "siblingIndex": 19
                         },
                         "Layer": {
                             "layer_id": 2,
@@ -26682,7 +27880,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 18
+                                    "siblingIndex": 19
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -26786,7 +27984,7 @@
                                 "a1063123-23b1-454b-b06c-05b48726d559"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 19
+                            "siblingIndex": 20
                         },
                         "Layer": {
                             "layer_id": 1,
@@ -28370,10 +29568,12 @@
                                 "e8bfc756-655b-f24c-9b67-e57edb414c55",
                                 "cd8c8701-ee10-5740-9488-c8c032189b46",
                                 "e79e397b-e0ab-874f-823f-32dd3bdd0322",
-                                "d9dd26c9-ad46-c649-90d0-185cf9721b76"
+                                "d9dd26c9-ad46-c649-90d0-185cf9721b76",
+                                "e12c32c3-d9cd-384a-86e8-5480f6818105",
+                                "cd2478f9-2ace-f44a-84b3-52198bc0b70d"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 20
+                            "siblingIndex": 21
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -28398,10 +29598,173 @@
                             ]
                         },
                         "Name": {
-                            "name": "Interactable"
+                            "name": "Lv2 Interactable"
                         }
                     },
-                    "Name": "Interactable"
+                    "Name": "Lv2 Interactable"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "cd2478f9-2ace-f44a-84b3-52198bc0b70d"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "75d1f30b-c786-784b-baba-f6f13f5e7436",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                50.34251022338867,
+                                0.0,
+                                8.533889770507813
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                -0.6521121859550476,
+                                0.7581226229667664
+                            ],
+                            "scale": [
+                                3.0299999713897705,
+                                3.0299999713897705,
+                                3.0299999713897705
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "9927db1c-9aff-be47-a5dc-3068b2c9f8f9",
+                                    "aoTextureOverride": "df12f04f-34c5-644d-980a-c8251d57cd55",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "9bc1e511-f6a7-9d48-9723-5cd1200ca942",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "df12f04f-34c5-644d-980a-c8251d57cd55",
+                                    "normalTextureOverride": "91e02ba2-c6b8-184f-bd48-b59674946972",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "df12f04f-34c5-644d-980a-c8251d57cd55",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "dd9ec25f-57d2-bf41-be2d-95dd1f1eddcd",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Tire"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "75d1f30b-c786-784b-baba-f6f13f5e7436",
+                                    "siblingIndex": 0
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        50.34251022338867,
+                                        0.0,
+                                        8.533889770507813
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        -0.6521121859550476,
+                                        0.7581226229667664
+                                    ],
+                                    "scale": [
+                                        3.0299999713897705,
+                                        3.0299999713897705,
+                                        3.0299999713897705
+                                    ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "collider_offset": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "collider_scale": [
+                                        0.6000000238418579,
+                                        0.4000000059604645,
+                                        0.699999988079071
+                                    ],
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 0
+                                    },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "32951e6c-e4d5-d74e-accb-28e55974cf17",
+                            "instanceRootGUID": "cd2478f9-2ace-f44a-84b3-52198bc0b70d",
+                            "sourcePrefabGUID": "96f2d4ae-0b76-d043-a5df-262893a0691e"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collider_offset": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collider_scale": [
+                                0.6000000238418579,
+                                0.4000000059604645,
+                                0.699999988079071
+                            ],
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 0
+                            },
+                            "physics_enabled": true,
+                            "use_gravity": true,
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        "Tag": {
+                            "tags": [
+                                "hiding_spot"
+                            ]
+                        }
+                    },
+                    "Name": "Tire"
                 }
             },
             {
@@ -28413,7 +29776,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "75d1f30b-c786-784b-baba-f6f13f5e7436",
-                            "siblingIndex": 0
+                            "siblingIndex": 1
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -28477,7 +29840,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "75d1f30b-c786-784b-baba-f6f13f5e7436",
-                                    "siblingIndex": 0
+                                    "siblingIndex": 1
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -28576,12 +29939,175 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
+                            "guid": "e12c32c3-d9cd-384a-86e8-5480f6818105"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "75d1f30b-c786-784b-baba-f6f13f5e7436",
+                            "siblingIndex": 2
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                29.732616424560547,
+                                0.06260877847671509,
+                                -7.303606986999512
+                            ],
+                            "rotation": [
+                                -0.6384186744689941,
+                                0.6549032926559448,
+                                -0.28197264671325684,
+                                0.28985312581062317
+                            ],
+                            "scale": [
+                                3.030000686645508,
+                                3.0300004482269287,
+                                3.030000686645508
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "9927db1c-9aff-be47-a5dc-3068b2c9f8f9",
+                                    "aoTextureOverride": "df12f04f-34c5-644d-980a-c8251d57cd55",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "9bc1e511-f6a7-9d48-9723-5cd1200ca942",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "df12f04f-34c5-644d-980a-c8251d57cd55",
+                                    "normalTextureOverride": "91e02ba2-c6b8-184f-bd48-b59674946972",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "df12f04f-34c5-644d-980a-c8251d57cd55",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "dd9ec25f-57d2-bf41-be2d-95dd1f1eddcd",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Tire"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "75d1f30b-c786-784b-baba-f6f13f5e7436",
+                                    "siblingIndex": 2
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        29.732616424560547,
+                                        0.06260877847671509,
+                                        -7.303606986999512
+                                    ],
+                                    "rotation": [
+                                        -0.6384186744689941,
+                                        0.6549032926559448,
+                                        -0.28197264671325684,
+                                        0.28985312581062317
+                                    ],
+                                    "scale": [
+                                        3.030000686645508,
+                                        3.0300004482269287,
+                                        3.030000686645508
+                                    ]
+                                },
+                                "RigidBody3D": {
+                                    "angular_velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "collider_offset": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "collider_scale": [
+                                        0.6000000238418579,
+                                        0.4000000059604645,
+                                        0.699999988079071
+                                    ],
+                                    "motion_type": 0,
+                                    "physics_behavior": {
+                                        "behavior": 0
+                                    },
+                                    "physics_enabled": true,
+                                    "use_gravity": true,
+                                    "velocity": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "32951e6c-e4d5-d74e-accb-28e55974cf17",
+                            "instanceRootGUID": "e12c32c3-d9cd-384a-86e8-5480f6818105",
+                            "sourcePrefabGUID": "96f2d4ae-0b76-d043-a5df-262893a0691e"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collider_offset": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collider_scale": [
+                                0.6000000238418579,
+                                0.4000000059604645,
+                                0.699999988079071
+                            ],
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 0
+                            },
+                            "physics_enabled": true,
+                            "use_gravity": true,
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        "Tag": {
+                            "tags": [
+                                "hiding_spot"
+                            ]
+                        }
+                    },
+                    "Name": "Tire"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
                             "guid": "cd8c8701-ee10-5740-9488-c8c032189b46"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "75d1f30b-c786-784b-baba-f6f13f5e7436",
-                            "siblingIndex": 1
+                            "siblingIndex": 3
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -28645,7 +30171,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "75d1f30b-c786-784b-baba-f6f13f5e7436",
-                                    "siblingIndex": 1
+                                    "siblingIndex": 3
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -28744,7 +30270,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "75d1f30b-c786-784b-baba-f6f13f5e7436",
-                            "siblingIndex": 2
+                            "siblingIndex": 4
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -28808,7 +30334,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "75d1f30b-c786-784b-baba-f6f13f5e7436",
-                                    "siblingIndex": 2
+                                    "siblingIndex": 4
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -28907,7 +30433,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "75d1f30b-c786-784b-baba-f6f13f5e7436",
-                            "siblingIndex": 3
+                            "siblingIndex": 5
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -28971,7 +30497,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "75d1f30b-c786-784b-baba-f6f13f5e7436",
-                                    "siblingIndex": 3
+                                    "siblingIndex": 5
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -29135,7 +30661,7 @@
                                 "699c6026-69a9-d649-b32d-a3e802ae602a"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 21
+                            "siblingIndex": 22
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -33933,7 +35459,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 22
+                            "siblingIndex": 23
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -34039,7 +35565,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 23
+                            "siblingIndex": 24
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -34158,7 +35684,7 @@
                                 "2d06fd7f-4265-5945-aa65-7714dbc65876"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 24
+                            "siblingIndex": 25
                         },
                         "Layer": {
                             "layer_id": 3,
@@ -34684,7 +36210,7 @@
                                 "5ba93d30-299b-8349-82a1-b9caffe961af"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 25
+                            "siblingIndex": 26
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -38496,7 +40022,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 26
+                            "siblingIndex": 27
                         },
                         "Layer": {
                             "layer_id": 0,
