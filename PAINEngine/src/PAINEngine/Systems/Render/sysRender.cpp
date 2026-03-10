@@ -224,9 +224,19 @@ namespace PAIN {
 					PN_CORE_ERROR("OpenGL err on update loop begin: {}", err);
 				}
 
+				auto rendererService = services.lock()->get<sRenderer>();
+				if (!rendererService || !rendererService->w_renderer) {
+					return;
+				}
+
+				if (rendererService->w_renderer->resizeDirty) {
+					rendererService->w_renderer->resizeDirty = false;
+					rendererService->w_renderer->_initDeferredShadingBuffers();
+				}
+
 				if (editor_visible) {
 					glBindFramebuffer(GL_FRAMEBUFFER,
-									  services.lock()->get<sRenderer>()->getFinalFbo());
+									  rendererService->getFinalFbo());
 					// glViewport(0, 0, fbWidth, fbHeight);
 				} else {
 					glBindFramebuffer(GL_FRAMEBUFFER, 0);

@@ -593,6 +593,15 @@ namespace PAIN {
 		PN_CORE_INFO("Initializing deferred shading buffers with size: {}x{}",
 					 winWidth, winHeight);
 
+		auto checkFramebufferComplete = [](const char* label) -> bool {
+			GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+			if (status != GL_FRAMEBUFFER_COMPLETE) {
+				PN_CORE_ERROR("{} is incomplete! Status: 0x{:x}", label, status);
+				return false;
+			}
+			return true;
+		};
+
 		// DELETE OLD RESOURCES FIRST
 		if (ds_fbo) { glDeleteFramebuffers(1, &ds_fbo);   ds_fbo = 0; }
 		if (final_fbo) { glDeleteFramebuffers(1, &final_fbo); final_fbo = 0; }
@@ -682,9 +691,13 @@ namespace PAIN {
 			glGenRenderbuffers(1, &final_rbo);
 			glBindRenderbuffer(GL_RENDERBUFFER, final_rbo);
 			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, winWidth,
-								  winHeight);
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-									  GL_RENDERBUFFER, final_rbo);
+							  winHeight);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+							  GL_RENDERBUFFER, final_rbo);
+
+			if (!checkFramebufferComplete("Final framebuffer")) {
+				return;
+			}
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -705,7 +718,11 @@ namespace PAIN {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-								   pp_texture, 0);
+							   pp_texture, 0);
+
+			if (!checkFramebufferComplete("Post-process framebuffer (pp_fbo)")) {
+				return;
+			}
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -726,7 +743,11 @@ namespace PAIN {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-								   pp2_texture, 0);
+							   pp2_texture, 0);
+
+			if (!checkFramebufferComplete("Post-process framebuffer (pp2_fbo)")) {
+				return;
+			}
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -753,7 +774,7 @@ namespace PAIN {
 			glBindRenderbuffer(GL_RENDERBUFFER, minimap_rbo);
 			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, minimap_width,
 				minimap_height);
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
 				GL_RENDERBUFFER, minimap_rbo);
 
 			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -874,7 +895,7 @@ namespace PAIN {
 		}
 
 		_initDeferredShadingBuffers(); // FBOs/textures only
-		_initGeometryBuffers();        // VAOs/VBOs — called ONCE, never on resize
+		_initGeometryBuffers();        // VAOs/VBOs ï¿½ called ONCE, never on resize
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
@@ -1463,6 +1484,12 @@ namespace PAIN {
 		(void)view;
 		(void)proj;
 
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &minimap_prev_fbo);
+		glGetIntegerv(GL_VIEWPORT, minimap_prev_viewport);
+		glGetFloatv(GL_COLOR_CLEAR_VALUE, minimap_prev_clear_color);
+		minimap_prev_depth_test = glIsEnabled(GL_DEPTH_TEST);
+		minimap_state_saved = true;
+
 		const glm::vec2 minimap_size = GraphicsSettings::get().minimap_size_px;
 		const int target_width = std::max(64, static_cast<int>(minimap_size.x));
 		const int target_height = std::max(64, static_cast<int>(minimap_size.y));
@@ -1498,8 +1525,14 @@ namespace PAIN {
 			glBindRenderbuffer(GL_RENDERBUFFER, minimap_rbo);
 			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, minimap_width,
 				minimap_height);
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
 				GL_RENDERBUFFER, minimap_rbo);
+
+			GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+			if (status != GL_FRAMEBUFFER_COMPLETE) {
+				PN_CORE_ERROR("Minimap framebuffer is incomplete after resize! Status: 0x{:x}",
+					status);
+			}
 		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, minimap_fbo);
@@ -1513,8 +1546,25 @@ namespace PAIN {
 	}
 
 	void WindowsRenderer::EndMinimapPass() {
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glViewport(0, 0, winWidth, winHeight);
+		if (!minimap_state_saved) {
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glViewport(0, 0, winWidth, winHeight);
+			return;
+		}
+
+		glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(minimap_prev_fbo));
+		glViewport(minimap_prev_viewport[0], minimap_prev_viewport[1],
+			minimap_prev_viewport[2], minimap_prev_viewport[3]);
+		glClearColor(minimap_prev_clear_color[0], minimap_prev_clear_color[1],
+			minimap_prev_clear_color[2], minimap_prev_clear_color[3]);
+
+		if (minimap_prev_depth_test) {
+			glEnable(GL_DEPTH_TEST);
+		} else {
+			glDisable(GL_DEPTH_TEST);
+		}
+
+		minimap_state_saved = false;
 	}
 
 	void WindowsRenderer::UploadMinimapWalls(const std::vector<glm::vec2>& worldXZVertices) {
