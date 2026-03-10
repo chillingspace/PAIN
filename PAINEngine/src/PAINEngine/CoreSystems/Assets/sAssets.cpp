@@ -717,7 +717,7 @@ namespace PAIN {
 				auto relative = std::filesystem::relative(out_path, path_service->resolvePath(Path::main_assets_alias, ""));
 
 				//Register asset
-				if(checkAssetRegistered(relative))registerAsset(relative);
+				if(!checkAssetRegistered(relative))registerAsset(relative);
 			}
 		}
 #endif

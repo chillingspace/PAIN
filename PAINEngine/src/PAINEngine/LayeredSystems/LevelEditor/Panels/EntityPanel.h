@@ -32,6 +32,7 @@ namespace PAIN {
 
                 void setRegistry(ECS::RegistryID registryID) {
                     currentRegistryID = registryID;
+                    force_refresh = true;
                 }
 
                 ECS::RegistryID getCurrentRegistry() const {
