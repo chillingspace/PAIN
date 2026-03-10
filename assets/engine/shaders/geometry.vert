@@ -17,6 +17,12 @@ layout(location=4) in vec4 aBoneWeights;        // how much effect does this bon
 layout(location=5) in vec3 aTangent;
 layout(location=6) in vec3 aBitangent;
 
+// per-instance model matrix (instanced rendering)
+layout(location = 7) in vec4 aInstanceM0;
+layout(location = 8) in vec4 aInstanceM1;
+layout(location = 9) in vec4 aInstanceM2;
+layout(location = 10) in vec4 aInstanceM3;
+
 layout(location = 0) out vec3 vNormal;
 layout(location = 1) out vec3 vFragPos;
 layout(location = 2) out vec2 vTexCoords;
@@ -27,6 +33,7 @@ layout(location = 1) uniform mat4 u_V;
 layout(location = 2) uniform mat4 u_P;
 
 uniform float u_InvertUvY;
+uniform float u_UseInstancing;
 
 // animation
 const int MAX_BONES = 100;
@@ -34,9 +41,13 @@ uniform mat4 u_BoneMatrices[MAX_BONES];     // xform matrix for each bone
 uniform float u_Animated;
 
 void main() {
+    mat4 effectiveM = u_UseInstancing > 0.5
+        ? mat4(aInstanceM0, aInstanceM1, aInstanceM2, aInstanceM3)
+        : u_M;
+
     vec4 localPos;
     vec3 localNormal;
-    
+
     if (u_Animated > 0.5) {
         mat4 skin = u_BoneMatrices[int(aBoneIndices.x)] * aBoneWeights.x
                   + u_BoneMatrices[int(aBoneIndices.y)] * aBoneWeights.y
@@ -58,8 +69,8 @@ void main() {
         localNormal = aNormal;
     }
 
-    vNormal = mat3(transpose(inverse(u_M))) * localNormal;
-    vFragPos = vec3(u_M * localPos);
+    vNormal = mat3(transpose(inverse(effectiveM))) * localNormal;
+    vFragPos = vec3(effectiveM * localPos);
 
     if (u_InvertUvY > 0.5) {
         // invert tex coords vertically for compressed textures(astc)
@@ -69,11 +80,11 @@ void main() {
         vTexCoords = vec2(aTexCoords.x, aTexCoords.y);
     }
 
-    mat4 MVP = u_P * u_V * u_M;
+    mat4 MVP = u_P * u_V * effectiveM;
     gl_Position = MVP * localPos;
 
-    vec3 T = normalize(vec3(u_M * vec4(aTangent, 0.0)));
-    vec3 B = normalize(vec3(u_M * vec4(aBitangent, 0.0)));
-    vec3 N = normalize(vec3(u_M * vec4(aNormal, 0.0)));
+    vec3 T = normalize(vec3(effectiveM * vec4(aTangent, 0.0)));
+    vec3 B = normalize(vec3(effectiveM * vec4(aBitangent, 0.0)));
+    vec3 N = normalize(vec3(effectiveM * vec4(aNormal, 0.0)));
     TBN = mat3(T, B, N);
 }

@@ -251,6 +251,8 @@ namespace PAIN {
 
 					if (ImGui::Checkbox("Daytime", &gfx.world_light)) {}
 					if (ImGui::Checkbox("Draw Floor", &gfx.draw_floor)) {}
+					if (ImGui::Checkbox("Instanced Rendering", &gfx.use_instanced_rendering)) {}
+					if (ImGui::IsItemHovered()) ImGui::SetTooltip("Batch non-animated objects with the same mesh into instanced draw calls");
 					if (ImGui::SliderFloat("FOV", &gfx.fov, 30.0f, 120.0f)) {}
 					ImGui::Separator();
 
