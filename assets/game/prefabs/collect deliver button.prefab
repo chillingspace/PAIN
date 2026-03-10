@@ -1,0 +1,131 @@
+{
+    "entities": [
+        {
+            "components": {
+                "CustomHitbox2D": {
+                    "max_point": [
+                        94.5999984741211,
+                        87.5999984741211
+                    ],
+                    "min_point": [
+                        -96.80000305175781,
+                        -105.19999694824219
+                    ],
+                    "position_offset": [
+                        2.0,
+                        7.5
+                    ]
+                },
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "18a8d426-4f81-b54e-a985-72ceafb36934",
+                    "siblingIndex": 2
+                },
+                "Layer": {
+                    "layer_id": 1,
+                    "layer_mask": 2
+                },
+                "LocalTransform": {
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "Name": {
+                    "name": "collect deliver button"
+                },
+                "Tag": {
+                    "tags": [
+                        "android_ui"
+                    ]
+                },
+                "Texture2D": {
+                    "pos": [
+                        0.550000011920929,
+                        -0.75
+                    ],
+                    "texture_guid": "3c0b0308-6dea-5a4a-a9e0-3e125ee9598c",
+                    "texture_scale": [
+                        0.20000000298023224,
+                        0.20000000298023224
+                    ]
+                },
+                "UIButton": {
+                    "action": "game_Collect",
+                    "disabled_color": -10066330,
+                    "highlighted_color": -3355444,
+                    "normal_color": -1,
+                    "payload": "",
+                    "pressed_color": -5592406,
+                    "state": "Normal"
+                },
+                "UIElement": {
+                    "b_is_enabled": true,
+                    "b_is_interactable": true,
+                    "layer": 0
+                },
+                "UIRectTransform": {
+                    "anchor_max": [
+                        0.5,
+                        0.5
+                    ],
+                    "anchor_min": [
+                        0.5,
+                        0.5
+                    ],
+                    "anchored_position": [
+                        0.0,
+                        0.0
+                    ],
+                    "local_position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "offset_max": [
+                        0.0,
+                        0.0
+                    ],
+                    "offset_min": [
+                        0.0,
+                        0.0
+                    ],
+                    "pivot": [
+                        0.5,
+                        0.5
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "size_delta": [
+                        100.0,
+                        100.0
+                    ]
+                }
+            },
+            "entityGUID": "63468803-8740-6446-9248-b63d7e49f36d"
+        }
+    ],
+    "prefabName": "collect deliver button",
+    "rootEntityGUID": "63468803-8740-6446-9248-b63d7e49f36d"
+}

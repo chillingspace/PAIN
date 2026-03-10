@@ -4450,6 +4450,11 @@
                                 0.0,
                                 0.0
                             ]
+                        },
+                        "Tag": {
+                            "tags": [
+                                "wall"
+                            ]
                         }
                     },
                     "Name": "Container_Blue"
@@ -4802,6 +4807,11 @@
                                 0.0,
                                 0.0
                             ]
+                        },
+                        "Tag": {
+                            "tags": [
+                                "wall"
+                            ]
                         }
                     },
                     "Name": "Container_Blue"
@@ -4985,6 +4995,11 @@
                                 0.0,
                                 0.0,
                                 0.0
+                            ]
+                        },
+                        "Tag": {
+                            "tags": [
+                                "wall"
                             ]
                         }
                     },
@@ -5170,6 +5185,11 @@
                                 0.0,
                                 0.0
                             ]
+                        },
+                        "Tag": {
+                            "tags": [
+                                "wall"
+                            ]
                         }
                     },
                     "Name": "Container_Blue"
@@ -5353,6 +5373,11 @@
                                 0.0,
                                 0.0,
                                 0.0
+                            ]
+                        },
+                        "Tag": {
+                            "tags": [
+                                "wall"
                             ]
                         }
                     },
@@ -9568,7 +9593,6 @@
                         "Hierarchy": {
                             "childrenGUIDs": [
                                 "234f63d2-9ce2-de4a-b2e9-b51df68fadf4",
-                                "63468803-8740-6446-9248-b63d7e49f36d",
                                 "09276c7c-b239-474f-950f-e175ea7b3e7e",
                                 "0dc7d509-a2c9-b640-ae82-df7adde1fa4b",
                                 "a314c7d3-a6b0-0946-afac-cae443d2fa92"
@@ -9748,12 +9772,12 @@
                     "Components": {
                         "CustomHitbox2D": {
                             "max_point": [
-                                117.5999984741211,
-                                114.80000305175781
+                                73.5999984741211,
+                                72.0
                             ],
                             "min_point": [
-                                -116.9000015258789,
-                                -119.5999984741211
+                                -75.9000015258789,
+                                -72.0
                             ],
                             "position_offset": [
                                 0.0,
@@ -9805,8 +9829,8 @@
                             ],
                             "texture_guid": "931913db-35c2-f044-b648-e07fd4f1b456",
                             "texture_scale": [
-                                0.25,
-                                0.25
+                                0.15000000596046448,
+                                0.15000000596046448
                             ]
                         },
                         "UIButton": {
@@ -9899,142 +9923,12 @@
                             ]
                         },
                         "GUID": {
-                            "guid": "63468803-8740-6446-9248-b63d7e49f36d"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "18a8d426-4f81-b54e-a985-72ceafb36934",
-                            "siblingIndex": 2
-                        },
-                        "Layer": {
-                            "layer_id": 1,
-                            "layer_mask": 2
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "collect/deliver button"
-                        },
-                        "Tag": {
-                            "tags": [
-                                "android_ui"
-                            ]
-                        },
-                        "Texture2D": {
-                            "pos": [
-                                0.550000011920929,
-                                -0.75
-                            ],
-                            "texture_guid": "3c0b0308-6dea-5a4a-a9e0-3e125ee9598c",
-                            "texture_scale": [
-                                0.20000000298023224,
-                                0.20000000298023224
-                            ]
-                        },
-                        "UIButton": {
-                            "action": "game_Collect",
-                            "disabled_color": -10066330,
-                            "highlighted_color": -3355444,
-                            "normal_color": -1,
-                            "payload": "",
-                            "pressed_color": -5592406,
-                            "state": "Normal"
-                        },
-                        "UIElement": {
-                            "b_is_enabled": true,
-                            "b_is_interactable": true,
-                            "layer": 0
-                        },
-                        "UIRectTransform": {
-                            "anchor_max": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchor_min": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchored_position": [
-                                0.0,
-                                0.0
-                            ],
-                            "local_position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "offset_max": [
-                                0.0,
-                                0.0
-                            ],
-                            "offset_min": [
-                                0.0,
-                                0.0
-                            ],
-                            "pivot": [
-                                0.5,
-                                0.5
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "size_delta": [
-                                100.0,
-                                100.0
-                            ]
-                        }
-                    },
-                    "Name": "collect/deliver button"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "CustomHitbox2D": {
-                            "max_point": [
-                                94.5999984741211,
-                                87.5999984741211
-                            ],
-                            "min_point": [
-                                -96.80000305175781,
-                                -105.19999694824219
-                            ],
-                            "position_offset": [
-                                2.0,
-                                7.5
-                            ]
-                        },
-                        "GUID": {
                             "guid": "a314c7d3-a6b0-0946-afac-cae443d2fa92"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "18a8d426-4f81-b54e-a985-72ceafb36934",
-                            "siblingIndex": 3
+                            "siblingIndex": 2
                         },
                         "Layer": {
                             "layer_id": 1,
@@ -10164,7 +10058,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "18a8d426-4f81-b54e-a985-72ceafb36934",
-                            "siblingIndex": 4
+                            "siblingIndex": 3
                         },
                         "Layer": {
                             "layer_id": 1,

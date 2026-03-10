@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "collect deliver button.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 8090975778894181631
+  },
+  "descriptor_version": 1,
+  "guid": "966ab214-0176-fd44-933f-f743ac49678c",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\collect deliver button.prefab"
+  }
+}
