@@ -56,6 +56,11 @@ ui.autoConfirmHit = true   -- NEW: true = old light-enemy behavior
 local ALERT_SFX_COOLDOWN_TIME = 1.0
 local alertSfxCooldown = 0.0
 
+local DANGER_HAPTIC_INTERVAL = 0.65
+local DANGER_HAPTIC_DURATION_MS = 40
+local DANGER_HAPTIC_AMPLITUDE = 220
+local dangerHapticTimer = 0.0
+
 -- helpers -------------------------------------------------------
 
 local function hideUI()
@@ -95,6 +100,12 @@ local function stopAudio()
     end
 end
 
+local function triggerDangerHapticPulse()
+    if hapticsDangerPulse then
+        hapticsDangerPulse(DANGER_HAPTIC_DURATION_MS, DANGER_HAPTIC_AMPLITUDE)
+    end
+end
+
 -- public API called from enemy scripts --------------------------
 
 -- autoConfirmHit:
@@ -118,7 +129,10 @@ function ui.begin(enemyEntity, autoConfirmHit)
     ui.sourceEnemy    = enemyEntity
     ui.autoConfirmHit = autoConfirmHit
 
+    dangerHapticTimer = 0.0
+
     showUI()
+    triggerDangerHapticPulse()
 
     if alertSfxCooldown <= 0 then
         if enemyEntity then
@@ -149,6 +163,7 @@ function ui.cancel(enemyEntity)
     if not ui.active then return end
     ui.isDetected  = false
     ui.sourceEnemy = nil
+    dangerHapticTimer = 0.0
 end
 
 function ui.confirmHit()
@@ -156,6 +171,7 @@ function ui.confirmHit()
     ui.active     = false
     ui.isDetected = false
     ui.timer      = 0.0
+    dangerHapticTimer = 0.0
 
     hideUI()
     stopAudio()
@@ -209,7 +225,18 @@ local function update(dt)
     end
 
     if not ui.active then
+        dangerHapticTimer = 0.0
         return
+    end
+
+    if ui.isDetected then
+        dangerHapticTimer = dangerHapticTimer - dt
+        if dangerHapticTimer <= 0.0 then
+            triggerDangerHapticPulse()
+            dangerHapticTimer = DANGER_HAPTIC_INTERVAL
+        end
+    else
+        dangerHapticTimer = 0.0
     end
 
     -- auto-confirm mode: old light enemy behavior

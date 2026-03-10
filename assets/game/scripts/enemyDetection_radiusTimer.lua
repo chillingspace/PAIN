@@ -16,8 +16,17 @@ local playerCaught = false
 -- If the player is being detected (For detection UI)
 local playerDetected = false
 local minimapTagged = false
+local dangerHapticCooldown = 0.0
+
+local DANGER_HAPTIC_INTERVAL = 0.65
+local DANGER_HAPTIC_DURATION_MS = 40
+local DANGER_HAPTIC_AMPLITUDE = 220
 
 registerUpdate(function(dt)
+    if dangerHapticCooldown > 0.0 then
+        dangerHapticCooldown = dangerHapticCooldown - dt
+    end
+
     if (not minimapTagged) and addTag then
         addTag(entityId, "Enemy")
         addTag(entityId, "danger")
@@ -29,6 +38,7 @@ registerUpdate(function(dt)
     if not p then
         timeSeen = 0.0
         playerCaught = false
+        dangerHapticCooldown = 0.0
         return
     end
     player = p
@@ -38,6 +48,7 @@ registerUpdate(function(dt)
         playerDetected = false
         timeSeen = 0.0
         playerCaught = false
+        dangerHapticCooldown = 0.0
         return
     end
 
@@ -46,6 +57,7 @@ registerUpdate(function(dt)
         playerDetected = false
         timeSeen = 0.0
         playerCaught = false
+        dangerHapticCooldown = 0.0
         return
     end
 
@@ -71,6 +83,11 @@ registerUpdate(function(dt)
         -- Mark player as being detected
         playerDetected = true
 
+        if dangerHapticCooldown <= 0.0 and hapticsDangerPulse then
+            hapticsDangerPulse(DANGER_HAPTIC_DURATION_MS, DANGER_HAPTIC_AMPLITUDE)
+            dangerHapticCooldown = DANGER_HAPTIC_INTERVAL
+        end
+
         -- player in detection range
         -- log("[enemyDetection_radius] I see the player!")    
 
@@ -94,6 +111,7 @@ registerUpdate(function(dt)
         -- timeSeen = 0.0
 
         playerDetected = false
+        dangerHapticCooldown = 0.0
 
         -- Leaving range makes timer decay
         timeSeen = math.max(0.0, timeSeen - dt * 2.0)

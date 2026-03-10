@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "IEngineAPI.h"
 #include "PAINEngine/CoreSystems/Audio/Audio.h"
+#include "CoreSystems/Haptics/Haptics.h"
 #include "PAINEngine/CoreSystems/Path/Path.h"
 #include "PAINEngine/CoreSystems/Assets/sAssets.h"
 #include "Systems/Audio/sysAudio.h"
@@ -1197,6 +1198,36 @@ namespace PAIN {
             // Note: To actually delay quit, we'd need a timer system
             // For now the script should manually call quitApplication() after waiting
         });
+
+        lua_.set_function("hapticsDangerPulse", [this](sol::optional<int> durationMs, sol::optional<int> amplitude) {
+            if (!services_) return;
+            auto haptics = services_->get<Haptics::Haptics>();
+            if (!haptics || !haptics->hasHaptics()) return;
+
+            static auto lastPulse = std::chrono::steady_clock::time_point::min();
+            auto now = std::chrono::steady_clock::now();
+            if (lastPulse != std::chrono::steady_clock::time_point::min()) {
+                auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastPulse).count();
+                if (elapsed < 300) return;
+            }
+
+            int duration = durationMs.value_or(40);
+            int amp = amplitude.value_or(220);
+
+            if (duration < 1) duration = 1;
+            if (amp < 0) amp = 0;
+            if (amp > 255) amp = 255;
+
+            haptics->vibrate(static_cast<int64_t>(duration), amp);
+            lastPulse = now;
+            });
+
+        lua_.set_function("hapticsStop", [this]() {
+            if (!services_) return;
+            auto haptics = services_->get<Haptics::Haptics>();
+            if (!haptics || !haptics->hasHaptics()) return;
+            haptics->stop();
+            });
 
 
         /* =========================================================================== */
