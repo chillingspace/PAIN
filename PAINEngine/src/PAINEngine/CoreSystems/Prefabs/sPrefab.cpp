@@ -116,10 +116,6 @@ namespace PAIN {
 
 			// Save prefab to file
 			savePrefabToFile(prefab_asset, virt_path_to_prefab, registry_id);
-
-			// Register the new asset immediately so it appears in the editor without restart
-			auto asset_service = services.lock()->get<Assets::Manager>();
-			asset_service->registerAsset(prefab_folder.string() + "/" + prefabName + prefab_ext);
 		}
 #endif
 
