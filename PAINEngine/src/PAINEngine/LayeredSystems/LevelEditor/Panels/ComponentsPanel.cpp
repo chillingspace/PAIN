@@ -1069,6 +1069,20 @@ namespace PAIN {
 							light.shadow_type = static_cast<PAIN::SHADOW_TYPES>(currentShadow);
 						}
 
+						if (light.shadow_type == PAIN::SHADOW_TYPES::MAPPED) {
+							static constexpr const char* resNames[] = {
+								"128x128","256x256","512x512","1024x1024","2048x2048","4096x4096"
+							};
+							static constexpr int resValues[] = { 128, 256, 512, 1024, 2048, 4096 };
+							int resIdx = 3; // default 1024
+							for (int i = 0; i < 6; ++i)
+								if (resValues[i] == light.shadow_resolution) { resIdx = i; break; }
+							if (ImGui::Combo("Shadow Resolution", &resIdx, resNames, 6))
+								light.shadow_resolution = resValues[resIdx];
+						}
+
+						ImGui::Checkbox("Volumetric Lighting", &light.volumetric);
+
 						ImGui::Separator();
 
 						// Direction lighting (Only for Directional & Spotlight)

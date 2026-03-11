@@ -548,6 +548,8 @@ namespace PAIN {
 					light.type = static_cast<Light::TYPES>(lighting.light_type);
 					light.setShadowType(
 						static_cast<Light::SHADOW_TYPES>(lighting.shadow_type));
+					light.setShadowResolution(lighting.shadow_resolution);
+					light.volumetric = lighting.volumetric;
 
 					// works for non point light
 					light.direction = lighting.direction;

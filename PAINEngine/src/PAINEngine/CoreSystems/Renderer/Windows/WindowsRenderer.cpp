@@ -2814,6 +2814,9 @@ namespace PAIN {
 			if (key == "world" || key == "cam") {
 				continue;
 			}
+			if (!l.volumetric) {
+				continue;
+			}
 			const bool hasShadowMap =
 				l.getShadowType() == Light::SHADOW_TYPES::MAPPED && l.getShadowTexture() != 0;
 			const bool supportsUnshadowedVolumetrics =
