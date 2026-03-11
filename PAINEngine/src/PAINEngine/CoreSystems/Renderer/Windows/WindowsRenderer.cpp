@@ -728,12 +728,17 @@ namespace PAIN {
 		appendToBuffer(shadow_ebo, GL_ELEMENT_ARRAY_BUFFER,
 			existingIndexBytes, newIndices.data(), newIndexBytes);
 
-		// Update IBO if instancing enabled
-		if (GS.use_instanced_rendering && geometry_ibo) {
+		// Pre-size the instance matrix buffer — filled per-frame in DrawGeometryInstanced.
+		// Reserve space for MAX_INSTANCES matrices upfront to avoid per-frame realloc.
+		static constexpr int MAX_INSTANCES = 4096;
+		if (geometry_ibo) {
 			glBindBuffer(GL_ARRAY_BUFFER, geometry_ibo);
-			glBufferData(GL_ARRAY_BUFFER,
-				instanced_offsets.size() * sizeof(IBOData),
-				nullptr, GL_DYNAMIC_DRAW);
+			GLint currentIboSize = 0;
+			glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &currentIboSize);
+			const GLsizeiptr needed = MAX_INSTANCES * sizeof(glm::mat4);
+			if (currentIboSize < (GLint)needed) {
+				glBufferData(GL_ARRAY_BUFFER, needed, nullptr, GL_DYNAMIC_DRAW);
+			}
 		}
 
 		glBindVertexArray(0);
@@ -797,6 +802,7 @@ namespace PAIN {
 		std::filesystem::path bloom_blend_path = "engine/shaders/bloom_blend.vert";
 		std::filesystem::path tone_path = "engine/shaders/tone.vert";
 		std::filesystem::path volumetric_path = "engine/shaders/volumetric.vert";
+		std::filesystem::path occlusion_path = "engine/shaders/occlusion.vert";
 #else
 		std::filesystem::path pbr_path = "engine\\shaders\\android_pbr.vert";
 		std::filesystem::path geometry_path =
@@ -966,6 +972,15 @@ namespace PAIN {
 			PN_CORE_WARN("Failed to create shader program for volumetric lighting (non-fatal)");
 			volumetric_shader = nullptr;
 		}
+
+#ifdef PN_PLATFORM_WINDOWS
+		shader_opt = assets_loader->getAsset<Assets::Shader>(occlusion_path);
+		occlusion_shader = shader_opt.has_value() ? shader_opt.value() : occlusion_shader;
+		if (!occlusion_shader || occlusion_shader->GetRendererID() == 0) {
+			PN_CORE_WARN("Failed to create occlusion shader (non-fatal, occlusion culling disabled)");
+			occlusion_shader = nullptr;
+		}
+#endif
 	}
 
 	void WindowsRenderer::_createDeferredShadingBuffer(unsigned int& tex,
@@ -1338,6 +1353,16 @@ namespace PAIN {
 			glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Assets::Vertex), (void*)offsetof(Assets::Vertex, bitangent));
 			glEnableVertexAttribArray(6);
 
+			// Instance model matrix buffer (locations 7-10, one mat4 per instance, divisor=1)
+			glGenBuffers(1, &geometry_ibo);
+			glBindBuffer(GL_ARRAY_BUFFER, geometry_ibo);
+			for (int col = 0; col < 4; ++col) {
+				glEnableVertexAttribArray(7 + col);
+				glVertexAttribPointer(7 + col, 4, GL_FLOAT, GL_FALSE,
+					sizeof(glm::mat4), (void*)(col * sizeof(glm::vec4)));
+				glVertexAttribDivisor(7 + col, 1);
+			}
+
 			glBindVertexArray(0);
 		}
 
@@ -1374,6 +1399,46 @@ namespace PAIN {
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
 			glEnableVertexAttribArray(1);
 			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+
+			glBindVertexArray(0);
+		}
+
+		// === Occlusion Cube VAO/VBO/EBO ===
+		// Unit cube centered at origin, vertices in [-0.5, 0.5]
+		{
+			static constexpr float cubeVerts[] = {
+				// 8 unique corners of a unit cube
+				-0.5f, -0.5f, -0.5f,
+				 0.5f, -0.5f, -0.5f,
+				 0.5f,  0.5f, -0.5f,
+				-0.5f,  0.5f, -0.5f,
+				-0.5f, -0.5f,  0.5f,
+				 0.5f, -0.5f,  0.5f,
+				 0.5f,  0.5f,  0.5f,
+				-0.5f,  0.5f,  0.5f,
+			};
+			static constexpr unsigned int cubeIdx[] = {
+				0,1,2, 2,3,0, // -Z
+				4,5,6, 6,7,4, // +Z
+				0,4,7, 7,3,0, // -X
+				1,5,6, 6,2,1, // +X
+				0,1,5, 5,4,0, // -Y
+				3,2,6, 6,7,3, // +Y
+			};
+
+			glGenVertexArrays(1, &occlusion_vao);
+			glBindVertexArray(occlusion_vao);
+
+			glGenBuffers(1, &occlusion_vbo);
+			glBindBuffer(GL_ARRAY_BUFFER, occlusion_vbo);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVerts), cubeVerts, GL_STATIC_DRAW);
+
+			glGenBuffers(1, &occlusion_ebo);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, occlusion_ebo);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeIdx), cubeIdx, GL_STATIC_DRAW);
+
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
 			glBindVertexArray(0);
 		}
@@ -1600,6 +1665,7 @@ namespace PAIN {
 		geometry_shader->Bind();
 		geometry_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
 		geometry_shader->SetUniform("u_P", scene->GetActiveCamera()->projection());
+		geometry_shader->SetUniform("u_Instanced", 0.f);
 	}
 
 	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene::SceneManager> scene,
@@ -1620,6 +1686,7 @@ namespace PAIN {
 		const auto& modelAsset = component.cachedModelAsset;
 
 		geometry_shader->SetUniform("u_M", M);
+		geometry_shader->SetUniform("u_Instanced", 0.f);
 		geometry_shader->SetUniform("u_InvertUvY", 0.f);
 
 		// ========================================
@@ -1975,8 +2042,202 @@ namespace PAIN {
 		}
 	}
 
+	void WindowsRenderer::DrawGeometryInstanced(
+		std::shared_ptr<Scene::SceneManager> scene,
+		ModelRenderer& component,
+		const std::vector<glm::mat4>& matrices)
+	{
+		if (!geometry_shader || !component.cachedModelAsset || matrices.empty())
+			return;
+		if (!component.bufferOffset.isUploaded)
+			return;
+
+		const int instanceCount = static_cast<int>(matrices.size());
+
+		// Upload model matrices to the instance VBO
+		glBindBuffer(GL_ARRAY_BUFFER, geometry_ibo);
+		const GLsizeiptr needed = instanceCount * sizeof(glm::mat4);
+		GLint currentSize = 0;
+		glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &currentSize);
+		if (currentSize < (GLint)needed) {
+			glBufferData(GL_ARRAY_BUFFER, needed * 2, nullptr, GL_DYNAMIC_DRAW);
+		}
+		glBufferSubData(GL_ARRAY_BUFFER, 0, needed, matrices.data());
+
+		geometry_shader->SetUniform("u_Instanced", 1.0f);
+		geometry_shader->SetUniform("u_Animated",  0.0f);
+		geometry_shader->SetUniform("u_InvertUvY", 0.0f);
+		geometry_shader->SetUniform("DEBUG_TYPE", (float)GraphicsSettings::get().DEBUG_PBR_MAP_TYPE);
+
+		auto assetManager = services->get<Assets::Manager>();
+		const auto& modelAsset = component.cachedModelAsset;
+
+		glBindVertexArray(geometry_vao);
+
+		for (size_t i = 0; i < modelAsset->submeshes.size(); ++i) {
+			const auto& submesh = modelAsset->submeshes[i];
+			if (submesh.materialIndex >= component.materials.size())
+				continue;
+
+			// Resolve material from the representative component (same for all instances)
+			MaterialInstance* mat = &component.materials[submesh.materialIndex];
+			auto materialAssetOpt = assetManager->getAsset<Assets::Material>(mat->materialGUID);
+			auto materialAsset = materialAssetOpt.has_value() ? materialAssetOpt.value() : nullptr;
+
+			unsigned int albedoTex = 0, normalTex = 0, metallicTex = 0;
+			unsigned int roughnessTex = 0, aoTex = 0, emissiveTex = 0;
+			glm::vec3 baseColor(1.f);
+			float metallic = 0.f, roughness = 0.5f;
+
+			if (materialAsset) {
+				auto getTex = [&](const std::filesystem::path& p) -> unsigned int {
+					auto opt = assetManager->getAsset<Assets::Texture>(p);
+					return opt.has_value() ? opt.value()->gl_texture : 0u;
+				};
+				albedoTex   = getTex(materialAsset->albedoTexturePath);
+				normalTex   = getTex(materialAsset->normalTexturePath);
+				metallicTex = getTex(materialAsset->metallicTexturePath);
+				roughnessTex= getTex(materialAsset->roughnessTexturePath);
+				aoTex       = getTex(materialAsset->aoTexturePath);
+				emissiveTex = getTex(materialAsset->emissiveTexturePath);
+				baseColor   = materialAsset->baseColor;
+				metallic    = materialAsset->metallic;
+				roughness   = materialAsset->roughness;
+			}
+
+			geometry_shader->SetUniform("material.rough", roughness);
+			geometry_shader->SetUniform("material.metal",  metallic);
+			geometry_shader->SetUniform("material.color",  baseColor);
+			geometry_shader->SetUniform("u_UseEmissionOverride", 0.f);
+
+			const bool hasTex = albedoTex != 0 && GS.DEBUG_USE_DIFFUSE_MAP;
+			geometry_shader->SetUniform("material.useTex", hasTex ? 1.f : 0.f);
+			if (hasTex) { glActiveTexture(GL_TEXTURE6);  glBindTexture(GL_TEXTURE_2D, albedoTex);    geometry_shader->SetUniform("material.tex", 6); }
+
+			if (aoTex && GS.DEBUG_USE_AO_MAP) {
+				glActiveTexture(GL_TEXTURE7); glBindTexture(GL_TEXTURE_2D, aoTex);
+				geometry_shader->SetUniform("material.ao_map", 7);
+				geometry_shader->SetUniform("material.use_ao", 1.f);
+			} else { geometry_shader->SetUniform("material.use_ao", 0.f); }
+
+			if (normalTex && GS.DEBUG_USE_NORMAL_MAP) {
+				glActiveTexture(GL_TEXTURE8); glBindTexture(GL_TEXTURE_2D, normalTex);
+				geometry_shader->SetUniform("material.normal_map", 8);
+				geometry_shader->SetUniform("material.use_normal", 1.f);
+			} else { geometry_shader->SetUniform("material.use_normal", 0.f); }
+
+			if (roughnessTex && GS.DEBUG_USE_ROUGHNESSMETALLIC_MAP) {
+				glActiveTexture(GL_TEXTURE9); glBindTexture(GL_TEXTURE_2D, roughnessTex);
+				geometry_shader->SetUniform("material.roughnessmetallic_map", 9);
+				geometry_shader->SetUniform("material.use_roughnessmetallic", 1.f);
+			} else { geometry_shader->SetUniform("material.use_roughnessmetallic", 0.f); }
+
+			if (emissiveTex && GS.DEBUG_USE_EMISSION_MAP) {
+				glActiveTexture(GL_TEXTURE10); glBindTexture(GL_TEXTURE_2D, emissiveTex);
+				geometry_shader->SetUniform("material.use_emission", 1.f);
+				geometry_shader->SetUniform("material.emission_map", 10);
+			} else { geometry_shader->SetUniform("material.use_emission", 0.f); }
+
+			glDrawElementsInstanced(
+				GL_TRIANGLES, submesh.indexCount, GL_UNSIGNED_INT,
+				(void*)((component.bufferOffset.indexOffset + submesh.firstIndex) * sizeof(unsigned int)),
+				instanceCount);
+		}
+
+		// Restore non-instanced mode for subsequent DrawGeometry calls
+		geometry_shader->SetUniform("u_Instanced", 0.0f);
+		glBindVertexArray(0);
+	}
+
 	void WindowsRenderer::EndGeometryPass() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	void WindowsRenderer::AdvanceOcclusionFrame() {
+		occlusion_frame ^= 1; // toggle 0 <-> 1
+	}
+
+	bool WindowsRenderer::GetOcclusionResult(entt::entity entity) const {
+		auto it = occlusion_query_map.find(entity);
+		if (it == occlusion_query_map.end())
+			return true; // no prior result → assume visible
+
+		const int readFrame = occlusion_frame ^ 1; // opposite of current write frame
+		const auto& state = it->second;
+		if (!state.hasResult[readFrame] || state.queries[readFrame] == 0)
+			return true; // no result yet → assume visible
+
+		// Check if result is available without stalling
+		GLuint available = 0;
+		glGetQueryObjectuiv(state.queries[readFrame], GL_QUERY_RESULT_AVAILABLE, &available);
+		if (!available)
+			return true; // GPU hasn't finished yet → assume visible to avoid false culling
+
+		GLuint result = 0;
+		glGetQueryObjectuiv(state.queries[readFrame], GL_QUERY_RESULT, &result);
+		return result > 0;
+	}
+
+	void WindowsRenderer::OcclusionQueryPass(
+		std::shared_ptr<Scene::SceneManager> scene,
+		const std::vector<std::pair<entt::entity, AABB>>& aabbs)
+	{
+#ifdef PN_PLATFORM_ANDROID
+		(void)scene; (void)aabbs;
+		return;
+#else
+		if (!occlusion_shader || aabbs.empty())
+			return;
+
+		// Save GL state
+		GLboolean depthWriteMask; glGetBooleanv(GL_DEPTH_WRITEMASK, &depthWriteMask);
+		GLboolean colorMask[4];
+		glGetBooleanv(GL_COLOR_WRITEMASK, colorMask);
+
+		// Query only depth — no color, no depth writes
+		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+		glDepthMask(GL_FALSE);
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LEQUAL); // LEQUAL: AABB faces co-planar with geometry still pass
+
+		occlusion_shader->Bind();
+		occlusion_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
+		occlusion_shader->SetUniform("u_P", scene->GetActiveCamera()->projection());
+
+		glBindVertexArray(occlusion_vao);
+
+		const int writeFrame = occlusion_frame;
+
+		for (const auto& [entity, aabb] : aabbs) {
+			auto& state = occlusion_query_map[entity];
+
+			// Lazily allocate query objects
+			if (state.queries[writeFrame] == 0) {
+				glGenQueries(1, &state.queries[writeFrame]);
+			}
+
+			// Scale unit cube [-0.5,0.5] to the worldAABB extents
+			const glm::vec3 center = (aabb.min + aabb.max) * 0.5f;
+			const glm::vec3 size   = aabb.max - aabb.min;
+			glm::mat4 M = glm::translate(glm::mat4(1.f), center)
+						* glm::scale(glm::mat4(1.f), glm::max(size, glm::vec3(0.001f)));
+
+			occlusion_shader->SetUniform("u_M", M);
+
+			glBeginQuery(GL_ANY_SAMPLES_PASSED, state.queries[writeFrame]);
+			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr);
+			glEndQuery(GL_ANY_SAMPLES_PASSED);
+
+			state.hasResult[writeFrame] = true;
+		}
+
+		glBindVertexArray(0);
+
+		// Restore GL state
+		glDepthFunc(GL_LESS);
+		glColorMask(colorMask[0], colorMask[1], colorMask[2], colorMask[3]);
+		glDepthMask(depthWriteMask);
+#endif
 	}
 
 	void WindowsRenderer::BeginMinimapPass(const glm::mat4& view,
@@ -3274,6 +3535,18 @@ namespace PAIN {
 			glDeleteBuffers(1, &debug_VBO);
 			debug_VBO = 0;
 		}
+
+		if (occlusion_vao) { glDeleteVertexArrays(1, &occlusion_vao); occlusion_vao = 0; }
+		if (occlusion_vbo) { glDeleteBuffers(1, &occlusion_vbo); occlusion_vbo = 0; }
+		if (occlusion_ebo) { glDeleteBuffers(1, &occlusion_ebo); occlusion_ebo = 0; }
+
+		// Delete all occlusion query objects
+		for (auto& [entity, state] : occlusion_query_map) {
+			for (int i = 0; i < 2; ++i) {
+				if (state.queries[i]) glDeleteQueries(1, &state.queries[i]);
+			}
+		}
+		occlusion_query_map.clear();
 
 		if (minimap_wall_vao) {
 			glDeleteVertexArrays(1, &minimap_wall_vao);
