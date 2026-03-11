@@ -419,10 +419,6 @@ namespace PAIN {
 				return;
 			}
 
-			// Advance occlusion query double-buffer index before reading results this frame
-			if (GraphicsSettings::get().occlusion_culling)
-				rendererService->w_renderer->AdvanceOcclusionFrame();
-
 			rendererService->w_renderer->BeginGeometryPass(rendererService->m_Scene);
 
 			auto& gs = GraphicsSettings::get();
@@ -435,9 +431,6 @@ namespace PAIN {
 				std::vector<glm::mat4> matrices;
 			};
 			std::unordered_map<std::string, InstanceGroup> instanceGroups;
-
-			// Collect frustum-visible AABBs for occlusion query pass (ALL frustum-visible, even if occlusion-culled)
-			std::vector<std::pair<entt::entity, BoundingVolume*>> frustumVisibleBVs;
 
 			// Use structured bindings with .each() for proper group iteration
 			for (auto [entity, model, transform, layer] : renderGroup.each()) {
@@ -468,18 +461,6 @@ namespace PAIN {
 					if (!isAABBInFrustum(boundingVol->worldAABB, camFrustum)) {
 						gs.stats.objects_culled++;
 						continue; // skip rendering this object, it's outside the frustum
-					}
-				}
-
-				// Collect for occlusion query pass (after depth buffer is populated)
-				if (gs.occlusion_culling && boundingVol && boundingVol->worldAABB.isValid())
-					frustumVisibleBVs.push_back({entity, boundingVol});
-
-				// OCCLUSION CULLING (1-frame delayed query results)
-				if (gs.occlusion_culling) {
-					if (!rendererService->w_renderer->GetOcclusionResult(entity)) {
-						gs.stats.occlusion_culled++;
-						continue;
 					}
 				}
 
@@ -519,15 +500,6 @@ namespace PAIN {
 					rendererService->w_renderer->DrawGeometryInstanced(
 						rendererService->m_Scene, *grp.rep, grp.matrices);
 				}
-			}
-
-			// Issue occlusion queries while the G-buffer FBO is still bound (correct depth buffer)
-			if (gs.occlusion_culling && !frustumVisibleBVs.empty()) {
-				std::vector<std::pair<entt::entity, AABB>> queryList;
-				queryList.reserve(frustumVisibleBVs.size());
-				for (auto [e, bv] : frustumVisibleBVs)
-					queryList.push_back({e, bv->worldAABB});
-				rendererService->w_renderer->OcclusionQueryPass(rendererService->m_Scene, queryList);
 			}
 
 			rendererService->w_renderer->EndGeometryPass();

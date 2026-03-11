@@ -802,7 +802,6 @@ namespace PAIN {
 		std::filesystem::path bloom_blend_path = "engine/shaders/bloom_blend.vert";
 		std::filesystem::path tone_path = "engine/shaders/tone.vert";
 		std::filesystem::path volumetric_path = "engine/shaders/volumetric.vert";
-		std::filesystem::path occlusion_path = "engine/shaders/occlusion.vert";
 #else
 		std::filesystem::path pbr_path = "engine\\shaders\\android_pbr.vert";
 		std::filesystem::path geometry_path =
@@ -973,14 +972,6 @@ namespace PAIN {
 			volumetric_shader = nullptr;
 		}
 
-#ifdef PN_PLATFORM_WINDOWS
-		shader_opt = assets_loader->getAsset<Assets::Shader>(occlusion_path);
-		occlusion_shader = shader_opt.has_value() ? shader_opt.value() : occlusion_shader;
-		if (!occlusion_shader || occlusion_shader->GetRendererID() == 0) {
-			PN_CORE_WARN("Failed to create occlusion shader (non-fatal, occlusion culling disabled)");
-			occlusion_shader = nullptr;
-		}
-#endif
 	}
 
 	void WindowsRenderer::_createDeferredShadingBuffer(unsigned int& tex,
@@ -1403,45 +1394,6 @@ namespace PAIN {
 			glBindVertexArray(0);
 		}
 
-		// === Occlusion Cube VAO/VBO/EBO ===
-		// Unit cube centered at origin, vertices in [-0.5, 0.5]
-		{
-			static constexpr float cubeVerts[] = {
-				// 8 unique corners of a unit cube
-				-0.5f, -0.5f, -0.5f,
-				 0.5f, -0.5f, -0.5f,
-				 0.5f,  0.5f, -0.5f,
-				-0.5f,  0.5f, -0.5f,
-				-0.5f, -0.5f,  0.5f,
-				 0.5f, -0.5f,  0.5f,
-				 0.5f,  0.5f,  0.5f,
-				-0.5f,  0.5f,  0.5f,
-			};
-			static constexpr unsigned int cubeIdx[] = {
-				0,1,2, 2,3,0, // -Z
-				4,5,6, 6,7,4, // +Z
-				0,4,7, 7,3,0, // -X
-				1,5,6, 6,2,1, // +X
-				0,1,5, 5,4,0, // -Y
-				3,2,6, 6,7,3, // +Y
-			};
-
-			glGenVertexArrays(1, &occlusion_vao);
-			glBindVertexArray(occlusion_vao);
-
-			glGenBuffers(1, &occlusion_vbo);
-			glBindBuffer(GL_ARRAY_BUFFER, occlusion_vbo);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVerts), cubeVerts, GL_STATIC_DRAW);
-
-			glGenBuffers(1, &occlusion_ebo);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, occlusion_ebo);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeIdx), cubeIdx, GL_STATIC_DRAW);
-
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-
-			glBindVertexArray(0);
-		}
 	}
 
 	void WindowsRenderer::Init(std::shared_ptr<Services> app_services) {
@@ -2151,93 +2103,6 @@ namespace PAIN {
 
 	void WindowsRenderer::EndGeometryPass() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	}
-
-	void WindowsRenderer::AdvanceOcclusionFrame() {
-		occlusion_frame ^= 1; // toggle 0 <-> 1
-	}
-
-	bool WindowsRenderer::GetOcclusionResult(entt::entity entity) const {
-		auto it = occlusion_query_map.find(entity);
-		if (it == occlusion_query_map.end())
-			return true; // no prior result → assume visible
-
-		const int readFrame = occlusion_frame ^ 1; // opposite of current write frame
-		const auto& state = it->second;
-		if (!state.hasResult[readFrame] || state.queries[readFrame] == 0)
-			return true; // no result yet → assume visible
-
-		// Check if result is available without stalling
-		GLuint available = 0;
-		glGetQueryObjectuiv(state.queries[readFrame], GL_QUERY_RESULT_AVAILABLE, &available);
-		if (!available)
-			return true; // GPU hasn't finished yet → assume visible to avoid false culling
-
-		GLuint result = 0;
-		glGetQueryObjectuiv(state.queries[readFrame], GL_QUERY_RESULT, &result);
-		return result > 0;
-	}
-
-	void WindowsRenderer::OcclusionQueryPass(
-		std::shared_ptr<Scene::SceneManager> scene,
-		const std::vector<std::pair<entt::entity, AABB>>& aabbs)
-	{
-#ifdef PN_PLATFORM_ANDROID
-		(void)scene; (void)aabbs;
-		return;
-#else
-		if (!occlusion_shader || aabbs.empty())
-			return;
-
-		// Save GL state
-		GLboolean depthWriteMask; glGetBooleanv(GL_DEPTH_WRITEMASK, &depthWriteMask);
-		GLboolean colorMask[4];
-		glGetBooleanv(GL_COLOR_WRITEMASK, colorMask);
-
-		// Query only depth — no color, no depth writes
-		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-		glDepthMask(GL_FALSE);
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LEQUAL); // LEQUAL: AABB faces co-planar with geometry still pass
-
-		occlusion_shader->Bind();
-		occlusion_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
-		occlusion_shader->SetUniform("u_P", scene->GetActiveCamera()->projection());
-
-		glBindVertexArray(occlusion_vao);
-
-		const int writeFrame = occlusion_frame;
-
-		for (const auto& [entity, aabb] : aabbs) {
-			auto& state = occlusion_query_map[entity];
-
-			// Lazily allocate query objects
-			if (state.queries[writeFrame] == 0) {
-				glGenQueries(1, &state.queries[writeFrame]);
-			}
-
-			// Scale unit cube [-0.5,0.5] to the worldAABB extents
-			const glm::vec3 center = (aabb.min + aabb.max) * 0.5f;
-			const glm::vec3 size   = aabb.max - aabb.min;
-			glm::mat4 M = glm::translate(glm::mat4(1.f), center)
-						* glm::scale(glm::mat4(1.f), glm::max(size, glm::vec3(0.001f)));
-
-			occlusion_shader->SetUniform("u_M", M);
-
-			glBeginQuery(GL_ANY_SAMPLES_PASSED, state.queries[writeFrame]);
-			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr);
-			glEndQuery(GL_ANY_SAMPLES_PASSED);
-
-			state.hasResult[writeFrame] = true;
-		}
-
-		glBindVertexArray(0);
-
-		// Restore GL state
-		glDepthFunc(GL_LESS);
-		glColorMask(colorMask[0], colorMask[1], colorMask[2], colorMask[3]);
-		glDepthMask(depthWriteMask);
-#endif
 	}
 
 	void WindowsRenderer::BeginMinimapPass(const glm::mat4& view,
@@ -3535,18 +3400,6 @@ namespace PAIN {
 			glDeleteBuffers(1, &debug_VBO);
 			debug_VBO = 0;
 		}
-
-		if (occlusion_vao) { glDeleteVertexArrays(1, &occlusion_vao); occlusion_vao = 0; }
-		if (occlusion_vbo) { glDeleteBuffers(1, &occlusion_vbo); occlusion_vbo = 0; }
-		if (occlusion_ebo) { glDeleteBuffers(1, &occlusion_ebo); occlusion_ebo = 0; }
-
-		// Delete all occlusion query objects
-		for (auto& [entity, state] : occlusion_query_map) {
-			for (int i = 0; i < 2; ++i) {
-				if (state.queries[i]) glDeleteQueries(1, &state.queries[i]);
-			}
-		}
-		occlusion_query_map.clear();
 
 		if (minimap_wall_vao) {
 			glDeleteVertexArrays(1, &minimap_wall_vao);

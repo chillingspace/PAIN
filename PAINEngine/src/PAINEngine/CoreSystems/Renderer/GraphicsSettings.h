@@ -62,7 +62,6 @@ namespace PAIN {
 			int objects_rendered = 0;
 			int shadow_objects_culled = 0;
 			int shadow_objects_rendered = 0;
-			int occlusion_culled = 0;
 		} stats;
 
 		SHADOW_TYPES shadow_type = SHADOW_TYPES::SOFT;
@@ -147,7 +146,6 @@ namespace PAIN {
 
 		// optimisation
 		bool use_instanced_rendering = true;
-		bool occlusion_culling = true;
 
 		// minimap
 		bool minimap_enabled = false;

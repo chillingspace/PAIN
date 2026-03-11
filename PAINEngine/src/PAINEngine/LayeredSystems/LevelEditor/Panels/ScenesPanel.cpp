@@ -654,9 +654,6 @@ namespace PAIN {
                 ImGui::Separator();
                 if (ImGui::Checkbox("GPU Instancing", &gs.use_instanced_rendering)) {}
                 if (ImGui::IsItemHovered()) ImGui::SetTooltip("Batches identical non-animated objects into one draw call.");
-                if (ImGui::Checkbox("Occlusion Culling", &gs.occlusion_culling)) {}
-                if (ImGui::IsItemHovered()) ImGui::SetTooltip("Skips objects fully hidden behind geometry (1-frame delay).");
-
                 ImGui::Separator();
 
                 bool using_diffuse = gs.DEBUG_USE_DIFFUSE_MAP;

@@ -168,17 +168,7 @@ namespace PAIN {
 							  const glm::vec4& color);
 		void DebugPass2DCircle(const glm::vec2& center_p, const glm::vec2& radius_ndc,
 							  const glm::vec4& color, int segments = 32);
-		// Issues GL_ANY_SAMPLES_PASSED occlusion queries for all entities in `aabbs`.
-	// Results are read next frame via GetOcclusionResult().
-	void OcclusionQueryPass(std::shared_ptr<Scene::SceneManager> scene,
-							const std::vector<std::pair<entt::entity, AABB>>& aabbs);
-	// Returns false if the entity was confirmed occluded last frame (safe to skip).
-	// Returns true for newly-seen entities (no prior result).
-	bool GetOcclusionResult(entt::entity entity) const;
-	// Call once per frame before OcclusionQueryPass to advance the double-buffer index.
-	void AdvanceOcclusionFrame();
-
-	void VolumetricPass(std::shared_ptr<Scene::SceneManager> scene,
+		void VolumetricPass(std::shared_ptr<Scene::SceneManager> scene,
 						   const LightSources& lights);
 		void PostProcessPass();
 
@@ -247,19 +237,6 @@ namespace PAIN {
 		unsigned int empty_vao = 0;
 		unsigned int passthrough_vao = 0;
 		unsigned int passthrough_vbo = 0;
-
-		// === Occlusion Culling ===
-		unsigned int occlusion_vao = 0;
-		unsigned int occlusion_vbo = 0;
-		unsigned int occlusion_ebo = 0;
-		std::shared_ptr<Assets::Shader> occlusion_shader = nullptr;
-
-		struct OcclusionQueryState {
-			GLuint queries[2] = {0, 0}; // double-buffered
-			bool hasResult[2] = {false, false};
-		};
-		std::unordered_map<entt::entity, OcclusionQueryState> occlusion_query_map;
-		int occlusion_frame = 0; // toggles 0/1 each frame
 
 		unsigned int final_texture = 0; // for imgui/post-processing/display
 		unsigned int pp_texture = 0;	// for ping-pong for post-processing
