@@ -35,6 +35,8 @@ namespace PAIN {
 
 	class WindowsRenderer {
 	private:
+		static constexpr int MAX_VOLUMETRIC_LIGHTS = 4;
+
 		// for instanced rendering
 
 		// scene vbo stuff
@@ -194,12 +196,13 @@ namespace PAIN {
                   unsigned int passthrough_vbo = 0;
   */
 		unsigned int ds_fbo = 0; // deferred shading framebuffer
-		unsigned int ds_rbo = 0; // depth buffer
+		unsigned int ds_depth_texture = 0;
 		// unsigned int shadow_fbo = 0;
 		unsigned int final_fbo = 0;
 		unsigned int final_rbo = 0;
 		unsigned int minimap_fbo = 0;
 		unsigned int minimap_rbo = 0;
+		std::array<unsigned int, 2> volumetric_fbos{0, 0};
 
 		unsigned int pp_fbo = 0;  // post-processing framebuffer (for ping-pong)
 		unsigned int pp2_fbo = 0; // post-processing framebuffer 2 (for ping-pong)
@@ -233,8 +236,18 @@ namespace PAIN {
 		unsigned int pp_texture = 0;	// for ping-pong for post-processing
 		unsigned int pp2_texture = 0;	// for ping-pong for post-processing (bloom etc)
 		unsigned int minimap_texture = 0;
+		std::array<unsigned int, 2> volumetric_textures{0, 0};
 		int minimap_width = 0;
 		int minimap_height = 0;
+		int volumetric_width = 0;
+		int volumetric_height = 0;
+		int volumetric_history_index = 0;
+		bool volumetric_history_valid = false;
+		glm::mat4 volumetric_prev_vp = glm::mat4(1.0f);
+		glm::vec3 volumetric_prev_cam_pos = glm::vec3(0.0f);
+		glm::vec3 volumetric_prev_cam_forward = glm::vec3(0.0f, 0.0f, -1.0f);
+		unsigned int volumetric_frame_index = 0;
+		std::unordered_map<std::string, int> volumetric_selection_ttl;
 
 		GLint minimap_prev_fbo = 0;
 		GLint minimap_prev_viewport[4] = {0, 0, 0, 0};
@@ -276,8 +289,9 @@ namespace PAIN {
 			&pp2_fbo,
 			&minimap_fbo,
 		};
-		std::array<unsigned int*, 3> rbos{&ds_rbo, &final_rbo, &minimap_rbo};
-		std::array<unsigned int*, 9> texs{
+		std::array<unsigned int*, 2> rbos{&final_rbo, &minimap_rbo};
+		std::array<unsigned int*, 10> texs{
+			&ds_depth_texture,
 			&pos_texture,
 			&col_texture,
 			&norm_texture,

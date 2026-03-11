@@ -29,6 +29,7 @@
         "df7c04c2-94d4-5347-8dad-6527e853bf94",
         "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
         "ab88a2ae-3d34-3342-b2ed-df719f19b490",
+        "25c6e2c3-b701-4c43-b049-8c9b21a29441",
         "d67f82f6-9682-ba48-a64c-8697034ad488",
         "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
         "ecc50f9b-7cb8-274e-afdf-1ab2b89c6d8c",
@@ -39,6 +40,7 @@
         "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
         "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd",
         "b3ec7aee-c5ff-af48-9aa1-f912f843a888",
+        "164de26f-1403-e146-8a76-735d5dc42155",
         "c3be7e4a-501e-0744-ac10-55d1b5a38d86",
         "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
         "c7685566-a3eb-4b4f-a630-7d08fedb36e5",
@@ -58,6 +60,8 @@
         "351d0711-28db-d346-81fe-fe5904ff854a",
         "f8f9abf4-39b2-3f41-9e00-4bdfd4476881",
         "d9977322-f31e-bc4c-b298-fbcd6690c4ba",
+        "a77749e3-6c15-7446-a792-5609dd96b391",
+        "31f050fc-b8fd-9f44-9f4c-c2b19a10e63e",
         "e01c794e-0add-d542-9860-03f63c3193ab",
         "a8977689-ded0-fa41-9efb-33354e83dec7",
         "1c7ce177-d679-a44a-89d0-a718aa172c23",
@@ -100,7 +104,7 @@
         "0b9ad008-e8ad-144b-855d-115dd4683035",
         "b6f7c506-7c21-1847-a0b9-597479e83e13",
         "9d082b82-72a3-e149-a6bb-b0fa70c02de0",
-        "a77749e3-6c15-7446-a792-5609dd96b391",
+        "466ca22c-0eb2-0d49-ac1a-b9d822cc1ce4",
         "c49ebb97-d7ba-f148-9e46-16d6c5543147",
         "3e8dc653-3d17-ab42-bb53-da040f01f965",
         "06cab9b7-c91a-6948-bb59-426b8032ea12",
@@ -217,16 +221,16 @@
         ],
         "farPlane": 100.0,
         "forward": [
-            -0.010526156984269619,
-            -0.6637076139450073,
-            -0.7479181289672852
+            -0.6710155010223389,
+            -0.5661656856536865,
+            0.47874292731285095
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            -0.1612379401922226,
-            4.412954330444336,
-            -10.084941864013672
+            4.840952396392822,
+            16.056232452392578,
+            -11.04649543762207
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 20.0,
@@ -238,123 +242,6 @@
     },
     "ecs": {
         "Entities": [
-            {
-                "Entity": {
-                    "Components": {
-                        "GUID": {
-                            "guid": "25019932-a962-8340-bab4-d7dc4a6fa5cd"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 0
-                        },
-                        "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                6.025232315063477,
-                                -11.61721420288086
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "Particles"
-                        },
-                        "ParticleSystem": {
-                            "angularVelocity": 0.0,
-                            "angularVelocityVariance": 0.0,
-                            "blendMode": 0,
-                            "colorOverLifetime": [
-                                {
-                                    "color": [
-                                        1.0,
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "time": 1.0
-                                }
-                            ],
-                            "directionMode": 0,
-                            "directionSpace": 0,
-                            "drag": 0.0,
-                            "emissionDirection": [
-                                0.0,
-                                90.0,
-                                50.0
-                            ],
-                            "emissionRate": 5.0,
-                            "emissionShape": 3,
-                            "emissionSpread": 90.0,
-                            "gravityMultiplier": 1.0,
-                            "lifetime": 1.0,
-                            "lifetimeVariance": 5.0,
-                            "looping": true,
-                            "maxParticles": 1000,
-                            "particleTexture": "b931be10-eb87-4345-9d73-09670aa9669d",
-                            "playDuration": 0.0,
-                            "playOnAwake": true,
-                            "renderShape": 2,
-                            "shapeParams": {
-                                "boxHalfExtents": [
-                                    0.5,
-                                    0.5,
-                                    0.5
-                                ],
-                                "circleArc": 360.0,
-                                "circleRadius": 14.899999618530273,
-                                "coneAngle": 25.0,
-                                "sphereRadius": 12.199999809265137,
-                                "volumeEmission": true
-                            },
-                            "simulationSpace": 0,
-                            "sizeOverLifetime": [],
-                            "sizeOverLifetimeMultiplier": 1.0,
-                            "softEdge": 0.20000000298023224,
-                            "sortMode": 0,
-                            "speed": 1.0,
-                            "speedVariance": 0.0,
-                            "startColor": [
-                                1.0,
-                                0.8526509404182434,
-                                0.6858407258987427,
-                                1.0
-                            ],
-                            "startColorVariance": [
-                                0.8539823293685913,
-                                0.7097904682159424,
-                                0.5630237460136414,
-                                0.0
-                            ],
-                            "startRotation": 0.0,
-                            "startRotationVariance": 0.0,
-                            "startSize": 1.0,
-                            "startSizeVariance": 1.0,
-                            "velocityOverLifetime": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "velocityOverLifetimeEnabled": false
-                        }
-                    },
-                    "Name": "Particles"
-                }
-            },
             {
                 "Entity": {
                     "Components": {
@@ -3192,10 +3079,10 @@
                             ]
                         },
                         "Name": {
-                            "name": "e1"
+                            "name": "se A"
                         }
                     },
-                    "Name": "e1"
+                    "Name": "se A"
                 }
             },
             {
@@ -3303,7 +3190,7 @@
                             "visible": true
                         },
                         "Name": {
-                            "name": "Enemy1"
+                            "name": "se A"
                         },
                         "Scripts": {
                             "scripts": [
@@ -3316,9 +3203,14 @@
                                     "script_asset": "91decdb8-51ee-b642-8013-042034d23774"
                                 }
                             ]
+                        },
+                        "Tag": {
+                            "tags": [
+                                "patrol_group_A"
+                            ]
                         }
                     },
-                    "Name": "Enemy1"
+                    "Name": "se A"
                 }
             },
             {
@@ -3359,7 +3251,7 @@
                         },
                         "Tag": {
                             "tags": [
-                                "enemy_patrol_start"
+                                "enemy_patrol_start_A"
                             ]
                         }
                     },
@@ -3404,7 +3296,7 @@
                         },
                         "Tag": {
                             "tags": [
-                                "enemy_patrol_end"
+                                "enemy_patrol_end_A"
                             ]
                         }
                     },
@@ -3449,10 +3341,10 @@
                             ]
                         },
                         "Name": {
-                            "name": "e2"
+                            "name": "se B"
                         }
                     },
-                    "Name": "e2"
+                    "Name": "se B"
                 }
             },
             {
@@ -3573,6 +3465,11 @@
                                     "script_asset": "91decdb8-51ee-b642-8013-042034d23774"
                                 }
                             ]
+                        },
+                        "Tag": {
+                            "tags": [
+                                "patrol_group_B"
+                            ]
                         }
                     },
                     "Name": "Enemy"
@@ -3616,7 +3513,7 @@
                         },
                         "Tag": {
                             "tags": [
-                                "enemy_patrol_start"
+                                "enemy_patrol_start_B"
                             ]
                         }
                     },
@@ -3661,7 +3558,7 @@
                         },
                         "Tag": {
                             "tags": [
-                                "enemy_patrol_end"
+                                "enemy_patrol_end_B"
                             ]
                         }
                     },
@@ -3830,6 +3727,11 @@
                                     "script_asset": "91decdb8-51ee-b642-8013-042034d23774"
                                 }
                             ]
+                        },
+                        "Tag": {
+                            "tags": [
+                                "patrol_group_C"
+                            ]
                         }
                     },
                     "Name": "Enemy"
@@ -3873,7 +3775,7 @@
                         },
                         "Tag": {
                             "tags": [
-                                "enemy_patrol_start"
+                                "enemy_patrol_start_C"
                             ]
                         }
                     },
@@ -3918,7 +3820,7 @@
                         },
                         "Tag": {
                             "tags": [
-                                "enemy_patrol_end"
+                                "enemy_patrol_end_C"
                             ]
                         }
                     },
@@ -4129,6 +4031,11 @@
                                     "script_asset": "91decdb8-51ee-b642-8013-042034d23774"
                                 }
                             ]
+                        },
+                        "Tag": {
+                            "tags": [
+                                "patrol_group_D"
+                            ]
                         }
                     },
                     "Name": "Enemy"
@@ -4172,7 +4079,7 @@
                         },
                         "Tag": {
                             "tags": [
-                                "enemy_patrol_start"
+                                "enemy_patrol_start_D"
                             ]
                         }
                     },
@@ -4217,7 +4124,7 @@
                         },
                         "Tag": {
                             "tags": [
-                                "enemy_patrol_end"
+                                "enemy_patrol_end_D"
                             ]
                         }
                     },

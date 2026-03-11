@@ -1,4 +1,6 @@
-#version 330 core
+#version 300 es
+precision highp float;
+precision highp int;
 
 in vec2 TexCoords;
 layout(location = 0) out vec4 FragColor;
@@ -12,10 +14,10 @@ struct Light {
     mat4 V;
     mat4 P;
     float shadowMapIdx;
-    float type;         // 0=point, 1=directional, 2=spotlight
+    float type;
     vec3 direction;
-    float innerCutoff;  // cosine of inner angle
-    float outerCutoff;  // cosine of outer angle
+    float innerCutoff;
+    float outerCutoff;
 };
 
 #define MAX_LIGHTS 4
@@ -162,7 +164,6 @@ void main() {
     }
 
     vec3 currentColor = accumulated * u_VolumetricIntensity;
-
     vec3 finalColor = currentColor;
     if (hasSurface && u_HistoryValid > 0 && u_HistoryBlend > 0.0) {
         vec4 prevClip = u_PrevVP * vec4(surfaceWorldPos, 1.0);

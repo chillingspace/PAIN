@@ -26,7 +26,7 @@ namespace PAIN {
 		~TextRenderer();
 
 		static bool initialized;
-		static std::shared_ptr<Services> services;
+		static std::weak_ptr<Services> services;
 
 		unsigned int vao, vbo;
 		std::shared_ptr<Assets::Shader> shader;
@@ -43,6 +43,11 @@ namespace PAIN {
 			initialized = true;
 		}
 
+		static void shutdown() {
+			services.reset();
+			initialized = false;
+		}
+
 		static TextRenderer& get() {
 			if (!initialized) {
                 throw std::runtime_error("TextRenderer not initialized!");
@@ -52,7 +57,11 @@ namespace PAIN {
 		}
 
 		glm::mat4 projection() {
-			auto win_dim = services->get<Window::Window>()->getFrameBuffer();
+			auto svc = services.lock();
+			if (!svc) {
+				throw std::runtime_error("TextRenderer services expired");
+			}
+			auto win_dim = svc->get<Window::Window>()->getFrameBuffer();
 			// this projection gives allows us to work in screen space coordinates
 			static const glm::mat4 proj = glm::ortho(0.0f, win_dim.x * 1.f, 0.0f, win_dim.y * 1.f);
 			return proj;
