@@ -652,6 +652,9 @@ namespace PAIN {
                     ImGui::SliderFloat("Vol Scatter (Mie g)", &gs.volumetric_scatter, 0.0f, 0.99f);
                 }
                 ImGui::Separator();
+                if (ImGui::Checkbox("GPU Instancing", &gs.use_instanced_rendering)) {}
+                if (ImGui::IsItemHovered()) ImGui::SetTooltip("Batches identical non-animated objects into one draw call.");
+                ImGui::Separator();
 
                 bool using_diffuse = gs.DEBUG_USE_DIFFUSE_MAP;
                 if (ImGui::Checkbox("Using Diffuse Map", &using_diffuse))
