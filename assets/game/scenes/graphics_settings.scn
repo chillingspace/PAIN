@@ -135,7 +135,6 @@
                             "childrenGUIDs": [
                                 "7beaa535-462c-7f45-9d6d-4090ca227034",
                                 "9cd8f47f-6463-f747-9161-5941ccdd6c0a",
-                                "d3b0f1f6-95e2-a445-9590-c4ad1169da63",
                                 "f02eecce-bf53-1940-9990-80a6b0692ebd",
                                 "1915db12-41ad-e448-8ef7-34bb04aacfdb",
                                 "fffffce1-8726-8b49-af0e-06d51dbb42d5",
@@ -145,7 +144,8 @@
                                 "d9db24aa-0cca-894e-891d-1e5e67ae92f3",
                                 "0e4f02da-e565-aa40-a6ef-2cff0184d507",
                                 "8223fe5a-bf3f-674c-a56a-195bc4648e6a",
-                                "fc850314-1175-924a-91d2-dbb700235259"
+                                "fc850314-1175-924a-91d2-dbb700235259",
+                                "5e87bd99-73ec-0046-9839-b4e476586697"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 0
@@ -342,7 +342,7 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
-                            "guid": "d3b0f1f6-95e2-a445-9590-c4ad1169da63"
+                            "guid": "5e87bd99-73ec-0046-9839-b4e476586697"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
@@ -372,17 +372,17 @@
                             ]
                         },
                         "Name": {
-                            "name": "master_bar"
+                            "name": "display_fullscreen"
                         },
                         "Texture2D": {
                             "pos": [
                                 0.0,
                                 0.30000001192092896
                             ],
-                            "texture_guid": "d68c31eb-4037-d241-9d51-29c2edb8179f",
+                            "texture_guid": "b0b5eb01-c92e-8549-84b7-5fc1c75f0eb7",
                             "texture_scale": [
-                                0.6000000238418579,
-                                0.009999999776482582
+                                0.30000001192092896,
+                                0.10000000149011612
                             ]
                         },
                         "UIElement": {
@@ -437,7 +437,7 @@
                             ]
                         }
                     },
-                    "Name": "master_bar"
+                    "Name": "display_fullscreen"
                 }
             },
             {

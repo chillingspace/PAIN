@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "right_arrow_button.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 13302730414258335265
+  },
+  "descriptor_version": 1,
+  "guid": "8f97aeb0-256e-8a4e-8835-37536c0a65d8",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\right_arrow_button.prefab"
+  }
+}
