@@ -160,6 +160,8 @@ namespace PAIN {
 							  const glm::vec4& color);
 		void DebugPass2DCircle(const glm::vec2& center_p, const glm::vec2& radius_ndc,
 							  const glm::vec4& color, int segments = 32);
+		void VolumetricPass(std::shared_ptr<Scene::SceneManager> scene,
+						   const LightSources& lights);
 		void PostProcessPass();
 
 		void Render2DTexture(GLuint texture_id, const glm::vec2& pos,
@@ -263,6 +265,7 @@ namespace PAIN {
 		std::shared_ptr<Assets::Shader> tone_shader = nullptr;
 		std::shared_ptr<Assets::Shader> bloom_blend_shader = nullptr;
 		std::shared_ptr<Assets::Shader> minimap_wall_shader = nullptr;
+		std::shared_ptr<Assets::Shader> volumetric_shader = nullptr;
 
 		// for easy access to clear memory
 		std::array<unsigned int*, 5> fbos{

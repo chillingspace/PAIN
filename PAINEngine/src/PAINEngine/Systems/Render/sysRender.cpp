@@ -286,6 +286,11 @@ namespace PAIN {
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after lighting pass: {}", err);
 				}
+				volumetricPass(registry);
+				err = glGetError();
+				if (err != GL_NO_ERROR) {
+					PN_CORE_ERROR("OpenGL err after volumetric pass: {}", err);
+				}
 				particlePass(registry);
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
@@ -558,6 +563,18 @@ namespace PAIN {
 			auto scene = svc->get<Scene::SceneManager>();
 			rendererService->w_renderer->LightingPass(scene, LightSources::get());
 		}
+
+	void System::volumetricPass(entt::registry& registry) {
+		auto rendererService = services.lock()->get<sRenderer>();
+		if (!rendererService || !rendererService->w_renderer)
+			return;
+
+		auto svc = services.lock();
+		if (!svc) return;
+
+		auto scene = svc->get<Scene::SceneManager>();
+		rendererService->w_renderer->VolumetricPass(scene, LightSources::get());
+	}
 
 		// ============================================
 		// PARTICLE RENDER PASS - GPU Instanced Rendering
