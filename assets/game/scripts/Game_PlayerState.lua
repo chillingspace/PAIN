@@ -717,13 +717,11 @@ local function handleLetterLogic(px, py, pz)
         end
         setPosition(S.carriedLetter, px + off.x, py + off.y, pz + off.z)
 
-        -- Check for delivery
-        if collectPressed then
-            local deliveryPoint = findNearestByTag("letter_collection", px, py, pz, S.deliveryRadius)
-            if deliveryPoint then
-                collectPressed = false
-                deliverLetter()
-            end
+        -- Check for delivery (auto on proximity, or manual via C key / UI button)
+        local deliveryPoint = findNearestByTag("letter_collection", px, py, pz, S.deliveryRadius)
+        if deliveryPoint then
+            collectPressed = false
+            deliverLetter()
         end
         return  -- Don't pick up new letters while carrying
     end
@@ -731,13 +729,11 @@ local function handleLetterLogic(px, py, pz)
     -- If hidden, skip pickup
     if S.hidden then return end
 
-    -- Try to pick up letter
-    if collectPressed then
-        local letter = findNearestByTag("letter_collectible", px, py, pz, S.pickupRadius)
-        if letter then
-            collectPressed = false
-            pickupLetter(letter)
-        end
+    -- Try to pick up letter (auto on proximity, or manual via C key / UI button)
+    local letter = findNearestByTag("letter_collectible", px, py, pz, S.pickupRadius)
+    if letter then
+        collectPressed = false
+        pickupLetter(letter)
     end
 end
 

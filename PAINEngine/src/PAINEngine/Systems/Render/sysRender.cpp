@@ -531,7 +531,15 @@ namespace PAIN {
 
 				if (auto lightOpt = LightSources::get().get(lightName)) {
 					Light& light = lightOpt.value();
-					light.position = transform.position + lighting.offset;
+					// Use WorldTransform so the spotlight renders at the correct world
+					// location even when the entity is a non-root child with a parent
+					// that has a non-zero position. Falls back to LocalTransform for
+					// root entities where WorldTransform may not yet be computed.
+					glm::vec3 entityWorldPos = transform.position;
+					if (auto* wt = registry.try_get<WorldTransform>(entity)) {
+						entityWorldPos = glm::vec3(wt->matrix[3]);
+					}
+					light.position = entityWorldPos + lighting.offset;
 					light.L_intensity = lighting.light_intensity;
 					light.type = static_cast<Light::TYPES>(lighting.light_type);
 					light.setShadowType(

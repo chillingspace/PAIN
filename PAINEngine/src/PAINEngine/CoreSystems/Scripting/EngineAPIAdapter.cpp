@@ -280,6 +280,14 @@ namespace PAIN {
         return { 0.f, 0.f, 0.f };
     }
 
+    glm::vec3 EngineAPIAdapter::GetWorldPosition(entt::entity entityId) {
+        if (auto opt = ecs_.getEntityComponent<PAIN::WorldTransform>(entityId)) {
+            const glm::mat4& m = opt->get().matrix;
+            return { m[3][0], m[3][1], m[3][2] };
+        }
+        return { 0.f, 0.f, 0.f };
+    }
+
     void EngineAPIAdapter::SetPosition(entt::entity entityId, glm::vec3 p) {
         /*auto& t = ensure<PAIN::Transform>(entityId);
         t.position = { p.x, p.y, p.z };*/
@@ -955,10 +963,32 @@ namespace PAIN {
         auto& l = ensure<PAIN::Lighting>(entityId);
         l.light_type = static_cast<PAIN::TYPES>(ty);
     }
+    glm::vec3 EngineAPIAdapter::GetLightOffset(entt::entity entityId) {
+        if (auto opt = ecs_.getEntityComponent<PAIN::Lighting>(entityId)) {
+            return opt->get().offset;
+        }
+        return { 0.f, 0.f, 0.f };
+    }
+
     void EngineAPIAdapter::SetLightDirection(entt::entity entityId, float x, float y, float z) {
         auto& l = ensure<PAIN::Lighting>(entityId);
         l.direction = glm::normalize(glm::vec3{ x,y,z });
     }
+
+    glm::vec3 EngineAPIAdapter::GetLightDirection(entt::entity entityId) {
+        if (auto opt = ecs_.getEntityComponent<PAIN::Lighting>(entityId)) {
+            return opt->get().direction;
+        }
+        return { 0.f, -1.f, 0.f };
+    }
+
+    float EngineAPIAdapter::GetLightOuterAngle(entt::entity entityId) {
+        if (auto opt = ecs_.getEntityComponent<PAIN::Lighting>(entityId)) {
+            return opt->get().outer_angle;
+        }
+        return 17.5f;
+    }
+
     void EngineAPIAdapter::SetShadowType(entt::entity entityId, int st) {
         auto& l = ensure<PAIN::Lighting>(entityId);
         l.shadow_type = static_cast<PAIN::SHADOW_TYPES>(st);

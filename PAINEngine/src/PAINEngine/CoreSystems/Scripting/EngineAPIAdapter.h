@@ -85,6 +85,7 @@ namespace PAIN {
         /*                                Transform                                    */
         /* =========================================================================== */
         glm::vec3 GetPosition(entt::entity entityId) override;
+        glm::vec3 GetWorldPosition(entt::entity entityId) override;
         void SetPosition(entt::entity entityId, glm::vec3 p) override;
         glm::vec2 Get2DPosition(entt::entity entityId) override;
         void Set2DPosition(entt::entity entityId, glm::vec2 p) override;
@@ -187,9 +188,12 @@ namespace PAIN {
         void AddLight(entt::entity entityId) override;
         void RemoveLight(entt::entity entityId) override;
         void SetLightPosition(entt::entity entityId, float x, float y, float z) override;
+        glm::vec3 GetLightOffset(entt::entity entityId) override;
         void SetLightIntensity(entt::entity entityId, float r, float g, float b) override;
         void SetLightType(entt::entity entityId, int typeEnum /*0:POINT,1:DIRECTIONAL,2:SPOTLIGHT*/) override;
         void SetLightDirection(entt::entity entityId, float x, float y, float z) override;
+        glm::vec3 GetLightDirection(entt::entity entityId) override;
+        float GetLightOuterAngle(entt::entity entityId) override;
         void SetShadowType(entt::entity entityId, int shadowEnum /*0:NONE,1:MAPPED,2:SCREEN_SPACE*/) override;
 
         /* =========================================================================== */
