@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "controls_spritesheet.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 8026578329712039741
+  },
+  "descriptor_version": 1,
+  "guid": "5c3b45aa-8d1d-144f-8799-542214fe108d",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\controls_spritesheet.png"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "graphics_spritesheet.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 9005250731478285954
+  },
+  "descriptor_version": 1,
+  "guid": "321ec499-d253-9046-b9be-4b5a40afa2f9",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\graphics_spritesheet.png"
+  }
+}
