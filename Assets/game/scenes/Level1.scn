@@ -238,16 +238,16 @@
         ],
         "farPlane": 100.0,
         "forward": [
-            -0.03364267572760582,
-            -0.7118521332740784,
-            -0.7015231847763062
+            -0.9998152852058411,
+            -0.015459493733942509,
+            -0.01141951885074377
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            0.9863733053207397,
-            4.369248390197754,
-            -9.956533432006836
+            -3.0105109214782715,
+            3.5113399028778076,
+            -25.084077835083008
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 31.100000381469727,
@@ -4179,7 +4179,7 @@
                                 0.0
                             ],
                             "outer_angle": 17.5,
-                            "shadow_type": 0
+                            "shadow_type": 1
                         },
                         "LocalTransform": {
                             "position": [
@@ -4483,7 +4483,7 @@
                                 0.0
                             ],
                             "outer_angle": 32.0,
-                            "shadow_type": 0
+                            "shadow_type": 1
                         },
                         "LocalTransform": {
                             "position": [
@@ -4740,7 +4740,7 @@
                                 0.0
                             ],
                             "outer_angle": 32.0,
-                            "shadow_type": 0
+                            "shadow_type": 1
                         },
                         "LocalTransform": {
                             "position": [
@@ -4997,7 +4997,7 @@
                                 0.0
                             ],
                             "outer_angle": 32.0,
-                            "shadow_type": 0
+                            "shadow_type": 1
                         },
                         "LocalTransform": {
                             "position": [
@@ -5254,7 +5254,7 @@
                                 0.0
                             ],
                             "outer_angle": 32.0,
-                            "shadow_type": 0
+                            "shadow_type": 1
                         },
                         "LocalTransform": {
                             "position": [

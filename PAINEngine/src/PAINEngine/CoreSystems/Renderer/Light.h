@@ -23,7 +23,11 @@ namespace PAIN {
 		};
 
 	private:
+#ifdef PN_PLATFORM_ANDROID
 		static constexpr int MAX_SHADOWMAPPED_LIGHTS = 1;		// cant increase. will break android. android cannot handle > 16 textures
+#else
+		static constexpr int MAX_SHADOWMAPPED_LIGHTS = 4;		// Windows: matches shader array size in volumetric.frag / pbr.frag
+#endif
 		static int num_shadowmapped_lights;
 		SHADOW_TYPES shadow_type = SHADOW_TYPES::NONE;
 		unsigned int shadow_fbo = 0;
@@ -68,16 +72,16 @@ namespace PAIN {
 		void _cleanup() {
 			if (shadow_fbo) {
 				glDeleteFramebuffers(1, &shadow_fbo);
+				shadow_fbo = 0;
 			}
 
 			if (shadow_texture) {
 				glDeleteTextures(1, &shadow_texture);
+				shadow_texture = 0;
 			}
 		}
 	public:
-		Light() {
-			num_shadowmapped_lights = 0;
-		}
+		Light() = default;
 		~Light() {
 			_cleanup();
 		}
