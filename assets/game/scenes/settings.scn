@@ -640,7 +640,7 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "payload": "game/scenes/audio_settings.scn",
+                            "payload": "game/scenes/graphics_settings.scn",
                             "pressed_color": -5592406,
                             "state": "Normal"
                         },
