@@ -15,6 +15,195 @@
 #include "CoreSystems/Windows/Window.h"
 #include "ECS/Controller.h"
 
+namespace {
+	constexpr int kMaxVolumetricLights = 4;
+	constexpr int kVolumetricFirstShadowTextureUnit = 2;
+
+	struct PackedVolumetricLight {
+		const PAIN::Light* light = nullptr;
+		int shadowTextureUnit = -1;
+		int shadowMapIdx = -1;
+	};
+
+	struct CandidateVolumetricLight {
+		std::string key;
+		const PAIN::Light* light = nullptr;
+		bool hasShadowMap = false;
+		bool inCameraView = false;
+		bool hysteresisActive = false;
+		float viewScore = std::numeric_limits<float>::max();
+		float distToCamera = std::numeric_limits<float>::max();
+	};
+
+	struct VolumetricUniformNames {
+		std::array<std::string, kMaxVolumetricLights> position;
+		std::array<std::string, kMaxVolumetricLights> intensity;
+		std::array<std::string, kMaxVolumetricLights> view;
+		std::array<std::string, kMaxVolumetricLights> projection;
+		std::array<std::string, kMaxVolumetricLights> shadowMapIdx;
+		std::array<std::string, kMaxVolumetricLights> type;
+		std::array<std::string, kMaxVolumetricLights> direction;
+		std::array<std::string, kMaxVolumetricLights> innerCutoff;
+		std::array<std::string, kMaxVolumetricLights> outerCutoff;
+	};
+
+	const VolumetricUniformNames& GetVolumetricUniformNames() {
+		static const VolumetricUniformNames names = [] {
+			VolumetricUniformNames out{};
+			for (int i = 0; i < kMaxVolumetricLights; ++i) {
+				const std::string prefix = "u_Lights[" + std::to_string(i) + "].";
+				out.position[i] = prefix + "position";
+				out.intensity[i] = prefix + "L";
+				out.view[i] = prefix + "V";
+				out.projection[i] = prefix + "P";
+				out.shadowMapIdx[i] = prefix + "shadowMapIdx";
+				out.type[i] = prefix + "type";
+				out.direction[i] = prefix + "direction";
+				out.innerCutoff[i] = prefix + "innerCutoff";
+				out.outerCutoff[i] = prefix + "outerCutoff";
+			}
+			return out;
+		}();
+
+		return names;
+	}
+
+	bool IsSphereInsideFrustum(const PAIN::Frustum& frustum, const glm::vec3& center, float radius) {
+		const PAIN::Plane* planes[6] = {
+			&frustum.leftFace, &frustum.rightFace,
+			&frustum.bottomFace, &frustum.topFace,
+			&frustum.nearFace, &frustum.farFace
+		};
+
+		for (const PAIN::Plane* plane : planes) {
+			if (plane->getSignedDistanceToPlane(center) < -radius) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	bool IsPointInsideCameraView(const PAIN::Camera& camera, const glm::vec3& point) {
+		const glm::vec4 clipPos = camera.projection() * camera.view() * glm::vec4(point, 1.0f);
+		if (clipPos.w <= 0.0f) {
+			return false;
+		}
+
+		const glm::vec3 ndc = glm::vec3(clipPos) / clipPos.w;
+		return ndc.z >= -1.0f && ndc.z <= 1.0f &&
+			   ndc.x >= -1.0f && ndc.x <= 1.0f &&
+			   ndc.y >= -1.0f && ndc.y <= 1.0f;
+	}
+
+	float GetVolumetricInfluenceRadius(const PAIN::Light& light, float volumetricMaxDistance) {
+		if (light.type == PAIN::Light::TYPES::POINT) {
+			return std::max(0.5f, std::min(light.far_plane, volumetricMaxDistance));
+		}
+		if (light.type == PAIN::Light::TYPES::SPOTLIGHT) {
+			const float coneLength = std::max(0.5f, std::min(light.far_plane, volumetricMaxDistance));
+			const float coneRadius = std::tan(glm::radians(light.outer_angle)) * coneLength;
+			return std::sqrt((coneLength * 0.5f) * (coneLength * 0.5f) + coneRadius * coneRadius);
+		}
+		return std::max(0.5f, volumetricMaxDistance);
+	}
+
+	glm::vec3 GetVolumetricInfluenceCenter(const PAIN::Light& light, float volumetricMaxDistance) {
+		if (light.type == PAIN::Light::TYPES::SPOTLIGHT) {
+			const float coneLength = std::max(0.5f, std::min(light.far_plane, volumetricMaxDistance));
+			return light.position + glm::normalize(light.direction) * (coneLength * 0.5f);
+		}
+		return light.position;
+	}
+
+	float ComputeViewPriority(const PAIN::Camera& camera, const PAIN::Light& light, float volumetricMaxDistance) {
+		const glm::vec3 influenceCenter = GetVolumetricInfluenceCenter(light, volumetricMaxDistance);
+		const glm::vec3 toCenter = influenceCenter - camera.pos;
+		const float distance = glm::length(toCenter);
+		if (distance <= 0.0001f) {
+			return 0.0f;
+		}
+
+		const glm::vec3 dirToCenter = toCenter / distance;
+		const float facing = glm::clamp(glm::dot(glm::normalize(camera.forward), dirToCenter), -1.0f, 1.0f);
+		const float anglePenalty = 1.0f - facing;
+		return anglePenalty * 1000.0f + distance;
+	}
+
+	std::array<glm::vec3, 10> GetSpotlightSamplePoints(const PAIN::Light& light, float volumetricMaxDistance) {
+		const float coneLength = std::max(0.5f, std::min(light.far_plane, volumetricMaxDistance));
+		const glm::vec3 forward = glm::normalize(light.direction);
+		glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+		if (glm::abs(glm::dot(forward, up)) > 0.98f) {
+			up = glm::vec3(1.0f, 0.0f, 0.0f);
+		}
+
+		const glm::vec3 right = glm::normalize(glm::cross(forward, up));
+		const glm::vec3 basisUp = glm::normalize(glm::cross(right, forward));
+		const glm::vec3 baseCenter = light.position + forward * coneLength;
+		const float coneRadius = std::tan(glm::radians(light.outer_angle)) * coneLength;
+		const float halfConeRadius = coneRadius * 0.5f;
+
+		return {
+			light.position,
+			light.position + forward * (coneLength * 0.33f),
+			light.position + forward * (coneLength * 0.66f),
+			baseCenter,
+			baseCenter + right * coneRadius,
+			baseCenter - right * coneRadius,
+			baseCenter + basisUp * coneRadius,
+			baseCenter - basisUp * coneRadius,
+			baseCenter + glm::normalize(right + basisUp) * halfConeRadius,
+			baseCenter + glm::normalize(right - basisUp) * halfConeRadius
+		};
+	}
+
+	bool IsVolumetricLightVisible(const PAIN::Camera& camera, const PAIN::Frustum& frustum,
+								  const PAIN::Light& light, float volumetricMaxDistance) {
+		if (light.type == PAIN::Light::TYPES::SPOTLIGHT) {
+			const auto samplePoints = GetSpotlightSamplePoints(light, volumetricMaxDistance);
+			for (const glm::vec3& samplePoint : samplePoints) {
+				if (IsPointInsideCameraView(camera, samplePoint)) {
+					return true;
+				}
+			}
+		}
+
+		const glm::vec3 influenceCenter = GetVolumetricInfluenceCenter(light, volumetricMaxDistance);
+		const float influenceRadius = GetVolumetricInfluenceRadius(light, volumetricMaxDistance);
+		return IsSphereInsideFrustum(frustum, influenceCenter, influenceRadius) ||
+			   IsPointInsideCameraView(camera, light.position);
+	}
+
+	float ComputeVolumetricViewPriority(const PAIN::Camera& camera, const PAIN::Light& light,
+										const std::string& key,
+										const std::unordered_map<std::string, int>& selectionTtl,
+										float volumetricMaxDistance) {
+		float bestScore = ComputeViewPriority(camera, light, volumetricMaxDistance);
+		if (light.type == PAIN::Light::TYPES::SPOTLIGHT) {
+			const auto samplePoints = GetSpotlightSamplePoints(light, volumetricMaxDistance);
+			for (const glm::vec3& samplePoint : samplePoints) {
+				const glm::vec3 toPoint = samplePoint - camera.pos;
+				const float distance = glm::length(toPoint);
+				if (distance <= 0.0001f) {
+					bestScore = 0.0f;
+					break;
+				}
+
+				const glm::vec3 dirToPoint = toPoint / distance;
+				const float facing = glm::clamp(glm::dot(glm::normalize(camera.forward), dirToPoint), -1.0f, 1.0f);
+				const float anglePenalty = 1.0f - facing;
+				bestScore = std::min(bestScore, anglePenalty * 1000.0f + distance);
+			}
+		}
+
+		const auto ttlIt = selectionTtl.find(key);
+		if (ttlIt != selectionTtl.end() && ttlIt->second > 0) {
+			bestScore = std::max(0.0f, bestScore - 250.0f);
+		}
+		return bestScore;
+	}
+}
+
 namespace PAIN {
 	// Light light = {
 	//	{2.f, 3.f, 2.f},	// position
@@ -386,6 +575,7 @@ namespace PAIN {
 		std::filesystem::path bloom_path = "engine/shaders/bloom.vert";
 		std::filesystem::path bloom_blend_path = "engine/shaders/bloom_blend.vert";
 		std::filesystem::path tone_path = "engine/shaders/tone.vert";
+		std::filesystem::path volumetric_path = "engine/shaders/volumetric.vert";
 #else
 		std::filesystem::path pbr_path = "engine\\shaders\\android_pbr.vert";
 		std::filesystem::path geometry_path =
@@ -404,6 +594,7 @@ namespace PAIN {
 		std::filesystem::path bloom_blend_path =
 			"engine\\shaders\\android_bloom_blend.vert";
 		std::filesystem::path tone_path = "engine\\shaders\\android_tone.vert";
+		std::filesystem::path volumetric_path = "engine\\shaders\\android_volumetric.vert";
 #endif
 
 		// Get assets loader
@@ -547,9 +738,6 @@ namespace PAIN {
 			minimap_wall_shader = nullptr;
 		}
 
-#ifdef PN_PLATFORM_WINDOWS
-		// Volumetric lighting shader (Windows only)
-		std::filesystem::path volumetric_path = "engine/shaders/volumetric.vert";
 		shader_opt = assets_loader->getAsset<Assets::Shader>(volumetric_path);
 		volumetric_shader = shader_opt.has_value() ? shader_opt.value() : volumetric_shader;
 
@@ -557,7 +745,6 @@ namespace PAIN {
 			PN_CORE_WARN("Failed to create shader program for volumetric lighting (non-fatal)");
 			volumetric_shader = nullptr;
 		}
-#endif
 	}
 
 	void WindowsRenderer::_createDeferredShadingBuffer(unsigned int& tex,
@@ -619,6 +806,8 @@ namespace PAIN {
 		if (final_fbo) { glDeleteFramebuffers(1, &final_fbo); final_fbo = 0; }
 		if (pp_fbo) { glDeleteFramebuffers(1, &pp_fbo);   pp_fbo = 0; }
 		if (pp2_fbo) { glDeleteFramebuffers(1, &pp2_fbo);  pp2_fbo = 0; }
+		glDeleteFramebuffers(static_cast<GLsizei>(volumetric_fbos.size()), volumetric_fbos.data());
+		volumetric_fbos = {0, 0};
 		if (minimap_fbo) { glDeleteFramebuffers(1, &minimap_fbo);      minimap_fbo = 0; }
 		if (minimap_texture) { glDeleteTextures(1, &minimap_texture);      minimap_texture = 0; }
 		if (minimap_rbo) { glDeleteRenderbuffers(1, &minimap_rbo);     minimap_rbo = 0; }
@@ -626,13 +815,22 @@ namespace PAIN {
 		// Delete all G-buffer textures
 		GLuint textures[] = { pos_texture, col_texture, norm_texture,
 							  material_properties_texture, emission_texture,
-							  final_texture, pp_texture, pp2_texture };
-		glDeleteTextures(8, textures);
+							  ds_depth_texture, final_texture, pp_texture,
+							  pp2_texture, volumetric_textures[0], volumetric_textures[1] };
+		glDeleteTextures(10, textures);
 		pos_texture = col_texture = norm_texture = material_properties_texture
-			= emission_texture = final_texture = pp_texture = pp2_texture = 0;
+			= emission_texture = ds_depth_texture = final_texture = pp_texture
+			= pp2_texture = 0;
+		volumetric_textures = {0, 0};
+		volumetric_history_index = 0;
+		volumetric_history_valid = false;
+		volumetric_prev_vp = glm::mat4(1.0f);
+		volumetric_prev_cam_pos = glm::vec3(0.0f);
+		volumetric_prev_cam_forward = glm::vec3(0.0f, 0.0f, -1.0f);
+		volumetric_frame_index = 0;
+		volumetric_selection_ttl.clear();
 
 		// Delete renderbuffers
-		if (ds_rbo) { glDeleteRenderbuffers(1, &ds_rbo);    ds_rbo = 0; }
 		if (final_rbo) { glDeleteRenderbuffers(1, &final_rbo); final_rbo = 0; }
 
 		if (winWidth == 0 || winHeight == 0) {
@@ -663,12 +861,21 @@ namespace PAIN {
 			};
 			glDrawBuffers(NUM_GBUFFERS, attachments);
 
-			glGenRenderbuffers(1, &ds_rbo);
-			glBindRenderbuffer(GL_RENDERBUFFER, ds_rbo);
-			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, winWidth,
-								  winHeight);
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-									  GL_RENDERBUFFER, ds_rbo);
+			glGenTextures(1, &ds_depth_texture);
+			glBindTexture(GL_TEXTURE_2D, ds_depth_texture);
+#ifdef PN_PLATFORM_ANDROID
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, winWidth, winHeight,
+						 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, nullptr);
+#else
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, winWidth, winHeight,
+						 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, nullptr);
+#endif
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
+								   ds_depth_texture, 0);
 
 			GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 			if (status != GL_FRAMEBUFFER_COMPLETE) {
@@ -676,6 +883,35 @@ namespace PAIN {
 				return;
 			}
 			PN_CORE_INFO("G-buffer FBO is complete");
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		}
+
+		{
+			const float scale =
+				glm::clamp(GraphicsSettings::get().volumetric_resolution_scale, 0.25f, 1.0f);
+			volumetric_width = std::max(1, static_cast<int>(std::round(winWidth * scale)));
+			volumetric_height = std::max(1, static_cast<int>(std::round(winHeight * scale)));
+
+			glGenFramebuffers(static_cast<GLsizei>(volumetric_fbos.size()), volumetric_fbos.data());
+			glGenTextures(static_cast<GLsizei>(volumetric_textures.size()), volumetric_textures.data());
+
+			for (size_t i = 0; i < volumetric_fbos.size(); ++i) {
+				glBindFramebuffer(GL_FRAMEBUFFER, volumetric_fbos[i]);
+				glBindTexture(GL_TEXTURE_2D, volumetric_textures[i]);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, volumetric_width, volumetric_height, 0,
+							 GL_RGBA, GL_FLOAT, nullptr);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+									   volumetric_textures[i], 0);
+
+				if (!checkFramebufferComplete("Volumetric framebuffer")) {
+					return;
+				}
+			}
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
@@ -2175,117 +2411,232 @@ namespace PAIN {
 
 	void WindowsRenderer::VolumetricPass(std::shared_ptr<Scene::SceneManager> scene,
 										 const LightSources& lights) {
+#ifdef PN_PLATFORM_ANDROID
+		(void)scene;
+		(void)lights;
+		return;
+#else
+		(void)lights;
 		if (!volumetric_shader || volumetric_shader->GetRendererID() == 0)
 			return;
-		if (!GraphicsSettings::get().volumetric)
+		if (!GraphicsSettings::get().volumetric) {
+			volumetric_history_valid = false;
+			volumetric_selection_ttl.clear();
 			return;
-		if (!LightSources::get().lightsOn)
+		}
+		if (!LightSources::get().lightsOn) {
+			volumetric_history_valid = false;
+			volumetric_selection_ttl.clear();
+			return;
+		}
+		if (volumetric_fbos[0] == 0 || volumetric_fbos[1] == 0 ||
+			volumetric_textures[0] == 0 || volumetric_textures[1] == 0 ||
+			ds_depth_texture == 0)
 			return;
 
-		// Additively blend volumetric scattering into the HDR scene (final_fbo)
-		// so it gets tone-mapped and bloomed together with the rest.
-		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+		auto& gs = GraphicsSettings::get();
+		const int maxVolumetricLights =
+			std::clamp(gs.volumetric_max_lights, 1, kMaxVolumetricLights);
+		const int hysteresisFrames = std::max(0, gs.volumetric_selection_hysteresis_frames);
+
+		for (auto it = volumetric_selection_ttl.begin(); it != volumetric_selection_ttl.end();) {
+			if (it->second > 0) {
+				--it->second;
+			}
+			if (it->second <= 0) {
+				it = volumetric_selection_ttl.erase(it);
+			}
+			else {
+				++it;
+			}
+		}
+
+		std::vector<CandidateVolumetricLight> candidates;
+		candidates.reserve(LightSources::get().getCount());
+		auto cam = scene->GetActiveCamera();
+		if (!cam) {
+			return;
+		}
+		const Frustum cameraFrustum = cam->getFrustum();
+
+		for (auto& [key, lRef] : LightSources::get().getAllWithKeys()) {
+			const Light& l = lRef.get();
+			if (key == "world" || key == "cam") {
+				continue;
+			}
+			const bool hasShadowMap =
+				l.getShadowType() == Light::SHADOW_TYPES::MAPPED && l.getShadowTexture() != 0;
+			const bool supportsUnshadowedVolumetrics =
+				l.type == Light::TYPES::SPOTLIGHT || l.type == Light::TYPES::POINT;
+
+			if (!hasShadowMap && !supportsUnshadowedVolumetrics) {
+				continue;
+			}
+
+			const glm::vec3 influenceCenter = GetVolumetricInfluenceCenter(l, gs.volumetric_max_dist);
+			const bool inCameraView =
+				IsVolumetricLightVisible(*cam, cameraFrustum, l, gs.volumetric_max_dist);
+			const float distToCamera = glm::distance(cam->pos, influenceCenter);
+			const bool hysteresisActive = volumetric_selection_ttl.contains(key);
+
+			candidates.push_back({
+				key,
+				&l,
+				hasShadowMap,
+				inCameraView,
+				hysteresisActive,
+				ComputeVolumetricViewPriority(*cam, l, key, volumetric_selection_ttl, gs.volumetric_max_dist),
+				distToCamera
+			});
+		}
+
+		std::sort(candidates.begin(), candidates.end(),
+			[](const CandidateVolumetricLight& lhs, const CandidateVolumetricLight& rhs) {
+				if (lhs.inCameraView != rhs.inCameraView) {
+					return lhs.inCameraView && !rhs.inCameraView;
+				}
+				if (lhs.hysteresisActive != rhs.hysteresisActive) {
+					return lhs.hysteresisActive && !rhs.hysteresisActive;
+				}
+				if (lhs.viewScore != rhs.viewScore) {
+					return lhs.viewScore < rhs.viewScore;
+				}
+				return lhs.distToCamera < rhs.distToCamera;
+			});
+
+		std::vector<PackedVolumetricLight> packedLights;
+		packedLights.reserve(std::min<int>(maxVolumetricLights, static_cast<int>(candidates.size())));
+
+		int nextShadowTextureUnit = kVolumetricFirstShadowTextureUnit;
+		int nextShadowMapIdx = 0;
+		for (const CandidateVolumetricLight& candidate : candidates) {
+			if (static_cast<int>(packedLights.size()) >= maxVolumetricLights) {
+				break;
+			}
+
+			PackedVolumetricLight packed{};
+			packed.light = candidate.light;
+			if (candidate.hasShadowMap) {
+				packed.shadowTextureUnit = nextShadowTextureUnit;
+				packed.shadowMapIdx = nextShadowMapIdx;
+				++nextShadowTextureUnit;
+				++nextShadowMapIdx;
+			}
+			packedLights.push_back(packed);
+			if (hysteresisFrames > 0) {
+				volumetric_selection_ttl[candidate.key] = hysteresisFrames;
+			}
+		}
+
+		if (packedLights.empty()) {
+			volumetric_history_valid = false;
+			volumetric_selection_ttl.clear();
+			return;
+		}
+
+		const auto& uniformNames = GetVolumetricUniformNames();
+		const glm::mat4 vp = cam->projection() * cam->view();
+		const glm::mat4 invVP = glm::inverse(vp);
+		const int previousHistoryIndex = volumetric_history_index;
+		const int currentHistoryIndex = 1 - previousHistoryIndex;
+		const float cameraPosDelta = glm::length(cam->pos - volumetric_prev_cam_pos);
+		const float cameraDirDelta = 1.0f - glm::clamp(
+			glm::dot(glm::normalize(cam->forward), glm::normalize(volumetric_prev_cam_forward)),
+			-1.0f, 1.0f);
+		const float motionPenalty = glm::clamp(cameraPosDelta * 0.08f + cameraDirDelta * 2.5f, 0.0f, 0.75f);
+		const float historyBlend = volumetric_history_valid
+			? glm::clamp(gs.volumetric_temporal_blend - motionPenalty, 0.0f, 0.95f)
+			: 0.0f;
+
+		// Render the expensive march into a low-resolution target first.
+		glBindFramebuffer(GL_FRAMEBUFFER, volumetric_fbos[currentHistoryIndex]);
+		glViewport(0, 0, volumetric_width, volumetric_height);
+		glDisable(GL_BLEND);
 		glDisable(GL_DEPTH_TEST);
 		glDepthMask(GL_FALSE);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_ONE, GL_ONE);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
 
 		volumetric_shader->Bind();
 
-		// gPos at slot 0
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, pos_texture);
-		volumetric_shader->SetUniform("gPos", 0);
+		glBindTexture(GL_TEXTURE_2D, ds_depth_texture);
+		volumetric_shader->SetUniform("u_DepthTex", 0);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, volumetric_textures[previousHistoryIndex]);
+		volumetric_shader->SetUniform("u_HistoryTex", 1);
 
-		// Shadow maps start at slot 1
-		int tex_id    = 1;
-		int lightIdx  = 0;
-		for (auto& [key, lRef] : LightSources::get().getAllWithKeys()) {
-			if (key == "world") continue;  // world (directional) light excluded from volumetrics
-			const Light& l = lRef.get();
-			std::stringstream ss;
-
-			if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
-				glActiveTexture(GL_TEXTURE0 + tex_id);
+		for (size_t lightIdx = 0; lightIdx < packedLights.size(); ++lightIdx) {
+			const PackedVolumetricLight& packed = packedLights[lightIdx];
+			const Light& l = *packed.light;
+			if (packed.shadowMapIdx >= 0) {
+				glActiveTexture(GL_TEXTURE0 + packed.shadowTextureUnit);
 				glBindTexture(GL_TEXTURE_2D, l.getShadowTexture());
-
-				ss << "u_ShadowMaps[" << (tex_id - 1) << "]";
-				volumetric_shader->SetUniform(ss.str(), tex_id);
-				ss.str(""); ss.clear();
-
-				ss << "u_Lights[" << lightIdx << "].shadowMapIdx";
-				volumetric_shader->SetUniform(ss.str(), static_cast<float>(tex_id - 1));
-				ss.str(""); ss.clear();
-
-				++tex_id;
-			} else {
-				ss << "u_Lights[" << lightIdx << "].shadowMapIdx";
-				volumetric_shader->SetUniform(ss.str(), -1.f);
-				ss.str(""); ss.clear();
+				volumetric_shader->SetUniform(
+					"u_ShadowMaps[" + std::to_string(packed.shadowMapIdx) + "]",
+					packed.shadowTextureUnit);
+				volumetric_shader->SetUniform(uniformNames.shadowMapIdx[lightIdx],
+											  static_cast<float>(packed.shadowMapIdx));
 			}
-
-			ss << "u_Lights[" << lightIdx << "].position";
-			volumetric_shader->SetUniform(ss.str(), l.position);
-			ss.str(""); ss.clear();
-
-			ss << "u_Lights[" << lightIdx << "].V";
-			volumetric_shader->SetUniform(ss.str(), l.view());
-			ss.str(""); ss.clear();
-
-			ss << "u_Lights[" << lightIdx << "].P";
-			volumetric_shader->SetUniform(ss.str(), l.projection());
-			ss.str(""); ss.clear();
-
-			ss << "u_Lights[" << lightIdx << "].type";
-			volumetric_shader->SetUniform(ss.str(), static_cast<float>(l.type));
-			ss.str(""); ss.clear();
-
-			ss << "u_Lights[" << lightIdx << "].L";
-			volumetric_shader->SetUniform(ss.str(), l.L_intensity);
-			ss.str(""); ss.clear();
-
-			ss << "u_Lights[" << lightIdx << "].direction";
-			volumetric_shader->SetUniform(ss.str(), l.direction);
-			ss.str(""); ss.clear();
-
-			ss << "u_Lights[" << lightIdx << "].innerCutoff";
-			volumetric_shader->SetUniform(ss.str(), glm::cos(glm::radians(l.inner_angle)));
-			ss.str(""); ss.clear();
-
-			ss << "u_Lights[" << lightIdx << "].outerCutoff";
-			volumetric_shader->SetUniform(ss.str(), glm::cos(glm::radians(l.outer_angle)));
-			ss.str(""); ss.clear();
-
-			++lightIdx;
+			else {
+				volumetric_shader->SetUniform(uniformNames.shadowMapIdx[lightIdx], -1.0f);
+			}
+			volumetric_shader->SetUniform(uniformNames.position[lightIdx], l.position);
+			volumetric_shader->SetUniform(uniformNames.view[lightIdx], l.view());
+			volumetric_shader->SetUniform(uniformNames.projection[lightIdx], l.projection());
+			volumetric_shader->SetUniform(uniformNames.type[lightIdx], static_cast<float>(l.type));
+			volumetric_shader->SetUniform(uniformNames.intensity[lightIdx], l.L_intensity);
+			volumetric_shader->SetUniform(uniformNames.direction[lightIdx], l.direction);
+			volumetric_shader->SetUniform(uniformNames.innerCutoff[lightIdx],
+										  glm::cos(glm::radians(l.inner_angle)));
+			volumetric_shader->SetUniform(uniformNames.outerCutoff[lightIdx],
+										  glm::cos(glm::radians(l.outer_angle)));
 		}
 
-		// Camera
-		auto   cam   = scene->GetActiveCamera();
-		glm::mat4 vp    = cam->projection() * cam->view();
-		glm::mat4 invVP = glm::inverse(vp);
 		volumetric_shader->SetUniform("u_CamPos",  cam->pos);
 		volumetric_shader->SetUniform("u_InvVP",   invVP);
-		volumetric_shader->SetUniform("u_NumLights", LightSources::get().getCount() * 1.f);
+		volumetric_shader->SetUniform("u_PrevVP", volumetric_prev_vp);
+		volumetric_shader->SetUniform("u_NumLights", static_cast<int>(packedLights.size()));
+		volumetric_shader->SetUniform("u_HistoryBlend", historyBlend);
+		volumetric_shader->SetUniform("u_HistoryClamp", gs.volumetric_history_clamp);
+		volumetric_shader->SetUniform("u_HistoryValid", volumetric_history_valid ? 1 : 0);
+		volumetric_shader->SetUniform("u_FrameIndex", static_cast<int>(volumetric_frame_index++));
 
-		// Settings
-		auto& gs = GraphicsSettings::get();
 		volumetric_shader->SetUniform("u_VolumetricIntensity", gs.volumetric_intensity);
-		volumetric_shader->SetUniform("u_VolumetricSteps",     static_cast<float>(gs.volumetric_steps));
+		volumetric_shader->SetUniform("u_VolumetricSteps", gs.volumetric_steps);
 		volumetric_shader->SetUniform("u_VolumetricMaxDist",   gs.volumetric_max_dist);
 		volumetric_shader->SetUniform("u_VolumetricScatter",   gs.volumetric_scatter);
+		volumetric_shader->SetUniform("u_VolumetricJitterStrength", gs.volumetric_jitter_strength);
 
 		glBindVertexArray(empty_vao);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-		// Restore state
+		// Composite the low-resolution result into the HDR scene.
+		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+		glViewport(0, 0, winWidth, winHeight);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE, GL_ONE);
+		passthrough_shader->Bind();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, volumetric_textures[currentHistoryIndex]);
+		passthrough_shader->SetUniform("tex", 0);
+		glBindVertexArray(passthrough_vao);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+
 		glDisable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
+		volumetric_prev_vp = vp;
+		volumetric_prev_cam_pos = cam->pos;
+		volumetric_prev_cam_forward = cam->forward;
+		volumetric_history_index = currentHistoryIndex;
+		volumetric_history_valid = true;
 
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after VolumetricPass: {}", err);
 		}
+#endif
 	}
 
 	void WindowsRenderer::PostProcessPass() {
@@ -2598,6 +2949,18 @@ namespace PAIN {
 				*rbo = 0;
 			}
 		}
+
+		glDeleteFramebuffers(static_cast<GLsizei>(volumetric_fbos.size()), volumetric_fbos.data());
+		glDeleteTextures(static_cast<GLsizei>(volumetric_textures.size()), volumetric_textures.data());
+		volumetric_fbos = {0, 0};
+		volumetric_textures = {0, 0};
+		volumetric_history_index = 0;
+		volumetric_history_valid = false;
+		volumetric_prev_vp = glm::mat4(1.0f);
+		volumetric_prev_cam_pos = glm::vec3(0.0f);
+		volumetric_prev_cam_forward = glm::vec3(0.0f, 0.0f, -1.0f);
+		volumetric_frame_index = 0;
+		volumetric_selection_ttl.clear();
 
 		TextRenderer::shutdown();
 	}

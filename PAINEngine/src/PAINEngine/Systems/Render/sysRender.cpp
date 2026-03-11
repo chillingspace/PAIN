@@ -514,6 +514,10 @@ namespace PAIN {
 			if (!svc)
 				return;
 
+			auto scene = svc->get<Scene::SceneManager>();
+			if (!scene)
+				return;
+
 			auto lightingGroup = registry.group<Lighting>(entt::get<LocalTransform>);
 
 			// Cache to track which lights are still active this frame
@@ -568,7 +572,6 @@ namespace PAIN {
 				}
 			}
 
-			auto scene = svc->get<Scene::SceneManager>();
 			rendererService->w_renderer->LightingPass(scene, LightSources::get());
 		}
 

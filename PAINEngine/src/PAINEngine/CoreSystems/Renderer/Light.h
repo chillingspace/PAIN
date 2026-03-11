@@ -26,7 +26,7 @@ namespace PAIN {
 #ifdef PN_PLATFORM_ANDROID
 		static constexpr int MAX_SHADOWMAPPED_LIGHTS = 1;		// cant increase. will break android. android cannot handle > 16 textures
 #else
-		static constexpr int MAX_SHADOWMAPPED_LIGHTS = 4;		// Windows: matches shader array size in volumetric.frag / pbr.frag
+		static constexpr int MAX_SHADOWMAPPED_LIGHTS = 4;		// Windows: fixed budget, selection must rotate ownership
 #endif
 		static int num_shadowmapped_lights;
 		SHADOW_TYPES shadow_type = SHADOW_TYPES::NONE;

@@ -64,7 +64,7 @@ namespace PAIN {
 			int shadow_objects_rendered = 0;
 		} stats;
 
-		SHADOW_TYPES shadow_type = SHADOW_TYPES::SOFTEST;
+		SHADOW_TYPES shadow_type = SHADOW_TYPES::SOFT;
 		bool gamma_correction = true;
 		glm::vec3 AMBIENT_LIGHT = glm::vec3(0.f);
 		bool world_light = true;
@@ -90,9 +90,15 @@ namespace PAIN {
 		// volumetric lighting (god rays / light shafts)
 		bool volumetric = true;
 		float volumetric_intensity = 0.5f;   // overall brightness; start low
-		int   volumetric_steps = 64;           // ray march steps; 32-128 typical
-		float volumetric_max_dist = 50.0f;     // max ray length in world units
+		int   volumetric_steps = 24;           // ray march steps; keep low and rely on lower-resolution upsampling
+		float volumetric_max_dist = 40.0f;     // max ray length in world units
 		float volumetric_scatter = 0.f;       // Mie g: 0=uniform, 1=pure forward
+		float volumetric_resolution_scale = 0.5f; // render volumetrics at reduced resolution, then upscale additively
+		int   volumetric_max_lights = 4;      // separate cap from total scene lights to control cost
+		float volumetric_temporal_blend = 0.85f; // low-res history stabilization; higher = steadier but more trailing
+		float volumetric_jitter_strength = 1.0f; // offsets ray-march layers so temporal filtering can smooth them out
+		float volumetric_history_clamp = 0.35f; // reject stale history when current and previous lighting diverge
+		int   volumetric_selection_hysteresis_frames = 3; // keep recently visible cones alive briefly near frustum edges
 
 		// animation
 		bool interpolate_animation{ true };		// smoother animations at the expense of performance

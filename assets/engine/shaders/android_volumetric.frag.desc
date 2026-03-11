@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "android_volumetric.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 17736568887720382472
+  },
+  "descriptor_version": 1,
+  "guid": "72a281d9-6ea1-4f9d-b84d-d226d1738002",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_volumetric.frag"
+  }
+}
