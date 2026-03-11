@@ -1,9 +1,65 @@
 #include "pch.h"
 #include "sysTransform.h"
+#include "ECS/Components/cPhysics.h"
+#include "Systems/Physics/sysPhysics.h"
 
 
 namespace PAIN {
 	namespace Transform {
+
+		static void TeleportPhysicsBody(entt::entity e, entt::registry& registry, std::weak_ptr<Services>& services) {
+			if (registry.all_of<PAIN::Physics::RigidBody3D>(e)) {
+				auto& rb = registry.get<PAIN::Physics::RigidBody3D>(e);
+				if (!rb.bodyID.IsInvalid()) {
+					if (auto svc = services.lock()) {
+						if (auto physSystem = svc->get<PAIN::Physics::System>()) {
+							// We need the world transform, so let's make sure it's updated manually
+							auto& local = registry.get<PAIN::LocalTransform>(e);
+							auto& world = registry.get<PAIN::WorldTransform>(e);
+							
+							// Get parent world matrix
+							glm::mat4 parentWorld(1.0f);
+							if (auto hierarchy = registry.try_get<Entity::Hierarchy>(e)) {
+								if (hierarchy->parentGUID.IsValid()) {
+									auto ecs = svc->get<ECS::Controller>();
+									ECS::RegistryID regID = ECS::MAIN_REGISTRY_ID;
+									for (const auto& id : ecs->getAllRegistryIDs()) {
+										if (&ecs->getRegistry(id) == &registry) {
+											regID = id;
+											break;
+										}
+									}
+									entt::entity parent = ecs->getGUIDRegistry(regID).resolveGUID(hierarchy->parentGUID);
+									if (parent != entt::null && registry.valid(parent) && registry.all_of<PAIN::WorldTransform>(parent)) {
+										parentWorld = registry.get<PAIN::WorldTransform>(parent).matrix;
+									}
+								}
+							}
+
+							// Compute world matrix immediately
+							glm::mat4 localMat = glm::translate(glm::mat4(1.0f), local.position)
+								* glm::mat4(local.rotation)
+								* glm::scale(glm::mat4(1.0f), local.scale);
+							
+							world.matrix = parentWorld * localMat;
+							
+							// Extract global position and rotation
+							glm::vec3 worldPos, scale, skew;
+							glm::vec4 perspective;
+							glm::quat worldRot;
+							glm::decompose(world.matrix, scale, worldRot, worldPos, skew, perspective);
+							
+							// Teleport the Jolt body
+							PAIN::LocalTransform tempTransform;
+							tempTransform.position = worldPos;
+							tempTransform.rotation = worldRot;
+							
+							physSystem->teleportBodyToTransform(e, tempTransform, rb);
+						}
+					}
+				}
+			}
+		}
 
 		void System::onUpdate(AppTiming timing, entt::registry& registry) {
 			//Ensure local with world
@@ -97,6 +153,33 @@ namespace PAIN {
 
 			if (childWorld && parentWorld && childLocal)
 			{
+
+				// FIX: Ensure the child's world matrix is current before reparenting math
+				// A freshly-cloned entity may have dirty=true and a stale/identity matrix.
+				if (childWorld->dirty)
+				{
+					// Walk up to find the child's current parent world matrix
+					glm::mat4 currentParentWorld(1.0f);
+					if (auto* ch = registry.try_get<Entity::Hierarchy>(child)) {
+						if (ch->parentGUID.IsValid()) {
+							auto ecs = services.lock()->get<ECS::Controller>();
+							auto regID = getRegistryIDFromRef(registry);
+							entt::entity oldParent = ecs->getGUIDRegistry(regID).resolveGUID(ch->parentGUID);
+							if (oldParent != entt::null && registry.valid(oldParent)) {
+								if (auto* opw = registry.try_get<WorldTransform>(oldParent))
+									currentParentWorld = opw->matrix;
+							}
+						}
+					}
+
+					glm::mat4 localMat = glm::translate(glm::mat4(1.0f), childLocal->position)
+						* glm::mat4(childLocal->rotation)
+						* glm::scale(glm::mat4(1.0f), childLocal->scale);
+
+					childWorld->matrix = currentParentWorld * localMat;
+					childWorld->dirty = false;
+				}
+
 				// 2. Compute inverse of parent's world matrix
 				glm::mat4 invParentWorld = glm::inverse(parentWorld->matrix);
 
@@ -145,6 +228,7 @@ namespace PAIN {
 			}
 
 			markDirty(child, registry);
+			TeleportPhysicsBody(child, registry, services);
 		}
 
 		void System::removeParent(entt::entity child, entt::registry& registry) {
@@ -167,6 +251,7 @@ namespace PAIN {
 
 			hierarchy->parentGUID = Assets::GUID();
 			markDirty(child, registry);
+			TeleportPhysicsBody(child, registry, services);
 		}
 
 		void System::propagateDirty(entt::entity e, entt::registry& registry) {
