@@ -198,6 +198,17 @@ namespace PAIN {
             result.max = glm::max(a.max, b.max); // Use glm::max
             return result;
         }
+
+        AABB expanded(float margin) const {
+            return AABB(min - glm::vec3(margin), max + glm::vec3(margin));
+        }
+
+        // Returns true if this AABB fully contains 'other'
+        bool contains(const AABB& other) const {
+            return other.min.x >= min.x && other.max.x <= max.x
+                && other.min.y >= min.y && other.max.y <= max.y
+                && other.min.z >= min.z && other.max.z <= max.z;
+        }
     };
 
 } // namespace PAIN

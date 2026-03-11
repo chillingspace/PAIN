@@ -64,6 +64,9 @@ public:
     );
 
 private:
+    static constexpr float BVH_FAT_AABB_PADDING = 0.2f;  // world-space units
+    static constexpr int   BVH_REBUILD_INTERVAL = 300;   // frames between quality rebuilds
+    int m_framesSinceRebuild = 0;
     // Track scene state
     size_t m_lastEntityCount = 0;
     bool m_needsFullRebuild = true;

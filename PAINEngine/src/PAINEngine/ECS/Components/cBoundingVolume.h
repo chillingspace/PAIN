@@ -16,6 +16,7 @@ namespace PAIN {
 struct BoundingVolume {
   AABB localAABB;          // AABB relative to model origin
   AABB worldAABB;          // AABB in world space
+  AABB fatAABB;			   // expanded AABB stored in BVH leaf
   int bvhNodeIndex = -1;   // Index in BVH node pool, -1 if not added
   bool needsUpdate = true; // Flag for world AABB recalculation
 
