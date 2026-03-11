@@ -546,6 +546,18 @@ namespace PAIN {
 			PN_CORE_WARN("Failed to create shader program for minimap_wall (non-fatal, will fall back to debug path)");
 			minimap_wall_shader = nullptr;
 		}
+
+#ifdef PN_PLATFORM_WINDOWS
+		// Volumetric lighting shader (Windows only)
+		std::filesystem::path volumetric_path = "engine/shaders/volumetric.vert";
+		shader_opt = assets_loader->getAsset<Assets::Shader>(volumetric_path);
+		volumetric_shader = shader_opt.has_value() ? shader_opt.value() : volumetric_shader;
+
+		if (!volumetric_shader || volumetric_shader->GetRendererID() == 0) {
+			PN_CORE_WARN("Failed to create shader program for volumetric lighting (non-fatal)");
+			volumetric_shader = nullptr;
+		}
+#endif
 	}
 
 	void WindowsRenderer::_createDeferredShadingBuffer(unsigned int& tex,
@@ -2159,6 +2171,121 @@ namespace PAIN {
 		glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(verts.size() / 7));
 
 		glBindVertexArray(0);
+	}
+
+	void WindowsRenderer::VolumetricPass(std::shared_ptr<Scene::SceneManager> scene,
+										 const LightSources& lights) {
+		if (!volumetric_shader || volumetric_shader->GetRendererID() == 0)
+			return;
+		if (!GraphicsSettings::get().volumetric)
+			return;
+		if (!LightSources::get().lightsOn)
+			return;
+
+		// Additively blend volumetric scattering into the HDR scene (final_fbo)
+		// so it gets tone-mapped and bloomed together with the rest.
+		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+		glDisable(GL_DEPTH_TEST);
+		glDepthMask(GL_FALSE);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE, GL_ONE);
+
+		volumetric_shader->Bind();
+
+		// gPos at slot 0
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, pos_texture);
+		volumetric_shader->SetUniform("gPos", 0);
+
+		// Shadow maps start at slot 1
+		int tex_id    = 1;
+		int lightIdx  = 0;
+		for (auto& [key, lRef] : LightSources::get().getAllWithKeys()) {
+			if (key == "world") continue;  // world (directional) light excluded from volumetrics
+			const Light& l = lRef.get();
+			std::stringstream ss;
+
+			if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
+				glActiveTexture(GL_TEXTURE0 + tex_id);
+				glBindTexture(GL_TEXTURE_2D, l.getShadowTexture());
+
+				ss << "u_ShadowMaps[" << (tex_id - 1) << "]";
+				volumetric_shader->SetUniform(ss.str(), tex_id);
+				ss.str(""); ss.clear();
+
+				ss << "u_Lights[" << lightIdx << "].shadowMapIdx";
+				volumetric_shader->SetUniform(ss.str(), static_cast<float>(tex_id - 1));
+				ss.str(""); ss.clear();
+
+				++tex_id;
+			} else {
+				ss << "u_Lights[" << lightIdx << "].shadowMapIdx";
+				volumetric_shader->SetUniform(ss.str(), -1.f);
+				ss.str(""); ss.clear();
+			}
+
+			ss << "u_Lights[" << lightIdx << "].position";
+			volumetric_shader->SetUniform(ss.str(), l.position);
+			ss.str(""); ss.clear();
+
+			ss << "u_Lights[" << lightIdx << "].V";
+			volumetric_shader->SetUniform(ss.str(), l.view());
+			ss.str(""); ss.clear();
+
+			ss << "u_Lights[" << lightIdx << "].P";
+			volumetric_shader->SetUniform(ss.str(), l.projection());
+			ss.str(""); ss.clear();
+
+			ss << "u_Lights[" << lightIdx << "].type";
+			volumetric_shader->SetUniform(ss.str(), static_cast<float>(l.type));
+			ss.str(""); ss.clear();
+
+			ss << "u_Lights[" << lightIdx << "].L";
+			volumetric_shader->SetUniform(ss.str(), l.L_intensity);
+			ss.str(""); ss.clear();
+
+			ss << "u_Lights[" << lightIdx << "].direction";
+			volumetric_shader->SetUniform(ss.str(), l.direction);
+			ss.str(""); ss.clear();
+
+			ss << "u_Lights[" << lightIdx << "].innerCutoff";
+			volumetric_shader->SetUniform(ss.str(), glm::cos(glm::radians(l.inner_angle)));
+			ss.str(""); ss.clear();
+
+			ss << "u_Lights[" << lightIdx << "].outerCutoff";
+			volumetric_shader->SetUniform(ss.str(), glm::cos(glm::radians(l.outer_angle)));
+			ss.str(""); ss.clear();
+
+			++lightIdx;
+		}
+
+		// Camera
+		auto   cam   = scene->GetActiveCamera();
+		glm::mat4 vp    = cam->projection() * cam->view();
+		glm::mat4 invVP = glm::inverse(vp);
+		volumetric_shader->SetUniform("u_CamPos",  cam->pos);
+		volumetric_shader->SetUniform("u_InvVP",   invVP);
+		volumetric_shader->SetUniform("u_NumLights", LightSources::get().getCount() * 1.f);
+
+		// Settings
+		auto& gs = GraphicsSettings::get();
+		volumetric_shader->SetUniform("u_VolumetricIntensity", gs.volumetric_intensity);
+		volumetric_shader->SetUniform("u_VolumetricSteps",     static_cast<float>(gs.volumetric_steps));
+		volumetric_shader->SetUniform("u_VolumetricMaxDist",   gs.volumetric_max_dist);
+		volumetric_shader->SetUniform("u_VolumetricScatter",   gs.volumetric_scatter);
+
+		glBindVertexArray(empty_vao);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+		// Restore state
+		glDisable(GL_BLEND);
+		glEnable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
+
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err after VolumetricPass: {}", err);
+		}
 	}
 
 	void WindowsRenderer::PostProcessPass() {

@@ -25,6 +25,7 @@ namespace PAIN {
             void uiPass(entt::registry& registry);
             void particlePass(entt::registry& registry);
             void minimapPass(entt::registry& registry);
+            void volumetricPass(entt::registry& registry);
 
         public:
             explicit System(std::shared_ptr<Services> svc);

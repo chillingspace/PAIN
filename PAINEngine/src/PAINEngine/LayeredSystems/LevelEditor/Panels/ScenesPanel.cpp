@@ -643,6 +643,16 @@ namespace PAIN {
                 if (ImGui::Checkbox("Using IBL", &using_ibl))
                     gs.ibl = using_ibl;
 
+                ImGui::Separator();
+                if (ImGui::Checkbox("Volumetric Lighting", &gs.volumetric)) {}
+                if (gs.volumetric) {
+                    ImGui::SliderFloat("Vol Intensity", &gs.volumetric_intensity, 0.0f, 1.0f);
+                    ImGui::SliderInt("Vol Steps", &gs.volumetric_steps, 8, 128);
+                    ImGui::SliderFloat("Vol Max Distance", &gs.volumetric_max_dist, 1.0f, 200.0f);
+                    ImGui::SliderFloat("Vol Scatter (Mie g)", &gs.volumetric_scatter, 0.0f, 0.99f);
+                }
+                ImGui::Separator();
+
                 bool using_diffuse = gs.DEBUG_USE_DIFFUSE_MAP;
                 if (ImGui::Checkbox("Using Diffuse Map", &using_diffuse))
                     gs.DEBUG_USE_DIFFUSE_MAP = using_diffuse;

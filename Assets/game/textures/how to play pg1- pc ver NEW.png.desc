@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Fence_baseColor_1001.png",
+    "name": "how to play pg1- pc ver NEW.png",
     "type": "Texture"
   },
   "build_data": {
-    "hash": 14187846663448255644
+    "hash": 15164337856819318794
   },
   "descriptor_version": 1,
-  "guid": "bd0a49e9-5411-cf4a-ab01-33d1b318e15d",
+  "guid": "cffcaacf-e530-054e-8840-547d4272f0a4",
   "import_settings": {
     "android_compression": "ASTC_4x4",
     "generate_mipmaps": true,
@@ -15,6 +15,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\Fence_baseColor_1001.png"
+    "source_file": "game\\textures\\how to play pg1- pc ver NEW.png"
   }
 }
