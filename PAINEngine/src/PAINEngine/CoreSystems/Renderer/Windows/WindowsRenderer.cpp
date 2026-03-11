@@ -78,12 +78,14 @@ namespace {
 		GLint currentVao = 0;
 		GLint drawFbo = 0;
 		GLint activeTexture = 0;
+		GLint framebufferBinding = 0;
 		GLint maxFragTextureUnits = 0;
 		GLint maxCombinedTextureUnits = 0;
 		glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
 		glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &currentVao);
 		glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawFbo);
 		glGetIntegerv(GL_ACTIVE_TEXTURE, &activeTexture);
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &framebufferBinding);
 		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxFragTextureUnits);
 		glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxCombinedTextureUnits);
 
@@ -116,6 +118,7 @@ namespace {
 						  unit, tex2d, texCube);
 		}
 		glActiveTexture(previousActiveTexture);
+		glBindFramebuffer(GL_FRAMEBUFFER, framebufferBinding);
 	}
 
 	void LogDepthBlitDiagnostics(GLuint readFbo, GLuint drawFbo) {
@@ -124,6 +127,13 @@ namespace {
 			return;
 		}
 		loggedOnce = true;
+
+		GLint previousReadFbo = 0;
+		GLint previousDrawFbo = 0;
+		GLint previousRenderbuffer = 0;
+		glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &previousReadFbo);
+		glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &previousDrawFbo);
+		glGetIntegerv(GL_RENDERBUFFER_BINDING, &previousRenderbuffer);
 
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, readFbo);
 		const GLenum readStatus = glCheckFramebufferStatus(GL_READ_FRAMEBUFFER);
@@ -145,13 +155,19 @@ namespace {
 		glGetFramebufferAttachmentParameteriv(
 			GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &drawName);
 
-		glBindRenderbuffer(GL_RENDERBUFFER, static_cast<GLuint>(drawName));
-		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_SAMPLES, &drawSamples);
+		if (drawType == GL_RENDERBUFFER) {
+			glBindRenderbuffer(GL_RENDERBUFFER, static_cast<GLuint>(drawName));
+			glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_SAMPLES, &drawSamples);
+		}
 
 		PN_CORE_ERROR(
 			"[GL] Depth blit diagnostics: readFbo={} status=0x{:x} depthType=0x{:x} depthObj={} drawFbo={} status=0x{:x} depthType=0x{:x} depthObj={} drawSamples={}",
 			readFbo, readStatus, readType, readName,
 			drawFbo, drawStatus, drawType, drawName, drawSamples);
+
+		glBindRenderbuffer(GL_RENDERBUFFER, previousRenderbuffer);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, previousReadFbo);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, previousDrawFbo);
 	}
 
 	struct PackedVolumetricLight {
@@ -424,10 +440,14 @@ namespace PAIN {
 	void WindowsRenderer::uploadTexture(std::shared_ptr<Assets::Texture> tex) {
 
 		// ========================================
-		// SAVE ACTIVE TEXTURE UNIT
+		// SAVE TEXTURE STATE
 		// ========================================
-		GLint activeTextureUnit;
+		GLint activeTextureUnit = 0;
+		GLint previousTex2D = 0;
+		GLint previousTexCube = 0;
 		glGetIntegerv(GL_ACTIVE_TEXTURE, &activeTextureUnit);
+		glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTex2D);
+		glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &previousTexCube);
 
 		PN_CORE_TRACE("Texture load started, active unit: GL_TEXTURE{}", activeTextureUnit - GL_TEXTURE0);
 
@@ -436,9 +456,6 @@ namespace PAIN {
 		// ========================================
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, 0);
-
-		// Clear any errors
-		while (glGetError() != GL_NO_ERROR);
 
 		// VALIDATE EXTRACTED DATA
 		if (tex->mipOffsets.size() != tex->mipSizes.size()) {
@@ -576,9 +593,11 @@ namespace PAIN {
 		std::vector<size_t>().swap(tex->mipSizes);
 
 		// ========================================
-		// RESTORE ACTIVE TEXTURE UNIT
+		// RESTORE TEXTURE STATE
 		// ========================================
 		glActiveTexture(activeTextureUnit);
+		glBindTexture(GL_TEXTURE_2D, previousTex2D);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, previousTexCube);
 	}
 
 	void WindowsRenderer::initSceneVbo() {
@@ -994,6 +1013,13 @@ namespace PAIN {
 		PN_CORE_INFO("Initializing deferred shading buffers with size: {}x{}",
 					 winWidth, winHeight);
 
+		GLint previousFramebuffer = 0;
+		GLint previousRenderbuffer = 0;
+		GLint previousTexture2D = 0;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &previousFramebuffer);
+		glGetIntegerv(GL_RENDERBUFFER_BINDING, &previousRenderbuffer);
+		glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTexture2D);
+
 		auto checkFramebufferComplete = [](const char* label) -> bool {
 			GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 			if (status != GL_FRAMEBUFFER_COMPLETE) {
@@ -1003,40 +1029,54 @@ namespace PAIN {
 			return true;
 		};
 
+		auto restoreBindingState = [&]() {
+			glBindTexture(GL_TEXTURE_2D, previousTexture2D);
+			glBindRenderbuffer(GL_RENDERBUFFER, previousRenderbuffer);
+			glBindFramebuffer(GL_FRAMEBUFFER, previousFramebuffer);
+		};
+
+		auto resetFramebufferResources = [&]() {
+			if (ds_fbo) { glDeleteFramebuffers(1, &ds_fbo); ds_fbo = 0; }
+			if (final_fbo) { glDeleteFramebuffers(1, &final_fbo); final_fbo = 0; }
+			if (pp_fbo) { glDeleteFramebuffers(1, &pp_fbo); pp_fbo = 0; }
+			if (pp2_fbo) { glDeleteFramebuffers(1, &pp2_fbo); pp2_fbo = 0; }
+			glDeleteFramebuffers(static_cast<GLsizei>(volumetric_fbos.size()), volumetric_fbos.data());
+			volumetric_fbos = {0, 0};
+			if (minimap_fbo) { glDeleteFramebuffers(1, &minimap_fbo); minimap_fbo = 0; }
+			if (minimap_texture) { glDeleteTextures(1, &minimap_texture); minimap_texture = 0; }
+			if (minimap_rbo) { glDeleteRenderbuffers(1, &minimap_rbo); minimap_rbo = 0; }
+
+			GLuint textures[] = { pos_texture, col_texture, norm_texture,
+								  material_properties_texture, emission_texture,
+								  ds_depth_texture, final_texture, pp_texture,
+								  pp2_texture, volumetric_textures[0], volumetric_textures[1] };
+			glDeleteTextures(10, textures);
+			pos_texture = col_texture = norm_texture = material_properties_texture
+				= emission_texture = ds_depth_texture = final_texture = pp_texture
+				= pp2_texture = 0;
+			volumetric_textures = {0, 0};
+			volumetric_history_index = 0;
+			volumetric_history_valid = false;
+			volumetric_prev_vp = glm::mat4(1.0f);
+			volumetric_prev_cam_pos = glm::vec3(0.0f);
+			volumetric_prev_cam_forward = glm::vec3(0.0f, 0.0f, -1.0f);
+			volumetric_frame_index = 0;
+			volumetric_selection_ttl.clear();
+			if (final_rbo) { glDeleteRenderbuffers(1, &final_rbo); final_rbo = 0; }
+		};
+
+		auto failInit = [&](const char* label) {
+			PN_CORE_ERROR("Deferred renderer buffer initialization failed at {}", label);
+			resetFramebufferResources();
+			restoreBindingState();
+		};
+
 		// DELETE OLD RESOURCES FIRST
-		if (ds_fbo) { glDeleteFramebuffers(1, &ds_fbo);   ds_fbo = 0; }
-		if (final_fbo) { glDeleteFramebuffers(1, &final_fbo); final_fbo = 0; }
-		if (pp_fbo) { glDeleteFramebuffers(1, &pp_fbo);   pp_fbo = 0; }
-		if (pp2_fbo) { glDeleteFramebuffers(1, &pp2_fbo);  pp2_fbo = 0; }
-		glDeleteFramebuffers(static_cast<GLsizei>(volumetric_fbos.size()), volumetric_fbos.data());
-		volumetric_fbos = {0, 0};
-		if (minimap_fbo) { glDeleteFramebuffers(1, &minimap_fbo);      minimap_fbo = 0; }
-		if (minimap_texture) { glDeleteTextures(1, &minimap_texture);      minimap_texture = 0; }
-		if (minimap_rbo) { glDeleteRenderbuffers(1, &minimap_rbo);     minimap_rbo = 0; }
-
-		// Delete all G-buffer textures
-		GLuint textures[] = { pos_texture, col_texture, norm_texture,
-							  material_properties_texture, emission_texture,
-							  ds_depth_texture, final_texture, pp_texture,
-							  pp2_texture, volumetric_textures[0], volumetric_textures[1] };
-		glDeleteTextures(10, textures);
-		pos_texture = col_texture = norm_texture = material_properties_texture
-			= emission_texture = ds_depth_texture = final_texture = pp_texture
-			= pp2_texture = 0;
-		volumetric_textures = {0, 0};
-		volumetric_history_index = 0;
-		volumetric_history_valid = false;
-		volumetric_prev_vp = glm::mat4(1.0f);
-		volumetric_prev_cam_pos = glm::vec3(0.0f);
-		volumetric_prev_cam_forward = glm::vec3(0.0f, 0.0f, -1.0f);
-		volumetric_frame_index = 0;
-		volumetric_selection_ttl.clear();
-
-		// Delete renderbuffers
-		if (final_rbo) { glDeleteRenderbuffers(1, &final_rbo); final_rbo = 0; }
+		resetFramebufferResources();
 
 		if (winWidth == 0 || winHeight == 0) {
 			PN_CORE_ERROR("Invalid window dimensions: {}x{}", winWidth, winHeight);
+			restoreBindingState();
 			return;
 		}
 
@@ -1082,6 +1122,7 @@ namespace PAIN {
 			GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 			if (status != GL_FRAMEBUFFER_COMPLETE) {
 				PN_CORE_ERROR("G-buffer FBO is incomplete! Status: 0x{:x}", status);
+				failInit("G-buffer FBO");
 				return;
 			}
 			PN_CORE_INFO("G-buffer FBO is complete");
@@ -1111,6 +1152,7 @@ namespace PAIN {
 									   volumetric_textures[i], 0);
 
 				if (!checkFramebufferComplete("Volumetric framebuffer")) {
+					failInit("Volumetric framebuffer");
 					return;
 				}
 			}
@@ -1126,6 +1168,7 @@ namespace PAIN {
 			glGenTextures(1, &final_texture);
 			if (final_texture == 0) {
 				PN_CORE_ERROR("Failed to create final texture");
+				failInit("Final color texture allocation");
 				return;
 			}
 			glBindTexture(GL_TEXTURE_2D, final_texture);
@@ -1146,6 +1189,7 @@ namespace PAIN {
 							  GL_RENDERBUFFER, final_rbo);
 
 			if (!checkFramebufferComplete("Final framebuffer")) {
+				failInit("Final framebuffer");
 				return;
 			}
 
@@ -1158,6 +1202,7 @@ namespace PAIN {
 			glGenTextures(1, &pp_texture);
 			if (pp_texture == 0) {
 				PN_CORE_ERROR("Failed to create final texture");
+				failInit("Post-process texture allocation");
 				return;
 			}
 			glBindTexture(GL_TEXTURE_2D, pp_texture);
@@ -1171,6 +1216,7 @@ namespace PAIN {
 							   pp_texture, 0);
 
 			if (!checkFramebufferComplete("Post-process framebuffer (pp_fbo)")) {
+				failInit("Post-process framebuffer (pp_fbo)");
 				return;
 			}
 
@@ -1183,6 +1229,7 @@ namespace PAIN {
 			glGenTextures(1, &pp2_texture);
 			if (pp2_texture == 0) {
 				PN_CORE_ERROR("Failed to create final texture");
+				failInit("Post-process texture allocation (pp2)");
 				return;
 			}
 			glBindTexture(GL_TEXTURE_2D, pp2_texture);
@@ -1196,6 +1243,7 @@ namespace PAIN {
 							   pp2_texture, 0);
 
 			if (!checkFramebufferComplete("Post-process framebuffer (pp2_fbo)")) {
+				failInit("Post-process framebuffer (pp2_fbo)");
 				return;
 			}
 
@@ -1229,12 +1277,14 @@ namespace PAIN {
 
 			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 				PN_CORE_ERROR("Minimap framebuffer is incomplete");
+				failInit("Minimap framebuffer");
+				return;
 			}
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
 
-		
+		restoreBindingState();
 	}
 
 	void WindowsRenderer::_initGeometryBuffers()
@@ -2107,6 +2157,8 @@ namespace PAIN {
 		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+		glViewport(0, 0, winWidth, winHeight);
+		glDisable(GL_BLEND);
 
 		// glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
 		glClear(GL_COLOR_BUFFER_BIT);
