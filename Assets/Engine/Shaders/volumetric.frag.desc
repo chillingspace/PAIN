@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "volumetric.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 8966759572250467239
+  },
+  "descriptor_version": 1,
+  "guid": "fb676a09-0088-2e47-ac57-bb42de03d6a5",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\volumetric.frag"
+  }
+}
