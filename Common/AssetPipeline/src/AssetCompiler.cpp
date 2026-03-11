@@ -463,7 +463,7 @@ namespace PAIN {
                 float* raw_pixels = stbi_loadf(asset_info.raw_path.string().c_str(),
                     &width, &height, &channels, 0);
                 if (!raw_pixels) {
-                    std::cout << "ERROR: Failed to load HDR image: " << asset_info.raw_path
+                    std::cout << "WARNING: Failed to load HDR image: " << asset_info.raw_path
                         << " - " << stbi_failure_reason() << std::endl;
                     return;
                 }
@@ -495,7 +495,7 @@ namespace PAIN {
                         std::cout << "HDR alignment successful: " << width << "x" << height << std::endl;
                     }
                     else {
-                        std::cout << "ERROR: HDR alignment resize failed!" << std::endl;
+                        std::cout << "WARNING: HDR alignment resize failed!" << std::endl;
                         free(aligned_pixels);
                         stbi_image_free(raw_pixels);
                         return;
@@ -532,7 +532,7 @@ namespace PAIN {
                         std::cout << "Resized HDR to: " << width << "x" << height << std::endl;
                     }
                     else {
-                        std::cout << "ERROR: HDR resize failed!" << std::endl;
+                        std::cout << "WARNING: HDR resize failed!" << std::endl;
                         free(resized_pixels);
                         stbi_image_free(raw_pixels);
                         return;
@@ -540,7 +540,7 @@ namespace PAIN {
                 }
 
                 if (!verifyDirectory(asset_info.shipped_path)) {
-                    std::cout << "ERROR: Failed to create output dir: " << asset_info.shipped_path.parent_path() << std::endl;
+                    std::cout << "WARNING: Failed to create output dir: " << asset_info.shipped_path.parent_path() << std::endl;
                     stbi_image_free(raw_pixels);
                     return;
                 }
@@ -565,7 +565,7 @@ namespace PAIN {
                 );
 
                 if (!raw_pixels) {
-                    std::cout << "ERROR: Failed to load texture: " << asset_info.raw_path
+                    std::cout << "WARNING: Failed to load texture: " << asset_info.raw_path
                         << " - " << stbi_failure_reason() << std::endl;
                     return;
                 }
@@ -599,7 +599,7 @@ namespace PAIN {
                         std::cout << "Alignment successful: " << width << "x" << height << std::endl;
                     }
                     else {
-                        std::cout << "ERROR: Alignment resize failed!" << std::endl;
+                        std::cout << "WARNING: Alignment resize failed!" << std::endl;
                         free(aligned_pixels);
                         stbi_image_free(raw_pixels);
                         return;
@@ -634,7 +634,7 @@ namespace PAIN {
                         std::cout << "Resized texture to: " << width << "x" << height << std::endl;
                     }
                     else {
-                        std::cout << "ERROR: Resize failed!" << std::endl;
+                        std::cout << "WARNING: Resize failed!" << std::endl;
                         free(resized_pixels);
                         stbi_image_free(raw_pixels);
                         return;
@@ -642,7 +642,7 @@ namespace PAIN {
                 }
 
                 if (!verifyDirectory(asset_info.shipped_path)) {
-                    std::cout << "ERROR: Failed to create output dir: " << asset_info.shipped_path.parent_path() << std::endl;
+                    std::cout << "WARNING: Failed to create output dir: " << asset_info.shipped_path.parent_path() << std::endl;
                     stbi_image_free(raw_pixels);
                     return;
                 }
@@ -666,7 +666,7 @@ namespace PAIN {
                 desc_file.hash = fileHashing(asset_info.raw_path);
             }
             else {
-                std::cout << "ERROR: Texture compilation failed for: " << asset_info.raw_path.filename() << std::endl;
+                std::cout << "WARNING: Texture compilation failed for: " << asset_info.raw_path.filename() << std::endl;
                 asset_info.shipped_path.extension().replace_extension(asset_info.raw_path.extension());
                 copyFile(asset_info.raw_path, asset_info.shipped_path);
             }
