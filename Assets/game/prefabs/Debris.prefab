@@ -1,0 +1,101 @@
+{
+    "entities": [
+        {
+            "components": {
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        52.480079650878906,
+                        0.0,
+                        9.042099952697754
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "9bf3ceeb-5736-2743-9d95-e1a34ab40882",
+                            "aoTextureOverride": "366edb10-25c3-e24c-8c2f-44e4be46953b",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "182d27d8-ab48-7a4b-b015-645117085d0e",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "366edb10-25c3-e24c-8c2f-44e4be46953b",
+                            "normalTextureOverride": "d7e85790-e5af-0d4b-92e0-05aa2c94aed5",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "366edb10-25c3-e24c-8c2f-44e4be46953b",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "df160745-bc2d-d949-a8c3-e7181514ac0a",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "Debris"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.10000000149011612,
+                        -0.10000000149011612,
+                        -0.4000000059604645
+                    ],
+                    "collider_scale": [
+                        2.9000000953674316,
+                        1.100000023841858,
+                        1.899999976158142
+                    ],
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 0
+                    },
+                    "physics_enabled": true,
+                    "use_gravity": true,
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "efed9826-4b91-024d-9aa7-a31e6d2e74cb"
+        }
+    ],
+    "prefabName": "Debris",
+    "rootEntityGUID": "efed9826-4b91-024d-9aa7-a31e6d2e74cb"
+}

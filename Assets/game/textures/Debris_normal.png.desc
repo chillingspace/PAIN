@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Debris_normal.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 8174374182486506600
+  },
+  "descriptor_version": 1,
+  "guid": "d7e85790-e5af-0d4b-92e0-05aa2c94aed5",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Debris_normal.png"
+  }
+}

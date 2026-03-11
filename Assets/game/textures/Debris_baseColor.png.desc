@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Debris_baseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 14247232917257716947
+  },
+  "descriptor_version": 1,
+  "guid": "9bf3ceeb-5736-2743-9d95-e1a34ab40882",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Debris_baseColor.png"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "buttons.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 9644228668731045753
+  },
+  "descriptor_version": 1,
+  "guid": "2b14cd46-f35b-3342-8bdf-0d941a05f55f",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\buttons.prefab"
+  }
+}
