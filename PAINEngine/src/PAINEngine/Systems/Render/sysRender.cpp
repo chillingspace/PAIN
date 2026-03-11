@@ -984,10 +984,17 @@ namespace PAIN {
 			// Mode 1: Draw Physics Colliders (Cyan for basic, different colors for
 			// compound shapes)
 			if (debug_mode == 1) {
-				// Iterate entities with both RigidBody3D and Transform
-				auto view = registry.view<Physics::RigidBody3D, LocalTransform>();
+				// Iterate entities with both RigidBody3D and WorldTransform
+				auto view = registry.view<Physics::RigidBody3D, WorldTransform>();
 
-				for (auto [entity, rb, trans] : view.each()) {
+				for (auto [entity, rb, world_trans] : view.each()) {
+					// Extract world pos, scale, rot
+					glm::vec3 worldPos, worldScale, skew;
+					glm::vec4 perspective;
+					glm::quat worldRot;
+					glm::decompose(world_trans.matrix, worldScale, worldRot, worldPos, skew, perspective);
+					worldRot = glm::normalize(worldRot);
+
 					// Check if entity has CompoundCollider
 					auto* compCollider = registry.try_get<CompoundCollider>(entity);
 
@@ -1014,36 +1021,36 @@ namespace PAIN {
 							glm::vec3 half_extents;
 							if (shape.type == ColliderShapeType::Box) {
 								half_extents =
-									shape.boxHalfExtents * trans.scale * rb.collider_scale;
+									shape.boxHalfExtents * worldScale * rb.collider_scale;
 							} else if (shape.type == ColliderShapeType::Sphere) {
 								float scaledRadius =
 									shape.sphereRadius *
-									glm::max(trans.scale.x, glm::max(trans.scale.y, trans.scale.z));
+									glm::max(worldScale.x, glm::max(worldScale.y, worldScale.z));
 								half_extents = glm::vec3(scaledRadius);
 							} else if (shape.type == ColliderShapeType::Capsule) {
 								float scaledRadius =
-									shape.capsuleRadius * glm::max(trans.scale.x, trans.scale.z);
-								float scaledHeight = shape.capsuleHalfHeight * trans.scale.y;
+									shape.capsuleRadius * glm::max(worldScale.x, worldScale.z);
+								float scaledHeight = shape.capsuleHalfHeight * worldScale.y;
 								half_extents = glm::vec3(scaledRadius, scaledHeight + scaledRadius,
 														 scaledRadius);
 							} else {
-								half_extents = glm::vec3(0.5f) * trans.scale;
+								half_extents = glm::vec3(0.5f) * worldScale;
 							}
 
 							// Calculate scaled offset (note: offset does NOT scale by
 							// collider_scale per physics engine)
-							glm::vec3 scaled_offset = shape.offset * trans.scale;
+							glm::vec3 scaled_offset = shape.offset * worldScale;
 
 							// Entity rotation combined with shape local rotation
-							glm::quat entity_rot = glm::normalize(trans.rotation);
+							glm::quat entity_rot = worldRot;
 							glm::quat shape_rot = glm::normalize(shape.rotation);
 							glm::quat combined_rot = entity_rot * shape_rot;
 
 							// Check if entity has any rotation (non-identity quaternion)
-							bool hasRotation = glm::abs(trans.rotation.w - 1.0f) > 0.0001f ||
-											   glm::abs(trans.rotation.x) > 0.0001f ||
-											   glm::abs(trans.rotation.y) > 0.0001f ||
-											   glm::abs(trans.rotation.z) > 0.0001f;
+							bool hasRotation = glm::abs(worldRot.w - 1.0f) > 0.0001f ||
+											   glm::abs(worldRot.x) > 0.0001f ||
+											   glm::abs(worldRot.y) > 0.0001f ||
+											   glm::abs(worldRot.z) > 0.0001f;
 
 							if (hasRotation) {
 								// Calculate 8 corners of OBB for oriented visualization
@@ -1065,14 +1072,14 @@ namespace PAIN {
 								glm::vec3 rotated_offset = entity_rot * scaled_offset;
 								for (int i = 0; i < 8; ++i) {
 									glm::vec3 rotated_corner = combined_rot * local_corners[i];
-									corners[i] = trans.position + rotated_offset + rotated_corner;
+									corners[i] = worldPos + rotated_offset + rotated_corner;
 								}
 
 								// Use OBB rendering for rotated entities
 								rendererService->w_renderer->DebugPassOBB(corners, color, scene);
 							} else {
 								// No rotation - use faster AABB path
-								glm::vec3 center = trans.position + scaled_offset;
+								glm::vec3 center = worldPos + scaled_offset;
 								glm::vec3 min_aabb = center - half_extents;
 								glm::vec3 max_aabb = center + half_extents;
 								rendererService->w_renderer->DebugPass(min_aabb, max_aabb, color,
@@ -1084,15 +1091,15 @@ namespace PAIN {
 						// Fall back to basic RigidBody3D collider (original behavior)
 						glm::vec4 color = glm::vec4(0.0f, 1.0f, 1.0f, 1.0f); // Cyan for Physics
 
-						glm::vec3 offset_scaled = trans.scale * rb.collider_offset;
-						glm::vec3 half_extents = 0.5f * trans.scale * rb.collider_scale;
-						glm::quat rotation = glm::normalize(trans.rotation);
+						glm::vec3 offset_scaled = worldScale * rb.collider_offset;
+						glm::vec3 half_extents = 0.5f * worldScale * rb.collider_scale;
+						glm::quat rotation = worldRot;
 
 						// Check if entity has any rotation (non-identity quaternion)
-						bool hasRotation = glm::abs(trans.rotation.w - 1.0f) > 0.0001f ||
-										   glm::abs(trans.rotation.x) > 0.0001f ||
-										   glm::abs(trans.rotation.y) > 0.0001f ||
-										   glm::abs(trans.rotation.z) > 0.0001f;
+						bool hasRotation = glm::abs(worldRot.w - 1.0f) > 0.0001f ||
+										   glm::abs(worldRot.x) > 0.0001f ||
+										   glm::abs(worldRot.y) > 0.0001f ||
+										   glm::abs(worldRot.z) > 0.0001f;
 
 						if (hasRotation) {
 							// Calculate 8 corners of OBB for oriented visualization
@@ -1113,14 +1120,14 @@ namespace PAIN {
 							glm::vec3 corners[8];
 							for (int i = 0; i < 8; ++i) {
 								glm::vec3 body_space_point = offset_scaled + local_corners[i];
-								corners[i] = trans.position + (rotation * body_space_point);
+								corners[i] = worldPos + (rotation * body_space_point);
 							}
 
 							// Use OBB rendering for rotated entities
 							rendererService->w_renderer->DebugPassOBB(corners, color, scene);
 						} else {
 							// No rotation - use faster AABB path
-							glm::vec3 center = trans.position + offset_scaled;
+							glm::vec3 center = worldPos + offset_scaled;
 							glm::vec3 min_aabb = center - half_extents;
 							glm::vec3 max_aabb = center + half_extents;
 							rendererService->w_renderer->DebugPass(min_aabb, max_aabb, color,

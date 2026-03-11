@@ -1,4 +1,4 @@
-﻿/*****************************************************************/ /**
+/*****************************************************************/ /**
  * \\file   Controller.cpp
  * \\brief  ECS Controller
  *
@@ -10,7 +10,8 @@
 #include "Controller.h"
 #include "ECS/Components/GLMSerialization.h"
 #include "pch.h"
-// Systems
+
+ // Systems
 #include "Systems/AI/sysAI.h"
 #include "Systems/Animation/sysAnimation.h"
 #include "Systems/Audio/sysAudio.h"
@@ -33,9 +34,9 @@ namespace PAIN {
 
 		template <typename... Components>
 		nlohmann::json
-		serializeAllComponentsImpl(entt::entity entity, const entt::registry& registry,
-								   std::tuple<Components...>,
-								   const std::unordered_set<std::string>& filter) {
+			serializeAllComponentsImpl(entt::entity entity, const entt::registry& registry,
+				std::tuple<Components...>,
+				const std::unordered_set<std::string>& filter) {
 			nlohmann::json components;
 
 			auto expand = [&](auto type_tag) {
@@ -59,27 +60,31 @@ namespace PAIN {
 							try {
 								components[comp_name] =
 									PAIN::Serialization::to_json_reflected(comp);
-							} catch (const std::exception& e) {
-								PN_CORE_ERROR("Failed to serialize {} using reflection: {}",
-											  comp_name, e.what());
 							}
-						} else {
+							catch (const std::exception& e) {
+								PN_CORE_ERROR("Failed to serialize {} using reflection: {}",
+									comp_name, e.what());
+							}
+						}
+						else {
 							// Only compile this if type is convertible to JSON
 							if constexpr (std::is_constructible_v<nlohmann::json, T>) {
 								try {
 									components[comp_name] = nlohmann::json(comp);
-								} catch (const std::exception& e) {
+								}
+								catch (const std::exception& e) {
 									PN_CORE_WARN("Failed to serialize {}: {}", comp_name, e.what());
 								}
-							} else {
+							}
+							else {
 								PN_CORE_WARN("Component {} is not serializable (no reflection or "
-											 "JSON converter)",
-											 comp_name);
+									"JSON converter)",
+									comp_name);
 							}
 						}
 					}
 				}
-			};
+				};
 
 			(expand(entt::type_identity<Components>{}), ...);
 			return components;
@@ -93,7 +98,7 @@ namespace PAIN {
 			// Validate input
 			if (!components.is_object()) {
 				PN_CORE_WARN("deserializeAllComponentsImpl: Expected JSON object, got {}",
-							 components.type_name());
+					components.type_name());
 				return;
 			}
 
@@ -119,26 +124,30 @@ namespace PAIN {
 							if constexpr (refl::trait::is_reflectable_v<T>) {
 								try {
 									PAIN::Serialization::from_json_reflected(comp,
-																			 components[comp_name]);
-								} catch (const std::exception& e) {
+										components[comp_name]);
+								}
+								catch (const std::exception& e) {
 									PN_CORE_ERROR("Failed to deserialize {} using reflection: {}",
-												  comp_name, e.what());
+										comp_name, e.what());
 									return; // Skip this component
 								}
-							} else {
+							}
+							else {
 								// Only compile this if type is convertible from JSON
 								if constexpr (std::is_constructible_v<T, nlohmann::json>) {
 									try {
 										comp = components[comp_name].get<T>();
-									} catch (const std::exception& e) {
+									}
+									catch (const std::exception& e) {
 										PN_CORE_WARN("Failed to deserialize {}: {}", comp_name,
-													 e.what());
+											e.what());
 										return; // Skip this component
 									}
-								} else {
+								}
+								else {
 									PN_CORE_WARN("Component {} is not deserializable (no reflection "
-												 "or JSON converter)",
-												 comp_name);
+										"or JSON converter)",
+										comp_name);
 									return; // Skip this component
 								}
 							}
@@ -146,27 +155,29 @@ namespace PAIN {
 							// Successfully deserialized - now emplace or replace
 							if (registry.template all_of<T>(entity)) {
 								registry.template replace<T>(entity, std::move(comp));
-							} else {
+							}
+							else {
 								registry.template emplace<T>(entity, std::move(comp));
 							}
-						} catch (const std::exception& e) {
+						}
+						catch (const std::exception& e) {
 							PN_CORE_ERROR("Unexpected error deserializing {}: {}", comp_name,
-										  e.what());
+								e.what());
 						}
 					}
 				}
-			};
+				};
 
 			(expand(entt::type_identity<Components>{}), ...);
 		}
 
 		/*****************************************************************/ /**
-        * EntityGUIDRegistry
-        * Implementation
-        *********************************************************************/
+		* EntityGUIDRegistry
+		* Implementation
+		*********************************************************************/
 
 		Assets::GUID EntityGUIDRegistry::getOrCreateGUID(entt::entity e,
-														 entt::registry& registry) {
+			entt::registry& registry) {
 			// Check if entity already has GUID component
 			if (auto* guidComp = registry.try_get<Entity::GUID>(e)) {
 				// Update registry mapping
@@ -191,7 +202,7 @@ namespace PAIN {
 			return entt::null;
 		}
 		void EntityGUIDRegistry::remapGUID(const Assets::GUID& oldGuid,
-										   const Assets::GUID& newGuid) {
+			const Assets::GUID& newGuid) {
 			auto it = guid_to_entity.find(oldGuid);
 			if (it != guid_to_entity.end()) {
 				entt::entity e = it->second;
@@ -201,12 +212,12 @@ namespace PAIN {
 				guid_to_entity[newGuid] = e;
 				entity_to_guid[e] = newGuid;
 				PN_CORE_INFO("[GUID Registry] Remapped entity {} from {} to {}",
-							 static_cast<uint32_t>(e), oldGuid.ToString(),
-							 newGuid.ToString());
+					static_cast<uint32_t>(e), oldGuid.ToString(),
+					newGuid.ToString());
 			}
 		}
 		void EntityGUIDRegistry::registerEntity(entt::entity e,
-												const Assets::GUID& guid) {
+			const Assets::GUID& guid) {
 			guid_to_entity[guid] = e;
 			entity_to_guid[e] = guid;
 		}
@@ -229,9 +240,9 @@ namespace PAIN {
 			entity_to_guid.clear();
 		}
 		/*****************************************************************/ /**
-        * Controller
-        * Implementation
-        *********************************************************************/
+		* Controller
+		* Implementation
+		*********************************************************************/
 		Controller::Controller(std::shared_ptr<Services> svc) {
 			services = svc;
 
@@ -242,12 +253,12 @@ namespace PAIN {
 			registries[MAIN_REGISTRY_ID] = std::move(mainContext);
 
 			PN_CORE_INFO("[ECS Controller] Initialized with main registry (ID: {})",
-						 MAIN_REGISTRY_ID);
+				MAIN_REGISTRY_ID);
 		}
 		/*****************************************************************/ /**
-        * Helper
-        * Methods
-        *********************************************************************/
+		* Helper
+		* Methods
+		*********************************************************************/
 		RegistryContext* Controller::getRegistryContext(RegistryID id) {
 			auto it = registries.find(id);
 			if (it == registries.end()) {
@@ -281,12 +292,12 @@ namespace PAIN {
 			return ctx->registry;
 		}
 		/*****************************************************************/ /**
-        * Registry
-        * Management
-        * Methods
-        *********************************************************************/
+		* Registry
+		* Management
+		* Methods
+		*********************************************************************/
 		RegistryID Controller::createRegistry(const std::string& name,
-											  bool autoSimulate) {
+			bool autoSimulate) {
 			RegistryID newId = next_registry_id++;
 
 			RegistryContext ctx;
@@ -310,9 +321,10 @@ namespace PAIN {
 			auto it = registries.find(id);
 			if (it != registries.end()) {
 				PN_CORE_INFO("[ECS Controller] Destroying registry '{}' (ID: {})",
-							 it->second.name, id);
+					it->second.name, id);
 				registries.erase(it);
-			} else {
+			}
+			else {
 				PN_CORE_WARN(
 					"[ECS Controller] Attempted to destroy non-existent registry {}", id);
 			}
@@ -330,7 +342,7 @@ namespace PAIN {
 			if (ctx) {
 				ctx->auto_simulate = autoSimulate;
 				PN_CORE_INFO("[ECS Controller] Registry {} auto-simulate set to {}", id,
-							 autoSimulate);
+					autoSimulate);
 			}
 		}
 		bool Controller::isRegistryAutoSimulate(RegistryID id) const {
@@ -350,10 +362,10 @@ namespace PAIN {
 			return ids;
 		}
 		/*****************************************************************/ /**
-        * GUID
-        * Registry
-        * Methods
-        *********************************************************************/
+		* GUID
+		* Registry
+		* Methods
+		*********************************************************************/
 		EntityGUIDRegistry& Controller::getGUIDRegistry(RegistryID registryId) {
 			auto* ctx = getRegistryContext(registryId);
 			if (!ctx) {
@@ -363,7 +375,7 @@ namespace PAIN {
 			return ctx->guid_registry;
 		}
 		const EntityGUIDRegistry&
-		Controller::getGUIDRegistry(RegistryID registryId) const {
+			Controller::getGUIDRegistry(RegistryID registryId) const {
 			auto* ctx = getRegistryContext(registryId);
 			if (!ctx) {
 				PN_CORE_ERROR("[ECS Controller] Returning main GUID registry as fallback");
@@ -372,12 +384,12 @@ namespace PAIN {
 			return ctx->guid_registry;
 		}
 		Assets::GUID Controller::getOrCreateEntityGUID(entt::entity e,
-													   RegistryID registryId) {
+			RegistryID registryId) {
 			return getGUIDRegistry(registryId)
 				.getOrCreateGUID(e, getRegistry(registryId));
 		}
 		entt::entity Controller::resolveGUID(const Assets::GUID& guid,
-											 RegistryID registryId) const {
+			RegistryID registryId) const {
 			return getGUIDRegistry(registryId).resolveGUID(guid);
 		}
 		int Controller::getEntitiesCount(RegistryID registryId) const {
@@ -385,9 +397,9 @@ namespace PAIN {
 			return ctx ? static_cast<int>(ctx->entity_count) : 0;
 		}
 		/*****************************************************************/ /**
-        * Event
-        * Dispatching
-        *********************************************************************/
+		* Event
+		* Dispatching
+		*********************************************************************/
 		void Controller::dispatchToLayers(Event::Event& e) {
 			for (auto& sys : systems) {
 				if (sys && sys->enabled) {
@@ -409,12 +421,12 @@ namespace PAIN {
 			}
 		}
 		/*****************************************************************/ /**
-        * System
-        * Update
-        * Methods
-        *********************************************************************/
+		* System
+		* Update
+		* Methods
+		*********************************************************************/
 		void Controller::updateSystemsForRegistry(RegistryID id, AppTiming timing,
-												  bool isFixed) {
+			bool isFixed) {
 			auto* ctx = getRegistryContext(id);
 			if (!ctx)
 				return;
@@ -426,14 +438,17 @@ namespace PAIN {
 				try {
 					if (isFixed) {
 						sys->onFixedUpdate(timing, ctx->registry);
-					} else {
+					}
+					else {
 						sys->onUpdate(timing, ctx->registry);
 					}
-				} catch (const std::exception& e) {
+				}
+				catch (const std::exception& e) {
 					PN_CORE_ERROR("System '{}' threw exception: {}", sys->getSysName(),
-								  e.what());
+						e.what());
 					sys->enabled = false;
-				} catch (...) {
+				}
+				catch (...) {
 					PN_CORE_ERROR("System '{}' threw unknown exception!", sys->getSysName());
 					sys->enabled = false;
 				}
@@ -464,11 +479,11 @@ namespace PAIN {
 			}
 		}
 		/*****************************************************************/ /**
-        * Component
-        * and
-        * System
-        * Registration
-        *********************************************************************/
+		* Component
+		* and
+		* System
+		* Registration
+		*********************************************************************/
 		void Controller::registerAllComponents() {
 			// Entity components
 			registerComponent<Entity::GUID>("GUID");
@@ -536,9 +551,9 @@ namespace PAIN {
 			dispatchToLayers(e);
 		}
 		/*****************************************************************/ /**
-        * Entity
-        * Methods
-        *********************************************************************/
+		* Entity
+		* Methods
+		*********************************************************************/
 		entt::entity Controller::createEntity(RegistryID registryId) {
 			auto* ctx = getRegistryContext(registryId);
 			if (!ctx)
@@ -551,11 +566,11 @@ namespace PAIN {
 			ctx->registry.emplace<Entity::Layer>(new_entity);
 			ctx->guid_registry.registerEntity(new_entity, guid);
 			PN_CORE_INFO("Created entity {} with GUID {} in registry {}",
-						 static_cast<uint32_t>(new_entity), guid.ToString(), registryId);
+				static_cast<uint32_t>(new_entity), guid.ToString(), registryId);
 			return new_entity;
 		}
 		entt::entity Controller::createEntity(Assets::GUID const& e_id,
-											  RegistryID registryId) {
+			RegistryID registryId) {
 			auto* ctx = getRegistryContext(registryId);
 			if (!ctx)
 				return entt::null;
@@ -566,15 +581,15 @@ namespace PAIN {
 			ctx->registry.emplace<Entity::Layer>(new_entity);
 			ctx->guid_registry.registerEntity(new_entity, e_id);
 			PN_CORE_INFO("Created entity {} with GUID {} in registry {}",
-						 static_cast<uint32_t>(new_entity), e_id.ToString(), registryId);
+				static_cast<uint32_t>(new_entity), e_id.ToString(), registryId);
 			return new_entity;
 		}
 
 		entt::entity Controller::cloneEntity(entt::entity copy, RegistryID srcRegistry,
-											 RegistryID dstRegistry) {
+			RegistryID dstRegistry) {
 			if (!checkEntity(copy, srcRegistry)) {
 				PN_CORE_ERROR("Cannot clone invalid entity: {}",
-							  static_cast<uint32_t>(copy));
+					static_cast<uint32_t>(copy));
 				return entt::null;
 			}
 
@@ -604,6 +619,53 @@ namespace PAIN {
 				}
 			}
 
+			// --- POST-CLONE CLEANUP ---
+			// 1. Invalidate Physics Body ID
+			if (dstCtx->registry.all_of<PAIN::Physics::RigidBody3D>(clone)) {
+				auto& rb = dstCtx->registry.get<PAIN::Physics::RigidBody3D>(clone);
+				rb.bodyID = JPH::BodyID(JPH::BodyID::cInvalidBodyID);
+			}
+
+			// 2. Reset Audio Source runtime handles if present
+			if (dstCtx->registry.all_of<PAIN::Audio::AudioSource>(clone)) {
+				auto& audio = dstCtx->registry.get<PAIN::Audio::AudioSource>(clone);
+				audio.state = PAIN::Audio::AudioState::Stopped;
+				audio.hasStarted = false;
+				audio.playTrigger = false;
+				audio.stopTrigger = false;
+				audio.channelId.value = -1;
+				audio.track_channel_ids.clear();
+			}
+
+			// 3. Mark WorldTransform dirty so it gets properly recomputed
+			//    (clone has copied matrix from source, but needs fresh computation
+			//     before any reparenting or physics teleport)
+			if (dstCtx->registry.all_of<PAIN::WorldTransform>(clone)) {
+				auto& world = dstCtx->registry.get<PAIN::WorldTransform>(clone);
+				world.dirty = true;
+				world.matrix = glm::mat4(1.0f); // clear stale source matrix
+			}
+
+			// 4. Update hierarchy — clone should keep parent with clean children list
+			if (dstCtx->registry.all_of<Entity::Hierarchy>(clone)) {
+				auto& hierarchy = dstCtx->registry.get<Entity::Hierarchy>(clone);
+				
+				// Keep parentGUID, but officially register the clone to the parent
+				if (hierarchy.parentGUID.IsValid()) {
+					entt::entity parentEntity = dstCtx->guid_registry.resolveGUID(hierarchy.parentGUID);
+					if (parentEntity != entt::null && dstCtx->registry.valid(parentEntity)) {
+						if (auto* parentHierarchy = dstCtx->registry.try_get<Entity::Hierarchy>(parentEntity)) {
+							if (dstCtx->registry.all_of<Entity::GUID>(clone)) {
+								auto& cloneGUID = dstCtx->registry.get<Entity::GUID>(clone);
+								parentHierarchy->childrenGUIDs.push_back(cloneGUID.guid);
+							}
+						}
+					}
+				}
+
+				hierarchy.childrenGUIDs.clear();          // clear copied children
+			}
+
 			PN_CORE_INFO(
 				"Cloned entity {} (registry {}) to {} (registry {}) with new GUID",
 				static_cast<uint32_t>(copy), srcRegistry, static_cast<uint32_t>(clone),
@@ -614,7 +676,7 @@ namespace PAIN {
 		void Controller::destroyEntity(entt::entity entity, RegistryID registryId) {
 			if (!checkEntity(entity, registryId)) {
 				PN_CORE_ERROR("Attempted to destroy invalid entity: {}",
-							  static_cast<uint32_t>(entity));
+					static_cast<uint32_t>(entity));
 				return;
 			}
 			auto* ctx = getRegistryContext(registryId);
@@ -639,17 +701,17 @@ namespace PAIN {
 			PN_CORE_INFO("Cleared all entities in registry {}", registryId);
 		}
 		/*****************************************************************/ /**
-        * Component
-        * Methods
-        *********************************************************************/
+		* Component
+		* Methods
+		*********************************************************************/
 		const std::unordered_map<std::string,
-								 std::function<void(entt::entity, RegistryID)>>&
-		Controller::getComponentFactories() const {
+			std::function<void(entt::entity, RegistryID)>>&
+			Controller::getComponentFactories() const {
 			return component_factories;
 		}
 		std::vector<std::string>
-		Controller::getEntityComponentNames(entt::entity entity,
-											RegistryID registryId) const {
+			Controller::getEntityComponentNames(entt::entity entity,
+				RegistryID registryId) const {
 			std::vector<std::string> component_names;
 			if (!checkEntity(entity, registryId)) {
 				return component_names;
@@ -663,20 +725,20 @@ namespace PAIN {
 			return component_names;
 		}
 		void Controller::loadAllComponentsFromJson(entt::entity entity,
-												   const nlohmann::json& comps,
-												   RegistryID registryId) {
+			const nlohmann::json& comps,
+			RegistryID registryId) {
 			// Note: This uses MAIN_REGISTRY_ID for backward compatibility
 			if (!comps.is_object()) {
 				PN_CORE_WARN("loadAllComponentsFromJson: Expected object, got {}",
-							 comps.type_name());
+					comps.type_name());
 				return;
 			}
 			deserializeAllComponentsImpl(entity, getRegistry(registryId), comps,
-										 AllGameplayComponents{});
+				AllGameplayComponents{});
 		}
 		std::vector<std::string>
-		Controller::getComponentNames(entt::entity entity,
-									  RegistryID registryId) const {
+			Controller::getComponentNames(entt::entity entity,
+				RegistryID registryId) const {
 			std::vector<std::string> names;
 
 			auto* ctx = getRegistryContext(registryId);
@@ -697,17 +759,17 @@ namespace PAIN {
 			return names;
 		}
 		nlohmann::json Controller::getAllComponentsAsJson(entt::entity entity,
-														  RegistryID registryId) const {
+			RegistryID registryId) const {
 			// Note: This uses MAIN_REGISTRY_ID for backward compatibility
 			if (!checkEntity(entity, registryId)) {
 				return nlohmann::json::object();
 			}
 			return serializeAllComponentsImpl(entity, getRegistry(registryId),
-											  AllGameplayComponents{});
+				AllGameplayComponents{});
 		}
 		nlohmann::json Controller::getComponentAsJson(entt::entity entity,
-													  std::string const& comp_name,
-													  RegistryID registryId) const {
+			std::string const& comp_name,
+			RegistryID registryId) const {
 			auto* ctx = getRegistryContext(registryId);
 			if (!ctx)
 				return nlohmann::json();
@@ -725,8 +787,8 @@ namespace PAIN {
 			return nlohmann::json();
 		}
 		bool Controller::hasComponentByName(entt::entity entity,
-											const std::string& name,
-											RegistryID registryId) const {
+			const std::string& name,
+			RegistryID registryId) const {
 			auto it = component_checkers.find(name);
 			if (it == component_checkers.end()) {
 				return false;
@@ -734,16 +796,16 @@ namespace PAIN {
 			return it->second(entity, registryId);
 		}
 		void Controller::removeComponentByName(entt::entity entity,
-											   const std::string& name,
-											   RegistryID registryId) {
+			const std::string& name,
+			RegistryID registryId) {
 			auto it = component_removers.find(name);
 			if (it != component_removers.end()) {
 				it->second(entity, registryId);
 			}
 		}
 		void* Controller::getComponentPtrByName(entt::entity entity,
-												const std::string& name,
-												RegistryID registryId) {
+			const std::string& name,
+			RegistryID registryId) {
 			auto it = component_getters.find(name);
 			if (it == component_getters.end()) {
 				return nullptr;
