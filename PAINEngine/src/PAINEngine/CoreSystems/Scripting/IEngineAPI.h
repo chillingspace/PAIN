@@ -14,12 +14,12 @@ namespace PAIN {
     class Camera;
 
 
-/**
- * @brief Interface exposing high-level engine operations to scripting systems
- *
- * This allows LuaManager to interact with the engine
- * without directly depending on ECS, AssetManager, or System internals.
- */
+    /**
+     * @brief Interface exposing high-level engine operations to scripting systems
+     *
+     * This allows LuaManager to interact with the engine
+     * without directly depending on ECS, AssetManager, or System internals.
+     */
     struct IEngineAPI {
         virtual ~IEngineAPI() = default;
 
@@ -73,6 +73,7 @@ namespace PAIN {
         /* =========================================================================== */
         virtual glm::vec3 GetPosition(entt::entity entityId) = 0;
         virtual void SetPosition(entt::entity entityId, glm::vec3 p) = 0;
+        virtual glm::vec3 GetSmoothPosition(entt::entity entityId) = 0;
         virtual glm::vec2 Get2DPosition(entt::entity entityId) = 0;
         virtual void Set2DPosition(entt::entity entityId, glm::vec2 p) = 0;
         virtual glm::vec3 GetScale(entt::entity entityId) = 0;
@@ -85,6 +86,8 @@ namespace PAIN {
         /* =========================================================================== */
         virtual glm::vec3 GetVelocity(entt::entity entityId) = 0;
         virtual void SetVelocity(entt::entity entityId, glm::vec3 v) = 0;
+        virtual void AddForce(entt::entity e, glm::vec3 force) = 0;
+        virtual void AddImpulse(entt::entity e, glm::vec3 impulse) = 0;
 		virtual bool IsGrounded(entt::entity entityId, float maxDistance) = 0;
         virtual std::tuple<bool, glm::vec3> GetWallNormal(entt::entity entityId, glm::vec3 direction, float checkDistance) = 0;
         virtual void DisablePhysics(entt::entity e) = 0;

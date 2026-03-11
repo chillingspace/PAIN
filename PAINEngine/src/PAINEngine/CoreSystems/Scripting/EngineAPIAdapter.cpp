@@ -302,6 +302,21 @@ namespace PAIN {
         }
     }
 
+    glm::vec3 EngineAPIAdapter::GetSmoothPosition(entt::entity entityId)
+    {
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<PAIN::LocalTransform, Physics::RigidBody3D>(entityId))
+            return GetPosition(entityId);  // fallback to raw
+
+        const auto& t = reg.get<PAIN::LocalTransform>(entityId);
+        const auto& rb = reg.get<Physics::RigidBody3D>(entityId);
+
+        if (auto phys = ecs_.getSystem<PAIN::Physics::System>())
+            return glm::mix(rb.prevPosition, t.position, phys->getAccumulatorAlpha());
+
+        return t.position;
+    }
+
     glm::vec2 EngineAPIAdapter::Get2DPosition(entt::entity entityId) {
         if (auto opt = ecs_.getEntityComponent<PAIN::Texture2D>(entityId)) {
             return opt->get().pos;
@@ -399,6 +414,23 @@ namespace PAIN {
         }
 
     }
+
+    void EngineAPIAdapter::AddForce(entt::entity e, glm::vec3 force) {
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<Physics::RigidBody3D>(e)) return;
+        auto& rb = reg.get<Physics::RigidBody3D>(e);
+        if (auto phys = ecs_.getSystem<PAIN::Physics::System>())
+            phys->addForce(e, force);  // Jolt::AddForce
+    }
+
+    void EngineAPIAdapter::AddImpulse(entt::entity e, glm::vec3 impulse) {
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<Physics::RigidBody3D>(e)) return;
+        auto& rb = reg.get<Physics::RigidBody3D>(e);
+        if (auto phys = ecs_.getSystem<PAIN::Physics::System>())
+            phys->addImpulse(e, impulse);  // Jolt::AddImpulse
+    }
+
 
     bool EngineAPIAdapter::IsGrounded(entt::entity entityId, float maxDistance) {
         auto& reg = ecs_.getRegistry();
