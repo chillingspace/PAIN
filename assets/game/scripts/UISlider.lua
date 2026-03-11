@@ -66,6 +66,14 @@ local volumeFunctions = {
             audioSetGroupVolumeDb("sfx", linearToDb(v))
         end
     end
+
+    -- brightness_handle = function(v)
+
+    -- end
+
+    -- gamma_handle = function(v)
+
+    -- end
 }
 
 _G.SliderUI = _G.SliderUI or {}
@@ -177,16 +185,5 @@ registerUpdate(function(dt)
         if fn then
             fn(value)
         end
-
-        -- !TODO: Code below not used unless things go wrong. Remove this code otherwise.
-        -- Update volume here
-        -- if sliderName == "master_handle" then
-        --     -- Set master volume to value
-        -- elseif sliderName == "bgm_handle" then
-        --     -- Set bgm volume to value
-        -- elseif sliderName == "sfx_handle" then
-        --     -- Set sfx volume to value
-        -- end
-
     end
 end)

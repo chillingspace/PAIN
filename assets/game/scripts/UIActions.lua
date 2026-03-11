@@ -16,6 +16,26 @@ G.TutorialSceneName   = G.TutorialSceneName  or "game/scenes/Tutorial.scn"
 -- -- Placeholder for next level
 G.NextLevelName       = G.NextLevelName      or "game/scenes/Tutorial.scn"
 
+-- ==================== GRAPHICS SETTINGS ====================
+G.GraphicsSettings = G.GraphicsSettings or {
+    displayMode = "windowed"
+}
+
+local function updateGraphicsModeDisplay()
+    local e = findEntity("display_state")
+    if not e then
+        printLog("[UI] display_state not found")
+        return
+    end
+
+    if G.GraphicsSettings.displayMode == "fullscreen" then
+        setTexture(e, getImageID("game/textures/fullscreen_text.png"))
+    else
+        setTexture(e, getImageID("game/textures/windowed_text.png"))
+    end
+end
+
+
 -- ==================== AUDIO-AWARE SCENE CHANGE ====================
 -- Helper to do scene transitions with audio fade-out
 local function changeSceneWithAudioFade(scenePath)
@@ -646,8 +666,33 @@ local handlers = {
 
 
     ----------------------------------------------------------------------
-    -- CREDITS
+    -- GRAPHICS SETTINGS
     ----------------------------------------------------------------------
+    graphics_Left = function(buttonEntity, payload)
+        playUIClick()
+
+        if _G.GraphicsSettings.displayMode == "fullscreen" then
+            _G.GraphicsSettings.displayMode = "windowed"
+        else
+            _G.GraphicsSettings.displayMode = "fullscreen"
+        end
+
+        updateGraphicsModeDisplay()
+        printLog("[UI] graphics_Left -> " .. tostring(_G.GraphicsSettings.displayMode))
+    end,
+
+    graphics_Right = function(buttonEntity, payload)
+        playUIClick()
+
+        if _G.GraphicsSettings.displayMode == "windowed" then
+            _G.GraphicsSettings.displayMode = "fullscreen"
+        else
+            _G.GraphicsSettings.displayMode = "windowed"
+        end
+
+        updateGraphicsModeDisplay()
+        printLog("[UI] graphics_Right -> " .. tostring(_G.GraphicsSettings.displayMode))
+    end,
 }
 
 function G.UI_OnAction(actionName, buttonEntity, payload)
