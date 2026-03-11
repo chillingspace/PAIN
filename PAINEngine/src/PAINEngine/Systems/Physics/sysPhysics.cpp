@@ -378,7 +378,8 @@ namespace PAIN {
 						if (lock.Succeeded()) {
 							const JPH::Body& body = lock.GetBody();
 							const JPH::Quat rotation = body.GetRotation();
-							
+							const JPH::RVec3 position = body.GetPosition();
+
 							glm::vec3 joltWorldPos(position.GetX(), position.GetY(), position.GetZ());
 							glm::quat joltWorldRot(rotation.GetW(), rotation.GetX(), rotation.GetY(), rotation.GetZ());
 
@@ -420,7 +421,7 @@ namespace PAIN {
 								transform.position = newPos;
 								transform.rotation = glm::normalize(newRot);
 							} else {
-								transform.position = joltWorldPos;
+								transform.position = glm::mix(rigidBody.prevPosition, joltWorldPos, accumulator_alpha_);
 								transform.rotation = glm::normalize(joltWorldRot);
 							}
 
