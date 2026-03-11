@@ -31,6 +31,7 @@ namespace {
 		bool hasShadowMap = false;
 		bool inCameraView = false;
 		bool hysteresisActive = false;
+		float screenCoverage = 0.0f;
 		float viewScore = std::numeric_limits<float>::max();
 		float distToCamera = std::numeric_limits<float>::max();
 	};
@@ -129,7 +130,17 @@ namespace {
 		return anglePenalty * 1000.0f + distance;
 	}
 
-	std::array<glm::vec3, 10> GetSpotlightSamplePoints(const PAIN::Light& light, float volumetricMaxDistance) {
+	bool ProjectPointToNdc(const glm::mat4& vp, const glm::vec3& point, glm::vec3& ndcOut) {
+		const glm::vec4 clipPos = vp * glm::vec4(point, 1.0f);
+		if (clipPos.w <= 0.0001f) {
+			return false;
+		}
+
+		ndcOut = glm::vec3(clipPos) / clipPos.w;
+		return true;
+	}
+
+	std::array<glm::vec3, 12> GetSpotlightSamplePoints(const PAIN::Light& light, float volumetricMaxDistance) {
 		const float coneLength = std::max(0.5f, std::min(light.far_plane, volumetricMaxDistance));
 		const glm::vec3 forward = glm::normalize(light.direction);
 		glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -141,7 +152,6 @@ namespace {
 		const glm::vec3 basisUp = glm::normalize(glm::cross(right, forward));
 		const glm::vec3 baseCenter = light.position + forward * coneLength;
 		const float coneRadius = std::tan(glm::radians(light.outer_angle)) * coneLength;
-		const float halfConeRadius = coneRadius * 0.5f;
 
 		return {
 			light.position,
@@ -152,48 +162,105 @@ namespace {
 			baseCenter - right * coneRadius,
 			baseCenter + basisUp * coneRadius,
 			baseCenter - basisUp * coneRadius,
-			baseCenter + glm::normalize(right + basisUp) * halfConeRadius,
-			baseCenter + glm::normalize(right - basisUp) * halfConeRadius
+			baseCenter + glm::normalize(right + basisUp) * coneRadius,
+			baseCenter + glm::normalize(right - basisUp) * coneRadius,
+			baseCenter + glm::normalize(-right + basisUp) * coneRadius,
+			baseCenter + glm::normalize(-right - basisUp) * coneRadius
 		};
 	}
 
-	bool IsVolumetricLightVisible(const PAIN::Camera& camera, const PAIN::Frustum& frustum,
-								  const PAIN::Light& light, float volumetricMaxDistance) {
-		if (light.type == PAIN::Light::TYPES::SPOTLIGHT) {
-			const auto samplePoints = GetSpotlightSamplePoints(light, volumetricMaxDistance);
-			for (const glm::vec3& samplePoint : samplePoints) {
-				if (IsPointInsideCameraView(camera, samplePoint)) {
-					return true;
-				}
-			}
-		}
+	struct VolumetricVisibilityMetrics {
+		bool visible = false;
+		float coverage = 0.0f;
+		float viewScore = std::numeric_limits<float>::max();
+	};
 
-		const glm::vec3 influenceCenter = GetVolumetricInfluenceCenter(light, volumetricMaxDistance);
-		const float influenceRadius = GetVolumetricInfluenceRadius(light, volumetricMaxDistance);
-		return IsSphereInsideFrustum(frustum, influenceCenter, influenceRadius) ||
-			   IsPointInsideCameraView(camera, light.position);
-	}
+	VolumetricVisibilityMetrics ComputeVolumetricVisibilityMetrics(const PAIN::Camera& camera,
+		const PAIN::Frustum& frustum, const PAIN::Light& light, float volumetricMaxDistance) {
+		VolumetricVisibilityMetrics metrics{};
+		const glm::mat4 vp = camera.projection() * camera.view();
+		float minX = 1.0f;
+		float minY = 1.0f;
+		float maxX = 0.0f;
+		float maxY = 0.0f;
+		bool anyOnScreen = false;
+		int validProjectedPoints = 0;
 
-	float ComputeVolumetricViewPriority(const PAIN::Camera& camera, const PAIN::Light& light,
-										const std::string& key,
-										const std::unordered_map<std::string, int>& selectionTtl,
-										float volumetricMaxDistance) {
-		float bestScore = ComputeViewPriority(camera, light, volumetricMaxDistance);
 		if (light.type == PAIN::Light::TYPES::SPOTLIGHT) {
 			const auto samplePoints = GetSpotlightSamplePoints(light, volumetricMaxDistance);
 			for (const glm::vec3& samplePoint : samplePoints) {
 				const glm::vec3 toPoint = samplePoint - camera.pos;
 				const float distance = glm::length(toPoint);
-				if (distance <= 0.0001f) {
-					bestScore = 0.0f;
-					break;
+				if (distance > 0.0001f) {
+					const glm::vec3 dirToPoint = toPoint / distance;
+					const float facing = glm::clamp(glm::dot(glm::normalize(camera.forward), dirToPoint), -1.0f, 1.0f);
+					const float anglePenalty = 1.0f - facing;
+					metrics.viewScore = std::min(metrics.viewScore, anglePenalty * 1000.0f + distance);
 				}
 
-				const glm::vec3 dirToPoint = toPoint / distance;
-				const float facing = glm::clamp(glm::dot(glm::normalize(camera.forward), dirToPoint), -1.0f, 1.0f);
-				const float anglePenalty = 1.0f - facing;
-				bestScore = std::min(bestScore, anglePenalty * 1000.0f + distance);
+				glm::vec3 ndcPoint{};
+				if (!ProjectPointToNdc(vp, samplePoint, ndcPoint)) {
+					continue;
+				}
+
+				++validProjectedPoints;
+				const bool onScreen =
+					ndcPoint.z >= -1.0f && ndcPoint.z <= 1.0f &&
+					ndcPoint.x >= -1.0f && ndcPoint.x <= 1.0f &&
+					ndcPoint.y >= -1.0f && ndcPoint.y <= 1.0f;
+				anyOnScreen = anyOnScreen || onScreen;
+
+				const float uvX = glm::clamp(ndcPoint.x * 0.5f + 0.5f, 0.0f, 1.0f);
+				const float uvY = glm::clamp(ndcPoint.y * 0.5f + 0.5f, 0.0f, 1.0f);
+				minX = std::min(minX, uvX);
+				minY = std::min(minY, uvY);
+				maxX = std::max(maxX, uvX);
+				maxY = std::max(maxY, uvY);
 			}
+
+			if (validProjectedPoints >= 2) {
+				const float width = std::max(0.0f, maxX - minX);
+				const float height = std::max(0.0f, maxY - minY);
+				metrics.coverage = width * height;
+				metrics.visible = anyOnScreen || metrics.coverage > 0.0005f;
+			}
+
+			if (!metrics.visible) {
+				const glm::vec3 influenceCenter = GetVolumetricInfluenceCenter(light, volumetricMaxDistance);
+				const float influenceRadius = GetVolumetricInfluenceRadius(light, volumetricMaxDistance);
+				metrics.visible = IsSphereInsideFrustum(frustum, influenceCenter, influenceRadius);
+			}
+
+			if (metrics.viewScore == std::numeric_limits<float>::max()) {
+				metrics.viewScore = ComputeViewPriority(camera, light, volumetricMaxDistance);
+			}
+			return metrics;
+		}
+
+		const glm::vec3 influenceCenter = GetVolumetricInfluenceCenter(light, volumetricMaxDistance);
+		const float influenceRadius = GetVolumetricInfluenceRadius(light, volumetricMaxDistance);
+		metrics.visible = IsSphereInsideFrustum(frustum, influenceCenter, influenceRadius) ||
+						  IsPointInsideCameraView(camera, light.position);
+		metrics.viewScore = ComputeViewPriority(camera, light, volumetricMaxDistance);
+
+		glm::vec3 ndcCenter{};
+		if (ProjectPointToNdc(vp, influenceCenter, ndcCenter)) {
+			const float approxRadiusNdc = glm::clamp(influenceRadius / std::max(glm::length(influenceCenter - camera.pos), 0.5f), 0.01f, 0.75f);
+			const float approxRadiusUv = approxRadiusNdc * 0.5f;
+			metrics.coverage = glm::pi<float>() * approxRadiusUv * approxRadiusUv;
+		}
+
+		return metrics;
+	}
+
+	float ComputeVolumetricViewPriority(const PAIN::Camera& camera, const PAIN::Light& light,
+										const std::string& key,
+										const std::unordered_map<std::string, int>& selectionTtl,
+										float volumetricMaxDistance,
+										float baseScore) {
+		float bestScore = baseScore;
+		if (bestScore == std::numeric_limits<float>::max()) {
+			bestScore = ComputeViewPriority(camera, light, volumetricMaxDistance);
 		}
 
 		const auto ttlIt = selectionTtl.find(key);
@@ -2474,18 +2541,20 @@ namespace PAIN {
 			}
 
 			const glm::vec3 influenceCenter = GetVolumetricInfluenceCenter(l, gs.volumetric_max_dist);
-			const bool inCameraView =
-				IsVolumetricLightVisible(*cam, cameraFrustum, l, gs.volumetric_max_dist);
+			const VolumetricVisibilityMetrics visibility =
+				ComputeVolumetricVisibilityMetrics(*cam, cameraFrustum, l, gs.volumetric_max_dist);
 			const float distToCamera = glm::distance(cam->pos, influenceCenter);
 			const bool hysteresisActive = volumetric_selection_ttl.contains(key);
+			const bool effectivelyVisible = visibility.visible || hysteresisActive;
 
 			candidates.push_back({
 				key,
 				&l,
 				hasShadowMap,
-				inCameraView,
+				effectivelyVisible,
 				hysteresisActive,
-				ComputeVolumetricViewPriority(*cam, l, key, volumetric_selection_ttl, gs.volumetric_max_dist),
+				visibility.coverage,
+				ComputeVolumetricViewPriority(*cam, l, key, volumetric_selection_ttl, gs.volumetric_max_dist, visibility.viewScore),
 				distToCamera
 			});
 		}
@@ -2494,6 +2563,9 @@ namespace PAIN {
 			[](const CandidateVolumetricLight& lhs, const CandidateVolumetricLight& rhs) {
 				if (lhs.inCameraView != rhs.inCameraView) {
 					return lhs.inCameraView && !rhs.inCameraView;
+				}
+				if (lhs.screenCoverage != rhs.screenCoverage) {
+					return lhs.screenCoverage > rhs.screenCoverage;
 				}
 				if (lhs.hysteresisActive != rhs.hysteresisActive) {
 					return lhs.hysteresisActive && !rhs.hysteresisActive;
@@ -2511,6 +2583,9 @@ namespace PAIN {
 		int nextShadowMapIdx = 0;
 		for (const CandidateVolumetricLight& candidate : candidates) {
 			if (static_cast<int>(packedLights.size()) >= maxVolumetricLights) {
+				break;
+			}
+			if (!candidate.inCameraView) {
 				break;
 			}
 
