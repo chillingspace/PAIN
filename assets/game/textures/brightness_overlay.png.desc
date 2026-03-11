@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Fence_normal.png",
+    "name": "brightness_overlay.png",
     "type": "Texture"
   },
   "build_data": {
-    "hash": 5303358806646637546
+    "hash": 16940673804434378778
   },
   "descriptor_version": 1,
-  "guid": "148002de-981f-c14e-8ee0-a0c654bfe4c8",
+  "guid": "5b8d94cc-a143-564b-b010-f1470249857f",
   "import_settings": {
     "android_compression": "ASTC_4x4",
     "generate_mipmaps": true,
@@ -15,6 +15,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\Fence_normal.png"
+    "source_file": "game\\textures\\brightness_overlay.png"
   }
 }

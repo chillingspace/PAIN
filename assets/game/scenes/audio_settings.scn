@@ -134,6 +134,11 @@
                         "Hierarchy": {
                             "childrenGUIDs": [
                                 "7beaa535-462c-7f45-9d6d-4090ca227034",
+                                "9cd8f47f-6463-f747-9161-5941ccdd6c0a",
+                                "c57eafe9-91dc-e142-9cd0-f3b3a11de5e5",
+                                "1dfa2a4f-5d18-a541-8f42-a6eda9f34f29",
+                                "d3b0f1f6-95e2-a445-9590-c4ad1169da63",
+                                "954f7853-48b6-0044-b5ea-715aafb4a7dc",
                                 "f02eecce-bf53-1940-9990-80a6b0692ebd",
                                 "1915db12-41ad-e448-8ef7-34bb04aacfdb",
                                 "fffffce1-8726-8b49-af0e-06d51dbb42d5",
@@ -143,8 +148,7 @@
                                 "5897e9ad-062b-d64f-bb5c-d3cbe7db156d",
                                 "d9db24aa-0cca-894e-891d-1e5e67ae92f3",
                                 "0e4f02da-e565-aa40-a6ef-2cff0184d507",
-                                "109b2729-7dd4-f947-86f5-cb4ed12acb11",
-                                "cdeabfb8-ecce-a74f-812f-516c10854576"
+                                "109b2729-7dd4-f947-86f5-cb4ed12acb11"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 0
@@ -239,12 +243,544 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
-                            "guid": "f02eecce-bf53-1940-9990-80a6b0692ebd"
+                            "guid": "9cd8f47f-6463-f747-9161-5941ccdd6c0a"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
                             "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "master_text"
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                -0.6000000238418579,
+                                0.30000001192092896
+                            ],
+                            "texture_guid": "02b14dea-f665-da4d-b8b6-0827fef26eac",
+                            "texture_scale": [
+                                0.20000000298023224,
+                                0.05000000074505806
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "master_text"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "c57eafe9-91dc-e142-9cd0-f3b3a11de5e5"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
+                            "siblingIndex": 1
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "master_minus"
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                -0.4000000059604645,
+                                0.30000001192092896
+                            ],
+                            "texture_guid": "6b552878-5312-184c-b2bd-db0fcf59e586",
+                            "texture_scale": [
+                                0.05000000074505806,
+                                0.019999999552965164
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "master_minus"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "1dfa2a4f-5d18-a541-8f42-a6eda9f34f29"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
+                            "siblingIndex": 2
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "master_plus"
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                0.4000000059604645,
+                                0.30000001192092896
+                            ],
+                            "texture_guid": "ec849340-a7c9-f84a-ad47-7dd6c877f30c",
+                            "texture_scale": [
+                                0.05000000074505806,
+                                0.05000000074505806
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "master_plus"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "CustomHitbox2D": {
+                            "max_point": [
+                                50.0,
+                                50.0
+                            ],
+                            "min_point": [
+                                -50.0,
+                                -50.0
+                            ],
+                            "position_offset": [
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        "GUID": {
+                            "guid": "954f7853-48b6-0044-b5ea-715aafb4a7dc"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
+                            "siblingIndex": 3
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "master_handle"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "a3228277-a976-1a4a-b247-e09d061d40d8"
+                                }
+                            ]
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                0.3199999928474426,
+                                0.30000001192092896
+                            ],
+                            "texture_guid": "9269dae6-5f24-4f48-80f8-1995722646d2",
+                            "texture_scale": [
+                                0.05000000074505806,
+                                0.05000000074505806
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "master_handle"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "d3b0f1f6-95e2-a445-9590-c4ad1169da63"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
+                            "siblingIndex": 4
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "master_bar"
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                0.0,
+                                0.30000001192092896
+                            ],
+                            "texture_guid": "d68c31eb-4037-d241-9d51-29c2edb8179f",
+                            "texture_scale": [
+                                0.6000000238418579,
+                                0.009999999776482582
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "master_bar"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "f02eecce-bf53-1940-9990-80a6b0692ebd"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
+                            "siblingIndex": 5
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -360,7 +896,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 1
+                            "siblingIndex": 6
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -470,7 +1006,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 2
+                            "siblingIndex": 7
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -572,7 +1108,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 3
+                            "siblingIndex": 8
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -674,7 +1210,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 4
+                            "siblingIndex": 9
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -776,7 +1312,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 5
+                            "siblingIndex": 10
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -892,7 +1428,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 6
+                            "siblingIndex": 11
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1002,7 +1538,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 7
+                            "siblingIndex": 12
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1104,7 +1640,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 8
+                            "siblingIndex": 13
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1206,7 +1742,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 9
+                            "siblingIndex": 14
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1340,7 +1876,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 10
+                            "siblingIndex": 15
                         },
                         "Layer": {
                             "layer_id": 1,
@@ -1462,166 +1998,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "AudioSource": {
-                            "audio_tracks": [],
-                            "group_name": "sfx",
-                            "is3D": true,
-                            "looping": true,
-                            "maxDistance": 50.0,
-                            "minDistance": 1.0,
-                            "pitchDb": 0.0,
-                            "playOnStart": false,
-                            "pos": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "selected_audio": "6621d58f-1f66-bb4f-8c78-b77404b6296b",
-                            "track_volumes": [],
-                            "volumeDb": 0.0
-                        },
-                        "CustomHitbox2D": {
-                            "max_point": [
-                                204.10000610351563,
-                                50.0
-                            ],
-                            "min_point": [
-                                -50.0,
-                                -50.0
-                            ],
-                            "position_offset": [
-                                0.0,
-                                0.0
-                            ]
-                        },
-                        "GUID": {
-                            "guid": "cdeabfb8-ecce-a74f-812f-516c10854576"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 11
-                        },
-                        "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.6797102689743042,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "audio_button"
-                        },
-                        "Texture2D": {
-                            "pos": [
-                                -0.05000000074505806,
-                                0.30000001192092896
-                            ],
-                            "texture_guid": "2d8e7a6a-fa7e-e84a-b602-13bb753a0bae",
-                            "texture_scale": [
-                                0.30000001192092896,
-                                0.10000000149011612
-                            ]
-                        },
-                        "UIAnimation": {
-                            "b_loop": true,
-                            "b_playing": false,
-                            "duration": 0.20000000298023224,
-                            "frame_duration": 0.10000000149011612,
-                            "spritesheet_columns": 2,
-                            "spritesheet_rows": 1,
-                            "total_frames": 2
-                        },
-                        "UIButton": {
-                            "action": "LoadScene",
-                            "disabled_color": -10066330,
-                            "highlighted_color": -3355444,
-                            "normal_color": -1,
-                            "payload": "game/scenes/mainmenu.scn",
-                            "pressed_color": -5592406,
-                            "state": "Normal"
-                        },
-                        "UIElement": {
-                            "b_is_enabled": true,
-                            "b_is_interactable": true,
-                            "layer": 0
-                        },
-                        "UIRectTransform": {
-                            "anchor_max": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchor_min": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchored_position": [
-                                0.0,
-                                0.0
-                            ],
-                            "local_position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "offset_max": [
-                                0.0,
-                                0.0
-                            ],
-                            "offset_min": [
-                                0.0,
-                                0.0
-                            ],
-                            "pivot": [
-                                0.5,
-                                0.5
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "size_delta": [
-                                1024.0,
-                                88.0
-                            ]
-                        },
-                        "UVCoordinates": {
-                            "uv": [
-                                0.0016556291375309229,
-                                0.009615384973585606,
-                                0.498344361782074,
-                                0.9903846383094788
-                            ]
-                        }
-                    },
-                    "Name": "audio_button"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
                         "GUID": {
                             "guid": "5ebbec7a-a181-584c-921d-e90f35a3ed82"
                         },
@@ -1660,7 +2036,7 @@
                                 0.0,
                                 0.0
                             ],
-                            "texture_guid": "a32e9b08-c3ba-db41-a4d9-3122731c4fcd",
+                            "texture_guid": "7ed70aff-18c9-5b4e-9fd2-3a0110502b0a",
                             "texture_scale": [
                                 2.0,
                                 1.0
