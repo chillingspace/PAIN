@@ -13,6 +13,8 @@
 #include "ECS/Components/cAudioSource.h"
 #include "ECS/Controller.h"
 #include "Utility/Log.h"
+#include "PAINEngine/CoreSystems/Renderer/GraphicsSettings.h"
+#include "PAINEngine/CoreSystems/Windows/Window.h"
 
 #include <fstream>
 #include <filesystem>
@@ -1062,6 +1064,37 @@ namespace PAIN {
             auto audio = services_->get<Audio::Audio>();
             if (!audio) return 0.0f;
             return audio->getGroupVolumeDb(group.c_str());
+            });
+
+        // ==================== Graphics Settings Control ====================
+        // Gamma, brightness, and fullscreen for settings UI
+
+        // setGamma(value) - Set gamma correction value (default 2.2, range ~1.5-3.0)
+        lua_.set_function("setGamma", [](float value) {
+            GraphicsSettings::get().gamma_value = value;
+            });
+
+        // getGamma() -> float
+        lua_.set_function("getGamma", []() -> float {
+            return GraphicsSettings::get().gamma_value;
+            });
+
+        // setBrightness(value) - Set tone mapping exposure (default 1.0, range ~0.5-2.0)
+        lua_.set_function("setBrightness", [](float value) {
+            GraphicsSettings::get().tone_mapping_exposure = value;
+            });
+
+        // getBrightness() -> float
+        lua_.set_function("getBrightness", []() -> float {
+            return GraphicsSettings::get().tone_mapping_exposure;
+            });
+
+        // setFullscreen(bool) - Toggle fullscreen/windowed mode (PC only)
+        lua_.set_function("setFullscreen", [this](bool fullscreen) {
+            if (!services_) return;
+            auto window = services_->get<Window::Window>();
+            if (!window) return;
+            window->setFullscreen(fullscreen);
             });
 
         // ==================== Settings Persistence ====================

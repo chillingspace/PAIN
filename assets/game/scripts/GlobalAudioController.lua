@@ -254,6 +254,48 @@ registerUpdate(function(dt)
                 loadAndApply("vol_bgm",    "music",  "bgm")
                 loadAndApply("vol_sfx",    "sfx",    "sfx")
             end
+
+            -- Apply saved graphics settings from disk
+            if settingsLoad then
+                -- Brightness (tone mapping exposure)
+                if setBrightness then
+                    local saved = settingsLoad("gfx_brightness", "")
+                    if saved ~= "" then
+                        local val = tonumber(saved)
+                        if val then
+                            -- Convert slider 0-1 to exposure 0.5-2.0
+                            local exposure = 0.5 + val * 1.5
+                            setBrightness(exposure)
+                            log("[GlobalAudio] Loaded brightness slider = " .. tostring(val) .. " -> exposure " .. tostring(exposure))
+                        end
+                    end
+                end
+
+                -- Gamma
+                if setGamma then
+                    local saved = settingsLoad("gfx_gamma", "")
+                    if saved ~= "" then
+                        local val = tonumber(saved)
+                        if val then
+                            -- Convert slider 0-1 to gamma 1.5-3.0
+                            local gamma = 1.5 + val * 1.5
+                            setGamma(gamma)
+                            log("[GlobalAudio] Loaded gamma slider = " .. tostring(val) .. " -> gamma " .. tostring(gamma))
+                        end
+                    end
+                end
+
+                -- Fullscreen/Windowed (PC only)
+                if setFullscreen then
+                    local saved = settingsLoad("gfx_displaymode", "")
+                    if saved ~= "" then
+                        _G.GraphicsSettings = _G.GraphicsSettings or {}
+                        _G.GraphicsSettings.displayMode = saved
+                        setFullscreen(saved == "fullscreen")
+                        log("[GlobalAudio] Loaded display mode = " .. saved)
+                    end
+                end
+            end
         end
     end
 end)

@@ -66,6 +66,7 @@ namespace PAIN {
 
 		SHADOW_TYPES shadow_type = SHADOW_TYPES::SOFTEST;
 		bool gamma_correction = true;
+		float gamma_value = 2.2f;			// adjustable gamma: 1.5-3.0 range, controlled by settings slider
 		glm::vec3 AMBIENT_LIGHT = glm::vec3(0.f);
 		bool world_light = true;
 		float fov = 60.0f;

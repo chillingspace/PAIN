@@ -135,6 +135,53 @@ namespace PAIN {
 			}
 		}
 
+		void GLFW_Window::setFullscreen(bool fullscreen)
+		{
+			GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+
+			if (fullscreen) {
+				// Save current windowed position and size for potential restore
+				int wx, wy, ww, wh;
+				glfwGetWindowPos(ptr_window, &wx, &wy);
+				glfwGetWindowSize(ptr_window, &ww, &wh);
+
+				// Get primary monitor resolution
+				int width = 1920, height = 1080;  // fallback
+				if (monitor) {
+					const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+					if (mode) {
+						width = mode->width;
+						height = mode->height;
+					}
+				}
+
+				glfwSetWindowMonitor(ptr_window, monitor, 0, 0, width, height, GLFW_DONT_CARE);
+				PN_CORE_INFO("[Window] Switched to fullscreen {}x{}", width, height);
+			}
+			else {
+				// Windowed: centered 1280x720
+				int winW = 1280, winH = 720;
+				int posX = 100, posY = 100;
+
+				// Try to center on monitor
+				if (monitor) {
+					const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+					if (mode) {
+						posX = (mode->width - winW) / 2;
+						posY = (mode->height - winH) / 2;
+					}
+				}
+
+				glfwSetWindowMonitor(ptr_window, nullptr, posX, posY, winW, winH, GLFW_DONT_CARE);
+				PN_CORE_INFO("[Window] Switched to windowed {}x{} at ({},{})", winW, winH, posX, posY);
+			}
+
+			// Update frame buffer after mode change
+			int w, h;
+			glfwGetFramebufferSize(ptr_window, &w, &h);
+			frame_buffer = { w, h };
+		}
+
 		void GLFW_Window::fbsize_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int width, [[maybe_unused]] int height) {
 			// Ignore 0x0 resize events
 			if (width == 0 || height == 0) {

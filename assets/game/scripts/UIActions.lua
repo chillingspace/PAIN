@@ -677,6 +677,16 @@ local handlers = {
             _G.GraphicsSettings.displayMode = "fullscreen"
         end
 
+        -- Apply fullscreen/windowed mode (PC only)
+        if setFullscreen then
+            setFullscreen(_G.GraphicsSettings.displayMode == "fullscreen")
+        end
+
+        -- Save to settings file
+        if settingsSave then
+            settingsSave("gfx_displaymode", _G.GraphicsSettings.displayMode)
+        end
+
         updateGraphicsModeDisplay()
         printLog("[UI] graphics_Left -> " .. tostring(_G.GraphicsSettings.displayMode))
     end,
@@ -688,6 +698,16 @@ local handlers = {
             _G.GraphicsSettings.displayMode = "fullscreen"
         else
             _G.GraphicsSettings.displayMode = "windowed"
+        end
+
+        -- Apply fullscreen/windowed mode (PC only)
+        if setFullscreen then
+            setFullscreen(_G.GraphicsSettings.displayMode == "fullscreen")
+        end
+
+        -- Save to settings file
+        if settingsSave then
+            settingsSave("gfx_displaymode", _G.GraphicsSettings.displayMode)
         end
 
         updateGraphicsModeDisplay()
