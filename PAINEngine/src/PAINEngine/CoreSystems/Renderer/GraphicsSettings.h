@@ -89,10 +89,10 @@ namespace PAIN {
 
 		// volumetric lighting (god rays / light shafts)
 		bool volumetric = true;
-		float volumetric_intensity = 0.05f;   // overall brightness; start low
+		float volumetric_intensity = 0.5f;   // overall brightness; start low
 		int   volumetric_steps = 64;           // ray march steps; 32-128 typical
 		float volumetric_max_dist = 50.0f;     // max ray length in world units
-		float volumetric_scatter = 0.7f;       // Mie g: 0=uniform, 1=pure forward
+		float volumetric_scatter = 0.f;       // Mie g: 0=uniform, 1=pure forward
 
 		// animation
 		bool interpolate_animation{ true };		// smoother animations at the expense of performance

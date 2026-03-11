@@ -39,11 +39,6 @@ uniform float u_VolumetricSteps;      // number of ray march steps
 uniform float u_VolumetricMaxDist;    // maximum ray length
 uniform float u_VolumetricScatter;    // Mie g factor (0=isotropic, 0.9=heavy forward)
 
-// Simple noise for ray-start jitter to reduce banding
-float hash(vec2 co) {
-    return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
-}
-
 // Henyey-Greenstein Mie scattering phase function
 float hgPhase(float cosTheta, float g) {
     float g2 = g * g;
@@ -89,17 +84,19 @@ void main() {
     int   numSteps  = int(u_VolumetricSteps);
     float stepSize  = rayLen / float(numSteps);
 
-    // Jitter the ray start to break up banding
-    float jitter = hash(TexCoords * 100.0);
-
     vec3 accumulated = vec3(0.0);
 
     for (int s = 0; s < numSteps; s++) {
-        float t         = (float(s) + jitter) * stepSize;
+        float t         = (float(s) + 0.5) * stepSize;
         vec3  samplePos = u_CamPos + rayDir * t;
 
         for (int i = 0; i < int(u_NumLights); i++) {
             Light light = u_Lights[i];
+
+            // Without a shadow map there is no occlusion data — the light would
+            // brighten the entire volume uniformly with no visible shafts, so skip it.
+            if (light.shadowMapIdx < -0.5) continue;
+
             vec3  lightContrib = vec3(0.0);
 
             if (int(light.type) == 0) {
@@ -108,23 +105,16 @@ void main() {
                 float dist        = length(toLight);
                 float attenuation = 100.0 / max(dist * dist, 0.001);
 
-                float inShadow = 0.0;
-                if (light.shadowMapIdx > -0.5)
-                    inShadow = sampleShadow(int(light.shadowMapIdx), samplePos, light);
-
-                float cosTheta = dot(normalize(toLight), -rayDir);
-                float phase    = hgPhase(cosTheta, u_VolumetricScatter);
+                float inShadow    = sampleShadow(int(light.shadowMapIdx), samplePos, light);
+                float cosTheta    = dot(normalize(toLight), -rayDir);
+                float phase       = hgPhase(cosTheta, u_VolumetricScatter);
 
                 lightContrib = light.L * attenuation * phase * (1.0 - inShadow);
             }
             else if (int(light.type) == 1) {
                 // ----- Directional light -----
-                vec3 lightDir = normalize(-light.direction);
-
-                float inShadow = 0.0;
-                if (light.shadowMapIdx > -0.5)
-                    inShadow = sampleShadow(int(light.shadowMapIdx), samplePos, light);
-
+                vec3 lightDir  = normalize(-light.direction);
+                float inShadow = sampleShadow(int(light.shadowMapIdx), samplePos, light);
                 float cosTheta = dot(lightDir, -rayDir);
                 float phase    = hgPhase(cosTheta, u_VolumetricScatter);
 
@@ -142,10 +132,7 @@ void main() {
                 float epsilon      = max(light.innerCutoff - light.outerCutoff, 0.001);
                 float spotIntensity = clamp((theta - light.outerCutoff) / epsilon, 0.0, 1.0);
 
-                float inShadow = 0.0;
-                if (light.shadowMapIdx > -0.5)
-                    inShadow = sampleShadow(int(light.shadowMapIdx), samplePos, light);
-
+                float inShadow = sampleShadow(int(light.shadowMapIdx), samplePos, light);
                 float cosTheta = dot(toLightNorm, -rayDir);
                 float phase    = hgPhase(cosTheta, u_VolumetricScatter);
 
