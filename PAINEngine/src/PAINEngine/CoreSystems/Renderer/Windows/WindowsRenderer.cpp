@@ -2598,6 +2598,8 @@ namespace PAIN {
 				*rbo = 0;
 			}
 		}
+
+		TextRenderer::shutdown();
 	}
 } // namespace PAIN
 

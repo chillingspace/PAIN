@@ -378,21 +378,61 @@ namespace PAIN {
 						if (lock.Succeeded()) {
 							const JPH::Body& body = lock.GetBody();
 							const JPH::Quat rotation = body.GetRotation();
+							
+							glm::vec3 joltWorldPos(position.GetX(), position.GetY(), position.GetZ());
+							glm::quat joltWorldRot(rotation.GetW(), rotation.GetX(), rotation.GetY(), rotation.GetZ());
 
-							// Check motion type mismatch
+							// Will update after releasing lock
 							if (body.GetMotionType() != desired_motion_type) {
-								// Will update after releasing lock
+							}
+							
+							bool hasParent = false;
+							glm::mat4 parentWorld(1.0f);
+							if (auto* hierarchy = registry.try_get<Entity::Hierarchy>(entity)) {
+								if (hierarchy->parentGUID.IsValid()) {
+									if (auto svc = services.lock()) {
+										auto ecs = svc->get<ECS::Controller>();
+										ECS::RegistryID regID = ECS::MAIN_REGISTRY_ID;
+										for (const auto& id : ecs->getAllRegistryIDs()) {
+											if (&ecs->getRegistry(id) == &registry) {
+												regID = id; break;
+											}
+										}
+										entt::entity parent = ecs->getGUIDRegistry(regID).resolveGUID(hierarchy->parentGUID);
+										if (parent != entt::null && registry.valid(parent) && registry.all_of<WorldTransform>(parent)) {
+											hasParent = true;
+											parentWorld = registry.get<WorldTransform>(parent).matrix;
+										}
+									}
+								}
+							}
+							
+							if (hasParent) {
+								glm::mat4 joltWorldMat = glm::translate(glm::mat4(1.0f), joltWorldPos) * glm::mat4(joltWorldRot);
+								glm::mat4 localMat = glm::inverse(parentWorld) * joltWorldMat;
+								
+								glm::vec3 newScale, newSkew;
+								glm::vec4 newPerspective;
+								glm::quat newRot;
+								glm::vec3 newPos;
+								glm::decompose(localMat, newScale, newRot, newPos, newSkew, newPerspective);
+								
+								transform.position = newPos;
+								transform.rotation = glm::normalize(newRot);
+							} else {
+								transform.position = joltWorldPos;
+								transform.rotation = glm::normalize(joltWorldRot);
 							}
 
-							// Inside your body lock read block, replace the direct assignment:
-							JPH::RVec3 position = body.GetPosition();
-							glm::vec3 currentPos(position.GetX(), position.GetY(), position.GetZ());
+							// // Inside your body lock read block, replace the direct assignment:
+							// JPH::RVec3 position = body.GetPosition();
+							// glm::vec3 currentPos(position.GetX(), position.GetY(), position.GetZ());
 
-							// Interpolate between previous and current physics position (which might affect accuracy but improves visual smoothness)
-							transform.position = glm::mix(rigidBody.prevPosition, currentPos, accumulator_alpha_);
+							// // Interpolate between previous and current physics position (which might affect accuracy but improves visual smoothness)
+							// transform.position = glm::mix(rigidBody.prevPosition, currentPos, accumulator_alpha_);
 
-							transform.rotation = glm::quat(rotation.GetW(), rotation.GetX(),
-														   rotation.GetY(), rotation.GetZ());
+							// transform.rotation = glm::quat(rotation.GetW(), rotation.GetX(),
+							// 							   rotation.GetY(), rotation.GetZ());
 							world.dirty = true;
 
 							const JPH::Vec3 velocity = body.GetLinearVelocity();
@@ -494,8 +534,8 @@ namespace PAIN {
 
 		void System::syncNewBodies(entt::registry& registry) {
 			// Use view to avoid group ownership conflict with onUpdate
-			auto view = registry.view<Physics::RigidBody3D, LocalTransform>();
-			for (auto&& [entity, rigidBody, transform] : view.each()) {
+			auto view = registry.view<Physics::RigidBody3D, LocalTransform, WorldTransform>();
+			for (auto&& [entity, rigidBody, transform, world] : view.each()) {
 
 				// skip if physics disabled
 				if (!rigidBody.physics_enabled) {
@@ -516,11 +556,15 @@ namespace PAIN {
 
 				// Only create if not already created (or just destroyed above)
 				if (rigidBody.bodyID.IsInvalid()) {
-					// Get rotation
-					const glm::quat& q = glm::normalize(transform.rotation);
+					// Get world transform
+					glm::vec3 worldPos, scale, skew;
+					glm::vec4 perspective;
+					glm::quat worldRot;
+					glm::decompose(world.matrix, scale, worldRot, worldPos, skew, perspective);
+					worldRot = glm::normalize(worldRot);
 
-					JPH::Quat rotationQuat(q.x, q.y, q.z,
-										   q.w); // Jolt uses x, y, z, w order
+					JPH::Quat rotationQuat(worldRot.x, worldRot.y, worldRot.z,
+										   worldRot.w); // Jolt uses x, y, z, w order
 
 					// Create Jolt body settings
 
@@ -543,16 +587,16 @@ namespace PAIN {
 							switch (shape.type) {
 							case ColliderShapeType::Box:
 								subShape = new JPH::BoxShape(
-									JPH::Vec3(shape.boxHalfExtents.x * transform.scale.x * rigidBody.collider_scale.x,
-											  shape.boxHalfExtents.y * transform.scale.y * rigidBody.collider_scale.y,
-											  shape.boxHalfExtents.z * transform.scale.z * rigidBody.collider_scale.z),
+									JPH::Vec3(shape.boxHalfExtents.x * scale.x * rigidBody.collider_scale.x,
+											  shape.boxHalfExtents.y * scale.y * rigidBody.collider_scale.y,
+											  shape.boxHalfExtents.z * scale.z * rigidBody.collider_scale.z),
 									0.0f // convex radius
 								);
 								break;
 
 							case ColliderShapeType::Sphere:
 								subShape = new JPH::SphereShape(
-									shape.sphereRadius * glm::max(glm::max(transform.scale.x, transform.scale.y), transform.scale.z) *
+									shape.sphereRadius * glm::max(glm::max(scale.x, scale.y), scale.z) *
 									glm::max(glm::max(rigidBody.collider_scale.x,
 													  rigidBody.collider_scale.y),
 											 rigidBody.collider_scale.z));
@@ -560,8 +604,8 @@ namespace PAIN {
 
 							case ColliderShapeType::Capsule:
 								subShape = new JPH::CapsuleShape(
-									shape.capsuleHalfHeight * transform.scale.y * rigidBody.collider_scale.y,
-									shape.capsuleRadius * glm::max(transform.scale.x, transform.scale.z) *
+									shape.capsuleHalfHeight * scale.y * rigidBody.collider_scale.y,
+									shape.capsuleRadius * glm::max(scale.x, scale.z) *
 										glm::max(rigidBody.collider_scale.x,
 												 rigidBody.collider_scale.z));
 								break;
@@ -570,11 +614,11 @@ namespace PAIN {
 							// Calculate offset with entity scale and RigidBody collider_offset
 							// applied
 							JPH::Vec3 subOffset((shape.offset.x + rigidBody.collider_offset.x) *
-													transform.scale.x,
+													scale.x,
 												(shape.offset.y + rigidBody.collider_offset.y) *
-													transform.scale.y,
+													scale.y,
 												(shape.offset.z + rigidBody.collider_offset.z) *
-													transform.scale.z);
+													scale.z);
 
 							// Convert rotation
 							JPH::Quat subRotation(shape.rotation.x, shape.rotation.y,
@@ -593,16 +637,16 @@ namespace PAIN {
 										  (uint32_t)entity);
 							// Fallback to simple box
 							finalShape = new JPH::BoxShape(
-								JPH::Vec3(.5f * transform.scale.x * rigidBody.collider_scale.x,
-										  .5f * transform.scale.y * rigidBody.collider_scale.y,
-										  .5f * transform.scale.z * rigidBody.collider_scale.z),
+								JPH::Vec3(.5f * scale.x * rigidBody.collider_scale.x,
+										  .5f * scale.y * rigidBody.collider_scale.y,
+										  .5f * scale.z * rigidBody.collider_scale.z),
 								0.0f);
 						}
 					} else {
 						// ensure positive dimensions in order to prevent assert errors
-						float extentX = std::abs(.5f * transform.scale.x * rigidBody.collider_scale.x);
-						float extentY = std::abs(.5f * transform.scale.y * rigidBody.collider_scale.y);
-						float extentZ = std::abs(.5f * transform.scale.z * rigidBody.collider_scale.z);
+						float extentX = std::abs(.5f * scale.x * rigidBody.collider_scale.x);
+						float extentY = std::abs(.5f * scale.y * rigidBody.collider_scale.y);
+						float extentZ = std::abs(.5f * scale.z * rigidBody.collider_scale.z);
 
 						// ensure dimensions are not exactly zero to be safe
 						extentX = std::max(extentX, 0.001f);
@@ -620,9 +664,9 @@ namespace PAIN {
 						// We wrap the box shape in a transform shape to offset it from the
 						// entity center
 						if (rigidBody.collider_offset != glm::vec3(0.0f)) {
-							JPH::Vec3 offset(rigidBody.collider_offset.x * transform.scale.x,
-											 rigidBody.collider_offset.y * transform.scale.y,
-											 rigidBody.collider_offset.z * transform.scale.z);
+							JPH::Vec3 offset(rigidBody.collider_offset.x * scale.x,
+											 rigidBody.collider_offset.y * scale.y,
+											 rigidBody.collider_offset.z * scale.z);
 							finalShape = new JPH::RotatedTranslatedShape(
 								offset, JPH::Quat::sIdentity(), finalShape);
 						}
@@ -645,9 +689,9 @@ namespace PAIN {
 
 					// Create Jolt body settings
 					JPH::BodyCreationSettings settings(finalShape,
-													   JPH::RVec3(transform.position.x,
-																  transform.position.y,
-																  transform.position.z),
+													   JPH::RVec3(worldPos.x,
+																  worldPos.y,
+																  worldPos.z),
 													   rotationQuat, motion_type, jolt_layer);
 
 					settings.mAllowDynamicOrKinematic = true;
@@ -668,7 +712,7 @@ namespace PAIN {
 						JPH::EAllowedDOFs::TranslationY |
 						JPH::EAllowedDOFs::TranslationZ;
 
-					JPH::Vec3 com_offset(0.0f, -0.3f * transform.scale.y, 0.0f);
+					JPH::Vec3 com_offset(0.0f, -0.3f * scale.y, 0.0f);
 					settings.mMassPropertiesOverride.mInertia.SetTranslation(com_offset);
 
 					JPH::BodyID body_id = body_interface->CreateAndAddBody(

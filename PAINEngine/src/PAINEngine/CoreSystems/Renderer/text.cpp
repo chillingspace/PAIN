@@ -16,10 +16,14 @@
 #endif
 
 bool PAIN::TextRenderer::initialized = false;
-std::shared_ptr<PAIN::Services> PAIN::TextRenderer::services = nullptr;
+std::weak_ptr<PAIN::Services> PAIN::TextRenderer::services;
 
 namespace PAIN {
 	TextRenderer::TextRenderer() {
+        auto svc = services.lock();
+        if (!svc) {
+            throw std::runtime_error("TextRenderer services expired during construction");
+        }
 
 		// compile and link shader
 		{
@@ -29,7 +33,7 @@ namespace PAIN {
 			std::filesystem::path text_path = "engine\\shaders\\text.vert";
 #endif
 
-			auto shader_opt = services->get<Assets::Manager>()->getAsset<Assets::Shader>(text_path);
+			auto shader_opt = svc->get<Assets::Manager>()->getAsset<Assets::Shader>(text_path);
 			shader = shader_opt.has_value() ? shader_opt.value() : shader;
 			PN_CORE_INFO("Text shader compiled, ID: {}", shader->GetRendererID());
 		}
@@ -77,7 +81,10 @@ namespace PAIN {
 
     std::vector<std::string> TextRenderer::handleTextWrap(const PAIN::UIText& text_comp)
     {
-        auto font_opt = services->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(text_comp.font_guid);
+        auto svc = services.lock();
+        if (!svc) return {};
+
+        auto font_opt = svc->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(text_comp.font_guid);
         if (!font_opt) return {};
         auto font = font_opt.value().get()->getFont();
         if (!font) return {};
@@ -253,13 +260,19 @@ namespace PAIN {
 
     void TextRenderer::renderText(UIText& text_comp)
     {
+        auto svc = services.lock();
+        if (!svc) {
+            PN_CORE_ERROR("TextRenderer services expired");
+            return;
+        }
+
         if (shader->GetRendererID() == 0) {
             PN_CORE_ERROR("TextRenderer shader not initialized!");
             return;
         }
 
         // Get font asset
-        auto font_opt = services->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(text_comp.font_guid);
+        auto font_opt = svc->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(text_comp.font_guid);
         if (!font_opt.has_value()) return;
         auto font = font_opt.value().get()->getFont();
         if (!font) return;

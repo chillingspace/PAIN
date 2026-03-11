@@ -55,6 +55,7 @@ namespace PAIN {
 
 	std::shared_ptr<spdlog::logger> Log::s_CoreLogger;
 	std::shared_ptr<spdlog::logger> Log::s_ClientLogger;
+    bool Log::s_Initialized = false;
 
     // Helper function to check if OpenGL extension is supported
     static bool IsGLExtensionSupported(const char* extension) {
@@ -142,6 +143,10 @@ namespace PAIN {
     }
 
 	void Log::Init() {
+        if (s_Initialized) {
+            return;
+        }
+
 #ifdef PN_PLATFORM_ANDROID
         auto sink = std::make_shared<spdlog::sinks::android_sink_mt>("PAIN"); // Logcat tag
 #else
@@ -171,7 +176,37 @@ namespace PAIN {
         s_ClientLogger->sinks().push_back(debug_sink);
 #endif
 
+        s_Initialized = true;
+
 	}
+
+    void Log::Shutdown() {
+        if (!s_Initialized) {
+            return;
+        }
+
+#ifdef _DEBUG
+        DebugConsoleSink::clear();
+#endif
+
+        if (s_CoreLogger) {
+            s_CoreLogger->flush();
+            s_CoreLogger->sinks().clear();
+        }
+
+        if (s_ClientLogger) {
+            s_ClientLogger->flush();
+            s_ClientLogger->sinks().clear();
+        }
+
+        spdlog::drop_all();
+        spdlog::set_default_logger(nullptr);
+        spdlog::shutdown();
+
+        s_CoreLogger.reset();
+        s_ClientLogger.reset();
+        s_Initialized = false;
+    }
 
     void LogMemoryFullDiagnostic(const char* label) {
         long physical_ram_mb = 0;
