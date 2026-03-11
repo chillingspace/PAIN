@@ -19,6 +19,134 @@ namespace {
 	constexpr int kMaxVolumetricLights = 4;
 	constexpr int kVolumetricFirstShadowTextureUnit = 2;
 
+	const char* DescribeGlError(GLenum err) {
+		switch (err) {
+		case GL_NO_ERROR: return "GL_NO_ERROR";
+		case GL_INVALID_ENUM: return "GL_INVALID_ENUM";
+		case GL_INVALID_VALUE: return "GL_INVALID_VALUE";
+		case GL_INVALID_OPERATION: return "GL_INVALID_OPERATION";
+		case GL_STACK_OVERFLOW: return "GL_STACK_OVERFLOW";
+		case GL_STACK_UNDERFLOW: return "GL_STACK_UNDERFLOW";
+		case GL_OUT_OF_MEMORY: return "GL_OUT_OF_MEMORY";
+#ifdef GL_INVALID_FRAMEBUFFER_OPERATION
+		case GL_INVALID_FRAMEBUFFER_OPERATION: return "GL_INVALID_FRAMEBUFFER_OPERATION";
+#endif
+		default: return "GL_UNKNOWN_ERROR";
+		}
+	}
+
+	bool ValidateProgramForDraw(GLuint program, const char* label) {
+		if (program == 0 || !glIsProgram(program)) {
+			PN_CORE_ERROR("[GL] {} program handle is invalid: {}", label, program);
+			return false;
+		}
+
+		glValidateProgram(program);
+		GLint validateStatus = GL_FALSE;
+		glGetProgramiv(program, GL_VALIDATE_STATUS, &validateStatus);
+		if (validateStatus == GL_TRUE) {
+			return true;
+		}
+
+		GLint logLength = 0;
+		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
+		std::string infoLog(logLength > 0 ? logLength : 1, '\0');
+		if (logLength > 1) {
+			glGetProgramInfoLog(program, logLength, nullptr, infoLog.data());
+		}
+
+		PN_CORE_ERROR("[GL] {} program validation failed for {}: {}",
+					  label, program, infoLog.c_str());
+		return false;
+	}
+
+	void LogLightingDrawDiagnostics(GLuint program, GLuint vao, GLuint fbo, int usedTextureUnits) {
+		static bool loggedOnce = false;
+		if (loggedOnce) {
+			return;
+		}
+		loggedOnce = true;
+
+		GLint currentProgram = 0;
+		GLint currentVao = 0;
+		GLint drawFbo = 0;
+		GLint activeTexture = 0;
+		GLint maxFragTextureUnits = 0;
+		GLint maxCombinedTextureUnits = 0;
+		glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
+		glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &currentVao);
+		glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawFbo);
+		glGetIntegerv(GL_ACTIVE_TEXTURE, &activeTexture);
+		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxFragTextureUnits);
+		glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxCombinedTextureUnits);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		const GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+		PN_CORE_ERROR(
+			"[GL] Lighting draw diagnostics: program={} currentProgram={} isProgram={} vao={} currentVao={} isVao={} fbo={} currentFbo={} fboStatus=0x{:x} usedTextureUnits={} maxFragTextureUnits={} maxCombinedTextureUnits={}",
+			program,
+			currentProgram,
+			glIsProgram(program),
+			vao,
+			currentVao,
+			glIsVertexArray(vao),
+			fbo,
+			drawFbo,
+			framebufferStatus,
+			usedTextureUnits,
+			maxFragTextureUnits,
+			maxCombinedTextureUnits);
+
+		const GLint previousActiveTexture = activeTexture;
+		for (int unit = 0; unit < usedTextureUnits; ++unit) {
+			glActiveTexture(GL_TEXTURE0 + unit);
+			GLint tex2d = 0;
+			GLint texCube = 0;
+			glGetIntegerv(GL_TEXTURE_BINDING_2D, &tex2d);
+			glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &texCube);
+			PN_CORE_ERROR("[GL] Lighting draw texture unit {}: tex2D={} texCube={}",
+						  unit, tex2d, texCube);
+		}
+		glActiveTexture(previousActiveTexture);
+	}
+
+	void LogDepthBlitDiagnostics(GLuint readFbo, GLuint drawFbo) {
+		static bool loggedOnce = false;
+		if (loggedOnce) {
+			return;
+		}
+		loggedOnce = true;
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, readFbo);
+		const GLenum readStatus = glCheckFramebufferStatus(GL_READ_FRAMEBUFFER);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, drawFbo);
+		const GLenum drawStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+
+		GLint readType = GL_NONE;
+		GLint readName = 0;
+		GLint drawType = GL_NONE;
+		GLint drawName = 0;
+		GLint drawSamples = 0;
+
+		glGetFramebufferAttachmentParameteriv(
+			GL_READ_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &readType);
+		glGetFramebufferAttachmentParameteriv(
+			GL_READ_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &readName);
+		glGetFramebufferAttachmentParameteriv(
+			GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &drawType);
+		glGetFramebufferAttachmentParameteriv(
+			GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &drawName);
+
+		glBindRenderbuffer(GL_RENDERBUFFER, static_cast<GLuint>(drawName));
+		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_SAMPLES, &drawSamples);
+
+		PN_CORE_ERROR(
+			"[GL] Depth blit diagnostics: readFbo={} status=0x{:x} depthType=0x{:x} depthObj={} drawFbo={} status=0x{:x} depthType=0x{:x} depthObj={} drawSamples={}",
+			readFbo, readStatus, readType, readName,
+			drawFbo, drawStatus, drawType, drawName, drawSamples);
+	}
+
 	struct PackedVolumetricLight {
 		const PAIN::Light* light = nullptr;
 		int shadowTextureUnit = -1;
@@ -1005,9 +1133,9 @@ namespace PAIN {
 
 			glGenRenderbuffers(1, &final_rbo);
 			glBindRenderbuffer(GL_RENDERBUFFER, final_rbo);
-			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, winWidth,
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, winWidth,
 							  winHeight);
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
 							  GL_RENDERBUFFER, final_rbo);
 
 			if (!checkFramebufferComplete("Final framebuffer")) {
@@ -2143,14 +2271,90 @@ namespace PAIN {
 				PN_CORE_ERROR("OpenGL err after setting ibl uniforms: {}", err);
 			}
 
+			auto abortLightingPass = [&]() {
+				glEnable(GL_DEPTH_TEST);
+				glDepthMask(GL_TRUE);
+			};
+
+			GLint maxFragTextureUnits = 0;
+			GLint maxCombinedTextureUnits = 0;
+			glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxFragTextureUnits);
+			glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxCombinedTextureUnits);
+			if (tex_id > maxFragTextureUnits || tex_id > maxCombinedTextureUnits) {
+				PN_CORE_ERROR(
+					"[GL] Lighting pass requires {} texture units but device only exposes {} fragment / {} combined texture units",
+					tex_id, maxFragTextureUnits, maxCombinedTextureUnits);
+				LogLightingDrawDiagnostics(
+					pbr_shader ? pbr_shader->GetRendererID() : 0,
+					passthrough_vao,
+					final_fbo,
+					tex_id);
+				abortLightingPass();
+				return;
+			}
+
+			static GLuint validatedLightingProgram = 0;
+			if (validatedLightingProgram != (pbr_shader ? pbr_shader->GetRendererID() : 0) &&
+				!ValidateProgramForDraw(pbr_shader ? pbr_shader->GetRendererID() : 0, "LightingPass")) {
+				LogLightingDrawDiagnostics(
+					pbr_shader ? pbr_shader->GetRendererID() : 0,
+					passthrough_vao,
+					final_fbo,
+					tex_id);
+				abortLightingPass();
+				return;
+			}
+			validatedLightingProgram = pbr_shader ? pbr_shader->GetRendererID() : 0;
+
+			if (!glIsVertexArray(passthrough_vao)) {
+				PN_CORE_ERROR("[GL] LightingPass passthrough VAO is invalid: {}", passthrough_vao);
+				LogLightingDrawDiagnostics(
+					pbr_shader ? pbr_shader->GetRendererID() : 0,
+					passthrough_vao,
+					final_fbo,
+					tex_id);
+				abortLightingPass();
+				return;
+			}
+
+			const GLenum finalFboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+			if (finalFboStatus != GL_FRAMEBUFFER_COMPLETE) {
+				PN_CORE_ERROR("[GL] LightingPass framebuffer {} is incomplete before draw: 0x{:x}",
+							  final_fbo, finalFboStatus);
+				LogLightingDrawDiagnostics(
+					pbr_shader ? pbr_shader->GetRendererID() : 0,
+					passthrough_vao,
+					final_fbo,
+					tex_id);
+				abortLightingPass();
+				return;
+			}
+
 			// #endif
 
 			glBindVertexArray(passthrough_vao);
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after binding lighting VAO: {} ({})", err, DescribeGlError(err));
+				LogLightingDrawDiagnostics(
+					pbr_shader ? pbr_shader->GetRendererID() : 0,
+					passthrough_vao,
+					final_fbo,
+					tex_id);
+				abortLightingPass();
+				return;
+			}
+
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
-				PN_CORE_ERROR("OpenGL err after drawing lighting pass: {}", err);
+				PN_CORE_ERROR("OpenGL err after drawing lighting pass: {} ({})", err, DescribeGlError(err));
+				LogLightingDrawDiagnostics(
+					pbr_shader ? pbr_shader->GetRendererID() : 0,
+					passthrough_vao,
+					final_fbo,
+					tex_id);
 			}
 		}
 
@@ -2165,7 +2369,8 @@ namespace PAIN {
 
 		err = glGetError();
 		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("OpenGL err after blitting depth buffer: {}", err);
+			PN_CORE_ERROR("OpenGL err after blitting depth buffer: {} ({})", err, DescribeGlError(err));
+			LogDepthBlitDiagnostics(ds_fbo, final_fbo);
 		}
 
 		// Now final_fbo has depth info. Render skybox:

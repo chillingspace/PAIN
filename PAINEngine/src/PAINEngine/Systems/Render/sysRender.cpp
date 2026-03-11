@@ -575,17 +575,17 @@ namespace PAIN {
 			rendererService->w_renderer->LightingPass(scene, LightSources::get());
 		}
 
-	void System::volumetricPass(entt::registry& registry) {
-		auto rendererService = services.lock()->get<sRenderer>();
-		if (!rendererService || !rendererService->w_renderer)
-			return;
+		void System::volumetricPass(entt::registry& registry) {
+			auto rendererService = services.lock()->get<sRenderer>();
+			if (!rendererService || !rendererService->w_renderer)
+				return;
 
-		auto svc = services.lock();
-		if (!svc) return;
+			auto svc = services.lock();
+			if (!svc) return;
 
-		auto scene = svc->get<Scene::SceneManager>();
-		rendererService->w_renderer->VolumetricPass(scene, LightSources::get());
-	}
+			auto scene = svc->get<Scene::SceneManager>();
+			rendererService->w_renderer->VolumetricPass(scene, LightSources::get());
+		}
 
 		// ============================================
 		// PARTICLE RENDER PASS - GPU Instanced Rendering
