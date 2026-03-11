@@ -2891,11 +2891,6 @@ namespace PAIN {
 
 	void WindowsRenderer::VolumetricPass(std::shared_ptr<Scene::SceneManager> scene,
 										 const LightSources& lights) {
-#ifdef PN_PLATFORM_ANDROID
-		(void)scene;
-		(void)lights;
-		return;
-#else
 		(void)lights;
 		if (!volumetric_shader || volumetric_shader->GetRendererID() == 0)
 			return;
@@ -2960,7 +2955,7 @@ namespace PAIN {
 			const VolumetricVisibilityMetrics visibility =
 				ComputeVolumetricVisibilityMetrics(*cam, cameraFrustum, l, gs.volumetric_max_dist);
 			const float distToCamera = glm::distance(cam->pos, influenceCenter);
-			const bool hysteresisActive = volumetric_selection_ttl.contains(key);
+			const bool hysteresisActive = volumetric_selection_ttl.count(key) > 0;
 			const bool effectivelyVisible = visibility.visible || hysteresisActive;
 
 			candidates.push_back({
@@ -3127,7 +3122,6 @@ namespace PAIN {
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after VolumetricPass: {}", err);
 		}
-#endif
 	}
 
 	void WindowsRenderer::PostProcessPass() {
