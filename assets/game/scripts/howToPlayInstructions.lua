@@ -7,7 +7,7 @@ registerUpdate(function(dt)
 
         if isMobile then
 
-            local fileName = "game/textures/how to play pg1- mobile ver.ktx"
+            local fileName = "game/textures/how to play pg1- mobile ver NEW.ktx"
             local guid = getImageID(fileName)
             
             if guid ~= "" and guid ~= nil then
@@ -18,7 +18,7 @@ registerUpdate(function(dt)
             end
             
         else
-            local fileName = "game/textures/how to play pg1- pc ver.png"
+            local fileName = "game/textures/how to play pg1- pc ver NEW.png"
             local guid = getImageID(fileName)
             
             if guid ~= "" and guid ~= nil then
