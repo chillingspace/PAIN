@@ -18,6 +18,13 @@
 namespace {
 	constexpr int kMaxVolumetricLights = 4;
 	constexpr int kVolumetricFirstShadowTextureUnit = 2;
+	constexpr int kGBufferTextureCount = 5;
+	constexpr int kFixedShadowTextureUnitStart = kGBufferTextureCount;
+	constexpr int kMaxPbrShadowMaps = 4;
+	constexpr int kIrradianceTextureUnit = kFixedShadowTextureUnitStart + kMaxPbrShadowMaps;
+	constexpr int kPrefilterTextureUnit = kIrradianceTextureUnit + 1;
+	constexpr int kBrdfLutTextureUnit = kPrefilterTextureUnit + 1;
+	constexpr int kLightingTextureUnitsUsed = kBrdfLutTextureUnit + 1;
 
 	const char* DescribeGlError(GLenum err) {
 		switch (err) {
@@ -2143,33 +2150,52 @@ namespace PAIN {
 				PN_CORE_ERROR("OpenGL err after binding gbuffer textures: {}", err);
 			}
 
-			static constexpr int NEXT_VALID_TEXID =
-				5; // increment this after adding new texture bindings above
-			int tex_id = NEXT_VALID_TEXID;
+			for (int shadowSlot = 0; shadowSlot < kMaxPbrShadowMaps; ++shadowSlot) {
+				glActiveTexture(GL_TEXTURE0 + kFixedShadowTextureUnitStart + shadowSlot);
+				glBindTexture(GL_TEXTURE_2D, 0);
+#ifdef PN_PLATFORM_WINDOWS
+				pbr_shader->SetUniform("u_ShadowMaps[" + std::to_string(shadowSlot) + "]",
+									   kFixedShadowTextureUnitStart + shadowSlot);
+#else
+				pbr_shader->SetUniform("u_ShadowMap" + std::to_string(shadowSlot),
+									   kFixedShadowTextureUnitStart + shadowSlot);
+#endif
+			}
+
+			int shadowMapCount = 0;
 			int i{};
 			for (const Light& l : LightSources::get().getAll()) {
 				std::stringstream ss;
 				if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
-					glActiveTexture(GL_TEXTURE0 + tex_id);
+					if (shadowMapCount >= kMaxPbrShadowMaps) {
+						PN_CORE_WARN("[GL] Skipping extra mapped shadow light at index {} because PBR shadow map budget is {}",
+									 i, kMaxPbrShadowMaps);
+						ss << "u_Lights[" << i << "].shadowMapIdx";
+						pbr_shader->SetUniform(ss.str(), -1.f);
+						ss.str("");
+						ss.clear();
+					}
+					else {
+						glActiveTexture(GL_TEXTURE0 + kFixedShadowTextureUnitStart + shadowMapCount);
 					glBindTexture(GL_TEXTURE_2D, l.getShadowTexture());
 
 #ifdef PN_PLATFORM_WINDOWS
-					ss << "u_ShadowMaps[" << (tex_id - NEXT_VALID_TEXID) << "]";
+						ss << "u_ShadowMaps[" << shadowMapCount << "]";
 #else
-					ss << "u_ShadowMap" << (tex_id - NEXT_VALID_TEXID);
+						ss << "u_ShadowMap" << shadowMapCount;
 #endif
 
-					pbr_shader->SetUniform(ss.str(), tex_id);
-					ss.str("");
-					ss.clear();
+						pbr_shader->SetUniform(ss.str(), kFixedShadowTextureUnitStart + shadowMapCount);
+						ss.str("");
+						ss.clear();
 
-					ss << "u_Lights[" << i << "].shadowMapIdx";
-					pbr_shader->SetUniform(ss.str(),
-										   tex_id - static_cast<float>(NEXT_VALID_TEXID));
-					ss.str("");
-					ss.clear();
+						ss << "u_Lights[" << i << "].shadowMapIdx";
+						pbr_shader->SetUniform(ss.str(), static_cast<float>(shadowMapCount));
+						ss.str("");
+						ss.clear();
 
-					++tex_id;
+						++shadowMapCount;
+					}
 				} else {
 					ss << "u_Lights[" << i << "].shadowMapIdx";
 					pbr_shader->SetUniform(ss.str(), -1.f);
@@ -2233,7 +2259,7 @@ namespace PAIN {
 								   (float)GraphicsSettings::get().DEBUG_PBR_MAP_TYPE);
 
 			pbr_shader->SetUniform("u_NumShadowMaps",
-								   (tex_id - NEXT_VALID_TEXID) * 1.f);
+								   shadowMapCount * 1.f);
 
 			pbr_shader->SetUniform("gPos", 0);
 			pbr_shader->SetUniform("gCol", 1);
@@ -2254,17 +2280,17 @@ namespace PAIN {
 			pbr_shader->SetUniform("u_CamPos", scene->GetActiveCamera()->pos);
 			pbr_shader->SetUniform("u_UseIbl", GraphicsSettings::get().ibl ? 1.f : 0.f);
 
-			glActiveTexture(GL_TEXTURE0 + tex_id);
+			glActiveTexture(GL_TEXTURE0 + kIrradianceTextureUnit);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, Skybox::get().getIrradianceMap());
-			pbr_shader->SetUniform("irradianceMap", tex_id++);
+			pbr_shader->SetUniform("irradianceMap", kIrradianceTextureUnit);
 
-			glActiveTexture(GL_TEXTURE0 + tex_id);
+			glActiveTexture(GL_TEXTURE0 + kPrefilterTextureUnit);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, Skybox::get().getPrefilterMap());
-			pbr_shader->SetUniform("prefilterMap", tex_id++);
+			pbr_shader->SetUniform("prefilterMap", kPrefilterTextureUnit);
 
-			glActiveTexture(GL_TEXTURE0 + tex_id);
+			glActiveTexture(GL_TEXTURE0 + kBrdfLutTextureUnit);
 			glBindTexture(GL_TEXTURE_2D, Skybox::get().getBrdfLUT());
-			pbr_shader->SetUniform("brdfLut", tex_id++);
+			pbr_shader->SetUniform("brdfLut", kBrdfLutTextureUnit);
 
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
@@ -2280,15 +2306,15 @@ namespace PAIN {
 			GLint maxCombinedTextureUnits = 0;
 			glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxFragTextureUnits);
 			glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxCombinedTextureUnits);
-			if (tex_id > maxFragTextureUnits || tex_id > maxCombinedTextureUnits) {
+			if (kLightingTextureUnitsUsed > maxFragTextureUnits || kLightingTextureUnitsUsed > maxCombinedTextureUnits) {
 				PN_CORE_ERROR(
 					"[GL] Lighting pass requires {} texture units but device only exposes {} fragment / {} combined texture units",
-					tex_id, maxFragTextureUnits, maxCombinedTextureUnits);
+					kLightingTextureUnitsUsed, maxFragTextureUnits, maxCombinedTextureUnits);
 				LogLightingDrawDiagnostics(
 					pbr_shader ? pbr_shader->GetRendererID() : 0,
 					passthrough_vao,
 					final_fbo,
-					tex_id);
+					kLightingTextureUnitsUsed);
 				abortLightingPass();
 				return;
 			}
@@ -2300,7 +2326,7 @@ namespace PAIN {
 					pbr_shader ? pbr_shader->GetRendererID() : 0,
 					passthrough_vao,
 					final_fbo,
-					tex_id);
+					kLightingTextureUnitsUsed);
 				abortLightingPass();
 				return;
 			}
@@ -2312,7 +2338,7 @@ namespace PAIN {
 					pbr_shader ? pbr_shader->GetRendererID() : 0,
 					passthrough_vao,
 					final_fbo,
-					tex_id);
+					kLightingTextureUnitsUsed);
 				abortLightingPass();
 				return;
 			}
@@ -2325,7 +2351,7 @@ namespace PAIN {
 					pbr_shader ? pbr_shader->GetRendererID() : 0,
 					passthrough_vao,
 					final_fbo,
-					tex_id);
+					kLightingTextureUnitsUsed);
 				abortLightingPass();
 				return;
 			}
@@ -2340,7 +2366,7 @@ namespace PAIN {
 					pbr_shader ? pbr_shader->GetRendererID() : 0,
 					passthrough_vao,
 					final_fbo,
-					tex_id);
+					kLightingTextureUnitsUsed);
 				abortLightingPass();
 				return;
 			}
@@ -2354,7 +2380,7 @@ namespace PAIN {
 					pbr_shader ? pbr_shader->GetRendererID() : 0,
 					passthrough_vao,
 					final_fbo,
-					tex_id);
+					kLightingTextureUnitsUsed);
 			}
 		}
 
