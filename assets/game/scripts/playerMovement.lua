@@ -204,7 +204,7 @@ registerUpdate(function(dt)
         fwd = fwd + joystickDirY
         fwd = math.max(-1.0, math.min(1.0, fwd))
 
-        local px, py, pz = getSmoothPosition(playerId)
+        local px, py, pz = getPosition(playerId)
         local ep = S.pipeEntrancePos
 
         -- project player's current position onto the pipe axis

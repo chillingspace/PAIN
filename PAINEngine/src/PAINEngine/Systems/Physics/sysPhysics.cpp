@@ -296,7 +296,7 @@ namespace PAIN {
 				if (delta_time > 0.0f) {
 					auto view = registry.view<Physics::RigidBody3D, LocalTransform>();
 					for (auto [entity, rb, transform] : view.each()) {
-						if (rb.physics_enabled) {
+						if (rb.physics_enabled && !rb.bodyID.IsInvalid()) {
 							JPH::Vec3 pos = body_interface->GetPosition(rb.bodyID);
 							rb.prevPosition = glm::vec3(pos.GetX(), pos.GetY(), pos.GetZ());
 						}
@@ -388,7 +388,7 @@ namespace PAIN {
 							JPH::RVec3 position = body.GetPosition();
 							glm::vec3 currentPos(position.GetX(), position.GetY(), position.GetZ());
 
-							// Interpolate between previous and current physics position
+							// Interpolate between previous and current physics position (which might affect accuracy but improves visual smoothness)
 							transform.position = glm::mix(rigidBody.prevPosition, currentPos, accumulator_alpha_);
 
 							transform.rotation = glm::quat(rotation.GetW(), rotation.GetX(),

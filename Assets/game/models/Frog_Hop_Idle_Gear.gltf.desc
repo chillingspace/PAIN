@@ -1,20 +1,20 @@
 {
   "asset_info": {
-    "name": "Fence.gltf",
+    "name": "Frog_Hop_Idle_Gear.gltf",
     "type": "Model"
   },
   "build_data": {
-    "hash": 16819755918527298312
+    "hash": 9444099297767716092
   },
   "descriptor_version": 1,
-  "guid": "3b99f393-1f31-b847-933d-0f10509c199a",
+  "guid": "ad49fe3b-067d-dd46-8405-a06d04d8dbec",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
     "generate_normals": false,
     "generate_tangents": true,
-    "import_animations": false,
-    "import_skeleton": false,
+    "import_animations": true,
+    "import_skeleton": true,
     "improve_cache_locality": true,
     "join_identical_vertices": true,
     "lod_levels": 3,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "game\\models\\Fence.gltf"
+    "source_file": "game\\models\\Frog_Hop_Idle_Gear.gltf"
   }
 }

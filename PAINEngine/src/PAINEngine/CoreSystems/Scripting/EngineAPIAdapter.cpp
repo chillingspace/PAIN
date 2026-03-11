@@ -302,21 +302,6 @@ namespace PAIN {
         }
     }
 
-    glm::vec3 EngineAPIAdapter::GetSmoothPosition(entt::entity entityId)
-    {
-        auto& reg = ecs_.getRegistry();
-        if (!reg.all_of<PAIN::LocalTransform, Physics::RigidBody3D>(entityId))
-            return GetPosition(entityId);  // fallback to raw
-
-        const auto& t = reg.get<PAIN::LocalTransform>(entityId);
-        const auto& rb = reg.get<Physics::RigidBody3D>(entityId);
-
-        if (auto phys = ecs_.getSystem<PAIN::Physics::System>())
-            return glm::mix(rb.prevPosition, t.position, phys->getAccumulatorAlpha());
-
-        return t.position;
-    }
-
     glm::vec2 EngineAPIAdapter::Get2DPosition(entt::entity entityId) {
         if (auto opt = ecs_.getEntityComponent<PAIN::Texture2D>(entityId)) {
             return opt->get().pos;

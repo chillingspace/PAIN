@@ -1208,7 +1208,7 @@ namespace PAIN {
 				if (mdl_opt.has_value()) {
 					mdl = mdl_opt.value();
 
-					auto e = AddObject(mdl, "dm", { 0.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(1.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
+					auto e = AddObject(mdl, "damaged_helmet", { 0.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(1.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
 				}
 
 
@@ -1241,16 +1241,16 @@ namespace PAIN {
 					//mdl->materials[0].metallic = 0.f;
 					//mdl->materials[0].roughness = 1.f;
 					//mdl->materials[0].baseColor = { 0.3f, 0.3f, 0.3f };
-					auto e = AddObject(mdl, "bs", { 0.f, 0.f, -10.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(0.0f, 0.0f, 0.0f)), { 5.f, 5.f, 5.f });
+					auto e = AddObject(mdl, "brainstem_model", { 0.f, 0.f, -10.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(0.0f, 0.0f, 0.0f)), { 5.f, 5.f, 5.f });
 				}
 				else {
 					throw std::runtime_error("animation obj err");
 				}
 
 #ifdef PN_PLATFORM_WINDOWS
-				std::filesystem::path fh_path = "game/models/FrogAnim.mesh";
+				std::filesystem::path fh_path = "game/models/Frog_Hop_Idle_Gear.mesh";
 #else	
-				std::filesystem::path fh_path = "game\\models\\FrogAnim.mesh";
+				std::filesystem::path fh_path = "game\\models\\Frog_Hop_Idle_Gear.mesh";
 #endif
 				//Get model
 				PN_CORE_INFO("Attempting to add {} to scene", fh_path.string());
@@ -1260,7 +1260,7 @@ namespace PAIN {
 					//mdl->materials[0].metallic = 0.f;
 					//mdl->materials[0].roughness = 1.f;
 					//mdl->materials[0].baseColor = { 0.3f, 0.3f, 0.3f };
-					auto e = AddObject(mdl, "fh", { -3.f, 2.f, 0.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(0.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
+					auto e = AddObject(mdl, "frog_hop", { -3.f, 2.f, 0.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(0.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
 				}
 				else {
 					throw std::runtime_error("animation obj err");

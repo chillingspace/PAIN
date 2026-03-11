@@ -20,7 +20,6 @@
     "textures": {
         "albedo": "game\\textures\\Gear_baseColor.png",
         "ao": "game\\textures\\Gear_occlusionRoughnessMetallic.png",
-        "emissive": "game\\textures\\Gear_emissive.png",
         "lightmap": "game\\textures\\Gear_occlusionRoughnessMetallic.png",
         "metallic": "game\\textures\\Gear_occlusionRoughnessMetallic.png",
         "normal": "game\\textures\\Gear_normal.png",

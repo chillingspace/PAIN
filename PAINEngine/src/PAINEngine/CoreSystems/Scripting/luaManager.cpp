@@ -562,12 +562,6 @@ namespace PAIN {
             return std::make_tuple(p.x, p.y, p.z);
             });
         lua_.set_function("setPosition", [this](entt::entity entityId, float x, float y, float z) { if (api_) api_->SetPosition(entityId, { x,y,z }); });
-        
-        lua_.set_function("getSmoothPosition", [this](int id) {
-            auto e = static_cast<entt::entity>(id);
-            auto p = api_->GetSmoothPosition(e);
-            return std::make_tuple(p.x, p.y, p.z);
-            });
 
         lua_.set_function("get2DPosition", [this](entt::entity entityId) {
             if (!api_) {
