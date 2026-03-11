@@ -28,7 +28,8 @@ namespace PAIN {
 
         static void clear() {
             std::lock_guard<std::mutex> lock(getEntriesMutex());
-            getEntries().clear();
+            std::deque<DebugLogEntry> empty;
+            getEntries().swap(empty);
         }
 
     protected:

@@ -40,6 +40,7 @@ namespace PAIN {
 	}
 
 	Application::~Application() {
+
 		//Destroy top down
 		for (auto it = layer_stack.rbegin(); it != layer_stack.rend(); ++it) {
 
@@ -57,6 +58,7 @@ namespace PAIN {
 			(*it).lock()->services = nullptr;
 		}
 		core_stack.clear();
+		services.reset();
 	}
 
 	template<typename T>
