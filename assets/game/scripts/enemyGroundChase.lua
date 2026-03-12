@@ -281,6 +281,7 @@ do
     end
 
     local function hideDetectionBarOnly()
+        if DetectionUI and DetectionUI.active and DetectionUI.autoConfirmHit then return end
         local barBG    = findEntity(UI_DETECT_BAR_BG)
         local barFillL = findEntity(UI_DETECT_BAR_FILL_L)
         local barFillR = findEntity(UI_DETECT_BAR_FILL_R)
