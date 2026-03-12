@@ -229,21 +229,23 @@ registerUpdate(function(dt)
         safeDist = math.sqrt(cdx*cdx + cdy*cdy + cdz*cdz)
     end
 
-    -- Layer 1 – minSafeDist pre-filter
-    -- Snaps immediately to any new minimum, prevents clipping
-    -- Decays slowly toward desiredDist when the wall is clear (less jitter)
-    minSafeDist = minSafeDist + (desiredDist - minSafeDist) * math.min(1.0, CAM_FORGET_SPEED * dt)
-    if safeDist < minSafeDist then
-        minSafeDist = safeDist
-    end
+    local wallHit = safeDist < (desiredDist - 0.05)
 
-    -- Layer 2 – currentCamDist asymmetric lerp
-    -- Pulls toward minSafeDist fast, recovers toward desiredDist slowly
-    if minSafeDist < currentCamDist then
-        local t = math.min(1.0, CAM_PULL_IN_SPEED * dt)
+    if wallHit then
+        -- Wall present: use full two-layer system to prevent clipping
+        local expForget = 1.0 - math.exp(-CAM_FORGET_SPEED * dt)
+        minSafeDist = minSafeDist + (desiredDist - minSafeDist) * expForget
+        if safeDist < minSafeDist then
+            minSafeDist = safeDist
+        end
+
+        -- Snap in fast
+        local t = 1.0 - math.exp(-CAM_PULL_IN_SPEED * dt)
         currentCamDist = currentCamDist + (minSafeDist - currentCamDist) * t
     else
-        local t = math.min(1.0, CAM_PULL_OUT_SPEED * dt)
+        -- No wall: skip the gate entirely, single smooth ease out
+        minSafeDist = desiredDist  -- reset gate so next wall hit starts clean
+        local t = 1.0 - math.exp(-CAM_PULL_OUT_SPEED * dt)
         currentCamDist = currentCamDist + (desiredDist - currentCamDist) * t
     end
 

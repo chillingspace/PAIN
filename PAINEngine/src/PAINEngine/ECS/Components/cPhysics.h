@@ -93,6 +93,8 @@ namespace PAIN {
             MotionType motion_type = MotionType::Dynamic;
             Physics::LayerMapping physics_behavior;
 
+            glm::vec3 prevPosition{ 0.f, 0.f, 0.f };
+
             // Scale modifier for the collider (multiplies with transform scale)
             glm::vec3 collider_scale = glm::vec3(1.0f);
             

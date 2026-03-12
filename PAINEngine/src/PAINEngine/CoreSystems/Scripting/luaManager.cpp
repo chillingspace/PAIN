@@ -632,6 +632,15 @@ namespace PAIN {
             return std::make_tuple(v.x, v.y, v.z);
             });
         lua_.set_function("setVelocity", [this](entt::entity entityId, float x, float y, float z) { if (api_) api_->SetVelocity(entityId, { x,y,z }); });
+        lua_.set_function("addForce", [this](int id, float x, float y, float z) {
+            auto e = static_cast<entt::entity>(id);
+            api_->AddForce(e, { x, y, z });
+            });
+
+        lua_.set_function("addImpulse", [this](int id, float x, float y, float z) {
+            auto e = static_cast<entt::entity>(id);
+            api_->AddImpulse(e, { x, y, z });
+            });
 
         lua_.set_function("isGrounded_", [this](entt::entity entityId, float maxDistance) {
             return api_ ? api_->IsGrounded(entityId, maxDistance) : false;

@@ -1,32 +1,8 @@
 {
     "assets": [
-        "1c7ce177-d679-a44a-89d0-a718aa172c23",
-        "0d290cee-b55d-2e45-907d-ae2c745f492f",
-        "db504491-476b-9442-8649-25cd5de072a3",
-        "633f661d-20e5-3b45-b5a5-299f91b71e17",
-        "5ccceeb5-887c-db4c-8cae-0efe9e91b198",
-        "163da0e7-00d9-0541-a470-a859fd023b6b",
-        "ab88a2ae-3d34-3342-b2ed-df719f19b490",
-        "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
-        "df7c04c2-94d4-5347-8dad-6527e853bf94",
-        "6f3aeae1-f4e9-2d45-9b24-b2277f3607a8",
-        "15808cf2-db36-c04b-8954-48d10ebaf528",
-        "65365c00-7be8-7b48-9780-ed46b6ef0404",
-        "d67f82f6-9682-ba48-a64c-8697034ad488",
-        "6100a187-8732-804d-903d-32a5c3dc0576",
-        "3b99f393-1f31-b847-933d-0f10509c199a",
-        "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
-        "ecc50f9b-7cb8-274e-afdf-1ab2b89c6d8c",
+        "12c6a232-d825-c942-832d-b21967248159",
         "5dbc2f57-64e8-d242-8aaa-e4244c67e866",
-        "3e57df15-f432-d441-8fee-c0c1e3286406",
-        "148002de-981f-c14e-8ee0-a0c654bfe4c8",
-        "c5b76687-7e58-0a47-a524-e39b588d53ba",
-        "f6a92284-3591-ca4c-9cf5-1e0167b2d240",
-        "119720b3-2ed7-a14a-9f6b-c425ab8ae872",
-        "466ca22c-0eb2-0d49-ac1a-b9d822cc1ce4",
-        "4727438d-9c1f-ea47-91e0-8911d3412588",
-        "eb82aeb3-455a-a748-ae80-25d51172e04c",
-        "1306b522-49e3-d046-b63f-5eaa494dd1ae",
+        "c3c73890-4fc8-794a-b225-fd289396baf1",
         "ea2431c4-c2c5-724e-a713-daf897030244",
         "14c2b2ac-66d8-104e-98f3-96bbd5bc18b6",
         "186005f2-dcbb-9f4b-af50-d2d4b98041da",
@@ -34,7 +10,7 @@
         "38a421a9-1ffc-3c47-a8e2-f0af50f2e2c2",
         "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
         "d54d96e7-2dc0-c947-8f1a-bab6892ff688",
-        "5d46bba2-ab81-064e-bab5-2517c42f6aca",
+        "4727438d-9c1f-ea47-91e0-8911d3412588",
         "08527159-b243-d742-a313-9001198b2097",
         "ffd57a3d-b8b4-2b40-94a5-52ecd82a5a5f",
         "d9977322-f31e-bc4c-b298-fbcd6690c4ba",
@@ -42,7 +18,6 @@
         "6a6e7d67-82c1-f846-96c5-4c5338a9a7ec",
         "3da3f0aa-e9d3-634a-b1c9-f88763fb5bae",
         "25c6e2c3-b701-4c43-b049-8c9b21a29441",
-        "31f050fc-b8fd-9f44-9f4c-c2b19a10e63e",
         "146f4e3b-5c24-624f-80c8-d74159ed9f41",
         "a8977689-ded0-fa41-9efb-33354e83dec7",
         "41022c20-5591-324d-80ff-f14090e5e9d3",
@@ -115,6 +90,7 @@
         "6f5d22ac-86ff-ed4e-978c-55ceb1b59a3f",
         "0377d90f-9de9-5a42-8583-17b17904b178",
         "b27dcc69-a3d9-0440-9d50-5885f3230eba",
+        "148002de-981f-c14e-8ee0-a0c654bfe4c8",
         "0ff82290-b7e5-3549-a21b-006d1e00f0ab",
         "d9eeea8a-2cf6-3849-8511-2e6c3be0f011",
         "df12f04f-34c5-644d-980a-c8251d57cd55",
@@ -129,7 +105,6 @@
         "c3240e7d-4066-2444-a024-c1d31c71a299",
         "c79c529b-71e5-164c-854d-f8cf076f5318",
         "b4a81861-94f2-584b-9da1-dbb24a91f93c",
-        "164de26f-1403-e146-8a76-735d5dc42155",
         "510e3ede-f637-c448-99e8-7dc200d60c8f",
         "c3be7e4a-501e-0744-ac10-55d1b5a38d86",
         "b3ec7aee-c5ff-af48-9aa1-f912f843a888",
@@ -138,15 +113,24 @@
         "44bd363b-5d65-664a-a1dd-c750fad4e7c6",
         "0955a106-00fb-8040-8ce5-9402d6bd1c59",
         "b264fed7-6c6f-8344-a856-9d4094c5f8c5",
+        "15808cf2-db36-c04b-8954-48d10ebaf528",
+        "6f3aeae1-f4e9-2d45-9b24-b2277f3607a8",
         "e8a9c8c9-3faf-e046-abbb-27ff8f28b3d4",
         "ceaca03d-cd4f-b546-b889-64ee89a0d1e0",
         "19d818f3-a8fc-1b4a-bf95-b233da10f329",
         "af95e0ee-f1ac-1d45-88e1-e7bbd2979f36",
         "89e040b6-c439-7c45-a630-000c72698fcf",
         "27878181-a46a-494c-91d4-953c69e3a1d3",
+        "633f661d-20e5-3b45-b5a5-299f91b71e17",
+        "db504491-476b-9442-8649-25cd5de072a3",
         "72c56f00-de1f-7546-a886-4494f74066a0",
+        "d67f82f6-9682-ba48-a64c-8697034ad488",
+        "65365c00-7be8-7b48-9780-ed46b6ef0404",
         "5118d991-2d48-3545-8b17-c9b991d368d0",
         "5c00815c-1692-6e45-b852-06a086a81b0d",
+        "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
+        "6100a187-8732-804d-903d-32a5c3dc0576",
+        "3b99f393-1f31-b847-933d-0f10509c199a",
         "e60f5690-3ae8-a142-b726-5ea017a209e9",
         "0b9ad008-e8ad-144b-855d-115dd4683035",
         "b6f7c506-7c21-1847-a0b9-597479e83e13",
@@ -177,17 +161,25 @@
         "8ec89d31-ef7e-9247-834a-8782dd0c614d",
         "2d87afdc-663f-ed4a-bdce-4ac73c3b6db0",
         "f57adda3-64e1-a544-86a2-842c8976e7e0",
+        "f6a92284-3591-ca4c-9cf5-1e0167b2d240",
+        "df7c04c2-94d4-5347-8dad-6527e853bf94",
+        "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
+        "ab88a2ae-3d34-3342-b2ed-df719f19b490",
+        "ecc50f9b-7cb8-274e-afdf-1ab2b89c6d8c",
         "476662dc-9a7b-2243-97be-6e01bceeb854",
         "351d0711-28db-d346-81fe-fe5904ff854a",
         "f8f9abf4-39b2-3f41-9e00-4bdfd4476881",
         "9927db1c-9aff-be47-a5dc-3068b2c9f8f9",
+        "1c7ce177-d679-a44a-89d0-a718aa172c23",
+        "0d290cee-b55d-2e45-907d-ae2c745f492f",
+        "5ccceeb5-887c-db4c-8cae-0efe9e91b198",
+        "163da0e7-00d9-0541-a470-a859fd023b6b",
         "ee65299b-47d9-4648-ae3d-7a9e1ae75012",
-        "6fc0ccbc-ae9d-a948-9557-6140470621c4",
         "79269c4e-addb-ea41-85c6-57e984c24ff3",
         "a77749e3-6c15-7446-a792-5609dd96b391",
         "14377587-a8fe-2b47-9f46-dad6bdad2753",
         "c49ebb97-d7ba-f148-9e46-16d6c5543147",
-        "38e8f9de-b2dc-0f47-ad64-f0209917e593",
+        "12958b85-38b8-4645-a2fb-6efe9bd744c4",
         "3e8dc653-3d17-ab42-bb53-da040f01f965",
         "06cab9b7-c91a-6948-bb59-426b8032ea12",
         "3c58c656-1127-1a47-92ea-6c59604296e5",
@@ -223,15 +215,15 @@
             },
             {
                 "forward": [
-                    -0.1549341231584549,
-                    -0.4343305230140686,
-                    0.8873289227485657
+                    0.046482108533382416,
+                    -0.721743106842041,
+                    0.6905984878540039
                 ],
                 "occupied": true,
                 "pos": [
-                    0.29193365573883057,
-                    3.230595111846924,
-                    -7.524979591369629
+                    51.02859878540039,
+                    11.766334533691406,
+                    11.512500762939453
                 ],
                 "up": [
                     0.0,
@@ -296,16 +288,16 @@
         ],
         "farPlane": 100.0,
         "forward": [
-            0.7162792086601257,
-            -0.6896209716796875,
-            0.10661692172288895
+            0.13076725602149963,
+            -0.944378137588501,
+            -0.30174458026885986
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            24.091697692871094,
-            17.18665885925293,
-            2.170161724090576
+            51.76041793823242,
+            17.004993438720703,
+            14.020808219909668
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 31.100000381469727,
@@ -438,6 +430,78 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
+                            "guid": "4601809b-491c-7e4a-a2ba-af630b8bf9ca"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                26.01504898071289,
+                                2.062999963760376,
+                                -6.7694478034973145
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "ae735021-6b9f-5948-a40d-9d2018714594",
+                                    "aoTextureOverride": "0f18abbc-1111-4342-b9b0-3bd2f07282c4",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "959882ea-525a-c544-bae8-df70063dff56",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "0f18abbc-1111-4342-b9b0-3bd2f07282c4",
+                                    "normalTextureOverride": "ea5a6e57-9fec-b74c-93d9-92c84803d79e",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "0f18abbc-1111-4342-b9b0-3bd2f07282c4",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "c3c73890-4fc8-794a-b225-fd289396baf1",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "exclamation_alert"
+                        }
+                    },
+                    "Name": "exclamation_alert"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
                             "guid": "aee25d6a-c13d-f043-895a-ae6c392d3092"
                         },
                         "Hierarchy": {
@@ -526,6 +590,11 @@
             {
                 "Entity": {
                     "Components": {
+                        "Animation": {
+                            "defaultAnimationIndex": -1,
+                            "loopAnimation": true,
+                            "playbackSpeed": 1.0
+                        },
                         "AudioSource": {
                             "audio_tracks": [],
                             "group_name": "",
@@ -601,8 +670,8 @@
                             "castShadows": true,
                             "materials": [
                                 {
-                                    "albedoTextureOverride": "ab88a2ae-3d34-3342-b2ed-df719f19b490",
-                                    "aoTextureOverride": "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
+                                    "albedoTextureOverride": "5c6243be-4e17-8447-b831-10b10e96cfa9",
+                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "baseColorOverride": [
                                         1.0,
                                         1.0,
@@ -613,19 +682,19 @@
                                         1.0,
                                         1.0
                                     ],
-                                    "emissiveTextureOverride": "ecc50f9b-7cb8-274e-afdf-1ab2b89c6d8c",
+                                    "emissiveTextureOverride": "e58e6350-ed88-244b-b62c-2b81f69a5dd5",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "15808cf2-db36-c04b-8954-48d10ebaf528",
+                                    "materialGUID": "9f8965fd-64e2-7f43-b1fb-c3b4a6762ae1",
                                     "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
-                                    "normalTextureOverride": "d67f82f6-9682-ba48-a64c-8697034ad488",
+                                    "metallicTextureOverride": "99eefdf1-4245-8f47-858d-b26fff4f5629",
+                                    "normalTextureOverride": "0b7984ec-aa7d-ba48-8227-876a09b9eace",
                                     "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
+                                    "roughnessTextureOverride": "99eefdf1-4245-8f47-858d-b26fff4f5629",
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "df7c04c2-94d4-5347-8dad-6527e853bf94",
+                            "modelGUID": "12c6a232-d825-c942-832d-b21967248159",
                             "receiveShadows": true,
                             "visible": true
                         },
@@ -790,6 +859,11 @@
             {
                 "Entity": {
                     "Components": {
+                        "Animation": {
+                            "defaultAnimationIndex": -1,
+                            "loopAnimation": true,
+                            "playbackSpeed": 1.0
+                        },
                         "AudioSource": {
                             "audio_tracks": [],
                             "group_name": "",
@@ -865,8 +939,8 @@
                             "castShadows": true,
                             "materials": [
                                 {
-                                    "albedoTextureOverride": "ab88a2ae-3d34-3342-b2ed-df719f19b490",
-                                    "aoTextureOverride": "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
+                                    "albedoTextureOverride": "5c6243be-4e17-8447-b831-10b10e96cfa9",
+                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "baseColorOverride": [
                                         1.0,
                                         1.0,
@@ -877,19 +951,19 @@
                                         1.0,
                                         1.0
                                     ],
-                                    "emissiveTextureOverride": "ecc50f9b-7cb8-274e-afdf-1ab2b89c6d8c",
+                                    "emissiveTextureOverride": "e58e6350-ed88-244b-b62c-2b81f69a5dd5",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "15808cf2-db36-c04b-8954-48d10ebaf528",
+                                    "materialGUID": "9f8965fd-64e2-7f43-b1fb-c3b4a6762ae1",
                                     "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
-                                    "normalTextureOverride": "d67f82f6-9682-ba48-a64c-8697034ad488",
+                                    "metallicTextureOverride": "99eefdf1-4245-8f47-858d-b26fff4f5629",
+                                    "normalTextureOverride": "0b7984ec-aa7d-ba48-8227-876a09b9eace",
                                     "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
+                                    "roughnessTextureOverride": "99eefdf1-4245-8f47-858d-b26fff4f5629",
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "df7c04c2-94d4-5347-8dad-6527e853bf94",
+                            "modelGUID": "12c6a232-d825-c942-832d-b21967248159",
                             "receiveShadows": true,
                             "visible": true
                         },
@@ -1054,6 +1128,11 @@
             {
                 "Entity": {
                     "Components": {
+                        "Animation": {
+                            "defaultAnimationIndex": -1,
+                            "loopAnimation": true,
+                            "playbackSpeed": 1.0
+                        },
                         "AudioSource": {
                             "audio_tracks": [],
                             "group_name": "",
@@ -1129,8 +1208,8 @@
                             "castShadows": true,
                             "materials": [
                                 {
-                                    "albedoTextureOverride": "ab88a2ae-3d34-3342-b2ed-df719f19b490",
-                                    "aoTextureOverride": "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
+                                    "albedoTextureOverride": "5c6243be-4e17-8447-b831-10b10e96cfa9",
+                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "baseColorOverride": [
                                         1.0,
                                         1.0,
@@ -1141,19 +1220,19 @@
                                         1.0,
                                         1.0
                                     ],
-                                    "emissiveTextureOverride": "ecc50f9b-7cb8-274e-afdf-1ab2b89c6d8c",
+                                    "emissiveTextureOverride": "e58e6350-ed88-244b-b62c-2b81f69a5dd5",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "15808cf2-db36-c04b-8954-48d10ebaf528",
+                                    "materialGUID": "9f8965fd-64e2-7f43-b1fb-c3b4a6762ae1",
                                     "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
-                                    "normalTextureOverride": "d67f82f6-9682-ba48-a64c-8697034ad488",
+                                    "metallicTextureOverride": "99eefdf1-4245-8f47-858d-b26fff4f5629",
+                                    "normalTextureOverride": "0b7984ec-aa7d-ba48-8227-876a09b9eace",
                                     "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
+                                    "roughnessTextureOverride": "99eefdf1-4245-8f47-858d-b26fff4f5629",
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "df7c04c2-94d4-5347-8dad-6527e853bf94",
+                            "modelGUID": "12c6a232-d825-c942-832d-b21967248159",
                             "receiveShadows": true,
                             "visible": true
                         },
@@ -1318,6 +1397,11 @@
             {
                 "Entity": {
                     "Components": {
+                        "Animation": {
+                            "defaultAnimationIndex": -1,
+                            "loopAnimation": true,
+                            "playbackSpeed": 1.0
+                        },
                         "AudioSource": {
                             "audio_tracks": [],
                             "group_name": "",
@@ -1393,8 +1477,8 @@
                             "castShadows": true,
                             "materials": [
                                 {
-                                    "albedoTextureOverride": "ab88a2ae-3d34-3342-b2ed-df719f19b490",
-                                    "aoTextureOverride": "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
+                                    "albedoTextureOverride": "5c6243be-4e17-8447-b831-10b10e96cfa9",
+                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "baseColorOverride": [
                                         1.0,
                                         1.0,
@@ -1405,19 +1489,19 @@
                                         1.0,
                                         1.0
                                     ],
-                                    "emissiveTextureOverride": "ecc50f9b-7cb8-274e-afdf-1ab2b89c6d8c",
+                                    "emissiveTextureOverride": "e58e6350-ed88-244b-b62c-2b81f69a5dd5",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "15808cf2-db36-c04b-8954-48d10ebaf528",
+                                    "materialGUID": "9f8965fd-64e2-7f43-b1fb-c3b4a6762ae1",
                                     "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
-                                    "normalTextureOverride": "d67f82f6-9682-ba48-a64c-8697034ad488",
+                                    "metallicTextureOverride": "99eefdf1-4245-8f47-858d-b26fff4f5629",
+                                    "normalTextureOverride": "0b7984ec-aa7d-ba48-8227-876a09b9eace",
                                     "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
+                                    "roughnessTextureOverride": "99eefdf1-4245-8f47-858d-b26fff4f5629",
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "df7c04c2-94d4-5347-8dad-6527e853bf94",
+                            "modelGUID": "12c6a232-d825-c942-832d-b21967248159",
                             "receiveShadows": true,
                             "visible": true
                         },
@@ -1591,8 +1675,7 @@
                             "childrenGUIDs": [
                                 "53f5f39c-0319-5d41-811c-caa4029dec5e",
                                 "f19390a8-f230-7c4f-a39a-a781eaa39822",
-                                "9467f46d-9d92-bc43-ab40-5e17f14bc585",
-                                "c6825b8b-c524-7d42-a9c6-318a536f3d45"
+                                "9467f46d-9d92-bc43-ab40-5e17f14bc585"
                             ],
                             "parentGUID": "35947cfd-e172-c247-af9b-0132b9666a02",
                             "siblingIndex": 0
@@ -1675,84 +1758,12 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
-                            "guid": "c6825b8b-c524-7d42-a9c6-318a536f3d45"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "8c7cf13f-1d18-0e47-82d5-b23943b27a7e",
-                            "siblingIndex": 1
-                        },
-                        "Layer": {
-                            "layer_id": 8,
-                            "layer_mask": 256
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                25.96872901916504,
-                                2.0633513927459717,
-                                -6.80642032623291
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "ModelRenderer": {
-                            "castShadows": true,
-                            "materials": [
-                                {
-                                    "albedoTextureOverride": "119720b3-2ed7-a14a-9f6b-c425ab8ae872",
-                                    "aoTextureOverride": "1306b522-49e3-d046-b63f-5eaa494dd1ae",
-                                    "baseColorOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "c5b76687-7e58-0a47-a524-e39b588d53ba",
-                                    "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "1306b522-49e3-d046-b63f-5eaa494dd1ae",
-                                    "normalTextureOverride": "eb82aeb3-455a-a748-ae80-25d51172e04c",
-                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "1306b522-49e3-d046-b63f-5eaa494dd1ae",
-                                    "useOverrides": false
-                                }
-                            ],
-                            "modelGUID": "3e57df15-f432-d441-8fee-c0c1e3286406",
-                            "receiveShadows": true,
-                            "visible": true
-                        },
-                        "Name": {
-                            "name": "exclamation_alert"
-                        }
-                    },
-                    "Name": "exclamation_alert"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "GUID": {
                             "guid": "9467f46d-9d92-bc43-ab40-5e17f14bc585"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "8c7cf13f-1d18-0e47-82d5-b23943b27a7e",
-                            "siblingIndex": 2
+                            "siblingIndex": 1
                         },
                         "Layer": {
                             "layer_id": 8,
@@ -1814,11 +1825,34 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "8c7cf13f-1d18-0e47-82d5-b23943b27a7e",
-                            "siblingIndex": 3
+                            "siblingIndex": 2
                         },
                         "Layer": {
                             "layer_id": 8,
                             "layer_mask": 256
+                        },
+                        "Lighting": {
+                            "direction": [
+                                0.0,
+                                -0.561860978603363,
+                                0.8272316455841064
+                            ],
+                            "inner_angle": 20.0,
+                            "light_intensity": [
+                                0.14835166931152344,
+                                0.14835166931152344,
+                                0.14835166931152344
+                            ],
+                            "light_type": 2,
+                            "offset": [
+                                0.0,
+                                2.0,
+                                -0.3499999940395355
+                            ],
+                            "outer_angle": 32.5,
+                            "shadow_resolution": 1024,
+                            "shadow_type": 0,
+                            "volumetric": true
                         },
                         "LocalTransform": {
                             "position": [
@@ -1939,9 +1973,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                40.41535949707031,
                                 0.0,
-                                24.426908493041992
+                                0.0,
+                                0.0
                             ],
                             "rotation": [
                                 0.0,
@@ -1996,9 +2030,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                3.03436279296875,
+                                41.43983459472656,
                                 0.0,
-                                -4.162992477416992
+                                20.12369155883789
                             ],
                             "rotation": [
                                 0.0,
@@ -2054,9 +2088,9 @@
                                 0.0
                             ],
                             "collider_offset": [
-                                40.400001525878906,
+                                0.0,
                                 0.699999988079071,
-                                24.399999618530273
+                                0.0
                             ],
                             "collider_scale": [
                                 1.399999976158142,
@@ -2109,9 +2143,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                -2.6064834594726563,
+                                36.64836502075195,
                                 0.0,
-                                -4.454874038696289
+                                19.970134735107422
                             ],
                             "rotation": [
                                 0.0,
@@ -2154,9 +2188,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                6.7887115478515625,
+                                45.183990478515625,
                                 0.0,
-                                -4.615070343017578
+                                18.354503631591797
                             ],
                             "rotation": [
                                 0.0,
@@ -2203,9 +2237,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                62.18394470214844,
                                 0.0,
-                                8.719612121582031
+                                0.0,
+                                0.0
                             ],
                             "rotation": [
                                 0.0,
@@ -2243,9 +2277,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                -9.335674285888672,
+                                52.7921028137207,
                                 0.0,
-                                -0.08500003814697266
+                                8.977370262145996
                             ],
                             "rotation": [
                                 0.0,
@@ -2293,9 +2327,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                -1.6215744018554688,
+                                56.207763671875,
                                 0.0,
-                                0.2667112350463867
+                                9.05654239654541
                             ],
                             "rotation": [
                                 0.0,
@@ -2351,9 +2385,9 @@
                                 0.0
                             ],
                             "collider_offset": [
-                                62.20000076293945,
+                                0.0,
                                 0.699999988079071,
-                                8.800000190734863
+                                0.0
                             ],
                             "collider_scale": [
                                 1.5,
@@ -2406,9 +2440,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                0.10228347778320313,
+                                60.1105842590332,
                                 0.0,
-                                -0.08506298065185547
+                                8.569912910461426
                             ],
                             "rotation": [
                                 0.0,
@@ -2455,9 +2489,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                56.48693084716797,
                                 0.0,
-                                26.507234573364258
+                                0.0,
+                                0.0
                             ],
                             "rotation": [
                                 0.0,
@@ -2486,9 +2520,17 @@
                             "loopAnimation": true,
                             "playbackSpeed": 1.0
                         },
-                        "CompoundCollider": {
-                            "shapes": [],
-                            "useCompoundCollider": false
+                        "Collider": {
+                            "box_size": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collision_layer": 0,
+                            "friction": 0.5,
+                            "is_trigger": false,
+                            "restitution": 0.10000000149011612,
+                            "shape": 0
                         },
                         "GUID": {
                             "guid": "c66cc9c2-e2d0-2e48-a680-4baeac6a7cf0"
@@ -2504,9 +2546,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                -1.1847801208496094,
+                                55.36372375488281,
                                 0.0,
-                                -4.395524978637695
+                                21.714763641357422
                             ],
                             "rotation": [
                                 0.0,
@@ -2562,9 +2604,9 @@
                                 0.0
                             ],
                             "collider_offset": [
-                                56.5,
+                                0.0,
                                 0.699999988079071,
-                                26.700000762939453
+                                0.0
                             ],
                             "collider_scale": [
                                 1.600000023841858,
@@ -2617,9 +2659,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                -1.0,
+                                55.26912307739258,
                                 0.0,
-                                -8.62861442565918
+                                27.253223419189453
                             ],
                             "rotation": [
                                 0.0,
@@ -2662,9 +2704,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                -1.0,
+                                54.95077896118164,
                                 0.0,
-                                0.5409641265869141
+                                18.52359390258789
                             ],
                             "rotation": [
                                 0.0,
@@ -2711,9 +2753,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                49.24237060546875,
                                 0.0,
-                                1.7035667896270752
+                                0.0,
+                                0.0
                             ],
                             "rotation": [
                                 0.0,
@@ -2751,9 +2793,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                -0.12888717651367188,
+                                33.697105407714844,
                                 0.0,
-                                -0.08500000089406967
+                                1.7382892370224
                             ],
                             "rotation": [
                                 0.0,
@@ -2813,9 +2855,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                -0.2852630615234375,
+                                47.66135025024414,
                                 -9.5367431640625e-07,
-                                0.8849737644195557
+                                1.9800934791564941
                             ],
                             "rotation": [
                                 0.0,
@@ -2871,14 +2913,14 @@
                                 0.0
                             ],
                             "collider_offset": [
-                                49.20000076293945,
-                                0.699999988079071,
-                                1.899999976158142
+                                0.0,
+                                0.6000000238418579,
+                                0.0
                             ],
                             "collider_scale": [
-                                1.7000000476837158,
+                                1.600000023841858,
                                 1.5,
-                                1.7000000476837158
+                                2.0999999046325684
                             ],
                             "motion_type": 2,
                             "physics_behavior": {
@@ -2926,9 +2968,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                -13.060745239257813,
+                                50.73965072631836,
                                 0.0,
-                                -0.08506298065185547
+                                1.978168249130249
                             ],
                             "rotation": [
                                 0.0,
@@ -7854,7 +7896,7 @@
                             "position": [
                                 55.30434036254883,
                                 0.0,
-                                6.355945110321045
+                                5.640989303588867
                             ],
                             "rotation": [
                                 0.0,
@@ -7914,7 +7956,7 @@
                                     "position": [
                                         55.30434036254883,
                                         0.0,
-                                        6.355945110321045
+                                        5.640989303588867
                                     ],
                                     "rotation": [
                                         0.0,
@@ -22755,6 +22797,11 @@
             {
                 "Entity": {
                     "Components": {
+                        "Animation": {
+                            "defaultAnimationIndex": -1,
+                            "loopAnimation": true,
+                            "playbackSpeed": 1.0
+                        },
                         "AudioSource": {
                             "audio_tracks": [],
                             "group_name": "",
@@ -22830,8 +22877,8 @@
                             "castShadows": true,
                             "materials": [
                                 {
-                                    "albedoTextureOverride": "ab88a2ae-3d34-3342-b2ed-df719f19b490",
-                                    "aoTextureOverride": "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
+                                    "albedoTextureOverride": "5c6243be-4e17-8447-b831-10b10e96cfa9",
+                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "baseColorOverride": [
                                         1.0,
                                         1.0,
@@ -22842,19 +22889,19 @@
                                         1.0,
                                         1.0
                                     ],
-                                    "emissiveTextureOverride": "ecc50f9b-7cb8-274e-afdf-1ab2b89c6d8c",
+                                    "emissiveTextureOverride": "e58e6350-ed88-244b-b62c-2b81f69a5dd5",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "15808cf2-db36-c04b-8954-48d10ebaf528",
+                                    "materialGUID": "9f8965fd-64e2-7f43-b1fb-c3b4a6762ae1",
                                     "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
-                                    "normalTextureOverride": "d67f82f6-9682-ba48-a64c-8697034ad488",
+                                    "metallicTextureOverride": "99eefdf1-4245-8f47-858d-b26fff4f5629",
+                                    "normalTextureOverride": "0b7984ec-aa7d-ba48-8227-876a09b9eace",
                                     "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
+                                    "roughnessTextureOverride": "99eefdf1-4245-8f47-858d-b26fff4f5629",
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "df7c04c2-94d4-5347-8dad-6527e853bf94",
+                            "modelGUID": "12c6a232-d825-c942-832d-b21967248159",
                             "receiveShadows": true,
                             "visible": true
                         },
@@ -23057,6 +23104,11 @@
             {
                 "Entity": {
                     "Components": {
+                        "Animation": {
+                            "defaultAnimationIndex": -1,
+                            "loopAnimation": true,
+                            "playbackSpeed": 1.0
+                        },
                         "AudioSource": {
                             "audio_tracks": [],
                             "group_name": "",
@@ -23132,8 +23184,8 @@
                             "castShadows": true,
                             "materials": [
                                 {
-                                    "albedoTextureOverride": "ab88a2ae-3d34-3342-b2ed-df719f19b490",
-                                    "aoTextureOverride": "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
+                                    "albedoTextureOverride": "5c6243be-4e17-8447-b831-10b10e96cfa9",
+                                    "aoTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "baseColorOverride": [
                                         1.0,
                                         1.0,
@@ -23144,19 +23196,19 @@
                                         1.0,
                                         1.0
                                     ],
-                                    "emissiveTextureOverride": "ecc50f9b-7cb8-274e-afdf-1ab2b89c6d8c",
+                                    "emissiveTextureOverride": "e58e6350-ed88-244b-b62c-2b81f69a5dd5",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "15808cf2-db36-c04b-8954-48d10ebaf528",
+                                    "materialGUID": "9f8965fd-64e2-7f43-b1fb-c3b4a6762ae1",
                                     "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
-                                    "normalTextureOverride": "d67f82f6-9682-ba48-a64c-8697034ad488",
+                                    "metallicTextureOverride": "99eefdf1-4245-8f47-858d-b26fff4f5629",
+                                    "normalTextureOverride": "0b7984ec-aa7d-ba48-8227-876a09b9eace",
                                     "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
+                                    "roughnessTextureOverride": "99eefdf1-4245-8f47-858d-b26fff4f5629",
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "df7c04c2-94d4-5347-8dad-6527e853bf94",
+                            "modelGUID": "12c6a232-d825-c942-832d-b21967248159",
                             "receiveShadows": true,
                             "visible": true
                         },
@@ -28934,9 +28986,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                50.34251022338867,
+                                50.08019256591797,
                                 0.0,
-                                8.533889770507813
+                                7.573909282684326
                             ],
                             "rotation": [
                                 0.0,
@@ -28994,9 +29046,9 @@
                                 },
                                 "LocalTransform": {
                                     "position": [
-                                        50.34251022338867,
+                                        50.08019256591797,
                                         0.0,
-                                        8.533889770507813
+                                        7.573909282684326
                                     ],
                                     "rotation": [
                                         0.0,
@@ -35093,7 +35145,7 @@
                                     "useOverrides": true
                                 }
                             ],
-                            "modelGUID": "38e8f9de-b2dc-0f47-ad64-f0209917e593",
+                            "modelGUID": "12958b85-38b8-4645-a2fb-6efe9bd744c4",
                             "receiveShadows": true,
                             "visible": true
                         },
