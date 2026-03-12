@@ -1,0 +1,27 @@
+{
+    "flags": {
+        "doubleSided": true,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "emissive": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "metallic": 1.0,
+        "roughness": 1.0
+    },
+    "textures": {
+        "albedo": "game\\textures\\SkyEnemy_Enemy1_BaseColor.png",
+        "emissive": "game\\textures\\SkyEnemy_Enemy1_Emissive.png",
+        "metallic": "game\\textures\\SkyEnemy_Enemy1_Metallic-SkyEnemy_Enemy1_Roughness.png",
+        "normal": "game\\textures\\SkyEnemy_Enemy1_Normal.png",
+        "roughness": "game\\textures\\SkyEnemy_Enemy1_Metallic-SkyEnemy_Enemy1_Roughness.png"
+    }
+}
