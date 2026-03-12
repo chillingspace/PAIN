@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Playfulist.otf",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 3081211384007483347
+  },
+  "descriptor_version": 1,
+  "guid": "dd887201-e6fd-5945-81a8-31f8913ec163",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\others\\Playfulist.otf"
+  }
+}
