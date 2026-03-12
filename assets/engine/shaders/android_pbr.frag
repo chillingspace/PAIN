@@ -52,8 +52,11 @@ uniform samplerCube prefilterMap;
 uniform sampler2D brdfLut;
 uniform vec3 u_CamPos;
 
-#define MAX_SHADOWMAPPED_LIGHTS 1
+#define MAX_SHADOWMAPPED_LIGHTS 4
 uniform sampler2D u_ShadowMap0;
+uniform sampler2D u_ShadowMap1;
+uniform sampler2D u_ShadowMap2;
+uniform sampler2D u_ShadowMap3;
 uniform float u_NumShadowMaps;
 
 Material material;
@@ -145,17 +148,22 @@ vec3 microfacetModel(vec3 position, vec3 n, Light light) {
 }
 
 float shadowIntensity(int shadow_map_idx, vec3 fragPos, vec3 normal, Light light) {
-    // frag pos in light space
     vec4 fragPosLight = light.P * light.V * vec4(fragPos, 1.0);
-    vec3 projCoords = fragPosLight.xyz / fragPosLight.w;    // perspective divide
-    projCoords = projCoords * 0.5 + 0.5;        // convert NDC[-1, 1] to UV[0, 1]
+    vec3 projCoords = fragPosLight.xyz / fragPosLight.w;
+    projCoords = projCoords * 0.5 + 0.5;
 
-    // check if proj coords within shadow map
-    if (projCoords.z > 1.0 || projCoords.x < 0.0 || projCoords.x > 1.0 || projCoords.y < 0.0 || projCoords.y > 1.0) {
+    if (projCoords.z > 1.0 || projCoords.x < 0.0 || projCoords.x > 1.0 || 
+        projCoords.y < 0.0 || projCoords.y > 1.0) {
         return 0.0;
     }
 
-    float shadow_map_depth = texture(u_ShadowMap0, projCoords.xy).r;
+    // Pick the right shadow map
+    float shadow_map_depth;
+    if (shadow_map_idx == 0)      shadow_map_depth = texture(u_ShadowMap0, projCoords.xy).r;
+    else if (shadow_map_idx == 1) shadow_map_depth = texture(u_ShadowMap1, projCoords.xy).r;
+    else if (shadow_map_idx == 2) shadow_map_depth = texture(u_ShadowMap2, projCoords.xy).r;
+    else                          shadow_map_depth = texture(u_ShadowMap3, projCoords.xy).r;
+
     
     float frag_depth = projCoords.z;
     

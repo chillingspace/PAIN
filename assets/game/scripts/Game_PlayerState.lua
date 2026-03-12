@@ -632,7 +632,7 @@ end
 local function exitPipe()
     S.inPipe = false
     setVisibility(S.player, true)
-    if S.carriedLetter then setVisibility(S.carriedLetter, true) end
+
     enablePhysics(S.player)
     audioPlaySFXFromEntity(SFX_PIPE_OUT, S.player, VOL_HIDE)
     log("[PlayerState] Player exited pipe")
