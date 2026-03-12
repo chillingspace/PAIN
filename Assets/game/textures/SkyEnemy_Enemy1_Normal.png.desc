@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "SkyEnemy_Enemy1_Normal.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 732309952038684970
+  },
+  "descriptor_version": 1,
+  "guid": "2ce31d6e-4748-3c42-8761-edec2410952a",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\SkyEnemy_Enemy1_Normal.png"
+  }
+}

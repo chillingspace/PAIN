@@ -133,7 +133,10 @@ namespace PAIN {
 		LoadScene,
 
 		howtoplay_Right,
-		howtoplay_Left
+		howtoplay_Left,
+
+		graphics_Left,
+		graphics_Right
 	};
 
 	struct UIButton {
@@ -334,7 +337,10 @@ namespace PAIN {
 		{PAIN::UIAction::LoadScene, "LoadScene"},
 
 		{PAIN::UIAction::howtoplay_Right, "howtoplay_Right"},
-		{PAIN::UIAction::howtoplay_Left, "howtoplay_Left"}
+		{PAIN::UIAction::howtoplay_Left, "howtoplay_Left"},
+
+		{PAIN::UIAction::graphics_Left, "graphics_Left"},
+		{PAIN::UIAction::graphics_Right, "graphics_Right"}
 	})
 
 } // namespace PAIN

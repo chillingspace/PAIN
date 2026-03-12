@@ -7,9 +7,10 @@ local jumpPressed = false
 local wasMoving = false
 
 -- Animation
-local ANIM_IDLE = "Frog_RigAction" 
-local ANIM_WALK = "Frog_Jump"
+local ANIM_IDLE = "Frog_Idle" 
+local ANIM_WALK = "Frog_Hopping"
 local ANIM_JUMP = "Frog_Jump"
+local ANIM_FLIGHT = "Frog_Flight"
 local currentAnimState = "" 
 local lastAnimTime =  0.0
 
@@ -118,14 +119,27 @@ local jumpCooldown = 0.0
 
 -- Player SFX file paths
 local SFX_PLAYER_HOPS = {
-    "game/audio/sfx/player/frog hop/Player_Hop_01.wav",
-    "game/audio/sfx/player/frog hop/Player_Hop_02.wav",
-    "game/audio/sfx/player/frog hop/Player_Hop_03.wav",
-    "game/audio/sfx/player/frog hop/Player_Hop_04.wav",
-    "game/audio/sfx/player/frog hop/Player_Hop_05.wav",
-    "game/audio/sfx/player/frog hop/Player_Hop_06.wav",
-    "game/audio/sfx/player/frog hop/Player_Hop_07.wav"
+    "game/audio/sfx/player/frog footstep/Frog_Footstep_01.wav",
+    "game/audio/sfx/player/frog footstep/Frog_Footstep_02.wav",
+    "game/audio/sfx/player/frog footstep/Frog_Footstep_03.wav",
+    "game/audio/sfx/player/frog footstep/Frog_Footstep_04.wav",
+    "game/audio/sfx/player/frog footstep/Frog_Footstep_05.wav",
+    "game/audio/sfx/player/frog footstep/Frog_Footstep_06.wav",
+    "game/audio/sfx/player/frog footstep/Frog_Footstep_07.wav",
+    "game/audio/sfx/player/frog footstep/Frog_Footstep_08.wav",
+    "game/audio/sfx/player/frog footstep/Frog_Footstep_09.wav"
 }
+
+-- Old hop sound, maybe use for jumps only
+--local SFX_PLAYER_HOPS = {
+    --"game/audio/sfx/player/frog hop/Player_Hop_01.wav",
+    --"game/audio/sfx/player/frog hop/Player_Hop_02.wav",
+    --"game/audio/sfx/player/frog hop/Player_Hop_03.wav",
+    --"game/audio/sfx/player/frog hop/Player_Hop_04.wav",
+    --"game/audio/sfx/player/frog hop/Player_Hop_05.wav",
+    --"game/audio/sfx/player/frog hop/Player_Hop_06.wav",
+    --"game/audio/sfx/player/frog hop/Player_Hop_07.wav"
+--}
 
 local SFX_PLAYER_IDLES = {
     "game/audio/sfx/player/frog croak/Player_VO_Idle_01.wav",
@@ -136,8 +150,8 @@ local SFX_PLAYER_IDLES = {
 }
 
 -- SFX Volumes modifier
-local VOL_PLAYER_HOP = 0.0
-local VOL_PLAYER_IDLE = 0.0
+local VOL_PLAYER_HOP = 0.1
+local VOL_PLAYER_IDLE = 0.1
 
 registerUpdate(function(dt)
     -- EARLY EXIT: If game is paused, freeze player completely
@@ -204,7 +218,7 @@ registerUpdate(function(dt)
         fwd = fwd + joystickDirY
         fwd = math.max(-1.0, math.min(1.0, fwd))
 
-        local px, py, pz = getPosition(id)
+        local px, py, pz = getPosition(playerId)
         local ep = S.pipeEntrancePos
 
         -- project player's current position onto the pipe axis
@@ -286,6 +300,11 @@ registerUpdate(function(dt)
             PlayAnim(id, ANIM_WALK, 0.1, true) -- on the ground
             Animation.SetLoop(id, true)
         end
+        if not isGrounded then
+            PlayAnim(id, ANIM_FLIGHT, 0.1, true) -- moving in the sky
+            Animation.SetLoop(id, true)
+        end
+        
         -- Play hop sound when starting to move
         if not wasMoving then
             
@@ -313,6 +332,7 @@ registerUpdate(function(dt)
         
         -- Make sure animation is not looping
         if isGrounded then 
+            PlayAnim(id, ANIM_JUMP, 0.25, false) -- on the ground
             Animation.SetSpeed(id, 2)
             Animation.SetLoop(id, false)
          end

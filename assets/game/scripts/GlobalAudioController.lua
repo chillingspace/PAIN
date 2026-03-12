@@ -106,7 +106,8 @@ local function applySceneVolumes()
         -- Track 0: Level BGM (main), Track 1: Ambient, Track 2: Combat (muted initially)
         if trackCount >= 1 then globalBGMFade(0, targetVol, CONFIG.fadeDuration) end
         if trackCount >= 2 then globalBGMFade(1, CONFIG.ambientVolume, CONFIG.fadeDuration) end
-        if trackCount >= 3 then globalBGMFade(2, CONFIG.mutedVolume, 0.1) end
+        -- Combat BGM disabled (game design decision)
+        -- if trackCount >= 3 then globalBGMFade(2, CONFIG.mutedVolume, 0.1) end
         inCombat = false
         
     else
@@ -158,28 +159,32 @@ local function changeSceneWithFade(scenePath)
 end
 
 -- ==================== COMBAT LAYER CONTROL ====================
+-- Combat BGM transition disabled (game design decision)
 -- Call this from UIDetection.lua or enemy scripts
 function GlobalAudio_SetCombat(combatActive)
-    -- Only process in gameplay scenes (tutorial and level1)
-    if currentScene ~= "tutorial" and currentScene ~= "level1" and currentScene ~= "level" then return end
-    if combatActive == inCombat then return end
-    
-    inCombat = combatActive
-    local trackCount = globalBGMGetTrackCount()
-    
-    if combatActive then
-        -- Fade out main BGM, fade in combat layer
-        if trackCount >= 1 then globalBGMFade(0, CONFIG.mutedVolume, CONFIG.crossfadeDuration) end
-        if trackCount >= 3 then globalBGMFade(2, CONFIG.defaultVolume, CONFIG.crossfadeDuration) end
-    else
-        -- Fade in main BGM, fade out combat layer
-        local targetVol = CONFIG.defaultVolume
-        if currentScene == "tutorial" then targetVol = linearToDb(TUTORIAL_BGM_VOLUME_SCALE) end
-        if currentScene == "level1"   then targetVol = linearToDb(LEVEL1_BGM_VOLUME_SCALE) end
+    -- Combat BGM crossfade disabled - detection SFX still plays via UIDetection.lua
+    do return end
 
-        if trackCount >= 1 then globalBGMFade(0, targetVol, CONFIG.crossfadeDuration) end
-        if trackCount >= 3 then globalBGMFade(2, CONFIG.mutedVolume, CONFIG.crossfadeDuration) end
-    end
+    -- -- Only process in gameplay scenes (tutorial and level1)
+    -- if currentScene ~= "tutorial" and currentScene ~= "level1" and currentScene ~= "level" then return end
+    -- if combatActive == inCombat then return end
+    -- 
+    -- inCombat = combatActive
+    -- local trackCount = globalBGMGetTrackCount()
+    -- 
+    -- if combatActive then
+    --     -- Fade out main BGM, fade in combat layer
+    --     if trackCount >= 1 then globalBGMFade(0, CONFIG.mutedVolume, CONFIG.crossfadeDuration) end
+    --     if trackCount >= 3 then globalBGMFade(2, CONFIG.defaultVolume, CONFIG.crossfadeDuration) end
+    -- else
+    --     -- Fade in main BGM, fade out combat layer
+    --     local targetVol = CONFIG.defaultVolume
+    --     if currentScene == "tutorial" then targetVol = linearToDb(TUTORIAL_BGM_VOLUME_SCALE) end
+    --     if currentScene == "level1"   then targetVol = linearToDb(LEVEL1_BGM_VOLUME_SCALE) end
+    --
+    --     if trackCount >= 1 then globalBGMFade(0, targetVol, CONFIG.crossfadeDuration) end
+    --     if trackCount >= 3 then globalBGMFade(2, CONFIG.mutedVolume, CONFIG.crossfadeDuration) end
+    -- end
 end
 
 -- ==================== GAME OVER DUCKING ====================
@@ -253,6 +258,48 @@ registerUpdate(function(dt)
                 loadAndApply("vol_master", "master", "master")
                 loadAndApply("vol_bgm",    "music",  "bgm")
                 loadAndApply("vol_sfx",    "sfx",    "sfx")
+            end
+
+            -- Apply saved graphics settings from disk
+            if settingsLoad then
+                -- Brightness (tone mapping exposure)
+                if setBrightness then
+                    local saved = settingsLoad("gfx_brightness", "")
+                    if saved ~= "" then
+                        local val = tonumber(saved)
+                        if val then
+                            -- Convert slider 0-1 to exposure 0.5-2.0
+                            local exposure = 0.5 + val * 1.5
+                            setBrightness(exposure)
+                            log("[GlobalAudio] Loaded brightness slider = " .. tostring(val) .. " -> exposure " .. tostring(exposure))
+                        end
+                    end
+                end
+
+                -- Gamma
+                if setGamma then
+                    local saved = settingsLoad("gfx_gamma", "")
+                    if saved ~= "" then
+                        local val = tonumber(saved)
+                        if val then
+                            -- Convert slider 0-1 to gamma 1.5-3.0
+                            local gamma = 1.5 + val * 1.5
+                            setGamma(gamma)
+                            log("[GlobalAudio] Loaded gamma slider = " .. tostring(val) .. " -> gamma " .. tostring(gamma))
+                        end
+                    end
+                end
+
+                -- Fullscreen/Windowed (PC only)
+                if setFullscreen then
+                    local saved = settingsLoad("gfx_displaymode", "")
+                    if saved ~= "" then
+                        _G.GraphicsSettings = _G.GraphicsSettings or {}
+                        _G.GraphicsSettings.displayMode = saved
+                        setFullscreen(saved == "fullscreen")
+                        log("[GlobalAudio] Loaded display mode = " .. saved)
+                    end
+                end
             end
         end
     end

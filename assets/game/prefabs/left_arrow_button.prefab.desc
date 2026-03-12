@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "left_arrow_button.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 8860812673722898086
+  },
+  "descriptor_version": 1,
+  "guid": "f97c005a-bdfd-5149-8f6e-65a4861c72f7",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\left_arrow_button.prefab"
+  }
+}

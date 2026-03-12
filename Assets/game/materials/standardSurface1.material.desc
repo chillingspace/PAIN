@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "standardSurface1.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 9377500634447049951
+  },
+  "descriptor_version": 1,
+  "guid": "3a976dda-9eeb-ae41-9050-0b7dcae71a10",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\standardSurface1.material"
+  }
+}

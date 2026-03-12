@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Exclaimation_occlusionRoughnessMetallic.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 13573640321188824184
+  },
+  "descriptor_version": 1,
+  "guid": "a58a1f11-44e2-484a-a527-4f00c4780139",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Exclaimation_occlusionRoughnessMetallic.png"
+  }
+}

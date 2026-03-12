@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Exclaimation.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 1627209457844866889
+  },
+  "descriptor_version": 1,
+  "guid": "960bc5f7-31ef-b746-b540-dc5a8f98346d",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\Exclaimation.glb"
+  }
+}

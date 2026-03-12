@@ -294,26 +294,26 @@ namespace PAIN {
 			if (temp_allocator && job_system && jolt_physics) {
 				// Only update if time has actually passed
 				if (delta_time > 0.0f) {
+					auto view = registry.view<Physics::RigidBody3D, LocalTransform>();
+					for (auto [entity, rb, transform] : view.each()) {
+						if (rb.physics_enabled && !rb.bodyID.IsInvalid()) {
+							JPH::Vec3 pos = body_interface->GetPosition(rb.bodyID);
+							rb.prevPosition = glm::vec3(pos.GetX(), pos.GetY(), pos.GetZ());
+						}
+							
+
+					}
+
 					syncNewBodies(registry);
-					jolt_physics->Update(delta_time, collision_steps, temp_allocator.get(),
-										 job_system.get());
+					jolt_physics->Update(delta_time, collision_steps,
+						temp_allocator.get(), job_system.get());
 					dispatchCollisionEvents(registry);
 				}
 			}
 		}
 
 		void System::onUpdate(AppTiming timing, entt::registry& registry) {
-			// To get fixed delta time here
-			// const float delta_time = 1.f / 60.f; // <-- REMOVE THIS
-
-			// The main simulation step is no longer here.
-			// if (temp_allocator && job_system && jolt_physics)
-			// {
-			//    syncNewBodies(registry);
-			//    jolt_physics->Update(delta_time, collision_steps, temp_allocator.get(),
-			//    job_system.get());
-			// }
-			// ^ALL OF THE ABOVE LOGIC IS MOVED TO onFixedUpdate
+			accumulator_alpha_ = timing.alpha;
 
 			// IF GAME IS STOPPED
 			if (timing.dt <= 0.0001f) {
@@ -377,9 +377,9 @@ namespace PAIN {
 													 rigidBody.bodyID);
 						if (lock.Succeeded()) {
 							const JPH::Body& body = lock.GetBody();
-							const JPH::RVec3 position = body.GetPosition();
 							const JPH::Quat rotation = body.GetRotation();
-							
+							const JPH::RVec3 position = body.GetPosition();
+
 							glm::vec3 joltWorldPos(position.GetX(), position.GetY(), position.GetZ());
 							glm::quat joltWorldRot(rotation.GetW(), rotation.GetX(), rotation.GetY(), rotation.GetZ());
 
@@ -421,10 +421,19 @@ namespace PAIN {
 								transform.position = newPos;
 								transform.rotation = glm::normalize(newRot);
 							} else {
-								transform.position = joltWorldPos;
+								transform.position = glm::mix(rigidBody.prevPosition, joltWorldPos, accumulator_alpha_);
 								transform.rotation = glm::normalize(joltWorldRot);
 							}
 
+							// // Inside your body lock read block, replace the direct assignment:
+							// JPH::RVec3 position = body.GetPosition();
+							// glm::vec3 currentPos(position.GetX(), position.GetY(), position.GetZ());
+
+							// // Interpolate between previous and current physics position (which might affect accuracy but improves visual smoothness)
+							// transform.position = glm::mix(rigidBody.prevPosition, currentPos, accumulator_alpha_);
+
+							// transform.rotation = glm::quat(rotation.GetW(), rotation.GetX(),
+							// 							   rotation.GetY(), rotation.GetZ());
 							world.dirty = true;
 
 							const JPH::Vec3 velocity = body.GetLinearVelocity();
@@ -835,6 +844,43 @@ namespace PAIN {
 			// Read from Jolt
 			JPH::Vec3 vel = body_interface->GetLinearVelocity(rb.bodyID);
 			return glm::vec3(vel.GetX(), vel.GetY(), vel.GetZ());
+		}
+
+		void System::addForce(entt::entity e, const glm::vec3& force) {
+			auto svc = services.lock();
+			if (!svc) return;
+
+			auto ecs = svc->get<ECS::Controller>();
+			if (!ecs) return;
+
+			auto& registry = ecs->getRegistry();
+			if (!registry.valid(e) || !registry.all_of<Physics::RigidBody3D>(e)) return;
+
+			auto& rb = registry.get<Physics::RigidBody3D>(e);
+			if (rb.bodyID.IsInvalid() || !body_interface) return;
+
+			// body_interface->AddForce takes world space, local position
+			body_interface->AddForce(rb.bodyID,
+				JPH::Vec3(force.x, force.y, force.z));
+		}
+
+		void System::addImpulse(entt::entity e, const glm::vec3& impulse) {
+			auto svc = services.lock();
+			if (!svc) return;
+
+			auto ecs = svc->get<ECS::Controller>();
+			if (!ecs) return;
+
+			auto& registry = ecs->getRegistry();
+			if (!registry.valid(e) || !registry.all_of<Physics::RigidBody3D>(e)) return;
+
+			auto& rb = registry.get<Physics::RigidBody3D>(e);
+			if (rb.bodyID.IsInvalid() || !body_interface) return;
+
+			// Activate body + apply impulse (instant velocity change)
+			body_interface->ActivateBody(rb.bodyID);
+			body_interface->AddImpulse(rb.bodyID,
+				JPH::Vec3(impulse.x, impulse.y, impulse.z));
 		}
 
 		void System::create_floor() {

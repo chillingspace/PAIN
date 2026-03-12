@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "controls_overlay.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 12050048492454382584
+  },
+  "descriptor_version": 1,
+  "guid": "2f6acddc-e28a-9a42-b861-da758de39135",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\controls_overlay.png"
+  }
+}

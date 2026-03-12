@@ -30,9 +30,20 @@ local SFX_TEST_FILE = "game/audio/sfx/Gear Pick Up.wav"
 
 -- Settings key mapping (slider entity name -> settings file key)
 local SETTINGS_KEYS = {
-    master_handle = "vol_master",
-    bgm_handle    = "vol_bgm",
-    sfx_handle    = "vol_sfx",
+    master_handle     = "vol_master",
+    bgm_handle        = "vol_bgm",
+    sfx_handle        = "vol_sfx",
+    brightness_handle = "gfx_brightness",
+    gamma_handle      = "gfx_gamma",
+}
+
+-- Default slider values (0.0-1.0 range, maps to actual value via handler)
+local DEFAULT_VALUES = {
+    master_handle     = 1.0,
+    bgm_handle        = 1.0,
+    sfx_handle        = 1.0,
+    brightness_handle = 0.333,  -- maps to exposure 1.0 (range 0.5-2.0)
+    gamma_handle      = 0.467,  -- maps to gamma 2.2 (range 1.5-3.0)
 }
 
 -- Global volume state (persists across scenes via _G)
@@ -64,6 +75,30 @@ local volumeFunctions = {
         _G.VolumeSettings.sfx = v
         if audioSetGroupVolumeDb then
             audioSetGroupVolumeDb("sfx", linearToDb(v))
+        end
+    end,
+
+    brightness_handle = function(v)
+        -- Map 0.0-1.0 slider to 0.5-2.0 exposure
+        local exposure = 0.5 + v * 1.5
+        if setBrightness then
+            setBrightness(exposure)
+            local readback = getBrightness and getBrightness() or -999
+            log(string.format("[BRIGHTNESS DEBUG] set exposure=%.3f, readback=%.3f", exposure, readback))
+        else
+            log("[BRIGHTNESS DEBUG] setBrightness function NOT FOUND!")
+        end
+    end,
+
+    gamma_handle = function(v)
+        -- Map 0.0-1.0 slider to 1.5-3.0 gamma
+        local gamma = 1.5 + v * 1.5
+        if setGamma then
+            setGamma(gamma)
+            local readback = getGamma and getGamma() or -999
+            log(string.format("[GAMMA DEBUG] set gamma=%.3f, readback=%.3f", gamma, readback))
+        else
+            log("[GAMMA DEBUG] setGamma function NOT FOUND!")
         end
     end
 }
@@ -177,16 +212,5 @@ registerUpdate(function(dt)
         if fn then
             fn(value)
         end
-
-        -- !TODO: Code below not used unless things go wrong. Remove this code otherwise.
-        -- Update volume here
-        -- if sliderName == "master_handle" then
-        --     -- Set master volume to value
-        -- elseif sliderName == "bgm_handle" then
-        --     -- Set bgm volume to value
-        -- elseif sliderName == "sfx_handle" then
-        --     -- Set sfx volume to value
-        -- end
-
     end
 end)

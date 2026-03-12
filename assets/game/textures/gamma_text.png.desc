@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "gamma_text.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 3435344802217839696
+  },
+  "descriptor_version": 1,
+  "guid": "916ff435-5897-0e49-9528-0076ca501ca6",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\gamma_text.png"
+  }
+}

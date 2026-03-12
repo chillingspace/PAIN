@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Exclaimation.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 7322666590724524457
+  },
+  "descriptor_version": 1,
+  "guid": "bb0bc5a8-5546-514f-adbb-ed84183437d2",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Exclaimation.material"
+  }
+}

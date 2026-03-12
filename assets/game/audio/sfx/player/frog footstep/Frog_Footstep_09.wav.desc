@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Frog_Footstep_09.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 16598631649916950708
+  },
+  "descriptor_version": 1,
+  "guid": "7b85ef4b-26ef-214a-8882-9156e96b3504",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\player\\frog footstep\\Frog_Footstep_09.wav"
+  }
+}
