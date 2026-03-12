@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 
 #include "sPrefab.h"
 
@@ -6,6 +6,7 @@
 #include "ECS/Components/AllComponents.h"
 #include "ECS/Components/cEntity.h"
 #include "ECS/Controller.h"
+#include "CoreSystems/Scene/Scene.h"
 
 
 namespace PAIN {
@@ -314,6 +315,29 @@ namespace PAIN {
 			catch (const std::exception& e) {
 				PN_CORE_ERROR("Failed to load components: {}", e.what());
 				// Continue anyway - entity is created
+			}
+
+			// ========================================
+			// 4.5. VALIDATE COMPONENT LAYER
+			// ========================================
+			if (registry.any_of<Entity::Layer>(entity)) {
+				auto sceneManager = services.lock()->get<Scene::SceneManager>();
+				if (sceneManager) {
+					auto& layer = registry.get<Entity::Layer>(entity);
+					auto const& sceneLayers = sceneManager->getLayers();
+					
+					// If the layer ID saved in the prefab exceeds the current scene layers, reset to default (0).
+					if (layer.layer_id < 0 || layer.layer_id >= static_cast<int>(sceneLayers.size())) {
+						PN_CORE_WARN("Prefab entity {} has invalid layerID {}, resetting to Default (0)", 
+							newGUID.ToString(), layer.layer_id);
+						
+						layer.layer_id = 0;
+						layer.layer_mask = 1;
+						if (!sceneLayers.empty()) {
+							layer.layerName = sceneLayers[0].name;
+						}
+					}
+				}
 			}
 
 			// ========================================
