@@ -80,6 +80,11 @@ do
     local SHOW_ICON_IN_SEARCH    = false
     local SHOW_ICON_IN_RETURN    = false
 
+    -- Audio
+    local SFX_DETECTION = "game/audio/sfx/enemy/Enemy_Alert_Loop_v1.wav"
+    local SFX_CHASE     = "game/audio/sfx/enemy/Enemy_Alert_Loop_v1.wav"  -- swap this path when ready
+    local SFX_VOL       = 1.0
+
     -- Detection bar entities to hide, red overlay still visible
     local UI_DETECT_BAR_BG       = "UI_DetectBar_BG"
     local UI_DETECT_BAR_FILL_L   = "UI_DetectBar_Fill_L"
@@ -137,6 +142,7 @@ do
     local chaseOrigin = nil  -- position where the enemy first spotted the player
 
     local alertIcon = nil
+    local audioChannel = -1
 
     -- Light values cached from editor on init
     local lightDirY       = -0.866  -- fallback if no light component
@@ -281,6 +287,23 @@ do
         if barBG    then set2DPosition(barBG,    HIDE_UI_X, HIDE_UI_Y) end
         if barFillL then set2DPosition(barFillL, HIDE_UI_X, HIDE_UI_Y) end
         if barFillR then set2DPosition(barFillR, HIDE_UI_X, HIDE_UI_Y) end
+    end
+
+    local function stopGroundAudio()
+        if audioChannel >= 0 then
+            audioStopChannel(audioChannel)
+            if _G.SFXChannels then _G.SFXChannels[audioChannel] = nil end
+            audioChannel = -1
+        end
+    end
+
+    local function playGroundAudio(sfxPath)
+        stopGroundAudio()
+        audioChannel = audioPlaySFXFromEntity(sfxPath, enemy, SFX_VOL, true)
+        if audioChannel >= 0 then
+            _G.SFXChannels = _G.SFXChannels or {}
+            _G.SFXChannels[audioChannel] = true
+        end
     end
 
     -- vision cone light
@@ -500,6 +523,7 @@ do
         scanPauseDuration = 0.0
 
         setDetectionUIActive(false)
+        stopGroundAudio()
         refreshAlertIconForState()
         setMoveAnim(false)
     end
@@ -537,6 +561,7 @@ do
             local ex, ey, ez = getEnemyPos()
             chaseOrigin = { x = ex, y = ey, z = ez }
             setMoveAnim(false)
+            playGroundAudio(SFX_DETECTION)
 
         elseif newState == STATE_CHASE then
             setDetectionUIActive(true)
@@ -544,18 +569,21 @@ do
             lostSightTimer = 0.0
             searchArrived = false
             setMoveAnim(true)
+            playGroundAudio(SFX_CHASE)
 
         elseif newState == STATE_SEARCH then
             setDetectionUIActive(false)
             lostSightTimer = 0.0
             searchArrived = false
             setMoveAnim(true)  -- starts by walking to last-seen position
+            stopGroundAudio()
 
         elseif newState == STATE_RETURN_HOME then
             setDetectionUIActive(false)
             lostSightTimer = 0.0
             searchArrived = false
             setMoveAnim(true)
+            stopGroundAudio()
         end
 
         refreshAlertIconForState()
