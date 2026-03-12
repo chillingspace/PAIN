@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "exclaimation mark ui.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 1255683510454840295
+  },
+  "descriptor_version": 1,
+  "guid": "1e639b81-b5bd-6e47-96f8-9451bf492db5",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\exclaimation mark ui.png"
+  }
+}
