@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Build2.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 7428057294739232875
+  },
+  "descriptor_version": 1,
+  "guid": "d623b3f8-5caf-e649-a783-729e6026dfb2",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Build2.material"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Build2.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 17871547857520114676
+  },
+  "descriptor_version": 1,
+  "guid": "888aead4-8096-9a49-88c2-d55d5e1fda92",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Build2.prefab"
+  }
+}

@@ -1,14 +1,5 @@
 {
     "assets": [
-        "26628b2d-06f2-9648-831e-7a2f4253d948",
-        "12958b85-38b8-4645-a2fb-6efe9bd744c4",
-        "e4e877e9-e737-2d45-8217-3d7f5ab16384",
-        "4ac8b55a-c418-6b4b-9f91-518bf8df79f1",
-        "1c3470fa-7502-ed43-8d9e-123f089cc779",
-        "2d87afdc-663f-ed4a-bdce-4ac73c3b6db0",
-        "0201b174-c121-9c4b-8920-c3ef05bb6ad5",
-        "256aaf03-37ee-654a-947b-dba5e889cb54",
-        "033d5b32-dede-f947-af8e-9cca54d7f135",
         "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
         "12519c04-c5f6-5f4a-adc5-78b1afbbc8ca",
         "bb0bc5a8-5546-514f-adbb-ed84183437d2",
@@ -21,6 +12,7 @@
         "5ccceeb5-887c-db4c-8cae-0efe9e91b198",
         "ab4c29a6-7fbe-ac43-bc8b-8acad3cc3c07",
         "2ce31d6e-4748-3c42-8761-edec2410952a",
+        "8fa6c8ae-f2e1-8f4b-a3ec-7195238cfc38",
         "4438ada8-1bcf-a542-8705-5e59b74f34a5",
         "caa95774-ebd1-024d-b01b-cb9fcd0b2ce2",
         "5dbc2f57-64e8-d242-8aaa-e4244c67e866",
@@ -31,13 +23,17 @@
         "38a421a9-1ffc-3c47-a8e2-f0af50f2e2c2",
         "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
         "d54d96e7-2dc0-c947-8f1a-bab6892ff688",
+        "466ca22c-0eb2-0d49-ac1a-b9d822cc1ce4",
         "4727438d-9c1f-ea47-91e0-8911d3412588",
+        "5d46bba2-ab81-064e-bab5-2517c42f6aca",
         "08527159-b243-d742-a313-9001198b2097",
         "ffd57a3d-b8b4-2b40-94a5-52ecd82a5a5f",
         "d9977322-f31e-bc4c-b298-fbcd6690c4ba",
         "4b1f318e-49f7-1545-bb84-b9c6608f3471",
         "6a6e7d67-82c1-f846-96c5-4c5338a9a7ec",
         "3da3f0aa-e9d3-634a-b1c9-f88763fb5bae",
+        "25c6e2c3-b701-4c43-b049-8c9b21a29441",
+        "31f050fc-b8fd-9f44-9f4c-c2b19a10e63e",
         "146f4e3b-5c24-624f-80c8-d74159ed9f41",
         "a8977689-ded0-fa41-9efb-33354e83dec7",
         "41022c20-5591-324d-80ff-f14090e5e9d3",
@@ -59,6 +55,13 @@
         "9679f581-d33b-d44d-ae70-30f076c3dca3",
         "6094d6ab-f4b7-054d-b7ef-f0cfc76d7718",
         "443a2cb0-5def-da40-92eb-3cdef9b65ed8",
+        "44bd363b-5d65-664a-a1dd-c750fad4e7c6",
+        "0955a106-00fb-8040-8ce5-9402d6bd1c59",
+        "154c6c51-982f-d845-b493-e30d07a80100",
+        "ecc50f9b-7cb8-274e-afdf-1ab2b89c6d8c",
+        "d623b3f8-5caf-e649-a783-729e6026dfb2",
+        "e1959178-f9dc-b440-a4b4-bb50f6005f93",
+        "2280284b-d43b-a04d-b96c-b057b4976861",
         "91e02ba2-c6b8-184f-bd48-b59674946972",
         "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
         "e01c794e-0add-d542-9860-03f63c3193ab",
@@ -86,6 +89,7 @@
         "3fd9c353-23d4-e84a-ab6d-d4eea163ad9b",
         "4abba89c-2728-1a4b-bf13-c88751021af2",
         "04a181ef-234c-2045-945f-0053f79a7033",
+        "256aaf03-37ee-654a-947b-dba5e889cb54",
         "37866613-e4bf-e54f-bad7-60f6f99f0c98",
         "5aa8f938-deee-7048-9a6b-33482dd8252b",
         "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
@@ -116,19 +120,19 @@
         "38832c5f-2033-d84b-af32-fc539fb29e5a",
         "40ee8b7e-1c90-1a4a-b198-9bf31be1b08e",
         "c79a09c6-ea1f-ca46-8d92-d5cf53337487",
+        "4ac8b55a-c418-6b4b-9f91-518bf8df79f1",
         "d716543f-207b-5a47-9496-b5ccafe42b6b",
         "9dc666a4-a004-0346-803d-0530eb3a2f70",
         "8e26f21e-f0ca-5448-a80f-70f21e165ec6",
         "c3240e7d-4066-2444-a024-c1d31c71a299",
         "c79c529b-71e5-164c-854d-f8cf076f5318",
         "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+        "164de26f-1403-e146-8a76-735d5dc42155",
         "510e3ede-f637-c448-99e8-7dc200d60c8f",
         "c3be7e4a-501e-0744-ac10-55d1b5a38d86",
         "b3ec7aee-c5ff-af48-9aa1-f912f843a888",
         "1ec3ccd3-20b9-e646-8fc8-f33ee22ea4e4",
         "a4f0ef0e-e825-fd4c-a9c7-0ca0ace59222",
-        "44bd363b-5d65-664a-a1dd-c750fad4e7c6",
-        "0955a106-00fb-8040-8ce5-9402d6bd1c59",
         "b264fed7-6c6f-8344-a856-9d4094c5f8c5",
         "15808cf2-db36-c04b-8954-48d10ebaf528",
         "6f3aeae1-f4e9-2d45-9b24-b2277f3607a8",
@@ -175,13 +179,13 @@
         "b3d2b2fc-4e62-0d4a-a66d-9c99cccd62cd",
         "4ab9b8a8-4bdc-e046-83a2-24863013c030",
         "8ec89d31-ef7e-9247-834a-8782dd0c614d",
+        "2d87afdc-663f-ed4a-bdce-4ac73c3b6db0",
         "f57adda3-64e1-a544-86a2-842c8976e7e0",
         "f6a92284-3591-ca4c-9cf5-1e0167b2d240",
         "12c6a232-d825-c942-832d-b21967248159",
         "df7c04c2-94d4-5347-8dad-6527e853bf94",
         "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
         "ab88a2ae-3d34-3342-b2ed-df719f19b490",
-        "ecc50f9b-7cb8-274e-afdf-1ab2b89c6d8c",
         "476662dc-9a7b-2243-97be-6e01bceeb854",
         "351d0711-28db-d346-81fe-fe5904ff854a",
         "f8f9abf4-39b2-3f41-9e00-4bdfd4476881",
@@ -190,10 +194,12 @@
         "0d290cee-b55d-2e45-907d-ae2c745f492f",
         "163da0e7-00d9-0541-a470-a859fd023b6b",
         "ee65299b-47d9-4648-ae3d-7a9e1ae75012",
+        "6fc0ccbc-ae9d-a948-9557-6140470621c4",
         "79269c4e-addb-ea41-85c6-57e984c24ff3",
         "a77749e3-6c15-7446-a792-5609dd96b391",
         "14377587-a8fe-2b47-9f46-dad6bdad2753",
         "c49ebb97-d7ba-f148-9e46-16d6c5543147",
+        "12958b85-38b8-4645-a2fb-6efe9bd744c4",
         "3e8dc653-3d17-ab42-bb53-da040f01f965",
         "06cab9b7-c91a-6948-bb59-426b8032ea12",
         "3c58c656-1127-1a47-92ea-6c59604296e5",
@@ -302,16 +308,16 @@
         ],
         "farPlane": 100.0,
         "forward": [
-            0.49895766377449036,
-            -0.5764344930648804,
-            0.6471201777458191
+            0.819020688533783,
+            -0.5519407987594604,
+            -0.15673665702342987
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            4.005473613739014,
-            22.41163444519043,
-            -14.740289688110352
+            15.690398216247559,
+            10.943477630615234,
+            4.744487762451172
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 31.100000381469727,
@@ -2107,7 +2113,7 @@
                         "Animation": {
                             "defaultAnimationIndex": -1,
                             "loopAnimation": true,
-                            "playbackSpeed": 0.20000000298023224
+                            "playbackSpeed": 0.3400000035762787
                         },
                         "Collider": {
                             "box_size": [
@@ -2136,20 +2142,20 @@
                         "Lighting": {
                             "direction": [
                                 0.0,
-                                -0.561860978603363,
-                                0.8272316455841064
+                                -0.7495837807655334,
+                                0.6619095206260681
                             ],
                             "inner_angle": 20.0,
                             "light_intensity": [
-                                0.04682406410574913,
-                                0.12367814779281616,
-                                0.18131870031356812
+                                0.6000000238418579,
+                                0.6000000238418579,
+                                0.9176470637321472
                             ],
                             "light_type": 2,
                             "offset": [
                                 0.0,
-                                1.9500000476837158,
-                                -0.3499999940395355
+                                2.0,
+                                0.0
                             ],
                             "outer_angle": 32.5,
                             "shadow_resolution": 1024,
@@ -2304,7 +2310,7 @@
                         "Animation": {
                             "defaultAnimationIndex": -1,
                             "loopAnimation": true,
-                            "playbackSpeed": 0.20000000298023224
+                            "playbackSpeed": 0.3400000035762787
                         },
                         "Collider": {
                             "box_size": [
@@ -2333,20 +2339,20 @@
                         "Lighting": {
                             "direction": [
                                 0.0,
-                                -0.5946114659309387,
-                                0.8040132522583008
+                                -0.7496845126152039,
+                                0.6617953181266785
                             ],
                             "inner_angle": 18.0,
                             "light_intensity": [
-                                0.08471199125051498,
-                                0.1617743968963623,
-                                0.3351648449897766
+                                0.6000000238418579,
+                                0.6000000238418579,
+                                0.9176470637321472
                             ],
                             "light_type": 2,
                             "offset": [
                                 0.0,
-                                1.9500000476837158,
-                                -0.3499999940395355
+                                2.0,
+                                0.0
                             ],
                             "outer_angle": 20.0,
                             "shadow_resolution": 1024,
@@ -2636,7 +2642,7 @@
                         "Animation": {
                             "defaultAnimationIndex": -1,
                             "loopAnimation": true,
-                            "playbackSpeed": 0.20000000298023224
+                            "playbackSpeed": 0.3400000035762787
                         },
                         "GUID": {
                             "guid": "2d3c4418-4ca4-f04c-9c29-04564bcc32d7"
@@ -2653,20 +2659,20 @@
                         "Lighting": {
                             "direction": [
                                 0.0,
-                                -0.576393187046051,
-                                0.8171725273132324
+                                -0.7496845126152039,
+                                0.6617953181266785
                             ],
                             "inner_angle": 18.0,
                             "light_intensity": [
-                                0.06122449040412903,
-                                0.15250058472156525,
-                                0.2857142686843872
+                                0.6000000238418579,
+                                0.6000000238418579,
+                                0.9529411792755127
                             ],
                             "light_type": 2,
                             "offset": [
                                 0.0,
-                                1.9500000476837158,
-                                -0.3499999940395355
+                                2.0,
+                                0.0
                             ],
                             "outer_angle": 20.0,
                             "shadow_resolution": 1024,
@@ -2866,7 +2872,7 @@
                         "Animation": {
                             "defaultAnimationIndex": -1,
                             "loopAnimation": true,
-                            "playbackSpeed": 0.20000000298023224
+                            "playbackSpeed": 0.3400000035762787
                         },
                         "Collider": {
                             "box_size": [
@@ -2895,20 +2901,20 @@
                         "Lighting": {
                             "direction": [
                                 0.0,
-                                -0.607708752155304,
-                                0.7941599488258362
+                                -0.7496845126152039,
+                                0.6617953181266785
                             ],
                             "inner_angle": 18.0,
                             "light_intensity": [
-                                0.14943847060203552,
-                                0.1939525157213211,
-                                0.36263734102249146
+                                0.6000000238418579,
+                                0.6000000238418579,
+                                0.9529411792755127
                             ],
                             "light_type": 2,
                             "offset": [
                                 0.0,
-                                1.9500000476837158,
-                                -0.3499999940395355
+                                2.0,
+                                0.0
                             ],
                             "outer_angle": 20.0,
                             "shadow_resolution": 1024,
@@ -3198,7 +3204,7 @@
                         "Animation": {
                             "defaultAnimationIndex": -1,
                             "loopAnimation": true,
-                            "playbackSpeed": 0.20000000298023224
+                            "playbackSpeed": 0.3400000035762787
                         },
                         "Collider": {
                             "box_size": [
@@ -3227,20 +3233,20 @@
                         "Lighting": {
                             "direction": [
                                 0.0,
-                                -0.6126158833503723,
-                                0.7903807759284973
+                                -0.7494385838508606,
+                                0.6620737910270691
                             ],
                             "inner_angle": 18.0,
                             "light_intensity": [
-                                0.03438595309853554,
-                                0.1700848937034607,
-                                0.3681318759918213
+                                0.6000000238418579,
+                                0.6000000238418579,
+                                0.9529411792755127
                             ],
                             "light_type": 2,
                             "offset": [
                                 0.0,
-                                1.9500000476837158,
-                                -0.3499999940395355
+                                2.0,
+                                0.0
                             ],
                             "outer_angle": 20.0,
                             "shadow_resolution": 1024,
@@ -5896,7 +5902,7 @@
                                     ],
                                     "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "e4e877e9-e737-2d45-8217-3d7f5ab16384",
+                                    "materialGUID": "d623b3f8-5caf-e649-a783-729e6026dfb2",
                                     "metallicOverride": 1.0,
                                     "metallicTextureOverride": "033d5b32-dede-f947-af8e-9cca54d7f135",
                                     "normalTextureOverride": "0201b174-c121-9c4b-8920-c3ef05bb6ad5",
@@ -5906,7 +5912,7 @@
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "26628b2d-06f2-9648-831e-7a2f4253d948",
+                            "modelGUID": "154c6c51-982f-d845-b493-e30d07a80100",
                             "receiveShadows": true,
                             "visible": true
                         },
@@ -5919,6 +5925,10 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
                                     "siblingIndex": 1
+                                },
+                                "Layer": {
+                                    "layer_id": 0,
+                                    "layer_mask": 1
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -5937,6 +5947,41 @@
                                         1.0,
                                         1.0
                                     ]
+                                },
+                                "ModelRenderer": {
+                                    "castShadows": true,
+                                    "materials": [
+                                        {
+                                            "albedoTextureOverride": "1c3470fa-7502-ed43-8d9e-123f089cc779",
+                                            "aoTextureOverride": "033d5b32-dede-f947-af8e-9cca54d7f135",
+                                            "baseColorOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "materialGUID": "d623b3f8-5caf-e649-a783-729e6026dfb2",
+                                            "metallicOverride": 1.0,
+                                            "metallicTextureOverride": "033d5b32-dede-f947-af8e-9cca54d7f135",
+                                            "normalTextureOverride": "0201b174-c121-9c4b-8920-c3ef05bb6ad5",
+                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "roughnessOverride": 1.0,
+                                            "roughnessTextureOverride": "033d5b32-dede-f947-af8e-9cca54d7f135",
+                                            "useOverrides": false
+                                        }
+                                    ],
+                                    "modelGUID": "154c6c51-982f-d845-b493-e30d07a80100",
+                                    "receiveShadows": true,
+                                    "visible": true
+                                },
+                                "Name": {
+                                    "name": "Build2"
                                 }
                             },
                             "correspondingPrefabEntityGUID": "9deb9768-61b8-9846-bfdd-9bf720e4fdf3",
