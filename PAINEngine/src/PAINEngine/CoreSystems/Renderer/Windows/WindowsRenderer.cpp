@@ -3307,7 +3307,6 @@ namespace PAIN {
 
 			glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
 			gamma_shader->Bind();
-			gamma_shader->SetUniform("u_gamma", GraphicsSettings::get().gamma_value);
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, src_tex);
 			gamma_shader->SetUniform("tex", 0);
