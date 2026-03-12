@@ -1522,10 +1522,6 @@ namespace PAIN {
 							ImVec2 localMousePos = ImVec2(mousePos.x - viewportPos.x, mousePos.y - viewportPos.y);
 							performMousePicking(localMousePos, size);
 						}
-
-
-
-
 					}
 
 					// Delete selected entity with Delete key (works regardless of viewport hover)
