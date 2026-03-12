@@ -642,6 +642,9 @@ local function exitPipe()
     log("[PlayerState] Player exited pipe")
 end
 
+-- Expose so playerMovement.lua can trigger exit on reaching either pipe end
+S.exitPipe = exitPipe
+
 
 -------------------------------------------------
 -- Helper: Handle hide/unhide toggle
