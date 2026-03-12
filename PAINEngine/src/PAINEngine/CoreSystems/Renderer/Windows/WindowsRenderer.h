@@ -22,6 +22,7 @@
 #include "../Material.h"
 
 #include "CoreSystems/Assets/sAssets.h"
+#include "CoreSystems/Collision/BoundingVolume.h"
 #include "CoreSystems/Path/Path.h"
 #include "CoreSystems/Scene/Camera.h"
 #include "CoreSystems/Scene/Scene.h"
@@ -122,6 +123,11 @@ namespace PAIN {
 		void BeginGeometryPass(std::shared_ptr<Scene::SceneManager> scene);
 		void DrawGeometry(std::shared_ptr<Scene::SceneManager> scene,
 						  ModelRenderer& component, const glm::mat4& M);
+		// Draws multiple instances of the same model/submesh combo. Material uniforms
+		// are taken from `component` (first instance's data). All matrices uploaded at once.
+		void DrawGeometryInstanced(std::shared_ptr<Scene::SceneManager> scene,
+								   ModelRenderer& component,
+								   const std::vector<glm::mat4>& matrices);
 		void EndGeometryPass();
 
 		void BeginMinimapPass(const glm::mat4& view, const glm::mat4& proj);
