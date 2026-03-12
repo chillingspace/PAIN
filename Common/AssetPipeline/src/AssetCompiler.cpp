@@ -823,6 +823,15 @@ namespace PAIN {
                 }
             }
 
+            // Build map from mesh index > owning scene node
+            std::unordered_map<unsigned int, aiNode*> meshIndexToNode;
+            std::function<void(aiNode*)> walkNodes = [&](aiNode* node) {
+                for (unsigned int i = 0; i < node->mNumMeshes; ++i)
+                    meshIndexToNode[node->mMeshes[i]] = node;
+                for (unsigned int i = 0; i < node->mNumChildren; ++i)
+                    walkNodes(node->mChildren[i]);
+                };
+            walkNodes(scene->mRootNode);
 
             size_t vertexBase = 0;
             for (unsigned int m = 0; m < scene->mNumMeshes; ++m) {
@@ -860,6 +869,50 @@ namespace PAIN {
                             }
                         }
                     }
+                    else {
+                        // Unskinned mesh, find nearest bone ancestor and pin to it
+                        auto nodeIt = meshIndexToNode.find(m);
+                        if (nodeIt != meshIndexToNode.end()) {
+                            aiNode* node = nodeIt->second;
+
+                            // Find nearest bone parent
+                            int targetBoneIndex = -1;
+                            aiNode* cur = node->mParent;
+                            while (cur) {
+                                auto boneIt = boneNameToIndex.find(cur->mName.C_Str());
+                                if (boneIt != boneNameToIndex.end()) {
+                                    targetBoneIndex = boneIt->second;
+                                    weights.push_back({ (uint32_t)boneIt->second, 1.0f });
+                                    break;
+                                }
+                                cur = cur->mParent;
+                            }
+
+                            if (targetBoneIndex >= 0) {
+                                // Walk ALL the way to scene root (includes Frog_Rig scale)
+                                aiMatrix4x4 worldTransform = node->mTransformation;
+                                aiNode* parent = node->mParent;
+                                while (parent) {
+                                    worldTransform = parent->mTransformation * worldTransform;
+                                    parent = parent->mParent;
+                                }
+
+                                // No invBind needed - just bake full world transform
+                                aiVector3D p(vert.pos.x, vert.pos.y, vert.pos.z);
+                                p = worldTransform * p;
+                                vert.pos = glm::vec3(p.x, p.y, p.z);
+
+                                aiMatrix3x3 normalMat(worldTransform);
+                                normalMat.Inverse();
+                                normalMat.Transpose();
+                                aiVector3D n(vert.normal.x, vert.normal.y, vert.normal.z);
+                                n = normalMat * n;
+                                vert.normal = glm::normalize(glm::vec3(n.x, n.y, n.z));
+                            }
+                        }
+                        if (weights.empty()) weights.push_back({ 0, 1.0f });
+                    }
+                    
                     // Sort and clamp to max_bone_weights
                     std::sort(weights.begin(), weights.end(),
                         [](const auto& a, const auto& b) { return a.second > b.second; });
