@@ -178,6 +178,9 @@ namespace PAIN {
         virtual void SetLightDirection(entt::entity entityId, float x, float y, float z) = 0;
         virtual glm::vec3 GetLightDirection(entt::entity entityId) = 0;
         virtual float GetLightOuterAngle(entt::entity entityId) = 0;
+        virtual void SetLightOuterAngle(entt::entity entityId, float degrees) = 0;
+        virtual float GetLightInnerAngle(entt::entity entityId) = 0;
+        virtual void SetLightInnerAngle(entt::entity entityId, float degrees) = 0;
         virtual void SetShadowType(entt::entity entityId, int shadowEnum /*0:NONE,1:MAPPED,2:SCREEN_SPACE*/) = 0;
 
         /* =========================================================================== */

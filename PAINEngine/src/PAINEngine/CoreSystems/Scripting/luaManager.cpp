@@ -1463,6 +1463,11 @@ namespace PAIN {
         lua_.set_function("getLightOuterAngle", [this](entt::entity entityId) -> float {
             return api_ ? api_->GetLightOuterAngle(entityId) : 17.5f;
         });
+        lua_.set_function("setLightOuterAngle", [this](entt::entity entityId, float degrees) { if (api_) api_->SetLightOuterAngle(entityId, degrees); });
+        lua_.set_function("getLightInnerAngle", [this](entt::entity entityId) -> float {
+            return api_ ? api_->GetLightInnerAngle(entityId) : 12.5f;
+        });
+        lua_.set_function("setLightInnerAngle", [this](entt::entity entityId, float degrees) { if (api_) api_->SetLightInnerAngle(entityId, degrees); });
         lua_.set_function("setShadowType", [this](entt::entity entityId, int shadowTypeInt) {if (api_) api_->SetShadowType(entityId, shadowTypeInt); });
 
         /* =========================================================================== */

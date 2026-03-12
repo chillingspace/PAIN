@@ -69,6 +69,9 @@ do
     -- Smooth turning
     local TURN_SPEED_DEG         = 120.0  -- degrees/sec for PATROL_TURN state
 
+    -- Animation
+    local ANIM_MOVE              = "ArmatureAction"
+
     -- Exclamation icon
     local ALERT_ICON_NAME        = "exclamation_alert"
     local ALERT_ICON_HEIGHT      = 2.0
@@ -134,6 +137,12 @@ do
     local chaseOrigin = nil  -- position where the enemy first spotted the player
 
     local alertIcon = nil
+
+    -- Light values cached from editor on init
+    local lightDirY       = -0.866  -- fallback if no light component
+    local lightDirXZMag   = 0.5     -- XZ magnitude of editor direction; preserves pitch when yaw changes
+    local lightOuterAngle = 26.0
+    local lightInnerAngle = 10.0
 
     -- =========================================================
     -- HELPERS
@@ -277,9 +286,9 @@ do
     -- vision cone light
     local function updateVisionLight()
         if not hasLight or not hasLight(enemy) then return end
-        local fx = math.sin(currentYaw)
-        local fz = math.cos(currentYaw)
-        setLightDirection(enemy, fx, -0.15, fz)   -- slight downward tilt; auto-normalized by engine
+        local fx = math.sin(currentYaw) * lightDirXZMag
+        local fz = math.cos(currentYaw) * lightDirXZMag
+        setLightDirection(enemy, fx, lightDirY, fz)
 
         if state == STATE_ALERT_PAUSE or state == STATE_CHASE then
             setLightIntensity(enemy, 1.0, 0.1, 0.1)    -- red: alerted
@@ -370,6 +379,25 @@ do
         alertIcon = findEntity(ALERT_ICON_NAME)
         if alertIcon and setVisibility then
             setVisibility(alertIcon, false)
+        end
+    end
+
+    -- =========================================================
+    -- ANIMATION
+    -- =========================================================
+
+    local animMoving = false  -- track to avoid redundant calls
+
+    local function setMoveAnim(moving)
+        if animMoving == moving then return end
+        animMoving = moving
+        if not Animation then return end
+        if moving then
+            Animation.Play(enemy, ANIM_MOVE)
+            Animation.SetLoop(enemy, true)
+            Animation.SetSpeed(enemy, 1.0)
+        else
+            Animation.SetSpeed(enemy, 0.0)
         end
     end
 
@@ -473,6 +501,7 @@ do
 
         setDetectionUIActive(false)
         refreshAlertIconForState()
+        setMoveAnim(false)
     end
 
     local function beginPatrolTurn()
@@ -480,6 +509,7 @@ do
         stateTimer = 0.0
         setDetectionUIActive(false)
         refreshAlertIconForState()
+        setMoveAnim(false)
     end
 
     local function beginPatrolWalk()
@@ -488,6 +518,7 @@ do
         walkScanTimer = 0.0
         setDetectionUIActive(false)
         refreshAlertIconForState()
+        setMoveAnim(true)
     end
 
     local function enterState(newState)
@@ -505,22 +536,26 @@ do
             -- Record where the enemy was when it spotted the player
             local ex, ey, ez = getEnemyPos()
             chaseOrigin = { x = ex, y = ey, z = ez }
+            setMoveAnim(false)
 
         elseif newState == STATE_CHASE then
             setDetectionUIActive(true)
             hideDetectionBarOnly()
             lostSightTimer = 0.0
             searchArrived = false
+            setMoveAnim(true)
 
         elseif newState == STATE_SEARCH then
             setDetectionUIActive(false)
             lostSightTimer = 0.0
             searchArrived = false
+            setMoveAnim(true)  -- starts by walking to last-seen position
 
         elseif newState == STATE_RETURN_HOME then
             setDetectionUIActive(false)
             lostSightTimer = 0.0
             searchArrived = false
+            setMoveAnim(true)
         end
 
         refreshAlertIconForState()
@@ -550,6 +585,24 @@ do
 
         discoverWaypoints()
         tryCacheAlertIcon()
+
+        -- Cache light values set in the editor and apply angles once
+        if hasLight and hasLight(enemy) then
+            if getLightDirection then
+                local dx, dy, dz = getLightDirection(enemy)
+                lightDirY     = dy
+                lightDirXZMag = math.sqrt(dx * dx + dz * dz)
+            end
+            if getLightOuterAngle then
+                lightOuterAngle = getLightOuterAngle(enemy)
+            end
+            if getLightInnerAngle then
+                lightInnerAngle = getLightInnerAngle(enemy)
+            end
+            -- Apply angles once here; updateVisionLight only updates direction/color per frame
+            if setLightOuterAngle then setLightOuterAngle(enemy, lightOuterAngle) end
+            if setLightInnerAngle then setLightInnerAngle(enemy, lightInnerAngle) end
+        end
     end
 
     -- =========================================================
@@ -810,6 +863,7 @@ do
                     scanTargetYaw = scanBaseYaw + math.rad(SEARCH_SCAN_ANGLE_DEG)
                     scanPauseTimer = 0.0
                     scanPauseDuration = 0.0
+                    setMoveAnim(false)
                 end
 
             -- Phase 2: scan in place (same 4-phase system as endpoint scan)

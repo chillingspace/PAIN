@@ -1006,6 +1006,23 @@ namespace PAIN {
         return 17.5f;
     }
 
+    void EngineAPIAdapter::SetLightOuterAngle(entt::entity entityId, float degrees) {
+        auto& l = ensure<PAIN::Lighting>(entityId);
+        l.outer_angle = degrees;
+    }
+
+    float EngineAPIAdapter::GetLightInnerAngle(entt::entity entityId) {
+        if (auto opt = ecs_.getEntityComponent<PAIN::Lighting>(entityId)) {
+            return opt->get().inner_angle;
+        }
+        return 12.5f;
+    }
+
+    void EngineAPIAdapter::SetLightInnerAngle(entt::entity entityId, float degrees) {
+        auto& l = ensure<PAIN::Lighting>(entityId);
+        l.inner_angle = degrees;
+    }
+
     void EngineAPIAdapter::SetShadowType(entt::entity entityId, int st) {
         auto& l = ensure<PAIN::Lighting>(entityId);
         l.shadow_type = static_cast<PAIN::SHADOW_TYPES>(st);
