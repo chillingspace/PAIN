@@ -563,12 +563,6 @@ namespace PAIN {
 						ImGui::EndMenu();
 					}
 
-					// FPS counter - right-aligned
-					float fps = 1.0f / timing.dt;
-					float text_width = 150.0f;
-					ImGui::SetCursorPosX(ImGui::GetWindowWidth() - text_width);
-					ImGui::Text("FPS: %.1f (%.2f ms)", fps, timing.dt * 1000.0f);
-
 					ImGui::EndMenuBar();
 				}
 
