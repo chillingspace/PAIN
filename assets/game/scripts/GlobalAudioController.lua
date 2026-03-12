@@ -106,7 +106,8 @@ local function applySceneVolumes()
         -- Track 0: Level BGM (main), Track 1: Ambient, Track 2: Combat (muted initially)
         if trackCount >= 1 then globalBGMFade(0, targetVol, CONFIG.fadeDuration) end
         if trackCount >= 2 then globalBGMFade(1, CONFIG.ambientVolume, CONFIG.fadeDuration) end
-        if trackCount >= 3 then globalBGMFade(2, CONFIG.mutedVolume, 0.1) end
+        -- Combat BGM disabled (game design decision)
+        -- if trackCount >= 3 then globalBGMFade(2, CONFIG.mutedVolume, 0.1) end
         inCombat = false
         
     else
@@ -158,28 +159,32 @@ local function changeSceneWithFade(scenePath)
 end
 
 -- ==================== COMBAT LAYER CONTROL ====================
+-- Combat BGM transition disabled (game design decision)
 -- Call this from UIDetection.lua or enemy scripts
 function GlobalAudio_SetCombat(combatActive)
-    -- Only process in gameplay scenes (tutorial and level1)
-    if currentScene ~= "tutorial" and currentScene ~= "level1" and currentScene ~= "level" then return end
-    if combatActive == inCombat then return end
-    
-    inCombat = combatActive
-    local trackCount = globalBGMGetTrackCount()
-    
-    if combatActive then
-        -- Fade out main BGM, fade in combat layer
-        if trackCount >= 1 then globalBGMFade(0, CONFIG.mutedVolume, CONFIG.crossfadeDuration) end
-        if trackCount >= 3 then globalBGMFade(2, CONFIG.defaultVolume, CONFIG.crossfadeDuration) end
-    else
-        -- Fade in main BGM, fade out combat layer
-        local targetVol = CONFIG.defaultVolume
-        if currentScene == "tutorial" then targetVol = linearToDb(TUTORIAL_BGM_VOLUME_SCALE) end
-        if currentScene == "level1"   then targetVol = linearToDb(LEVEL1_BGM_VOLUME_SCALE) end
+    -- Combat BGM crossfade disabled - detection SFX still plays via UIDetection.lua
+    do return end
 
-        if trackCount >= 1 then globalBGMFade(0, targetVol, CONFIG.crossfadeDuration) end
-        if trackCount >= 3 then globalBGMFade(2, CONFIG.mutedVolume, CONFIG.crossfadeDuration) end
-    end
+    -- -- Only process in gameplay scenes (tutorial and level1)
+    -- if currentScene ~= "tutorial" and currentScene ~= "level1" and currentScene ~= "level" then return end
+    -- if combatActive == inCombat then return end
+    -- 
+    -- inCombat = combatActive
+    -- local trackCount = globalBGMGetTrackCount()
+    -- 
+    -- if combatActive then
+    --     -- Fade out main BGM, fade in combat layer
+    --     if trackCount >= 1 then globalBGMFade(0, CONFIG.mutedVolume, CONFIG.crossfadeDuration) end
+    --     if trackCount >= 3 then globalBGMFade(2, CONFIG.defaultVolume, CONFIG.crossfadeDuration) end
+    -- else
+    --     -- Fade in main BGM, fade out combat layer
+    --     local targetVol = CONFIG.defaultVolume
+    --     if currentScene == "tutorial" then targetVol = linearToDb(TUTORIAL_BGM_VOLUME_SCALE) end
+    --     if currentScene == "level1"   then targetVol = linearToDb(LEVEL1_BGM_VOLUME_SCALE) end
+    --
+    --     if trackCount >= 1 then globalBGMFade(0, targetVol, CONFIG.crossfadeDuration) end
+    --     if trackCount >= 3 then globalBGMFade(2, CONFIG.mutedVolume, CONFIG.crossfadeDuration) end
+    -- end
 end
 
 -- ==================== GAME OVER DUCKING ====================

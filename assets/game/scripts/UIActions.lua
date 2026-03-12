@@ -724,3 +724,19 @@ function G.UI_OnAction(actionName, buttonEntity, payload)
         printLog("[UI] No handler for action "..tostring(actionName))
     end
 end
+
+-- ==================== INIT: Sync display text on scene load ====================
+-- Wait a few frames so GlobalAudioController has time to load saved settings
+local uiactions_initDone = false
+local uiactions_frameCount = 0
+local UIACTIONS_FRAMES_TO_WAIT = 5  -- GlobalAudioController waits 3, so we wait 5
+
+registerUpdate(function(dt)
+    if uiactions_initDone then return end
+    uiactions_frameCount = uiactions_frameCount + 1
+    if uiactions_frameCount >= UIACTIONS_FRAMES_TO_WAIT then
+        uiactions_initDone = true
+        updateGraphicsModeDisplay()
+        --printLog("[UIActions] Init: synced display mode text to " .. tostring(_G.GraphicsSettings.displayMode))
+    end
+end)
