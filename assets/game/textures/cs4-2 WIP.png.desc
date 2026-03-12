@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "cs4-2 WIP.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 14385671059102504441
+  },
+  "descriptor_version": 1,
+  "guid": "442363af-cd3a-5844-a1f8-aa7b2d61fd8c",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\cs4-2 WIP.png"
+  }
+}

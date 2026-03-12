@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "cutSceneLogic3.lua",
+    "type": "Script"
+  },
+  "build_data": {
+    "hash": 560727130117282683
+  },
+  "descriptor_version": 1,
+  "guid": "725a9266-b692-ac45-8c0c-92da64772134",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scripts\\cutScene3Logic.lua"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "cs3-5.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 12305891524904506997
+  },
+  "descriptor_version": 1,
+  "guid": "67536c87-41a5-4649-b4e4-73af2ca2116f",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\cs3-5.png"
+  }
+}
