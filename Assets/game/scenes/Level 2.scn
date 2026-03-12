@@ -281,16 +281,16 @@
         ],
         "farPlane": 100.0,
         "forward": [
-            0.8023478388786316,
-            -0.5164346098899841,
-            0.2992210388183594
+            0.7138848900794983,
+            -0.6196887493133545,
+            0.32611992955207825
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            20.95486068725586,
-            22.48226547241211,
-            0.972152829170227
+            17.32500457763672,
+            8.01092529296875,
+            -6.472175121307373
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 31.100000381469727,
@@ -1538,8 +1538,8 @@
                             "siblingIndex": 2
                         },
                         "Layer": {
-                            "layer_id": 8,
-                            "layer_mask": 256
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -1576,14 +1576,15 @@
                             "childrenGUIDs": [
                                 "53f5f39c-0319-5d41-811c-caa4029dec5e",
                                 "f19390a8-f230-7c4f-a39a-a781eaa39822",
-                                "9467f46d-9d92-bc43-ab40-5e17f14bc585"
+                                "9467f46d-9d92-bc43-ab40-5e17f14bc585",
+                                "c6825b8b-c524-7d42-a9c6-318a536f3d45"
                             ],
                             "parentGUID": "35947cfd-e172-c247-af9b-0132b9666a02",
                             "siblingIndex": 0
                         },
                         "Layer": {
-                            "layer_id": 8,
-                            "layer_mask": 256
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -1622,8 +1623,8 @@
                             "siblingIndex": 0
                         },
                         "Layer": {
-                            "layer_id": 8,
-                            "layer_mask": 256
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -1659,7 +1660,7 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
-                            "guid": "9467f46d-9d92-bc43-ab40-5e17f14bc585"
+                            "guid": "c6825b8b-c524-7d42-a9c6-318a536f3d45"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
@@ -1667,8 +1668,123 @@
                             "siblingIndex": 1
                         },
                         "Layer": {
-                            "layer_id": 8,
-                            "layer_mask": 256
+                            "layer_id": 1,
+                            "layer_mask": 2
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                25.826946258544922,
+                                0.0,
+                                -8.02237606048584
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "exclamation_alert"
+                        },
+                        "Tag": {
+                            "tags": [
+                                "enemy_patrol_start_A"
+                            ]
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                0.0,
+                                0.0
+                            ],
+                            "texture_guid": "1e639b81-b5bd-6e47-96f8-9451bf492db5",
+                            "texture_scale": [
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": false,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIFollowsWorldEntity": {
+                            "entity_target_guid": "00000000-0000-0000-0000-000000000000",
+                            "world_offset": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "exclamation_alert"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "9467f46d-9d92-bc43-ab40-5e17f14bc585"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "8c7cf13f-1d18-0e47-82d5-b23943b27a7e",
+                            "siblingIndex": 2
+                        },
+                        "Layer": {
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -1726,11 +1842,11 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "8c7cf13f-1d18-0e47-82d5-b23943b27a7e",
-                            "siblingIndex": 2
+                            "siblingIndex": 3
                         },
                         "Layer": {
-                            "layer_id": 8,
-                            "layer_mask": 256
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -1846,8 +1962,8 @@
                             "siblingIndex": 1
                         },
                         "Layer": {
-                            "layer_id": 8,
-                            "layer_mask": 256
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -1903,8 +2019,8 @@
                             "siblingIndex": 0
                         },
                         "Layer": {
-                            "layer_id": 8,
-                            "layer_mask": 256
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -2016,8 +2132,8 @@
                             "siblingIndex": 1
                         },
                         "Layer": {
-                            "layer_id": 8,
-                            "layer_mask": 256
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -2061,8 +2177,8 @@
                             "siblingIndex": 2
                         },
                         "Layer": {
-                            "layer_id": 8,
-                            "layer_mask": 256
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -2110,8 +2226,8 @@
                             "siblingIndex": 2
                         },
                         "Layer": {
-                            "layer_id": 8,
-                            "layer_mask": 256
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -2150,8 +2266,8 @@
                             "siblingIndex": 0
                         },
                         "Layer": {
-                            "layer_id": 8,
-                            "layer_mask": 256
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -2200,8 +2316,8 @@
                             "siblingIndex": 1
                         },
                         "Layer": {
-                            "layer_id": 8,
-                            "layer_mask": 256
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -2313,8 +2429,8 @@
                             "siblingIndex": 2
                         },
                         "Layer": {
-                            "layer_id": 8,
-                            "layer_mask": 256
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -2362,8 +2478,8 @@
                             "siblingIndex": 3
                         },
                         "Layer": {
-                            "layer_id": 8,
-                            "layer_mask": 256
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -2411,8 +2527,8 @@
                             "siblingIndex": 0
                         },
                         "Layer": {
-                            "layer_id": 8,
-                            "layer_mask": 256
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -2524,8 +2640,8 @@
                             "siblingIndex": 1
                         },
                         "Layer": {
-                            "layer_id": 8,
-                            "layer_mask": 256
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -2569,8 +2685,8 @@
                             "siblingIndex": 2
                         },
                         "Layer": {
-                            "layer_id": 8,
-                            "layer_mask": 256
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -2618,8 +2734,8 @@
                             "siblingIndex": 4
                         },
                         "Layer": {
-                            "layer_id": 8,
-                            "layer_mask": 256
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -2658,8 +2774,8 @@
                             "siblingIndex": 0
                         },
                         "Layer": {
-                            "layer_id": 8,
-                            "layer_mask": 256
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -2720,8 +2836,8 @@
                             "siblingIndex": 1
                         },
                         "Layer": {
-                            "layer_id": 8,
-                            "layer_mask": 256
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -2833,8 +2949,8 @@
                             "siblingIndex": 2
                         },
                         "Layer": {
-                            "layer_id": 8,
-                            "layer_mask": 256
+                            "layer_id": 1,
+                            "layer_mask": 2
                         },
                         "LocalTransform": {
                             "position": [
@@ -29336,6 +29452,17 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "a1063123-23b1-454b-b06c-05b48726d559",
                                     "siblingIndex": 2
+                                },
+                                "Texture2D": {
+                                    "pos": [
+                                        0.5,
+                                        -0.550000011920929
+                                    ],
+                                    "texture_guid": "ae3a0a6b-31b6-784c-a377-b551352c4e18",
+                                    "texture_scale": [
+                                        0.20000000298023224,
+                                        0.20000000298023224
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "a314c7d3-a6b0-0946-afac-cae443d2fa92",
@@ -29349,8 +29476,8 @@
                         },
                         "Texture2D": {
                             "pos": [
-                                0.7300000190734863,
-                                -0.27000001072883606
+                                0.5,
+                                -0.550000011920929
                             ],
                             "texture_guid": "ae3a0a6b-31b6-784c-a377-b551352c4e18",
                             "texture_scale": [
@@ -29478,6 +29605,17 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "a1063123-23b1-454b-b06c-05b48726d559",
                                     "siblingIndex": 3
+                                },
+                                "Texture2D": {
+                                    "pos": [
+                                        0.75,
+                                        -0.550000011920929
+                                    ],
+                                    "texture_guid": "5196e609-0b34-0742-87ec-b0260a14c392",
+                                    "texture_scale": [
+                                        0.20000000298023224,
+                                        0.20000000298023224
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "09276c7c-b239-474f-950f-e175ea7b3e7e",
@@ -29491,8 +29629,8 @@
                         },
                         "Texture2D": {
                             "pos": [
-                                0.8500000238418579,
-                                -0.75
+                                0.75,
+                                -0.550000011920929
                             ],
                             "texture_guid": "5196e609-0b34-0742-87ec-b0260a14c392",
                             "texture_scale": [

@@ -14212,6 +14212,17 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "4e5ea470-34ff-6f48-8638-d4a6ece31fa1",
                                     "siblingIndex": 2
+                                },
+                                "Texture2D": {
+                                    "pos": [
+                                        0.5,
+                                        -0.550000011920929
+                                    ],
+                                    "texture_guid": "ae3a0a6b-31b6-784c-a377-b551352c4e18",
+                                    "texture_scale": [
+                                        0.20000000298023224,
+                                        0.20000000298023224
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "a314c7d3-a6b0-0946-afac-cae443d2fa92",
@@ -14225,8 +14236,8 @@
                         },
                         "Texture2D": {
                             "pos": [
-                                0.7300000190734863,
-                                -0.27000001072883606
+                                0.5,
+                                -0.550000011920929
                             ],
                             "texture_guid": "ae3a0a6b-31b6-784c-a377-b551352c4e18",
                             "texture_scale": [
@@ -14354,6 +14365,17 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "4e5ea470-34ff-6f48-8638-d4a6ece31fa1",
                                     "siblingIndex": 3
+                                },
+                                "Texture2D": {
+                                    "pos": [
+                                        0.75,
+                                        -0.550000011920929
+                                    ],
+                                    "texture_guid": "5196e609-0b34-0742-87ec-b0260a14c392",
+                                    "texture_scale": [
+                                        0.20000000298023224,
+                                        0.20000000298023224
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "09276c7c-b239-474f-950f-e175ea7b3e7e",
@@ -14367,8 +14389,8 @@
                         },
                         "Texture2D": {
                             "pos": [
-                                0.8500000238418579,
-                                -0.75
+                                0.75,
+                                -0.550000011920929
                             ],
                             "texture_guid": "5196e609-0b34-0742-87ec-b0260a14c392",
                             "texture_scale": [
