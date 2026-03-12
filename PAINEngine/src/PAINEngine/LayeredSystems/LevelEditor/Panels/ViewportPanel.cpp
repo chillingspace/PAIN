@@ -365,6 +365,31 @@ namespace PAIN {
 
 			void ViewportPanel::onAttach()
 			{
+				registerPopUp("ConfirmDelete", [this](std::any const& data) {
+					std::string entityName = "Unknown";
+					if (data.has_value() && data.type() == typeid(std::shared_ptr<std::string>))
+						entityName = *std::any_cast<std::shared_ptr<std::string>>(data);
+
+					ImGui::Text("Delete \"%s\"?", entityName.c_str());
+					ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "This action cannot be undone.");
+					ImGui::Spacing();
+
+					if (ImGui::Button("Delete", ImVec2(120, 0))) {
+						auto ecs = services->get<ECS::Controller>();
+						if (pendingDeleteEntity != entt::null && ecs->checkEntity(pendingDeleteEntity, currentRegistryID)) {
+							m_EntityPanel->setSelectedEntity(entt::null);
+							ecs->destroyEntity(pendingDeleteEntity, currentRegistryID);
+						}
+						pendingDeleteEntity = entt::null;
+						closePopUp("ConfirmDelete");
+					}
+					ImGui::SameLine();
+					if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+						pendingDeleteEntity = entt::null;
+						closePopUp("ConfirmDelete");
+					}
+					});
+
 				//Init with reference to entity and comp panel
 				m_EntityPanel = services->get<Editor>()->getPanel<EntityPanel>();
 #ifdef PN_PLATFORM_WINDOWS
@@ -1498,6 +1523,19 @@ namespace PAIN {
 							performMousePicking(localMousePos, size);
 						}
 					}
+
+					// Delete selected entity with Delete key (works regardless of viewport hover)
+					if (!ImGui::GetIO().WantTextInput && ImGui::IsKeyPressed(ImGuiKey_Delete)) {
+						entt::entity selectedEntity = m_EntityPanel->getSelectedEntity();
+						if (selectedEntity != entt::null && ecs->checkEntity(selectedEntity, currentRegistryID)) {
+							auto nameOpt = ecs->getEntityComponent<Entity::Name>(selectedEntity, currentRegistryID);
+							pendingDeleteEntity = selectedEntity;
+							pendingDeleteName = nameOpt.has_value() ? nameOpt.value().get().name : "Unknown";
+							openPopUp("ConfirmDelete", std::make_shared<std::string>(pendingDeleteName));
+						}
+					}
+
+					renderPopUps();
 
 					// Update state for next frame
 					wasAnyGizmoActive = isAnyGizmoActive;
