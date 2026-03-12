@@ -1,3 +1,14 @@
+/*****************************************************************/ /**
+ * \file   ViewportPanel.h
+ * \brief
+ *
+ * \author Nicole Esther Lee, 2301544, lee.n@digipen.edu (100%)
+ * \co-author
+ *
+ * \date   October 2025
+ * All content  2025 DigiPen Institute of Technology Singapore, all rights reserved.
+ *********************************************************************/
+
 #pragma once
 
 #ifdef _DEBUG
@@ -87,6 +98,9 @@ namespace PAIN {
                 void handleMaterialDrop(File* materialFile,
                     ImVec2 localMousePos,
                     ImVec2 viewportSize);
+
+                entt::entity pendingDeleteEntity = entt::null;
+                std::string pendingDeleteName;
             };
 
         } // namespace Panel
