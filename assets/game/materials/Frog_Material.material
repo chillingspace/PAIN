@@ -15,11 +15,9 @@
             0.0
         ],
         "metallic": 0.0,
-        "roughness": 1.0
+        "roughness": 0.5
     },
     "textures": {
-        "albedo": "game\\textures\\frog_diffuse.png",
-        "metallic": "game\\textures\\frog_roughness.png",
-        "roughness": "game\\textures\\frog_roughness.png"
+        "albedo": "game\\textures\\Frog_Frog_Material_BaseColor.1001.png"
     }
 }

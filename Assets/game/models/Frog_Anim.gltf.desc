@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Frog_Anim_Gear.gltf",
+    "name": "Frog_Anim.gltf",
     "type": "Model"
   },
   "build_data": {
-    "hash": 7560535854579018512
+    "hash": 161948760172614182
   },
   "descriptor_version": 1,
-  "guid": "a5302a28-588d-fc4d-a39a-57873647e5c1",
+  "guid": "12958b85-38b8-4645-a2fb-6efe9bd744c4",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "game\\models\\Frog_Anim_Gear.gltf"
+    "source_file": "game\\models\\Frog_Anim.gltf"
   }
 }

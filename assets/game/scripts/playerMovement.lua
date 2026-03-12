@@ -7,9 +7,10 @@ local jumpPressed = false
 local wasMoving = false
 
 -- Animation
-local ANIM_IDLE = "Frog_RigAction" 
-local ANIM_WALK = "Frog_Jump"
+local ANIM_IDLE = "Frog_Idle" 
+local ANIM_WALK = "Frog_Hopping"
 local ANIM_JUMP = "Frog_Jump"
+local ANIM_FLIGHT = "Frog_Flight"
 local currentAnimState = "" 
 local lastAnimTime =  0.0
 
@@ -286,6 +287,11 @@ registerUpdate(function(dt)
             PlayAnim(id, ANIM_WALK, 0.1, true) -- on the ground
             Animation.SetLoop(id, true)
         end
+        if not isGrounded then
+            PlayAnim(id, ANIM_FLIGHT, 0.1, true) -- moving in the sky
+            Animation.SetLoop(id, true)
+        end
+        
         -- Play hop sound when starting to move
         if not wasMoving then
             
@@ -313,6 +319,7 @@ registerUpdate(function(dt)
         
         -- Make sure animation is not looping
         if isGrounded then 
+            PlayAnim(id, ANIM_JUMP, 0.25, false) -- on the ground
             Animation.SetSpeed(id, 2)
             Animation.SetLoop(id, false)
          end

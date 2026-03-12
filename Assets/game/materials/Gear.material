@@ -10,9 +10,9 @@
             1.0
         ],
         "emissive": [
-            1.0,
-            1.0,
-            1.0
+            0.0,
+            0.0,
+            0.0
         ],
         "metallic": 1.0,
         "roughness": 1.0
@@ -20,9 +20,6 @@
     "textures": {
         "albedo": "game\\textures\\Gear_baseColor.png",
         "ao": "game\\textures\\Gear_occlusionRoughnessMetallic.png",
-        "lightmap": "game\\textures\\Gear_occlusionRoughnessMetallic.png",
-        "metallic": "game\\textures\\Gear_occlusionRoughnessMetallic.png",
-        "normal": "game\\textures\\Gear_normal.png",
-        "roughness": "game\\textures\\Gear_occlusionRoughnessMetallic.png"
+        "lightmap": "game\\textures\\Gear_occlusionRoughnessMetallic.png"
     }
 }
