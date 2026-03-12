@@ -70,6 +70,9 @@ namespace PAIN {
 			//Hide cursor 
 			virtual void hideCursor(bool hide) = 0;
 
+			//Fullscreen toggle (PC only, no-op on mobile)
+			virtual void setFullscreen(bool fullscreen) {}
+
 			//Create window
 			static Window* create(void* app = nullptr, Package const& package = Package());
 

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Playfulist.ttf",
+    "type": "Font"
+  },
+  "build_data": {
+    "hash": 9293042828455382595
+  },
+  "descriptor_version": 1,
+  "guid": "de491929-bcab-6949-9a77-a1d03ba57e1c",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\fonts\\Playfulist.ttf"
+  }
+}

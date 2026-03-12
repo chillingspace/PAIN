@@ -16,6 +16,26 @@ G.TutorialSceneName   = G.TutorialSceneName  or "game/scenes/Tutorial.scn"
 -- -- Placeholder for next level
 G.NextLevelName       = G.NextLevelName      or "game/scenes/Tutorial.scn"
 
+-- ==================== GRAPHICS SETTINGS ====================
+G.GraphicsSettings = G.GraphicsSettings or {
+    displayMode = "windowed"
+}
+
+local function updateGraphicsModeDisplay()
+    local e = findEntity("display_state")
+    if not e then
+        printLog("[UI] display_state not found")
+        return
+    end
+
+    if G.GraphicsSettings.displayMode == "fullscreen" then
+        setTexture(e, getImageID("game/textures/fullscreen_text.png"))
+    else
+        setTexture(e, getImageID("game/textures/windowed_text.png"))
+    end
+end
+
+
 -- ==================== AUDIO-AWARE SCENE CHANGE ====================
 -- Helper to do scene transitions with audio fade-out
 local function changeSceneWithAudioFade(scenePath)
@@ -646,8 +666,53 @@ local handlers = {
 
 
     ----------------------------------------------------------------------
-    -- CREDITS
+    -- GRAPHICS SETTINGS
     ----------------------------------------------------------------------
+    graphics_Left = function(buttonEntity, payload)
+        playUIClick()
+
+        if _G.GraphicsSettings.displayMode == "fullscreen" then
+            _G.GraphicsSettings.displayMode = "windowed"
+        else
+            _G.GraphicsSettings.displayMode = "fullscreen"
+        end
+
+        -- Apply fullscreen/windowed mode (PC only)
+        if setFullscreen then
+            setFullscreen(_G.GraphicsSettings.displayMode == "fullscreen")
+        end
+
+        -- Save to settings file
+        if settingsSave then
+            settingsSave("gfx_displaymode", _G.GraphicsSettings.displayMode)
+        end
+
+        updateGraphicsModeDisplay()
+        printLog("[UI] graphics_Left -> " .. tostring(_G.GraphicsSettings.displayMode))
+    end,
+
+    graphics_Right = function(buttonEntity, payload)
+        playUIClick()
+
+        if _G.GraphicsSettings.displayMode == "windowed" then
+            _G.GraphicsSettings.displayMode = "fullscreen"
+        else
+            _G.GraphicsSettings.displayMode = "windowed"
+        end
+
+        -- Apply fullscreen/windowed mode (PC only)
+        if setFullscreen then
+            setFullscreen(_G.GraphicsSettings.displayMode == "fullscreen")
+        end
+
+        -- Save to settings file
+        if settingsSave then
+            settingsSave("gfx_displaymode", _G.GraphicsSettings.displayMode)
+        end
+
+        updateGraphicsModeDisplay()
+        printLog("[UI] graphics_Right -> " .. tostring(_G.GraphicsSettings.displayMode))
+    end,
 }
 
 function G.UI_OnAction(actionName, buttonEntity, payload)
@@ -659,3 +724,19 @@ function G.UI_OnAction(actionName, buttonEntity, payload)
         printLog("[UI] No handler for action "..tostring(actionName))
     end
 end
+
+-- ==================== INIT: Sync display text on scene load ====================
+-- Wait a few frames so GlobalAudioController has time to load saved settings
+local uiactions_initDone = false
+local uiactions_frameCount = 0
+local UIACTIONS_FRAMES_TO_WAIT = 5  -- GlobalAudioController waits 3, so we wait 5
+
+registerUpdate(function(dt)
+    if uiactions_initDone then return end
+    uiactions_frameCount = uiactions_frameCount + 1
+    if uiactions_frameCount >= UIACTIONS_FRAMES_TO_WAIT then
+        uiactions_initDone = true
+        updateGraphicsModeDisplay()
+        --printLog("[UIActions] Init: synced display mode text to " .. tostring(_G.GraphicsSettings.displayMode))
+    end
+end)

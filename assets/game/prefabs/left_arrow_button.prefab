@@ -1,0 +1,161 @@
+{
+    "entities": [
+        {
+            "components": {
+                "AudioSource": {
+                    "audio_tracks": [],
+                    "group_name": "sfx",
+                    "is3D": true,
+                    "looping": true,
+                    "maxDistance": 50.0,
+                    "minDistance": 1.0,
+                    "pitchDb": 0.0,
+                    "playOnStart": false,
+                    "pos": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "selected_audio": "6621d58f-1f66-bb4f-8c78-b77404b6296b",
+                    "track_volumes": [],
+                    "volumeDb": 0.0
+                },
+                "CustomHitbox2D": {
+                    "max_point": [
+                        71.5,
+                        71.0999984741211
+                    ],
+                    "min_point": [
+                        -72.69999694824219,
+                        -72.80000305175781
+                    ],
+                    "position_offset": [
+                        0.0,
+                        0.0
+                    ]
+                },
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 2
+                },
+                "Layer": {
+                    "layer_id": 2,
+                    "layer_mask": 4
+                },
+                "LocalTransform": {
+                    "position": [
+                        0.6797102689743042,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "Name": {
+                    "name": "left_arrow_button"
+                },
+                "Texture2D": {
+                    "pos": [
+                        -0.8799999952316284,
+                        0.0
+                    ],
+                    "texture_guid": "b04f81c8-80fe-4143-9156-fdd2b1a61953",
+                    "texture_scale": [
+                        0.10000000149011612,
+                        0.10000000149011612
+                    ]
+                },
+                "UIAnimation": {
+                    "b_loop": true,
+                    "b_playing": false,
+                    "duration": 0.20000000298023224,
+                    "frame_duration": 0.10000000149011612,
+                    "spritesheet_columns": 2,
+                    "spritesheet_rows": 1,
+                    "total_frames": 2
+                },
+                "UIButton": {
+                    "action": "howtoplay_Left",
+                    "disabled_color": -10066330,
+                    "highlighted_color": -3355444,
+                    "normal_color": -1,
+                    "payload": "",
+                    "pressed_color": -5592406,
+                    "state": "Normal"
+                },
+                "UIElement": {
+                    "b_is_enabled": true,
+                    "b_is_interactable": true,
+                    "layer": 0
+                },
+                "UIRectTransform": {
+                    "anchor_max": [
+                        0.5,
+                        0.5
+                    ],
+                    "anchor_min": [
+                        0.5,
+                        0.5
+                    ],
+                    "anchored_position": [
+                        0.0,
+                        0.0
+                    ],
+                    "local_position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "offset_max": [
+                        0.0,
+                        0.0
+                    ],
+                    "offset_min": [
+                        0.0,
+                        0.0
+                    ],
+                    "pivot": [
+                        0.5,
+                        0.5
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "size_delta": [
+                        1024.0,
+                        88.0
+                    ]
+                },
+                "UVCoordinates": {
+                    "uv": [
+                        0.0042372881434857845,
+                        0.008333333767950535,
+                        0.4957627058029175,
+                        0.9916666746139526
+                    ]
+                }
+            },
+            "entityGUID": "d601ffba-4470-e94a-ab3e-42b7b9ba321c"
+        }
+    ],
+    "prefabName": "left_arrow_button",
+    "rootEntityGUID": "d601ffba-4470-e94a-ab3e-42b7b9ba321c"
+}

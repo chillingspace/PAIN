@@ -821,6 +821,9 @@ namespace PAIN {
 
 							"howtoplay_Right",
 							"howtoplay_Left",
+
+							"graphics_Left",
+							"graphics_Right"
 						};
 
 						int action_idx = static_cast<int>(button.action);

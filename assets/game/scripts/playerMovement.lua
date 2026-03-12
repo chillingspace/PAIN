@@ -119,14 +119,27 @@ local jumpCooldown = 0.0
 
 -- Player SFX file paths
 local SFX_PLAYER_HOPS = {
-    "game/audio/sfx/player/frog hop/Player_Hop_01.wav",
-    "game/audio/sfx/player/frog hop/Player_Hop_02.wav",
-    "game/audio/sfx/player/frog hop/Player_Hop_03.wav",
-    "game/audio/sfx/player/frog hop/Player_Hop_04.wav",
-    "game/audio/sfx/player/frog hop/Player_Hop_05.wav",
-    "game/audio/sfx/player/frog hop/Player_Hop_06.wav",
-    "game/audio/sfx/player/frog hop/Player_Hop_07.wav"
+    "game/audio/sfx/player/frog footstep/Frog_Footstep_01.wav",
+    "game/audio/sfx/player/frog footstep/Frog_Footstep_02.wav",
+    "game/audio/sfx/player/frog footstep/Frog_Footstep_03.wav",
+    "game/audio/sfx/player/frog footstep/Frog_Footstep_04.wav",
+    "game/audio/sfx/player/frog footstep/Frog_Footstep_05.wav",
+    "game/audio/sfx/player/frog footstep/Frog_Footstep_06.wav",
+    "game/audio/sfx/player/frog footstep/Frog_Footstep_07.wav",
+    "game/audio/sfx/player/frog footstep/Frog_Footstep_08.wav",
+    "game/audio/sfx/player/frog footstep/Frog_Footstep_09.wav"
 }
+
+-- Old hop sound, maybe use for jumps only
+--local SFX_PLAYER_HOPS = {
+    --"game/audio/sfx/player/frog hop/Player_Hop_01.wav",
+    --"game/audio/sfx/player/frog hop/Player_Hop_02.wav",
+    --"game/audio/sfx/player/frog hop/Player_Hop_03.wav",
+    --"game/audio/sfx/player/frog hop/Player_Hop_04.wav",
+    --"game/audio/sfx/player/frog hop/Player_Hop_05.wav",
+    --"game/audio/sfx/player/frog hop/Player_Hop_06.wav",
+    --"game/audio/sfx/player/frog hop/Player_Hop_07.wav"
+--}
 
 local SFX_PLAYER_IDLES = {
     "game/audio/sfx/player/frog croak/Player_VO_Idle_01.wav",
@@ -137,8 +150,8 @@ local SFX_PLAYER_IDLES = {
 }
 
 -- SFX Volumes modifier
-local VOL_PLAYER_HOP = 0.0
-local VOL_PLAYER_IDLE = 0.0
+local VOL_PLAYER_HOP = 0.1
+local VOL_PLAYER_IDLE = 0.1
 
 registerUpdate(function(dt)
     -- EARLY EXIT: If game is paused, freeze player completely

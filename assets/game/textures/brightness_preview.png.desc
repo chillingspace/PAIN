@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "brightness_preview.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 15792110715575888579
+  },
+  "descriptor_version": 1,
+  "guid": "1797d340-8698-d247-95ce-5324d947e401",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\brightness_preview.png"
+  }
+}

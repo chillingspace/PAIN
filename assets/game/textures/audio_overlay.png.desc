@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "audio_overlay.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 16395068516748988009
+  },
+  "descriptor_version": 1,
+  "guid": "7ed70aff-18c9-5b4e-9fd2-3a0110502b0a",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\audio_overlay.png"
+  }
+}

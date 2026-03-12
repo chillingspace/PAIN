@@ -95,9 +95,10 @@ local function stopAudio()
         alertLoopChannel = -1
     end
 
-    if _G.GlobalAudio and _G.GlobalAudio.setCombat then
-        _G.GlobalAudio.setCombat(false)
-    end
+    -- Combat BGM transition disabled (game design decision)
+    -- if _G.GlobalAudio and _G.GlobalAudio.setCombat then
+    --     _G.GlobalAudio.setCombat(false)
+    -- end
 end
 
 local function triggerDangerHapticPulse()
@@ -150,9 +151,10 @@ function ui.begin(enemyEntity, autoConfirmHit)
         end
     end
 
-    if _G.GlobalAudio and _G.GlobalAudio.setCombat then
-        _G.GlobalAudio.setCombat(true)
-    end
+    -- Combat BGM transition disabled (game design decision)
+    -- if _G.GlobalAudio and _G.GlobalAudio.setCombat then
+    --     _G.GlobalAudio.setCombat(true)
+    -- end
 end
 
 function ui.cancel(enemyEntity)

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "graphics_settings.scn",
+    "type": "Scenes"
+  },
+  "build_data": {
+    "hash": 16351046892508976324
+  },
+  "descriptor_version": 1,
+  "guid": "a7cc1b9c-3722-6b40-896e-d0ac8aeca9f6",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scenes\\graphics_settings.scn"
+  }
+}

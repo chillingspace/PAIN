@@ -60,6 +60,9 @@ namespace PAIN {
 		case UIAction::howtoplay_Right:		   return "howtoplay_Right";
 		case UIAction::howtoplay_Left:		   return "howtoplay_Left";
 
+		case UIAction::graphics_Left:		   return "graphics_Left";
+		case UIAction::graphics_Right:		   return "graphics_Right";
+
 		case UIAction::None:
 		default:                               return "None";
 		}

@@ -68,6 +68,8 @@ namespace PAIN {
 
 			void hideCursor(bool hide) override;
 
+		void setFullscreen(bool fullscreen) override;
+
 		};
 	}
 }
