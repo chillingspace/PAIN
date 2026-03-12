@@ -281,16 +281,16 @@
         ],
         "farPlane": 100.0,
         "forward": [
-            0.8559241890907288,
-            -0.4445321261882782,
-            0.2641686797142029
+            0.8023478388786316,
+            -0.5164346098899841,
+            0.2992210388183594
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            40.91728210449219,
-            9.633374214172363,
-            8.416773796081543
+            20.95486068725586,
+            22.48226547241211,
+            0.972152829170227
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 31.100000381469727,
@@ -560,7 +560,9 @@
                                 0.0
                             ],
                             "outer_angle": 32.0,
-                            "shadow_type": 0
+                            "shadow_resolution": 1024,
+                            "shadow_type": 0,
+                            "volumetric": true
                         },
                         "LocalTransform": {
                             "position": [
@@ -822,7 +824,9 @@
                                 0.05000000074505806
                             ],
                             "outer_angle": 32.0,
-                            "shadow_type": 0
+                            "shadow_resolution": 1024,
+                            "shadow_type": 0,
+                            "volumetric": true
                         },
                         "LocalTransform": {
                             "position": [
@@ -1084,7 +1088,9 @@
                                 0.05000000074505806
                             ],
                             "outer_angle": 32.0,
-                            "shadow_type": 0
+                            "shadow_resolution": 1024,
+                            "shadow_type": 0,
+                            "volumetric": true
                         },
                         "LocalTransform": {
                             "position": [
@@ -1346,7 +1352,9 @@
                                 0.05000000074505806
                             ],
                             "outer_angle": 32.0,
-                            "shadow_type": 0
+                            "shadow_resolution": 1024,
+                            "shadow_type": 0,
+                            "volumetric": true
                         },
                         "LocalTransform": {
                             "position": [
@@ -23260,7 +23268,9 @@
                                 0.0
                             ],
                             "outer_angle": 17.5,
-                            "shadow_type": 0
+                            "shadow_resolution": 1024,
+                            "shadow_type": 0,
+                            "volumetric": false
                         },
                         "LocalTransform": {
                             "position": [
@@ -23560,7 +23570,9 @@
                                 0.0
                             ],
                             "outer_angle": 32.0,
-                            "shadow_type": 0
+                            "shadow_resolution": 1024,
+                            "shadow_type": 0,
+                            "volumetric": false
                         },
                         "LocalTransform": {
                             "position": [
@@ -23817,7 +23829,9 @@
                                 0.0
                             ],
                             "outer_angle": 32.0,
-                            "shadow_type": 0
+                            "shadow_resolution": 1024,
+                            "shadow_type": 0,
+                            "volumetric": false
                         },
                         "LocalTransform": {
                             "position": [
