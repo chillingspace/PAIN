@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "cs3-2.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 16469797375112518089
+  },
+  "descriptor_version": 1,
+  "guid": "60624f27-8df0-e549-a091-95506decfa59",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\cs3-2.png"
+  }
+}

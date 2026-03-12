@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Build2.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 2197547566849359812
+  },
+  "descriptor_version": 1,
+  "guid": "9b5cba30-a29d-d84c-8a30-ba687baba911",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\Build2.glb"
+  }
+}
