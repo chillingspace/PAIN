@@ -525,29 +525,19 @@ namespace PAIN {
                 }
 
                 // Calculate new aabb if is dirty
-                AABB oldAABB = bvComponent.worldAABB;
                 AABB newWorldAABB = bvComponent.localAABB.transform(transform.matrix);
-
-                // Update aabb
                 bvComponent.worldAABB = newWorldAABB;
 
-                // Check if the move is large relative to the node size
-                float displacement = glm::distance(oldAABB.getCenter(), newWorldAABB.getCenter());
-                float nodeSize = oldAABB.getExtents().length();
+                // Only touch BVH if entity has escaped its fat AABB
+                bool escapedFat = !bvComponent.fatAABB.contains(newWorldAABB);
 
-                // Update bvh leaf
-                if (displacement > nodeSize * 2.0f) {
-                    // Full rebuild if the displacement is large
-                    m_needsFullRebuild = true;
+                if (escapedFat && m_bvh.isBuilt() && bvComponent.bvhNodeIndex != -1) {
+                    // Reinsert with new fat AABB (refit only, no rebuild)
+                    bvComponent.fatAABB = newWorldAABB.expanded(BVH_FAT_AABB_PADDING);
+                    m_bvh.updateLeaf(bvComponent.bvhNodeIndex, bvComponent.fatAABB);
                 }
-                else {
-                    // Fast update (just refit)
-                    if (m_bvh.isBuilt() && !m_needsFullRebuild && bvComponent.bvhNodeIndex != -1) {
-                        m_bvh.updateLeaf(bvComponent.bvhNodeIndex, bvComponent.worldAABB);
-                    }
-                }
+                // If still inside fat AABB, BVH needs zero work this frame
 
-                // Remove dirty flag
                 bvComponent.needsUpdate = false;
             }
 
@@ -576,7 +566,7 @@ namespace PAIN {
             m_currentFrameEntities.insert(entity);
             m_bvhItems.push_back({ entity, bvComponent.worldAABB });
 
-            // Incremental insert (Fix #2)
+            // Incremental insert 
             if (m_bvh.isBuilt() && m_bvhItems.size() < m_lastEntityCount * 1.2) {
                 bvComponent.bvhNodeIndex = m_bvh.insertLeaf(entity, bvComponent.worldAABB);
             }
@@ -610,8 +600,11 @@ namespace PAIN {
 
         m_trackedEntities = std::move(m_currentFrameEntities);
 
-        // Rebuild only if necessary
-        if (m_needsFullRebuild || !m_bvh.isBuilt()) {
+        m_framesSinceRebuild++;
+        bool periodicRebuild = (m_framesSinceRebuild >= BVH_REBUILD_INTERVAL);
+
+        if (m_needsFullRebuild || !m_bvh.isBuilt() || periodicRebuild) {
+            m_framesSinceRebuild = 0;
             //PN_CORE_INFO("BVH full rebuild: {} items", m_bvhItems.size());
 
             auto rebuildStart = std::chrono::high_resolution_clock::now();

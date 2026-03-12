@@ -563,11 +563,41 @@ namespace PAIN {
 						ImGui::EndMenu();
 					}
 
-					// FPS counter - right-aligned
-					float fps = 1.0f / timing.dt;
-					float text_width = 150.0f;
-					ImGui::SetCursorPosX(ImGui::GetWindowWidth() - text_width);
-					ImGui::Text("FPS: %.1f (%.2f ms)", fps, timing.dt * 1000.0f);
+					ImGui::Separator();
+
+					// ---- Toolbar: Save, Undo, Redo ----
+					bool canUndo = command_manager->canUndo();
+					bool canRedo = command_manager->canRedo();
+
+					if (ImGui::Button("Save")) {
+						auto scn = PN_SCENE_SERVICE;
+						if (scn && !scn->isPlaying()) {
+							scn->saveActiveScene(scn->getCurrScnID());
+							openPopUp("Info", std::make_shared<std::string>("Scene Saved!"));
+						}
+					}
+					if (ImGui::IsItemHovered()) ImGui::SetTooltip("Save Scene (Ctrl+S)");
+
+					// ---- Center: Scene name ----
+					{
+						std::string scn_name = "No Scene";
+						Assets::GUID curr_id = PN_SCENE_SERVICE ? PN_SCENE_SERVICE->getCurrScnID() : Assets::GUID{};
+						if (curr_id.IsValid()) {
+							auto scn_data = PN_ASSET_SERVICE->getAssetData(curr_id);
+							if (scn_data) {
+								scn_name = scn_data->name;
+								auto dot = scn_name.rfind('.');
+								if (dot != std::string::npos) scn_name = scn_name.substr(0, dot);
+							}
+						}
+
+						float text_width = ImGui::CalcTextSize(scn_name.c_str()).x;
+						float center_x = (ImGui::GetWindowWidth() - text_width) * 0.5f;
+						float current_x = ImGui::GetCursorPosX();
+						if (center_x > current_x) ImGui::SetCursorPosX(center_x);
+
+						ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "%s", scn_name.c_str());
+					}
 
 					ImGui::EndMenuBar();
 				}

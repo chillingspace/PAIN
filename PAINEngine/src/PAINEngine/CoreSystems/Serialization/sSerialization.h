@@ -323,9 +323,16 @@ namespace PAIN {
                     ::PAIN::Serialization::from_json_reflected(out, j);
                 }
                 else if constexpr (std::is_enum_v<std::remove_cv_t<std::remove_reference_t<T>>>) {
-                    // delegate to ADL serializer so that string enums are parsed
-                    // correctly when NLOHMANN_JSON_SERIALIZE_ENUM was used.
-                    nlohmann::adl_serializer<T>::from_json(j, out);
+                    // Scene files store enums as integers. The NLOHMANN_JSON_SERIALIZE_ENUM
+                    // string-based ADL from_json fails to match integers and silently returns
+                    // the first enum value, so read integers directly. Fall back to the ADL
+                    // serializer only when the stored value is actually a string.
+                    if (j.is_number()) {
+                        using U = std::underlying_type_t<std::remove_cv_t<std::remove_reference_t<T>>>;
+                        out = static_cast<std::remove_cv_t<std::remove_reference_t<T>>>(j.template get<U>());
+                    } else {
+                        nlohmann::adl_serializer<T>::from_json(j, out);
+                    }
                 }
                 else {
                     // Fallback to nlohmann's get

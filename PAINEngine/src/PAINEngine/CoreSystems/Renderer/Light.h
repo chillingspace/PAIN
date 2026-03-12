@@ -32,12 +32,13 @@ namespace PAIN {
 		SHADOW_TYPES shadow_type = SHADOW_TYPES::NONE;
 		unsigned int shadow_fbo = 0;
 		unsigned int shadow_texture = 0;
+		int shadow_map_resolution = 1024;
 
 		void _createShadowMapBuffers() {
 			glGenFramebuffers(1, &shadow_fbo);
 			glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
 
-			const int tex_width = GraphicsSettings::get().SHADOW_MAP_WIDTHS.at(GraphicsSettings::get().shadow_type);
+			const int tex_width = shadow_map_resolution;
 
 			// shadow buffer cannot be created like other textures. is not used to store data like pos,color etc. but depth
 			glGenTextures(1, &shadow_texture);
@@ -85,6 +86,8 @@ namespace PAIN {
 		~Light() {
 			_cleanup();
 		}
+
+		bool volumetric = false;
 
 		glm::vec3 position{};
 		glm::vec3 L_intensity = glm::vec3(0.1f);
@@ -181,6 +184,15 @@ namespace PAIN {
 			shadow_type = type;
 
 			return true;
+		}
+
+		void setShadowResolution(int res) {
+			if (res == shadow_map_resolution) return;
+			shadow_map_resolution = res;
+			if (shadow_type == SHADOW_TYPES::MAPPED && shadow_fbo != 0) {
+				_cleanup();
+				_createShadowMapBuffers();
+			}
 		}
 
 		unsigned int getShadowFbo() const {

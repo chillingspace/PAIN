@@ -238,16 +238,16 @@
         ],
         "farPlane": 100.0,
         "forward": [
-            -0.9998152852058411,
-            -0.015459493733942509,
-            -0.01141951885074377
+            -0.9068275690078735,
+            -0.34506601095199585,
+            0.24206021428108215
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            -3.0105109214782715,
-            3.5113399028778076,
-            -25.084077835083008
+            4.67803955078125,
+            6.817241668701172,
+            -8.989587783813477
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 31.100000381469727,
@@ -4179,7 +4179,9 @@
                                 0.0
                             ],
                             "outer_angle": 17.5,
-                            "shadow_type": 1
+                            "shadow_resolution": 1024,
+                            "shadow_type": 0,
+                            "volumetric": true
                         },
                         "LocalTransform": {
                             "position": [
@@ -4483,7 +4485,9 @@
                                 0.0
                             ],
                             "outer_angle": 32.0,
-                            "shadow_type": 1
+                            "shadow_resolution": 1024,
+                            "shadow_type": 0,
+                            "volumetric": true
                         },
                         "LocalTransform": {
                             "position": [
@@ -4740,7 +4744,9 @@
                                 0.0
                             ],
                             "outer_angle": 32.0,
-                            "shadow_type": 1
+                            "shadow_resolution": 1024,
+                            "shadow_type": 0,
+                            "volumetric": true
                         },
                         "LocalTransform": {
                             "position": [
@@ -4997,7 +5003,9 @@
                                 0.0
                             ],
                             "outer_angle": 32.0,
-                            "shadow_type": 1
+                            "shadow_resolution": 1024,
+                            "shadow_type": 0,
+                            "volumetric": true
                         },
                         "LocalTransform": {
                             "position": [
@@ -5254,7 +5262,9 @@
                                 0.0
                             ],
                             "outer_angle": 32.0,
-                            "shadow_type": 1
+                            "shadow_resolution": 1024,
+                            "shadow_type": 0,
+                            "volumetric": true
                         },
                         "LocalTransform": {
                             "position": [
@@ -5511,7 +5521,9 @@
                                 0.0
                             ],
                             "outer_angle": 32.0,
-                            "shadow_type": 0
+                            "shadow_resolution": 1024,
+                            "shadow_type": 0,
+                            "volumetric": true
                         },
                         "LocalTransform": {
                             "position": [
@@ -5768,7 +5780,9 @@
                                 0.0
                             ],
                             "outer_angle": 32.0,
-                            "shadow_type": 0
+                            "shadow_resolution": 1024,
+                            "shadow_type": 0,
+                            "volumetric": true
                         },
                         "LocalTransform": {
                             "position": [
@@ -13997,12 +14011,12 @@
                     "Components": {
                         "CustomHitbox2D": {
                             "max_point": [
-                                73.5999984741211,
-                                72.0
+                                97.30000305175781,
+                                96.0999984741211
                             ],
                             "min_point": [
-                                -75.9000015258789,
-                                -72.0
+                                -96.19999694824219,
+                                -99.0999984741211
                             ],
                             "position_offset": [
                                 0.0,
@@ -14061,13 +14075,13 @@
                         },
                         "Texture2D": {
                             "pos": [
-                                -0.800000011920929,
-                                -0.6000000238418579
+                                -0.699999988079071,
+                                -0.550000011920929
                             ],
                             "texture_guid": "931913db-35c2-f044-b648-e07fd4f1b456",
                             "texture_scale": [
-                                0.15000000596046448,
-                                0.15000000596046448
+                                0.20000000298023224,
+                                0.20000000298023224
                             ]
                         },
                         "UIButton": {

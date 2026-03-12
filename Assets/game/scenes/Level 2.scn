@@ -281,16 +281,16 @@
         ],
         "farPlane": 100.0,
         "forward": [
-            0.8559241890907288,
-            -0.4445321261882782,
-            0.2641686797142029
+            0.8023478388786316,
+            -0.5164346098899841,
+            0.2992210388183594
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            40.91728210449219,
-            9.633374214172363,
-            8.416773796081543
+            20.95486068725586,
+            22.48226547241211,
+            0.972152829170227
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 31.100000381469727,
@@ -560,7 +560,9 @@
                                 0.0
                             ],
                             "outer_angle": 32.0,
-                            "shadow_type": 0
+                            "shadow_resolution": 1024,
+                            "shadow_type": 0,
+                            "volumetric": true
                         },
                         "LocalTransform": {
                             "position": [
@@ -822,7 +824,9 @@
                                 0.05000000074505806
                             ],
                             "outer_angle": 32.0,
-                            "shadow_type": 0
+                            "shadow_resolution": 1024,
+                            "shadow_type": 0,
+                            "volumetric": true
                         },
                         "LocalTransform": {
                             "position": [
@@ -1084,7 +1088,9 @@
                                 0.05000000074505806
                             ],
                             "outer_angle": 32.0,
-                            "shadow_type": 0
+                            "shadow_resolution": 1024,
+                            "shadow_type": 0,
+                            "volumetric": true
                         },
                         "LocalTransform": {
                             "position": [
@@ -1346,7 +1352,9 @@
                                 0.05000000074505806
                             ],
                             "outer_angle": 32.0,
-                            "shadow_type": 0
+                            "shadow_resolution": 1024,
+                            "shadow_type": 0,
+                            "volumetric": true
                         },
                         "LocalTransform": {
                             "position": [
@@ -20168,7 +20176,7 @@
                                         0.25,
                                         -0.15000000596046448
                                     ],
-                                    "texture_guid": "7fdfa6e4-cca0-6144-9aa0-9e18470ae75a",
+                                    "texture_guid": "b77039aa-0434-8241-88d1-912fecf7ccbe",
                                     "texture_scale": [
                                         0.20000000298023224,
                                         0.07999999821186066
@@ -20193,7 +20201,7 @@
                                 0.25,
                                 -0.15000000596046448
                             ],
-                            "texture_guid": "7fdfa6e4-cca0-6144-9aa0-9e18470ae75a",
+                            "texture_guid": "b77039aa-0434-8241-88d1-912fecf7ccbe",
                             "texture_scale": [
                                 0.20000000298023224,
                                 0.07999999821186066
@@ -20346,7 +20354,7 @@
                                         -0.3499999940395355,
                                         -0.15000000596046448
                                     ],
-                                    "texture_guid": "0b7423ec-97fe-dc4b-ae96-4aa5a9bed448",
+                                    "texture_guid": "33eb95de-2918-f546-98d7-6337bb88083f",
                                     "texture_scale": [
                                         0.20000000298023224,
                                         0.07999999821186066
@@ -20371,7 +20379,7 @@
                                 -0.3499999940395355,
                                 -0.15000000596046448
                             ],
-                            "texture_guid": "0b7423ec-97fe-dc4b-ae96-4aa5a9bed448",
+                            "texture_guid": "33eb95de-2918-f546-98d7-6337bb88083f",
                             "texture_scale": [
                                 0.20000000298023224,
                                 0.07999999821186066
@@ -20604,7 +20612,7 @@
                                         -0.4000000059604645,
                                         -0.699999988079071
                                     ],
-                                    "texture_guid": "6d12a8ac-ad22-794c-a7e9-2fe32d9f6b57",
+                                    "texture_guid": "2f7e48db-385a-534f-badb-8cbc413f0201",
                                     "texture_scale": [
                                         0.4000000059604645,
                                         0.09000000357627869
@@ -20629,7 +20637,7 @@
                                 -0.4000000059604645,
                                 -0.699999988079071
                             ],
-                            "texture_guid": "6d12a8ac-ad22-794c-a7e9-2fe32d9f6b57",
+                            "texture_guid": "2f7e48db-385a-534f-badb-8cbc413f0201",
                             "texture_scale": [
                                 0.4000000059604645,
                                 0.09000000357627869
@@ -20778,7 +20786,7 @@
                                         0.30000001192092896,
                                         -0.699999988079071
                                     ],
-                                    "texture_guid": "c3bf7110-7bea-8e4d-8ac3-e97081eee4a9",
+                                    "texture_guid": "b5e31ae4-5d04-e64d-8370-609d0b060a90",
                                     "texture_scale": [
                                         0.30000001192092896,
                                         0.10000000149011612
@@ -20803,7 +20811,7 @@
                                 0.30000001192092896,
                                 -0.699999988079071
                             ],
-                            "texture_guid": "c3bf7110-7bea-8e4d-8ac3-e97081eee4a9",
+                            "texture_guid": "b5e31ae4-5d04-e64d-8370-609d0b060a90",
                             "texture_scale": [
                                 0.30000001192092896,
                                 0.10000000149011612
@@ -21036,7 +21044,7 @@
                                         -0.4000000059604645,
                                         -0.699999988079071
                                     ],
-                                    "texture_guid": "6989da0a-a6d0-3448-a662-8eccc81f78b7",
+                                    "texture_guid": "fff544a7-09f9-c946-b707-89944788f9d6",
                                     "texture_scale": [
                                         0.4000000059604645,
                                         0.09000000357627869
@@ -21061,7 +21069,7 @@
                                 -0.4000000059604645,
                                 -0.699999988079071
                             ],
-                            "texture_guid": "6989da0a-a6d0-3448-a662-8eccc81f78b7",
+                            "texture_guid": "fff544a7-09f9-c946-b707-89944788f9d6",
                             "texture_scale": [
                                 0.4000000059604645,
                                 0.09000000357627869
@@ -21210,7 +21218,7 @@
                                         0.30000001192092896,
                                         -0.699999988079071
                                     ],
-                                    "texture_guid": "c3bf7110-7bea-8e4d-8ac3-e97081eee4a9",
+                                    "texture_guid": "b5e31ae4-5d04-e64d-8370-609d0b060a90",
                                     "texture_scale": [
                                         0.30000001192092896,
                                         0.10000000149011612
@@ -21235,7 +21243,7 @@
                                 0.30000001192092896,
                                 -0.699999988079071
                             ],
-                            "texture_guid": "c3bf7110-7bea-8e4d-8ac3-e97081eee4a9",
+                            "texture_guid": "b5e31ae4-5d04-e64d-8370-609d0b060a90",
                             "texture_scale": [
                                 0.30000001192092896,
                                 0.10000000149011612
@@ -23260,7 +23268,9 @@
                                 0.0
                             ],
                             "outer_angle": 17.5,
-                            "shadow_type": 0
+                            "shadow_resolution": 1024,
+                            "shadow_type": 0,
+                            "volumetric": false
                         },
                         "LocalTransform": {
                             "position": [
@@ -23560,7 +23570,9 @@
                                 0.0
                             ],
                             "outer_angle": 32.0,
-                            "shadow_type": 0
+                            "shadow_resolution": 1024,
+                            "shadow_type": 0,
+                            "volumetric": false
                         },
                         "LocalTransform": {
                             "position": [
@@ -23817,7 +23829,9 @@
                                 0.0
                             ],
                             "outer_angle": 32.0,
-                            "shadow_type": 0
+                            "shadow_resolution": 1024,
+                            "shadow_type": 0,
+                            "volumetric": false
                         },
                         "LocalTransform": {
                             "position": [
@@ -29121,12 +29135,12 @@
                     "Components": {
                         "CustomHitbox2D": {
                             "max_point": [
-                                73.5999984741211,
-                                72.0
+                                97.30000305175781,
+                                96.0999984741211
                             ],
                             "min_point": [
-                                -75.9000015258789,
-                                -72.0
+                                -96.19999694824219,
+                                -99.0999984741211
                             ],
                             "position_offset": [
                                 0.0,
@@ -29185,13 +29199,13 @@
                         },
                         "Texture2D": {
                             "pos": [
-                                -0.800000011920929,
-                                -0.6000000238418579
+                                -0.699999988079071,
+                                -0.550000011920929
                             ],
                             "texture_guid": "931913db-35c2-f044-b648-e07fd4f1b456",
                             "texture_scale": [
-                                0.15000000596046448,
-                                0.15000000596046448
+                                0.20000000298023224,
+                                0.20000000298023224
                             ]
                         },
                         "UIButton": {

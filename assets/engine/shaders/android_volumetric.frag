@@ -21,7 +21,7 @@ struct Light {
 };
 
 #define MAX_LIGHTS 4
-#define MAX_SHADOWMAPPED_LIGHTS 4
+#define MAX_SHADOWMAPPED_LIGHTS 1
 #define MAX_VOLUMETRIC_STEPS 64
 
 uniform Light u_Lights[MAX_LIGHTS];
@@ -75,7 +75,7 @@ float sampleShadow(int shadowIdx, vec3 worldPos, Light light) {
         return 0.0;
     }
 
-    float shadowDepth = texture(u_ShadowMaps[shadowIdx], projCoords.xy).r;
+    float shadowDepth = texture(u_ShadowMaps[0], projCoords.xy).r;
     if (shadowDepth >= 0.99) {
         return 0.0;
     }
