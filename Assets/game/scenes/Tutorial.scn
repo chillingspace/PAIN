@@ -9410,9 +9410,9 @@
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [
-                                "18a8d426-4f81-b54e-a985-72ceafb36934",
                                 "7f20ef65-a9d5-4541-859b-ff911ea58a59",
-                                "c8989800-69e0-aa48-a789-d62df22f9123"
+                                "c8989800-69e0-aa48-a789-d62df22f9123",
+                                "01217e52-b00d-084d-bea0-6c5346f3d94f"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 27
@@ -9499,587 +9499,6 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
-                            "guid": "18a8d426-4f81-b54e-a985-72ceafb36934"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [
-                                "234f63d2-9ce2-de4a-b2e9-b51df68fadf4",
-                                "09276c7c-b239-474f-950f-e175ea7b3e7e",
-                                "0dc7d509-a2c9-b640-ae82-df7adde1fa4b",
-                                "a314c7d3-a6b0-0946-afac-cae443d2fa92"
-                            ],
-                            "parentGUID": "08f7b37b-512b-8046-aa8f-df4df3c659da",
-                            "siblingIndex": 0
-                        },
-                        "Layer": {
-                            "layer_id": 1,
-                            "layer_mask": 2
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "buttons"
-                        }
-                    },
-                    "Name": "buttons"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "CustomHitbox2D": {
-                            "max_point": [
-                                50.0,
-                                50.0
-                            ],
-                            "min_point": [
-                                -50.0,
-                                -50.0
-                            ],
-                            "position_offset": [
-                                0.0,
-                                0.0
-                            ]
-                        },
-                        "GUID": {
-                            "guid": "234f63d2-9ce2-de4a-b2e9-b51df68fadf4"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "18a8d426-4f81-b54e-a985-72ceafb36934",
-                            "siblingIndex": 0
-                        },
-                        "Layer": {
-                            "layer_id": 1,
-                            "layer_mask": 2
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "pause button"
-                        },
-                        "Scripts": {
-                            "scripts": [
-                                {
-                                    "enabled": true,
-                                    "script_asset": "08480cf4-84ee-8f42-96f7-f6e1573225f9"
-                                }
-                            ]
-                        },
-                        "Tag": {
-                            "tags": [
-                                "android_ui"
-                            ]
-                        },
-                        "Texture2D": {
-                            "pos": [
-                                0.800000011920929,
-                                0.699999988079071
-                            ],
-                            "texture_guid": "7ccefaa4-196c-9a44-8f03-bd9d4f7328d0",
-                            "texture_scale": [
-                                0.10000000149011612,
-                                0.10000000149011612
-                            ]
-                        },
-                        "UIButton": {
-                            "action": "goto_Pause",
-                            "disabled_color": -10066330,
-                            "highlighted_color": -3355444,
-                            "normal_color": -1,
-                            "payload": "",
-                            "pressed_color": -5592406,
-                            "state": "Normal"
-                        },
-                        "UIElement": {
-                            "b_is_enabled": true,
-                            "b_is_interactable": true,
-                            "layer": 0
-                        },
-                        "UIRectTransform": {
-                            "anchor_max": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchor_min": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchored_position": [
-                                0.0,
-                                0.0
-                            ],
-                            "local_position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "offset_max": [
-                                0.0,
-                                0.0
-                            ],
-                            "offset_min": [
-                                0.0,
-                                0.0
-                            ],
-                            "pivot": [
-                                0.5,
-                                0.5
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "size_delta": [
-                                100.0,
-                                100.0
-                            ]
-                        }
-                    },
-                    "Name": "pause button"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "CustomHitbox2D": {
-                            "max_point": [
-                                73.5999984741211,
-                                72.0
-                            ],
-                            "min_point": [
-                                -75.9000015258789,
-                                -72.0
-                            ],
-                            "position_offset": [
-                                0.0,
-                                0.0
-                            ]
-                        },
-                        "GUID": {
-                            "guid": "0dc7d509-a2c9-b640-ae82-df7adde1fa4b"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "18a8d426-4f81-b54e-a985-72ceafb36934",
-                            "siblingIndex": 1
-                        },
-                        "Layer": {
-                            "layer_id": 1,
-                            "layer_mask": 2
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "joystick"
-                        },
-                        "Tag": {
-                            "tags": [
-                                "android_ui"
-                            ]
-                        },
-                        "Texture2D": {
-                            "pos": [
-                                -0.800000011920929,
-                                -0.6000000238418579
-                            ],
-                            "texture_guid": "931913db-35c2-f044-b648-e07fd4f1b456",
-                            "texture_scale": [
-                                0.15000000596046448,
-                                0.15000000596046448
-                            ]
-                        },
-                        "UIButton": {
-                            "action": "game_Move",
-                            "disabled_color": -10066330,
-                            "highlighted_color": -3355444,
-                            "normal_color": -1,
-                            "payload": "",
-                            "pressed_color": -5592406,
-                            "state": "Normal"
-                        },
-                        "UIElement": {
-                            "b_is_enabled": true,
-                            "b_is_interactable": true,
-                            "layer": 0
-                        },
-                        "UIJoystick": {
-                            "center_position": [
-                                0.0,
-                                0.0
-                            ],
-                            "is_dragging": false,
-                            "max_radius": 0.15000000596046448
-                        },
-                        "UIRectTransform": {
-                            "anchor_max": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchor_min": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchored_position": [
-                                0.0,
-                                0.0
-                            ],
-                            "local_position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "offset_max": [
-                                0.0,
-                                0.0
-                            ],
-                            "offset_min": [
-                                0.0,
-                                0.0
-                            ],
-                            "pivot": [
-                                0.5,
-                                0.5
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "size_delta": [
-                                100.0,
-                                100.0
-                            ]
-                        }
-                    },
-                    "Name": "joystick"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "CustomHitbox2D": {
-                            "max_point": [
-                                94.5999984741211,
-                                87.5999984741211
-                            ],
-                            "min_point": [
-                                -96.80000305175781,
-                                -105.19999694824219
-                            ],
-                            "position_offset": [
-                                2.0,
-                                7.5
-                            ]
-                        },
-                        "GUID": {
-                            "guid": "a314c7d3-a6b0-0946-afac-cae443d2fa92"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "18a8d426-4f81-b54e-a985-72ceafb36934",
-                            "siblingIndex": 2
-                        },
-                        "Layer": {
-                            "layer_id": 1,
-                            "layer_mask": 2
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                2.8526031970977783,
-                                1.9104310274124146,
-                                -5.961182594299316
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "hide button"
-                        },
-                        "Tag": {
-                            "tags": [
-                                "android_ui"
-                            ]
-                        },
-                        "Texture2D": {
-                            "pos": [
-                                0.7300000190734863,
-                                -0.27000001072883606
-                            ],
-                            "texture_guid": "ae3a0a6b-31b6-784c-a377-b551352c4e18",
-                            "texture_scale": [
-                                0.20000000298023224,
-                                0.20000000298023224
-                            ]
-                        },
-                        "UIButton": {
-                            "action": "game_Hide",
-                            "disabled_color": -10066330,
-                            "highlighted_color": -3355444,
-                            "normal_color": -1,
-                            "payload": "",
-                            "pressed_color": -5592406,
-                            "state": "Normal"
-                        },
-                        "UIElement": {
-                            "b_is_enabled": true,
-                            "b_is_interactable": true,
-                            "layer": 0
-                        },
-                        "UIRectTransform": {
-                            "anchor_max": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchor_min": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchored_position": [
-                                0.0,
-                                0.0
-                            ],
-                            "local_position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "offset_max": [
-                                0.0,
-                                0.0
-                            ],
-                            "offset_min": [
-                                0.0,
-                                0.0
-                            ],
-                            "pivot": [
-                                0.5,
-                                0.5
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "size_delta": [
-                                100.0,
-                                100.0
-                            ]
-                        }
-                    },
-                    "Name": "hide button"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "CustomHitbox2D": {
-                            "max_point": [
-                                88.0999984741211,
-                                93.30000305175781
-                            ],
-                            "min_point": [
-                                -81.5,
-                                -93.5999984741211
-                            ],
-                            "position_offset": [
-                                -1.2000000476837158,
-                                0.0
-                            ]
-                        },
-                        "GUID": {
-                            "guid": "09276c7c-b239-474f-950f-e175ea7b3e7e"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "18a8d426-4f81-b54e-a985-72ceafb36934",
-                            "siblingIndex": 3
-                        },
-                        "Layer": {
-                            "layer_id": 1,
-                            "layer_mask": 2
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                3.552999973297119,
-                                1.9104310274124146,
-                                -5.961182594299316
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "jump button"
-                        },
-                        "Tag": {
-                            "tags": [
-                                "android_ui"
-                            ]
-                        },
-                        "Texture2D": {
-                            "pos": [
-                                0.8500000238418579,
-                                -0.75
-                            ],
-                            "texture_guid": "5196e609-0b34-0742-87ec-b0260a14c392",
-                            "texture_scale": [
-                                0.20000000298023224,
-                                0.20000000298023224
-                            ]
-                        },
-                        "UIButton": {
-                            "action": "game_Jump",
-                            "disabled_color": -10066330,
-                            "highlighted_color": -3355444,
-                            "normal_color": -1,
-                            "payload": "",
-                            "pressed_color": -5592406,
-                            "state": "Normal"
-                        },
-                        "UIElement": {
-                            "b_is_enabled": true,
-                            "b_is_interactable": true,
-                            "layer": 0
-                        },
-                        "UIRectTransform": {
-                            "anchor_max": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchor_min": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchored_position": [
-                                0.0,
-                                0.0
-                            ],
-                            "local_position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "offset_max": [
-                                0.0,
-                                0.0
-                            ],
-                            "offset_min": [
-                                0.0,
-                                0.0
-                            ],
-                            "pivot": [
-                                0.5,
-                                0.5
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "size_delta": [
-                                100.0,
-                                100.0
-                            ]
-                        }
-                    },
-                    "Name": "jump button"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "GUID": {
                             "guid": "c8989800-69e0-aa48-a789-d62df22f9123"
                         },
                         "Hierarchy": {
@@ -10090,7 +9509,7 @@
                                 "55bfc182-798e-b446-b2e2-0854fc478ffb"
                             ],
                             "parentGUID": "08f7b37b-512b-8046-aa8f-df4df3c659da",
-                            "siblingIndex": 1
+                            "siblingIndex": 0
                         },
                         "Layer": {
                             "layer_id": 1,
@@ -10542,7 +9961,7 @@
                                 "919b7422-5e7c-c140-b2c0-91ef65fa8262"
                             ],
                             "parentGUID": "08f7b37b-512b-8046-aa8f-df4df3c659da",
-                            "siblingIndex": 2
+                            "siblingIndex": 1
                         },
                         "Layer": {
                             "layer_id": 1,
@@ -10901,6 +10320,670 @@
                         }
                     },
                     "Name": "heart_3"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "01217e52-b00d-084d-bea0-6c5346f3d94f"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [
+                                "6e41ee12-36ee-0f4f-9ece-23cf6fd43704",
+                                "dd829c84-d03a-124d-978c-72192c7e9c8b",
+                                "da0c44c3-c389-2c4f-aa35-e19b38cab40a",
+                                "898332ec-5a8a-be4c-8f4b-9ab84cb080a9"
+                            ],
+                            "parentGUID": "08f7b37b-512b-8046-aa8f-df4df3c659da",
+                            "siblingIndex": 2
+                        },
+                        "Layer": {
+                            "layer_id": 1,
+                            "layer_mask": 2
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                -18.984189987182617,
+                                0.0,
+                                -0.13627147674560547
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "buttons"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [
+                                        "6e41ee12-36ee-0f4f-9ece-23cf6fd43704",
+                                        "dd829c84-d03a-124d-978c-72192c7e9c8b",
+                                        "da0c44c3-c389-2c4f-aa35-e19b38cab40a",
+                                        "898332ec-5a8a-be4c-8f4b-9ab84cb080a9"
+                                    ],
+                                    "parentGUID": "08f7b37b-512b-8046-aa8f-df4df3c659da",
+                                    "siblingIndex": 2
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        -18.984189987182617,
+                                        0.0,
+                                        -0.13627147674560547
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "scale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "18a8d426-4f81-b54e-a985-72ceafb36934",
+                            "instanceRootGUID": "01217e52-b00d-084d-bea0-6c5346f3d94f",
+                            "sourcePrefabGUID": "2b14cd46-f35b-3342-8bdf-0d941a05f55f"
+                        }
+                    },
+                    "Name": "buttons"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "CustomHitbox2D": {
+                            "max_point": [
+                                50.0,
+                                50.0
+                            ],
+                            "min_point": [
+                                -50.0,
+                                -50.0
+                            ],
+                            "position_offset": [
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        "GUID": {
+                            "guid": "6e41ee12-36ee-0f4f-9ece-23cf6fd43704"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "01217e52-b00d-084d-bea0-6c5346f3d94f",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 1,
+                            "layer_mask": 2
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "pause button"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "01217e52-b00d-084d-bea0-6c5346f3d94f",
+                                    "siblingIndex": 0
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "234f63d2-9ce2-de4a-b2e9-b51df68fadf4",
+                            "instanceRootGUID": "01217e52-b00d-084d-bea0-6c5346f3d94f",
+                            "sourcePrefabGUID": "2b14cd46-f35b-3342-8bdf-0d941a05f55f"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "08480cf4-84ee-8f42-96f7-f6e1573225f9"
+                                }
+                            ]
+                        },
+                        "Tag": {
+                            "tags": [
+                                "android_ui"
+                            ]
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                0.800000011920929,
+                                0.699999988079071
+                            ],
+                            "texture_guid": "7ccefaa4-196c-9a44-8f03-bd9d4f7328d0",
+                            "texture_scale": [
+                                0.10000000149011612,
+                                0.10000000149011612
+                            ]
+                        },
+                        "UIButton": {
+                            "action": "goto_Pause",
+                            "disabled_color": -10066330,
+                            "highlighted_color": -3355444,
+                            "normal_color": -1,
+                            "payload": "",
+                            "pressed_color": -5592406,
+                            "state": "Normal"
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "pause button"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "CustomHitbox2D": {
+                            "max_point": [
+                                97.30000305175781,
+                                96.0999984741211
+                            ],
+                            "min_point": [
+                                -96.19999694824219,
+                                -99.0999984741211
+                            ],
+                            "position_offset": [
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        "GUID": {
+                            "guid": "da0c44c3-c389-2c4f-aa35-e19b38cab40a"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "01217e52-b00d-084d-bea0-6c5346f3d94f",
+                            "siblingIndex": 1
+                        },
+                        "Layer": {
+                            "layer_id": 1,
+                            "layer_mask": 2
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "joystick"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "01217e52-b00d-084d-bea0-6c5346f3d94f",
+                                    "siblingIndex": 1
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "0dc7d509-a2c9-b640-ae82-df7adde1fa4b",
+                            "instanceRootGUID": "01217e52-b00d-084d-bea0-6c5346f3d94f",
+                            "sourcePrefabGUID": "2b14cd46-f35b-3342-8bdf-0d941a05f55f"
+                        },
+                        "Tag": {
+                            "tags": [
+                                "android_ui"
+                            ]
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                -0.800000011920929,
+                                -0.6000000238418579
+                            ],
+                            "texture_guid": "931913db-35c2-f044-b648-e07fd4f1b456",
+                            "texture_scale": [
+                                0.20000000298023224,
+                                0.20000000298023224
+                            ]
+                        },
+                        "UIButton": {
+                            "action": "game_Move",
+                            "disabled_color": -10066330,
+                            "highlighted_color": -3355444,
+                            "normal_color": -1,
+                            "payload": "",
+                            "pressed_color": -5592406,
+                            "state": "Normal"
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIJoystick": {
+                            "center_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "is_dragging": false,
+                            "max_radius": 0.15000000596046448
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "joystick"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "CustomHitbox2D": {
+                            "max_point": [
+                                94.5999984741211,
+                                87.5999984741211
+                            ],
+                            "min_point": [
+                                -96.80000305175781,
+                                -105.19999694824219
+                            ],
+                            "position_offset": [
+                                2.0,
+                                7.5
+                            ]
+                        },
+                        "GUID": {
+                            "guid": "898332ec-5a8a-be4c-8f4b-9ab84cb080a9"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "01217e52-b00d-084d-bea0-6c5346f3d94f",
+                            "siblingIndex": 2
+                        },
+                        "Layer": {
+                            "layer_id": 1,
+                            "layer_mask": 2
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                2.8526031970977783,
+                                1.9104310274124146,
+                                -5.961182594299316
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "hide button"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "01217e52-b00d-084d-bea0-6c5346f3d94f",
+                                    "siblingIndex": 2
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "a314c7d3-a6b0-0946-afac-cae443d2fa92",
+                            "instanceRootGUID": "01217e52-b00d-084d-bea0-6c5346f3d94f",
+                            "sourcePrefabGUID": "2b14cd46-f35b-3342-8bdf-0d941a05f55f"
+                        },
+                        "Tag": {
+                            "tags": [
+                                "android_ui"
+                            ]
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                0.7300000190734863,
+                                -0.27000001072883606
+                            ],
+                            "texture_guid": "ae3a0a6b-31b6-784c-a377-b551352c4e18",
+                            "texture_scale": [
+                                0.20000000298023224,
+                                0.20000000298023224
+                            ]
+                        },
+                        "UIButton": {
+                            "action": "game_Hide",
+                            "disabled_color": -10066330,
+                            "highlighted_color": -3355444,
+                            "normal_color": -1,
+                            "payload": "",
+                            "pressed_color": -5592406,
+                            "state": "Normal"
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "hide button"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "CustomHitbox2D": {
+                            "max_point": [
+                                88.0999984741211,
+                                93.30000305175781
+                            ],
+                            "min_point": [
+                                -81.5,
+                                -93.5999984741211
+                            ],
+                            "position_offset": [
+                                -1.2000000476837158,
+                                0.0
+                            ]
+                        },
+                        "GUID": {
+                            "guid": "dd829c84-d03a-124d-978c-72192c7e9c8b"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "01217e52-b00d-084d-bea0-6c5346f3d94f",
+                            "siblingIndex": 3
+                        },
+                        "Layer": {
+                            "layer_id": 1,
+                            "layer_mask": 2
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                3.552999973297119,
+                                1.9104310274124146,
+                                -5.961182594299316
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "jump button"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "01217e52-b00d-084d-bea0-6c5346f3d94f",
+                                    "siblingIndex": 3
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "09276c7c-b239-474f-950f-e175ea7b3e7e",
+                            "instanceRootGUID": "01217e52-b00d-084d-bea0-6c5346f3d94f",
+                            "sourcePrefabGUID": "2b14cd46-f35b-3342-8bdf-0d941a05f55f"
+                        },
+                        "Tag": {
+                            "tags": [
+                                "android_ui"
+                            ]
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                0.8500000238418579,
+                                -0.75
+                            ],
+                            "texture_guid": "5196e609-0b34-0742-87ec-b0260a14c392",
+                            "texture_scale": [
+                                0.20000000298023224,
+                                0.20000000298023224
+                            ]
+                        },
+                        "UIButton": {
+                            "action": "game_Jump",
+                            "disabled_color": -10066330,
+                            "highlighted_color": -3355444,
+                            "normal_color": -1,
+                            "payload": "",
+                            "pressed_color": -5592406,
+                            "state": "Normal"
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "jump button"
                 }
             },
             {
