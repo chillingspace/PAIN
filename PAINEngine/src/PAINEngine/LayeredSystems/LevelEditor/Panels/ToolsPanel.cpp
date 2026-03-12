@@ -449,7 +449,7 @@ namespace PAIN {
 
 				// ---- Keyboard shortcuts (Ctrl+Z / Ctrl+Y) ----
 				// Only fire when no ImGui widget is actively capturing keyboard input
-				if (!ImGui::GetIO().WantCaptureKeyboard) {
+				if (!ImGui::GetIO().WantTextInput) {
 					bool ctrl = ImGui::GetIO().KeyCtrl;
 
 					if (ctrl && ImGui::IsKeyPressed(ImGuiKey_Z, false)) {
@@ -457,6 +457,18 @@ namespace PAIN {
 					}
 					if (ctrl && ImGui::IsKeyPressed(ImGuiKey_Y, false)) {
 						command_manager->redo();
+					}
+					if (ctrl && ImGui::IsKeyPressed(ImGuiKey_S, false)) {
+						auto scn = PN_SCENE_SERVICE;
+						if (scn) {
+							if (scn->isPlaying()) {
+								openPopUp("Info", std::make_shared<std::string>("Cannot save scene while Game is Playing! Please Stop first."));
+							}
+							else {
+								scn->saveActiveScene(scn->getCurrScnID());
+								openPopUp("Info", std::make_shared<std::string>("Scene Saved!"));
+							}
+						}
 					}
 				}
 
@@ -567,19 +579,6 @@ namespace PAIN {
 					}
 
 					ImGui::Separator();
-
-					// ---- Toolbar: Save, Undo, Redo ----
-					bool canUndo = command_manager->canUndo();
-					bool canRedo = command_manager->canRedo();
-
-					if (ImGui::Button("Save")) {
-						auto scn = PN_SCENE_SERVICE;
-						if (scn && !scn->isPlaying()) {
-							scn->saveActiveScene(scn->getCurrScnID());
-							openPopUp("Info", std::make_shared<std::string>("Scene Saved!"));
-						}
-					}
-					if (ImGui::IsItemHovered()) ImGui::SetTooltip("Save Scene (Ctrl+S)");
 
 					// ---- Center: Scene name ----
 					{
