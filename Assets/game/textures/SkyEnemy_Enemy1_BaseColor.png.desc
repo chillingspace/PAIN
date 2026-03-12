@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "SkyEnemy_Enemy1_BaseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 2184594288509886565
+  },
+  "descriptor_version": 1,
+  "guid": "ab4c29a6-7fbe-ac43-bc8b-8acad3cc3c07",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\SkyEnemy_Enemy1_BaseColor.png"
+  }
+}
