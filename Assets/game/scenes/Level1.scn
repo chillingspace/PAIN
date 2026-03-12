@@ -330,15 +330,6 @@
                         },
                         "PrefabInstance": {
                             "componentOverrides": {
-                                "Hierarchy": {
-                                    "childrenGUIDs": [],
-                                    "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 0
-                                },
-                                "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
-                                },
                                 "LocalTransform": {
                                     "position": [
                                         -0.780746579170227,
@@ -356,41 +347,6 @@
                                         2.880000114440918,
                                         2.880000114440918
                                     ]
-                                },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "e01c794e-0add-d542-9860-03f63c3193ab",
-                                            "aoTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "normalTextureOverride": "d9a10e76-3db1-0c41-9368-c476a1845c40",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
-                                    "receiveShadows": true,
-                                    "visible": true
-                                },
-                                "Name": {
-                                    "name": "Crate"
                                 },
                                 "RigidBody3D": {
                                     "angular_velocity": [
@@ -423,7 +379,7 @@
                             },
                             "correspondingPrefabEntityGUID": "2fc12db1-dc23-944a-a2e6-9b1fc43f948e",
                             "instanceRootGUID": "35ab5d0e-d940-c041-a4c1-a9461def467e",
-                            "sourcePrefabGUID": "9b62d2c6-23dc-5d4f-898b-ee799df743e7"
+                            "sourcePrefabGUID": "f679979d-9d97-6345-825e-212f3c0dac1c"
                         },
                         "RigidBody3D": {
                             "angular_velocity": [
@@ -979,36 +935,11 @@
                                     ],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 4
-                                },
-                                "Layer": {
-                                    "layer_id": 5,
-                                    "layer_mask": 32
-                                },
-                                "LocalTransform": {
-                                    "position": [
-                                        -18.588220596313477,
-                                        0.0,
-                                        -46.89264678955078
-                                    ],
-                                    "rotation": [
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        1.0
-                                    ],
-                                    "scale": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ]
-                                },
-                                "Name": {
-                                    "name": "restart_manager"
                                 }
                             },
-                            "correspondingPrefabEntityGUID": "d740ec1e-700a-1141-9969-7b51e60d2fd1",
+                            "correspondingPrefabEntityGUID": "5b06bcce-31b8-8340-baaa-ac9c654e80d8",
                             "instanceRootGUID": "e7dd5655-191d-1341-abe5-425597d8440e",
-                            "sourcePrefabGUID": "2a7639be-0237-594f-961b-d2b4ad15a7e5"
+                            "sourcePrefabGUID": "ba6b7137-3a6f-d74e-ae1b-16d6c16fe571"
                         },
                         "Scripts": {
                             "scripts": [
@@ -1074,15 +1005,6 @@
                         },
                         "PrefabInstance": {
                             "componentOverrides": {
-                                "Hierarchy": {
-                                    "childrenGUIDs": [],
-                                    "parentGUID": "5b06bcce-31b8-8340-baaa-ac9c654e80d8",
-                                    "siblingIndex": 0
-                                },
-                                "Layer": {
-                                    "layer_id": 5,
-                                    "layer_mask": 32
-                                },
                                 "Texture2D": {
                                     "pos": [
                                         0.25,
@@ -1104,9 +1026,9 @@
                                     "state": "Normal"
                                 }
                             },
-                            "correspondingPrefabEntityGUID": "1cdf440e-472c-084f-952a-2b0a2bbd42c9",
+                            "correspondingPrefabEntityGUID": "0aafdc40-3450-8143-be1d-2f43ada89af1",
                             "instanceRootGUID": "e7dd5655-191d-1341-abe5-425597d8440e",
-                            "sourcePrefabGUID": "2a7639be-0237-594f-961b-d2b4ad15a7e5"
+                            "sourcePrefabGUID": "ba6b7137-3a6f-d74e-ae1b-16d6c16fe571"
                         },
                         "Texture2D": {
                             "pos": [
@@ -1252,15 +1174,6 @@
                         },
                         "PrefabInstance": {
                             "componentOverrides": {
-                                "Hierarchy": {
-                                    "childrenGUIDs": [],
-                                    "parentGUID": "5b06bcce-31b8-8340-baaa-ac9c654e80d8",
-                                    "siblingIndex": 1
-                                },
-                                "Layer": {
-                                    "layer_id": 5,
-                                    "layer_mask": 32
-                                },
                                 "Texture2D": {
                                     "pos": [
                                         -0.3499999940395355,
@@ -1282,9 +1195,9 @@
                                     "state": "Normal"
                                 }
                             },
-                            "correspondingPrefabEntityGUID": "9bf4b89e-0533-6f4c-8cdd-d87badf74cec",
+                            "correspondingPrefabEntityGUID": "dd464bb8-d9f7-a245-9822-3d2644e4bbe2",
                             "instanceRootGUID": "e7dd5655-191d-1341-abe5-425597d8440e",
-                            "sourcePrefabGUID": "2a7639be-0237-594f-961b-d2b4ad15a7e5"
+                            "sourcePrefabGUID": "ba6b7137-3a6f-d74e-ae1b-16d6c16fe571"
                         },
                         "Texture2D": {
                             "pos": [
@@ -7569,10 +7482,6 @@
                                     "parentGUID": "e6d5c3b5-ad98-6b4a-a406-3725ee57b6c4",
                                     "siblingIndex": 9
                                 },
-                                "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
-                                },
                                 "LocalTransform": {
                                     "position": [
                                         3.6917836666107178,
@@ -7590,41 +7499,6 @@
                                         1.0,
                                         1.0
                                     ]
-                                },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
-                                            "aoTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "5936ba72-6cad-7a4a-8039-d1614e5a9719",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
-                                            "normalTextureOverride": "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "be682648-fcd7-2b47-b7bf-3faea372c733",
-                                    "receiveShadows": true,
-                                    "visible": true
-                                },
-                                "Name": {
-                                    "name": "Container_Blue"
                                 },
                                 "RigidBody3D": {
                                     "angular_velocity": [
@@ -7655,7 +7529,7 @@
                                     ]
                                 }
                             },
-                            "correspondingPrefabEntityGUID": "85d5637f-1475-d244-8a82-d0573c4dbaef",
+                            "correspondingPrefabEntityGUID": "02e1692c-bdee-3540-8cfd-c006449fc753",
                             "instanceRootGUID": "bfeac97c-6f44-3045-ad26-68984fbf8789",
                             "sourcePrefabGUID": "17f36f84-43ff-fc4a-bba1-91e64f8cf882"
                         },
@@ -7685,6 +7559,11 @@
                                 0.0,
                                 0.0,
                                 0.0
+                            ]
+                        },
+                        "Tag": {
+                            "tags": [
+                                "wall"
                             ]
                         }
                     },
@@ -11699,31 +11578,6 @@
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 17
                                 },
-                                "Layer": {
-                                    "layer_id": 5,
-                                    "layer_mask": 32
-                                },
-                                "LocalTransform": {
-                                    "position": [
-                                        -14.063501358032227,
-                                        0.0,
-                                        -45.78249740600586
-                                    ],
-                                    "rotation": [
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        1.0
-                                    ],
-                                    "scale": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ]
-                                },
-                                "Name": {
-                                    "name": "restart_overlay"
-                                },
                                 "Texture2D": {
                                     "pos": [
                                         0.0,
@@ -11736,9 +11590,9 @@
                                     ]
                                 }
                             },
-                            "correspondingPrefabEntityGUID": "a8a2a666-4902-1a43-82f9-85924a7ed701",
+                            "correspondingPrefabEntityGUID": "85b01bc4-04be-3243-96a9-4c8d0d4a8ad7",
                             "instanceRootGUID": "c2f38fa0-fd5a-a44c-a7de-e2d00c3b9f02",
-                            "sourcePrefabGUID": "3ae755df-b075-fc42-88ae-408c55e41704"
+                            "sourcePrefabGUID": "743a3c5d-e45e-c948-ba6c-b8d0b9534e25"
                         },
                         "Texture2D": {
                             "pos": [
@@ -11846,6 +11700,22 @@
                         "Name": {
                             "name": "PauseManager"
                         },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [
+                                        "85229db1-9cf5-064e-bd77-71c88e8dbfcc",
+                                        "c14c0a93-2636-2c44-ad3e-adb6fca520fe",
+                                        "830683d6-d837-f040-87c2-dc1c24baeb72"
+                                    ],
+                                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                                    "siblingIndex": 18
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "cbc53e43-5867-7042-86ff-da57ea2d741f",
+                            "instanceRootGUID": "00000000-0000-0000-0000-000000000000",
+                            "sourcePrefabGUID": "83d79194-afe1-4340-b2a4-e0ba12c24339"
+                        },
                         "Scripts": {
                             "scripts": [
                                 {
@@ -11929,31 +11799,6 @@
                                     "parentGUID": "cbc53e43-5867-7042-86ff-da57ea2d741f",
                                     "siblingIndex": 0
                                 },
-                                "Layer": {
-                                    "layer_id": 2,
-                                    "layer_mask": 4
-                                },
-                                "LocalTransform": {
-                                    "position": [
-                                        2.8526031970977783,
-                                        1.9104310274124146,
-                                        -5.961182594299316
-                                    ],
-                                    "rotation": [
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        1.0
-                                    ],
-                                    "scale": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ]
-                                },
-                                "Name": {
-                                    "name": "quit_button"
-                                },
                                 "Scripts": {
                                     "scripts": [
                                         {
@@ -11973,15 +11818,6 @@
                                         0.10000000149011612
                                     ]
                                 },
-                                "UIAnimation": {
-                                    "b_loop": true,
-                                    "b_playing": false,
-                                    "duration": 0.20000000298023224,
-                                    "frame_duration": 0.10000000149011612,
-                                    "spritesheet_columns": 2,
-                                    "spritesheet_rows": 1,
-                                    "total_frames": 2
-                                },
                                 "UIButton": {
                                     "action": "pause_Quit",
                                     "disabled_color": -10066330,
@@ -11990,70 +11826,19 @@
                                     "payload": "",
                                     "pressed_color": -5592406,
                                     "state": "Normal"
-                                },
-                                "UIElement": {
-                                    "b_is_enabled": true,
-                                    "b_is_interactable": true,
-                                    "layer": 0
-                                },
-                                "UIRectTransform": {
-                                    "anchor_max": [
-                                        0.5,
-                                        0.5
-                                    ],
-                                    "anchor_min": [
-                                        0.5,
-                                        0.5
-                                    ],
-                                    "anchored_position": [
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "local_position": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "offset_max": [
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "offset_min": [
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "pivot": [
-                                        0.5,
-                                        0.5
-                                    ],
-                                    "rotation": [
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        1.0
-                                    ],
-                                    "scale": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "size_delta": [
-                                        1024.0,
-                                        88.0
-                                    ]
-                                },
-                                "UVCoordinates": {
-                                    "uv": [
-                                        0.0018248175038024783,
-                                        0.011363636702299118,
-                                        0.49817517399787903,
-                                        0.9886363744735718
-                                    ]
                                 }
                             },
-                            "correspondingPrefabEntityGUID": "7beaa535-462c-7f45-9d6d-4090ca227034",
+                            "correspondingPrefabEntityGUID": "85229db1-9cf5-064e-bd77-71c88e8dbfcc",
                             "instanceRootGUID": "db6f6c9e-332d-0d47-95a2-b423042c2c3c",
-                            "sourcePrefabGUID": "5bbfbc9a-7b11-f544-a325-c92862eab362"
+                            "sourcePrefabGUID": "83d79194-afe1-4340-b2a4-e0ba12c24339"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "614b9671-17c7-4f4b-a759-f45410de3e15"
+                                }
+                            ]
                         },
                         "Texture2D": {
                             "pos": [
@@ -12218,31 +12003,6 @@
                                     "parentGUID": "cbc53e43-5867-7042-86ff-da57ea2d741f",
                                     "siblingIndex": 1
                                 },
-                                "Layer": {
-                                    "layer_id": 2,
-                                    "layer_mask": 4
-                                },
-                                "LocalTransform": {
-                                    "position": [
-                                        2.8526031970977783,
-                                        1.9104310274124146,
-                                        -5.961182594299316
-                                    ],
-                                    "rotation": [
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        1.0
-                                    ],
-                                    "scale": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ]
-                                },
-                                "Name": {
-                                    "name": "continue_button"
-                                },
                                 "Scripts": {
                                     "scripts": [
                                         {
@@ -12262,15 +12022,6 @@
                                         0.09000000357627869
                                     ]
                                 },
-                                "UIAnimation": {
-                                    "b_loop": true,
-                                    "b_playing": false,
-                                    "duration": 0.20000000298023224,
-                                    "frame_duration": 0.10000000149011612,
-                                    "spritesheet_columns": 2,
-                                    "spritesheet_rows": 1,
-                                    "total_frames": 2
-                                },
                                 "UIButton": {
                                     "action": "pause_Resume",
                                     "disabled_color": -10066330,
@@ -12279,57 +12030,6 @@
                                     "payload": "",
                                     "pressed_color": -5592406,
                                     "state": "Normal"
-                                },
-                                "UIElement": {
-                                    "b_is_enabled": true,
-                                    "b_is_interactable": true,
-                                    "layer": 0
-                                },
-                                "UIRectTransform": {
-                                    "anchor_max": [
-                                        0.5,
-                                        0.5
-                                    ],
-                                    "anchor_min": [
-                                        0.5,
-                                        0.5
-                                    ],
-                                    "anchored_position": [
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "local_position": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "offset_max": [
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "offset_min": [
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "pivot": [
-                                        0.5,
-                                        0.5
-                                    ],
-                                    "rotation": [
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        1.0
-                                    ],
-                                    "scale": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "size_delta": [
-                                        1024.0,
-                                        88.0
-                                    ]
                                 },
                                 "UVCoordinates": {
                                     "uv": [
@@ -12340,9 +12040,17 @@
                                     ]
                                 }
                             },
-                            "correspondingPrefabEntityGUID": "7beaa535-462c-7f45-9d6d-4090ca227034",
+                            "correspondingPrefabEntityGUID": "db6f6c9e-332d-0d47-95a2-b423042c2c3c",
                             "instanceRootGUID": "db6f6c9e-332d-0d47-95a2-b423042c2c3c",
-                            "sourcePrefabGUID": "5bbfbc9a-7b11-f544-a325-c92862eab362"
+                            "sourcePrefabGUID": "83d79194-afe1-4340-b2a4-e0ba12c24339"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "614b9671-17c7-4f4b-a759-f45410de3e15"
+                                }
+                            ]
                         },
                         "Texture2D": {
                             "pos": [
@@ -12507,31 +12215,6 @@
                                     "parentGUID": "cbc53e43-5867-7042-86ff-da57ea2d741f",
                                     "siblingIndex": 2
                                 },
-                                "Layer": {
-                                    "layer_id": 2,
-                                    "layer_mask": 4
-                                },
-                                "LocalTransform": {
-                                    "position": [
-                                        2.8526031970977783,
-                                        1.9104310274124146,
-                                        -5.961182594299316
-                                    ],
-                                    "rotation": [
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        1.0
-                                    ],
-                                    "scale": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ]
-                                },
-                                "Name": {
-                                    "name": "restart_button"
-                                },
                                 "Scripts": {
                                     "scripts": [
                                         {
@@ -12551,15 +12234,6 @@
                                         0.09000000357627869
                                     ]
                                 },
-                                "UIAnimation": {
-                                    "b_loop": true,
-                                    "b_playing": false,
-                                    "duration": 0.20000000298023224,
-                                    "frame_duration": 0.10000000149011612,
-                                    "spritesheet_columns": 2,
-                                    "spritesheet_rows": 1,
-                                    "total_frames": 2
-                                },
                                 "UIButton": {
                                     "action": "pause_Restart",
                                     "disabled_color": -10066330,
@@ -12568,70 +12242,19 @@
                                     "payload": "",
                                     "pressed_color": -5592406,
                                     "state": "Normal"
-                                },
-                                "UIElement": {
-                                    "b_is_enabled": true,
-                                    "b_is_interactable": true,
-                                    "layer": 0
-                                },
-                                "UIRectTransform": {
-                                    "anchor_max": [
-                                        0.5,
-                                        0.5
-                                    ],
-                                    "anchor_min": [
-                                        0.5,
-                                        0.5
-                                    ],
-                                    "anchored_position": [
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "local_position": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "offset_max": [
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "offset_min": [
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "pivot": [
-                                        0.5,
-                                        0.5
-                                    ],
-                                    "rotation": [
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        1.0
-                                    ],
-                                    "scale": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "size_delta": [
-                                        1024.0,
-                                        88.0
-                                    ]
-                                },
-                                "UVCoordinates": {
-                                    "uv": [
-                                        0.0012499999720603228,
-                                        0.011363636702299118,
-                                        0.4987500011920929,
-                                        0.9886363744735718
-                                    ]
                                 }
                             },
-                            "correspondingPrefabEntityGUID": "7beaa535-462c-7f45-9d6d-4090ca227034",
+                            "correspondingPrefabEntityGUID": "6453baf0-385a-7a40-bffb-de0d6288d042",
                             "instanceRootGUID": "db6f6c9e-332d-0d47-95a2-b423042c2c3c",
-                            "sourcePrefabGUID": "5bbfbc9a-7b11-f544-a325-c92862eab362"
+                            "sourcePrefabGUID": "83d79194-afe1-4340-b2a4-e0ba12c24339"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "614b9671-17c7-4f4b-a759-f45410de3e15"
+                                }
+                            ]
                         },
                         "Texture2D": {
                             "pos": [
@@ -20636,10 +20259,6 @@
                                     "parentGUID": "fb707969-9b8b-184a-83e3-b139e59c62a0",
                                     "siblingIndex": 28
                                 },
-                                "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
-                                },
                                 "LocalTransform": {
                                     "position": [
                                         -11.828357696533203,
@@ -20657,41 +20276,6 @@
                                         3.440000057220459,
                                         3.440000057220459
                                     ]
-                                },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "e01c794e-0add-d542-9860-03f63c3193ab",
-                                            "aoTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "normalTextureOverride": "d9a10e76-3db1-0c41-9368-c476a1845c40",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
-                                    "receiveShadows": true,
-                                    "visible": true
-                                },
-                                "Name": {
-                                    "name": "Crate"
                                 },
                                 "RigidBody3D": {
                                     "angular_velocity": [
@@ -20724,7 +20308,7 @@
                             },
                             "correspondingPrefabEntityGUID": "2fc12db1-dc23-944a-a2e6-9b1fc43f948e",
                             "instanceRootGUID": "1e6a8de7-c878-c54a-a40f-6346e92e5b57",
-                            "sourcePrefabGUID": "9b62d2c6-23dc-5d4f-898b-ee799df743e7"
+                            "sourcePrefabGUID": "f679979d-9d97-6345-825e-212f3c0dac1c"
                         },
                         "RigidBody3D": {
                             "angular_velocity": [
@@ -21339,10 +20923,6 @@
                                     "parentGUID": "fb707969-9b8b-184a-83e3-b139e59c62a0",
                                     "siblingIndex": 32
                                 },
-                                "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
-                                },
                                 "LocalTransform": {
                                     "position": [
                                         -3.3482561111450195,
@@ -21360,41 +20940,6 @@
                                         1.9700000286102295,
                                         1.9700000286102295
                                     ]
-                                },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "e01c794e-0add-d542-9860-03f63c3193ab",
-                                            "aoTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "normalTextureOverride": "d9a10e76-3db1-0c41-9368-c476a1845c40",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
-                                    "receiveShadows": true,
-                                    "visible": true
-                                },
-                                "Name": {
-                                    "name": "Crate"
                                 },
                                 "RigidBody3D": {
                                     "angular_velocity": [
@@ -21427,7 +20972,7 @@
                             },
                             "correspondingPrefabEntityGUID": "2fc12db1-dc23-944a-a2e6-9b1fc43f948e",
                             "instanceRootGUID": "f52bd4f6-eb26-094a-9b11-b6ae82422885",
-                            "sourcePrefabGUID": "9b62d2c6-23dc-5d4f-898b-ee799df743e7"
+                            "sourcePrefabGUID": "f679979d-9d97-6345-825e-212f3c0dac1c"
                         },
                         "RigidBody3D": {
                             "angular_velocity": [
@@ -21536,10 +21081,6 @@
                                     "parentGUID": "fb707969-9b8b-184a-83e3-b139e59c62a0",
                                     "siblingIndex": 33
                                 },
-                                "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
-                                },
                                 "LocalTransform": {
                                     "position": [
                                         -3.4951486587524414,
@@ -21557,41 +21098,6 @@
                                         2.9888999462127686,
                                         2.9888999462127686
                                     ]
-                                },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "e01c794e-0add-d542-9860-03f63c3193ab",
-                                            "aoTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "normalTextureOverride": "d9a10e76-3db1-0c41-9368-c476a1845c40",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
-                                    "receiveShadows": true,
-                                    "visible": true
-                                },
-                                "Name": {
-                                    "name": "Crate"
                                 },
                                 "RigidBody3D": {
                                     "angular_velocity": [
@@ -21624,7 +21130,7 @@
                             },
                             "correspondingPrefabEntityGUID": "2fc12db1-dc23-944a-a2e6-9b1fc43f948e",
                             "instanceRootGUID": "b1d51b66-4ef3-9e47-bbc3-dadc64f39a1e",
-                            "sourcePrefabGUID": "9b62d2c6-23dc-5d4f-898b-ee799df743e7"
+                            "sourcePrefabGUID": "f679979d-9d97-6345-825e-212f3c0dac1c"
                         },
                         "RigidBody3D": {
                             "angular_velocity": [
@@ -23971,10 +23477,6 @@
                                     "parentGUID": "fb707969-9b8b-184a-83e3-b139e59c62a0",
                                     "siblingIndex": 48
                                 },
-                                "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
-                                },
                                 "LocalTransform": {
                                     "position": [
                                         -15.225345611572266,
@@ -23992,41 +23494,6 @@
                                         1.0,
                                         1.0
                                     ]
-                                },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "e01c794e-0add-d542-9860-03f63c3193ab",
-                                            "aoTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "normalTextureOverride": "d9a10e76-3db1-0c41-9368-c476a1845c40",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
-                                    "receiveShadows": true,
-                                    "visible": true
-                                },
-                                "Name": {
-                                    "name": "Crate"
                                 },
                                 "RigidBody3D": {
                                     "angular_velocity": [
@@ -24059,7 +23526,7 @@
                             },
                             "correspondingPrefabEntityGUID": "2fc12db1-dc23-944a-a2e6-9b1fc43f948e",
                             "instanceRootGUID": "ee4ae10f-7b56-c042-9c21-a54d89b690e4",
-                            "sourcePrefabGUID": "9b62d2c6-23dc-5d4f-898b-ee799df743e7"
+                            "sourcePrefabGUID": "f679979d-9d97-6345-825e-212f3c0dac1c"
                         },
                         "RigidBody3D": {
                             "angular_velocity": [
@@ -24240,10 +23707,6 @@
                                     "parentGUID": "fb707969-9b8b-184a-83e3-b139e59c62a0",
                                     "siblingIndex": 50
                                 },
-                                "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
-                                },
                                 "LocalTransform": {
                                     "position": [
                                         -15.168771743774414,
@@ -24261,41 +23724,6 @@
                                         1.0,
                                         1.0
                                     ]
-                                },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "e01c794e-0add-d542-9860-03f63c3193ab",
-                                            "aoTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "normalTextureOverride": "d9a10e76-3db1-0c41-9368-c476a1845c40",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
-                                    "receiveShadows": true,
-                                    "visible": true
-                                },
-                                "Name": {
-                                    "name": "Crate"
                                 },
                                 "RigidBody3D": {
                                     "angular_velocity": [
@@ -24328,7 +23756,7 @@
                             },
                             "correspondingPrefabEntityGUID": "2fc12db1-dc23-944a-a2e6-9b1fc43f948e",
                             "instanceRootGUID": "2e1e09ee-49c5-fc40-bcdd-bd35e6188360",
-                            "sourcePrefabGUID": "9b62d2c6-23dc-5d4f-898b-ee799df743e7"
+                            "sourcePrefabGUID": "f679979d-9d97-6345-825e-212f3c0dac1c"
                         },
                         "RigidBody3D": {
                             "angular_velocity": [
@@ -24621,10 +24049,6 @@
                                     "parentGUID": "fb707969-9b8b-184a-83e3-b139e59c62a0",
                                     "siblingIndex": 52
                                 },
-                                "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
-                                },
                                 "LocalTransform": {
                                     "position": [
                                         4.355327606201172,
@@ -24642,41 +24066,6 @@
                                         2.431999921798706,
                                         2.431999921798706
                                     ]
-                                },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "e01c794e-0add-d542-9860-03f63c3193ab",
-                                            "aoTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "normalTextureOverride": "d9a10e76-3db1-0c41-9368-c476a1845c40",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
-                                    "receiveShadows": true,
-                                    "visible": true
-                                },
-                                "Name": {
-                                    "name": "Crate"
                                 },
                                 "RigidBody3D": {
                                     "angular_velocity": [
@@ -24709,7 +24098,7 @@
                             },
                             "correspondingPrefabEntityGUID": "2fc12db1-dc23-944a-a2e6-9b1fc43f948e",
                             "instanceRootGUID": "797678d2-c445-4e41-8e87-3151b1d525af",
-                            "sourcePrefabGUID": "9b62d2c6-23dc-5d4f-898b-ee799df743e7"
+                            "sourcePrefabGUID": "f679979d-9d97-6345-825e-212f3c0dac1c"
                         },
                         "RigidBody3D": {
                             "angular_velocity": [
@@ -24818,10 +24207,6 @@
                                     "parentGUID": "fb707969-9b8b-184a-83e3-b139e59c62a0",
                                     "siblingIndex": 53
                                 },
-                                "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
-                                },
                                 "LocalTransform": {
                                     "position": [
                                         -18.843868255615234,
@@ -24839,41 +24224,6 @@
                                         1.0,
                                         1.0
                                     ]
-                                },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "e01c794e-0add-d542-9860-03f63c3193ab",
-                                            "aoTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "normalTextureOverride": "d9a10e76-3db1-0c41-9368-c476a1845c40",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
-                                    "receiveShadows": true,
-                                    "visible": true
-                                },
-                                "Name": {
-                                    "name": "Crate"
                                 },
                                 "RigidBody3D": {
                                     "angular_velocity": [
@@ -24906,7 +24256,7 @@
                             },
                             "correspondingPrefabEntityGUID": "2fc12db1-dc23-944a-a2e6-9b1fc43f948e",
                             "instanceRootGUID": "075bb689-4671-5f4c-9bce-953c2a4e3694",
-                            "sourcePrefabGUID": "9b62d2c6-23dc-5d4f-898b-ee799df743e7"
+                            "sourcePrefabGUID": "f679979d-9d97-6345-825e-212f3c0dac1c"
                         },
                         "RigidBody3D": {
                             "angular_velocity": [
@@ -25015,10 +24365,6 @@
                                     "parentGUID": "fb707969-9b8b-184a-83e3-b139e59c62a0",
                                     "siblingIndex": 54
                                 },
-                                "Layer": {
-                                    "layer_id": 0,
-                                    "layer_mask": 1
-                                },
                                 "LocalTransform": {
                                     "position": [
                                         5.867923736572266,
@@ -25036,41 +24382,6 @@
                                         2.4800000190734863,
                                         2.4800000190734863
                                     ]
-                                },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "e01c794e-0add-d542-9860-03f63c3193ab",
-                                            "aoTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "normalTextureOverride": "d9a10e76-3db1-0c41-9368-c476a1845c40",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
-                                    "receiveShadows": true,
-                                    "visible": true
-                                },
-                                "Name": {
-                                    "name": "Crate"
                                 },
                                 "RigidBody3D": {
                                     "angular_velocity": [
@@ -25103,7 +24414,7 @@
                             },
                             "correspondingPrefabEntityGUID": "2fc12db1-dc23-944a-a2e6-9b1fc43f948e",
                             "instanceRootGUID": "648349bf-491e-b040-8a86-0f8c2456e869",
-                            "sourcePrefabGUID": "9b62d2c6-23dc-5d4f-898b-ee799df743e7"
+                            "sourcePrefabGUID": "f679979d-9d97-6345-825e-212f3c0dac1c"
                         },
                         "RigidBody3D": {
                             "angular_velocity": [

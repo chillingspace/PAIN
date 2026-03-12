@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Exclaimation_baseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 7131436614702163887
+  },
+  "descriptor_version": 1,
+  "guid": "db897ed4-97a7-b140-a7b4-3675d2c25a2a",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Exclaimation_baseColor.png"
+  }
+}

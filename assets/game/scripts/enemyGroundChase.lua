@@ -30,7 +30,7 @@ do
     local SEARCH_WAIT_TIME       = 1.5
 
     -- Chase / Search movement
-    local CHASE_SPEED            = 1.5
+    local CHASE_SPEED            = 2.0
     local RETURN_SPEED           = 1.2
     local MAX_CHASE_DISTANCE     = 10.0
     local ARRIVE_EPSILON         = 0.2
@@ -71,7 +71,7 @@ do
 
     -- Exclamation icon
     local ALERT_ICON_NAME        = "exclamation_alert"
-    local ALERT_ICON_HEIGHT      = 1.0
+    local ALERT_ICON_HEIGHT      = 2.0
     local SHOW_ICON_IN_ALERT     = true
     local SHOW_ICON_IN_CHASE     = true
     local SHOW_ICON_IN_SEARCH    = false
