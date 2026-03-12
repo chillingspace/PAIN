@@ -218,7 +218,7 @@ registerUpdate(function(dt)
         fwd = fwd + joystickDirY
         fwd = math.max(-1.0, math.min(1.0, fwd))
 
-        local px, py, pz = getPosition(playerId)
+        local px, py, pz = getPosition(id)
         local ep = S.pipeEntrancePos
 
         -- project player's current position onto the pipe axis
@@ -228,8 +228,9 @@ registerUpdate(function(dt)
         local currentT = toCurX * S.pipeDirX + toCurY * S.pipeDirY + toCurZ * S.pipeDirZ
 
         -- advance and clamp within [0, pipeLen]
-        local newT = math.max(0.0, math.min(S.pipeLen, currentT + fwd * speed * dt))
+        local newT = currentT + fwd * speed * dt
 
+        newT = math.max(0.0, math.min(S.pipeLen, newT))
         setPosition(id,
             ep.x + S.pipeDirX * newT,
             ep.y + S.pipeDirY * newT,

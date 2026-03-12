@@ -196,6 +196,9 @@ namespace PAIN {
         void SetLightDirection(entt::entity entityId, float x, float y, float z) override;
         glm::vec3 GetLightDirection(entt::entity entityId) override;
         float GetLightOuterAngle(entt::entity entityId) override;
+        void SetLightOuterAngle(entt::entity entityId, float degrees) override;
+        float GetLightInnerAngle(entt::entity entityId) override;
+        void SetLightInnerAngle(entt::entity entityId, float degrees) override;
         void SetShadowType(entt::entity entityId, int shadowEnum /*0:NONE,1:MAPPED,2:SCREEN_SPACE*/) override;
 
         /* =========================================================================== */

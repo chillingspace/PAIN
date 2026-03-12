@@ -6,7 +6,9 @@ local config = {
     
     mouseSensitivity = 0.002,
     touchSensitivity = 0.002,
-    pitchLimit = 1.4
+    pitchMax = 1.2,
+    pitchMin = -0.3,
+
 }
 
 local DEFAULT_YAW = 0.0
@@ -179,8 +181,8 @@ registerUpdate(function(dt)
         end
     end
 
-    if pitch >  config.pitchLimit then pitch =  config.pitchLimit end
-    if pitch < -config.pitchLimit then pitch = -config.pitchLimit end
+     if pitch > config.pitchMax then pitch = config.pitchMax end
+ if pitch < config.pitchMin then pitch = config.pitchMin end
 
     local cosY, sinY = math.cos(yaw), math.sin(yaw)
     local cosP, sinP = math.cos(pitch), math.sin(pitch)
