@@ -34,6 +34,8 @@ namespace PAIN {
         //	float near_plane;
         //	float far_plane;
         SHADOW_TYPES shadow_type;
+        int shadow_resolution = 1024;
+        bool volumetric = false;
 
         //spotlight
         float inner_angle = 12.5f;
@@ -66,6 +68,8 @@ REFL_FIELD(offset)
 REFL_FIELD(light_intensity)
 REFL_FIELD(light_type)
 REFL_FIELD(shadow_type)
+REFL_FIELD(shadow_resolution)
+REFL_FIELD(volumetric)
 REFL_FIELD(direction)
 REFL_FIELD(inner_angle)
 REFL_FIELD(outer_angle)

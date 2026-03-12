@@ -561,6 +561,14 @@ namespace PAIN {
             auto p = api_->GetPosition(entityId);
             return std::make_tuple(p.x, p.y, p.z);
             });
+        lua_.set_function("getWorldPosition", [this](entt::entity entityId) {
+            if (!api_) {
+                PN_ERROR("[LuaManager] API not initialized!");
+                return std::make_tuple(0.f, 0.f, 0.f);
+            }
+            auto p = api_->GetWorldPosition(entityId);
+            return std::make_tuple(p.x, p.y, p.z);
+            });
         lua_.set_function("setPosition", [this](entt::entity entityId, float x, float y, float z) { if (api_) api_->SetPosition(entityId, { x,y,z }); });
 
         lua_.set_function("get2DPosition", [this](entt::entity entityId) {
@@ -1408,9 +1416,20 @@ namespace PAIN {
         lua_.set_function("addLight", [this](entt::entity entityId) {if (api_) api_->AddLight(entityId); });
         lua_.set_function("removeLight", [this](entt::entity entityId) {if (api_) api_->RemoveLight(entityId); });
         lua_.set_function("setLightPosition", [this](entt::entity entityId, float x, float y, float z) {if (api_) api_->SetLightPosition(entityId, x, y, z); });
+        lua_.set_function("getLightOffset", [this](entt::entity entityId) {
+            auto v = api_ ? api_->GetLightOffset(entityId) : glm::vec3{0,0,0};
+            return std::make_tuple(v.x, v.y, v.z);
+        });
         lua_.set_function("setLightIntensity", [this](entt::entity entityId, float r, float g, float b) {if (api_) api_->SetLightIntensity(entityId, r, g, b); });
         lua_.set_function("setLightType", [this](entt::entity entityId, int typeInt) {if (api_) api_->SetLightType(entityId, typeInt);});
         lua_.set_function("setLightDirection", [this](entt::entity entityId, float x, float y, float z) {if (api_) api_->SetLightDirection(entityId, x, y, z); });
+        lua_.set_function("getLightDirection", [this](entt::entity entityId) {
+            auto v = api_ ? api_->GetLightDirection(entityId) : glm::vec3{0,-1,0};
+            return std::make_tuple(v.x, v.y, v.z);
+        });
+        lua_.set_function("getLightOuterAngle", [this](entt::entity entityId) -> float {
+            return api_ ? api_->GetLightOuterAngle(entityId) : 17.5f;
+        });
         lua_.set_function("setShadowType", [this](entt::entity entityId, int shadowTypeInt) {if (api_) api_->SetShadowType(entityId, shadowTypeInt); });
 
         /* =========================================================================== */

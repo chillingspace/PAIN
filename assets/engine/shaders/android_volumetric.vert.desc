@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "android_volumetric.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 8584205245545845726
+  },
+  "descriptor_version": 1,
+  "guid": "c4f5e1b0-0c0f-45f3-8f3f-580f8a11f001",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_volumetric.vert"
+  }
+}

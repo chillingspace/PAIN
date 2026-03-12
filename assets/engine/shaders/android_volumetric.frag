@@ -1,4 +1,6 @@
-#version 330 core
+#version 300 es
+precision highp float;
+precision highp int;
 
 in vec2 TexCoords;
 layout(location = 0) out vec4 FragColor;
@@ -12,14 +14,14 @@ struct Light {
     mat4 V;
     mat4 P;
     float shadowMapIdx;
-    float type;         // 0=point, 1=directional, 2=spotlight
+    float type;
     vec3 direction;
-    float innerCutoff;  // cosine of inner angle
-    float outerCutoff;  // cosine of outer angle
+    float innerCutoff;
+    float outerCutoff;
 };
 
 #define MAX_LIGHTS 4
-#define MAX_SHADOWMAPPED_LIGHTS 4
+#define MAX_SHADOWMAPPED_LIGHTS 1
 #define MAX_VOLUMETRIC_STEPS 64
 
 uniform Light u_Lights[MAX_LIGHTS];
@@ -73,7 +75,7 @@ float sampleShadow(int shadowIdx, vec3 worldPos, Light light) {
         return 0.0;
     }
 
-    float shadowDepth = texture(u_ShadowMaps[shadowIdx], projCoords.xy).r;
+    float shadowDepth = texture(u_ShadowMaps[0], projCoords.xy).r;
     if (shadowDepth >= 0.99) {
         return 0.0;
     }
@@ -162,7 +164,6 @@ void main() {
     }
 
     vec3 currentColor = accumulated * u_VolumetricIntensity;
-
     vec3 finalColor = currentColor;
     if (hasSurface && u_HistoryValid > 0 && u_HistoryBlend > 0.0) {
         vec4 prevClip = u_PrevVP * vec4(surfaceWorldPos, 1.0);

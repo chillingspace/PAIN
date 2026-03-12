@@ -6,24 +6,33 @@ local enemy = entityId
 local seeingPlayer = false
 local minimapTagged = false
 
--- match inspector values
-local LIGHT_OFFSET = { x = 0.0, y = 0.0, z = 0.0 }   -- same as Lighting.offset
-local OUTER_ANGLE_DEG = 32                          -- spotlight outer angle
-local MAX_DISTANCE = 9.0                              -- how far the light reaches (world units)
+-- Approximate player height so we test feet, torso, and head — not just the pivot.
+-- The pivot is typically at the feet; adjust if your player origin is at centre.
+local PLAYER_HEIGHT     = 1.8   -- world units (tune to match the player model)
+local LOST_SIGHT_GRACE  = 0.12  -- seconds before losing detection (matches ground enemy)
 
--- spotlight points straight down in world space for now
-local LIGHT_DIR = { x = 0.0, y = -1.0, z = 0.0 }
+local loseSightTimer = 0.0
 
 -- light colors
-local NORMAL_COLOR = { r = 0.5, g = 0.5, b = 0.5 }  -- warm white/yellow
-local ALERT_COLOR  = { r = 1.0, g = 0.1, b = 0.1 } -- red
+local NORMAL_COLOR = { r = 0.5, g = 0.5, b = 0.5 }
+local ALERT_COLOR  = { r = 1.0, g = 0.1, b = 0.1 }
 
 _G.EnemyFrozen = _G.EnemyFrozen or {}
 
-local function normalize(x, y, z)
-    local len = math.sqrt(x*x + y*y + z*z)
-    if len <= 1e-6 then return 0.0, 0.0, 0.0, 0.0 end
-    return x/len, y/len, z/len, len
+-- Returns true if the world point (px,py,pz) lies inside the cone defined by
+-- origin (ox,oy,oz), unit direction (ldx,ldy,ldz), and half-angle tangent.
+local function pointInCone(px, py, pz, ox, oy, oz, ldx, ldy, ldz, halfTan)
+    local vx = px - ox
+    local vy = py - oy
+    local vz = pz - oz
+    -- depth along the cone axis (positive = in front of the cone)
+    local depth = vx*ldx + vy*ldy + vz*ldz
+    if depth <= 0.0 then return false end
+    -- squared off-axis distance (Pythagoras: |v|^2 - depth^2)
+    local offSq = vx*vx + vy*vy + vz*vz - depth*depth
+    if offSq < 0.0 then offSq = 0.0 end
+    -- inside cone: offAxis / depth <= tan(halfAngle)  =>  offSq <= depth^2 * halfTan^2
+    return offSq <= depth * depth * halfTan * halfTan
 end
 
 setLightIntensity(enemy, NORMAL_COLOR.r, NORMAL_COLOR.g, NORMAL_COLOR.b)
@@ -38,71 +47,50 @@ registerUpdate(function(dt)
 
     -- cache player
     if not player then
-        -- if already use _G.PlayerEntity, prefer that
         player = _G.PlayerEntity or findEntity("Player")
         if not player then return end
     end
 
-    -- if you have player invincibility / respawn logic, respect it
+    -- respect invincibility / respawn / hidden states
     if PlayerState and PlayerState.canBeCaught and not PlayerState.canBeCaught() then
-        -- if we were seeing before, cancel
         if seeingPlayer and DetectionUI and DetectionUI.cancel then
             DetectionUI.cancel(enemy)
         end
         seeingPlayer = false
+        loseSightTimer = 0.0
         setLightIntensity(enemy, NORMAL_COLOR.r, NORMAL_COLOR.g, NORMAL_COLOR.b)
-
-        -- only unfreeze enemy once the ui bar has fully drained
         if not (DetectionUI and DetectionUI.active) then
             _G.EnemyFrozen[enemy] = false
         end
         return
     end
 
-    -- enemy/world position
-    local ex, ey, ez = getPosition(enemy)
+    -- Read actual light properties from the engine so they always match the editor values.
+    -- getWorldPosition uses WorldTransform (full hierarchy) — safe for parented entities.
+    -- getLightOffset / getLightDirection / getLightOuterAngle read the Lighting component.
+    local ex, ey, ez = getWorldPosition(enemy)
+    local lox, loy, loz = getLightOffset(enemy)
+    local ox = ex + lox
+    local oy = ey + loy
+    local oz = ez + loz
 
-    -- light origin = enemy position + light offset
-    local ox = ex + LIGHT_OFFSET.x
-    local oy = ey + LIGHT_OFFSET.y
-    local oz = ez + LIGHT_OFFSET.z
+    local ldx, ldy, ldz = getLightDirection(enemy)
+    local outerAngleDeg  = getLightOuterAngle(enemy)
+    local halfTan        = math.tan(math.rad(outerAngleDeg))
 
-    -- player position
-    local px, py, pz = getPosition(player)
+    -- Player world position (pivot, typically at feet).
+    local px, py, pz = getWorldPosition(player)
 
-    -- vector from light to player
-    local vx = px - ox
-    local vy = py - oy
-    local vz = pz - oz
-
-    -- early out on distance
-    local vxN, vyN, vzN, dist = normalize(vx, vy, vz)
-    if dist == 0.0 or dist > MAX_DISTANCE then
-        if seeingPlayer then
-            seeingPlayer = false
-            if DetectionUI and DetectionUI.cancel then DetectionUI.cancel(enemy) end
-            setLightIntensity(enemy, NORMAL_COLOR.r, NORMAL_COLOR.g, NORMAL_COLOR.b)
-        end
-        return
-    end
-
-    -- angle between light direction and vector to player
-    local lxN, lyN, lzN = normalize(LIGHT_DIR.x, LIGHT_DIR.y, LIGHT_DIR.z)
-    local dot = vxN*lxN + vyN*lyN + vzN*lzN
-    dot = math.max(-1.0, math.min(1.0, dot))  
-    local angleDeg = math.deg(math.acos(dot))
-
-    -- if angleDeg <= OUTER_ANGLE_DEG then
-    --     log("[enemyLightTrigger] Player is in the enemy light cone!")
-
-    --     if PlayerState and PlayerState.onCaught then
-    --         PlayerState.onCaught(player)
-    --     end
-    -- end
-
-    local inCone = (dist > 0.0 and dist <= MAX_DISTANCE and angleDeg <= OUTER_ANGLE_DEG)
+    -- Test three vertical sample points so the full player body is considered:
+    --   feet (pivot), torso (half height), head (full height).
+    -- Detection succeeds if any sample point is inside the cone.
+    local inCone = pointInCone(px, py,                    pz, ox, oy, oz, ldx, ldy, ldz, halfTan)
+               or  pointInCone(px, py + PLAYER_HEIGHT*0.5, pz, ox, oy, oz, ldx, ldy, ldz, halfTan)
+               or  pointInCone(px, py + PLAYER_HEIGHT,     pz, ox, oy, oz, ldx, ldy, ldz, halfTan)
 
     if inCone then
+        loseSightTimer = 0.0
+
         if not seeingPlayer then
             seeingPlayer = true
             _G.EnemyFrozen[enemy] = true
@@ -116,7 +104,17 @@ registerUpdate(function(dt)
         end
     else
         if seeingPlayer then
+            -- Grace period: require the player to be outside the cone for
+            -- LOST_SIGHT_GRACE seconds before actually cancelling detection.
+            -- This prevents flicker from jitter / animation bobbing / cone boundaries.
+            loseSightTimer = loseSightTimer + dt
+            if loseSightTimer < LOST_SIGHT_GRACE then
+                return  -- still within grace — keep current detection state
+            end
+
+            -- Grace elapsed — commit to losing the player
             seeingPlayer = false
+            loseSightTimer = 0.0
             if DetectionUI and DetectionUI.cancel then
                 DetectionUI.cancel(enemy)
             end

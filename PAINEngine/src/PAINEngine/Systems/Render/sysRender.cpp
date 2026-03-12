@@ -301,15 +301,16 @@ namespace PAIN {
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after debug pass: {}", err);
 				}
-				uiPass(registry);
-				err = glGetError();
-				if (err != GL_NO_ERROR) {
-					PN_CORE_ERROR("OpenGL err after UI pass: {}", err);
-				}
 				services.lock()->get<sRenderer>()->postProcessPass();
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after post process pass: {}", err);
+				}
+
+				uiPass(registry);
+				err = glGetError();
+				if (err != GL_NO_ERROR) {
+					PN_CORE_ERROR("OpenGL err after UI pass: {}", err);
 				}
 
 				glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
@@ -421,6 +422,17 @@ namespace PAIN {
 
 			rendererService->w_renderer->BeginGeometryPass(rendererService->m_Scene);
 
+			auto& gs = GraphicsSettings::get();
+			const bool useInstancing = gs.use_instanced_rendering;
+
+			// Instance groups: key -> (representative ModelRenderer*, [matrices])
+			// Key = modelVPath + "|" + materialGUIDs (only non-animated, non-override objects)
+			struct InstanceGroup {
+				ModelRenderer* rep = nullptr;
+				std::vector<glm::mat4> matrices;
+			};
+			std::unordered_map<std::string, InstanceGroup> instanceGroups;
+
 			// Use structured bindings with .each() for proper group iteration
 			for (auto [entity, model, transform, layer] : renderGroup.each()) {
 				// Components guaranteed to exist by group - no try_get needed!
@@ -429,7 +441,7 @@ namespace PAIN {
 
 				// Check layer visibility (not part of group, so still need try_get)
 				int layerID = layer.layer_id;
-				if (layerID < layers.size() && !layers[layerID].enabled) {
+				if (layerID < (int)layers.size() && !layers[layerID].enabled) {
 					continue;
 				}
 
@@ -448,17 +460,47 @@ namespace PAIN {
 				auto* boundingVol = registry.try_get<BoundingVolume>(entity);
 				if (boundingVol && boundingVol->worldAABB.isValid()) {
 					if (!isAABBInFrustum(boundingVol->worldAABB, camFrustum)) {
-						GraphicsSettings::get().stats.objects_culled++;
+						gs.stats.objects_culled++;
 						continue; // skip rendering this object, it's outside the frustum
 					}
 				}
 
-				GraphicsSettings::get().stats.objects_rendered++;
+				gs.stats.objects_rendered++;
 
-				// Draw geometry, passing animation pointer (may be null)
+				// GPU INSTANCING: batch non-animated, non-override objects by model+material key
+				const bool canInstance = useInstancing
+					&& model.boneTransforms.empty()
+					&& model.cachedModelAsset
+					&& model.bufferOffset.isUploaded;
+
+				if (canInstance) {
+					bool hasOverride = false;
+					std::string key = model.cachedModelAsset->vpath;
+					for (const auto& mat : model.materials) {
+						if (mat.useOverrides) { hasOverride = true; break; }
+						key += '|';
+						key += mat.materialGUID.ToString(false);
+					}
+					if (!hasOverride) {
+						auto& grp = instanceGroups[key];
+						if (!grp.rep) grp.rep = &const_cast<ModelRenderer&>(model);
+						grp.matrices.push_back(model_xform);
+						continue; // will be drawn in instanced batch below
+					}
+				}
+
+				// Non-instanced fallback
 				rendererService->w_renderer->DrawGeometry(
 					rendererService->m_Scene, const_cast<ModelRenderer&>(model),
 					model_xform);
+			}
+
+			// Flush instanced batches
+			for (auto& [key, grp] : instanceGroups) {
+				if (grp.rep && !grp.matrices.empty()) {
+					rendererService->w_renderer->DrawGeometryInstanced(
+						rendererService->m_Scene, *grp.rep, grp.matrices);
+				}
 			}
 
 			rendererService->w_renderer->EndGeometryPass();
@@ -514,6 +556,10 @@ namespace PAIN {
 			if (!svc)
 				return;
 
+			auto scene = svc->get<Scene::SceneManager>();
+			if (!scene)
+				return;
+
 			auto lightingGroup = registry.group<Lighting>(entt::get<LocalTransform>);
 
 			// Cache to track which lights are still active this frame
@@ -531,11 +577,21 @@ namespace PAIN {
 
 				if (auto lightOpt = LightSources::get().get(lightName)) {
 					Light& light = lightOpt.value();
-					light.position = transform.position + lighting.offset;
+					// Use WorldTransform so the spotlight renders at the correct world
+					// location even when the entity is a non-root child with a parent
+					// that has a non-zero position. Falls back to LocalTransform for
+					// root entities where WorldTransform may not yet be computed.
+					glm::vec3 entityWorldPos = transform.position;
+					if (auto* wt = registry.try_get<WorldTransform>(entity)) {
+						entityWorldPos = glm::vec3(wt->matrix[3]);
+					}
+					light.position = entityWorldPos + lighting.offset;
 					light.L_intensity = lighting.light_intensity;
 					light.type = static_cast<Light::TYPES>(lighting.light_type);
 					light.setShadowType(
 						static_cast<Light::SHADOW_TYPES>(lighting.shadow_type));
+					light.setShadowResolution(lighting.shadow_resolution);
+					light.volumetric = lighting.volumetric;
 
 					// works for non point light
 					light.direction = lighting.direction;
@@ -560,21 +616,20 @@ namespace PAIN {
 				}
 			}
 
-			auto scene = svc->get<Scene::SceneManager>();
 			rendererService->w_renderer->LightingPass(scene, LightSources::get());
 		}
 
-	void System::volumetricPass(entt::registry& registry) {
-		auto rendererService = services.lock()->get<sRenderer>();
-		if (!rendererService || !rendererService->w_renderer)
-			return;
+		void System::volumetricPass(entt::registry& registry) {
+			auto rendererService = services.lock()->get<sRenderer>();
+			if (!rendererService || !rendererService->w_renderer)
+				return;
 
-		auto svc = services.lock();
-		if (!svc) return;
+			auto svc = services.lock();
+			if (!svc) return;
 
-		auto scene = svc->get<Scene::SceneManager>();
-		rendererService->w_renderer->VolumetricPass(scene, LightSources::get());
-	}
+			auto scene = svc->get<Scene::SceneManager>();
+			rendererService->w_renderer->VolumetricPass(scene, LightSources::get());
+		}
 
 		// ============================================
 		// PARTICLE RENDER PASS - GPU Instanced Rendering
