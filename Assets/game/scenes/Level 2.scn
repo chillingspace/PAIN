@@ -1,8 +1,15 @@
 {
     "assets": [
-        "12c6a232-d825-c942-832d-b21967248159",
-        "5dbc2f57-64e8-d242-8aaa-e4244c67e866",
         "c3c73890-4fc8-794a-b225-fd289396baf1",
+        "836b6944-2065-e24e-8a21-a59e9ab0859d",
+        "70fbb33a-74e7-a641-90d5-3a6255b9d413",
+        "3a976dda-9eeb-ae41-9050-0b7dcae71a10",
+        "5ccceeb5-887c-db4c-8cae-0efe9e91b198",
+        "ab4c29a6-7fbe-ac43-bc8b-8acad3cc3c07",
+        "2ce31d6e-4748-3c42-8761-edec2410952a",
+        "4438ada8-1bcf-a542-8705-5e59b74f34a5",
+        "caa95774-ebd1-024d-b01b-cb9fcd0b2ce2",
+        "5dbc2f57-64e8-d242-8aaa-e4244c67e866",
         "ea2431c4-c2c5-724e-a713-daf897030244",
         "14c2b2ac-66d8-104e-98f3-96bbd5bc18b6",
         "186005f2-dcbb-9f4b-af50-d2d4b98041da",
@@ -10,7 +17,9 @@
         "38a421a9-1ffc-3c47-a8e2-f0af50f2e2c2",
         "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
         "d54d96e7-2dc0-c947-8f1a-bab6892ff688",
+        "466ca22c-0eb2-0d49-ac1a-b9d822cc1ce4",
         "4727438d-9c1f-ea47-91e0-8911d3412588",
+        "5d46bba2-ab81-064e-bab5-2517c42f6aca",
         "08527159-b243-d742-a313-9001198b2097",
         "ffd57a3d-b8b4-2b40-94a5-52ecd82a5a5f",
         "d9977322-f31e-bc4c-b298-fbcd6690c4ba",
@@ -105,6 +114,7 @@
         "c3240e7d-4066-2444-a024-c1d31c71a299",
         "c79c529b-71e5-164c-854d-f8cf076f5318",
         "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+        "164de26f-1403-e146-8a76-735d5dc42155",
         "510e3ede-f637-c448-99e8-7dc200d60c8f",
         "c3be7e4a-501e-0744-ac10-55d1b5a38d86",
         "b3ec7aee-c5ff-af48-9aa1-f912f843a888",
@@ -150,7 +160,6 @@
         "f6863a86-d8e4-194c-9c87-f42435c1060a",
         "4aecfe47-ed20-4341-805a-b691f14700e1",
         "8c17feda-975a-5d41-b7d1-687bfcb88afd",
-        "70fbb33a-74e7-a641-90d5-3a6255b9d413",
         "f02f0a71-8e9c-1843-9873-8e636f4ad324",
         "dd9ec25f-57d2-bf41-be2d-95dd1f1eddcd",
         "336c6028-99aa-3946-8822-3af0335aabf1",
@@ -162,6 +171,7 @@
         "2d87afdc-663f-ed4a-bdce-4ac73c3b6db0",
         "f57adda3-64e1-a544-86a2-842c8976e7e0",
         "f6a92284-3591-ca4c-9cf5-1e0167b2d240",
+        "12c6a232-d825-c942-832d-b21967248159",
         "df7c04c2-94d4-5347-8dad-6527e853bf94",
         "5c48f024-c5f0-8640-b287-c0ef9db0daa6",
         "ab88a2ae-3d34-3342-b2ed-df719f19b490",
@@ -172,9 +182,9 @@
         "9927db1c-9aff-be47-a5dc-3068b2c9f8f9",
         "1c7ce177-d679-a44a-89d0-a718aa172c23",
         "0d290cee-b55d-2e45-907d-ae2c745f492f",
-        "5ccceeb5-887c-db4c-8cae-0efe9e91b198",
         "163da0e7-00d9-0541-a470-a859fd023b6b",
         "ee65299b-47d9-4648-ae3d-7a9e1ae75012",
+        "6fc0ccbc-ae9d-a948-9557-6140470621c4",
         "79269c4e-addb-ea41-85c6-57e984c24ff3",
         "a77749e3-6c15-7446-a792-5609dd96b391",
         "14377587-a8fe-2b47-9f46-dad6bdad2753",
@@ -288,16 +298,16 @@
         ],
         "farPlane": 100.0,
         "forward": [
-            0.13076725602149963,
-            -0.944378137588501,
-            -0.30174458026885986
+            0.535385251045227,
+            -0.8221474885940552,
+            -0.19348478317260742
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            51.76041793823242,
-            17.004993438720703,
-            14.020808219909668
+            26.3919677734375,
+            16.888986587524414,
+            5.217739105224609
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 31.100000381469727,
@@ -684,7 +694,7 @@
                                     ],
                                     "emissiveTextureOverride": "e58e6350-ed88-244b-b62c-2b81f69a5dd5",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "9f8965fd-64e2-7f43-b1fb-c3b4a6762ae1",
+                                    "materialGUID": "3a976dda-9eeb-ae41-9050-0b7dcae71a10",
                                     "metallicOverride": 1.0,
                                     "metallicTextureOverride": "99eefdf1-4245-8f47-858d-b26fff4f5629",
                                     "normalTextureOverride": "0b7984ec-aa7d-ba48-8227-876a09b9eace",
@@ -694,7 +704,7 @@
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "12c6a232-d825-c942-832d-b21967248159",
+                            "modelGUID": "836b6944-2065-e24e-8a21-a59e9ab0859d",
                             "receiveShadows": true,
                             "visible": true
                         },
@@ -953,7 +963,7 @@
                                     ],
                                     "emissiveTextureOverride": "e58e6350-ed88-244b-b62c-2b81f69a5dd5",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "9f8965fd-64e2-7f43-b1fb-c3b4a6762ae1",
+                                    "materialGUID": "3a976dda-9eeb-ae41-9050-0b7dcae71a10",
                                     "metallicOverride": 1.0,
                                     "metallicTextureOverride": "99eefdf1-4245-8f47-858d-b26fff4f5629",
                                     "normalTextureOverride": "0b7984ec-aa7d-ba48-8227-876a09b9eace",
@@ -963,7 +973,7 @@
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "12c6a232-d825-c942-832d-b21967248159",
+                            "modelGUID": "836b6944-2065-e24e-8a21-a59e9ab0859d",
                             "receiveShadows": true,
                             "visible": true
                         },
@@ -1222,7 +1232,7 @@
                                     ],
                                     "emissiveTextureOverride": "e58e6350-ed88-244b-b62c-2b81f69a5dd5",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "9f8965fd-64e2-7f43-b1fb-c3b4a6762ae1",
+                                    "materialGUID": "3a976dda-9eeb-ae41-9050-0b7dcae71a10",
                                     "metallicOverride": 1.0,
                                     "metallicTextureOverride": "99eefdf1-4245-8f47-858d-b26fff4f5629",
                                     "normalTextureOverride": "0b7984ec-aa7d-ba48-8227-876a09b9eace",
@@ -1232,7 +1242,7 @@
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "12c6a232-d825-c942-832d-b21967248159",
+                            "modelGUID": "836b6944-2065-e24e-8a21-a59e9ab0859d",
                             "receiveShadows": true,
                             "visible": true
                         },
@@ -1491,7 +1501,7 @@
                                     ],
                                     "emissiveTextureOverride": "e58e6350-ed88-244b-b62c-2b81f69a5dd5",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "9f8965fd-64e2-7f43-b1fb-c3b4a6762ae1",
+                                    "materialGUID": "3a976dda-9eeb-ae41-9050-0b7dcae71a10",
                                     "metallicOverride": 1.0,
                                     "metallicTextureOverride": "99eefdf1-4245-8f47-858d-b26fff4f5629",
                                     "normalTextureOverride": "0b7984ec-aa7d-ba48-8227-876a09b9eace",
@@ -1501,7 +1511,7 @@
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "12c6a232-d825-c942-832d-b21967248159",
+                            "modelGUID": "836b6944-2065-e24e-8a21-a59e9ab0859d",
                             "receiveShadows": true,
                             "visible": true
                         },
