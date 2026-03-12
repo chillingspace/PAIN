@@ -972,7 +972,7 @@ namespace PAIN {
 		volumetric_shader = shader_opt.has_value() ? shader_opt.value() : volumetric_shader;
 
 		if (!volumetric_shader || volumetric_shader->GetRendererID() == 0) {
-			PN_CORE_WARN("Failed to create shader program for volumetric lighting (non-fatal)");
+			PN_CORE_ERROR("Failed to create shader program for volumetric lighting - volumetric effects will be disabled");
 			volumetric_shader = nullptr;
 		}
 
