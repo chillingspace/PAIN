@@ -1248,9 +1248,9 @@ namespace PAIN {
 				}
 
 #ifdef PN_PLATFORM_WINDOWS
-				std::filesystem::path fh_path = "game/models/Frog_Hop_Idle_Gear.mesh";
+				std::filesystem::path fh_path = "game/models/Frog_Anim_Gear.mesh";
 #else	
-				std::filesystem::path fh_path = "game\\models\\Frog_Hop_Idle_Gear.mesh";
+				std::filesystem::path fh_path = "game\\models\\Frog_Anim_Gear.mesh";
 #endif
 				//Get model
 				PN_CORE_INFO("Attempting to add {} to scene", fh_path.string());

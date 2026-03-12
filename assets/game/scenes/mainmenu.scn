@@ -9,8 +9,8 @@
         "a77749e3-6c15-7446-a792-5609dd96b391",
         "a67656ca-15a5-d441-b14d-dae036e5245e",
         "14377587-a8fe-2b47-9f46-dad6bdad2753",
+        "12958b85-38b8-4645-a2fb-6efe9bd744c4",
         "c49ebb97-d7ba-f148-9e46-16d6c5543147",
-        "7a103339-0d12-f947-9fd7-2b2c420c79c0",
         "3e8dc653-3d17-ab42-bb53-da040f01f965",
         "c7685566-a3eb-4b4f-a630-7d08fedb36e5",
         "9aac41f9-737d-d540-a485-7155b0011394",
@@ -2160,7 +2160,7 @@
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "7a103339-0d12-f947-9fd7-2b2c420c79c0",
+                            "modelGUID": "12958b85-38b8-4645-a2fb-6efe9bd744c4",
                             "receiveShadows": true,
                             "visible": true
                         },
