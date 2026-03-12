@@ -18,6 +18,8 @@ local SFX_HIDE_IN   = "game/audio/sfx/player/hide/Box In.wav"
 local SFX_HIDE_OUT  = "game/audio/sfx/player/hide/Box Out.wav"
 local SFX_PIPE_IN   = "game/audio/sfx/player/hide/Box In.wav"   -- swap pipe sfx later if have
 local SFX_PIPE_OUT  = "game/audio/sfx/player/hide/Box Out.wav"
+local SFX_COLLECT   = "game/audio/sfx/Gear Pick Up.wav"
+local SFX_DELIVER   = "game/audio/sfx/Gear Put Down.wav"
 
 -- Pipe group suffixes — tag pipe ends as "pipe_entrance_A" / "pipe_exit_A", etc.
 local PIPE_GROUPS = { "A","B","C","D","E","F","G","H","I","J","K","L","M","N","O",
@@ -28,6 +30,8 @@ local VOL_GAMEOVER_HIT = 0.0
 local VOL_GAMEOVER_LOOP = 0.0
 local VOL_RESPAWN = -3.0
 local VOL_HIDE = 0.0
+local VOL_COLLECT = 0.0
+local VOL_DELIVER = 0.0
 
 
 -- global so other scripts can use
@@ -532,6 +536,8 @@ local function deliverLetter()
     S.carriedLetter = nil
     S.lettersDelivered = (S.lettersDelivered or 0) + 1
 
+    if audioPlaySFX then audioPlaySFX(SFX_DELIVER, VOL_DELIVER) end
+
     log(string.format("[PlayerState] Delivered letter %d / %d", S.lettersDelivered, S.lettersToWin or 3))
 
     if S.lettersDelivered >= (S.lettersToWin or 3) then
@@ -550,6 +556,7 @@ local function pickupLetter(letter)
     if removeTag then removeTag(letter, "letter_collectible") end
     if addTag then addTag(letter, "letter_carried") end
     if audioPlay then audioPlay(letter) end
+    if audioPlaySFX then audioPlaySFX(SFX_COLLECT, VOL_COLLECT) end
 
     disablePhysics(letter)
     setVisibility(letter, false) 

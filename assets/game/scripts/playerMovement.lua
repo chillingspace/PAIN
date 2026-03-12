@@ -150,8 +150,8 @@ local SFX_PLAYER_IDLES = {
 }
 
 -- SFX Volumes modifier
-local VOL_PLAYER_HOP = 0.1
-local VOL_PLAYER_IDLE = 0.1
+local VOL_PLAYER_HOP = 1.0
+local VOL_PLAYER_IDLE = 0.7
 
 registerUpdate(function(dt)
     -- EARLY EXIT: If game is paused, freeze player completely

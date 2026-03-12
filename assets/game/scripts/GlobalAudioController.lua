@@ -24,6 +24,7 @@
 local MAINMENU_BGM_VOLUME_SCALE = 0.5
 local TUTORIAL_BGM_VOLUME_SCALE = 0.25
 local LEVEL1_BGM_VOLUME_SCALE   = 0.25
+local LEVEL2_BGM_VOLUME_SCALE   = 0.25
 
 -- ==================== HELPERS ====================
 local function linearToDb(linear)
@@ -60,6 +61,7 @@ local function detectCurrentScene()
             if string.find(lowerName, "howtoplay2") then return "howtoplay2" end
             if string.find(lowerName, "howtoplay") then return "howtoplay" end
             if string.find(lowerName, "level1") then return "level1" end
+            if string.find(lowerName, "level 2") or string.find(lowerName, "level2") then return "level2" end
             if string.find(lowerName, "level") then return "level" end
         else
             log("[GlobalAudioDebug] getCurrentSceneName returned nil")
@@ -97,11 +99,12 @@ local function applySceneVolumes()
             globalBGMFade(i, CONFIG.mutedVolume, 0.1)
         end
         
-    elseif currentScene == "tutorial" or currentScene == "level1" or currentScene == "level" then
+    elseif currentScene == "tutorial" or currentScene == "level1" or currentScene == "level2" or currentScene == "level" then
         -- Determine target volume based on scene
         local targetVol = CONFIG.defaultVolume
         if currentScene == "tutorial" then targetVol = linearToDb(TUTORIAL_BGM_VOLUME_SCALE) end
         if currentScene == "level1"   then targetVol = linearToDb(LEVEL1_BGM_VOLUME_SCALE) end
+        if currentScene == "level2"   then targetVol = linearToDb(LEVEL2_BGM_VOLUME_SCALE) end
 
         -- Track 0: Level BGM (main), Track 1: Ambient, Track 2: Combat (muted initially)
         if trackCount >= 1 then globalBGMFade(0, targetVol, CONFIG.fadeDuration) end
@@ -190,7 +193,7 @@ end
 -- ==================== GAME OVER DUCKING ====================
 function GlobalAudio_SetGameOver(active)
     -- Only relevant for Tutorial and Level1 where we have BGM + Game Over Loop
-    if currentScene ~= "tutorial" and currentScene ~= "level1" and currentScene ~= "level" then return end
+    if currentScene ~= "tutorial" and currentScene ~= "level1" and currentScene ~= "level2" and currentScene ~= "level" then return end
     
     local trackCount = globalBGMGetTrackCount()
     if trackCount < 1 then return end
@@ -205,7 +208,8 @@ function GlobalAudio_SetGameOver(active)
         local targetVol = CONFIG.defaultVolume
         if currentScene == "tutorial" then targetVol = linearToDb(TUTORIAL_BGM_VOLUME_SCALE) end
         if currentScene == "level1"   then targetVol = linearToDb(LEVEL1_BGM_VOLUME_SCALE) end
-        
+        if currentScene == "level2"   then targetVol = linearToDb(LEVEL2_BGM_VOLUME_SCALE) end
+
         globalBGMFade(0, targetVol, 1.0)
         log("[GlobalAudio] Game Over Ended: Restoring BGM")
     end
