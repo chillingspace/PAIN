@@ -87,6 +87,9 @@ namespace PAIN {
                 void handleMaterialDrop(File* materialFile,
                     ImVec2 localMousePos,
                     ImVec2 viewportSize);
+
+                entt::entity pendingDeleteEntity = entt::null;
+                std::string pendingDeleteName;
             };
 
         } // namespace Panel
