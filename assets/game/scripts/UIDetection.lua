@@ -117,9 +117,19 @@ function ui.begin(enemyEntity, autoConfirmHit)
     end
 
     if ui.active then
-        ui.sourceEnemy    = enemyEntity
-        ui.isDetected     = true
-        ui.autoConfirmHit = autoConfirmHit
+        ui.sourceEnemy = enemyEntity
+        ui.isDetected  = true
+        -- autoConfirmHit=true (fill bar) always takes priority over false (feedback-only).
+        -- This prevents the ground-chase enemy from suppressing the bar when a
+        -- charge-bar enemy (light) is also detecting the player simultaneously.
+        if autoConfirmHit then
+            if not ui.autoConfirmHit then
+                -- Upgrading from feedback-only to charge-bar: restore the bar
+                -- background that the ground-chase enemy may have moved off-screen.
+                showUI()
+            end
+            ui.autoConfirmHit = true
+        end
         return
     end
 

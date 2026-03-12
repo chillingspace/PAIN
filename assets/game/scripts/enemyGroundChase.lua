@@ -52,7 +52,7 @@ do
     local SCAN_PAUSE_MIN         = 0.5    -- pause at each extreme (seconds)
     local SCAN_PAUSE_MAX         = 1.0
     local SCAN_CYCLES_MIN        = 1      -- random number of full L-R cycles
-    local SCAN_CYCLES_MAX        = 3
+    local SCAN_CYCLES_MAX        = 2
 
     -- Walk scanning 
     local WALK_SCAN_SPEED        = 1.2    -- oscillation rate 
@@ -272,6 +272,22 @@ do
         if barBG    then set2DPosition(barBG,    HIDE_UI_X, HIDE_UI_Y) end
         if barFillL then set2DPosition(barFillL, HIDE_UI_X, HIDE_UI_Y) end
         if barFillR then set2DPosition(barFillR, HIDE_UI_X, HIDE_UI_Y) end
+    end
+
+    -- vision cone light
+    local function updateVisionLight()
+        if not hasLight or not hasLight(enemy) then return end
+        local fx = math.sin(currentYaw)
+        local fz = math.cos(currentYaw)
+        setLightDirection(enemy, fx, -0.15, fz)   -- slight downward tilt; auto-normalized by engine
+
+        if state == STATE_ALERT_PAUSE or state == STATE_CHASE then
+            setLightIntensity(enemy, 1.0, 0.1, 0.1)    -- red: alerted
+        elseif state == STATE_SEARCH then
+            setLightIntensity(enemy, 1.0, 0.55, 0.0)   -- orange: searching
+        else
+            setLightIntensity(enemy, 0.6, 0.6, 0.8)    -- pale blue: patrolling
+        end
     end
 
     -- alert icon helpers
@@ -522,6 +538,16 @@ do
         baseRotX, baseYaw, baseRotZ = rx, ry, rz
         currentYaw = baseYaw
 
+        -- Derive icon name from patrol group tag so each enemy finds its own icon.
+        if ALERT_ICON_NAME ~= "" then
+            for _, group in ipairs(PATROL_GROUPS) do
+                if hasTag(enemy, "patrol_group_" .. group) then
+                    ALERT_ICON_NAME = "exclamation_alert_" .. group
+                    break
+                end
+            end
+        end
+
         discoverWaypoints()
         tryCacheAlertIcon()
     end
@@ -559,6 +585,8 @@ do
         end
 
         stateTimer = stateTimer + dt
+
+        updateVisionLight()
 
         local SCAN_TURN_SPEED = math.rad(SCAN_TURN_SPEED_DEG)
         local TURN_SPEED      = math.rad(TURN_SPEED_DEG)
@@ -875,18 +903,34 @@ do
             if not player then return end
         end
 
+        if other ~= player and self ~= player then return end
+
+        -- Only damage when actively chasing
+        if state ~= STATE_CHASE then return end
+
         if PlayerState and PlayerState.canBeCaught and not PlayerState.canBeCaught() then
             return
         end
 
-        if other == player or self == player then
-            -- log("[enemyGroundChase] Player collided with ground chase enemy")
-
-            if PlayerState and PlayerState.onCaught then
-                PlayerState.onCaught(player)
-            elseif _G.PlayerState and _G.PlayerState.onCaught then
-                _G.PlayerState.onCaught(player)
+        -- Only damage when player is in front of the enemy (front-facing collision)
+        local ex, ey, ez = getEnemyPos()
+        local px, py, pz = getPosition(player)
+        if px then
+            local dx = px - ex
+            local dz = pz - ez
+            local len = math.sqrt(dx * dx + dz * dz)
+            if len > 1e-6 then
+                local fx = math.sin(currentYaw)
+                local fz = math.cos(currentYaw)
+                local dot = (dx / len) * fx + (dz / len) * fz
+                if dot <= 0.0 then return end  -- player is behind or beside the enemy
             end
+        end
+
+        if PlayerState and PlayerState.onCaught then
+            PlayerState.onCaught(player)
+        elseif _G.PlayerState and _G.PlayerState.onCaught then
+            _G.PlayerState.onCaught(player)
         end
     end, player)
 end
