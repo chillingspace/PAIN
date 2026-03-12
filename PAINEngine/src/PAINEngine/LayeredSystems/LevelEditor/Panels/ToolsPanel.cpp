@@ -243,6 +243,9 @@ namespace PAIN {
 					ImGui::Separator();
 
 					if (ImGui::Checkbox("Gamma Correction", &gfx.gamma_correction)) {}
+					if (gfx.gamma_correction) {
+						ImGui::SliderFloat("Gamma", &gfx.gamma_value, 1.0f, 3.0f);
+					}
 
 					float ambient_light[3] = { gfx.AMBIENT_LIGHT.r, gfx.AMBIENT_LIGHT.g, gfx.AMBIENT_LIGHT.b };
 					if (ImGui::ColorEdit3("Ambient Light", ambient_light)) {

@@ -3310,6 +3310,7 @@ namespace PAIN {
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, src_tex);
 			gamma_shader->SetUniform("tex", 0);
+			gamma_shader->SetUniform("u_gamma", GraphicsSettings::get().gamma_value);
 			glBindVertexArray(empty_vao);
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 			++postprocess_passes;
