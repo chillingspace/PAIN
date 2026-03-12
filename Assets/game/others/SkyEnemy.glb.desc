@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "SkyEnemy.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 5323972158267625459
+  },
+  "descriptor_version": 1,
+  "guid": "45ebc3d2-173f-ac4a-aaa3-ddfc1be80fe7",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\SkyEnemy.glb"
+  }
+}

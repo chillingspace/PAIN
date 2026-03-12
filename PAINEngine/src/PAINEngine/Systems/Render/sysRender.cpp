@@ -307,6 +307,13 @@ namespace PAIN {
 					PN_CORE_ERROR("OpenGL err after post process pass: {}", err);
 				}
 
+				if (editor_visible) {
+					glBindFramebuffer(GL_FRAMEBUFFER, rendererService->getFinalFbo());
+				}
+				else {
+					glBindFramebuffer(GL_FRAMEBUFFER, 0);
+				}
+
 				uiPass(registry);
 				err = glGetError();
 				if (err != GL_NO_ERROR) {

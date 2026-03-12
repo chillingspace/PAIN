@@ -100,6 +100,8 @@ namespace PAIN {
         /* =========================================================================== */
         glm::vec3 GetVelocity(entt::entity entityId) override;
         void SetVelocity(entt::entity entityId, glm::vec3 v) override;
+        void AddForce(entt::entity e, glm::vec3 force) override;
+        void AddImpulse(entt::entity e, glm::vec3 impulse) override;
 		bool IsGrounded(entt::entity entityId, float maxDistance = .25f) override;
         std::tuple<bool, glm::vec3> GetWallNormal(entt::entity entityId, glm::vec3 direction, float checkDistance) override;
         void DisablePhysics(entt::entity e) override;

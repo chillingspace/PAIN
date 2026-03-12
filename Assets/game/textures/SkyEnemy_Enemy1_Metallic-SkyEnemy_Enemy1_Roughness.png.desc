@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Gear_baseColor.png",
+    "name": "SkyEnemy_Enemy1_Metallic-SkyEnemy_Enemy1_Roughness.png",
     "type": "Texture"
   },
   "build_data": {
-    "hash": 3448607518396702955
+    "hash": 9777108956963504356
   },
   "descriptor_version": 1,
-  "guid": "25c6e2c3-b701-4c43-b049-8c9b21a29441",
+  "guid": "4438ada8-1bcf-a542-8705-5e59b74f34a5",
   "import_settings": {
     "android_compression": "ASTC_4x4",
     "generate_mipmaps": true,
@@ -15,6 +15,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\Gear_baseColor.png"
+    "source_file": "game\\textures\\SkyEnemy_Enemy1_Metallic-SkyEnemy_Enemy1_Roughness.png"
   }
 }

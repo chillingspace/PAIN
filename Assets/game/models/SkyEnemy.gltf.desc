@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "FrogAnim.gltf",
+    "name": "SkyEnemy.gltf",
     "type": "Model"
   },
   "build_data": {
-    "hash": 9054220384069005527
+    "hash": 5025374584435074409
   },
   "descriptor_version": 1,
-  "guid": "38e8f9de-b2dc-0f47-ad64-f0209917e593",
+  "guid": "836b6944-2065-e24e-8a21-a59e9ab0859d",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "game\\models\\FrogAnim.gltf"
+    "source_file": "game\\models\\SkyEnemy.gltf"
   }
 }

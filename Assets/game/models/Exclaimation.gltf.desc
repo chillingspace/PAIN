@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Cube.gltf",
+    "name": "Exclaimation.gltf",
     "type": "Model"
   },
   "build_data": {
-    "hash": 13489141898285819278
+    "hash": 7027976387580007726
   },
   "descriptor_version": 1,
-  "guid": "aa5e5f2d-cbe1-ac40-92ed-ccf8239cc223",
+  "guid": "12ed3b44-5c5a-a148-afc0-b5d5b00e140a",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "engine\\models\\Cube.gltf"
+    "source_file": "game\\models\\Exclaimation.gltf"
   }
 }
