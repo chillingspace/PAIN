@@ -2998,6 +2998,15 @@ namespace PAIN {
 	}
 
 	void WindowsRenderer::PostProcessPass() {
+		// ========================================
+		// POST-PROCESS: ALWAYS DISABLE DEPTH TEST
+		// Full-screen quads must not be rejected by
+		// scene geometry depth stored in final_fbo
+		// ========================================
+		glDisable(GL_DEPTH_TEST);
+		glDepthMask(GL_FALSE);
+
+
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err before tone mapping pass: {}", err);
@@ -3212,8 +3221,12 @@ namespace PAIN {
 		passthrough_shader->Bind();
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, final_texture);
+		passthrough_shader->SetUniform("tex", 0);
 		glBindVertexArray(passthrough_vao);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		glEnable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
 
 		err = glGetError();
 		if (err != GL_NO_ERROR) {

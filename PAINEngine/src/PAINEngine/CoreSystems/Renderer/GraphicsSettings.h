@@ -65,8 +65,8 @@ namespace PAIN {
 		} stats;
 
 		SHADOW_TYPES shadow_type = SHADOW_TYPES::SOFT;
-		bool gamma_correction = true;
-		glm::vec3 AMBIENT_LIGHT = glm::vec3(0.f);
+		bool gamma_correction = false;
+		glm::vec3 AMBIENT_LIGHT = glm::vec3(0.1f);
 		bool world_light = true;
 		float fov = 60.0f;
 		
@@ -81,7 +81,7 @@ namespace PAIN {
 		float global_light_intensity = 1.5f;
 		int bloom_quality = 4;		// number of blur passes for bloom. higher = bloomier, REPRESENTS GAUSSIAN BLUR PASSES, SO MINIMALLY 2
 
-		TONE_MAPPING_TYPES tone_mapping_mode = TONE_MAPPING_TYPES::ACES;
+		TONE_MAPPING_TYPES tone_mapping_mode = TONE_MAPPING_TYPES::NONE;
 		float tone_mapping_exposure = 1.f;
 
 		// image based lighting

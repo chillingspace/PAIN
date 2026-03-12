@@ -301,15 +301,16 @@ namespace PAIN {
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after debug pass: {}", err);
 				}
-				uiPass(registry);
-				err = glGetError();
-				if (err != GL_NO_ERROR) {
-					PN_CORE_ERROR("OpenGL err after UI pass: {}", err);
-				}
 				services.lock()->get<sRenderer>()->postProcessPass();
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after post process pass: {}", err);
+				}
+
+				uiPass(registry);
+				err = glGetError();
+				if (err != GL_NO_ERROR) {
+					PN_CORE_ERROR("OpenGL err after UI pass: {}", err);
 				}
 
 				glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
