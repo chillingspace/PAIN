@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "controls_settings.scn",
+    "type": "Scenes"
+  },
+  "build_data": {
+    "hash": 18246275165739983028
+  },
+  "descriptor_version": 1,
+  "guid": "97b19c2a-b2f8-bc44-9564-da91c8fde6e9",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scenes\\controls_settings.scn"
+  }
+}

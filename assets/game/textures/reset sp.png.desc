@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "reset sp.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 8665410038248269989
+  },
+  "descriptor_version": 1,
+  "guid": "6a4acbab-f63b-544d-ac4d-7921eff39b2d",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\reset sp.png"
+  }
+}

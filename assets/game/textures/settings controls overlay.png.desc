@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "settings controls overlay.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 12050048492454382584
+  },
+  "descriptor_version": 1,
+  "guid": "0ce31ff7-ebe5-1942-aaa0-396270d617f1",
+  "import_settings": {
+    "android_compression": "ASTC_4x4",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\settings controls overlay.png"
+  }
+}
