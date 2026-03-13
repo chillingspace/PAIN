@@ -170,7 +170,7 @@ end
 -- guard so keys arent registered twice if script reloads
 if not S._keysRegistered then
     -- Debugging
-    -- registerKeyUp("C", function() triggerGameWin() end)
+    registerKeyUp("P", function() triggerGameWin() end)
 
     registerKeyDown("C", function() collectPressed = true end)
     registerKeyUp("C", function() collectPressed = false end)
