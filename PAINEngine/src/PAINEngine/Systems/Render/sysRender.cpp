@@ -261,7 +261,7 @@ namespace PAIN {
 				GraphicsSettings::get().stats.shadow_objects_culled = 0;
 				GraphicsSettings::get().stats.shadow_objects_rendered = 0;
 
-				shadowPass(registry);
+				//shadowPass(registry);
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after shadow pass: {}", err);
@@ -281,7 +281,7 @@ namespace PAIN {
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after reflection pass: {}", err);
 				}
-			lightingPass(registry);
+				lightingPass(registry);
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after lighting pass: {}", err);
@@ -301,6 +301,7 @@ namespace PAIN {
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after debug pass: {}", err);
 				}
+				
 				services.lock()->get<sRenderer>()->postProcessPass();
 				err = glGetError();
 				if (err != GL_NO_ERROR) {

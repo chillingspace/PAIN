@@ -86,6 +86,13 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
     return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 } 
 
+float SampleShadowMap(int shadow_map_idx, vec2 uv) {
+    return texture(u_ShadowMaps[shadow_map_idx], uv).r;
+}
+
+vec2 ShadowTexelSize(int shadow_map_idx) {
+    return 1.0 / vec2(textureSize(u_ShadowMaps[shadow_map_idx], 0));
+}
 
 vec3 microfacetModel(vec3 position, vec3 n, Light light) {
     vec3 l;
@@ -156,7 +163,7 @@ float shadowIntensity(int shadow_map_idx, vec3 fragPos, vec3 normal, Light light
         return 0;
     }
 
-    float shadow_map_depth = texture(u_ShadowMaps[shadow_map_idx], projCoords.xy).r;
+    float shadow_map_depth = SampleShadowMap(shadow_map_idx, projCoords.xy);
     float frag_depth = projCoords.z;
     
     // If shadow map is empty (cleared to 1.0), no shadows
@@ -172,10 +179,10 @@ float shadowIntensity(int shadow_map_idx, vec3 fragPos, vec3 normal, Light light
 
     // PCF (Percentage Closer Filtering) for softer shadows
     float shadow = 0.0;
-    vec2 texelSize = 1.0 / textureSize(u_ShadowMaps[shadow_map_idx], 0);
+    vec2 texelSize = ShadowTexelSize(shadow_map_idx);
     for(int x = -1; x <= 1; ++x) {
         for(int y = -1; y <= 1; ++y) {
-            float pcfDepth = texture(u_ShadowMaps[shadow_map_idx], projCoords.xy + vec2(x, y) * texelSize).r;
+            float pcfDepth = SampleShadowMap(shadow_map_idx, projCoords.xy + vec2(x, y) * texelSize);
             // If shadow map is empty (no depth written), don't cast shadows
             if (pcfDepth >= 0.999) {
                 shadow += 0.0;  // No shadow from empty depth

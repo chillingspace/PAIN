@@ -89,6 +89,19 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
     return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 } 
 
+float SampleShadowMap(int shadow_map_idx, vec2 uv) {
+    if (shadow_map_idx == 0) return texture(u_ShadowMap0, uv).r;
+    if (shadow_map_idx == 1) return texture(u_ShadowMap1, uv).r;
+    if (shadow_map_idx == 2) return texture(u_ShadowMap2, uv).r;
+    return texture(u_ShadowMap3, uv).r;
+}
+
+vec2 ShadowTexelSize(int shadow_map_idx) {
+    if (shadow_map_idx == 0) return 1.0 / vec2(textureSize(u_ShadowMap0, 0));
+    if (shadow_map_idx == 1) return 1.0 / vec2(textureSize(u_ShadowMap1, 0));
+    if (shadow_map_idx == 2) return 1.0 / vec2(textureSize(u_ShadowMap2, 0));
+    return 1.0 / vec2(textureSize(u_ShadowMap3, 0));
+}
 
 vec3 microfacetModel(vec3 position, vec3 n, Light light) {
     vec3 l;
@@ -157,12 +170,7 @@ float shadowIntensity(int shadow_map_idx, vec3 fragPos, vec3 normal, Light light
         return 0.0;
     }
 
-    // Pick the right shadow map
-    float shadow_map_depth;
-    if (shadow_map_idx == 0)      shadow_map_depth = texture(u_ShadowMap0, projCoords.xy).r;
-    else if (shadow_map_idx == 1) shadow_map_depth = texture(u_ShadowMap1, projCoords.xy).r;
-    else if (shadow_map_idx == 2) shadow_map_depth = texture(u_ShadowMap2, projCoords.xy).r;
-    else                          shadow_map_depth = texture(u_ShadowMap3, projCoords.xy).r;
+    float shadow_map_depth = SampleShadowMap(shadow_map_idx, projCoords.xy);
 
     
     float frag_depth = projCoords.z;
@@ -181,12 +189,11 @@ float shadowIntensity(int shadow_map_idx, vec3 fragPos, vec3 normal, Light light
     // PCF (Percentage Closer Filtering) for softer shadows
     float shadow = 0.0;
     
-    ivec2 size = textureSize(u_ShadowMap0, 0);
-    vec2 texelSize = 1.0 / vec2(size);
+    vec2 texelSize = ShadowTexelSize(shadow_map_idx);
     
     for(int x = -1; x <= 1; ++x) {
         for(int y = -1; y <= 1; ++y) {
-            float pcfDepth = texture(u_ShadowMap0, projCoords.xy + vec2(x, y) * texelSize).r;
+            float pcfDepth = SampleShadowMap(shadow_map_idx, projCoords.xy + vec2(x, y) * texelSize);
             
             // If shadow map is empty (no depth written), don't cast shadows
             if (pcfDepth >= 0.999) {
