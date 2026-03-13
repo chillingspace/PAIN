@@ -1,5 +1,3 @@
-// pbr.frag
-
 #version 330 core
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_ARB_explicit_uniform_location : enable
@@ -75,10 +73,9 @@ float geomSmith(float nDotL) {
 }
 
 vec3 schlickFresnel(float lDotH) {
-    vec3 f0 = vec3(0.04f); // Dielectrics
-    if (material.metal == 1.0f)
-        f0 = material.color;
-    return f0 + (1.0f - f0) * pow(clamp(1.0f - lDotH, 0.0, 1.0), 5.0);
+    // Smoothly interpolate between dielectric (0.04) and metallic (base color)
+    vec3 f0 = mix(vec3(0.04), material.color, material.metal);
+    return f0 + (1.0 - f0) * pow(clamp(1.0 - lDotH, 0.0, 1.0), 5.0);
 }
 
 // for ibl. schlickFresnel but with roughness
@@ -153,7 +150,7 @@ float shadowIntensity(int shadow_map_idx, vec3 fragPos, vec3 normal, Light light
 
     // check if proj coords within shadow map
     if (projCoords.z > 1.0 || projCoords.x < 0.0 || projCoords.x > 1.0 || projCoords.y < 0.0 || projCoords.y > 1.0) {
-        return 0;
+        return 0.0;
     }
 
     float shadow_map_depth = texture(u_ShadowMaps[shadow_map_idx], projCoords.xy).r;
@@ -168,11 +165,12 @@ float shadowIntensity(int shadow_map_idx, vec3 fragPos, vec3 normal, Light light
     vec3 light_dir = normalize(light.position - fragPos);
     float bias = max(0.05 * (1.0 - dot(normal, light_dir)), 0.005);
 
-    // return frag_depth - bias > shadow_map_depth ? 1.0 : 0.0;
-
     // PCF (Percentage Closer Filtering) for softer shadows
     float shadow = 0.0;
-    vec2 texelSize = 1.0 / textureSize(u_ShadowMaps[shadow_map_idx], 0);
+    
+    // FIX: Cast textureSize ivec2 to vec2 before float division to prevent precision/truncation bugs on desktop.
+    vec2 texelSize = 1.0 / vec2(textureSize(u_ShadowMaps[shadow_map_idx], 0));
+    
     for(int x = -1; x <= 1; ++x) {
         for(int y = -1; y <= 1; ++y) {
             float pcfDepth = texture(u_ShadowMaps[shadow_map_idx], projCoords.xy + vec2(x, y) * texelSize).r;
@@ -193,11 +191,10 @@ const int IBL_DEBUG_TYPE_BASE = 8;
 const bool IBL_FLIP_Y_AXIS = true;
 
 void main() {
-    if (u_NumShadowMaps > MAX_SHADOWMAPPED_LIGHTS) {
+    if (u_NumShadowMaps > float(MAX_SHADOWMAPPED_LIGHTS)) {
         FragColor = vec4(1, 0, 1, 1);
         return;
     }
-
 
     vec3 fragPos = texture(gPos, TexCoords).rgb;
     material.color = texture(gCol, TexCoords).rgb;
@@ -213,7 +210,6 @@ void main() {
 
     vec3 color = vec3(0);
 
-    // if (material.alwaysLit == 0.0) {
     // Direct lighting
     vec3 directLighting = vec3(0);
     for (int i = 0; i < int(u_NumLights); i++) {
@@ -234,10 +230,6 @@ void main() {
         // IBL
         vec3 N = normalize(normal);
 
-        // if (IBL_FLIP_Y_AXIS) {
-        //     N.y = -N.y;
-        // }
-
         int dbg = int(DEBUG_TYPE);
 
         if (dbg == IBL_DEBUG_TYPE_BASE)
@@ -253,7 +245,6 @@ void main() {
         if (IBL_FLIP_Y_AXIS) {
             R.y = -R.y;
         }
-
 
         // DEBUG: Show the prefilter map. should look like perfect mirror
         if (dbg == IBL_DEBUG_TYPE_BASE+1)
@@ -276,16 +267,13 @@ void main() {
             return;
         }
 
-
         vec3 F = fresnelSchlickRoughness(NdotV, F0, material.rough);
         
         // Diffuse component
         vec3 kD = (1.0 - F) * (1.0 - material.metal);
         vec3 irradiance = texture(irradianceMap, N).rgb;
-        // irradiance = irradiance / (irradiance + vec3(1.0));
         vec3 diffuse = kD * irradiance * material.color;
 
-// #define DEBUG_IBL_DIFFUSE
 #ifdef DEBUG_IBL_DIFFUSE
         FragColor = vec4(diffuse, 1.0);
         return;
@@ -293,29 +281,9 @@ void main() {
 
         // Specular component  
         const float MAX_REFLECTION_LOD = 4.0;
-
         vec3 prefilteredColor = vec3(0, 0, 0);
 
-#ifdef DEBUG_MIP_INTERPOLATION
-        {
-            // somehow flooring the mipLevel, no interpolation fixes aura issue?
-            // !TODO: jspoh figure out why and a proper fix
-            float mipLevel = material.rough * MAX_REFLECTION_LOD;
-            mipLevel = floor(mipLevel); // Force discrete mip levels, no interpolation
-            prefilteredColor = textureLod(prefilterMap, R, mipLevel).rgb;
-        }
-#endif
-
         prefilteredColor = textureLod(prefilterMap, R, material.rough * MAX_REFLECTION_LOD).rgb;
-
-#ifdef DEBUG_MIP
-        {
-            // debug to see if mip issue
-            prefilteredColor = textureLod(prefilterMap, R, 0.0).rgb;  // Force mip 0
-        }
-#endif
-
-        // prefilteredColor = prefilteredColor / (prefilteredColor + vec3(1.0));  // Reinhard tone mapping
 
         vec2 envBRDF = texture(brdfLut, vec2(NdotV, material.rough)).rg;
         vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
@@ -334,6 +302,12 @@ void main() {
     vec3 emission = texture(gEmission, TexCoords).rgb;
     color += emission;
     
-    // color = color / (color + vec3(1.0)); // Reinhard
+    // Optional Reinhard tone mapping (You had this commented out)
+    // color = color / (color + vec3(1.0)); 
+    
+    // FIX: Apply Gamma Correction if your C++ application doesn't have glEnable(GL_FRAMEBUFFER_SRGB); enabled.
+    // If your Android app had an sRGB surface and your Windows app does not, uncommenting this will fix your colors.
+    // color = pow(color, vec3(1.0/2.2));
+
     FragColor = vec4(color, 1.0);
 }

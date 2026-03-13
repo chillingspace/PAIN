@@ -47,26 +47,25 @@ void main() {
 
     vec4 localPos;
     vec3 localNormal;
+    vec3 localTangent;
+    vec3 localBitangent;
 
     if (u_Animated > 0.5) {
-        mat4 skin = u_BoneMatrices[int(aBoneIndices.x)] * aBoneWeights.x
-                  + u_BoneMatrices[int(aBoneIndices.y)] * aBoneWeights.y
-                  + u_BoneMatrices[int(aBoneIndices.z)] * aBoneWeights.z
-                  + u_BoneMatrices[int(aBoneIndices.w)] * aBoneWeights.w;
+        mat4 skin = u_BoneMatrices[aBoneIndices.x] * aBoneWeights.x
+                  + u_BoneMatrices[aBoneIndices.y] * aBoneWeights.y
+                  + u_BoneMatrices[aBoneIndices.z] * aBoneWeights.z
+                  + u_BoneMatrices[aBoneIndices.w] * aBoneWeights.w;
 
-        // vec4 hardcodedWeights = vec4(0.25, 0.25, 0.25, 0.25);
-        // ivec4 hardcodedIndices = ivec4(0, 0, 0, 0);  // All bone 0
-        
-        // skin = u_BoneMatrices[hardcodedIndices[0]] * hardcodedWeights[0]
-        //           + u_BoneMatrices[hardcodedIndices[1]] * hardcodedWeights[1]
-        //           + u_BoneMatrices[hardcodedIndices[2]] * hardcodedWeights[2]
-        //           + u_BoneMatrices[hardcodedIndices[3]] * hardcodedWeights[3];
-        
         localPos = skin * vec4(aPos, 1.0);
-        localNormal = mat3(skin) * aNormal;
+        mat3 skinMat3 = mat3(skin);
+        localNormal = skinMat3 * aNormal;
+        localTangent = skinMat3 * aTangent;
+        localBitangent = skinMat3 * aBitangent;
     } else {
         localPos = vec4(aPos, 1.0);
         localNormal = aNormal;
+        localTangent = aTangent;
+        localBitangent = aBitangent;
     }
 
     vNormal = mat3(transpose(inverse(modelMatrix))) * localNormal;
@@ -83,8 +82,8 @@ void main() {
     mat4 MVP = u_P * u_V * modelMatrix;
     gl_Position = MVP * localPos;
 
-    vec3 T = normalize(vec3(modelMatrix * vec4(aTangent, 0.0)));
-    vec3 B = normalize(vec3(modelMatrix * vec4(aBitangent, 0.0)));
-    vec3 N = normalize(vec3(modelMatrix * vec4(aNormal, 0.0)));
+    vec3 T = normalize(vec3(modelMatrix * vec4(localTangent, 0.0)));
+    vec3 B = normalize(vec3(modelMatrix * vec4(localBitangent, 0.0)));
+    vec3 N = normalize(vec3(modelMatrix * vec4(localNormal, 0.0)));
     TBN = mat3(T, B, N);
 }
