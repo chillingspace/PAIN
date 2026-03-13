@@ -87,6 +87,9 @@ namespace PAIN {
 
 		// image based lighting
 		bool ibl = true;
+		float ibl_diffuse_strength = 1.0f;
+		float ibl_specular_strength = 1.0f;
+		float ibl_max_reflection_lod = 4.0f;
 
 		// volumetric lighting (god rays / light shafts)
 		bool volumetric = true;
@@ -125,6 +128,9 @@ namespace PAIN {
 			IBL_IRRADIANCE,
 			IBL_PREFILTER,
 			IBL_BRDFLUT,
+			IBL_DIFFUSE,
+			IBL_SPECULAR,
+			DIRECT_LIGHTING,
 			NUM_PBR_MAP_TYPES,
 		};
 
@@ -140,6 +146,9 @@ namespace PAIN {
 			"IBL_IRRADIANCE",
 			"IBL_PREFILTER",
 			"IBL_BRDFLUT",
+			"IBL_DIFFUSE",
+			"IBL_SPECULAR",
+			"DIRECT_LIGHTING",
 			"NUM_PBR_MAP_TYPES",
 		};
 

@@ -331,6 +331,9 @@ namespace PAIN {
 			//Setup gs
 			gs.world_light = env.useWorldLight;
 			gs.ibl = env.useIBL;
+			gs.ibl_diffuse_strength = env.iblDiffuseStrength;
+			gs.ibl_specular_strength = env.iblSpecularStrength;
+			gs.ibl_max_reflection_lod = env.iblMaxReflectionLod;
 			gs.DEBUG_USE_DIFFUSE_MAP = env.useDiffuseMap;
 			gs.DEBUG_USE_AO_MAP = env.useAOMap;
 			gs.DEBUG_USE_NORMAL_MAP = env.useNormalMap;
@@ -804,6 +807,9 @@ namespace PAIN {
 			//Other graphic settings
 			scene_asset.environment.useWorldLight = gs.world_light;
 			scene_asset.environment.useIBL = gs.ibl;
+			scene_asset.environment.iblDiffuseStrength = gs.ibl_diffuse_strength;
+			scene_asset.environment.iblSpecularStrength = gs.ibl_specular_strength;
+			scene_asset.environment.iblMaxReflectionLod = gs.ibl_max_reflection_lod;
 			scene_asset.environment.useDiffuseMap = gs.DEBUG_USE_DIFFUSE_MAP;
 			scene_asset.environment.useAOMap = gs.DEBUG_USE_AO_MAP;
 			scene_asset.environment.useNormalMap = gs.DEBUG_USE_NORMAL_MAP;

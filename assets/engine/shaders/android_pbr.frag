@@ -47,6 +47,9 @@ uniform sampler2D gEmission;
 
 // for ibl
 uniform float u_UseIbl;
+uniform float u_IblDiffuseStrength;
+uniform float u_IblSpecularStrength;
+uniform float u_IblMaxReflectionLod;
 uniform samplerCube irradianceMap;
 uniform samplerCube prefilterMap;
 uniform sampler2D brdfLut;
@@ -209,6 +212,12 @@ float shadowIntensity(int shadow_map_idx, vec3 fragPos, vec3 normal, Light light
 }
 
 const int IBL_DEBUG_TYPE_BASE = 8;
+const int IBL_DEBUG_IRRADIANCE = IBL_DEBUG_TYPE_BASE;
+const int IBL_DEBUG_PREFILTER = IBL_DEBUG_TYPE_BASE + 1;
+const int IBL_DEBUG_BRDFLUT = IBL_DEBUG_TYPE_BASE + 2;
+const int IBL_DIFFUSE = IBL_DEBUG_TYPE_BASE + 3;
+const int IBL_SPECULAR = IBL_DEBUG_TYPE_BASE + 4;
+const int DIRECT_LIGHTING = IBL_DEBUG_TYPE_BASE + 5;
 const bool IBL_FLIP_Y_AXIS = true;
 
 void main() {
@@ -231,6 +240,7 @@ void main() {
     vec3 viewNormal = mat3(u_V) * normalize(normal);
 
     vec3 color = vec3(0.0);
+    int dbg = int(DEBUG_TYPE);
 
     // if (material.alwaysLit == 0.0) {
     // Direct lighting
@@ -247,6 +257,11 @@ void main() {
         directLighting += light_contrib;
     }
     
+    if (dbg == DIRECT_LIGHTING) {
+        FragColor = vec4(directLighting, 1.0);
+        return;
+    }
+
     // Ambient/IBL
     vec3 ambient = vec3(0.0);
     if (u_UseIbl > 0.5) {
@@ -257,9 +272,7 @@ void main() {
         //     N.y = -N.y;
         // }
 
-        int dbg = int(DEBUG_TYPE);
-
-        if (dbg == IBL_DEBUG_TYPE_BASE)
+        if (dbg == IBL_DEBUG_IRRADIANCE)
         {
             vec3 irradiance = texture(irradianceMap, N).rgb;
             FragColor = vec4(irradiance, 1.0);
@@ -275,7 +288,7 @@ void main() {
 
 
         // DEBUG: Show the prefilter map. should look like perfect mirror
-        if (dbg == IBL_DEBUG_TYPE_BASE+1)
+        if (dbg == IBL_DEBUG_PREFILTER)
         {
             vec3 prefilteredColor = textureLod(prefilterMap, R, 0.0).rgb;  // Mip 0 = sharpest
             FragColor = vec4(prefilteredColor, 1.0);
@@ -288,7 +301,7 @@ void main() {
         float NdotV = max(dot(N, V), 0.001);
 
         // debug brdf lut. should look like gradient red/orange
-        if (dbg == IBL_DEBUG_TYPE_BASE+2)
+        if (dbg == IBL_DEBUG_BRDFLUT)
         {
             vec2 brdf = texture(brdfLut, vec2(NdotV, material.rough)).rg;
             FragColor = vec4(brdf.r, brdf.g, 0.0, 1.0);
@@ -302,16 +315,15 @@ void main() {
         vec3 kD = (1.0 - F) * (1.0 - material.metal);
         vec3 irradiance = texture(irradianceMap, N).rgb;
         // irradiance = irradiance / (irradiance + vec3(1.0));
-        vec3 diffuse = kD * irradiance * material.color;
+        vec3 diffuse = kD * irradiance * material.color * u_IblDiffuseStrength;
 
 // #define DEBUG_IBL_DIFFUSE
-#ifdef DEBUG_IBL_DIFFUSE
-        FragColor = vec4(diffuse, 1.0);
-        return;
-#endif
+        if (dbg == IBL_DIFFUSE) {
+            FragColor = vec4(diffuse, 1.0);
+            return;
+        }
 
         // Specular component  
-        const float MAX_REFLECTION_LOD = 4.0;
 
         vec3 prefilteredColor = vec3(0.0, 0.0, 0.0);
 
@@ -319,13 +331,13 @@ void main() {
         {
             // somehow flooring the mipLevel, no interpolation fixes aura issue?
             // !TODO: jspoh figure out why and a proper fix
-            float mipLevel = material.rough * MAX_REFLECTION_LOD;
+            float mipLevel = material.rough * u_IblMaxReflectionLod;
             mipLevel = floor(mipLevel); // Force discrete mip levels, no interpolation
             prefilteredColor = textureLod(prefilterMap, R, mipLevel).rgb;
         }
 #endif
 
-        prefilteredColor = textureLod(prefilterMap, R, material.rough * MAX_REFLECTION_LOD).rgb;
+        prefilteredColor = textureLod(prefilterMap, R, material.rough * u_IblMaxReflectionLod).rgb;
 
 #ifdef DEBUG_MIP
         {
@@ -337,7 +349,12 @@ void main() {
         // prefilteredColor = prefilteredColor / (prefilteredColor + vec3(1.0));  // Reinhard tone mapping
 
         vec2 envBRDF = texture(brdfLut, vec2(NdotV, material.rough)).rg;
-        vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
+        vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y) * u_IblSpecularStrength;
+
+        if (dbg == IBL_SPECULAR) {
+            FragColor = vec4(specular, 1.0);
+            return;
+        }
 
         ambient = diffuse + specular;
     } else {

@@ -90,6 +90,19 @@ namespace PAIN {
 		glBindVertexArray(0);
 	}
 
+	void Skybox::ConfigureSourceCubemapForIblSampling() {
+		if (!cubemap_tex) {
+			return;
+		}
+
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	}
+
 	void Skybox::convertEquirectangularToCubemap() {
 
 		// ========================================
@@ -128,9 +141,6 @@ namespace PAIN {
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 9);
 #endif
-
-		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
 		unsigned int captureFBO, captureRBO;
 		glGenFramebuffers(1, &captureFBO);
@@ -196,6 +206,10 @@ namespace PAIN {
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
 #endif
+
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
+		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+		ConfigureSourceCubemapForIblSampling();
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, WindowsRenderer::winWidth, WindowsRenderer::winHeight);
@@ -378,10 +392,7 @@ namespace PAIN {
 		if (irradianceShader_opt.has_value()) {
 			auto irradianceShader = irradianceShader_opt.value();
 
-			// Force complete mipmap chain OR disable mipmaps
-			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // NO mipmaps
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			ConfigureSourceCubemapForIblSampling();
 
 			// debug
 			{
@@ -460,6 +471,7 @@ namespace PAIN {
 			glViewport(0, 0, WindowsRenderer::winWidth, WindowsRenderer::winHeight);
 
 			glDeleteFramebuffers(1, &captureFBO);
+			glDeleteRenderbuffers(1, &captureRBO);
 
 			while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error after generateIrradianceMap: {}", err);
 
@@ -522,6 +534,7 @@ namespace PAIN {
 			prefilterShader->SetUniform("environmentMap", 0);
 			prefilterShader->SetUniform("projection", captureProjection);
 
+			ConfigureSourceCubemapForIblSampling();
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
 

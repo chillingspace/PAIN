@@ -2371,6 +2371,9 @@ namespace PAIN {
 			// for image based lighting
 			pbr_shader->SetUniform("u_CamPos", scene->GetActiveCamera()->pos);
 			pbr_shader->SetUniform("u_UseIbl", GraphicsSettings::get().ibl ? 1.f : 0.f);
+			pbr_shader->SetUniform("u_IblDiffuseStrength", GraphicsSettings::get().ibl_diffuse_strength);
+			pbr_shader->SetUniform("u_IblSpecularStrength", GraphicsSettings::get().ibl_specular_strength);
+			pbr_shader->SetUniform("u_IblMaxReflectionLod", GraphicsSettings::get().ibl_max_reflection_lod);
 
 			glActiveTexture(GL_TEXTURE0 + kIrradianceTextureUnit);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, Skybox::get().getIrradianceMap());

@@ -71,6 +71,9 @@ namespace PAIN {
                 glm::vec3 worldLightIntensity{ GraphicsSettings::get().global_light_intensity };
                 bool useWorldLight = true;
                 bool useIBL = true;
+                float iblDiffuseStrength = 1.0f;
+                float iblSpecularStrength = 1.0f;
+                float iblMaxReflectionLod = 4.0f;
                 bool useDiffuseMap = true;
                 bool useAOMap = true ;
                 bool useNormalMap = true;
