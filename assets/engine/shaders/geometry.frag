@@ -28,8 +28,10 @@ struct Material {
     sampler2D normal_map;
     float use_emission;
     sampler2D emission_map;
-    float use_roughnessmetallic;
-    sampler2D roughnessmetallic_map;
+    float use_roughness;
+    sampler2D roughness_map;
+    float use_metallic;
+    sampler2D metallic_map;
     vec3 color;
 };
 
@@ -50,11 +52,17 @@ vec3 ResolveGeometryNormal() {
 }
 
 vec3 ResolveGeometryMaterial(int dbg) {
-    if (material.use_roughnessmetallic > 0.5) {
-        return vec3(texture(material.roughnessmetallic_map, vTexCoords).gb,
-                    dbg != 0 && dbg < IBL_DEBUG_TYPE ? 1.0 : 0.0);
+    float roughness = material.rough;
+    if (material.use_roughness > 0.5) {
+        roughness = texture(material.roughness_map, vTexCoords).r;
     }
-    return vec3(material.rough, material.metal,
+
+    float metallic = material.metal;
+    if (material.use_metallic > 0.5) {
+        metallic = texture(material.metallic_map, vTexCoords).r;
+    }
+
+    return vec3(roughness, metallic,
                 dbg != 0 && dbg < IBL_DEBUG_TYPE ? 1.0 : 0.0);
 }
 
@@ -92,8 +100,8 @@ void main() {
         else if (dbg == 2) gCol = texture(material.tex, vTexCoords).rgb;
         else if (dbg == 3) gCol = texture(material.ao_map, vTexCoords).rgb;
         else if (dbg == 4) gCol = texture(material.normal_map, vTexCoords).rgb;
-        else if (dbg == 5) gCol = vec3(texture(material.roughnessmetallic_map, vTexCoords).g, 0.0, 0.0);
-        else if (dbg == 6) gCol = vec3(texture(material.roughnessmetallic_map, vTexCoords).b, 0.0, 0.0);
+        else if (dbg == 5) gCol = vec3(material.use_roughness > 0.5 ? texture(material.roughness_map, vTexCoords).rrr : vec3(material.rough));
+        else if (dbg == 6) gCol = vec3(material.use_metallic > 0.5 ? texture(material.metallic_map, vTexCoords).rrr : vec3(material.metal));
         else if (dbg == 7) gCol = texture(material.emission_map, vTexCoords).rgb;
         return;
     }

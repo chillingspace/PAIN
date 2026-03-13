@@ -432,7 +432,8 @@ namespace PAIN {
 			GLuint albedoTexture = 0;
 			GLuint aoTexture = 0;
 			GLuint normalTexture = 0;
-			GLuint roughnessMetallicTexture = 0;
+			GLuint roughnessTexture = 0;
+			GLuint metallicTexture = 0;
 			GLuint emissionTexture = 0;
 			glm::vec3 baseColor = glm::vec3(1.0f);
 			float roughness = 0.5f;
@@ -490,8 +491,10 @@ namespace PAIN {
 				material.aoTextureOverride, gs.DEBUG_USE_AO_MAP);
 			state.normalTexture = ResolveMaterialTexture(assetManager, material, materialAsset->normalTexturePath,
 				material.normalTextureOverride, gs.DEBUG_USE_NORMAL_MAP);
-			state.roughnessMetallicTexture = ResolveMaterialTexture(assetManager, material, materialAsset->roughnessTexturePath,
+			state.roughnessTexture = ResolveMaterialTexture(assetManager, material, materialAsset->roughnessTexturePath,
 				material.roughnessTextureOverride, gs.DEBUG_USE_ROUGHNESSMETALLIC_MAP);
+			state.metallicTexture = ResolveMaterialTexture(assetManager, material, materialAsset->metallicTexturePath,
+				material.metallicTextureOverride, gs.DEBUG_USE_ROUGHNESSMETALLIC_MAP);
 			state.emissionTexture = ResolveMaterialTexture(assetManager, material, materialAsset->emissiveTexturePath,
 				material.emissiveTextureOverride, gs.DEBUG_USE_EMISSION_MAP);
 			state.baseColor = material.useOverrides ? material.baseColorOverride : materialAsset->baseColor;
@@ -533,20 +536,28 @@ namespace PAIN {
 				geometry_shader->SetUniform("material.normal_map", 8);
 			}
 
-			const bool useRoughnessMetallic = state.roughnessMetallicTexture != 0;
-			geometry_shader->SetUniform("material.use_roughnessmetallic", useRoughnessMetallic ? 1.0f : 0.0f);
-			if (useRoughnessMetallic) {
+			const bool useRoughness = state.roughnessTexture != 0;
+			geometry_shader->SetUniform("material.use_roughness", useRoughness ? 1.0f : 0.0f);
+			if (useRoughness) {
 				glActiveTexture(GL_TEXTURE9);
-				glBindTexture(GL_TEXTURE_2D, state.roughnessMetallicTexture);
-				geometry_shader->SetUniform("material.roughnessmetallic_map", 9);
+				glBindTexture(GL_TEXTURE_2D, state.roughnessTexture);
+				geometry_shader->SetUniform("material.roughness_map", 9);
+			}
+
+			const bool useMetallic = state.metallicTexture != 0;
+			geometry_shader->SetUniform("material.use_metallic", useMetallic ? 1.0f : 0.0f);
+			if (useMetallic) {
+				glActiveTexture(GL_TEXTURE10);
+				glBindTexture(GL_TEXTURE_2D, state.metallicTexture);
+				geometry_shader->SetUniform("material.metallic_map", 10);
 			}
 
 			const bool useEmission = state.emissionTexture != 0;
 			geometry_shader->SetUniform("material.use_emission", useEmission ? 1.0f : 0.0f);
 			if (useEmission) {
-				glActiveTexture(GL_TEXTURE10);
+				glActiveTexture(GL_TEXTURE11);
 				glBindTexture(GL_TEXTURE_2D, state.emissionTexture);
-				geometry_shader->SetUniform("material.emission_map", 10);
+				geometry_shader->SetUniform("material.emission_map", 11);
 			}
 		}
 	}
