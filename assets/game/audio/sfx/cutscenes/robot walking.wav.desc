@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "robot walking.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 691124108413396261
+  },
+  "descriptor_version": 1,
+  "guid": "a417d44c-7504-b545-9a99-1ce63d8df790",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\cutscenes\\robot walking.wav"
+  }
+}

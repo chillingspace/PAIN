@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "robot light getting stronger cs2.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 7822197576230501628
+  },
+  "descriptor_version": 1,
+  "guid": "c8a8d530-1173-0b48-a24e-a21aa20e72fd",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\cutscenes\\robot light getting stronger cs2.wav"
+  }
+}

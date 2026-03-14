@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "throw frog cs1.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 6320434268036400766
+  },
+  "descriptor_version": 1,
+  "guid": "b03fda92-df7f-0f4b-8211-6192c4dcb2a3",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\cutscenes\\throw frog cs1.wav"
+  }
+}

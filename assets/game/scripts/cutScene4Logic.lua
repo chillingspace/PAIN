@@ -22,17 +22,36 @@ local FRAME_SFX = {
     [9] = { SFX_PATH .. "robot walking.wav" },
 }
 
+local activeSfxChannels = {}
+
+local function stopPreviousSFX()
+    if audioStopChannel then
+        for _, chId in ipairs(activeSfxChannels) do
+            if chId >= 0 then audioStopChannel(chId) end
+        end
+    end
+    activeSfxChannels = {}
+end
+
 local function playCutsceneSFX(frame)
+    stopPreviousSFX()
     local sfxList = FRAME_SFX[frame]
     if not sfxList or not audioPlaySFX then return end
     for _, sfxFile in ipairs(sfxList) do
-        audioPlaySFX(sfxFile, 0.0)
+        local chId = audioPlaySFX(sfxFile, 0.0)
+        if chId and chId >= 0 then
+            table.insert(activeSfxChannels, chId)
+        end
         print("[Cutscene4] Playing SFX for frame " .. frame .. ": " .. sfxFile)
     end
 end
 
 -- Play SFX for the initial frame (frame 1 is already displayed when scene loads)
-playCutsceneSFX(1)
+-- Guard to prevent double-play if script is loaded more than once
+if not _G.cs4_sfx_init then
+    _G.cs4_sfx_init = true
+    playCutsceneSFX(1)
+end
 
 registerUpdate(function(dt)
     -- Check for mouse click

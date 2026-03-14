@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "robot reboot ending cutscene.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 6723008293943912649
+  },
+  "descriptor_version": 1,
+  "guid": "483989bb-0c4d-a344-8271-f964aa908888",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\cutscenes\\robot reboot ending cutscene.wav"
+  }
+}
