@@ -459,7 +459,9 @@ namespace PAIN {
 			// 1. ANDROID SPECIFIC: Suspend the mixer thread
 			// This stops the CPU usage and releases audio hardware to the OS
 #ifdef PN_PLATFORM_ANDROID
-			impl_->sys->mixerSuspend();
+			// NOTE: We no longer suspend the mixer here because calling FMOD API
+			// after mixerSuspend results in undefined behavior (and failures to resume).
+			// mixerSuspend is now strictly handled by onAppPause/onAppResume.
 #endif
 
 			// 2. LOGIC: Pause the Master Group Only
@@ -492,7 +494,7 @@ namespace PAIN {
 			}
 			// ANDROID SPECIFIC: Resume the mixer thread
 #ifdef PN_PLATFORM_ANDROID
-			impl_->sys->mixerResume();
+			// NOTE: We no longer resume the mixer here. See pauseAll() for details.
 #endif
 			
 			// 2. LOGIC: Unpause Master Group
@@ -629,10 +631,12 @@ namespace PAIN {
 
 		void FmodAudio::onAppPause() {
 			if (!impl_->initialized) return;
+			PN_CORE_INFO("[FMOD] onAppPause() - Suspending mixer");
 			impl_->sys->mixerSuspend();
 		}
 		void FmodAudio::onAppResume() {
 			if (!impl_->initialized) return;
+			PN_CORE_INFO("[FMOD] onAppResume() - Resuming mixer");
 			impl_->sys->mixerResume();
 		}
 
