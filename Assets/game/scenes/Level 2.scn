@@ -23,17 +23,13 @@
         "38a421a9-1ffc-3c47-a8e2-f0af50f2e2c2",
         "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
         "d54d96e7-2dc0-c947-8f1a-bab6892ff688",
-        "466ca22c-0eb2-0d49-ac1a-b9d822cc1ce4",
         "4727438d-9c1f-ea47-91e0-8911d3412588",
-        "5d46bba2-ab81-064e-bab5-2517c42f6aca",
         "08527159-b243-d742-a313-9001198b2097",
         "ffd57a3d-b8b4-2b40-94a5-52ecd82a5a5f",
         "d9977322-f31e-bc4c-b298-fbcd6690c4ba",
         "4b1f318e-49f7-1545-bb84-b9c6608f3471",
         "6a6e7d67-82c1-f846-96c5-4c5338a9a7ec",
         "3da3f0aa-e9d3-634a-b1c9-f88763fb5bae",
-        "25c6e2c3-b701-4c43-b049-8c9b21a29441",
-        "31f050fc-b8fd-9f44-9f4c-c2b19a10e63e",
         "146f4e3b-5c24-624f-80c8-d74159ed9f41",
         "a8977689-ded0-fa41-9efb-33354e83dec7",
         "41022c20-5591-324d-80ff-f14090e5e9d3",
@@ -106,8 +102,9 @@
         "65010a62-9cbc-0e49-9887-7b9acba9b005",
         "aa276de3-edb3-6541-bdd3-535c8fce0f35",
         "ad95c15c-a360-f548-8f9e-f7cab095c869",
-        "9d082b82-72a3-e149-a6bb-b0fa70c02de0",
-        "46536048-be77-5544-9fdc-0a11d0b7e60f",
+        "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
+        "6100a187-8732-804d-903d-32a5c3dc0576",
+        "3b99f393-1f31-b847-933d-0f10509c199a",
         "15d07ef6-eadd-cf49-bf8f-8825d014f2c5",
         "6f5d22ac-86ff-ed4e-978c-55ceb1b59a3f",
         "0377d90f-9de9-5a42-8583-17b17904b178",
@@ -127,7 +124,6 @@
         "c3240e7d-4066-2444-a024-c1d31c71a299",
         "c79c529b-71e5-164c-854d-f8cf076f5318",
         "b4a81861-94f2-584b-9da1-dbb24a91f93c",
-        "164de26f-1403-e146-8a76-735d5dc42155",
         "510e3ede-f637-c448-99e8-7dc200d60c8f",
         "c3be7e4a-501e-0744-ac10-55d1b5a38d86",
         "b3ec7aee-c5ff-af48-9aa1-f912f843a888",
@@ -149,12 +145,10 @@
         "65365c00-7be8-7b48-9780-ed46b6ef0404",
         "5118d991-2d48-3545-8b17-c9b991d368d0",
         "5c00815c-1692-6e45-b852-06a086a81b0d",
-        "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
-        "6100a187-8732-804d-903d-32a5c3dc0576",
-        "3b99f393-1f31-b847-933d-0f10509c199a",
         "e60f5690-3ae8-a142-b726-5ea017a209e9",
         "0b9ad008-e8ad-144b-855d-115dd4683035",
         "b6f7c506-7c21-1847-a0b9-597479e83e13",
+        "9d082b82-72a3-e149-a6bb-b0fa70c02de0",
         "f79091e8-3999-8543-a6da-c631ad94a064",
         "b17a7e7a-a4f4-f746-9d4c-8101b65d9b4b",
         "c60c8f27-fe85-4546-8281-deaab9d87acc",
@@ -194,7 +188,6 @@
         "0d290cee-b55d-2e45-907d-ae2c745f492f",
         "163da0e7-00d9-0541-a470-a859fd023b6b",
         "ee65299b-47d9-4648-ae3d-7a9e1ae75012",
-        "6fc0ccbc-ae9d-a948-9557-6140470621c4",
         "79269c4e-addb-ea41-85c6-57e984c24ff3",
         "a77749e3-6c15-7446-a792-5609dd96b391",
         "14377587-a8fe-2b47-9f46-dad6bdad2753",
@@ -308,16 +301,16 @@
         ],
         "farPlane": 100.0,
         "forward": [
-            0.819020688533783,
-            -0.5519407987594604,
-            -0.15673665702342987
+            0.6335592269897461,
+            -0.7615418434143066,
+            0.1365896463394165
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            15.690398216247559,
-            10.943477630615234,
-            4.744487762451172
+            29.367263793945313,
+            18.952163696289063,
+            3.418879508972168
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 31.100000381469727,
@@ -9966,7 +9959,7 @@
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "46536048-be77-5544-9fdc-0a11d0b7e60f",
+                            "modelGUID": "3b99f393-1f31-b847-933d-0f10509c199a",
                             "receiveShadows": true,
                             "visible": true
                         },
@@ -9997,6 +9990,38 @@
                                         1.0,
                                         1.0
                                     ]
+                                },
+                                "ModelRenderer": {
+                                    "castShadows": true,
+                                    "materials": [
+                                        {
+                                            "albedoTextureOverride": "37c45efa-c7de-8241-9b1a-b26220fd197b",
+                                            "aoTextureOverride": "1d8df71b-3423-c54b-b6d8-58f6247fdf61",
+                                            "baseColorOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "materialGUID": "0377d90f-9de9-5a42-8583-17b17904b178",
+                                            "metallicOverride": 1.0,
+                                            "metallicTextureOverride": "1d8df71b-3423-c54b-b6d8-58f6247fdf61",
+                                            "normalTextureOverride": "cc05c05a-47eb-ca46-bf3d-c398644e58e1",
+                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "roughnessOverride": 1.0,
+                                            "roughnessTextureOverride": "1d8df71b-3423-c54b-b6d8-58f6247fdf61",
+                                            "useOverrides": false
+                                        }
+                                    ],
+                                    "modelGUID": "3b99f393-1f31-b847-933d-0f10509c199a",
+                                    "receiveShadows": true,
+                                    "visible": true
                                 }
                             },
                             "correspondingPrefabEntityGUID": "79645da4-aba9-d849-90c6-464be1064aa7",
@@ -10356,7 +10381,7 @@
                                     "useOverrides": false
                                 }
                             ],
-                            "modelGUID": "46536048-be77-5544-9fdc-0a11d0b7e60f",
+                            "modelGUID": "3b99f393-1f31-b847-933d-0f10509c199a",
                             "receiveShadows": true,
                             "visible": true
                         },
@@ -10387,6 +10412,38 @@
                                         1.0,
                                         1.0
                                     ]
+                                },
+                                "ModelRenderer": {
+                                    "castShadows": true,
+                                    "materials": [
+                                        {
+                                            "albedoTextureOverride": "37c45efa-c7de-8241-9b1a-b26220fd197b",
+                                            "aoTextureOverride": "1d8df71b-3423-c54b-b6d8-58f6247fdf61",
+                                            "baseColorOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "materialGUID": "0377d90f-9de9-5a42-8583-17b17904b178",
+                                            "metallicOverride": 1.0,
+                                            "metallicTextureOverride": "1d8df71b-3423-c54b-b6d8-58f6247fdf61",
+                                            "normalTextureOverride": "cc05c05a-47eb-ca46-bf3d-c398644e58e1",
+                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "roughnessOverride": 1.0,
+                                            "roughnessTextureOverride": "1d8df71b-3423-c54b-b6d8-58f6247fdf61",
+                                            "useOverrides": false
+                                        }
+                                    ],
+                                    "modelGUID": "3b99f393-1f31-b847-933d-0f10509c199a",
+                                    "receiveShadows": true,
+                                    "visible": true
                                 }
                             },
                             "correspondingPrefabEntityGUID": "79645da4-aba9-d849-90c6-464be1064aa7",
@@ -12536,9 +12593,9 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                62.839561462402344,
+                                63.766849517822266,
                                 -0.15359121561050415,
-                                13.664979934692383
+                                13.566524505615234
                             ],
                             "rotation": [
                                 0.0,
@@ -12596,9 +12653,9 @@
                                 },
                                 "LocalTransform": {
                                     "position": [
-                                        62.839561462402344,
+                                        63.766849517822266,
                                         -0.15359121561050415,
-                                        13.664979934692383
+                                        13.566524505615234
                                     ],
                                     "rotation": [
                                         0.0,

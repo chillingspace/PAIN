@@ -35,6 +35,7 @@
 #include "CoreSystems/Events/Android/SurfaceEvents.h"
 #include "CoreSystems/Events/Android/TouchEvents.h"
 #endif
+#include <CoreSystems/Renderer/sRenderer.h>
 
 //using PAIN::Audio::AudioResult;
 //using PAIN::Audio::PlaylistDesc;
@@ -901,16 +902,38 @@ namespace PAIN {
         //return mr->mesh_id; 
         return std::nullopt;
     }
-    void EngineAPIAdapter::SetMeshId(entt::entity entityId, uint32_t meshId) {
-        //auto& mr = ensure<PAIN::ModelRenderer>(entityId);
-        //mr.mesh_id = meshId; 
-
-        /*PAIN::ModelRenderer* mr = nullptr;
-        if (!try_get<PAIN::ModelRenderer>(entityId, mr)) {
-            PN_CORE_ERROR("SetMeshId: Entity {} has no ModelRenderer component", static_cast<entt::id_type>(entt::to_integral(entityId)));
+    void EngineAPIAdapter::SetModelByName(entt::entity entityId, const std::string& name) {
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<PAIN::ModelRenderer>(entityId)) {
+            PN_CORE_ERROR("SetModelByPath: Entity {} has no ModelRenderer", entt::to_integral(entityId));
             return;
         }
-        mr->mesh_id = meshId;*/
+
+        auto guid = assets_->findByName(name);
+        if (!guid.IsValid()) {
+            PN_CORE_ERROR("SetModelByPath: Could not find model '{}'", name);
+            return;
+        }
+        if (assets_->getTypeByGUID(guid) != Assets::Type::Model) {
+            PN_CORE_ERROR("SetModelByPath: '{}' is not a Model asset", name);
+            return;
+        }
+
+        auto& mr = reg.get<PAIN::ModelRenderer>(entityId);
+        mr.prevModelGUID = mr.modelGUID;
+        mr.modelGUID = guid;
+        mr.cachedModelAsset = nullptr;
+        mr.bufferOffset = {};
+        mr.submeshCaches.clear();
+
+        // Update model
+        auto newAsset = assets_->getAsset<PAIN::Assets::Model>(guid);
+        if (newAsset.has_value()) {
+            mr.cachedModelAsset = newAsset.value();
+        }
+        else {
+            PN_CORE_ERROR("SetModelByPath: Asset found by name but couldn't load model '{}'", name);
+        }
     }
 
     void EngineAPIAdapter::SetUITexture(entt::entity entityId, const std::string& textureGuidStr)

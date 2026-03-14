@@ -176,7 +176,7 @@ namespace PAIN {
         /*                                ModelRenderer                                 */
         /* =========================================================================== */
         std::optional<uint32_t> GetMeshId(entt::entity entityId) override;
-        void SetMeshId(entt::entity entityId, uint32_t meshId) override;
+        void SetModelByName(entt::entity entityId, const std::string& virtual_path) override;
 
         void SetUITexture(entt::entity entityId, const std::string& textureGuidStr) override;
         void SetUITextureScale(entt::entity e, glm::vec2 s) override;

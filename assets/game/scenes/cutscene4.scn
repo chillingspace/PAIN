@@ -1135,7 +1135,7 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "payload": "game/scenes/Tutorial.scn",
+                            "payload": "game/scenes/mainmenu.scn",
                             "pressed_color": -5592406,
                             "state": "Normal"
                         },

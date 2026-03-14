@@ -104,6 +104,7 @@ namespace PAIN {
             // Internal add object used for testing
             entt::entity AddObject(const std::shared_ptr<Assets::Model>& mdl, const std::string& name, const glm::vec3& pos, const glm::quat& quat, const glm::vec3& scale, Assets::GUID const& diff_id = Assets::GUID{}, Assets::GUID const& ao_id = Assets::GUID{});
 
+
         public:
             SceneManager() = default;
             ~SceneManager() override = default;
@@ -154,6 +155,8 @@ namespace PAIN {
             void changeScene(const Assets::GUID& sceneGUID);
 
             void processPendingSceneChange();
+
+            void updateSceneVBO();
 
 #ifdef PN_PLATFORM_WINDOWS
 #ifdef _DEBUG

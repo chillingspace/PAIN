@@ -1615,6 +1615,11 @@ namespace PAIN {
 			setGamePaused(false);
 		}
 
+		void SceneManager::updateSceneVBO()
+		{
+			services->get<sRenderer>()->initSceneVbo();
+		}
+
 #ifdef PN_PLATFORM_WINDOWS
 #ifdef _DEBUG
 		void SceneManager::createScene(std::string const& name) {
@@ -1867,6 +1872,7 @@ namespace PAIN {
 
 			return entity;
 		}
+
 
 		void SceneManager::setCurrSkyBoxTexture(Assets::GUID const& skybox_id) {
 			curr_skybox_id = skybox_id;

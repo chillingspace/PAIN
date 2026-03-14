@@ -170,7 +170,7 @@ end
 -- guard so keys arent registered twice if script reloads
 if not S._keysRegistered then
     -- Debugging
-    -- registerKeyUp("C", function() triggerGameWin() end)
+    registerKeyUp("P", function() triggerGameWin() end)
 
     registerKeyDown("C", function() collectPressed = true end)
     registerKeyUp("C", function() collectPressed = false end)
@@ -519,14 +519,6 @@ local function ensureMinimapGameplayTags()
 end
 
 
--------------------------------------------------
--- Helper: Apply hide scale factor
--------------------------------------------------
-local function applyHideScale(entity, baseScale)
-    local f = S.hideScaleFactor
-    setScale(entity, baseScale.x * f, baseScale.y * f, baseScale.z * f)
-end
-
 
 -------------------------------------------------
 -- Helper: Deliver carried letter
@@ -538,6 +530,8 @@ local function deliverLetter()
     if removeTag then
         removeTag(S.carriedLetter, "letter_carried")
     end
+
+    SetModel(S.player, "Frog_Anim.mesh")  
 
     S.carriedLetter = nil
     S.lettersDelivered = (S.lettersDelivered or 0) + 1
@@ -565,7 +559,9 @@ local function pickupLetter(letter)
     if audioPlaySFX then audioPlaySFX(SFX_COLLECT, VOL_COLLECT) end
 
     disablePhysics(letter)
-
+    setVisibility(letter, false) 
+    SetModel(S.player, "Frog_Anim_Gear.mesh")
+    
     log("[PlayerState] Collected letter on back")
 end
 
@@ -643,7 +639,7 @@ end
 local function exitPipe()
     S.inPipe = false
     setVisibility(S.player, true)
-    if S.carriedLetter then setVisibility(S.carriedLetter, true) end
+
     enablePhysics(S.player)
     audioPlaySFXFromEntity(SFX_PIPE_OUT, S.player, VOL_HIDE)
     log("[PlayerState] Player exited pipe")
@@ -678,7 +674,6 @@ local function handleHideToggle(px, py, pz)
         S.hiddenIn = nil
 
         setVisibility(S.player, true)
-        if S.carriedLetter then setVisibility(S.carriedLetter, true) end
 
         resetInputState()
         log("[PlayerState] Player left hiding spot")
@@ -702,7 +697,7 @@ local function handleHideToggle(px, py, pz)
             setPosition(S.player, bx, by, bz)
             setVelocity(S.player, 0.0, 0.0, 0.0)
             setVisibility(S.player, false)
-            if S.carriedLetter then setVisibility(S.carriedLetter, false) end
+
             resetInputState()
             S.hidden = true
             S.hiddenIn = bestSpot
@@ -953,9 +948,11 @@ function S.onCaught(player)
     -- drop carried letter
     if S.carriedLetter then
         setPosition(S.carriedLetter, deathPos.x, deathPos.y, deathPos.z)
+        setVisibility(S.carriedLetter, true)
         enablePhysics(S.carriedLetter)
         if removeTag then removeTag(S.carriedLetter, "letter_carried") end
         if addTag then addTag(S.carriedLetter, "letter_collectible") end
+        SetModel(S.player, "Frog_Anim.mesh")
         log("[PlayerState] Dropped carried letter at death position")
         -- REMOVED: playSfx(S.sfxDrop)
         S.carriedLetter = nil
