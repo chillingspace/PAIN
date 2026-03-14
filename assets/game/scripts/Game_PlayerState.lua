@@ -70,7 +70,7 @@ _G.PlayerState = _G.PlayerState or {
     pipeDirY        = 0.0,
     pipeDirZ        = 0.0,
     pipeLen         = 0.0,   -- world-space length of pipe
-    pipeEnterRadius = 1.5,   -- how close the player must be to enter a pipe
+    pipeEnterRadius = 0.7,   -- how close the player must be to enter a pipe
 
     -- SFX entities (Legacy entities removed)
     -- sfxHideIn  = nil,
@@ -657,10 +657,17 @@ S.exitPipe = exitPipe
 -- Helper: Handle hide/unhide toggle
 -------------------------------------------------
 local function handleHideToggle(px, py, pz)
-    -- Exit pipe
+    -- Exit pipe 
     if S.inPipe then
-        exitPipe()
-        resetInputState()
+        local toCurX = px - S.pipeEntrancePos.x
+        local toCurY = py - S.pipeEntrancePos.y
+        local toCurZ = pz - S.pipeEntrancePos.z
+        local currentT = toCurX * S.pipeDirX + toCurY * S.pipeDirY + toCurZ * S.pipeDirZ
+        local exitThreshold = S.pipeEnterRadius
+        if currentT <= exitThreshold or currentT >= S.pipeLen - exitThreshold then
+            exitPipe()
+            resetInputState()
+        end
         return
     end
 
