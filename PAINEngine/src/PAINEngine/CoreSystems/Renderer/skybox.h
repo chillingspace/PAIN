@@ -23,10 +23,13 @@ namespace PAIN {
 
 		unsigned int skybox_tex = 0;
 		unsigned int cubemap_tex = 0;
+		bool cubemap_owned_by_skybox = false;
 
 		void convertEquirectangularToCubemap();
 		void ConfigureSourceCubemapForIblSampling();
 		void renderCube();
+		void releaseGeneratedTextures();
+		void bindResolvedSkyboxTexture(const std::shared_ptr<Assets::Texture>& texture_asset);
 
 		std::shared_ptr<Assets::Shader> conversionShader;
 		std::shared_ptr<Assets::Shader> shader;

@@ -8,6 +8,105 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <array>
+#include <algorithm>
+#include <cmath>
+
+namespace {
+    constexpr float kPi = 3.14159265358979323846f;
+
+    bool IsHdrSkyboxCandidate(const PAIN::Assets::Info& asset, int width, int height) {
+        if (height <= 0) {
+            return false;
+        }
+
+        const float aspect = static_cast<float>(width) / static_cast<float>(height);
+        const bool is_equirectangular = std::abs(aspect - 2.0f) < 0.15f;
+        const std::string lower_name = PAIN::Assets::toLowerCase(asset.raw_path.stem().string());
+        const bool name_matches = lower_name.find("sky") != std::string::npos ||
+            lower_name.find("env") != std::string::npos ||
+            lower_name.find("ibl") != std::string::npos;
+
+        return is_equirectangular && name_matches;
+    }
+
+    glm::vec3 CubemapDirectionForFace(int face, float u, float v) {
+        switch (face) {
+        case 0: return glm::normalize(glm::vec3(1.0f, -v, -u));   // +X
+        case 1: return glm::normalize(glm::vec3(-1.0f, -v, u));   // -X
+        case 2: return glm::normalize(glm::vec3(u, 1.0f, v));     // +Y
+        case 3: return glm::normalize(glm::vec3(u, -1.0f, -v));   // -Y
+        case 4: return glm::normalize(glm::vec3(u, -v, 1.0f));    // +Z
+        default: return glm::normalize(glm::vec3(-u, -v, -1.0f)); // -Z
+        }
+    }
+
+    float WrapUnit(float value) {
+        value = std::fmod(value, 1.0f);
+        if (value < 0.0f) {
+            value += 1.0f;
+        }
+        return value;
+    }
+
+    std::vector<float> BuildCubemapFaceFromEquirectangular(
+        const float* pixels,
+        int width,
+        int height,
+        int channels,
+        int face,
+        int face_size
+    ) {
+        std::vector<float> face_pixels(static_cast<size_t>(face_size) * face_size * channels);
+
+        auto sample = [&](float u, float v, int channel) -> float {
+            const float wrapped_u = WrapUnit(u);
+            const float clamped_v = std::clamp(v, 0.0f, 1.0f);
+
+            const float x = wrapped_u * static_cast<float>(width - 1);
+            const float y = clamped_v * static_cast<float>(height - 1);
+
+            const int x0 = static_cast<int>(std::floor(x));
+            const int y0 = static_cast<int>(std::floor(y));
+            const int x1 = (x0 + 1) % width;
+            const int y1 = std::min(y0 + 1, height - 1);
+
+            const float tx = x - static_cast<float>(x0);
+            const float ty = y - static_cast<float>(y0);
+
+            auto at = [&](int sx, int sy) -> float {
+                return pixels[(static_cast<size_t>(sy) * width + sx) * channels + channel];
+            };
+
+            const float c00 = at(x0, y0);
+            const float c10 = at(x1, y0);
+            const float c01 = at(x0, y1);
+            const float c11 = at(x1, y1);
+
+            const float cx0 = c00 + (c10 - c00) * tx;
+            const float cx1 = c01 + (c11 - c01) * tx;
+            return cx0 + (cx1 - cx0) * ty;
+        };
+
+        for (int y = 0; y < face_size; ++y) {
+            for (int x = 0; x < face_size; ++x) {
+                const float u = (2.0f * (static_cast<float>(x) + 0.5f) / static_cast<float>(face_size)) - 1.0f;
+                const float v = (2.0f * (static_cast<float>(y) + 0.5f) / static_cast<float>(face_size)) - 1.0f;
+                const glm::vec3 dir = CubemapDirectionForFace(face, u, v);
+
+                const float sample_u = std::atan2(dir.z, dir.x) / (2.0f * kPi) + 0.5f;
+                const float sample_v = std::asin(std::clamp(dir.y, -1.0f, 1.0f)) / kPi + 0.5f;
+
+                const size_t dst = (static_cast<size_t>(y) * face_size + x) * channels;
+                for (int c = 0; c < channels; ++c) {
+                    face_pixels[dst + c] = sample(sample_u, sample_v, c);
+                }
+            }
+        }
+
+        return face_pixels;
+    }
+}
 
 
 namespace PAIN {
@@ -545,12 +644,37 @@ namespace PAIN {
                     return;
                 }
 
-                //Compress HDR texture
-                compression_success = CuttlefishCompressor(
-                    raw_pixels, width, height, channels,
-                    asset_info.shipped_path.string(),
-                    compression_format, desc_file.import_settings
-                );
+                const bool bake_android_cubemap =
+                    platform == Platform::Android &&
+                    IsHdrSkyboxCandidate(asset_info, width, height);
+
+                if (bake_android_cubemap) {
+                    const int face_size = std::max(32, desc_file.import_settings.value("max_size", 2048) / 4);
+                    std::array<std::vector<float>, 6> cubemap_faces;
+                    for (int face = 0; face < 6; ++face) {
+                        cubemap_faces[face] = BuildCubemapFaceFromEquirectangular(
+                            raw_pixels, width, height, channels, face, face_size
+                        );
+                    }
+
+                    std::cout << "Baking Android skybox cubemap at " << face_size << "x" << face_size << " per face" << std::endl;
+                    compression_success = CuttlefishCubemapCompressor(
+                        cubemap_faces,
+                        face_size,
+                        channels,
+                        asset_info.shipped_path.string(),
+                        compression_format,
+                        desc_file.import_settings
+                    );
+                }
+                else {
+                    //Compress HDR texture
+                    compression_success = CuttlefishCompressor(
+                        raw_pixels, width, height, channels,
+                        asset_info.shipped_path.string(),
+                        compression_format, desc_file.import_settings
+                    );
+                }
 
                 //Free loaded image
                 stbi_image_free(raw_pixels);
@@ -1642,6 +1766,12 @@ namespace PAIN {
                 cmd << " -f " << format;
                 cmd << " -Q " << settings.value("quality", "normal");
                 cmd << " -s rgbx";
+                if (format.rfind("ASTC_", 0) == 0) {
+                    cmd << " -t ufloat";
+                }
+                else {
+                    cmd << " -t float";
+                }
                 cmd << " -o \"" << output_path << "\"";
                 cmd << " --create-dir";
 
@@ -1670,6 +1800,86 @@ namespace PAIN {
             }
             catch (const std::exception& e) {
                 std::cout << "Cuttlefish HDR compression failed: " << e.what() << std::endl;
+                return false;
+            }
+        }
+
+        bool Compiler::CuttlefishCubemapCompressor(const std::array<std::vector<float>, 6>& face_pixels,
+            int face_size, int channels, const std::string& output_path,
+            const std::string& format, const nlohmann::json& settings) const {
+            static const std::array<const char*, 6> face_names = { "+x", "-x", "+y", "-y", "+z", "-z" };
+
+            std::vector<std::string> temp_inputs;
+            temp_inputs.reserve(face_names.size());
+
+            try {
+                for (size_t i = 0; i < face_names.size(); ++i) {
+                    std::string temp_input = "temp_" + std::to_string(getCurrentTimeStamp()) + "_" + face_names[i] + ".hdr";
+                    std::replace(temp_input.begin(), temp_input.end(), '+', 'p');
+                    std::replace(temp_input.begin(), temp_input.end(), '-', 'n');
+
+                    if (!stbi_write_hdr(temp_input.c_str(), face_size, face_size, channels, face_pixels[i].data())) {
+                        std::cout << "Failed to write temporary cubemap face (" << temp_input << ")" << std::endl;
+                        for (const auto& temp : temp_inputs) {
+                            std::filesystem::remove(temp);
+                        }
+                        return false;
+                    }
+
+                    temp_inputs.push_back(temp_input);
+                }
+
+                std::filesystem::create_directories(std::filesystem::path(output_path).parent_path());
+
+                std::stringstream cmd;
+                std::string cuttlefish_exe = GetCuttlefishExecutable();
+
+                cmd << "\"";
+                cmd << "\"" << cuttlefish_exe << "\"";
+                for (size_t i = 0; i < face_names.size(); ++i) {
+                    cmd << " -c " << face_names[i] << " \"" << temp_inputs[i] << "\"";
+                }
+                cmd << " -f " << format;
+                cmd << " -Q " << settings.value("quality", "normal");
+                cmd << " -s rgbx";
+                if (format.rfind("ASTC_", 0) == 0) {
+                    cmd << " -t ufloat";
+                }
+                else {
+                    cmd << " -t float";
+                }
+                cmd << " -o \"" << output_path << "\"";
+                cmd << " --create-dir";
+
+                if (settings.value("generate_mipmaps", true)) {
+                    cmd << " -m";
+                }
+
+                cmd << "\"";
+
+                const std::string final_command = cmd.str();
+                std::cout << "Running: " << final_command << std::endl;
+
+                const int result = system(final_command.c_str());
+
+                for (const auto& temp : temp_inputs) {
+                    std::filesystem::remove(temp);
+                }
+
+                if (result == 0) {
+                    std::cout << "Cuttlefish cubemap compression successful" << std::endl;
+                }
+                else {
+                    std::cout << "Cuttlefish cubemap compression failed with code: " << result << std::endl;
+                }
+
+                return result == 0;
+            }
+            catch (const std::exception& e) {
+                for (const auto& temp : temp_inputs) {
+                    std::filesystem::remove(temp);
+                }
+                std::cout << "Cuttlefish cubemap compression failed: " << e.what() << std::endl;
                 return false;
             }
         }

@@ -103,6 +103,58 @@ namespace PAIN {
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	}
 
+	void Skybox::releaseGeneratedTextures() {
+		if (cubemap_tex && !cubemap_owned_by_skybox) {
+			glDeleteTextures(1, &cubemap_tex);
+		}
+		cubemap_tex = 0;
+		cubemap_owned_by_skybox = false;
+
+		if (irradiance_map) {
+			glDeleteTextures(1, &irradiance_map);
+			irradiance_map = 0;
+		}
+		if (prefilter_map) {
+			glDeleteTextures(1, &prefilter_map);
+			prefilter_map = 0;
+		}
+		if (brdf_tex) {
+			glDeleteTextures(1, &brdf_tex);
+			brdf_tex = 0;
+		}
+	}
+
+	void Skybox::bindResolvedSkyboxTexture(const std::shared_ptr<Assets::Texture>& texture_asset) {
+		if (!texture_asset) {
+			return;
+		}
+
+		skybox_tex = texture_asset->gl_texture;
+		releaseGeneratedTextures();
+
+		if (texture_asset->is_cube_map) {
+			cubemap_tex = texture_asset->gl_texture;
+			cubemap_owned_by_skybox = true;
+			ConfigureSourceCubemapForIblSampling();
+			PN_CORE_INFO("Using precompiled cubemap skybox for {}", texture_asset->shipped_relative_path.string());
+		}
+		else {
+			convertEquirectangularToCubemap();
+		}
+
+		generateIrradianceMap();
+		generatePrefilterMap();
+		generateBRDFLUT();
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
+
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err after Skybox set texture: {}", err);
+		}
+	}
+
 	void Skybox::convertEquirectangularToCubemap() {
 
 		// ========================================
@@ -210,6 +262,7 @@ namespace PAIN {
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
 		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 		ConfigureSourceCubemapForIblSampling();
+		cubemap_owned_by_skybox = false;
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, WindowsRenderer::winWidth, WindowsRenderer::winHeight);
@@ -263,53 +316,21 @@ namespace PAIN {
 
 	void Skybox::setTexture(Assets::GUID const& id) {
 		auto sky_box_tex_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(id);
-		if (sky_box_tex_opt.has_value() && !sky_box_tex_opt.value()->gl_texture) services->get<sRenderer>()->uploadTexture(sky_box_tex_opt.value());
-		skybox_tex = sky_box_tex_opt.has_value() ? sky_box_tex_opt.value()->gl_texture : skybox_tex;
-
-		// Clean up old resources
-		if (cubemap_tex) { glDeleteTextures(1, &cubemap_tex); cubemap_tex = 0; }
-		if (irradiance_map) { glDeleteTextures(1, &irradiance_map); irradiance_map = 0; }
-		if (prefilter_map) { glDeleteTextures(1, &prefilter_map); prefilter_map = 0; }
-		if (brdf_tex) { glDeleteTextures(1, &brdf_tex); brdf_tex = 0; }
-
-		// generate IBL textures
-		convertEquirectangularToCubemap();
-		generateIrradianceMap();
-		generatePrefilterMap();
-		generateBRDFLUT();
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
-
-		GLenum err = glGetError();
-		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("OpenGL err after Skybox set texture: {}", err);
+		if (sky_box_tex_opt.has_value() && !sky_box_tex_opt.value()->gl_texture) {
+			services->get<sRenderer>()->uploadTexture(sky_box_tex_opt.value());
+		}
+		if (sky_box_tex_opt.has_value()) {
+			bindResolvedSkyboxTexture(sky_box_tex_opt.value());
 		}
 	}
 
 	void Skybox::setTexture(const std::filesystem::path& skybox_path) {
 		auto sky_box_tex_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(skybox_path);
-		if (sky_box_tex_opt.has_value() && !sky_box_tex_opt.value()->gl_texture) services->get<sRenderer>()->uploadTexture(sky_box_tex_opt.value());
-		skybox_tex = sky_box_tex_opt.has_value() ? sky_box_tex_opt.value()->gl_texture : skybox_tex;
-
-		// Clean up old resources
-		if (cubemap_tex) { glDeleteTextures(1, &cubemap_tex); cubemap_tex = 0; }
-		if (irradiance_map) { glDeleteTextures(1, &irradiance_map); irradiance_map = 0; }
-		if (prefilter_map) { glDeleteTextures(1, &prefilter_map); prefilter_map = 0; }
-		if (brdf_tex) { glDeleteTextures(1, &brdf_tex); brdf_tex = 0; }
-
-		//generate IBL textures
-		convertEquirectangularToCubemap();
-		generateIrradianceMap();
-		generatePrefilterMap();
-		generateBRDFLUT();
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
-
-		GLenum err = glGetError();
-		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("OpenGL err after Skybox set texture: {}", err);
+		if (sky_box_tex_opt.has_value() && !sky_box_tex_opt.value()->gl_texture) {
+			services->get<sRenderer>()->uploadTexture(sky_box_tex_opt.value());
+		}
+		if (sky_box_tex_opt.has_value()) {
+			bindResolvedSkyboxTexture(sky_box_tex_opt.value());
 		}
 	}
 

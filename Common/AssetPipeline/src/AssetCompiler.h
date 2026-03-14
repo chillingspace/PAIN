@@ -56,6 +56,7 @@ namespace PAIN {
 			std::string GetCuttlefishExecutable() const;
 			bool CuttlefishCompressor(unsigned char* pixels, int width, int height, int channels, const std::string& output_path, const std::string& format, const nlohmann::json& settings) const;
 			bool CuttlefishCompressor(float* pixels, int width, int height, int channels, const std::string& output_path, const std::string& format, const nlohmann::json& settings) const;
+			bool CuttlefishCubemapCompressor(const std::array<std::vector<float>, 6>& face_pixels, int face_size, int channels, const std::string& output_path, const std::string& format, const nlohmann::json& settings) const;
 			std::string GetFFMPEGExecutable() const;
 			void ExportModel(const Model& asset, const std::filesystem::path& out_path) const;
 
