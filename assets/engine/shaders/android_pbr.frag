@@ -181,10 +181,12 @@ float shadowIntensity(int shadow_map_idx, vec3 fragPos, vec3 normal, Light light
     if (shadow_map_depth >= 0.99) {
         return 0.0; // No shadow
     }
-
-    // bias to prevent shadow acne
-    vec3 light_dir = normalize(light.position - fragPos);
-    float bias = max(0.05 * (1.0 - dot(normal, light_dir)), 0.005);
+    // Bias should follow actual light direction. Using the camera-follow shadow source
+    // position for directional lights makes the bias unstable and causes shimmering.
+    vec3 light_dir = int(light.type) == 1
+        ? normalize(-light.direction)
+        : normalize(light.position - fragPos);
+    float bias = max(0.02 * (1.0 - dot(normal, light_dir)), 0.002);
 
     // return frag_depth - bias > shadow_map_depth ? 1.0 : 0.0;
 
