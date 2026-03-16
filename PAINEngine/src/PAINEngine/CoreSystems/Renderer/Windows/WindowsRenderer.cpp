@@ -1713,7 +1713,11 @@ namespace PAIN {
 		// critical for Mali GPU on android depth-only shadow rendering
 		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 #endif
+		#ifdef PN_PLATFORM_ANDROID
+		glClearDepthf(1.0f);
+#else
 		glClearDepth(1.0f);
+#endif
 		glClear(GL_DEPTH_BUFFER_BIT);
 	}
 
