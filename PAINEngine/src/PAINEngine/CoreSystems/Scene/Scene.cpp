@@ -362,25 +362,21 @@ namespace PAIN {
 				getWorldLight()->type = Light::TYPES::DIRECTIONAL;
 			}
 
-			//Load Skybox GUID
+			//Select the skybox, but don't bind it yet.
+			//configScene() clears the texture cache after this step, so binding here would
+			//leave Skybox holding deleted GL texture handles on the first scene load.
 			if (env.skyboxGUID.IsValid()) {
 				curr_skybox_id = env.skyboxGUID;
-				Skybox::get().setTexture(curr_skybox_id);
-				PN_CORE_INFO("[SceneManager] Set skybox with texture of GUID: {}", curr_skybox_id.ToString());
+				PN_CORE_INFO("[SceneManager] Queued skybox GUID for scene: {}", curr_skybox_id.ToString());
 			}
 			else {
-
 #ifdef PN_PLATFORM_WINDOWS
 				std::filesystem::path sb_path = "engine/textures/skybox2.hdr";
 #else
 				std::filesystem::path sb_path = "engine\\\\textures\\\\skybox2.hdr";
 #endif
-				//Set skybox id
 				curr_skybox_id = services->get<Assets::Manager>()->findGUID(sb_path);
-
-				//Default skybox texture
-				Skybox::get().setTexture(sb_path);
-				PN_CORE_INFO("[SceneManager] Set default skybox");
+				PN_CORE_INFO("[SceneManager] Queued default skybox GUID: {}", curr_skybox_id.ToString());
 			}
 
 			// Minimap settings
@@ -1134,6 +1130,15 @@ namespace PAIN {
 			loadingScreen->render();
 			PN_CORE_INFO("[SceneManager] Uploading textures to GPU");
 			assetManager->batchUploadAllCachedTextures();
+
+			if (curr_skybox_id.IsValid()) {
+				Skybox::get().setTexture(curr_skybox_id);
+				PN_CORE_INFO("[SceneManager] Bound skybox after scene texture upload: {}", curr_skybox_id.ToString());
+			}
+			else {
+				PN_CORE_WARN("[SceneManager] No valid skybox GUID available after scene texture upload");
+			}
+
 			loadingScreen->setStatus("Building Model's VBO...");
 			loadingScreen->setProgress(0.98f);
 			loadingScreen->render();
