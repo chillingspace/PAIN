@@ -62,7 +62,7 @@ vec3 ResolveGeometryMaterial(int dbg) {
     }
 
     return vec3(roughness, metallic,
-                dbg != 0 && dbg < IBL_DEBUG_TYPE ? 1.0 : 0.0);
+                material.use_ao > 0.5 ? pow(texture(material.ao_map, vTexCoords).r, 2.2) : 1.0);
 }
 
 vec3 ResolveGeometryEmission() {
@@ -80,13 +80,7 @@ vec3 ResolveGeometryColor() {
         return material.color;
     }
 
-    vec3 color = pow(texture(material.tex, vTexCoords).rgb, vec3(2.2));
-    if (material.use_ao == 0.0) {
-        return color;
-    }
-
-    float ao = pow(texture(material.ao_map, vTexCoords).r, 2.2);
-    return color * ao;
+    return pow(texture(material.tex, vTexCoords).rgb, vec3(2.2));
 }
 
 void main() {

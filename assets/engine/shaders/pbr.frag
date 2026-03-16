@@ -13,7 +13,7 @@ struct Material {
     float rough;
     float metal;
     vec3 color;
-    float debugging_geometry;    // bool
+    float ao;
 };
 
 struct Light {
@@ -222,7 +222,7 @@ void main() {
 
     material.rough = max(m.r, 0.04);
     material.metal = m.g;
-    material.debugging_geometry = m.b;
+    material.ao = m.b;
 
     vec3 viewFragPos = (u_V * vec4(fragPos, 1.0)).xyz;
     vec3 viewNormal = mat3(u_V) * normalize(normal);
@@ -303,7 +303,7 @@ void main() {
         vec3 kD = (1.0 - F) * (1.0 - material.metal);
         vec3 irradiance = texture(irradianceMap, N).rgb;
         // irradiance = irradiance / (irradiance + vec3(1.0));
-        vec3 diffuse = kD * irradiance * material.color * u_IblDiffuseStrength;
+        vec3 diffuse = kD * irradiance * material.color * material.ao * u_IblDiffuseStrength;
 
 // #define DEBUG_IBL_DIFFUSE
         if (dbg == IBL_DIFFUSE) {
@@ -346,12 +346,12 @@ void main() {
 
         ambient = diffuse + specular;
     } else {
-        ambient = material.color * u_AmbientLight;
+        ambient = material.color * material.ao * u_AmbientLight;
     }
     
     color = directLighting + ambient;
 
-    if (material.debugging_geometry > 0.5) {
+    if (dbg == 1) {
         color = material.color;
     }
 
