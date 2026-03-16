@@ -1709,7 +1709,10 @@ namespace PAIN {
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 		glDisable(GL_BLEND);
+#ifdef PN_PLATFORM_ANDROID
+		// critical for Mali GPU on android depth-only shadow rendering
 		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+#endif
 		glClearDepth(1.0f);
 		glClear(GL_DEPTH_BUFFER_BIT);
 	}
@@ -1764,7 +1767,9 @@ namespace PAIN {
 
 	void WindowsRenderer::EndShadowPass() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+#ifdef PN_PLATFORM_ANDROID
 		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+#endif
 	}
 
 	// Geometry pass entry point: sysRender has already selected the scene and
