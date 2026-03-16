@@ -3,6 +3,7 @@
 #include "pch.h"
 #include "./CoreSystems/Renderer/GraphicsSettings.h"
 #include "CoreSystems/Scene/Camera.h"
+#include <algorithm>
 
 namespace PAIN {
 
@@ -219,7 +220,6 @@ namespace PAIN {
 		bool lightsOn = true;		// global switch to toggle lights
 
 		static constexpr int MAX_LIGHT_SOURCES = 16;		// remember to set in fragment shader if this is changed
-		glm::vec3 AMBIENT_LIGHT = GraphicsSettings::get().AMBIENT_LIGHT;
 
 		/**
 		 * get singleton instance.
@@ -282,14 +282,33 @@ namespace PAIN {
 		}
 
 		std::vector<std::reference_wrapper<Light>> getAll() {
-			std::vector<std::reference_wrapper<Light>> out;
-			out.reserve(sources.size());
+			std::vector<std::pair<std::string, std::reference_wrapper<Light>>> sorted;
+			sorted.reserve(sources.size());
 
 			for (auto& [k, v] : sources) {
-				out.push_back(std::ref(v));
+				sorted.emplace_back(k, std::ref(v));
 			}
 
-			//PN_CORE_INFO("Z");
+			auto lightOrder = [](const std::string& key) {
+				if (key == "world") return 0;
+				if (key == "cam") return 1;
+				return 2;
+			};
+
+			std::stable_sort(sorted.begin(), sorted.end(), [&](const auto& lhs, const auto& rhs) {
+				const int lhsOrder = lightOrder(lhs.first);
+				const int rhsOrder = lightOrder(rhs.first);
+				if (lhsOrder != rhsOrder) {
+					return lhsOrder < rhsOrder;
+				}
+				return lhs.first < rhs.first;
+			});
+
+			std::vector<std::reference_wrapper<Light>> out;
+			out.reserve(sorted.size());
+			for (auto& [key, light] : sorted) {
+				out.push_back(light);
+			}
 
 			return out;
 		}
@@ -305,13 +324,28 @@ namespace PAIN {
 			return out;
 		}
 
-		std::vector<std::pair<const std::string&, std::reference_wrapper<Light>>> getAllWithKeys() {
-			std::vector<std::pair<const std::string&, std::reference_wrapper<Light>>> out;
+		std::vector<std::pair<std::string, std::reference_wrapper<Light>>> getAllWithKeys() {
+			std::vector<std::pair<std::string, std::reference_wrapper<Light>>> out;
 			out.reserve(sources.size());
 
 			for (auto& [k, v] : sources) {
 				out.emplace_back(k, std::ref(v));
 			}
+
+			auto lightOrder = [](const std::string& key) {
+				if (key == "world") return 0;
+				if (key == "cam") return 1;
+				return 2;
+			};
+
+			std::stable_sort(out.begin(), out.end(), [&](const auto& lhs, const auto& rhs) {
+				const int lhsOrder = lightOrder(lhs.first);
+				const int rhsOrder = lightOrder(rhs.first);
+				if (lhsOrder != rhsOrder) {
+					return lhsOrder < rhsOrder;
+				}
+				return lhs.first < rhs.first;
+			});
 
 			return out;
 		}

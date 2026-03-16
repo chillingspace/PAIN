@@ -2262,7 +2262,7 @@ namespace PAIN {
 
 			int shadowMapCount = 0;
 			int i{};
-			const auto allLights = LightSources::get().getAll();
+			const auto allLights = lights.getAll();
 			for (const Light& l : allLights) {
 				std::stringstream ss;
 				if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
@@ -2341,7 +2341,7 @@ namespace PAIN {
 
 				ss << "u_Lights[" << i << "].L";
 				pbr_shader->SetUniform(ss.str(),
-									   LightSources::get().lightsOn ? l.L_intensity : glm::vec3(0.0f));
+									   lights.lightsOn ? l.L_intensity : glm::vec3(0.0f));
 				ss.str("");
 				ss.clear();
 
@@ -2367,7 +2367,7 @@ namespace PAIN {
 
 			pbr_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
 			pbr_shader->SetUniform("u_NumLights", static_cast<float>(i));
-			pbr_shader->SetUniform("u_AmbientLight", LightSources::get().AMBIENT_LIGHT);
+			pbr_shader->SetUniform("u_AmbientLight", GraphicsSettings::get().AMBIENT_LIGHT);
 
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
@@ -2376,7 +2376,11 @@ namespace PAIN {
 
 			// for image based lighting
 			pbr_shader->SetUniform("u_CamPos", scene->GetActiveCamera()->pos);
-			pbr_shader->SetUniform("u_UseIbl", GraphicsSettings::get().ibl ? 1.f : 0.f);
+			const bool iblAvailable = GraphicsSettings::get().ibl
+				&& Skybox::get().getIrradianceMap() != 0
+				&& Skybox::get().getPrefilterMap() != 0
+				&& Skybox::get().getBrdfLUT() != 0;
+			pbr_shader->SetUniform("u_UseIbl", iblAvailable ? 1.f : 0.f);
 			pbr_shader->SetUniform("u_IblDiffuseStrength", GraphicsSettings::get().ibl_diffuse_strength);
 			pbr_shader->SetUniform("u_IblSpecularStrength", GraphicsSettings::get().ibl_specular_strength);
 			pbr_shader->SetUniform("u_IblMaxReflectionLod", GraphicsSettings::get().ibl_max_reflection_lod);
