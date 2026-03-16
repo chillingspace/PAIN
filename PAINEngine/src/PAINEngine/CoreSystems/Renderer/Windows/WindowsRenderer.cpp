@@ -46,6 +46,64 @@ namespace {
 		}
 	}
 
+	struct SavedGlState {
+		GLint framebuffer = 0;
+		GLint viewport[4] = {0, 0, 0, 0};
+		GLfloat clearColor[4] = {0.f, 0.f, 0.f, 0.f};
+		GLboolean depthTest = GL_FALSE;
+		GLboolean depthMask = GL_TRUE;
+		GLboolean blend = GL_FALSE;
+		GLint blendSrcRgb = GL_ONE;
+		GLint blendDstRgb = GL_ZERO;
+		GLint blendSrcAlpha = GL_ONE;
+		GLint blendDstAlpha = GL_ZERO;
+	};
+
+	SavedGlState CaptureGlState() {
+		SavedGlState state{};
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &state.framebuffer);
+		glGetIntegerv(GL_VIEWPORT, state.viewport);
+		glGetFloatv(GL_COLOR_CLEAR_VALUE, state.clearColor);
+		state.depthTest = glIsEnabled(GL_DEPTH_TEST);
+		glGetBooleanv(GL_DEPTH_WRITEMASK, &state.depthMask);
+		state.blend = glIsEnabled(GL_BLEND);
+		glGetIntegerv(GL_BLEND_SRC_RGB, &state.blendSrcRgb);
+		glGetIntegerv(GL_BLEND_DST_RGB, &state.blendDstRgb);
+		glGetIntegerv(GL_BLEND_SRC_ALPHA, &state.blendSrcAlpha);
+		glGetIntegerv(GL_BLEND_DST_ALPHA, &state.blendDstAlpha);
+		return state;
+	}
+
+	void RestoreGlState(const SavedGlState& state) {
+		glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(state.framebuffer));
+		glViewport(state.viewport[0], state.viewport[1], state.viewport[2], state.viewport[3]);
+		glClearColor(state.clearColor[0], state.clearColor[1], state.clearColor[2], state.clearColor[3]);
+		if (state.depthTest) {
+			glEnable(GL_DEPTH_TEST);
+		} else {
+			glDisable(GL_DEPTH_TEST);
+		}
+		glDepthMask(state.depthMask == GL_TRUE ? GL_TRUE : GL_FALSE);
+		if (state.blend) {
+			glEnable(GL_BLEND);
+		} else {
+			glDisable(GL_BLEND);
+		}
+		glBlendFuncSeparate(state.blendSrcRgb, state.blendDstRgb, state.blendSrcAlpha, state.blendDstAlpha);
+	}
+
+	bool ValidateFramebufferBinding(GLuint fbo, const char* label) {
+		GLint previousFramebuffer = 0;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &previousFramebuffer);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(previousFramebuffer));
+		if (status != GL_FRAMEBUFFER_COMPLETE) {
+			PN_CORE_ERROR("{} is incomplete! Status: 0x{:x}", label, status);
+			return false;
+		}
+		return true;
+	}
 	bool ValidateProgramForDraw(GLuint program, const char* label) {
 		if (program == 0 || !glIsProgram(program)) {
 			PN_CORE_ERROR("[GL] {} program handle is invalid: {}", label, program);
@@ -866,7 +924,7 @@ namespace PAIN {
 		appendToBuffer(shadow_ebo, GL_ELEMENT_ARRAY_BUFFER,
 			existingIndexBytes, newIndices.data(), newIndexBytes);
 
-		// Pre-size the instance matrix buffer — filled per-frame in DrawGeometryInstanced.
+		// Pre-size the instance matrix buffer - filled per-frame in DrawGeometryInstanced.
 		// Reserve space for MAX_INSTANCES matrices upfront to avoid per-frame realloc.
 		static constexpr int MAX_INSTANCES = 4096;
 		if (geometry_ibo) {
@@ -1550,7 +1608,7 @@ namespace PAIN {
 		}
 
 		_initDeferredShadingBuffers(); // FBOs/textures only
-		_initGeometryBuffers();        // VAOs/VBOs � called ONCE, never on resize
+		_initGeometryBuffers();        // VAOs/VBOs called ONCE, never on resize
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
@@ -2032,6 +2090,12 @@ namespace PAIN {
 		glGetIntegerv(GL_VIEWPORT, minimap_prev_viewport);
 		glGetFloatv(GL_COLOR_CLEAR_VALUE, minimap_prev_clear_color);
 		minimap_prev_depth_test = glIsEnabled(GL_DEPTH_TEST);
+		glGetBooleanv(GL_DEPTH_WRITEMASK, &minimap_prev_depth_mask);
+		minimap_prev_blend = glIsEnabled(GL_BLEND);
+		glGetIntegerv(GL_BLEND_SRC_RGB, &minimap_prev_blend_src_rgb);
+		glGetIntegerv(GL_BLEND_DST_RGB, &minimap_prev_blend_dst_rgb);
+		glGetIntegerv(GL_BLEND_SRC_ALPHA, &minimap_prev_blend_src_alpha);
+		glGetIntegerv(GL_BLEND_DST_ALPHA, &minimap_prev_blend_dst_alpha);
 		minimap_state_saved = true;
 
 		const glm::vec2 minimap_size = GraphicsSettings::get().minimap_size_px;
@@ -2107,6 +2171,14 @@ namespace PAIN {
 		} else {
 			glDisable(GL_DEPTH_TEST);
 		}
+		glDepthMask(minimap_prev_depth_mask == GL_TRUE ? GL_TRUE : GL_FALSE);
+		if (minimap_prev_blend) {
+			glEnable(GL_BLEND);
+		} else {
+			glDisable(GL_BLEND);
+		}
+		glBlendFuncSeparate(minimap_prev_blend_src_rgb, minimap_prev_blend_dst_rgb,
+			minimap_prev_blend_src_alpha, minimap_prev_blend_dst_alpha);
 
 		minimap_state_saved = false;
 	}
@@ -2380,6 +2452,14 @@ namespace PAIN {
 				&& Skybox::get().getIrradianceMap() != 0
 				&& Skybox::get().getPrefilterMap() != 0
 				&& Skybox::get().getBrdfLUT() != 0;
+			static bool loggedMissingIbl = false;
+			if (GraphicsSettings::get().ibl && !iblAvailable && !loggedMissingIbl) {
+				PN_CORE_WARN("[GL] IBL requested but irradiance/prefilter/BRDF resources are incomplete. Falling back to ambient lighting.");
+				loggedMissingIbl = true;
+			}
+			if (iblAvailable) {
+				loggedMissingIbl = false;
+			}
 			pbr_shader->SetUniform("u_UseIbl", iblAvailable ? 1.f : 0.f);
 			pbr_shader->SetUniform("u_IblDiffuseStrength", GraphicsSettings::get().ibl_diffuse_strength);
 			pbr_shader->SetUniform("u_IblSpecularStrength", GraphicsSettings::get().ibl_specular_strength);
@@ -3052,16 +3132,33 @@ namespace PAIN {
 	// Post-process entry point: final_texture remains the renderer-owned scene output,
 	// while sysRender decides whether the frame is ultimately presented to editor or swapchain.
 	void WindowsRenderer::PostProcessPass(bool presentToSwapchain) {
-		// ========================================
-		// POST-PROCESS: ALWAYS DISABLE DEPTH TEST
-		// Full-screen quads must not be rejected by
-		// scene geometry depth stored in final_fbo
-		// ========================================
-		glDisable(GL_DEPTH_TEST);
-		glDepthMask(GL_FALSE);
+		const auto savedState = CaptureGlState();
+	auto restorePassState = [&]() {
+		RestoreGlState(savedState);
+	};
 
+	if (final_texture == 0) {
+		PN_CORE_ERROR("[GL] PostProcessPass aborted because final_texture is invalid.");
+		restorePassState();
+		return;
+	}
+	if (!ValidateFramebufferBinding(final_fbo, "Post-process final framebuffer") ||
+		!ValidateFramebufferBinding(pp_fbo, "Post-process ping framebuffer") ||
+		!ValidateFramebufferBinding(pp2_fbo, "Post-process pong framebuffer")) {
+		restorePassState();
+		return;
+	}
 
-		GLenum err = glGetError();
+	// ========================================
+	// POST-PROCESS: ALWAYS DISABLE DEPTH TEST
+	// Full-screen quads must not be rejected by
+	// scene geometry depth stored in final_fbo
+	// ========================================
+	glDisable(GL_DEPTH_TEST);
+	glDepthMask(GL_FALSE);
+	glDisable(GL_BLEND);
+
+	GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err before tone mapping pass: {}", err);
 		}
@@ -3278,8 +3375,7 @@ namespace PAIN {
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 		}
 
-		glEnable(GL_DEPTH_TEST);
-		glDepthMask(GL_TRUE);
+		restorePassState();
 
 		err = glGetError();
 		if (err != GL_NO_ERROR) {

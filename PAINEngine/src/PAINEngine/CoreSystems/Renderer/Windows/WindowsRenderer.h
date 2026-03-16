@@ -259,6 +259,12 @@ namespace PAIN {
 		GLint minimap_prev_viewport[4] = {0, 0, 0, 0};
 		GLfloat minimap_prev_clear_color[4] = {0.f, 0.f, 0.f, 0.f};
 		GLboolean minimap_prev_depth_test = GL_FALSE;
+		GLboolean minimap_prev_depth_mask = GL_TRUE;
+		GLboolean minimap_prev_blend = GL_FALSE;
+		GLint minimap_prev_blend_src_rgb = GL_ONE;
+		GLint minimap_prev_blend_dst_rgb = GL_ZERO;
+		GLint minimap_prev_blend_src_alpha = GL_ONE;
+		GLint minimap_prev_blend_dst_alpha = GL_ZERO;
 		bool minimap_state_saved = false;
 
 		// === Debug Buffers ===
