@@ -66,22 +66,25 @@ uniform float DEBUG_TYPE;
 
 
 float ggxDistribution(float nDotH) {
-    float alpha2 = material.rough * material.rough * material.rough * material.rough;
-    float d = (nDotH * nDotH) * (alpha2 - 1.0f) + 1.0f;
-    return alpha2 / (PI * d * d + 0.0001f);
+    float alpha = max(material.rough * material.rough, 0.04);
+    float alpha2 = alpha * alpha;
+    float d = (nDotH * nDotH) * (alpha2 - 1.0) + 1.0;
+    return alpha2 / max(PI * d * d, 0.0001);
 }
 
-float geomSmith(float nDotL) {
-    float k = (material.rough + 1.0f) * (material.rough + 1.0f) / 8.0f;
-    float denom = nDotL * (1.0f - k) + k;
-    return 1.0f / denom;
+float geometrySchlickGGX(float nDotX) {
+    float r = material.rough + 1.0;
+    float k = (r * r) / 8.0;
+    float denom = nDotX * (1.0 - k) + k;
+    return nDotX / max(denom, 0.0001);
 }
 
-vec3 schlickFresnel(float lDotH) {
-    vec3 f0 = vec3(0.04f); // Dielectrics
-    if (material.metal == 1.0f)
-        f0 = material.color;
-    return f0 + (1.0f - f0) * pow(clamp(1.0f - lDotH, 0.0, 1.0), 5.0);
+float geometrySmith(float nDotV, float nDotL) {
+    return geometrySchlickGGX(nDotV) * geometrySchlickGGX(nDotL);
+}
+
+vec3 fresnelSchlick(float cosTheta, vec3 F0) {
+    return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
 // for ibl. schlickFresnel but with roughness
@@ -99,60 +102,55 @@ vec2 ShadowTexelSize(int shadow_map_idx) {
 
 vec3 microfacetModel(vec3 position, vec3 n, Light light) {
     vec3 l;
-    vec3 intensity = light.L;
+    vec3 radiance = light.L;
     
     if (int(light.type) == 0) { 
-        // point lighting
         vec3 lightPositionInView = (u_V * vec4(light.position, 1.0)).xyz;
         l = lightPositionInView - position;
         float dist = length(l);
         l = normalize(l);
-        intensity *= 100.0 / max(dist * dist, 0.001);
+        radiance *= 100.0 / max(dist * dist, 0.001);
     }
     else if (int(light.type) == 1) {
-        // directional lighting
         vec3 lightDirView = mat3(u_V) * normalize(-light.direction);
         l = normalize(lightDirView);
-
-        // attenuation not required
     }
     else if (int(light.type) == 2) {
-        // spotlight lighting
-        
         vec3 lightPositionInView = (u_V * vec4(light.position, 1.0)).xyz;
         l = lightPositionInView - position;
         float dist = length(l);
-        l = normalize(l); // Vector FROM Surface TO Light
-        
-        // distance attenuation
-        intensity *= 100.0 / max(dist * dist, 0.001);
+        l = normalize(l);
+        radiance *= 100.0 / max(dist * dist, 0.001);
 
-        // cone attenuation
-        // have to convert world space to view space
         vec3 spotDirView = normalize(mat3(u_V) * light.direction); 
-        
-        // calculate angle
         float theta = dot(-l, spotDirView); 
-        
-        // clamping to kill the light
         float epsilon = max(light.innerCutoff - light.outerCutoff, 0.001);
         float spotIntensity = clamp((theta - light.outerCutoff) / epsilon, 0.0, 1.0);
-        
-        intensity *= spotIntensity;
+        radiance *= spotIntensity;
     }
-
-    vec3 diffuseBrdf = material.color;
 
     vec3 v = normalize(-position);
     vec3 h = normalize(v + l);
     float nDotH = max(dot(n, h), 0.0);
-    float lDotH = max(dot(l, h), 0.0);
+    float hDotV = max(dot(h, v), 0.0);
     float nDotL = max(dot(n, l), 0.0);
     float nDotV = max(dot(n, v), 0.0);
-    vec3 specBrdf = 0.25f * ggxDistribution(nDotH) * schlickFresnel(lDotH) 
-                            * geomSmith(nDotL) * geomSmith(nDotV);
 
-    return (diffuseBrdf + PI * specBrdf) * intensity * nDotL;
+    if (nDotL <= 0.0 || nDotV <= 0.0) {
+        return vec3(0.0);
+    }
+
+    vec3 F0 = mix(vec3(0.04), material.color, material.metal);
+    vec3 F = fresnelSchlick(hDotV, F0);
+    float D = ggxDistribution(nDotH);
+    float G = geometrySmith(nDotV, nDotL);
+    vec3 specular = (D * G * F) / max(4.0 * nDotV * nDotL, 0.0001);
+
+    vec3 kS = F;
+    vec3 kD = (vec3(1.0) - kS) * (1.0 - material.metal);
+    vec3 diffuse = kD * material.color / PI;
+
+    return (diffuse + specular) * radiance * nDotL;
 }
 
 float shadowIntensity(int shadow_map_idx, vec3 fragPos, vec3 normal, Light light) {
