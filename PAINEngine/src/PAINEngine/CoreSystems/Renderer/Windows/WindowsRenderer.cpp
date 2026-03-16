@@ -1638,6 +1638,8 @@ namespace PAIN {
 		glUseProgram(currentProgram);
 	}
 
+	// Shadow pass entry point: sysRender selects which light to render,
+	// while the renderer owns framebuffer binding and per-pass GPU state.
 	void WindowsRenderer::BeginShadowPass(const Light& l) {
 		glBindFramebuffer(GL_FRAMEBUFFER, l.getShadowFbo());
 		// glClearDepth(1.0f);  // Explicitly set clear value
@@ -1709,6 +1711,8 @@ namespace PAIN {
 #endif
 	}
 
+	// Geometry pass entry point: sysRender has already selected the scene and
+	// camera; the renderer owns G-buffer binding, viewport, and draw state.
 	void WindowsRenderer::BeginGeometryPass(
 		std::shared_ptr<Scene::SceneManager> scene) {
 		// PN_CORE_INFO("Viewport: {}, {}", winWidth, winHeight);
@@ -2173,6 +2177,8 @@ namespace PAIN {
 		// }
 	}
 
+	// Lighting pass entry point: sysRender dispatches the frame stage, while the
+	// renderer consumes the G-buffer, light data, and IBL inputs to fill final_fbo.
 	void WindowsRenderer::LightingPass(std::shared_ptr<Scene::SceneManager> scene,
 									   const LightSources& lights) {
 		//{
@@ -2802,6 +2808,8 @@ namespace PAIN {
 		glBindVertexArray(0);
 	}
 
+	// Volumetric pass entry point: the renderer accumulates screen-space fog/light
+	// history after direct lighting and before particles, debug overlays, and post FX.
 	void WindowsRenderer::VolumetricPass(std::shared_ptr<Scene::SceneManager> scene,
 										 const LightSources& lights) {
 		(void)lights;
@@ -3037,6 +3045,8 @@ namespace PAIN {
 		}
 	}
 
+	// Post-process entry point: final_texture remains the renderer-owned scene output,
+	// while sysRender decides whether the frame is ultimately presented to editor or swapchain.
 	void WindowsRenderer::PostProcessPass() {
 		// ========================================
 		// POST-PROCESS: ALWAYS DISABLE DEPTH TEST

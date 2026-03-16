@@ -223,17 +223,41 @@ namespace PAIN {
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err on update loop begin: {}", err);
 				}
+				auto syncCameraLightFromActiveCamera = [&]() {
+					auto sceneManager = services.lock()->get<Scene::SceneManager>();
+					if (!sceneManager) {
+						return;
+					}
+
+					auto activeCamera = sceneManager->GetActiveCamera();
+					auto cameraLight = LightSources::get().get("cam");
+					if (!activeCamera || !cameraLight.has_value()) {
+						return;
+					}
+
+					Light& light = cameraLight->get();
+					light.position = activeCamera->pos;
+					light.position.y += 0.1f; // light on camera = grainy
+					light.fov = activeCamera->fov;
+					light.direction = activeCamera->forward;
+					light.aspect_ratio = activeCamera->aspect_ratio;
+				};
 
 				auto rendererService = services.lock()->get<sRenderer>();
 				if (!rendererService || !rendererService->w_renderer) {
 					return;
 				}
 
+				syncCameraLightFromActiveCamera();
 				if (rendererService->w_renderer->resizeDirty) {
 					rendererService->w_renderer->resizeDirty = false;
 					rendererService->w_renderer->_initDeferredShadingBuffers();
 				}
 
+				// Frame orchestration lives here:
+				// - sysRender extracts scene/editor state and chooses the presentation target
+				// - the renderer owns GPU state changes inside each pass entry point
+				// - post process produces the final scene image before UI overlays are composited
 				if (editor_visible) {
 					glBindFramebuffer(GL_FRAMEBUFFER,
 									  rendererService->getFinalFbo());
@@ -261,6 +285,11 @@ namespace PAIN {
 				GraphicsSettings::get().stats.shadow_objects_culled = 0;
 				GraphicsSettings::get().stats.shadow_objects_rendered = 0;
 
+				// Current frame order:
+				// shadow -> geometry -> minimap -> reflections -> lighting
+				// -> volumetrics -> particles -> debug overlays -> post process -> UI
+				// Future refactors should keep ownership here and only move work between
+				// passes when both Windows and Android follow the same contract.
 				//shadowPass(registry);
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
@@ -324,24 +353,10 @@ namespace PAIN {
 				glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
 			}
 
-			// set cam light to cam
-			auto olcam = LightSources::get().get("cam");
-			Light& lcam = olcam.value();
-			lcam.position =
-				services.lock()->get<Scene::SceneManager>()->GetActiveCamera()->pos;
-			lcam.position.y += 0.1f; // light on camera = grainy
-			lcam.fov =
-				services.lock()->get<Scene::SceneManager>()->GetActiveCamera()->fov;
-			lcam.direction =
-				services.lock()->get<Scene::SceneManager>()->GetActiveCamera()->forward;
-			lcam.aspect_ratio = services.lock()
-									->get<Scene::SceneManager>()
-									->GetActiveCamera()
-									->aspect_ratio;
-
 			GLenum err = glGetError();
 			while (err != GL_NO_ERROR) {
 				PN_CORE_ERROR("OpenGL err on update loop end: {}", err);
+				err = glGetError();
 			}
 		}
 
