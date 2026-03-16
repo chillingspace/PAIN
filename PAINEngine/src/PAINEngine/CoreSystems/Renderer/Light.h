@@ -281,8 +281,8 @@ namespace PAIN {
 			return std::ref(it->second);
 		}
 
-		std::vector<std::reference_wrapper<Light>> getAll() {
-			std::vector<std::pair<std::string, std::reference_wrapper<Light>>> sorted;
+		std::vector<std::reference_wrapper<const Light>> getAll() const {
+			std::vector<std::pair<std::string, std::reference_wrapper<const Light>>> sorted;
 			sorted.reserve(sources.size());
 
 			for (auto& [k, v] : sources) {
@@ -304,7 +304,7 @@ namespace PAIN {
 				return lhs.first < rhs.first;
 			});
 
-			std::vector<std::reference_wrapper<Light>> out;
+			std::vector<std::reference_wrapper<const Light>> out;
 			out.reserve(sorted.size());
 			for (auto& [key, light] : sorted) {
 				out.push_back(light);
@@ -324,8 +324,8 @@ namespace PAIN {
 			return out;
 		}
 
-		std::vector<std::pair<std::string, std::reference_wrapper<Light>>> getAllWithKeys() {
-			std::vector<std::pair<std::string, std::reference_wrapper<Light>>> out;
+		std::vector<std::pair<std::string, std::reference_wrapper<const Light>>> getAllWithKeys() const {
+			std::vector<std::pair<std::string, std::reference_wrapper<const Light>>> out;
 			out.reserve(sources.size());
 
 			for (auto& [k, v] : sources) {
