@@ -170,7 +170,7 @@ namespace PAIN {
 							  const glm::vec4& color, int segments = 32);
 		void VolumetricPass(std::shared_ptr<Scene::SceneManager> scene,
 						   const LightSources& lights);
-		void PostProcessPass();
+		void PostProcessPass(bool presentToSwapchain);
 
 		void Render2DTexture(GLuint texture_id, const glm::vec2& pos,
 							 glm::vec2& scale,

@@ -290,7 +290,7 @@ namespace PAIN {
 				// -> volumetrics -> particles -> debug overlays -> post process -> UI
 				// Future refactors should keep ownership here and only move work between
 				// passes when both Windows and Android follow the same contract.
-				//shadowPass(registry);
+				shadowPass(registry);
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after shadow pass: {}", err);
@@ -331,7 +331,7 @@ namespace PAIN {
 					PN_CORE_ERROR("OpenGL err after debug pass: {}", err);
 				}
 				
-				services.lock()->get<sRenderer>()->postProcessPass();
+				services.lock()->get<sRenderer>()->postProcessPass(!editor_visible);
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after post process pass: {}", err);
@@ -373,38 +373,37 @@ namespace PAIN {
 			if (!rendererService || !rendererService->w_renderer)
 				return;
 
-			glViewport(0, 0, GraphicsSettings::get().getShadowMapWidth(),
-					   GraphicsSettings::get().getShadowMapWidth());
-
+			// Phase 1 keeps shadow rendering enabled, so the viewport must match the
+			// actual shadow target owned by each light rather than a stale global size.
 			auto renderGroup =
 				registry.group<ModelRenderer>(entt::get<WorldTransform, Entity::Layer>);
 
-				for (const Light& l : LightSources::get().getAll()) {
-					if (l.getShadowType() != Light::SHADOW_TYPES::MAPPED)
-						continue;
+			for (const Light& l : LightSources::get().getAll()) {
+				if (l.getShadowType() != Light::SHADOW_TYPES::MAPPED)
+					continue;
 
-					rendererService->w_renderer->BeginShadowPass(l);
-					
-					Frustum lightFrustum = l.getFrustum();
+				glViewport(0, 0, l.getShadowResolution(), l.getShadowResolution());
+				rendererService->w_renderer->BeginShadowPass(l);
 
-					for (auto [entity, model, transform, layer] : renderGroup.each()) {
+				Frustum lightFrustum = l.getFrustum();
 
-						glm::mat4 model_xform = transform.matrix;
+				for (auto [entity, model, transform, layer] : renderGroup.each()) {
+					glm::mat4 model_xform = transform.matrix;
 
-						if (model.visible && model.castShadows) {
-							// FRUSTUM CULLING FOR SHADOWS
-							auto* boundingVol = registry.try_get<BoundingVolume>(entity);
-							if (boundingVol && boundingVol->worldAABB.isValid()) {
-								if (!isAABBInFrustum(boundingVol->worldAABB, lightFrustum)) {
-									GraphicsSettings::get().stats.shadow_objects_culled++;
-									continue; // skip shadow casting for this object, outside light frustum
-								}
+					if (model.visible && model.castShadows) {
+						// FRUSTUM CULLING FOR SHADOWS
+						auto* boundingVol = registry.try_get<BoundingVolume>(entity);
+						if (boundingVol && boundingVol->worldAABB.isValid()) {
+							if (!isAABBInFrustum(boundingVol->worldAABB, lightFrustum)) {
+								GraphicsSettings::get().stats.shadow_objects_culled++;
+								continue; // skip shadow casting for this object, outside light frustum
 							}
-						
-							GraphicsSettings::get().stats.shadow_objects_rendered++;
-							rendererService->w_renderer->DrawShadows(model, model_xform, l);
 						}
+
+						GraphicsSettings::get().stats.shadow_objects_rendered++;
+						rendererService->w_renderer->DrawShadows(model, model_xform, l);
 					}
+				}
 
 				rendererService->w_renderer->EndShadowPass();
 			}

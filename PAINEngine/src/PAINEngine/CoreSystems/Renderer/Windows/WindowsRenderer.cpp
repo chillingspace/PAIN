@@ -3047,7 +3047,7 @@ namespace PAIN {
 
 	// Post-process entry point: final_texture remains the renderer-owned scene output,
 	// while sysRender decides whether the frame is ultimately presented to editor or swapchain.
-	void WindowsRenderer::PostProcessPass() {
+	void WindowsRenderer::PostProcessPass(bool presentToSwapchain) {
 		// ========================================
 		// POST-PROCESS: ALWAYS DISABLE DEPTH TEST
 		// Full-screen quads must not be rejected by
@@ -3261,20 +3261,18 @@ namespace PAIN {
 			PN_CORE_ERROR("OpenGL err after finalizing post process pass: {}", err);
 		}
 
-		// set back to use final_fbo and final_texture for further rendering
-		;
+		// Keep final_fbo/final_texture as the renderer-owned postprocess output.
 		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
-		// glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-		// final_texture, 0);
 
-		// render to actual screen
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		passthrough_shader->Bind();
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, final_texture);
-		passthrough_shader->SetUniform("tex", 0);
-		glBindVertexArray(passthrough_vao);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		if (presentToSwapchain) {
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			passthrough_shader->Bind();
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, final_texture);
+			passthrough_shader->SetUniform("tex", 0);
+			glBindVertexArray(passthrough_vao);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+		}
 
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);

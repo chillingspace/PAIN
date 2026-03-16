@@ -202,6 +202,10 @@ namespace PAIN {
 		unsigned int getShadowTexture() const {
 			return shadow_texture;
 		}
+
+		int getShadowResolution() const {
+			return shadow_map_resolution;
+		}
 	};
 
 	class LightSources {
