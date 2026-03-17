@@ -177,7 +177,9 @@ namespace PAIN {
             case Type::Texture: {
                 bool higher_quality = asset.raw_path.extension() == ".hdr" || asset.raw_path.extension() == ".exr" ? true : false;
                 settings["window_compression"] = higher_quality ? "BC6H" : "BC7";
-                settings["android_compression"] = "ASTC_4x4";
+                settings["android_compression"] = higher_quality ? "R16G16B16A16" : "ASTC_4x4";
+                settings["android_bake_cubemap"] = false;
+                settings["android_skybox_source_format"] = "R16G16B16A16";
                 settings["generate_mipmaps"] = true;
                 settings["max_size"] = higher_quality ? 2048 : 1024;
                 break;
@@ -535,7 +537,7 @@ namespace PAIN {
                 break;
             case Platform::Android:
                 output_extension = ".ktx";
-                compression_format = desc_file.import_settings.value("android_compression", "ASTC_4x4");
+                compression_format = desc_file.import_settings.value("android_compression", higher_quality ? "R16G16B16A16" : "ASTC_4x4");
                 asset_info.shipped_path = output_dir / asset_info.relative_folder / (asset_info.raw_path.stem().string() + output_extension);
                 break;
             default:
@@ -646,6 +648,7 @@ namespace PAIN {
 
                 const bool bake_android_cubemap =
                     platform == Platform::Android &&
+                    desc_file.import_settings.value("android_bake_cubemap", false) &&
                     IsHdrSkyboxCandidate(asset_info, width, height);
 
                 if (bake_android_cubemap) {
