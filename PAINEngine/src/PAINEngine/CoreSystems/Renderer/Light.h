@@ -50,8 +50,9 @@ namespace PAIN {
 #else
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, tex_width, tex_width, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 #endif
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			// Manual PCF in the lighting shader expects raw depth samples.
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadow_texture, 0);
@@ -93,6 +94,9 @@ namespace PAIN {
 	public:
 		Light() = default;
 		~Light() {
+			if (shadow_type == SHADOW_TYPES::MAPPED && num_shadowmapped_lights > 0) {
+				--num_shadowmapped_lights;
+			}
 			_cleanup();
 		}
 

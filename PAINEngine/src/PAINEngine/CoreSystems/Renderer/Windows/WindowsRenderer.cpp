@@ -641,9 +641,11 @@ namespace PAIN {
 		GLint activeTextureUnit = 0;
 		GLint previousTex2D = 0;
 		GLint previousTexCube = 0;
+		GLint previousUnpackAlignment = 4;
 		glGetIntegerv(GL_ACTIVE_TEXTURE, &activeTextureUnit);
 		glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTex2D);
 		glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &previousTexCube);
+		glGetIntegerv(GL_UNPACK_ALIGNMENT, &previousUnpackAlignment);
 
 		PN_CORE_TRACE("Texture load started, active unit: GL_TEXTURE{}", activeTextureUnit - GL_TEXTURE0);
 
@@ -652,6 +654,9 @@ namespace PAIN {
 		// ========================================
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, 0);
+		if (!tex->is_compressed) {
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		}
 
 		// VALIDATE EXTRACTED DATA
 		if (tex->mipOffsets.size() != tex->mipSizes.size()) {
@@ -699,16 +704,33 @@ namespace PAIN {
 							std::to_string(face) + " mip " + std::to_string(mip));
 					}
 
-					glCompressedTexImage2D(
-						GL_TEXTURE_CUBE_MAP_POSITIVE_X + face,
-						mip,
-						tex->glTexFormat,
-						mipW,
-						mipH,
-						0,
-						static_cast<GLsizei>(mipSize),
-						tex->data.data() + offset
-					);
+					const uint8_t* uploadData = tex->data.data() + offset;
+
+					if (tex->is_compressed) {
+						glCompressedTexImage2D(
+							GL_TEXTURE_CUBE_MAP_POSITIVE_X + face,
+							mip,
+							tex->glTexFormat,
+							mipW,
+							mipH,
+							0,
+							static_cast<GLsizei>(mipSize),
+							uploadData
+						);
+					}
+					else {
+						glTexImage2D(
+							GL_TEXTURE_CUBE_MAP_POSITIVE_X + face,
+							mip,
+							tex->glTexFormat,
+							mipW,
+							mipH,
+							0,
+							tex->glBaseFormat,
+							tex->glDataType,
+							uploadData
+						);
+					}
 
 					GLenum err = glGetError();
 					if (err != GL_NO_ERROR) {
@@ -755,16 +777,31 @@ namespace PAIN {
 					throw std::runtime_error("Mip data overflow at mip " + std::to_string(mip));
 				}
 
-				glCompressedTexImage2D(
-					GL_TEXTURE_2D,
-					mip,
-					tex->glTexFormat,
-					mipW,
-					mipH,
-					0,
-					static_cast<GLsizei>(mipSize),
-					tex->data.data() + offset
-				);
+				if (tex->is_compressed) {
+					glCompressedTexImage2D(
+						GL_TEXTURE_2D,
+						mip,
+						tex->glTexFormat,
+						mipW,
+						mipH,
+						0,
+						static_cast<GLsizei>(mipSize),
+						tex->data.data() + offset
+					);
+				}
+				else {
+					glTexImage2D(
+						GL_TEXTURE_2D,
+						mip,
+						tex->glTexFormat,
+						mipW,
+						mipH,
+						0,
+						tex->glBaseFormat,
+						tex->glDataType,
+						tex->data.data() + offset
+					);
+				}
 
 				GLenum err = glGetError();
 				if (err != GL_NO_ERROR) {
@@ -791,6 +828,7 @@ namespace PAIN {
 		// ========================================
 		// RESTORE TEXTURE STATE
 		// ========================================
+		glPixelStorei(GL_UNPACK_ALIGNMENT, previousUnpackAlignment);
 		glActiveTexture(activeTextureUnit);
 		glBindTexture(GL_TEXTURE_2D, previousTex2D);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, previousTexCube);

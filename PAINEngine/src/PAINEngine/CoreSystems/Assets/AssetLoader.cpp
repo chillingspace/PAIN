@@ -200,12 +200,16 @@ namespace PAIN {
             tex->mips = kTexture->numLevels ? static_cast<int>(kTexture->numLevels) : 1;
             int numFaces = kTexture->numFaces ? kTexture->numFaces : 1;
 
-            tex->format = TextureFormat::ASTC;
+            tex->format = TextureFormat::UNKNOWN;
             tex->is_cube_map = (numFaces == 6);
+            tex->is_compressed = kTexture->isCompressed == KTX_TRUE;
 
             // Get OpenGL format
             if (kTexture->classId == ktxTexture1_c) {
-                tex->glTexFormat = reinterpret_cast<ktxTexture1*>(kTexture)->glInternalformat;
+                ktxTexture1* ktx1 = reinterpret_cast<ktxTexture1*>(kTexture);
+                tex->glTexFormat = ktx1->glInternalformat;
+                tex->glBaseFormat = ktx1->glFormat;
+                tex->glDataType = ktx1->glType;
             }
             else {
                 ktxTexture_Destroy(kTexture);
@@ -220,6 +224,7 @@ namespace PAIN {
             switch (tex->glTexFormat) {
             case GL_COMPRESSED_RGBA_ASTC_4x4_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 4;
                 tex->blockHeight = 4;
                 tex->blockSize = 16;
@@ -228,6 +233,7 @@ namespace PAIN {
 
             case GL_COMPRESSED_RGBA_ASTC_5x4_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 5;
                 tex->blockHeight = 4;
                 tex->blockSize = 16;
@@ -236,6 +242,7 @@ namespace PAIN {
 
             case GL_COMPRESSED_RGBA_ASTC_5x5_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 5;
                 tex->blockHeight = 5;
                 tex->blockSize = 16;
@@ -244,6 +251,7 @@ namespace PAIN {
 
             case GL_COMPRESSED_RGBA_ASTC_6x5_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 6;
                 tex->blockHeight = 5;
                 tex->blockSize = 16;
@@ -252,6 +260,7 @@ namespace PAIN {
 
             case GL_COMPRESSED_RGBA_ASTC_6x6_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 6;
                 tex->blockHeight = 6;
                 tex->blockSize = 16;
@@ -260,6 +269,7 @@ namespace PAIN {
 
             case GL_COMPRESSED_RGBA_ASTC_8x5_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 8;
                 tex->blockHeight = 5;
                 tex->blockSize = 16;
@@ -268,6 +278,7 @@ namespace PAIN {
 
             case GL_COMPRESSED_RGBA_ASTC_8x6_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 8;
                 tex->blockHeight = 6;
                 tex->blockSize = 16;
@@ -276,6 +287,7 @@ namespace PAIN {
 
             case GL_COMPRESSED_RGBA_ASTC_8x8_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 8;
                 tex->blockHeight = 8;
                 tex->blockSize = 16;
@@ -284,6 +296,7 @@ namespace PAIN {
 
             case GL_COMPRESSED_RGBA_ASTC_10x5_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 10;
                 tex->blockHeight = 5;
                 tex->blockSize = 16;
@@ -292,6 +305,7 @@ namespace PAIN {
 
             case GL_COMPRESSED_RGBA_ASTC_10x6_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 10;
                 tex->blockHeight = 6;
                 tex->blockSize = 16;
@@ -300,6 +314,7 @@ namespace PAIN {
 
             case GL_COMPRESSED_RGBA_ASTC_10x8_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 10;
                 tex->blockHeight = 8;
                 tex->blockSize = 16;
@@ -308,6 +323,7 @@ namespace PAIN {
 
             case GL_COMPRESSED_RGBA_ASTC_10x10_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 10;
                 tex->blockHeight = 10;
                 tex->blockSize = 16;
@@ -316,6 +332,7 @@ namespace PAIN {
 
             case GL_COMPRESSED_RGBA_ASTC_12x10_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 12;
                 tex->blockHeight = 10;
                 tex->blockSize = 16;
@@ -324,17 +341,31 @@ namespace PAIN {
 
             case GL_COMPRESSED_RGBA_ASTC_12x12_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 12;
                 tex->blockHeight = 12;
                 tex->blockSize = 16;
                 PN_CORE_INFO("KTX Format: ASTC 12x12 RGBA");
                 break;
 
+            case GL_RGB16F:
+            case GL_RGBA16F:
+            case GL_R11F_G11F_B10F:
+                tex->format = TextureFormat::FLOAT_HDR;
+                tex->is_compressed = false;
+                tex->blockWidth = 1;
+                tex->blockHeight = 1;
+                tex->blockSize = 0;
+                PN_CORE_INFO("KTX Format: uncompressed HDR 0x{:X}, base format 0x{:X}, type 0x{:X}",
+                    tex->glTexFormat, tex->glBaseFormat, tex->glDataType);
+                break;
+
             default:
-                PN_CORE_WARN("Unknown ASTC format 0x{:X}, defaulting to 4x4", tex->glTexFormat);
-                tex->blockWidth = 4;
-                tex->blockHeight = 4;
-                tex->blockSize = 16;
+                PN_CORE_WARN("Unknown KTX format 0x{:X}, compressed={}, base format 0x{:X}, type 0x{:X}",
+                    tex->glTexFormat, tex->is_compressed, tex->glBaseFormat, tex->glDataType);
+                tex->blockWidth = tex->is_compressed ? 4 : 1;
+                tex->blockHeight = tex->is_compressed ? 4 : 1;
+                tex->blockSize = tex->is_compressed ? 16 : 0;
                 formatRecognized = false;
                 break;
             }

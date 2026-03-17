@@ -649,6 +649,8 @@ namespace PAIN {
                     IsHdrSkyboxCandidate(asset_info, width, height);
 
                 if (bake_android_cubemap) {
+                    const std::string skybox_source_format =
+                        desc_file.import_settings.value("android_skybox_source_format", "R16G16B16A16");
                     const int face_size = std::max(32, desc_file.import_settings.value("max_size", 2048) / 4);
                     std::array<std::vector<float>, 6> cubemap_faces;
                     for (int face = 0; face < 6; ++face) {
@@ -657,13 +659,14 @@ namespace PAIN {
                         );
                     }
 
-                    std::cout << "Baking Android skybox cubemap at " << face_size << "x" << face_size << " per face" << std::endl;
+                    std::cout << "Baking Android skybox cubemap at " << face_size << "x" << face_size
+                        << " per face using float source format " << skybox_source_format << std::endl;
                     compression_success = CuttlefishCubemapCompressor(
                         cubemap_faces,
                         face_size,
                         channels,
                         asset_info.shipped_path.string(),
-                        compression_format,
+                        skybox_source_format,
                         desc_file.import_settings
                     );
                 }
