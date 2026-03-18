@@ -233,8 +233,8 @@ void main() {
     vec3 m = texture(gMaterial, TexCoords).rgb;
 
     material.rough = clamp(m.r, 0.04, 1.0);
-    material.metal = m.g;
-    material.ao = m.b;
+    material.metal = clamp(m.g, 0.0, 1.0);
+    material.ao = clamp(m.b, 0.0, 1.0);
 
     vec3 viewFragPos = (u_V * vec4(fragPos, 1.0)).xyz;
     vec3 viewNormal = mat3(u_V) * normalize(normal);
@@ -319,7 +319,7 @@ void main() {
         vec3 F = fresnelSchlickRoughness(NdotV, F0, material.rough);
         
         // Diffuse component
-        vec3 kD = (1.0 - F) * (1.0 - material.metal);
+        vec3 kD = clamp((1.0 - F) * (1.0 - material.metal), vec3(0.0), vec3(1.0));
         vec3 irradiance = SanitizeIblSample(texture(irradianceMap, N).rgb);
         // irradiance = irradiance / (irradiance + vec3(1.0));
         vec3 diffuse = kD * irradiance * material.color * material.ao * u_IblDiffuseStrength;

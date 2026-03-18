@@ -5,6 +5,9 @@ in vec3 WorldPos;
 uniform samplerCube environmentMap;
 
 const float PI = 3.14159265359;
+const float EPSILON = 0.0001;
+const int PHI_SAMPLES = 64;
+const int THETA_SAMPLES = 32;
 
 void main()
 {
@@ -21,19 +24,23 @@ void main()
     vec3 right = normalize(cross(up, N));
     up = normalize(cross(N, right));
 
-    float sampleDelta = 0.025;
     float sampleCount = 0.0;
 
-    for (float phi = 0.0; phi < 2.0 * PI; phi += sampleDelta) {
-        for (float theta = 0.0; theta < 0.5 * PI; theta += sampleDelta) {
+    // Use fixed integer loop counts for stable behavior across desktop/mobile compilers.
+    for (int phiIdx = 0; phiIdx < PHI_SAMPLES; ++phiIdx) {
+        float phi = (float(phiIdx) + 0.5) * (2.0 * PI / float(PHI_SAMPLES));
+        for (int thetaIdx = 0; thetaIdx < THETA_SAMPLES; ++thetaIdx) {
+            float theta = (float(thetaIdx) + 0.5) * (0.5 * PI / float(THETA_SAMPLES));
             vec3 tangentSample = vec3(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));
-            vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * N;
-            float sampleWeight = cos(theta) * sin(theta);
+            vec3 sampleVec = normalize(
+                tangentSample.x * right + tangentSample.y * up + tangentSample.z * N
+            );
+            float sampleWeight = max(cos(theta) * sin(theta), 0.0);
             irradiance += textureLod(environmentMap, sampleVec, 0.0).rgb * sampleWeight;
             sampleCount += 1.0;
         }
     }
 
-    irradiance = PI * irradiance / max(sampleCount, 1.0);
+    irradiance = PI * irradiance / max(sampleCount, EPSILON);
     FragColor = vec4(irradiance, 1.0);
 }

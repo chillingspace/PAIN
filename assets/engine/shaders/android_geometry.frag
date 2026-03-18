@@ -55,14 +55,18 @@ vec3 ResolveGeometryMaterial(int dbg) {
     if (material.use_roughness > 0.5) {
         roughness = texture(material.roughness_map, vTexCoords).r;
     }
+    roughness = clamp(roughness, 0.04, 1.0);
 
     float metallic = material.metal;
     if (material.use_metallic > 0.5) {
         metallic = texture(material.metallic_map, vTexCoords).r;
     }
+    metallic = clamp(metallic, 0.0, 1.0);
 
-    return vec3(roughness, metallic,
-                material.use_ao > 0.5 ? pow(texture(material.ao_map, vTexCoords).r, 2.2) : 1.0);
+    float ao = material.use_ao > 0.5 ? texture(material.ao_map, vTexCoords).r : 1.0;
+    ao = clamp(ao, 0.0, 1.0);
+
+    return vec3(roughness, metallic, ao);
 }
 
 vec3 ResolveGeometryEmission() {
