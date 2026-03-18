@@ -1,4 +1,4 @@
-/*****************************************************************/ /**
+﻿/*****************************************************************/ /**
  * \file   ViewportPanel.cpp
  * \brief  
  *
@@ -34,6 +34,7 @@
 #include "EntityPanel.h"
 #include "ResourcePanel.h"
 #include "ECS/Components/cMeshRenderer.h"
+#include "ECS/Components/cUIComps.h"
 
 #include "Systems/Physics/sysPhysics.h"
 #include "ECS/Components/cEntity.h"
@@ -883,8 +884,14 @@ namespace PAIN {
                     // === DRAG & DROP TARGET FOR MATERIALS ===
                     // ========================================
 
-                    // Reset drag hover entity
-                    m_DragHoveredEntity = entt::null;
+					// UI drag state
+					static bool isDraggingUI = false;
+					static glm::vec2 dragStartPos{ 0, 0 };
+					static ImVec2 dragStartMouse{ 0, 0 };
+					static entt::entity draggedUIEntity = entt::null;
+
+					// Reset drag hover entity
+					m_DragHoveredEntity = entt::null;
 
                     // Declare isUsingGizmo once at the top
 					bool isUsingGizmo = false;
@@ -1018,307 +1025,459 @@ namespace PAIN {
 					// === ImGuizmo - RENDER FIRST ===
 					// ========================================
 					if (m_EntityPanel) {
+
 						entt::entity selectedEntity = m_EntityPanel->getSelectedEntity();
-							
+
 						if (selectedEntity != entt::null) {
-							auto localTransformOpt = ecs->getEntityComponent<LocalTransform>(selectedEntity, currentRegistryID);
-							auto worldTransformOpt = ecs->getEntityComponent<WorldTransform>(selectedEntity, currentRegistryID);
+							auto& registry = ecs->getRegistry(currentRegistryID);
+							auto* uiRect = registry.try_get<UIRectTransform>(selectedEntity);
 
-							if (localTransformOpt.has_value() && worldTransformOpt.has_value()) {
-								LocalTransform& localTransform = localTransformOpt.value().get();
-								WorldTransform& worldTransform = worldTransformOpt.value().get();
-								auto camera = scene->GetActiveCamera();
+							// ========================================
+							// === UI Entity 2D Drag Gizmo ===
+							// ========================================
+							if (uiRect) {
+								auto* tex2d = registry.try_get<Texture2D>(selectedEntity);
+								if (tex2d) {
+									// tex2d->pos is NDC: x in [-1,1], y in [-1,1]
+									// tex2d->texture_scale is relative to screen height (scale.y = height/screenH, scale.x = width/screenH)
+									// Render2DTexture draws centered at pos with half-extents of texture_scale
 
-								if (camera) {
-									glm::mat4 viewMatrix = camera->view();
-									glm::mat4 projectionMatrix = camera->projection();
-									glm::mat4 modelMatrix = worldTransform.matrix;
+									// Get account for spritesheet
+									auto* uiAnim = registry.try_get<UIAnimation>(selectedEntity);
+									int cols = uiAnim ? std::max(1, uiAnim->spritesheet_columns) : 1;
+									int rows = uiAnim ? std::max(1, uiAnim->spritesheet_rows) : 1;
 
-									ImGuizmo::SetOrthographic(false);
-									ImGuizmo::SetDrawlist();
-									ImGuizmo::SetRect(viewportPos.x, viewportPos.y, size.x, size.y);
+									// tex2d->texture_scale already accounts for the full spritesheet
+									// so divide by cols/rows to get single frame scale
+									float frameScaleX = tex2d->texture_scale.x / cols;
+									float frameScaleY = tex2d->texture_scale.y / rows;
 
-									// Hotkeys (skip if typing in text field)
-								if (!ImGui::GetIO().WantTextInput) {
-									if (ImGui::IsKeyPressed(ImGuiKey_T))
-										m_GizmoOperation = ImGuizmo::TRANSLATE;
-									if (ImGui::IsKeyPressed(ImGuiKey_R))
-										m_GizmoOperation = ImGuizmo::ROTATE;
-									if (ImGui::IsKeyPressed(ImGuiKey_Y))
-										m_GizmoOperation = ImGuizmo::SCALE;
+									// Convert NDC center to ImGui screen coords
+									// NDC: x=0,y=0 is center; x=-1 is left, x=1 is right; y=1 is top, y=-1 is bottom
+									float screenCX = viewportPos.x + (tex2d->pos.x * 0.5f + 0.5f) * size.x;
+									float screenCY = viewportPos.y + (1.0f - (tex2d->pos.y * 0.5f + 0.5f)) * size.y;
+
+									// texture_scale is relative to screen HEIGHT in both axes (see Render2DTexture)
+									float screenW = frameScaleX * size.y;
+									float screenH = frameScaleY * size.y;
+
+									ImVec2 rectMin(screenCX - screenW * 0.5f, screenCY - screenH * 0.5f);
+									ImVec2 rectMax(screenCX + screenW * 0.5f, screenCY + screenH * 0.5f);
+
+									ImDrawList* dl = ImGui::GetWindowDrawList();
+									dl->AddRectFilled(rectMin, rectMax, IM_COL32(100, 180, 255, 30));
+									dl->AddRect(rectMin, rectMax, IM_COL32(100, 180, 255, 255), 0.0f, 0, 2.0f);
+
+									float hs = 5.0f;
+									auto corner = [&](float cx, float cy) {
+										dl->AddRectFilled(ImVec2(cx - hs, cy - hs), ImVec2(cx + hs, cy + hs), IM_COL32(100, 180, 255, 255));
+										};
+									corner(rectMin.x, rectMin.y); corner(rectMax.x, rectMin.y);
+									corner(rectMin.x, rectMax.y); corner(rectMax.x, rectMax.y);
+
+									// Use IO directly to bypass ImGui item ownership
+									ImVec2 mouse = ImGui::GetMousePos();
+									bool mouseOverRect = mouse.x >= rectMin.x && mouse.x <= rectMax.x &&
+										mouse.y >= rectMin.y && mouse.y <= rectMax.y;
+
+									if (draggedUIEntity != selectedEntity)
+										isDraggingUI = false;
+
+									// Use ImGui::GetIO() directly - bypasses item capture
+									if (mouseOverRect && ImGui::GetIO().MouseClicked[0] && !isDraggingUI) {
+										isDraggingUI = true;
+										draggedUIEntity = selectedEntity;
+										dragStartPos = tex2d->pos;
+										dragStartMouse = mouse;
+										ImGui::GetIO().MouseClicked[0] = false; // consume the click
+									}
+
+									if (isDraggingUI && ImGui::GetIO().MouseDown[0]) {
+										ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
+										float dx = (mouse.x - dragStartMouse.x) / (size.x * 0.5f);
+										float dy = -(mouse.y - dragStartMouse.y) / (size.y * 0.5f);
+
+										float newX = dragStartPos.x + dx;
+										float newY = dragStartPos.y + dy;
+
+										bool snapping = ImGui::IsKeyDown(ImGuiKey_LeftCtrl) || ImGui::IsKeyDown(ImGuiKey_RightCtrl);
+										if (snapping) {
+											// Define snap columns in NDC: left=-0.5, center=0, right=0.5
+											// and snap rows: top=0.75, middle=0, bottom=-0.75
+											// (adjust these to taste for your screen layout)
+											const float snapColumnsX[] = { -1.0f, -0.5f, 0.0f, 0.5f, 1.0f };
+											const float snapRowsY[] = { 1.0f,  0.5f, 0.0f, -0.5f, -1.0f };
+
+											// Find nearest snap column
+											float nearestX = snapColumnsX[0];
+											float minDistX = std::abs(newX - snapColumnsX[0]);
+											for (float snapX : snapColumnsX) {
+												float dist = std::abs(newX - snapX);
+												if (dist < minDistX) {
+													minDistX = dist;
+													nearestX = snapX;
+												}
+											}
+
+											// Find nearest snap row
+											float nearestY = snapRowsY[0];
+											float minDistY = std::abs(newY - snapRowsY[0]);
+											for (float snapY : snapRowsY) {
+												float dist = std::abs(newY - snapY);
+												if (dist < minDistY) {
+													minDistY = dist;
+													nearestY = snapY;
+												}
+											}
+
+											newX = nearestX;
+											newY = nearestY;
+
+											// Visual feedback - show which zone
+											const char* colName = (nearestX < -0.3f) ? "Left" : (nearestX > 0.3f) ? "Right" : "Center";
+											const char* rowName = (nearestY > 0.3f) ? "Top" : (nearestY < -0.3f) ? "Bottom" : "Middle";
+											ImGui::SetTooltip("Snap: %s %s", rowName, colName);
+										}
+
+										tex2d->pos.x = newX;
+										tex2d->pos.y = newY;
+										uiRect->layout_dirty = true;
+									}
+
+									// Arrow key nudge - moves by 1px normally, 10px with Ctrl
+									if (!ImGui::GetIO().WantTextInput) {
+										bool ctrlHeld = ImGui::IsKeyDown(ImGuiKey_LeftCtrl) || ImGui::IsKeyDown(ImGuiKey_RightCtrl);
+										float nudgePx = ctrlHeld ? 10.0f : 1.0f;
+
+										// Convert nudge from pixels to NDC
+										float nudgeX = nudgePx / (float)texWidth * 2.0f;
+										float nudgeY = nudgePx / (float)texHeight * 2.0f;
+
+										if (ImGui::IsKeyPressed(ImGuiKey_LeftArrow, true)) {
+											tex2d->pos.x -= nudgeX;
+											uiRect->layout_dirty = true;
+										}
+										if (ImGui::IsKeyPressed(ImGuiKey_RightArrow, true)) {
+											tex2d->pos.x += nudgeX;
+											uiRect->layout_dirty = true;
+										}
+										if (ImGui::IsKeyPressed(ImGuiKey_UpArrow, true)) {
+											tex2d->pos.y += nudgeY;
+											uiRect->layout_dirty = true;
+										}
+										if (ImGui::IsKeyPressed(ImGuiKey_DownArrow, true)) {
+											tex2d->pos.y -= nudgeY;
+											uiRect->layout_dirty = true;
+										}
+									}
+
+									if (isDraggingUI && !ImGui::GetIO().MouseDown[0]) {
+										isDraggingUI = false;
+										draggedUIEntity = entt::null;
+									}
 								}
+							}
+							else {
 
-									ImGuizmo::SetGizmoSizeClipSpace(0.15f);
+								auto localTransformOpt = ecs->getEntityComponent<LocalTransform>(selectedEntity, currentRegistryID);
+								auto worldTransformOpt = ecs->getEntityComponent<WorldTransform>(selectedEntity, currentRegistryID);
 
-									// Setup snapping
-									bool useSnap = ImGui::GetIO().KeyCtrl;
-									float snapValue = 0.5f;
+								if (localTransformOpt.has_value() && worldTransformOpt.has_value()) {
+									LocalTransform& localTransform = localTransformOpt.value().get();
+									WorldTransform& worldTransform = worldTransformOpt.value().get();
+									auto camera = scene->GetActiveCamera();
 
-									if (m_GizmoOperation == ImGuizmo::ROTATE) {
-										snapValue = 45.0f;
-									}
-									else if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
-										snapValue = 0.5f;
-									}
-									else if (m_GizmoOperation == ImGuizmo::SCALE) {
-										snapValue = 0.1f;
-									}
+									if (camera) {
+										glm::mat4 viewMatrix = camera->view();
+										glm::mat4 projectionMatrix = camera->projection();
+										glm::mat4 modelMatrix = worldTransform.matrix;
 
-									float snapValues[3] = { snapValue, snapValue, snapValue };
+										ImGuizmo::SetOrthographic(false);
+										ImGuizmo::SetDrawlist();
+										ImGuizmo::SetRect(viewportPos.x, viewportPos.y, size.x, size.y);
 
-									// Draw the gizmo (manipulates modelMatrix)
-									ImGuizmo::Manipulate(
-										glm::value_ptr(viewMatrix),
-										glm::value_ptr(projectionMatrix),
-										m_GizmoOperation,
-										m_GizmoMode,
-										glm::value_ptr(modelMatrix),
-										nullptr,
-										useSnap ? snapValues : nullptr
-									);
+										// Hotkeys (skip if typing in text field)
+										if (!ImGui::GetIO().WantTextInput) {
+											if (ImGui::IsKeyPressed(ImGuiKey_T))
+												m_GizmoOperation = ImGuizmo::TRANSLATE;
+											if (ImGui::IsKeyPressed(ImGuiKey_R))
+												m_GizmoOperation = ImGuizmo::ROTATE;
+											if (ImGui::IsKeyPressed(ImGuiKey_Y))
+												m_GizmoOperation = ImGuizmo::SCALE;
+										}
 
-									// Cache management
-									static bool wasUsing = false;
-									static glm::vec3 cachedPosition;
-									static glm::quat cachedRotation;
-									static glm::vec3 cachedScale;
-									static entt::entity lastSelectedEntity = entt::null;
-									static LocalTransform startTransform; 
+										ImGuizmo::SetGizmoSizeClipSpace(0.15f);
 
-									bool isCurrentlyUsing = ImGuizmo::IsUsing();
+										// Setup snapping
+										bool useSnap = ImGui::GetIO().KeyCtrl;
+										float snapValue = 0.5f;
 
-									// Reset cache if entity changed
-									if (selectedEntity != lastSelectedEntity) {
-										wasUsing = false;
-										lastSelectedEntity = selectedEntity;
-									}
+										if (m_GizmoOperation == ImGuizmo::ROTATE) {
+											snapValue = 45.0f;
+										}
+										else if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
+											snapValue = 0.5f;
+										}
+										else if (m_GizmoOperation == ImGuizmo::SCALE) {
+											snapValue = 0.1f;
+										}
 
-									// Just started using - cache original values
-									if (isCurrentlyUsing && !wasUsing) {
-										cachedPosition = localTransform.position;
-										cachedRotation = localTransform.rotation;
-										cachedScale = localTransform.scale;
-									}
+										float snapValues[3] = { snapValue, snapValue, snapValue };
 
-									// Currently manipulating
-									if (isCurrentlyUsing) {
-										// ===================================================
-										// STEP 1: Get parent's world matrix (if exists)
-										// ===================================================
-										glm::mat4 parentWorldMatrix = glm::mat4(1.0f);
+										// Draw the gizmo (manipulates modelMatrix)
+										ImGuizmo::Manipulate(
+											glm::value_ptr(viewMatrix),
+											glm::value_ptr(projectionMatrix),
+											m_GizmoOperation,
+											m_GizmoMode,
+											glm::value_ptr(modelMatrix),
+											nullptr,
+											useSnap ? snapValues : nullptr
+										);
 
-										auto hierarchyOpt = ecs->getEntityComponent<Entity::Hierarchy>(selectedEntity, currentRegistryID);
-										if (hierarchyOpt.has_value()) {
-											const Entity::Hierarchy& hierarchy = hierarchyOpt.value().get();
-											if (hierarchy.parentGUID.IsValid()) {
-												entt::entity parentEntity = ecs->resolveGUID(hierarchy.parentGUID, currentRegistryID);
-												if (parentEntity != entt::null) {
-													auto parentWorldOpt = ecs->getEntityComponent<WorldTransform>(parentEntity, currentRegistryID);
-													if (parentWorldOpt.has_value()) {
-														parentWorldMatrix = parentWorldOpt.value().get().matrix;
+										// Cache management
+										static bool wasUsing = false;
+										static glm::vec3 cachedPosition;
+										static glm::quat cachedRotation;
+										static glm::vec3 cachedScale;
+										static entt::entity lastSelectedEntity = entt::null;
+										static LocalTransform startTransform;
+
+										bool isCurrentlyUsing = ImGuizmo::IsUsing();
+
+										// Reset cache if entity changed
+										if (selectedEntity != lastSelectedEntity) {
+											wasUsing = false;
+											lastSelectedEntity = selectedEntity;
+										}
+
+										// Just started using - cache original values
+										if (isCurrentlyUsing && !wasUsing) {
+											cachedPosition = localTransform.position;
+											cachedRotation = localTransform.rotation;
+											cachedScale = localTransform.scale;
+										}
+
+										// Currently manipulating
+										if (isCurrentlyUsing) {
+											// ===================================================
+											// STEP 1: Get parent's world matrix (if exists)
+											// ===================================================
+											glm::mat4 parentWorldMatrix = glm::mat4(1.0f);
+
+											auto hierarchyOpt = ecs->getEntityComponent<Entity::Hierarchy>(selectedEntity, currentRegistryID);
+											if (hierarchyOpt.has_value()) {
+												const Entity::Hierarchy& hierarchy = hierarchyOpt.value().get();
+												if (hierarchy.parentGUID.IsValid()) {
+													entt::entity parentEntity = ecs->resolveGUID(hierarchy.parentGUID, currentRegistryID);
+													if (parentEntity != entt::null) {
+														auto parentWorldOpt = ecs->getEntityComponent<WorldTransform>(parentEntity, currentRegistryID);
+														if (parentWorldOpt.has_value()) {
+															parentWorldMatrix = parentWorldOpt.value().get().matrix;
+														}
+													}
+												}
+											}
+
+											// ===================================================
+											// STEP 2: Convert world matrix to local space
+											// ===================================================
+											glm::mat4 newLocalMatrix = glm::inverse(parentWorldMatrix) * modelMatrix;
+
+											// ===================================================
+											// STEP 3: Decompose local matrix
+											// ===================================================
+											float localTranslation[3], localRotation[3], localScale[3];
+											ImGuizmo::DecomposeMatrixToComponents(
+												glm::value_ptr(newLocalMatrix),
+												localTranslation,
+												localRotation,
+												localScale
+											);
+
+											// ===================================================
+											// STEP 4: Update LocalTransform based on gizmo operation
+											// ===================================================
+											if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
+												localTransform.position = glm::vec3(localTranslation[0], localTranslation[1], localTranslation[2]);
+												localTransform.rotation = cachedRotation;
+												localTransform.scale = cachedScale;
+											}
+											else if (m_GizmoOperation == ImGuizmo::ROTATE) {
+												localTransform.position = cachedPosition;
+												localTransform.rotation = glm::quat(glm::radians(glm::vec3(localRotation[0], localRotation[1], localRotation[2])));
+												localTransform.scale = cachedScale;
+											}
+											else if (m_GizmoOperation == ImGuizmo::SCALE) {
+												localTransform.position = cachedPosition;
+												localTransform.rotation = cachedRotation;
+												localTransform.scale = glm::vec3(localScale[0], localScale[1], localScale[2]);
+											}
+
+											// ===================================================
+											// STEP 5: Mark transform dirty & sync physics
+											// ===================================================
+											auto transformSystem = ecs->getSystem<Transform::System>();
+											if (transformSystem) {
+												transformSystem->markDirty(selectedEntity, ecs->getRegistry(currentRegistryID));
+											}
+
+											// Physics sync
+											SyncBodyToTransform(selectedEntity, ecs->getRegistry(currentRegistryID), ecs.get(), localTransform, /*dragging=*/true);
+
+											auto rbOpt = ecs->getEntityComponent<Physics::RigidBody3D>(selectedEntity, currentRegistryID);
+											if (rbOpt.has_value()) {
+												auto& rb = rbOpt.value().get();
+												auto physics_system = ecs->getSystem<Physics::System>();
+
+												if (physics_system) {
+													JPH::BodyInterface& body_interface = physics_system->GetPhysicsSystem()->GetBodyInterface();
+
+													// Disable physics temporarily during manipulation
+													body_interface.DeactivateBody(rb.bodyID);
+													body_interface.SetMotionType(rb.bodyID, JPH::EMotionType::Kinematic, JPH::EActivation::DontActivate);
+
+													if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
+														JPH::RVec3 pos(localTransform.position.x, localTransform.position.y, localTransform.position.z);
+														body_interface.SetPosition(rb.bodyID, pos, JPH::EActivation::DontActivate);
+													}
+													else if (m_GizmoOperation == ImGuizmo::ROTATE) {
+														JPH::Quat rot(localTransform.rotation.x, localTransform.rotation.y, localTransform.rotation.z, localTransform.rotation.w);
+														body_interface.SetRotation(rb.bodyID, rot, JPH::EActivation::DontActivate);
 													}
 												}
 											}
 										}
 
-										// ===================================================
-										// STEP 2: Convert world matrix to local space
-										// ===================================================
-										glm::mat4 newLocalMatrix = glm::inverse(parentWorldMatrix) * modelMatrix;
+										// Just released - reactivate physics
+										if (!isCurrentlyUsing && wasUsing) {
+											// Final decompose (same logic as above)
+											glm::mat4 parentWorldMatrix = glm::mat4(1.0f);
 
-										// ===================================================
-										// STEP 3: Decompose local matrix
-										// ===================================================
-										float localTranslation[3], localRotation[3], localScale[3];
-										ImGuizmo::DecomposeMatrixToComponents(
-											glm::value_ptr(newLocalMatrix),
-											localTranslation,
-											localRotation,
-											localScale
-										);
-
-										// ===================================================
-										// STEP 4: Update LocalTransform based on gizmo operation
-										// ===================================================
-										if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
-											localTransform.position = glm::vec3(localTranslation[0], localTranslation[1], localTranslation[2]);
-											localTransform.rotation = cachedRotation;
-											localTransform.scale = cachedScale;
-										}
-										else if (m_GizmoOperation == ImGuizmo::ROTATE) {
-											localTransform.position = cachedPosition;
-											localTransform.rotation = glm::quat(glm::radians(glm::vec3(localRotation[0], localRotation[1], localRotation[2])));
-											localTransform.scale = cachedScale;
-										}
-										else if (m_GizmoOperation == ImGuizmo::SCALE) {
-											localTransform.position = cachedPosition;
-											localTransform.rotation = cachedRotation;
-											localTransform.scale = glm::vec3(localScale[0], localScale[1], localScale[2]);
-										}
-
-										// ===================================================
-										// STEP 5: Mark transform dirty & sync physics
-										// ===================================================
-										auto transformSystem = ecs->getSystem<Transform::System>();
-										if (transformSystem) {
-											transformSystem->markDirty(selectedEntity, ecs->getRegistry(currentRegistryID));
-										}
-
-										// Physics sync
-										SyncBodyToTransform(selectedEntity, ecs->getRegistry(currentRegistryID), ecs.get(), localTransform, /*dragging=*/true);
-
-										auto rbOpt = ecs->getEntityComponent<Physics::RigidBody3D>(selectedEntity, currentRegistryID);
-										if (rbOpt.has_value()) {
-											auto& rb = rbOpt.value().get();
-											auto physics_system = ecs->getSystem<Physics::System>();
-
-											if (physics_system) {
-												JPH::BodyInterface& body_interface = physics_system->GetPhysicsSystem()->GetBodyInterface();
-
-												// Disable physics temporarily during manipulation
-												body_interface.DeactivateBody(rb.bodyID);
-												body_interface.SetMotionType(rb.bodyID, JPH::EMotionType::Kinematic, JPH::EActivation::DontActivate);
-
-												if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
-													JPH::RVec3 pos(localTransform.position.x, localTransform.position.y, localTransform.position.z);
-													body_interface.SetPosition(rb.bodyID, pos, JPH::EActivation::DontActivate);
-												}
-												else if (m_GizmoOperation == ImGuizmo::ROTATE) {
-													JPH::Quat rot(localTransform.rotation.x, localTransform.rotation.y, localTransform.rotation.z, localTransform.rotation.w);
-													body_interface.SetRotation(rb.bodyID, rot, JPH::EActivation::DontActivate);
-												}
-											}
-										}
-									}
-
-									// Just released - reactivate physics
-									if (!isCurrentlyUsing && wasUsing) {
-										// Final decompose (same logic as above)
-										glm::mat4 parentWorldMatrix = glm::mat4(1.0f);
-
-										auto hierarchyOpt = ecs->getEntityComponent<Entity::Hierarchy>(selectedEntity, currentRegistryID);
-										if (hierarchyOpt.has_value()) {
-											const Entity::Hierarchy& hierarchy = hierarchyOpt.value().get();
-											if (hierarchy.parentGUID.IsValid()) {
-												entt::entity parentEntity = ecs->resolveGUID(hierarchy.parentGUID, currentRegistryID);
-												if (parentEntity != entt::null) {
-													auto parentWorldOpt = ecs->getEntityComponent<WorldTransform>(parentEntity, currentRegistryID);
-													if (parentWorldOpt.has_value()) {
-														parentWorldMatrix = parentWorldOpt.value().get().matrix;
+											auto hierarchyOpt = ecs->getEntityComponent<Entity::Hierarchy>(selectedEntity, currentRegistryID);
+											if (hierarchyOpt.has_value()) {
+												const Entity::Hierarchy& hierarchy = hierarchyOpt.value().get();
+												if (hierarchy.parentGUID.IsValid()) {
+													entt::entity parentEntity = ecs->resolveGUID(hierarchy.parentGUID, currentRegistryID);
+													if (parentEntity != entt::null) {
+														auto parentWorldOpt = ecs->getEntityComponent<WorldTransform>(parentEntity, currentRegistryID);
+														if (parentWorldOpt.has_value()) {
+															parentWorldMatrix = parentWorldOpt.value().get().matrix;
+														}
 													}
 												}
 											}
-										}
 
-										glm::mat4 newLocalMatrix = glm::inverse(parentWorldMatrix) * modelMatrix;
+											glm::mat4 newLocalMatrix = glm::inverse(parentWorldMatrix) * modelMatrix;
 
-										float localTranslation[3], localRotation[3], localScale[3];
-										ImGuizmo::DecomposeMatrixToComponents(
-											glm::value_ptr(newLocalMatrix),
-											localTranslation,
-											localRotation,
-											localScale
-										);
+											float localTranslation[3], localRotation[3], localScale[3];
+											ImGuizmo::DecomposeMatrixToComponents(
+												glm::value_ptr(newLocalMatrix),
+												localTranslation,
+												localRotation,
+												localScale
+											);
 
-										if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
-											localTransform.position = glm::vec3(localTranslation[0], localTranslation[1], localTranslation[2]);
-										}
-										else if (m_GizmoOperation == ImGuizmo::ROTATE) {
-											localTransform.rotation = glm::quat(glm::radians(glm::vec3(localRotation[0], localRotation[1], localRotation[2])));
-										}
-										else if (m_GizmoOperation == ImGuizmo::SCALE) {
-											localTransform.scale = glm::vec3(localScale[0], localScale[1], localScale[2]);
-										}
-
-										// Mark dirty
-										auto transformSystem = ecs->getSystem<Transform::System>();
-										if (transformSystem) {
-											transformSystem->markDirty(selectedEntity, ecs->getRegistry(currentRegistryID));
-										}
-
-										// Reactivate physics
-										auto rbOpt = ecs->getEntityComponent<Physics::RigidBody3D>(selectedEntity, currentRegistryID);
-										if (rbOpt.has_value()) {
-											auto& rb = rbOpt.value().get();
-											auto physics_system = ecs->getSystem<Physics::System>();
-											if (physics_system) {
-												JPH::BodyInterface& body_interface = physics_system->GetPhysicsSystem()->GetBodyInterface();
-												body_interface.SetMotionType(rb.bodyID, JPH::EMotionType::Dynamic, JPH::EActivation::Activate);
-												body_interface.ActivateBody(rb.bodyID);
+											if (m_GizmoOperation == ImGuizmo::TRANSLATE) {
+												localTransform.position = glm::vec3(localTranslation[0], localTranslation[1], localTranslation[2]);
 											}
-										}
+											else if (m_GizmoOperation == ImGuizmo::ROTATE) {
+												localTransform.rotation = glm::quat(glm::radians(glm::vec3(localRotation[0], localRotation[1], localRotation[2])));
+											}
+											else if (m_GizmoOperation == ImGuizmo::SCALE) {
+												localTransform.scale = glm::vec3(localScale[0], localScale[1], localScale[2]);
+											}
 
-										LocalTransform endTransform = localTransform;
+											// Mark dirty
+											auto transformSystem = ecs->getSystem<Transform::System>();
+											if (transformSystem) {
+												transformSystem->markDirty(selectedEntity, ecs->getRegistry(currentRegistryID));
+											}
 
-										// Only create command if something actually changed
-
-										// Check if actually changed
-										if ((cachedPosition != endTransform.position ||
-											cachedRotation != endTransform.rotation ||
-											cachedScale != endTransform.scale) && command_manager)
-										{
-											auto guidOpt = ecs->getEntityComponent<Entity::GUID>(selectedEntity, currentRegistryID);
-
-											if (guidOpt.has_value()) {
-
-												// Capture Start/End data by value for the lambda
-												Assets::GUID targetGUID = guidOpt.value().get().guid;
-												LocalTransform startT = { cachedPosition, cachedRotation, cachedScale };
-												LocalTransform endT = endTransform;
-
-												command_manager->executeAction(Action{
-													// DO Action (Redo/Apply) using imguizmo
-													[this, targetGUID, endT]() {
-														auto ecs = services->get<ECS::Controller>();
-														entt::entity e = ecs->resolveGUID(targetGUID, currentRegistryID);
-
-														if (ecs->checkEntity(e, currentRegistryID)) {
-															auto& registry = ecs->getRegistry(currentRegistryID);
-
-															// Update Transform
-															registry.get_or_emplace<LocalTransform>(e) = endT;
-
-															// Mark Dirty
-															auto transformSystem = ecs->getSystem<Transform::System>();
-															if (transformSystem) {
-																transformSystem->markDirty(e, registry);
-															}
-
-															// Sync Physics
-															SyncBodyToTransform(e, registry, ecs.get(), endT, false);
-														}
-													},
-
-													// UNDO transform using imguizmo
-													[this, targetGUID, startT]() {
-														auto ecs = services->get<ECS::Controller>();
-														entt::entity e = ecs->resolveGUID(targetGUID, currentRegistryID);
-
-														if (ecs->checkEntity(e, currentRegistryID)) {
-															auto& registry = ecs->getRegistry(currentRegistryID);
-
-															// Revert Transform
-															registry.get_or_emplace<LocalTransform>(e) = startT;
-
-															// Mark Dirty
-															auto transformSystem = ecs->getSystem<Transform::System>();
-															if (transformSystem) {
-																transformSystem->markDirty(e, registry);
-															}
-
-															// Sync Physics
-															SyncBodyToTransform(e, registry, ecs.get(), startT, false);
-														}
-													},
-
-													// 3. Description
-													"Transform Entity: " + targetGUID.ToString()
-													});
+											// Reactivate physics
+											auto rbOpt = ecs->getEntityComponent<Physics::RigidBody3D>(selectedEntity, currentRegistryID);
+											if (rbOpt.has_value()) {
+												auto& rb = rbOpt.value().get();
+												auto physics_system = ecs->getSystem<Physics::System>();
+												if (physics_system) {
+													JPH::BodyInterface& body_interface = physics_system->GetPhysicsSystem()->GetBodyInterface();
+													body_interface.SetMotionType(rb.bodyID, JPH::EMotionType::Dynamic, JPH::EActivation::Activate);
+													body_interface.ActivateBody(rb.bodyID);
 												}
 											}
-									}
 
-									wasUsing = isCurrentlyUsing;
+											LocalTransform endTransform = localTransform;
+
+											// Only create command if something actually changed
+
+											// Check if actually changed
+											if ((cachedPosition != endTransform.position ||
+												cachedRotation != endTransform.rotation ||
+												cachedScale != endTransform.scale) && command_manager)
+											{
+												auto guidOpt = ecs->getEntityComponent<Entity::GUID>(selectedEntity, currentRegistryID);
+
+												if (guidOpt.has_value()) {
+
+													// Capture Start/End data by value for the lambda
+													Assets::GUID targetGUID = guidOpt.value().get().guid;
+													LocalTransform startT = { cachedPosition, cachedRotation, cachedScale };
+													LocalTransform endT = endTransform;
+
+													command_manager->executeAction(Action{
+														// DO Action (Redo/Apply) using imguizmo
+														[this, targetGUID, endT]() {
+															auto ecs = services->get<ECS::Controller>();
+															entt::entity e = ecs->resolveGUID(targetGUID, currentRegistryID);
+
+															if (ecs->checkEntity(e, currentRegistryID)) {
+																auto& registry = ecs->getRegistry(currentRegistryID);
+
+																// Update Transform
+																registry.get_or_emplace<LocalTransform>(e) = endT;
+
+																// Mark Dirty
+																auto transformSystem = ecs->getSystem<Transform::System>();
+																if (transformSystem) {
+																	transformSystem->markDirty(e, registry);
+																}
+
+																// Sync Physics
+																SyncBodyToTransform(e, registry, ecs.get(), endT, false);
+															}
+														},
+
+														// UNDO transform using imguizmo
+														[this, targetGUID, startT]() {
+															auto ecs = services->get<ECS::Controller>();
+															entt::entity e = ecs->resolveGUID(targetGUID, currentRegistryID);
+
+															if (ecs->checkEntity(e, currentRegistryID)) {
+																auto& registry = ecs->getRegistry(currentRegistryID);
+
+																// Revert Transform
+																registry.get_or_emplace<LocalTransform>(e) = startT;
+
+																// Mark Dirty
+																auto transformSystem = ecs->getSystem<Transform::System>();
+																if (transformSystem) {
+																	transformSystem->markDirty(e, registry);
+																}
+
+																// Sync Physics
+																SyncBodyToTransform(e, registry, ecs.get(), startT, false);
+															}
+														},
+
+														// 3. Description
+														"Transform Entity: " + targetGUID.ToString()
+														});
+												}
+											}
+										}
+
+										wasUsing = isCurrentlyUsing;
+									}
 								}
 							}
 						}
@@ -1509,7 +1668,7 @@ namespace PAIN {
 					}
 
 
-					bool isAnyGizmoActive = isUsingGizmo || ImGuizmo::IsUsingViewManipulate() || isHoveringViewCube;
+					bool isAnyGizmoActive = isUsingGizmo || ImGuizmo::IsUsingViewManipulate() || isHoveringViewCube || isDraggingUI;
 
 					static bool wasAnyGizmoActive = false;
 
