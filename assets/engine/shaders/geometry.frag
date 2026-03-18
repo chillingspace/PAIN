@@ -42,13 +42,74 @@ uniform float DEBUG_TYPE;
 
 const int IBL_DEBUG_TYPE = 8;
 
-vec3 ResolveGeometryNormal() {
-    if (material.use_normal > 0.5) {
-        vec3 normalMapContrib = texture(material.normal_map, vTexCoords).rgb;
-        normalMapContrib = normalMapContrib * 2.0 - 1.0;
-        return normalize(TBN * normalMapContrib);
+bool IsFiniteFloat(float value) {
+    return !(isnan(value) || isinf(value));
+}
+
+bool IsFiniteVec3(vec3 value) {
+    return !(any(isnan(value)) || any(isinf(value)));
+}
+
+vec3 SafeNormalize(vec3 value, vec3 fallback) {
+    float len2 = dot(value, value);
+    if (!IsFiniteFloat(len2) || len2 <= 1e-8) {
+        return fallback;
     }
-    return normalize(vNormal);
+    return value * inversesqrt(len2);
+}
+
+vec3 DecodeTangentNormal(vec3 sampleRgb) {
+    vec3 raw = clamp(sampleRgb, vec3(0.0), vec3(1.0));
+    vec3 decoded = raw * 2.0 - 1.0;
+    decoded.xy = clamp(decoded.xy, vec2(-0.999), vec2(0.999));
+    float xy2 = dot(decoded.xy, decoded.xy);
+    if (xy2 > 1.0) {
+        decoded.xy *= inversesqrt(xy2);
+        xy2 = dot(decoded.xy, decoded.xy);
+    }
+    decoded.z = sqrt(max(1.0 - xy2, 0.0));
+    return decoded;
+}
+
+mat3 BuildStableTBN(vec3 geometricNormal) {
+    vec3 N = SafeNormalize(geometricNormal, vec3(0.0, 0.0, 1.0));
+    vec3 T = SafeNormalize(TBN[0], vec3(1.0, 0.0, 0.0));
+    T = SafeNormalize(T - N * dot(T, N), vec3(1.0, 0.0, 0.0));
+
+    vec3 BRef = SafeNormalize(TBN[1], cross(N, T));
+    vec3 B = SafeNormalize(cross(N, T), BRef);
+    if (dot(B, BRef) < 0.0) {
+        B = -B;
+    }
+
+    return mat3(T, B, N);
+}
+
+vec3 ResolveGeometryNormal() {
+    vec3 geometricNormal = SafeNormalize(vNormal, vec3(0.0, 0.0, 1.0));
+    if (material.use_normal > 0.5) {
+        mat3 stableTBN = BuildStableTBN(geometricNormal);
+        vec3 sampledNormal = texture(material.normal_map, vTexCoords).rgb;
+
+        // Candidate A: texture values are already linear (expected path).
+        vec3 tangentLinear = DecodeTangentNormal(sampledNormal);
+        vec3 worldLinear = SafeNormalize(stableTBN * tangentLinear, geometricNormal);
+
+        // Candidate B: texture was unintentionally sampled through sRGB decode.
+        vec3 tangentFromSrgb = DecodeTangentNormal(pow(clamp(sampledNormal, vec3(0.0), vec3(1.0)), vec3(1.0 / 2.2)));
+        vec3 worldFromSrgb = SafeNormalize(stableTBN * tangentFromSrgb, geometricNormal);
+
+        vec3 worldNormal = dot(worldLinear, geometricNormal) >= dot(worldFromSrgb, geometricNormal)
+            ? worldLinear
+            : worldFromSrgb;
+
+        // Never allow inward/invalid normals: they produce black irradiance patches.
+        if (!IsFiniteVec3(worldNormal) || dot(worldNormal, geometricNormal) <= 0.0) {
+            return geometricNormal;
+        }
+        return worldNormal;
+    }
+    return geometricNormal;
 }
 
 vec3 ResolveGeometryMaterial(int dbg) {

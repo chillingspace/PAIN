@@ -5,6 +5,8 @@
 
 #ifdef PN_PLATFORM_ANDROID
 #include <ktx.h>
+#include <algorithm>
+#include <cctype>
 
 // ========================================
 // DEFINE MISSING ASTC sRGB CONSTANTS
@@ -72,6 +74,61 @@
 
 namespace PAIN {
 	namespace Assets {
+#ifdef PN_PLATFORM_ANDROID
+        namespace {
+            std::string ToLowerAscii(std::string value) {
+                std::transform(value.begin(), value.end(), value.begin(),
+                    [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+                return value;
+            }
+
+            bool ContainsAny(std::string const& value, std::initializer_list<const char*> needles) {
+                for (const char* needle : needles) {
+                    if (value.find(needle) != std::string::npos) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            bool IsLikelyLinearDataTexturePath(std::string const& virtual_path) {
+                const std::string lower = ToLowerAscii(virtual_path);
+
+                // Keep color/HDR cubemap paths untouched.
+                if (ContainsAny(lower, { "skybox", "cubemap", "ibl", "irradiance", "prefilter", "brdf" })) {
+                    return false;
+                }
+
+                return ContainsAny(lower, {
+                    "_normal", "normal_", "normalmap", "_nrm",
+                    "_ao", "ao_", "occlusion",
+                    "_rough", "roughness",
+                    "_metal", "metallic", "metalness",
+                    "_orm", "_rma", "_arm", "_mra", "_mrao"
+                });
+            }
+
+            GLenum ToLinearAstcFormat(GLenum format) {
+                switch (format) {
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR: return GL_COMPRESSED_RGBA_ASTC_4x4_KHR;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR: return GL_COMPRESSED_RGBA_ASTC_5x4_KHR;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR: return GL_COMPRESSED_RGBA_ASTC_5x5_KHR;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR: return GL_COMPRESSED_RGBA_ASTC_6x5_KHR;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR: return GL_COMPRESSED_RGBA_ASTC_6x6_KHR;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR: return GL_COMPRESSED_RGBA_ASTC_8x5_KHR;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR: return GL_COMPRESSED_RGBA_ASTC_8x6_KHR;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR: return GL_COMPRESSED_RGBA_ASTC_8x8_KHR;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR: return GL_COMPRESSED_RGBA_ASTC_10x5_KHR;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR: return GL_COMPRESSED_RGBA_ASTC_10x6_KHR;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR: return GL_COMPRESSED_RGBA_ASTC_10x8_KHR;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR: return GL_COMPRESSED_RGBA_ASTC_10x10_KHR;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR: return GL_COMPRESSED_RGBA_ASTC_12x10_KHR;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR: return GL_COMPRESSED_RGBA_ASTC_12x12_KHR;
+                default: return 0;
+                }
+            }
+        }
+#endif
 
         void Loader::RegisterLoader(Type const& type, LoaderFunc const& func) {
 
@@ -210,6 +267,17 @@ namespace PAIN {
                 tex->glTexFormat = ktx1->glInternalformat;
                 tex->glBaseFormat = ktx1->glFormat;
                 tex->glDataType = ktx1->glType;
+
+                if (!tex->is_cube_map && IsLikelyLinearDataTexturePath(virtual_path)) {
+                    const GLenum linearAstc = ToLinearAstcFormat(static_cast<GLenum>(tex->glTexFormat));
+                    if (linearAstc != 0 && linearAstc != tex->glTexFormat) {
+                        PN_CORE_INFO(
+                            "Forcing linear ASTC decode for data texture '{}' (internal 0x{:X} -> 0x{:X})",
+                            virtual_path, tex->glTexFormat, linearAstc
+                        );
+                        tex->glTexFormat = linearAstc;
+                    }
+                }
             }
             else {
                 ktxTexture_Destroy(kTexture);
