@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "loud commotion.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 10932174418397439542
+  },
+  "descriptor_version": 1,
+  "guid": "e5f6d90a-10d4-9645-a132-9addc151e09c",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\cutscenes\\loud commotion.wav"
+  }
+}

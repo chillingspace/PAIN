@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "crow cawing x3 cs3.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 18104067067179760466
+  },
+  "descriptor_version": 1,
+  "guid": "3bec1d39-382b-4640-9eec-a456dce44927",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\cutscenes\\crow cawing x3 cs3.wav"
+  }
+}

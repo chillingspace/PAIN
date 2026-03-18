@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "frog notice.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 12644278229575731197
+  },
+  "descriptor_version": 1,
+  "guid": "73a6fc67-fce9-6f4b-ad44-d04ba55544dd",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\cutscenes\\frog notice.wav"
+  }
+}

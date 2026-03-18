@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "enemy walking cs2.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 6158730433356177774
+  },
+  "descriptor_version": 1,
+  "guid": "54087b18-b4e6-b74e-8ea8-06ec672df946",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\cutscenes\\enemy walking cs2.wav"
+  }
+}

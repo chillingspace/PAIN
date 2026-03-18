@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "fixing robot.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 18368004595111805965
+  },
+  "descriptor_version": 1,
+  "guid": "21665e88-81d3-684b-a72c-54c1d423c354",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\cutscenes\\fixing robot.wav"
+  }
+}

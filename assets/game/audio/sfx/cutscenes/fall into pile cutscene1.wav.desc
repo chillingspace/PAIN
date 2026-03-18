@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "fall into pile cutscene1.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 7198564767512061939
+  },
+  "descriptor_version": 1,
+  "guid": "d736c187-18c5-d84d-8bbf-59ed0119b163",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\cutscenes\\fall into pile cutscene1.wav"
+  }
+}
