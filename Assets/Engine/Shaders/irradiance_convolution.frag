@@ -16,7 +16,8 @@ void main()
 #endif
 
     vec3 irradiance = vec3(0.0);
-    vec3 up = vec3(0.0, 1.0, 0.0);
+    // Build a robust tangent basis to avoid NaNs when N aligns with world-up.
+    vec3 up = abs(N.y) < 0.999 ? vec3(0.0, 1.0, 0.0) : vec3(0.0, 0.0, 1.0);
     vec3 right = normalize(cross(up, N));
     up = normalize(cross(N, right));
 

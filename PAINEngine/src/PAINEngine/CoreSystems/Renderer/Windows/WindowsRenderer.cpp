@@ -2508,7 +2508,10 @@ namespace PAIN {
 			pbr_shader->SetUniform("u_UseIbl", iblAvailable ? 1.f : 0.f);
 			pbr_shader->SetUniform("u_IblDiffuseStrength", GraphicsSettings::get().ibl_diffuse_strength);
 			pbr_shader->SetUniform("u_IblSpecularStrength", GraphicsSettings::get().ibl_specular_strength);
-			pbr_shader->SetUniform("u_IblMaxReflectionLod", GraphicsSettings::get().ibl_max_reflection_lod);
+			const float maxReflectionLod = std::min(
+				GraphicsSettings::get().ibl_max_reflection_lod,
+				Skybox::get().getPrefilterMaxReflectionLod());
+			pbr_shader->SetUniform("u_IblMaxReflectionLod", maxReflectionLod);
 
 			glActiveTexture(GL_TEXTURE0 + kIrradianceTextureUnit);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, Skybox::get().getIrradianceMap());

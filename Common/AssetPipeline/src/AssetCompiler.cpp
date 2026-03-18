@@ -178,6 +178,7 @@ namespace PAIN {
                 bool higher_quality = asset.raw_path.extension() == ".hdr" || asset.raw_path.extension() == ".exr" ? true : false;
                 settings["window_compression"] = higher_quality ? "BC6H" : "BC7";
                 settings["android_compression"] = higher_quality ? "R16G16B16A16" : "ASTC_4x4";
+                settings["android_allow_astc_hdr"] = false;
                 settings["android_bake_cubemap"] = false;
                 settings["android_skybox_source_format"] = "R16G16B16A16";
                 settings["generate_mipmaps"] = true;
@@ -543,6 +544,16 @@ namespace PAIN {
             default:
                 std::cout << "WARNING: Unsupported platform for texture compilation" << std::endl;
                 return;
+            }
+
+            if (platform == Platform::Android && higher_quality) {
+                const bool allow_astc_hdr = desc_file.import_settings.value("android_allow_astc_hdr", false);
+                if (!allow_astc_hdr && compression_format.rfind("ASTC_", 0) == 0) {
+                    std::cout << "WARNING: HDR texture requested ASTC format (" << compression_format
+                        << "). Overriding to R16G16B16A16 to preserve HDR IBL parity. "
+                        << "Set android_allow_astc_hdr=true to keep ASTC." << std::endl;
+                    compression_format = "R16G16B16A16";
+                }
             }
 
             //Check if recompilation is needed

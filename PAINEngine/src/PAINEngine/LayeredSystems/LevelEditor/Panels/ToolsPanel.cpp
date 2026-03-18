@@ -279,7 +279,7 @@ namespace PAIN {
 					if (gfx.ibl) {
 						if (ImGui::SliderFloat("IBL Diffuse", &gfx.ibl_diffuse_strength, 0.0f, 2.0f)) {}
 						if (ImGui::SliderFloat("IBL Specular", &gfx.ibl_specular_strength, 0.0f, 2.0f)) {}
-						if (ImGui::SliderFloat("IBL Max Reflection LOD", &gfx.ibl_max_reflection_lod, 0.0f, 8.0f)) {}
+						if (ImGui::SliderFloat("IBL Max Reflection LOD", &gfx.ibl_max_reflection_lod, 0.0f, 4.0f)) {}
 					}
 
 					ImGui::Spacing();

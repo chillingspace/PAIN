@@ -465,10 +465,6 @@ namespace PAIN {
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
 
-		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-			PN_CORE_ERROR("CaptureFBO in generateIrradianceMap not complete!");
-		}
-
 		// Same projection and views as your existing code
 		glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
 		glm::mat4 captureViews[] = {
@@ -488,8 +484,17 @@ namespace PAIN {
 
 		// Load irradiance shader
 		auto irradianceShader_opt = services->get<Assets::Manager>()->getAsset<Assets::Shader>(irradiance_shader_path);
-		if (irradianceShader_opt.has_value()) {
-			auto irradianceShader = irradianceShader_opt.value();
+		if (!irradianceShader_opt.has_value()) {
+			PN_CORE_ERROR("Failed to load irradiance shader; disabling irradiance map generation.");
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glDeleteFramebuffers(1, &captureFBO);
+			glDeleteRenderbuffers(1, &captureRBO);
+			glDeleteTextures(1, &irradiance_map);
+			irradiance_map = 0;
+			return;
+		}
+
+		auto irradianceShader = irradianceShader_opt.value();
 
 			ConfigureSourceCubemapForIblSampling();
 
@@ -524,6 +529,7 @@ namespace PAIN {
 				}
 			}
 
+			bool captureFailed = false;
 			// Render to each cubemap face
 			for (unsigned int i = 0; i < 6; ++i) {
 				irradianceShader->SetUniform("view", captureViews[i]);
@@ -543,11 +549,22 @@ namespace PAIN {
 						PN_CORE_ERROR("Unknown FBO error: {}", status); break;
 					}
 					while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error in glCheckFramebufferStatus: {}", err);
+					captureFailed = true;
+					break;
 				}
 
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 				renderCube();
+			}
+
+			if (captureFailed) {
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+				glDeleteFramebuffers(1, &captureFBO);
+				glDeleteRenderbuffers(1, &captureRBO);
+				glDeleteTextures(1, &irradiance_map);
+				irradiance_map = 0;
+				return;
 			}
 
 			// debug
@@ -574,7 +591,6 @@ namespace PAIN {
 			while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error after generateIrradianceMap: {}", err);
 
 			PN_CORE_INFO("Irradiance map generated, ID: {}", irradiance_map);
-		}
 	}
 
 
@@ -615,8 +631,14 @@ namespace PAIN {
 
 		// Load prefilter shader
 		auto prefilterShader_opt = services->get<Assets::Manager>()->getAsset<Assets::Shader>(prefilter_shader_path);
-		if (prefilterShader_opt.has_value()) {
-			auto prefilterShader = prefilterShader_opt.value();
+		if (!prefilterShader_opt.has_value()) {
+			PN_CORE_ERROR("Failed to load prefilter shader; disabling prefiltered env map generation.");
+			glDeleteTextures(1, &prefilter_map);
+			prefilter_map = 0;
+			return;
+		}
+
+		auto prefilterShader = prefilterShader_opt.value();
 
 			// Setup projection and views (same as before)
 			glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
@@ -646,6 +668,7 @@ namespace PAIN {
 
 			while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error before rendering to mipmap: {}", err);
 
+			bool captureFailed = false;
 			// Render for each mip level (each roughness level)
 			for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
 			{
@@ -681,6 +704,8 @@ namespace PAIN {
 							PN_CORE_ERROR("Unknown FBO error: {}", status); break;
 						}
 						while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error in glCheckFramebufferStatus: {}", err);
+						captureFailed = true;
+						break;
 					}
 
 					glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -689,6 +714,18 @@ namespace PAIN {
 					renderCube();
 					while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error after renderCube in generatePrefilterMap: {}", err);
 				}
+				if (captureFailed) {
+					break;
+				}
+			}
+
+			if (captureFailed) {
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+				glDeleteFramebuffers(1, &captureFBO);
+				glDeleteRenderbuffers(1, &captureRBO);
+				glDeleteTextures(1, &prefilter_map);
+				prefilter_map = 0;
+				return;
 			}
 
 			glBindTexture(GL_TEXTURE_CUBE_MAP, prefilter_map);
@@ -717,7 +754,6 @@ namespace PAIN {
 			glDeleteRenderbuffers(1, &captureRBO);
 
 			PN_CORE_INFO("Prefiltered map generated, ID: {}", prefilter_map);
-		}
 	}
 
 
@@ -755,6 +791,11 @@ namespace PAIN {
 
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 			PN_CORE_ERROR("CaptureFBO in generateBRDFLUT not complete!");
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glDeleteFramebuffers(1, &captureFBO);
+			glDeleteTextures(1, &brdf_tex);
+			brdf_tex = 0;
+			return;
 		}
 
 		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error after generating fbo: {}", err);
@@ -768,27 +809,33 @@ namespace PAIN {
 
 		// Load BRDF shader
 		auto brdfShader_opt = services->get<Assets::Manager>()->getAsset<Assets::Shader>(brdf_shader_path);
-		if (brdfShader_opt.has_value()) {
-			auto brdfShader = brdfShader_opt.value();
-
-			glViewport(0, 0, 512, 512);
-			brdfShader->Bind();
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-			while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error before renderQuad: {}", err);
-
-			renderQuad(); // Render a fullscreen quad (see below)
-
-			while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error after renderQuad: {}", err);
-
+		if (!brdfShader_opt.has_value()) {
+			PN_CORE_ERROR("Failed to load BRDF shader; disabling BRDF LUT generation.");
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 			glDeleteFramebuffers(1, &captureFBO);
-			//glDeleteRenderbuffers(1, &captureRBO);
-
-			PN_CORE_INFO("BRDF LUT generated, ID: {}", brdf_tex);
-			while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error at the end of generateBRDFLUT: {}", err);
+			glDeleteTextures(1, &brdf_tex);
+			brdf_tex = 0;
+			return;
 		}
+
+		auto brdfShader = brdfShader_opt.value();
+
+		glViewport(0, 0, 512, 512);
+		brdfShader->Bind();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error before renderQuad: {}", err);
+
+		renderQuad(); // Render a fullscreen quad (see below)
+
+		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error after renderQuad: {}", err);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glDeleteFramebuffers(1, &captureFBO);
+		//glDeleteRenderbuffers(1, &captureRBO);
+
+		PN_CORE_INFO("BRDF LUT generated, ID: {}", brdf_tex);
+		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error at the end of generateBRDFLUT: {}", err);
 	}
 
 

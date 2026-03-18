@@ -9,7 +9,7 @@
   "descriptor_version": 1,
   "guid": "d8f1f7af-e67c-4445-a55c-4c540a39b92b",
   "import_settings": {
-    "android_compression": "ASTC_4x4",
+    "android_compression": "R16G16B16A16",
     "generate_mipmaps": true,
     "max_size": 2048,
     "window_compression": "BC6H"

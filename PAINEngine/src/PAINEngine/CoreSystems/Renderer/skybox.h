@@ -76,6 +76,11 @@ namespace PAIN {
 			return prefilter_map;
 		}
 
+		float getPrefilterMaxReflectionLod() const {
+			// generatePrefilterMap allocates 5 mip levels [0..4].
+			return 4.0f;
+		}
+
 		unsigned int getBrdfLUT() const {
 			return brdf_tex;
 		}

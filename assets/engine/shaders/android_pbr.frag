@@ -220,6 +220,18 @@ const int IBL_DIFFUSE = IBL_DEBUG_TYPE_BASE + 3;
 const int IBL_SPECULAR = IBL_DEBUG_TYPE_BASE + 4;
 const int DIRECT_LIGHTING = IBL_DEBUG_TYPE_BASE + 5;
 const bool IBL_FLIP_Y_AXIS = true;
+const float IBL_SPECULAR_FIRELFY_CLAMP = 32.0;
+
+bool IsFiniteVec3(vec3 v) {
+    return !(any(isnan(v)) || any(isinf(v)));
+}
+
+vec3 SanitizeIblSample(vec3 value) {
+    if (!IsFiniteVec3(value)) {
+        return vec3(0.0);
+    }
+    return max(value, vec3(0.0));
+}
 
 void main() {
     if (int(u_NumShadowMaps) > MAX_SHADOWMAPPED_LIGHTS) {
@@ -233,7 +245,7 @@ void main() {
     vec3 normal = texture(gNorm, TexCoords).rgb;
     vec3 m = texture(gMaterial, TexCoords).rgb;
 
-    material.rough = max(m.r, 0.04);
+    material.rough = clamp(m.r, 0.04, 1.0);
     material.metal = m.g;
     material.ao = m.b;
 
@@ -265,6 +277,12 @@ void main() {
 
     // Ambient/IBL
     vec3 ambient = vec3(0.0);
+    bool wantsIblDebug = dbg >= IBL_DEBUG_IRRADIANCE && dbg <= IBL_SPECULAR;
+    if (wantsIblDebug && !(u_UseIbl > 0.5)) {
+        // Explicit missing-IBL marker in debug modes instead of silently falling back.
+        FragColor = vec4(1.0, 0.0, 1.0, 1.0);
+        return;
+    }
     if (u_UseIbl > 0.5) {
         // IBL
         vec3 N = normalize(normal);
@@ -275,7 +293,7 @@ void main() {
 
         if (dbg == IBL_DEBUG_IRRADIANCE)
         {
-            vec3 irradiance = texture(irradianceMap, N).rgb;
+            vec3 irradiance = SanitizeIblSample(texture(irradianceMap, N).rgb);
             FragColor = vec4(irradiance, 1.0);
             return;
         }
@@ -291,7 +309,7 @@ void main() {
         // DEBUG: Show the prefilter map. should look like perfect mirror
         if (dbg == IBL_DEBUG_PREFILTER)
         {
-            vec3 prefilteredColor = textureLod(prefilterMap, R, 0.0).rgb;  // Mip 0 = sharpest
+            vec3 prefilteredColor = SanitizeIblSample(textureLod(prefilterMap, R, 0.0).rgb);  // Mip 0 = sharpest
             FragColor = vec4(prefilteredColor, 1.0);
             return;
         }
@@ -299,12 +317,13 @@ void main() {
         vec3 F0 = vec3(0.04);
         F0 = mix(F0, material.color, material.metal);
         
-        float NdotV = max(dot(N, V), 0.001);
+        float NdotV = clamp(dot(N, V), 0.001, 1.0);
 
         // debug brdf lut. should look like gradient red/orange
         if (dbg == IBL_DEBUG_BRDFLUT)
         {
             vec2 brdf = texture(brdfLut, vec2(NdotV, material.rough)).rg;
+            brdf = clamp(brdf, vec2(0.0), vec2(1.0));
             FragColor = vec4(brdf.r, brdf.g, 0.0, 1.0);
             return;
         }
@@ -314,9 +333,10 @@ void main() {
         
         // Diffuse component
         vec3 kD = (1.0 - F) * (1.0 - material.metal);
-        vec3 irradiance = texture(irradianceMap, N).rgb;
+        vec3 irradiance = SanitizeIblSample(texture(irradianceMap, N).rgb);
         // irradiance = irradiance / (irradiance + vec3(1.0));
         vec3 diffuse = kD * irradiance * material.color * material.ao * u_IblDiffuseStrength;
+        diffuse = SanitizeIblSample(diffuse);
 
 // #define DEBUG_IBL_DIFFUSE
         if (dbg == IBL_DIFFUSE) {
@@ -326,7 +346,7 @@ void main() {
 
         // Specular component  
 
-        vec3 prefilteredColor = vec3(0.0, 0.0, 0.0);
+        vec3 prefilteredColor = vec3(0.0);
 
 #ifdef DEBUG_MIP_INTERPOLATION
         {
@@ -334,23 +354,30 @@ void main() {
             // !TODO: jspoh figure out why and a proper fix
             float mipLevel = material.rough * u_IblMaxReflectionLod;
             mipLevel = floor(mipLevel); // Force discrete mip levels, no interpolation
-            prefilteredColor = textureLod(prefilterMap, R, mipLevel).rgb;
+            prefilteredColor = SanitizeIblSample(textureLod(prefilterMap, R, mipLevel).rgb);
         }
 #endif
 
-        prefilteredColor = textureLod(prefilterMap, R, material.rough * u_IblMaxReflectionLod).rgb;
+        prefilteredColor = SanitizeIblSample(textureLod(prefilterMap, R, material.rough * u_IblMaxReflectionLod).rgb);
 
 #ifdef DEBUG_MIP
         {
             // debug to see if mip issue
-            prefilteredColor = textureLod(prefilterMap, R, 0.0).rgb;  // Force mip 0
+            prefilteredColor = SanitizeIblSample(textureLod(prefilterMap, R, 0.0).rgb);  // Force mip 0
         }
 #endif
 
         // prefilteredColor = prefilteredColor / (prefilteredColor + vec3(1.0));  // Reinhard tone mapping
 
         vec2 envBRDF = texture(brdfLut, vec2(NdotV, material.rough)).rg;
-        vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y) * u_IblSpecularStrength;
+        envBRDF = clamp(envBRDF, vec2(0.0), vec2(1.0));
+        vec3 specularTerm = max(F * envBRDF.x + envBRDF.y, vec3(0.0));
+        vec3 specular = prefilteredColor * specularTerm * u_IblSpecularStrength;
+        specular = SanitizeIblSample(specular);
+        float peak = max(specular.r, max(specular.g, specular.b));
+        if (peak > IBL_SPECULAR_FIRELFY_CLAMP) {
+            specular *= IBL_SPECULAR_FIRELFY_CLAMP / peak;
+        }
 
         if (dbg == IBL_SPECULAR) {
             FragColor = vec4(specular, 1.0);
