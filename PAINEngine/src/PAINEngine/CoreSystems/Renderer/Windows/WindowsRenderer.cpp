@@ -486,6 +486,37 @@ namespace {
 
 namespace PAIN {
 	namespace {
+		std::string ToLowerAsciiCopy(std::string value) {
+			std::transform(value.begin(), value.end(), value.begin(),
+				[](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+			return value;
+		}
+
+		bool ContainsAnyToken(const std::string& value, std::initializer_list<const char*> needles) {
+			for (const char* needle : needles) {
+				if (value.find(needle) != std::string::npos) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		bool IsLikelyPackedOrmPath(const std::filesystem::path& texturePath) {
+			if (texturePath.empty()) {
+				return false;
+			}
+			const std::string lower = ToLowerAsciiCopy(texturePath.lexically_normal().generic_string());
+			return ContainsAnyToken(lower, {
+				"occlusionroughnessmetallic",
+				"metallicroughness",
+				"_orm",
+				"_mrao",
+				"_rma",
+				"_arm",
+				"_mra"
+			});
+		}
+
 		struct GeometryMaterialState {
 			GLuint albedoTexture = 0;
 			GLuint aoTexture = 0;
@@ -493,6 +524,9 @@ namespace PAIN {
 			GLuint roughnessTexture = 0;
 			GLuint metallicTexture = 0;
 			GLuint emissionTexture = 0;
+			glm::vec3 aoChannelMask = glm::vec3(1.0f, 0.0f, 0.0f);
+			glm::vec3 roughnessChannelMask = glm::vec3(1.0f, 0.0f, 0.0f);
+			glm::vec3 metallicChannelMask = glm::vec3(1.0f, 0.0f, 0.0f);
 			glm::vec3 baseColor = glm::vec3(1.0f);
 			float roughness = 0.5f;
 			float metallic = 0.0f;
@@ -558,6 +592,56 @@ namespace PAIN {
 			state.baseColor = material.useOverrides ? material.baseColorOverride : materialAsset->baseColor;
 			state.metallic = material.useOverrides ? material.metallicOverride : materialAsset->metallic;
 			state.roughness = material.useOverrides ? material.roughnessOverride : materialAsset->roughness;
+
+			const std::string roughnessPathLower = ToLowerAsciiCopy(materialAsset->roughnessTexturePath.lexically_normal().generic_string());
+			const std::string metallicPathLower = ToLowerAsciiCopy(materialAsset->metallicTexturePath.lexically_normal().generic_string());
+			const std::string aoPathLower = ToLowerAsciiCopy(materialAsset->aoTexturePath.lexically_normal().generic_string());
+
+			const bool sameRoughMetalTexture = state.roughnessTexture != 0 && state.roughnessTexture == state.metallicTexture;
+			const bool sameAoRoughTexture = state.aoTexture != 0 && state.aoTexture == state.roughnessTexture;
+			const bool sameRoughMetalPath = !roughnessPathLower.empty() && roughnessPathLower == metallicPathLower;
+			const bool sameAoRoughPath = !aoPathLower.empty() && aoPathLower == roughnessPathLower;
+
+			const bool sameRoughMetalOverride = material.useOverrides &&
+				material.roughnessTextureOverride.IsValid() &&
+				material.roughnessTextureOverride == material.metallicTextureOverride;
+			const bool sameAoRoughOverride = material.useOverrides &&
+				material.aoTextureOverride.IsValid() &&
+				material.aoTextureOverride == material.roughnessTextureOverride;
+			const bool allowPathHeuristics = !material.useOverrides;
+
+			const bool roughMetalLinked = sameRoughMetalTexture ||
+				sameRoughMetalOverride ||
+				(allowPathHeuristics && sameRoughMetalPath);
+			const bool aoRoughLinked = sameAoRoughTexture ||
+				sameAoRoughOverride ||
+				(allowPathHeuristics && sameAoRoughPath);
+
+			const bool packedHint = (allowPathHeuristics && (
+				IsLikelyPackedOrmPath(materialAsset->roughnessTexturePath) ||
+				IsLikelyPackedOrmPath(materialAsset->metallicTexturePath) ||
+				IsLikelyPackedOrmPath(materialAsset->aoTexturePath)
+				)) || aoRoughLinked;
+
+			const bool usePackedMetalRough = state.roughnessTexture != 0 &&
+				state.metallicTexture != 0 &&
+				roughMetalLinked &&
+				(packedHint || aoRoughLinked);
+
+			if (usePackedMetalRough) {
+				// glTF ORM convention: R=AO, G=Roughness, B=Metallic.
+				state.roughnessChannelMask = glm::vec3(0.0f, 1.0f, 0.0f);
+				state.metallicChannelMask = glm::vec3(0.0f, 0.0f, 1.0f);
+			}
+
+			const bool usePackedAo = state.aoTexture != 0 &&
+				aoRoughLinked &&
+				(usePackedMetalRough || packedHint);
+
+			if (usePackedAo) {
+				state.aoChannelMask = glm::vec3(1.0f, 0.0f, 0.0f);
+			}
+
 			return state;
 		}
 
@@ -569,6 +653,9 @@ namespace PAIN {
 			geometry_shader->SetUniform("u_UseEmissionOverride", state.useEmissionOverride ? 1.0f : 0.0f);
 			geometry_shader->SetUniform("u_EmissionOverride",
 				state.useEmissionOverride ? state.emissionOverride : glm::vec3(0.0f));
+			geometry_shader->SetUniform("material.ao_channel_mask", state.aoChannelMask);
+			geometry_shader->SetUniform("material.roughness_channel_mask", state.roughnessChannelMask);
+			geometry_shader->SetUniform("material.metallic_channel_mask", state.metallicChannelMask);
 
 			const bool hasTexture = state.albedoTexture != 0;
 			geometry_shader->SetUniform("material.useTex", hasTexture ? 1.0f : 0.0f);

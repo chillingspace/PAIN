@@ -208,6 +208,8 @@ const int IBL_SPECULAR = IBL_DEBUG_TYPE_BASE + 4;
 const int DIRECT_LIGHTING = IBL_DEBUG_TYPE_BASE + 5;
 const bool IBL_FLIP_Y_AXIS = true;
 const float IBL_SPECULAR_FIRELFY_CLAMP = 32.0;
+const float SPECULAR_AA_VARIANCE_SCALE = 0.15;
+const float SPECULAR_AA_MAX_ADDITION = 0.35;
 
 bool IsFiniteVec3(vec3 v) {
     return !(any(isnan(v)) || any(isinf(v)));
@@ -218,6 +220,15 @@ vec3 SanitizeIblSample(vec3 value) {
         return vec3(0.0);
     }
     return max(value, vec3(0.0));
+}
+
+float ApplySpecularAA(float roughness, vec3 N) {
+    vec3 dndx = dFdx(N);
+    vec3 dndy = dFdy(N);
+    float variance = 0.5 * (dot(dndx, dndx) + dot(dndy, dndy));
+    float aaTerm = clamp(variance * SPECULAR_AA_VARIANCE_SCALE, 0.0, SPECULAR_AA_MAX_ADDITION);
+    float filtered = sqrt(clamp(roughness * roughness + aaTerm, 0.0, 1.0));
+    return clamp(filtered, 0.04, 1.0);
 }
 
 void main() {
@@ -236,8 +247,11 @@ void main() {
     material.metal = clamp(m.g, 0.0, 1.0);
     material.ao = clamp(m.b, 0.0, 1.0);
 
+    vec3 shadedNormal = normalize(normal);
+    material.rough = ApplySpecularAA(material.rough, shadedNormal);
+
     vec3 viewFragPos = (u_V * vec4(fragPos, 1.0)).xyz;
-    vec3 viewNormal = mat3(u_V) * normalize(normal);
+    vec3 viewNormal = mat3(u_V) * shadedNormal;
 
     vec3 color = vec3(0.0);
     int dbg = int(DEBUG_TYPE);
@@ -272,7 +286,7 @@ void main() {
     }
     if (u_UseIbl > 0.5) {
         // IBL
-        vec3 N = normalize(normal);
+        vec3 N = shadedNormal;
 
         // if (IBL_FLIP_Y_AXIS) {
         //     N.y = -N.y;

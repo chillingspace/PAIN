@@ -32,6 +32,9 @@ struct Material {
     sampler2D roughness_map;
     float use_metallic;
     sampler2D metallic_map;
+    vec3 ao_channel_mask;
+    vec3 roughness_channel_mask;
+    vec3 metallic_channel_mask;
     vec3 color;
 };
 
@@ -113,19 +116,38 @@ vec3 ResolveGeometryNormal() {
 }
 
 vec3 ResolveGeometryMaterial(int dbg) {
+    vec3 roughnessSample = vec3(0.0);
+    vec3 metallicSample = vec3(0.0);
+    vec3 aoSample = vec3(1.0);
+
     float roughness = material.rough;
     if (material.use_roughness > 0.5) {
-        roughness = texture(material.roughness_map, vTexCoords).r;
+        roughnessSample = texture(material.roughness_map, vTexCoords).rgb;
+        float maskWeight = dot(material.roughness_channel_mask, vec3(1.0));
+        roughness = maskWeight > 0.001
+            ? dot(roughnessSample, material.roughness_channel_mask)
+            : roughnessSample.r;
     }
     roughness = clamp(roughness, 0.04, 1.0);
 
     float metallic = material.metal;
     if (material.use_metallic > 0.5) {
-        metallic = texture(material.metallic_map, vTexCoords).r;
+        metallicSample = texture(material.metallic_map, vTexCoords).rgb;
+        float maskWeight = dot(material.metallic_channel_mask, vec3(1.0));
+        metallic = maskWeight > 0.001
+            ? dot(metallicSample, material.metallic_channel_mask)
+            : metallicSample.r;
     }
     metallic = clamp(metallic, 0.0, 1.0);
 
-    float ao = material.use_ao > 0.5 ? texture(material.ao_map, vTexCoords).r : 1.0;
+    float ao = 1.0;
+    if (material.use_ao > 0.5) {
+        aoSample = texture(material.ao_map, vTexCoords).rgb;
+        float maskWeight = dot(material.ao_channel_mask, vec3(1.0));
+        ao = maskWeight > 0.001
+            ? dot(aoSample, material.ao_channel_mask)
+            : aoSample.r;
+    }
     ao = clamp(ao, 0.0, 1.0);
 
     return vec3(roughness, metallic, ao);
