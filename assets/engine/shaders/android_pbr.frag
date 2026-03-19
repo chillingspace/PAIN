@@ -31,7 +31,17 @@ struct Light {
 };
 
 #define MAX_LIGHTS 16
-uniform Light u_Lights[MAX_LIGHTS];
+struct GPULight {
+    vec4 position_type;      // xyz + type
+    vec4 intensity_shadow;   // rgb + shadow map index
+    vec4 direction_inner;    // xyz + inner cutoff
+    vec4 outer_padding;      // x = outer cutoff
+    mat4 V;
+    mat4 P;
+};
+layout(std140) uniform PbrLightBlock {
+    GPULight uboLights[MAX_LIGHTS];
+};
 uniform float u_NumLights;
 uniform vec3 u_AmbientLight;
 
@@ -112,6 +122,21 @@ vec2 ShadowTexelSize(int shadow_map_idx) {
     if (shadow_map_idx == 1) return 1.0 / vec2(textureSize(u_ShadowMap1, 0));
     if (shadow_map_idx == 2) return 1.0 / vec2(textureSize(u_ShadowMap2, 0));
     return 1.0 / vec2(textureSize(u_ShadowMap3, 0));
+}
+
+Light FetchLight(int index) {
+    GPULight packedLight = uboLights[index];
+    Light light;
+    light.position = packedLight.position_type.xyz;
+    light.type = packedLight.position_type.w;
+    light.L = packedLight.intensity_shadow.xyz;
+    light.shadowMapIdx = packedLight.intensity_shadow.w;
+    light.direction = packedLight.direction_inner.xyz;
+    light.innerCutoff = packedLight.direction_inner.w;
+    light.outerCutoff = packedLight.outer_padding.x;
+    light.V = packedLight.V;
+    light.P = packedLight.P;
+    return light;
 }
 
 vec3 microfacetModel(vec3 position, vec3 n, Light light) {
@@ -289,10 +314,11 @@ void main() {
     // Direct lighting
     vec3 directLighting = vec3(0.0);
     for (int i = 0; i < int(u_NumLights); i++) {
-        vec3 light_contrib = microfacetModel(viewFragPos, viewNormal, u_Lights[i]);
+        Light light = FetchLight(i);
+        vec3 light_contrib = microfacetModel(viewFragPos, viewNormal, light);
 
-        if (u_Lights[i].shadowMapIdx > -0.5) {
-            float shadow_intensity = shadowIntensity(int(u_Lights[i].shadowMapIdx), fragPos, normal, u_Lights[i]);
+        if (light.shadowMapIdx > -0.5) {
+            float shadow_intensity = shadowIntensity(int(light.shadowMapIdx), fragPos, normal, light);
             float light_intensity = 1.0 - shadow_intensity;
             light_contrib *= light_intensity;
         }

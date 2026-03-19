@@ -237,6 +237,8 @@ namespace PAIN {
 		unsigned int empty_vao = 0;
 		unsigned int passthrough_vao = 0;
 		unsigned int passthrough_vbo = 0;
+		unsigned int pbr_light_ubo = 0;
+		unsigned int pbr_light_ubo_bound_program = 0;
 
 		unsigned int final_texture = 0; // for imgui/post-processing/display
 		unsigned int pp_texture = 0;	// for ping-pong for post-processing

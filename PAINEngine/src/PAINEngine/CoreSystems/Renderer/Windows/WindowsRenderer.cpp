@@ -27,6 +27,16 @@ namespace {
 	constexpr int kPrefilterTextureUnit = kIrradianceTextureUnit + 1;
 	constexpr int kBrdfLutTextureUnit = kPrefilterTextureUnit + 1;
 	constexpr int kLightingTextureUnitsUsed = kBrdfLutTextureUnit + 1;
+	constexpr GLuint kPbrLightUboBindingPoint = 0;
+
+	struct alignas(16) PbrLightGpuData {
+		glm::vec4 position_type = glm::vec4(0.0f); // xyz + light type
+		glm::vec4 intensity_shadow = glm::vec4(0.0f, 0.0f, 0.0f, -1.0f); // rgb + shadow map index
+		glm::vec4 direction_inner = glm::vec4(0.0f, 0.0f, -1.0f, 0.0f); // xyz + inner cutoff
+		glm::vec4 outer_padding = glm::vec4(0.0f); // x = outer cutoff
+		glm::mat4 view = glm::mat4(1.0f);
+		glm::mat4 projection = glm::mat4(1.0f);
+	};
 
 	const char* DescribeGlError(GLenum err) {
 		switch (err) {
@@ -315,33 +325,12 @@ namespace {
 	}
 
 	struct PbrUniformNames {
-		std::array<std::string, kMaxPbrLights> position;
-		std::array<std::string, kMaxPbrLights> intensity;
-		std::array<std::string, kMaxPbrLights> view;
-		std::array<std::string, kMaxPbrLights> projection;
-		std::array<std::string, kMaxPbrLights> shadowMapIdx;
-		std::array<std::string, kMaxPbrLights> type;
-		std::array<std::string, kMaxPbrLights> direction;
-		std::array<std::string, kMaxPbrLights> innerCutoff;
-		std::array<std::string, kMaxPbrLights> outerCutoff;
 		std::array<std::string, kMaxPbrShadowMaps> shadowSamplers;
 	};
 
 	const PbrUniformNames& GetPbrUniformNames() {
 		static const PbrUniformNames names = [] {
 			PbrUniformNames out{};
-			for (int i = 0; i < kMaxPbrLights; ++i) {
-				const std::string prefix = "u_Lights[" + std::to_string(i) + "].";
-				out.position[i] = prefix + "position";
-				out.intensity[i] = prefix + "L";
-				out.view[i] = prefix + "V";
-				out.projection[i] = prefix + "P";
-				out.shadowMapIdx[i] = prefix + "shadowMapIdx";
-				out.type[i] = prefix + "type";
-				out.direction[i] = prefix + "direction";
-				out.innerCutoff[i] = prefix + "innerCutoff";
-				out.outerCutoff[i] = prefix + "outerCutoff";
-			}
 			for (int i = 0; i < kMaxPbrShadowMaps; ++i) {
 #ifdef PN_PLATFORM_WINDOWS
 				out.shadowSamplers[i] = "u_ShadowMaps[" + std::to_string(i) + "]";
@@ -1236,6 +1225,28 @@ namespace PAIN {
 			PN_CORE_ERROR("Failed to create shader program for pbr");
 			throw std::runtime_error("");
 			return;
+		}
+
+		if (pbr_light_ubo == 0) {
+			glGenBuffers(1, &pbr_light_ubo);
+			glBindBuffer(GL_UNIFORM_BUFFER, pbr_light_ubo);
+			glBufferData(
+				GL_UNIFORM_BUFFER,
+				static_cast<GLsizeiptr>(sizeof(PbrLightGpuData) * kMaxPbrLights),
+				nullptr,
+				GL_DYNAMIC_DRAW);
+			glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		}
+
+		const GLuint pbrProgram = pbr_shader->GetRendererID();
+		const GLuint lightBlockIndex = glGetUniformBlockIndex(pbrProgram, "PbrLightBlock");
+		if (lightBlockIndex == GL_INVALID_INDEX) {
+			PN_CORE_ERROR("PBR shader missing required PbrLightBlock uniform block");
+			throw std::runtime_error("");
+			return;
+		} else {
+			glUniformBlockBinding(pbrProgram, lightBlockIndex, kPbrLightUboBindingPoint);
+			pbr_light_ubo_bound_program = pbrProgram;
 		}
 
 		// Geometry shader
@@ -2559,44 +2570,68 @@ namespace PAIN {
 
 			int shadowMapCount = 0;
 			int i{};
-			const auto& uniformNames = GetPbrUniformNames();
+			std::array<PbrLightGpuData, kMaxPbrLights> gpuLights{};
 			const auto allLights = lights.getAll();
 			for (const Light& l : allLights) {
 				if (i >= kMaxPbrLights) {
 					PN_CORE_WARN("[GL] Skipping extra light because shader budget is {}", kMaxPbrLights);
 					break;
 				}
+
+				PbrLightGpuData& gpuLight = gpuLights[i];
+				gpuLight.position_type = glm::vec4(l.position, static_cast<float>(l.type));
+				gpuLight.intensity_shadow = glm::vec4(
+					lights.lightsOn ? l.L_intensity : glm::vec3(0.0f),
+					-1.0f);
+				gpuLight.direction_inner = glm::vec4(
+					l.direction,
+					glm::cos(glm::radians(l.inner_angle)));
+				gpuLight.outer_padding = glm::vec4(
+					glm::cos(glm::radians(l.outer_angle)),
+					0.0f,
+					0.0f,
+					0.0f);
+				gpuLight.view = l.view();
+				gpuLight.projection = l.projection();
+
 				if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
 					if (shadowMapCount >= kMaxPbrShadowMaps) {
 						PN_CORE_WARN("[GL] Skipping extra mapped shadow light at index {} because PBR shadow map budget is {}",
 									 i, kMaxPbrShadowMaps);
-						pbr_shader->SetUniform(uniformNames.shadowMapIdx[i], -1.f);
 					}
 					else {
 						glActiveTexture(GL_TEXTURE0 + kFixedShadowTextureUnitStart + shadowMapCount);
 						glBindTexture(GL_TEXTURE_2D, l.getShadowTexture());
-
-						pbr_shader->SetUniform(uniformNames.shadowSamplers[shadowMapCount],
-											   kFixedShadowTextureUnitStart + shadowMapCount);
-						pbr_shader->SetUniform(uniformNames.shadowMapIdx[i], static_cast<float>(shadowMapCount));
+						gpuLight.intensity_shadow.w = static_cast<float>(shadowMapCount);
 
 						++shadowMapCount;
 					}
-				} else {
-					pbr_shader->SetUniform(uniformNames.shadowMapIdx[i], -1.f);
 				}
 
-				pbr_shader->SetUniform(uniformNames.position[i], l.position);
-				pbr_shader->SetUniform(uniformNames.view[i], l.view());
-				pbr_shader->SetUniform(uniformNames.projection[i], l.projection());
-				pbr_shader->SetUniform(uniformNames.type[i], static_cast<float>(l.type));
-				pbr_shader->SetUniform(uniformNames.innerCutoff[i], glm::cos(glm::radians(l.inner_angle)));
-				pbr_shader->SetUniform(uniformNames.outerCutoff[i], glm::cos(glm::radians(l.outer_angle)));
-				pbr_shader->SetUniform(uniformNames.direction[i], l.direction);
-				pbr_shader->SetUniform(uniformNames.intensity[i],
-									   lights.lightsOn ? l.L_intensity : glm::vec3(0.0f));
-
 				i++;
+			}
+
+			if (pbr_light_ubo != 0) {
+				const GLuint pbrProgram = pbr_shader->GetRendererID();
+				if (pbrProgram != pbr_light_ubo_bound_program) {
+					const GLuint lightBlockIndex = glGetUniformBlockIndex(pbrProgram, "PbrLightBlock");
+					if (lightBlockIndex == GL_INVALID_INDEX) {
+						PN_CORE_ERROR("PBR shader program {} missing PbrLightBlock; aborting LightingPass", pbrProgram);
+						glEnable(GL_DEPTH_TEST);
+						glDepthMask(GL_TRUE);
+						return;
+					}
+					glUniformBlockBinding(pbrProgram, lightBlockIndex, kPbrLightUboBindingPoint);
+					pbr_light_ubo_bound_program = pbrProgram;
+				}
+				glBindBuffer(GL_UNIFORM_BUFFER, pbr_light_ubo);
+				glBufferSubData(
+					GL_UNIFORM_BUFFER,
+					0,
+					static_cast<GLsizeiptr>(sizeof(PbrLightGpuData) * kMaxPbrLights),
+					gpuLights.data());
+				glBindBufferBase(GL_UNIFORM_BUFFER, kPbrLightUboBindingPoint, pbr_light_ubo);
+				glBindBuffer(GL_UNIFORM_BUFFER, 0);
 			}
 
 #ifdef _DEBUG
@@ -3621,6 +3656,12 @@ namespace PAIN {
 		if (passthrough_vbo != 0) {
 			glDeleteBuffers(1, &passthrough_vbo);
 			passthrough_vbo = 0;
+		}
+
+		if (pbr_light_ubo != 0) {
+			glDeleteBuffers(1, &pbr_light_ubo);
+			pbr_light_ubo = 0;
+			pbr_light_ubo_bound_program = 0;
 		}
 
 		if (geometry_vao != 0) {
