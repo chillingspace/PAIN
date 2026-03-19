@@ -220,7 +220,9 @@ const int IBL_DIFFUSE = IBL_DEBUG_TYPE_BASE + 3;
 const int IBL_SPECULAR = IBL_DEBUG_TYPE_BASE + 4;
 const int DIRECT_LIGHTING = IBL_DEBUG_TYPE_BASE + 5;
 const bool IBL_FLIP_Y_AXIS = true;
-const float IBL_SPECULAR_FIRELFY_CLAMP = 32.0;
+const float IBL_SPECULAR_FIRELFY_CLAMP = 12.0;
+const float IBL_SPECULAR_PREFILTER_LUMA_CLAMP = 24.0;
+const float IBL_SPECULAR_MIP_BIAS = 0.65;
 
 bool IsFiniteVec3(vec3 v) {
     return !(any(isnan(v)) || any(isinf(v)));
@@ -231,6 +233,15 @@ vec3 SanitizeIblSample(vec3 value) {
         return vec3(0.0);
     }
     return max(value, vec3(0.0));
+}
+
+vec3 ClampLuminance(vec3 value, float maxLuma) {
+    const vec3 lumaWeights = vec3(0.2126, 0.7152, 0.0722);
+    float luma = dot(value, lumaWeights);
+    if (luma > maxLuma && luma > 0.0001) {
+        value *= (maxLuma / luma);
+    }
+    return value;
 }
 
 void main() {
@@ -358,7 +369,13 @@ void main() {
         }
 #endif
 
-        prefilteredColor = SanitizeIblSample(textureLod(prefilterMap, R, material.rough * u_IblMaxReflectionLod).rgb);
+        float reflectionLod = clamp(
+            material.rough * u_IblMaxReflectionLod + IBL_SPECULAR_MIP_BIAS,
+            0.0,
+            u_IblMaxReflectionLod
+        );
+        prefilteredColor = SanitizeIblSample(textureLod(prefilterMap, R, reflectionLod).rgb);
+        prefilteredColor = ClampLuminance(prefilteredColor, IBL_SPECULAR_PREFILTER_LUMA_CLAMP);
 
 #ifdef DEBUG_MIP
         {
