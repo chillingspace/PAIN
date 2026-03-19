@@ -11,6 +11,7 @@
 #include "CoreSystems/Events/Android/TouchEvents.h"
 
 #include "Applications/Application.h"
+#include "CoreSystems/Renderer/GraphicsSettings.h"
 
 namespace PAIN {
 	namespace Window {
@@ -118,6 +119,14 @@ namespace PAIN {
 
             // Set viewport
             glViewport(0, 0, frame_buffer.x, frame_buffer.y);
+
+            // Explicit frame pacing policy for Android EGL.
+            const int requestedSwapInterval = std::max(0, GraphicsSettings::get().android_swap_interval);
+            if (!eglSwapInterval(m_Display, requestedSwapInterval)) {
+                PN_CORE_WARN("eglSwapInterval({}) failed, using driver default pacing", requestedSwapInterval);
+            } else {
+                PN_CORE_INFO("EGL swap interval set to {}", requestedSwapInterval);
+            }
 
             // Mark window as active
             b_active = true;

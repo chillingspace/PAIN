@@ -328,7 +328,10 @@ namespace PAIN {
 		* HERE.
 		*/
 		void _createDeferredShadingBuffer(unsigned int& tex, int num_channels,
-										  int gl_color_attachment);
+										  int gl_color_attachment,
+										  GLenum internal_format_override = 0,
+										  GLenum format_override = 0,
+										  GLenum type_override = 0);
 
 	};
 } // namespace PAIN

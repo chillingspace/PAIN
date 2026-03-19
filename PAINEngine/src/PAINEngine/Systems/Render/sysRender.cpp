@@ -676,6 +676,7 @@ namespace PAIN {
 		// PARTICLE RENDER PASS - GPU Instanced Rendering
 		// ============================================
 		void System::particlePass(entt::registry& registry) {
+#ifdef _DEBUG
 			auto logParticleGLError = [](const char* stage) {
 				GLenum err = glGetError();
 				while (err != GL_NO_ERROR) {
@@ -685,6 +686,9 @@ namespace PAIN {
 			};
 
 			while (glGetError() != GL_NO_ERROR) {}
+#else
+			auto logParticleGLError = [](const char*) {};
+#endif
 
 			auto rendererService = services.lock()->get<sRenderer>();
 			if (!rendererService || !rendererService->w_renderer)
@@ -772,6 +776,23 @@ namespace PAIN {
 				return;
 			}
 
+			static GLuint cachedUniformProgram = 0;
+			static GLint locTexSampler = -1;
+			static GLint locView = -1;
+			static GLint locProjection = -1;
+			static GLint locUseTexture = -1;
+			static GLint locShape = -1;
+			static GLint locSoftEdge = -1;
+			if (cachedUniformProgram != particleProgram) {
+				cachedUniformProgram = particleProgram;
+				locTexSampler = glGetUniformLocation(particleProgram, "tex");
+				locView = glGetUniformLocation(particleProgram, "u_V");
+				locProjection = glGetUniformLocation(particleProgram, "u_P");
+				locUseTexture = glGetUniformLocation(particleProgram, "u_UseTexture");
+				locShape = glGetUniformLocation(particleProgram, "u_Shape");
+				locSoftEdge = glGetUniformLocation(particleProgram, "u_SoftEdge");
+			}
+
 			// Billboard quad vertices (centered at origin, facing +Z)
 			// These are per-vertex, not per-instance
 			static const float quadVertices[] = {
@@ -793,6 +814,16 @@ namespace PAIN {
 			static GLuint quadEBO = 0;
 			static GLuint instanceVBO = 0;
 			static size_t instanceCapacity = 10000;
+
+			// Android can recreate GL context while these statics remain non-zero.
+			// Reset stale handles if the driver says they are no longer valid.
+			if (quadVAO != 0 && !glIsVertexArray(quadVAO)) {
+				quadVAO = 0;
+				quadVBO = 0;
+				quadEBO = 0;
+				instanceVBO = 0;
+				instanceCapacity = 10000;
+			}
 
 			if (quadVAO == 0) {
 				// Create quad VAO
@@ -867,12 +898,18 @@ namespace PAIN {
 			// Use particle shader
 			glUseProgram(particleProgram);
 			logParticleGLError("use program");
-			glUniform1i(glGetUniformLocation(particleProgram, "tex"), 0);
+			if (locTexSampler >= 0) {
+				glUniform1i(locTexSampler, 0);
+			}
 			logParticleGLError("set tex uniform");
 
 			// Set view and projection matrices
-			glUniformMatrix4fv(glGetUniformLocation(particleProgram, "u_V"), 1, GL_FALSE, &activeCam->view()[0][0]);
-			glUniformMatrix4fv(glGetUniformLocation(particleProgram, "u_P"), 1, GL_FALSE, &activeCam->projection()[0][0]);
+			if (locView >= 0) {
+				glUniformMatrix4fv(locView, 1, GL_FALSE, &activeCam->view()[0][0]);
+			}
+			if (locProjection >= 0) {
+				glUniformMatrix4fv(locProjection, 1, GL_FALSE, &activeCam->projection()[0][0]);
+			}
 			logParticleGLError("set VP uniforms");
 
 			glBindVertexArray(quadVAO);
@@ -987,9 +1024,15 @@ namespace PAIN {
 					break;
 				}
 
-				glUniform1i(glGetUniformLocation(particleProgram, "u_UseTexture"), particleTextureId != 0 ? 1 : 0);
-				glUniform1i(glGetUniformLocation(particleProgram, "u_Shape"), static_cast<int>(ps.renderShape));
-				glUniform1f(glGetUniformLocation(particleProgram, "u_SoftEdge"), glm::clamp(ps.softEdge, 0.0f, 1.0f));
+				if (locUseTexture >= 0) {
+					glUniform1i(locUseTexture, particleTextureId != 0 ? 1 : 0);
+				}
+				if (locShape >= 0) {
+					glUniform1i(locShape, static_cast<int>(ps.renderShape));
+				}
+				if (locSoftEdge >= 0) {
+					glUniform1f(locSoftEdge, glm::clamp(ps.softEdge, 0.0f, 1.0f));
+				}
 				logParticleGLError("set particle uniforms");
 
 				glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
@@ -1323,10 +1366,12 @@ namespace PAIN {
 			// ========================================
 			// CLEAR ANY PRE-EXISTING ERRORS
 			// ========================================
-			GLenum err;
+			GLenum err = GL_NO_ERROR;
+#ifdef _DEBUG
 			while ((err = glGetError()) != GL_NO_ERROR) {
 				PN_CORE_WARN("[UI Pass] Clearing pre-existing GL error: 0x{:X}", err);
 			}
+#endif
 
 			// ========================================
 			// SET GL STATE ONCE FOR ENTIRE UI PASS
@@ -1336,10 +1381,12 @@ namespace PAIN {
 			glDisable(GL_DEPTH_TEST);
 			glDisable(GL_CULL_FACE); // UI usually doesn't need culling
 
+#ifdef _DEBUG
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
 				PN_CORE_ERROR("[UI Pass] Error setting initial GL state: 0x{:X}", err);
 			}
+#endif
 
 			//Graphics settings
 			auto& gs = GraphicsSettings::get();
@@ -2216,12 +2263,14 @@ namespace PAIN {
 				TextRenderer::get().renderText(text_comp);
 
 				// CHECK FOR ERRORS AFTER EACH TEXT RENDER
+#ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR(
 						"[Render System] GL error after rendering font '{}': 0x{:X}",
 						font_opt.value()->name, err);
 				}
+#endif
 			}
 
 			// ========================================
@@ -2252,10 +2301,12 @@ namespace PAIN {
 			glDisable(GL_BLEND);
 			glEnable(GL_CULL_FACE);
 
+#ifdef _DEBUG
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
 				PN_CORE_ERROR("[UI Pass] Error restoring GL state: 0x{:X}", err);
 			}
+#endif
 		}
 
 	} // namespace Render

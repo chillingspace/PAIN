@@ -1368,7 +1368,10 @@ namespace PAIN {
 
 	void WindowsRenderer::_createDeferredShadingBuffer(unsigned int& tex,
 													   int num_channels,
-													   int gl_color_attachment) {
+													   int gl_color_attachment,
+													   GLenum internal_format_override,
+													   GLenum format_override,
+													   GLenum type_override) {
 		glGenTextures(1, &tex);
 		if (!tex) {
 			PN_CORE_ERROR("Failed to gen texture");
@@ -1378,25 +1381,38 @@ namespace PAIN {
 
 		glBindTexture(GL_TEXTURE_2D, tex);
 
-		switch (num_channels) {
-		case 2:
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, winWidth, winHeight, 0, GL_RG,
-						 GL_FLOAT, nullptr);
-			break;
-		case 3:
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, winWidth, winHeight, 0, GL_RGB,
-						 GL_FLOAT, nullptr);
-			break;
-		case 4:
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, winWidth, winHeight, 0, GL_RGBA,
-						 GL_FLOAT, nullptr);
-			break;
-		default:
-			PN_CORE_ERROR(
-				"{} channels isn't supported(by me lol not opengl so need to add)!",
-				num_channels);
-			break;
-		};
+		if (internal_format_override != 0 && format_override != 0 && type_override != 0) {
+			glTexImage2D(
+				GL_TEXTURE_2D,
+				0,
+				static_cast<GLint>(internal_format_override),
+				winWidth,
+				winHeight,
+				0,
+				format_override,
+				type_override,
+				nullptr);
+		} else {
+			switch (num_channels) {
+			case 2:
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, winWidth, winHeight, 0, GL_RG,
+							 GL_FLOAT, nullptr);
+				break;
+			case 3:
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, winWidth, winHeight, 0, GL_RGB,
+							 GL_FLOAT, nullptr);
+				break;
+			case 4:
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, winWidth, winHeight, 0, GL_RGBA,
+							 GL_FLOAT, nullptr);
+				break;
+			default:
+				PN_CORE_ERROR(
+					"{} channels isn't supported(by me lol not opengl so need to add)!",
+					num_channels);
+				break;
+			};
+		}
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
 						GL_NEAREST); // DO NOT USE GL_LINEAR
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -1483,12 +1499,19 @@ namespace PAIN {
 			glGenFramebuffers(1, &ds_fbo);
 			glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
 
+#ifdef PN_PLATFORM_ANDROID
+			_createDeferredShadingBuffer(pos_texture, 3, GL_COLOR_ATTACHMENT0);
+			_createDeferredShadingBuffer(col_texture, 3, GL_COLOR_ATTACHMENT1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+			_createDeferredShadingBuffer(norm_texture, 3, GL_COLOR_ATTACHMENT2);
+			_createDeferredShadingBuffer(material_properties_texture, 3, GL_COLOR_ATTACHMENT3, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+			_createDeferredShadingBuffer(emission_texture, 3, GL_COLOR_ATTACHMENT4, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+#else
 			_createDeferredShadingBuffer(pos_texture, 3, GL_COLOR_ATTACHMENT0);
 			_createDeferredShadingBuffer(col_texture, 3, GL_COLOR_ATTACHMENT1);
 			_createDeferredShadingBuffer(norm_texture, 3, GL_COLOR_ATTACHMENT2);
-			_createDeferredShadingBuffer(material_properties_texture, 3,
-										 GL_COLOR_ATTACHMENT3);
+			_createDeferredShadingBuffer(material_properties_texture, 3, GL_COLOR_ATTACHMENT3);
 			_createDeferredShadingBuffer(emission_texture, 3, GL_COLOR_ATTACHMENT4);
+#endif
 
 			static constexpr int NUM_GBUFFERS = 5;
 
@@ -3309,45 +3332,55 @@ namespace PAIN {
 		volumetric_history_index = currentHistoryIndex;
 		volumetric_history_valid = true;
 
+#ifdef _DEBUG
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after VolumetricPass: {}", err);
 		}
+#endif
 	}
 
 	// Post-process entry point: final_texture remains the renderer-owned scene output,
 	// while sysRender decides whether the frame is ultimately presented to editor or swapchain.
 	void WindowsRenderer::PostProcessPass(bool presentToSwapchain) {
+#ifdef _DEBUG
 		const auto savedState = CaptureGlState();
-	auto restorePassState = [&]() {
-		RestoreGlState(savedState);
-	};
+		auto restorePassState = [&]() {
+			RestoreGlState(savedState);
+		};
+#else
+		auto restorePassState = []() {};
+#endif
 
-	if (final_texture == 0) {
-		PN_CORE_ERROR("[GL] PostProcessPass aborted because final_texture is invalid.");
-		restorePassState();
-		return;
-	}
-	if (!ValidateFramebufferBinding(final_fbo, "Post-process final framebuffer") ||
-		!ValidateFramebufferBinding(pp_fbo, "Post-process ping framebuffer") ||
-		!ValidateFramebufferBinding(pp2_fbo, "Post-process pong framebuffer")) {
-		restorePassState();
-		return;
-	}
+		if (final_texture == 0) {
+			PN_CORE_ERROR("[GL] PostProcessPass aborted because final_texture is invalid.");
+			restorePassState();
+			return;
+		}
+#ifdef _DEBUG
+		if (!ValidateFramebufferBinding(final_fbo, "Post-process final framebuffer") ||
+			!ValidateFramebufferBinding(pp_fbo, "Post-process ping framebuffer") ||
+			!ValidateFramebufferBinding(pp2_fbo, "Post-process pong framebuffer")) {
+			restorePassState();
+			return;
+		}
+#endif
 
-	// ========================================
-	// POST-PROCESS: ALWAYS DISABLE DEPTH TEST
-	// Full-screen quads must not be rejected by
-	// scene geometry depth stored in final_fbo
-	// ========================================
-	glDisable(GL_DEPTH_TEST);
-	glDepthMask(GL_FALSE);
-	glDisable(GL_BLEND);
+		// ========================================
+		// POST-PROCESS: ALWAYS DISABLE DEPTH TEST
+		// Full-screen quads must not be rejected by
+		// scene geometry depth stored in final_fbo
+		// ========================================
+		glDisable(GL_DEPTH_TEST);
+		glDepthMask(GL_FALSE);
+		glDisable(GL_BLEND);
 
-	GLenum err = glGetError();
+#ifdef _DEBUG
+		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err before tone mapping pass: {}", err);
 		}
+#endif
 
 		int postprocess_passes = 0;
 
@@ -3475,10 +3508,12 @@ namespace PAIN {
 			glCheck(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
 			++postprocess_passes;
 		}
+#ifdef _DEBUG
 		err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after tone mapping pass: {}", err);
 		}
+#endif
 
 		// blur pass
 		if (GraphicsSettings::get().blur_strength) {
@@ -3503,10 +3538,12 @@ namespace PAIN {
 				++postprocess_passes;
 			}
 		}
+#ifdef _DEBUG
 		err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after blur pass: {}", err);
 		}
+#endif
 
 		// gamma correction
 		if (GraphicsSettings::get().gamma_correction) {
@@ -3526,10 +3563,12 @@ namespace PAIN {
 			++postprocess_passes;
 		}
 
+#ifdef _DEBUG
 		err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after gamma pass: {}", err);
 		}
+#endif
 
 		// make sure final_texture now holds the gamma corrected texture
 		// use passthrough to render pp_texture to final_texture if odd number of
@@ -3543,10 +3582,12 @@ namespace PAIN {
 			glBindVertexArray(passthrough_vao);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 		}
+#ifdef _DEBUG
 		err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after finalizing post process pass: {}", err);
 		}
+#endif
 
 		// Keep final_fbo/final_texture as the renderer-owned postprocess output.
 		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
@@ -3563,13 +3604,25 @@ namespace PAIN {
 
 		restorePassState();
 
+#ifdef _DEBUG
 		err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after PostProcessPass: {}", err);
 		}
+#endif
 	}
 
 	void WindowsRenderer::Cleanup() {
+		if (passthrough_vao != 0) {
+			glDeleteVertexArrays(1, &passthrough_vao);
+			passthrough_vao = 0;
+		}
+
+		if (passthrough_vbo != 0) {
+			glDeleteBuffers(1, &passthrough_vbo);
+			passthrough_vbo = 0;
+		}
+
 		if (geometry_vao != 0) {
 			glDeleteVertexArrays(1, &geometry_vao);
 			geometry_vao = 0;
