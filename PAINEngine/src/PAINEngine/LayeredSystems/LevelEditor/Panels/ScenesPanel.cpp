@@ -708,6 +708,11 @@ namespace PAIN {
                 if (ImGui::Combo("Recommended Position", &recommendedPos, recommendedPositions, IM_ARRAYSIZE(recommendedPositions)))
                     gs.minimap_recommended_position = static_cast<GraphicsSettings::MINIMAP_RECOMMENDED_POSITION>(recommendedPos);
 
+                static const char* minimapShapes[] = { "Square", "Circle" };
+                int minimapShape = static_cast<int>(gs.minimap_shape);
+                if (ImGui::Combo("Minimap Shape", &minimapShape, minimapShapes, IM_ARRAYSIZE(minimapShapes)))
+                    gs.minimap_shape = static_cast<GraphicsSettings::MINIMAP_SHAPE>(minimapShape);
+
                 bool overridePos = gs.minimap_override_position;
                 if (ImGui::Checkbox("Override Position", &overridePos))
                     gs.minimap_override_position = overridePos;

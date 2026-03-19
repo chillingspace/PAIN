@@ -120,6 +120,7 @@ namespace PAIN {
                 bool override_position = false;
                 GraphicsSettings::MINIMAP_RECOMMENDED_POSITION recommended_position =
                     GraphicsSettings::MINIMAP_RECOMMENDED_POSITION::BOTTOM_RIGHT;
+                GraphicsSettings::MINIMAP_SHAPE shape = GraphicsSettings::MINIMAP_SHAPE_SQUARE;
                 bool rotate_with_player = true;
                 bool show_player = true;
                 bool show_danger = true;

@@ -202,6 +202,11 @@ namespace PAIN {
 
 		// minimap
 		bool minimap_enabled = false;
+		enum MINIMAP_SHAPE {
+			MINIMAP_SHAPE_SQUARE = 0,
+			MINIMAP_SHAPE_CIRCLE,
+		};
+		MINIMAP_SHAPE minimap_shape = MINIMAP_SHAPE_SQUARE;
 		enum MINIMAP_RECOMMENDED_POSITION {
 			TOP_LEFT = 0,
 			TOP_RIGHT,

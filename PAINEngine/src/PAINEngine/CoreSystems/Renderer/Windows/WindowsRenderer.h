@@ -176,6 +176,14 @@ namespace PAIN {
 							 glm::vec2& scale,
 							 const glm::vec4& uv_transform = glm::vec4(1.0f, 1.0f,
 																	   0.0f, 0.0f));
+		void Render2DTextureCircular(GLuint texture_id, const glm::vec2& pos,
+							 glm::vec2& scale,
+							 const glm::vec4& uv_transform = glm::vec4(1.0f, 1.0f,
+																	   0.0f, 0.0f));
+
+		// Setup stencil buffer for circular clipping of subsequent draws
+		void BeginCircularStencilClip(const glm::vec2& center_ndc, const glm::vec2& radius_ndc);
+		void EndCircularStencilClip();
 
 		void Cleanup();
 

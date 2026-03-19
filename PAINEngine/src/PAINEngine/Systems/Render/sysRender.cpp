@@ -391,6 +391,7 @@ namespace PAIN {
 			auto rendererService = services.lock()->get<sRenderer>();
 			if (!rendererService || !rendererService->w_renderer)
 				return;
+			static std::unordered_set<std::string> warnedNonShadowPipeAssets;
 
 			// Phase 1 keeps shadow rendering enabled, so the viewport must match the
 			// actual shadow target owned by each light rather than a stale global size.
@@ -409,10 +410,28 @@ namespace PAIN {
 				for (auto [entity, model, transform, layer] : renderGroup.each()) {
 					glm::mat4 model_xform = transform.matrix;
 
+					if (model.visible && !model.castShadows && model.cachedModelAsset) {
+						std::string assetPath = model.cachedModelAsset->vpath;
+						std::string loweredPath = assetPath;
+						std::transform(
+							loweredPath.begin(),
+							loweredPath.end(),
+							loweredPath.begin(),
+							[](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+
+						if (loweredPath.find("pipe") != std::string::npos &&
+							warnedNonShadowPipeAssets.insert(assetPath).second) {
+							PN_CORE_WARN(
+								"Pipe occluder '{}' has castShadows=false; spotlight + volumetric light can leak through it.",
+								assetPath);
+						}
+					}
+
 					if (model.visible && model.castShadows) {
 						// FRUSTUM CULLING FOR SHADOWS
 						auto* boundingVol = registry.try_get<BoundingVolume>(entity);
-						if (boundingVol && boundingVol->worldAABB.isValid()) {
+						const bool allowFrustumCull = (l.type != Light::TYPES::SPOTLIGHT);
+						if (allowFrustumCull && boundingVol && boundingVol->worldAABB.isValid()) {
 							if (!isAABBInFrustum(boundingVol->worldAABB, lightFrustum)) {
 								GraphicsSettings::get().stats.shadow_objects_culled++;
 								continue; // skip shadow casting for this object, outside light frustum
@@ -597,34 +616,382 @@ namespace PAIN {
 
 			// Cache to track which lights are still active this frame
 			std::unordered_set<std::string> activeLightNames;
+			static std::unordered_set<std::string> warnedVolumetricShadowState;
+			static std::unordered_set<std::string> warnedShadowBudgetState;
+			static std::unordered_map<std::string, int> mappedVisibilityGraceFrames;
 
-			for (auto [entity, lighting, transform] : lightingGroup.each()) {
+			struct PendingLightUpdate {
+				entt::entity entity{};
+				Lighting* lighting = nullptr;
+				LocalTransform* transform = nullptr;
+				std::string lightName;
+				glm::vec3 worldPos = glm::vec3(0.0f);
+				Light::SHADOW_TYPES baseShadowType = Light::SHADOW_TYPES::NONE;
+				Light::SHADOW_TYPES resolvedShadowType = Light::SHADOW_TYPES::NONE;
+				bool requireMappedForVolumetric = false;
+				bool wantsMappedShadow = false;
+				bool inViewNow = false;
+				bool inCameraView = false;
+				bool wasMappedPreviousFrame = false;
+				float distanceToCamera = std::numeric_limits<float>::max();
+			};
 
-				std::string lightName = "light_" + std::to_string((uint32_t)entity);
-				activeLightNames.insert(lightName);
-
-				// Create light if new
-				if (!LightSources::get().get(lightName)) {
-					LightSources::get().create(lightName);
+			Camera* activeCamera = scene->GetActiveCamera();
+			const glm::mat4 cameraVP = activeCamera
+				? (activeCamera->projection() * activeCamera->view())
+				: glm::mat4(1.0f);
+			auto isPointInView = [&](const glm::vec3& worldPoint) -> bool {
+				if (!activeCamera) {
+					return false;
+				}
+				const glm::vec4 clip = cameraVP * glm::vec4(worldPoint, 1.0f);
+				if (clip.w <= 0.0001f) {
+					return false;
+				}
+				const glm::vec3 ndc = glm::vec3(clip) / clip.w;
+				return ndc.z >= -1.0f && ndc.z <= 1.0f &&
+					ndc.x >= -1.0f && ndc.x <= 1.0f &&
+					ndc.y >= -1.0f && ndc.y <= 1.0f;
+			};
+			auto isSphereInView = [&](const glm::vec3& worldCenter, float radius) -> bool {
+				if (!activeCamera) {
+					return false;
+				}
+				const Frustum cameraFrustum = activeCamera->getFrustum();
+				const Plane* planes[6] = {
+					&cameraFrustum.leftFace, &cameraFrustum.rightFace,
+					&cameraFrustum.bottomFace, &cameraFrustum.topFace,
+					&cameraFrustum.nearFace, &cameraFrustum.farFace
+				};
+				for (const Plane* plane : planes) {
+					if (plane->getSignedDistanceToPlane(worldCenter) < -radius) {
+						return false;
+					}
+				}
+				return true;
+			};
+			auto isSpotConeInView = [&](const glm::vec3& apex,
+										const glm::vec3& direction,
+										float outerAngleDeg) -> bool {
+				if (!activeCamera) {
+					return false;
 				}
 
-				if (auto lightOpt = LightSources::get().get(lightName)) {
+				const glm::vec3 dir =
+					glm::length(direction) > 0.0001f ? glm::normalize(direction) : glm::vec3(0.0f, -1.0f, 0.0f);
+				const float coneLength = glm::clamp(
+					GraphicsSettings::get().volumetric_max_dist,
+					6.0f,
+					40.0f);
+				const float fullConeRadius = std::tan(glm::radians(outerAngleDeg)) * coneLength;
+				const glm::vec3 center = apex + dir * (coneLength * 0.5f);
+				const float coneBoundingRadius = std::sqrt(
+					(coneLength * 0.5f) * (coneLength * 0.5f) + fullConeRadius * fullConeRadius);
+				if (isPointInView(apex) || isPointInView(center) || isPointInView(apex + dir * coneLength)) {
+					return true;
+				}
+				if (isSphereInView(center, coneBoundingRadius)) {
+					return true;
+				}
+
+				glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+				if (std::abs(glm::dot(dir, up)) > 0.95f) {
+					up = glm::vec3(1.0f, 0.0f, 0.0f);
+				}
+				const glm::vec3 right = glm::normalize(glm::cross(up, dir));
+				const glm::vec3 orthoUp = glm::normalize(glm::cross(dir, right));
+				const std::array<float, 4> coneTValues = { 0.2f, 0.45f, 0.7f, 1.0f };
+				for (float t : coneTValues) {
+					const glm::vec3 sliceCenter = apex + dir * (coneLength * t);
+					const float sliceRadius = fullConeRadius * t;
+					if (isPointInView(sliceCenter)) {
+						return true;
+					}
+					const std::array<glm::vec3, 4> ring = {
+						sliceCenter + right * sliceRadius,
+						sliceCenter - right * sliceRadius,
+						sliceCenter + orthoUp * sliceRadius,
+						sliceCenter - orthoUp * sliceRadius
+					};
+					for (const glm::vec3& p : ring) {
+						if (isPointInView(p)) {
+							return true;
+						}
+					}
+				}
+				const std::array<glm::vec3, 4> nearApexSamples = {
+					apex + right * (fullConeRadius * 0.1f),
+					apex - right * (fullConeRadius * 0.1f),
+					apex + orthoUp * (fullConeRadius * 0.1f),
+					apex - orthoUp * (fullConeRadius * 0.1f)
+				};
+				for (const glm::vec3& p : nearApexSamples) {
+					if (isPointInView(p)) {
+						return true;
+					}
+				}
+				return false;
+			};
+
+			std::vector<PendingLightUpdate> pending;
+			pending.reserve(lightingGroup.size());
+			for (auto [entity, lighting, transform] : lightingGroup.each()) {
+				PendingLightUpdate update{};
+				update.entity = entity;
+				update.lighting = &lighting;
+				update.transform = &transform;
+				update.lightName = "light_" + std::to_string((uint32_t)entity);
+				glm::vec3 entityWorldPos = transform.position;
+				if (auto* wt = registry.try_get<WorldTransform>(entity)) {
+					entityWorldPos = glm::vec3(wt->matrix[3]);
+				}
+				update.worldPos = entityWorldPos + lighting.offset;
+				update.baseShadowType = static_cast<Light::SHADOW_TYPES>(lighting.shadow_type);
+				update.requireMappedForVolumetric =
+					lighting.volumetric && lighting.light_type == TYPES::SPOTLIGHT;
+				update.wantsMappedShadow =
+					update.baseShadowType == Light::SHADOW_TYPES::MAPPED ||
+					update.requireMappedForVolumetric;
+
+				if (auto existingLight = LightSources::get().get(update.lightName)) {
+					const Light& priorLight = existingLight.value().get();
+					update.wasMappedPreviousFrame =
+						priorLight.getShadowType() == Light::SHADOW_TYPES::MAPPED &&
+						priorLight.getShadowTexture() != 0;
+				}
+
+				if (activeCamera) {
+					const bool isSpotlight = lighting.light_type == TYPES::SPOTLIGHT;
+					update.inViewNow = isSpotlight
+						? isSpotConeInView(update.worldPos, lighting.direction, lighting.outer_angle)
+						: isPointInView(update.worldPos);
+
+					constexpr int kVisibilityGraceFrames = 8;
+					int& grace = mappedVisibilityGraceFrames[update.lightName];
+					if (update.inViewNow) {
+						grace = kVisibilityGraceFrames;
+					}
+					else if (grace > 0) {
+						--grace;
+					}
+					update.inCameraView = update.inViewNow || grace > 0;
+
+					const glm::vec3 priorityTarget = isSpotlight
+						? (update.worldPos +
+							(glm::length(lighting.direction) > 0.0001f
+								? glm::normalize(lighting.direction)
+								: glm::vec3(0.0f, -1.0f, 0.0f)) *
+							(GraphicsSettings::get().volumetric_max_dist * 0.5f))
+						: update.worldPos;
+					update.distanceToCamera = glm::length(priorityTarget - activeCamera->pos);
+				}
+				else {
+					update.inViewNow = false;
+					update.inCameraView = false;
+					update.distanceToCamera = 0.0f;
+				}
+
+				activeLightNames.insert(update.lightName);
+				pending.push_back(update);
+			}
+
+			for (auto it = mappedVisibilityGraceFrames.begin();
+				 it != mappedVisibilityGraceFrames.end();) {
+				if (activeLightNames.find(it->first) == activeLightNames.end()) {
+					it = mappedVisibilityGraceFrames.erase(it);
+				}
+				else {
+					++it;
+				}
+			}
+
+			constexpr int kShadowMappedLightBudget = 4;
+			const int maxVolumetricLights =
+				std::clamp(GraphicsSettings::get().volumetric_max_lights, 1, 4);
+			static int worldShadowRestoreCooldownFrames = 0;
+			if (worldShadowRestoreCooldownFrames > 0) {
+				--worldShadowRestoreCooldownFrames;
+			}
+
+			const int inViewVolumetricDemand = static_cast<int>(std::count_if(
+				pending.begin(),
+				pending.end(),
+				[](const PendingLightUpdate& update) {
+					return update.requireMappedForVolumetric && update.inCameraView;
+				}));
+
+			const bool requireFullDynamicShadowBudget =
+				inViewVolumetricDemand >= maxVolumetricLights;
+			if (auto worldLightOpt = LightSources::get().get("world")) {
+				Light& worldLight = worldLightOpt.value();
+				if (requireFullDynamicShadowBudget &&
+					worldLight.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
+					worldLight.setShadowType(Light::SHADOW_TYPES::NONE);
+					worldShadowRestoreCooldownFrames = 20;
+				}
+				else if (!requireFullDynamicShadowBudget &&
+					worldShadowRestoreCooldownFrames == 0 &&
+					GraphicsSettings::get().world_light &&
+					worldLight.getShadowType() != Light::SHADOW_TYPES::MAPPED) {
+					worldLight.setShadowType(Light::SHADOW_TYPES::MAPPED);
+				}
+			}
+
+			int reservedShadowSlots = 0;
+			for (const auto& [key, lightRef] : LightSources::get().getAllWithKeys()) {
+				if (key != "world" && key != "cam") {
+					continue;
+				}
+				const Light& l = lightRef.get();
+				if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED &&
+					l.getShadowTexture() != 0) {
+					++reservedShadowSlots;
+				}
+			}
+			const int entityShadowBudget =
+				std::max(0, kShadowMappedLightBudget - reservedShadowSlots);
+
+			auto compareByFovThenDistance =
+				[](const PendingLightUpdate* lhs, const PendingLightUpdate* rhs) {
+				if (lhs->inCameraView != rhs->inCameraView) {
+					return lhs->inCameraView && !rhs->inCameraView;
+				}
+				if (lhs->inViewNow != rhs->inViewNow) {
+					return lhs->inViewNow && !rhs->inViewNow;
+				}
+				if (std::abs(lhs->distanceToCamera - rhs->distanceToCamera) > 0.001f) {
+					return lhs->distanceToCamera < rhs->distanceToCamera;
+				}
+				if (lhs->wasMappedPreviousFrame != rhs->wasMappedPreviousFrame) {
+					return lhs->wasMappedPreviousFrame && !rhs->wasMappedPreviousFrame;
+				}
+				return static_cast<uint32_t>(lhs->entity) < static_cast<uint32_t>(rhs->entity);
+			};
+
+			std::vector<PendingLightUpdate*> volumetricCandidates;
+			std::vector<PendingLightUpdate*> otherMappedCandidates;
+			for (auto& update : pending) {
+				if (!update.wantsMappedShadow) {
+					continue;
+				}
+				if (update.requireMappedForVolumetric) {
+					volumetricCandidates.push_back(&update);
+				}
+				else {
+					otherMappedCandidates.push_back(&update);
+				}
+			}
+
+			std::sort(
+				volumetricCandidates.begin(),
+				volumetricCandidates.end(),
+				compareByFovThenDistance);
+			std::sort(
+				otherMappedCandidates.begin(),
+				otherMappedCandidates.end(),
+				compareByFovThenDistance);
+
+			for (auto& update : pending) {
+				update.resolvedShadowType = update.baseShadowType;
+				if (update.wantsMappedShadow) {
+					update.resolvedShadowType = Light::SHADOW_TYPES::NONE;
+				}
+			}
+
+			int mappedAssigned = 0;
+			const int volumetricMappedBudget = std::min(entityShadowBudget, maxVolumetricLights);
+			for (auto* candidate : volumetricCandidates) {
+				if (mappedAssigned >= volumetricMappedBudget) {
+					break;
+				}
+				candidate->resolvedShadowType = Light::SHADOW_TYPES::MAPPED;
+				++mappedAssigned;
+			}
+
+			for (auto* candidate : otherMappedCandidates) {
+				if (mappedAssigned >= entityShadowBudget) {
+					break;
+				}
+				candidate->resolvedShadowType = Light::SHADOW_TYPES::MAPPED;
+				++mappedAssigned;
+			}
+
+			// Ensure all lights exist before resolving shadow state.
+			for (const auto& update : pending) {
+				if (!LightSources::get().get(update.lightName)) {
+					LightSources::get().create(update.lightName);
+				}
+			}
+
+			// Phase 1: demote non-mapped lights first so mapped slots are freed deterministically.
+			for (const auto& update : pending) {
+				if (update.resolvedShadowType == Light::SHADOW_TYPES::MAPPED) {
+					continue;
+				}
+				if (auto lightOpt = LightSources::get().get(update.lightName)) {
 					Light& light = lightOpt.value();
+					light.setShadowType(update.resolvedShadowType);
+				}
+			}
+
+			// Phase 2: promote mapped winners.
+			for (const auto& update : pending) {
+				if (update.resolvedShadowType != Light::SHADOW_TYPES::MAPPED) {
+					continue;
+				}
+				if (auto lightOpt = LightSources::get().get(update.lightName)) {
+					Light& light = lightOpt.value();
+					light.setShadowType(Light::SHADOW_TYPES::MAPPED);
+				}
+			}
+
+			for (const auto& update : pending) {
+				if (auto lightOpt = LightSources::get().get(update.lightName)) {
+					Light& light = lightOpt.value();
+					const Lighting& lighting = *update.lighting;
+					const LocalTransform& transform = *update.transform;
+
 					// Use WorldTransform so the spotlight renders at the correct world
 					// location even when the entity is a non-root child with a parent
 					// that has a non-zero position. Falls back to LocalTransform for
 					// root entities where WorldTransform may not yet be computed.
-					glm::vec3 entityWorldPos = transform.position;
-					if (auto* wt = registry.try_get<WorldTransform>(entity)) {
-						entityWorldPos = glm::vec3(wt->matrix[3]);
-					}
-					light.position = entityWorldPos + lighting.offset;
+					light.position = update.worldPos;
 					light.L_intensity = lighting.light_intensity;
 					light.type = static_cast<Light::TYPES>(lighting.light_type);
-					light.setShadowType(
-						static_cast<Light::SHADOW_TYPES>(lighting.shadow_type));
 					light.setShadowResolution(lighting.shadow_resolution);
-					light.volumetric = lighting.volumetric;
+
+					const bool hasMappedShadow =
+						light.getShadowType() == Light::SHADOW_TYPES::MAPPED &&
+						light.getShadowTexture() != 0;
+					light.volumetric =
+						lighting.volumetric &&
+						(!update.requireMappedForVolumetric || hasMappedShadow);
+
+					if (update.wantsMappedShadow && !hasMappedShadow) {
+						if (warnedShadowBudgetState.insert(update.lightName).second) {
+							PN_CORE_WARN(
+								"Light '{}' could not acquire mapped shadow (budget={}, reserved={}, type={}).",
+								update.lightName,
+								kShadowMappedLightBudget,
+								reservedShadowSlots,
+								static_cast<int>(lighting.light_type));
+						}
+					}
+					else {
+						warnedShadowBudgetState.erase(update.lightName);
+					}
+
+					if (lighting.volumetric &&
+						(update.requireMappedForVolumetric && !hasMappedShadow)) {
+						if (warnedVolumetricShadowState.insert(update.lightName).second) {
+							PN_CORE_WARN(
+								"Volumetric spotlight '{}' disabled: no mapped shadow texture available.",
+								update.lightName);
+						}
+					}
+					else {
+						warnedVolumetricShadowState.erase(update.lightName);
+					}
 
 					// works for non point light
 					light.direction = lighting.direction;
@@ -1460,8 +1827,14 @@ namespace PAIN {
 							(map_w / fbh),
 							(map_h / fbh));
 
-						rendererService->w_renderer->Render2DTexture(minimapTexture, minimap_pos,
-							minimap_scale);
+						// Render minimap texture with appropriate shape clipping
+						if (gs.minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
+							rendererService->w_renderer->Render2DTextureCircular(minimapTexture, minimap_pos,
+								minimap_scale);
+						} else {
+							rendererService->w_renderer->Render2DTexture(minimapTexture, minimap_pos,
+								minimap_scale);
+						}
 
 						auto toNdc = [&](float px, float py) {
 							return glm::vec2(
@@ -1477,26 +1850,62 @@ namespace PAIN {
 
 						const int border_layers = static_cast<int>(glm::round(border_thickness));
 						if (border_layers > 0) {
+							// For circular minimap, adjust size to fit within the circle
+							float effective_w = map_w;
+							float effective_h = map_h;
+							float center_x = center_x_px;
+							float center_y = center_y_px;
+							float diameter = glm::min(effective_w, effective_h);
+
+							if (gs.minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
+								// Use the smaller dimension as diameter for the circle
+								effective_w = diameter;
+								effective_h = diameter;
+							}
+
 							for (int i = 0; i < border_layers; ++i) {
 								const float inset = static_cast<float>(i) + 0.5f;
-								const float x0 = map_x + inset;
-								const float y0 = map_y + inset;
-								const float x1 = map_x + outer_w - inset;
-								const float y1 = map_y + outer_h - inset;
 
-								if (x1 <= x0 || y1 <= y0) {
-									break;
+								if (gs.minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
+									// Draw circular border using line segments
+									float outer_radius = (diameter * 0.5f) - inset;
+									if (outer_radius <= 0.0f) break;
+
+									const int segments = 64;
+									const float two_pi = glm::two_pi<float>();
+
+									// Convert center pixel position to NDC
+									glm::vec2 center_ndc(
+										(center_x / fbw) * 2.0f - 1.0f,
+										1.0f - (center_y / fbh) * 2.0f);
+
+									// Calculate radius in NDC units (approximate, using width for uniform scaling)
+									float radius_x = (outer_radius / fbw) * 2.0f;
+									float radius_y = (outer_radius / fbh) * 2.0f;
+									glm::vec2 radius_ndc(radius_x, radius_y);
+
+									rendererService->w_renderer->DebugPass2DCircle(center_ndc, radius_ndc, border_color, segments);
+								} else {
+									// Square border (existing code)
+									const float x0 = map_x + inset;
+									const float y0 = map_y + inset;
+									const float x1 = map_x + outer_w - inset;
+									const float y1 = map_y + outer_h - inset;
+
+									if (x1 <= x0 || y1 <= y0) {
+										break;
+									}
+
+									const glm::vec2 tl = toNdc(x0, y0);
+									const glm::vec2 tr = toNdc(x1, y0);
+									const glm::vec2 br = toNdc(x1, y1);
+									const glm::vec2 bl = toNdc(x0, y1);
+
+									rendererService->w_renderer->DebugPass2DLine(tl, tr, border_color);
+									rendererService->w_renderer->DebugPass2DLine(tr, br, border_color);
+									rendererService->w_renderer->DebugPass2DLine(br, bl, border_color);
+									rendererService->w_renderer->DebugPass2DLine(bl, tl, border_color);
 								}
-
-								const glm::vec2 tl = toNdc(x0, y0);
-								const glm::vec2 tr = toNdc(x1, y0);
-								const glm::vec2 br = toNdc(x1, y1);
-								const glm::vec2 bl = toNdc(x0, y1);
-
-								rendererService->w_renderer->DebugPass2DLine(tl, tr, border_color);
-								rendererService->w_renderer->DebugPass2DLine(tr, br, border_color);
-								rendererService->w_renderer->DebugPass2DLine(br, bl, border_color);
-								rendererService->w_renderer->DebugPass2DLine(bl, tl, border_color);
 							}
 						}
 
@@ -1809,6 +2218,19 @@ namespace PAIN {
 							static_cast<GLint>(fbh - draw_y - draw_h),
 							static_cast<GLsizei>(draw_w),
 							static_cast<GLsizei>(draw_h));
+
+						// For circular minimap, also setup stencil clipping
+						if (gs.minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
+							float diameter = glm::min(map_w, map_h);
+							float radius_px = diameter * 0.5f;
+							glm::vec2 center_ndc(
+								(center_x_px / fbw) * 2.0f - 1.0f,
+								1.0f - (center_y_px / fbh) * 2.0f);
+							glm::vec2 radius_ndc(
+								(radius_px / fbw) * 2.0f,
+								(radius_px / fbh) * 2.0f);
+							rendererService->w_renderer->BeginCircularStencilClip(center_ndc, radius_ndc);
+						}
 
 						if (gs.minimap_show_walls) {
                             uint64_t currentWallSignature = 1469598103934665603ull;
@@ -2134,6 +2556,11 @@ namespace PAIN {
 								arrow_start_ndc,
 								arrow_end_ndc,
 								glm::vec4(0.2f, 1.0f, 0.2f, 1.0f));
+						}
+
+						// Disable circular stencil clip if it was enabled
+						if (gs.minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
+							rendererService->w_renderer->EndCircularStencilClip();
 						}
 
 						glDisable(GL_SCISSOR_TEST);

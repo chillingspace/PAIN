@@ -206,7 +206,11 @@ float shadowIntensity(int shadow_map_idx, vec3 fragPos, vec3 normal, Light light
     vec3 light_dir = int(light.type) == 1
         ? normalize(-light.direction)
         : normalize(light.position - fragPos);
-    float bias = max(0.02 * (1.0 - dot(normal, light_dir)), 0.002);
+    float ndotl = clamp(dot(normal, light_dir), 0.0, 1.0);
+    float slope = 1.0 - ndotl;
+    float slopeScale = int(light.type) == 2 ? 0.008 : 0.012;
+    float minBias = int(light.type) == 2 ? 0.0008 : 0.0012;
+    float bias = max(slopeScale * slope, minBias);
 
     // return frag_depth - bias > shadow_map_depth ? 1.0 : 0.0;
 

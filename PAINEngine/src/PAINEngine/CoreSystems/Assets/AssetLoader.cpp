@@ -1508,6 +1508,10 @@ namespace PAIN {
                     sceneAsset->minimap.recommended_position =
                         static_cast<GraphicsSettings::MINIMAP_RECOMMENDED_POSITION>(minimap["recommended_position"].get<int>());
                 }
+                if (minimap.contains("shape")) {
+                    sceneAsset->minimap.shape =
+                        static_cast<GraphicsSettings::MINIMAP_SHAPE>(minimap["shape"].get<int>());
+                }
                 if (minimap.contains("rotate_with_player")) {
                     sceneAsset->minimap.rotate_with_player = minimap["rotate_with_player"].get<bool>();
                 }

@@ -387,6 +387,7 @@ namespace PAIN {
 			gs.minimap_pos_px = minimap.pos_px;
 			gs.minimap_override_position = minimap.override_position;
 			gs.minimap_recommended_position = minimap.recommended_position;
+			gs.minimap_shape = minimap.shape;
 			gs.minimap_rotate_with_player = minimap.rotate_with_player;
 			gs.minimap_show_player = minimap.show_player;
 			gs.minimap_show_danger = minimap.show_danger;
@@ -858,6 +859,7 @@ namespace PAIN {
 			scene_asset.minimap.pos_px = gs.minimap_pos_px;
 			scene_asset.minimap.override_position = gs.minimap_override_position;
 			scene_asset.minimap.recommended_position = gs.minimap_recommended_position;
+			scene_asset.minimap.shape = gs.minimap_shape;
 			scene_asset.minimap.rotate_with_player = gs.minimap_rotate_with_player;
 			scene_asset.minimap.show_player = gs.minimap_show_player;
 			scene_asset.minimap.show_danger = gs.minimap_show_danger;
@@ -952,6 +954,7 @@ namespace PAIN {
 				{"pos_px", {scn_asset.minimap.pos_px.x, scn_asset.minimap.pos_px.y}},
 				{"override_position", scn_asset.minimap.override_position},
 				{"recommended_position", static_cast<int>(scn_asset.minimap.recommended_position)},
+				{"shape", static_cast<int>(scn_asset.minimap.shape)},
 				{"rotate_with_player", scn_asset.minimap.rotate_with_player},
 				{"show_player", scn_asset.minimap.show_player},
 				{"show_danger", scn_asset.minimap.show_danger},

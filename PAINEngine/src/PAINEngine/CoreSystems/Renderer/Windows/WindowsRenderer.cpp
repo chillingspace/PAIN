@@ -1926,6 +1926,74 @@ namespace PAIN {
 		glUseProgram(currentProgram);
 	}
 
+	void WindowsRenderer::Render2DTextureCircular(GLuint texture_id, const glm::vec2& pos,
+										  glm::vec2& scale,
+										  const glm::vec4& uv_transform) {
+		if (texture_id == 0) {
+			PN_CORE_ERROR("Invalid texture_id in Render2DTextureCircular");
+			return;
+		}
+
+		if (!texture2d_shader) {
+			PN_CORE_ERROR("Unable to find texture2d_shader for circular minimap");
+			return;
+		}
+
+		// ========================================
+		// SAVE STATE
+		// ========================================
+		GLint currentActiveTexture;
+		glGetIntegerv(GL_ACTIVE_TEXTURE, &currentActiveTexture);
+		GLint currentTexture;
+		glGetIntegerv(GL_TEXTURE_BINDING_2D, &currentTexture);
+		GLint currentVAO;
+		glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &currentVAO);
+		GLint currentProgram;
+		glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
+
+		auto window_service = services->get<Window::Window>();
+		auto framebuffer = window_service->getFrameBuffer();
+		float aspect_ratio = static_cast<float>(framebuffer.x) / static_cast<float>(framebuffer.y);
+		glm::vec2 corrected_scale = glm::vec2(scale.x / aspect_ratio, scale.y);
+
+		// ========================================
+		// RENDER TEXTURE WITH CIRCULAR CLIPPING (shader-based)
+		// ========================================
+		glDisable(GL_DEPTH_TEST);
+		glDepthMask(GL_FALSE);
+
+		texture2d_shader->Bind();
+		texture2d_shader->SetUniform("pos", pos);
+		texture2d_shader->SetUniform("ndc_scale", corrected_scale);
+		texture2d_shader->SetUniform("uv_transform", uv_transform);
+		
+		// Enable circular clipping in shader
+		texture2d_shader->SetUniform("u_ClipCircle", 1);
+		texture2d_shader->SetUniform("u_CircleCenter", pos);
+		texture2d_shader->SetUniform("u_CircleRadius", corrected_scale.x); // x scale is radius in NDC
+
+		glActiveTexture(GL_TEXTURE6);
+		glBindTexture(GL_TEXTURE_2D, texture_id);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		texture2d_shader->SetUniform("tex", 6);
+
+		glBindVertexArray(passthrough_vao);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+		// Reset clip uniform for subsequent draws
+		texture2d_shader->SetUniform("u_ClipCircle", 0);
+
+		// ========================================
+		// RESTORE STATE
+		// ========================================
+		glDepthMask(GL_TRUE);
+		glActiveTexture(currentActiveTexture);
+		glBindTexture(GL_TEXTURE_2D, currentTexture);
+		glBindVertexArray(currentVAO);
+		glUseProgram(currentProgram);
+	}
+
 	// Shadow pass entry point: sysRender selects which light to render,
 	// while the renderer owns framebuffer binding and per-pass GPU state.
 	void WindowsRenderer::BeginShadowPass(const Light& l) {
@@ -1939,6 +2007,8 @@ namespace PAIN {
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 		glDisable(GL_BLEND);
+		// Two-sided shadow casting avoids leakage through thin/open geometry.
+		glDisable(GL_CULL_FACE);
 #ifdef PN_PLATFORM_ANDROID
 		// critical for Mali GPU on android depth-only shadow rendering
 		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
@@ -2001,6 +2071,8 @@ namespace PAIN {
 
 	void WindowsRenderer::EndShadowPass() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
 #ifdef PN_PLATFORM_ANDROID
 		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 #endif
@@ -2568,11 +2640,26 @@ namespace PAIN {
 									   kFixedShadowTextureUnitStart + shadowSlot);
 			}
 
+			struct ShadowMapCandidate {
+				int gpuLightIndex = -1;
+				std::string key;
+				GLuint shadowTexture = 0;
+				int priority = 0;
+				int insertionOrder = 0;
+			};
+
+			static std::unordered_set<std::string> loggedShadowBudgetDrops;
+
 			int shadowMapCount = 0;
 			int i{};
+			int mappedLightOrder = 0;
 			std::array<PbrLightGpuData, kMaxPbrLights> gpuLights{};
-			const auto allLights = lights.getAll();
-			for (const Light& l : allLights) {
+			std::vector<ShadowMapCandidate> shadowCandidates;
+			shadowCandidates.reserve(kMaxPbrLights);
+
+			const auto allLightsWithKeys = lights.getAllWithKeys();
+			for (const auto& [lightKey, lightRef] : allLightsWithKeys) {
+				const Light& l = lightRef.get();
 				if (i >= kMaxPbrLights) {
 					PN_CORE_WARN("[GL] Skipping extra light because shader budget is {}", kMaxPbrLights);
 					break;
@@ -2594,21 +2681,51 @@ namespace PAIN {
 				gpuLight.view = l.view();
 				gpuLight.projection = l.projection();
 
-				if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
-					if (shadowMapCount >= kMaxPbrShadowMaps) {
-						PN_CORE_WARN("[GL] Skipping extra mapped shadow light at index {} because PBR shadow map budget is {}",
-									 i, kMaxPbrShadowMaps);
-					}
-					else {
-						glActiveTexture(GL_TEXTURE0 + kFixedShadowTextureUnitStart + shadowMapCount);
-						glBindTexture(GL_TEXTURE_2D, l.getShadowTexture());
-						gpuLight.intensity_shadow.w = static_cast<float>(shadowMapCount);
+				if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED &&
+					l.getShadowTexture() != 0) {
+					int priority = 0;
+					if (l.type == Light::TYPES::SPOTLIGHT) priority += 60;
+					if (l.volumetric) priority += 30;
+					if (l.volumetric && l.type == Light::TYPES::SPOTLIGHT) priority += 40;
+					if (lightKey == "world") priority += 5;
 
-						++shadowMapCount;
-					}
+					shadowCandidates.push_back({
+						i,
+						lightKey,
+						l.getShadowTexture(),
+						priority,
+						mappedLightOrder++
+					});
 				}
 
 				i++;
+			}
+
+			std::sort(shadowCandidates.begin(), shadowCandidates.end(),
+				[](const ShadowMapCandidate& lhs, const ShadowMapCandidate& rhs) {
+					if (lhs.priority != rhs.priority) {
+						return lhs.priority > rhs.priority;
+					}
+					return lhs.insertionOrder < rhs.insertionOrder;
+				});
+
+			for (const ShadowMapCandidate& candidate : shadowCandidates) {
+				if (shadowMapCount >= kMaxPbrShadowMaps) {
+					if (loggedShadowBudgetDrops.insert(candidate.key).second) {
+						PN_CORE_WARN(
+							"[GL] Shadow budget drop: light '{}' did not get a shadow map slot (budget={})",
+							candidate.key,
+							kMaxPbrShadowMaps);
+					}
+					continue;
+				}
+
+				glActiveTexture(GL_TEXTURE0 + kFixedShadowTextureUnitStart + shadowMapCount);
+				glBindTexture(GL_TEXTURE_2D, candidate.shadowTexture);
+				gpuLights[candidate.gpuLightIndex].intensity_shadow.w =
+					static_cast<float>(shadowMapCount);
+				loggedShadowBudgetDrops.erase(candidate.key);
+				++shadowMapCount;
 			}
 
 			if (pbr_light_ubo != 0) {
@@ -3239,9 +3356,6 @@ namespace PAIN {
 			if (static_cast<int>(packedLights.size()) >= maxVolumetricLights) {
 				break;
 			}
-			if (!candidate.inCameraView) {
-				break;
-			}
 
 			PackedVolumetricLight packed{};
 			packed.light = candidate.light;
@@ -3645,6 +3759,69 @@ namespace PAIN {
 			PN_CORE_ERROR("OpenGL err after PostProcessPass: {}", err);
 		}
 #endif
+	}
+
+	void WindowsRenderer::BeginCircularStencilClip(const glm::vec2& center_ndc, const glm::vec2& radius_ndc) {
+		if (!debug_shader) return;
+
+		// Save current state
+		GLboolean colorMask[4];
+		glGetBooleanv(GL_COLOR_WRITEMASK, colorMask);
+
+		// Clear stencil
+		glClear(GL_STENCIL_BUFFER_BIT);
+
+		// Draw filled circle to stencil buffer
+		const int segments = 64;
+		std::vector<float> verts;
+		verts.reserve(static_cast<size_t>(segments) * 3 * 7);
+
+		for (int i = 0; i < segments; ++i) {
+			const float a0 = (static_cast<float>(i) / static_cast<float>(segments)) * glm::two_pi<float>();
+			const float a1 = (static_cast<float>(i + 1) / static_cast<float>(segments)) * glm::two_pi<float>();
+
+			const glm::vec2 p0(center_ndc.x + std::cos(a0) * radius_ndc.x,
+							   center_ndc.y + std::sin(a0) * radius_ndc.y);
+			const glm::vec2 p1(center_ndc.x + std::cos(a1) * radius_ndc.x,
+							   center_ndc.y + std::sin(a1) * radius_ndc.y);
+
+			// Triangle: center, p0, p1
+			verts.insert(verts.end(), {center_ndc.x, center_ndc.y, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f});
+			verts.insert(verts.end(), {p0.x, p0.y, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f});
+			verts.insert(verts.end(), {p1.x, p1.y, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f});
+		}
+
+		glBindVertexArray(debug_VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
+		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(), GL_DYNAMIC_DRAW);
+
+		// Color mask off - only writing to stencil
+		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+
+		// Setup stencil to write 1 where the circle triangles pass
+		glEnable(GL_STENCIL_TEST);
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		glStencilMask(0xFF);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
+		debug_shader->Bind();
+		glm::mat4 ortho_proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
+		debug_shader->SetUniform("u_V", glm::mat4(1.0f));
+		debug_shader->SetUniform("u_P", ortho_proj);
+
+		glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(verts.size() / 7));
+
+		// Restore color mask
+		glColorMask(colorMask[0], colorMask[1], colorMask[2], colorMask[3]);
+
+		// Enable stencil test for subsequent draws (only pass where stencil == 1)
+		glStencilFunc(GL_EQUAL, 1, 0xFF);
+		glStencilMask(0x00); // Don't modify stencil
+		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+	}
+
+	void WindowsRenderer::EndCircularStencilClip() {
+		glDisable(GL_STENCIL_TEST);
 	}
 
 	void WindowsRenderer::Cleanup() {
