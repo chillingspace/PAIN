@@ -11,6 +11,7 @@ const float PI = 3.14159265359;
 const float EPSILON = 0.0001;
 const float MAX_REFLECTION_MIP = 9.0;
 const float MAX_HDR_RADIANCE = 60000.0;
+const float PREFILTER_SAMPLE_LUMA_CLAMP = 128.0;
 
 bool IsFiniteVec3(vec3 v) {
     return !(any(isnan(v)) || any(isinf(v)));
@@ -22,6 +23,15 @@ vec3 SanitizeHdrSample(vec3 sampleValue, out bool valid) {
         return vec3(0.0);
     }
     return clamp(sampleValue, vec3(0.0), vec3(MAX_HDR_RADIANCE));
+}
+
+vec3 ClampLuminance(vec3 value, float maxLuma) {
+    const vec3 lumaWeights = vec3(0.2126, 0.7152, 0.0722);
+    float luma = dot(value, lumaWeights);
+    if (luma > maxLuma && luma > EPSILON) {
+        value *= (maxLuma / luma);
+    }
+    return value;
 }
 
 float DistributionGGX(vec3 N, vec3 H, float roughness)
@@ -126,6 +136,7 @@ void main()
             if (!envSampleValid) {
                 continue;
             }
+            envSample = ClampLuminance(envSample, PREFILTER_SAMPLE_LUMA_CLAMP);
             prefilteredColor += envSample * NdotL;
             totalWeight += NdotL;
         }

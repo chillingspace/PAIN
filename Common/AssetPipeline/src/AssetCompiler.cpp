@@ -124,6 +124,22 @@ namespace {
         return false;
     }
 
+    const char* GetCuttlefishHdrTypeForFormat(const std::string& format) {
+        // KTX doesn't accept ufloat for plain R16G16B16A16-style formats.
+        // BC6H/ASTC HDR paths should remain ufloat to preserve non-negative radiance.
+        if (format == "R16" ||
+            format == "R16G16" ||
+            format == "R16G16B16" ||
+            format == "R16G16B16A16" ||
+            format == "R32" ||
+            format == "R32G32" ||
+            format == "R32G32B32" ||
+            format == "R32G32B32A32") {
+            return "float";
+        }
+        return "ufloat";
+    }
+
     std::vector<float> BuildCubemapFaceFromEquirectangular(
         const float* pixels,
         int width,
@@ -960,8 +976,13 @@ namespace PAIN {
             }
             else {
                 std::cout << "WARNING: Texture compilation failed for: " << asset_info.raw_path.filename() << std::endl;
-                asset_info.shipped_path.extension().replace_extension(asset_info.raw_path.extension());
-                copyFile(asset_info.raw_path, asset_info.shipped_path);
+                if (std::filesystem::exists(asset_info.shipped_path)) {
+                    std::cout << "Keeping existing compiled texture: " << asset_info.shipped_path << std::endl;
+                }
+                else {
+                    std::cout << "ERROR: No previous compiled texture exists at: "
+                        << asset_info.shipped_path << std::endl;
+                }
             }
         }
 
@@ -1935,9 +1956,8 @@ namespace PAIN {
                 cmd << " -f " << format;
                 cmd << " -Q " << settings.value("quality", "normal");
                 cmd << " -s rgbx";
-                // HDR radiance/environment data should remain non-negative.
-                // Use unsigned-float transfer so BC6H stays UF16 and avoids signed artifacts.
-                cmd << " -t ufloat";
+                const char* hdr_type = GetCuttlefishHdrTypeForFormat(format);
+                cmd << " -t " << hdr_type;
                 cmd << " -o \"" << output_path << "\"";
                 cmd << " --create-dir";
 
@@ -2008,9 +2028,8 @@ namespace PAIN {
                 cmd << " -f " << format;
                 cmd << " -Q " << settings.value("quality", "normal");
                 cmd << " -s rgbx";
-                // HDR radiance/environment data should remain non-negative.
-                // Use unsigned-float transfer so BC6H stays UF16 and avoids signed artifacts.
-                cmd << " -t ufloat";
+                const char* hdr_type = GetCuttlefishHdrTypeForFormat(format);
+                cmd << " -t " << hdr_type;
                 cmd << " -o \"" << output_path << "\"";
                 cmd << " --create-dir";
 
