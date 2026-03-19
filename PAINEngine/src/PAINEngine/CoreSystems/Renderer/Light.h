@@ -42,7 +42,7 @@ private:
 			glBindTexture(GL_TEXTURE_2D, shadow_texture);
 
 #ifdef PN_PLATFORM_ANDROID
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, tex_width, tex_width, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT, nullptr);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, tex_width, tex_width, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, nullptr);
 #else
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, tex_width, tex_width, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 #endif
@@ -69,6 +69,14 @@ private:
 			//glDrawBuffers(0, nullptr);
 
 			GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+#ifdef PN_PLATFORM_ANDROID
+			if (status != GL_FRAMEBUFFER_COMPLETE) {
+				PN_CORE_WARN("Shadow FBO depth24 unsupported/incomplete on Android, falling back to depth16.");
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, tex_width, tex_width, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT, nullptr);
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadow_texture, 0);
+				status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+			}
+#endif
 			if (status != GL_FRAMEBUFFER_COMPLETE) {
 				PN_CORE_ERROR("Shadow FBO is incomplete! Status: 0x{:x}", status);
 				return;
@@ -104,11 +112,7 @@ private:
 
 		// dont touch these values unless you know what youre doing
 		float aspect_ratio = 1.f / 1.f;
-#ifdef PN_PLATFORM_WINDOWS
 		float near_plane{ 0.1f };		// closest distance light can see
-#else
-		float near_plane{ 1.f };
-#endif
 		float far_plane{ 30.f };		// furthest distance light can see(for shadows)
 
 		// not required for point lights
