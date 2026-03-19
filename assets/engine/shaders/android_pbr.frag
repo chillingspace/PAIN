@@ -220,9 +220,11 @@ const int IBL_DIFFUSE = IBL_DEBUG_TYPE_BASE + 3;
 const int IBL_SPECULAR = IBL_DEBUG_TYPE_BASE + 4;
 const int DIRECT_LIGHTING = IBL_DEBUG_TYPE_BASE + 5;
 const bool IBL_FLIP_Y_AXIS = true;
-const float IBL_SPECULAR_FIRELFY_CLAMP = 12.0;
-const float IBL_SPECULAR_PREFILTER_LUMA_CLAMP = 24.0;
-const float IBL_SPECULAR_MIP_BIAS = 0.65;
+const float IBL_SPECULAR_FIRELFY_CLAMP = 9.0;
+const float IBL_SPECULAR_PREFILTER_LUMA_CLAMP = 16.0;
+const float IBL_SPECULAR_MIP_BIAS = 0.9;
+const float ANDROID_IBL_SPECULAR_STRENGTH_SCALE = 0.82;
+const float ANDROID_IBL_ROUGHNESS_BIAS = 0.07;
 const float SPECULAR_AA_VARIANCE_SCALE = 0.15;
 const float SPECULAR_AA_MAX_ADDITION = 0.35;
 
@@ -341,20 +343,21 @@ void main() {
         
         vec3 F0 = vec3(0.04);
         F0 = mix(F0, material.color, material.metal);
+        float iblRoughness = clamp(material.rough + ANDROID_IBL_ROUGHNESS_BIAS, 0.04, 1.0);
         
         float NdotV = clamp(dot(N, V), 0.001, 1.0);
 
         // debug brdf lut. should look like gradient red/orange
         if (dbg == IBL_DEBUG_BRDFLUT)
         {
-            vec2 brdf = texture(brdfLut, vec2(NdotV, material.rough)).rg;
+            vec2 brdf = texture(brdfLut, vec2(NdotV, iblRoughness)).rg;
             brdf = clamp(brdf, vec2(0.0), vec2(1.0));
             FragColor = vec4(brdf.r, brdf.g, 0.0, 1.0);
             return;
         }
 
 
-        vec3 F = fresnelSchlickRoughness(NdotV, F0, material.rough);
+        vec3 F = fresnelSchlickRoughness(NdotV, F0, iblRoughness);
         
         // Diffuse component
         vec3 kD = clamp((1.0 - F) * (1.0 - material.metal), vec3(0.0), vec3(1.0));
@@ -377,14 +380,14 @@ void main() {
         {
             // somehow flooring the mipLevel, no interpolation fixes aura issue?
             // !TODO: jspoh figure out why and a proper fix
-            float mipLevel = material.rough * u_IblMaxReflectionLod;
+            float mipLevel = iblRoughness * u_IblMaxReflectionLod;
             mipLevel = floor(mipLevel); // Force discrete mip levels, no interpolation
             prefilteredColor = SanitizeIblSample(textureLod(prefilterMap, R, mipLevel).rgb);
         }
 #endif
 
         float reflectionLod = clamp(
-            material.rough * u_IblMaxReflectionLod + IBL_SPECULAR_MIP_BIAS,
+            iblRoughness * u_IblMaxReflectionLod + IBL_SPECULAR_MIP_BIAS,
             0.0,
             u_IblMaxReflectionLod
         );
@@ -400,10 +403,10 @@ void main() {
 
         // prefilteredColor = prefilteredColor / (prefilteredColor + vec3(1.0));  // Reinhard tone mapping
 
-        vec2 envBRDF = texture(brdfLut, vec2(NdotV, material.rough)).rg;
+        vec2 envBRDF = texture(brdfLut, vec2(NdotV, iblRoughness)).rg;
         envBRDF = clamp(envBRDF, vec2(0.0), vec2(1.0));
         vec3 specularTerm = max(F * envBRDF.x + envBRDF.y, vec3(0.0));
-        vec3 specular = prefilteredColor * specularTerm * u_IblSpecularStrength;
+        vec3 specular = prefilteredColor * specularTerm * (u_IblSpecularStrength * ANDROID_IBL_SPECULAR_STRENGTH_SCALE);
         specular = SanitizeIblSample(specular);
         float peak = max(specular.r, max(specular.g, specular.b));
         if (peak > IBL_SPECULAR_FIRELFY_CLAMP) {
