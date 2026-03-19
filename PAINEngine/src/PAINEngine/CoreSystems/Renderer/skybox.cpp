@@ -22,6 +22,10 @@
 namespace {
 	constexpr GLenum kHdrCubemapInternalFormat = GL_RGBA16F;
 	constexpr GLenum kHdrCubemapBaseFormat = GL_RGBA;
+	GLuint g_skyboxCubeVAO = 0;
+	GLuint g_skyboxCubeVBO = 0;
+	GLuint g_skyboxQuadVAO = 0;
+	GLuint g_skyboxQuadVBO = 0;
 
 	struct ScopedSkyboxCaptureState {
 		GLint framebuffer = 0;
@@ -106,13 +110,35 @@ namespace PAIN {
 	}
 
 	Skybox::~Skybox() {
+		releaseGeneratedTextures();
+		conversionShader.reset();
+		shader.reset();
+
+		// Singleton static may outlive GL context; skip teardown if context is gone.
+		if (glGetString(GL_VERSION) == nullptr) {
+			return;
+		}
+
+		if (g_skyboxCubeVAO != 0) {
+			glDeleteVertexArrays(1, &g_skyboxCubeVAO);
+			g_skyboxCubeVAO = 0;
+		}
+		if (g_skyboxCubeVBO != 0) {
+			glDeleteBuffers(1, &g_skyboxCubeVBO);
+			g_skyboxCubeVBO = 0;
+		}
+		if (g_skyboxQuadVAO != 0) {
+			glDeleteVertexArrays(1, &g_skyboxQuadVAO);
+			g_skyboxQuadVAO = 0;
+		}
+		if (g_skyboxQuadVBO != 0) {
+			glDeleteBuffers(1, &g_skyboxQuadVBO);
+			g_skyboxQuadVBO = 0;
+		}
 	}
 
 	void Skybox::renderCube() {
-		static unsigned int cubeVAO = 0;
-		static unsigned int cubeVBO = 0;
-
-		if (cubeVAO == 0) {
+		if (g_skyboxCubeVAO == 0) {
 			float vertices[] = {
 				// Back face
 				-1.0f, -1.0f, -1.0f,
@@ -158,16 +184,16 @@ namespace PAIN {
 				 -1.0f,  1.0f,  1.0f
 			};
 
-			glGenVertexArrays(1, &cubeVAO);
-			glGenBuffers(1, &cubeVBO);
-			glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+			glGenVertexArrays(1, &g_skyboxCubeVAO);
+			glGenBuffers(1, &g_skyboxCubeVBO);
+			glBindBuffer(GL_ARRAY_BUFFER, g_skyboxCubeVBO);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-			glBindVertexArray(cubeVAO);
+			glBindVertexArray(g_skyboxCubeVAO);
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 		}
 
-		glBindVertexArray(cubeVAO);
+		glBindVertexArray(g_skyboxCubeVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
 	}
@@ -842,10 +868,7 @@ namespace PAIN {
 
 
 	void Skybox::renderQuad() {
-		static unsigned int quadVAO = 0;
-		static unsigned int quadVBO = 0;
-
-		if (quadVAO == 0) {
+		if (g_skyboxQuadVAO == 0) {
 			float quadVertices[] = {
 				// positions        // texture Coords
 				-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
@@ -854,10 +877,10 @@ namespace PAIN {
 				 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
 			};
 
-			glGenVertexArrays(1, &quadVAO);
-			glGenBuffers(1, &quadVBO);
-			glBindVertexArray(quadVAO);
-			glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+			glGenVertexArrays(1, &g_skyboxQuadVAO);
+			glGenBuffers(1, &g_skyboxQuadVBO);
+			glBindVertexArray(g_skyboxQuadVAO);
+			glBindBuffer(GL_ARRAY_BUFFER, g_skyboxQuadVBO);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
@@ -865,7 +888,7 @@ namespace PAIN {
 			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 		}
 
-		glBindVertexArray(quadVAO);
+		glBindVertexArray(g_skyboxQuadVAO);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
 	}

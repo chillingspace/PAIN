@@ -123,7 +123,7 @@ namespace PAIN {
 
 		// volumetric lighting (god rays / light shafts)
 #ifdef PN_PLATFORM_ANDROID
-		bool volumetric = false;
+		bool volumetric = true;
 #else
 		bool volumetric = true;
 #endif
@@ -137,7 +137,7 @@ namespace PAIN {
 		float volumetric_scatter = 0.f;       // Mie g: 0=uniform, 1=pure forward
 #ifdef PN_PLATFORM_ANDROID
 		float volumetric_resolution_scale = 0.4f; // mobile preset: lower resolution
-		int   volumetric_max_lights = 2;      // mobile preset cap
+		int   volumetric_max_lights = 4;      // mobile preset cap
 #else
 		float volumetric_resolution_scale = 0.5f; // render volumetrics at reduced resolution, then upscale additively
 		int   volumetric_max_lights = 4;      // separate cap from total scene lights to control cost

@@ -574,17 +574,9 @@ namespace PAIN {
 		}
 
 		void System::reflectionPass(entt::registry& registry) {
-
-			auto rendererService = services.lock()->get<sRenderer>();
-			if (!rendererService || !rendererService->w_renderer)
-				return;
-
-			auto renderGroup =
-				registry.group<ModelRenderer>(entt::get<WorldTransform, Entity::Layer>);
-
-			for (auto [entity, model, transform, layer] : renderGroup.each()) {
-				rendererService->w_renderer->ReflectionPass(model);
-			}
+			(void)registry;
+			// Reflection pass is intentionally disabled until a real implementation
+			// (SSR/planar/probe blend) is added.
 		}
 
 		void System::lightingPass(entt::registry& registry) {
