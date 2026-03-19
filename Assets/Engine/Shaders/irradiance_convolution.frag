@@ -6,15 +6,40 @@ uniform samplerCube environmentMap;
 
 const float PI = 3.14159265359;
 const float EPSILON = 0.0001;
+const float MAX_HDR_RADIANCE = 60000.0;
+const float IRRADIANCE_SAMPLE_LUMA_CLAMP = 64.0;
 const int PHI_SAMPLES = 64;
 const int THETA_SAMPLES = 32;
+
+bool IsFiniteVec3(vec3 v) {
+    return !(any(isnan(v)) || any(isinf(v)));
+}
+
+vec3 SanitizeHdrSample(vec3 sampleValue, out bool valid) {
+    valid = IsFiniteVec3(sampleValue);
+    if (!valid) {
+        return vec3(0.0);
+    }
+    return clamp(sampleValue, vec3(0.0), vec3(MAX_HDR_RADIANCE));
+}
+
+vec3 ClampLuminance(vec3 value, float maxLuma) {
+    const vec3 lumaWeights = vec3(0.2126, 0.7152, 0.0722);
+    float luma = dot(value, lumaWeights);
+    if (luma > maxLuma && luma > EPSILON) {
+        value *= (maxLuma / luma);
+    }
+    return value;
+}
 
 void main()
 {
     vec3 N = normalize(WorldPos);
 
 #ifdef DEBUG
-    FragColor = vec4(texture(environmentMap, N).rgb, 1.0);
+    bool debugValid;
+    vec3 debugSample = SanitizeHdrSample(texture(environmentMap, N).rgb, debugValid);
+    FragColor = vec4(debugSample, 1.0);
     return;
 #endif
 
@@ -36,7 +61,14 @@ void main()
                 tangentSample.x * right + tangentSample.y * up + tangentSample.z * N
             );
             float sampleWeight = max(cos(theta) * sin(theta), 0.0);
-            irradiance += textureLod(environmentMap, sampleVec, 0.0).rgb * sampleWeight;
+            bool sampleValid;
+            // Use implicit LOD here to reduce aliasing from tiny ultra-bright texels.
+            vec3 envSample = SanitizeHdrSample(texture(environmentMap, sampleVec).rgb, sampleValid);
+            if (!sampleValid) {
+                continue;
+            }
+            envSample = ClampLuminance(envSample, IRRADIANCE_SAMPLE_LUMA_CLAMP);
+            irradiance += envSample * sampleWeight;
             sampleCount += 1.0;
         }
     }

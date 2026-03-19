@@ -8,6 +8,29 @@ uniform float roughness;
 const float PI = 3.14159265359;
 const float EPSILON = 0.0001;
 const float MAX_REFLECTION_MIP = 9.0;
+const float MAX_HDR_RADIANCE = 60000.0;
+const float PREFILTER_SAMPLE_LUMA_CLAMP = 128.0;
+
+bool IsFiniteVec3(vec3 v) {
+    return !(any(isnan(v)) || any(isinf(v)));
+}
+
+vec3 SanitizeHdrSample(vec3 sampleValue, out bool valid) {
+    valid = IsFiniteVec3(sampleValue);
+    if (!valid) {
+        return vec3(0.0);
+    }
+    return clamp(sampleValue, vec3(0.0), vec3(MAX_HDR_RADIANCE));
+}
+
+vec3 ClampLuminance(vec3 value, float maxLuma) {
+    const vec3 lumaWeights = vec3(0.2126, 0.7152, 0.0722);
+    float luma = dot(value, lumaWeights);
+    if (luma > maxLuma && luma > EPSILON) {
+        value *= (maxLuma / luma);
+    }
+    return value;
+}
 
 float DistributionGGX(vec3 N, vec3 H, float roughness)
 {
@@ -75,7 +98,9 @@ void main()
     // Avoid singular GGX/PDF behavior at roughness==0 on some mobile GPUs.
     if (roughness <= EPSILON)
     {
-        FragColor = vec4(textureLod(environmentMap, R, 0.0).rgb, 1.0);
+        bool baseSampleValid;
+        vec3 baseSample = SanitizeHdrSample(textureLod(environmentMap, R, 0.0).rgb, baseSampleValid);
+        FragColor = vec4(baseSample, 1.0);
         return;
     }
 
@@ -110,8 +135,14 @@ void main()
                 mipLevel = 0.0;
             }
             mipLevel = clamp(mipLevel, 0.0, MAX_REFLECTION_MIP);
-            
-            prefilteredColor += textureLod(environmentMap, L, mipLevel).rgb * NdotL;
+
+            bool envSampleValid;
+            vec3 envSample = SanitizeHdrSample(textureLod(environmentMap, L, mipLevel).rgb, envSampleValid);
+            if (!envSampleValid) {
+                continue;
+            }
+            envSample = ClampLuminance(envSample, PREFILTER_SAMPLE_LUMA_CLAMP);
+            prefilteredColor += envSample * NdotL;
             totalWeight      += NdotL;
         }
     }

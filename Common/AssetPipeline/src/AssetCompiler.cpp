@@ -11,9 +11,11 @@
 #include <array>
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 namespace {
     constexpr float kPi = 3.14159265358979323846f;
+    constexpr float kHdrExportMaxRadiance = 60000.0f;
 
     bool IsHdrSkyboxCandidate(const PAIN::Assets::Info& asset, int width, int height) {
         if (height <= 0) {
@@ -47,6 +49,79 @@ namespace {
             value += 1.0f;
         }
         return value;
+    }
+
+    struct HdrSanitizeStats {
+        size_t non_finite = 0;
+        size_t clamped_negative = 0;
+        size_t clamped_high = 0;
+    };
+
+    HdrSanitizeStats SanitizeHdrPixels(
+        float* pixels,
+        size_t pixel_count,
+        int channels,
+        bool clamp_negative_rgb,
+        float max_radiance
+    ) {
+        HdrSanitizeStats stats{};
+        if (!pixels || pixel_count == 0 || channels <= 0) {
+            return stats;
+        }
+
+        const int rgb_channels = std::min(3, channels);
+        for (size_t i = 0; i < pixel_count; ++i) {
+            float* px = pixels + (i * static_cast<size_t>(channels));
+            for (int c = 0; c < channels; ++c) {
+                float& v = px[c];
+                if (!std::isfinite(v)) {
+                    ++stats.non_finite;
+                    v = (c == 3) ? 1.0f : 0.0f;
+                    continue;
+                }
+
+                if (c < rgb_channels) {
+                    if (clamp_negative_rgb && v < 0.0f) {
+                        ++stats.clamped_negative;
+                        v = 0.0f;
+                    }
+                    if (v > max_radiance) {
+                        ++stats.clamped_high;
+                        v = max_radiance;
+                    }
+                }
+            }
+        }
+        return stats;
+    }
+
+    bool HasNonFiniteHdrPixels(
+        const float* pixels,
+        size_t pixel_count,
+        int channels,
+        size_t* out_pixel_index = nullptr,
+        float* out_value = nullptr
+    ) {
+        if (!pixels || pixel_count == 0 || channels <= 0) {
+            return false;
+        }
+
+        for (size_t i = 0; i < pixel_count; ++i) {
+            const float* px = pixels + (i * static_cast<size_t>(channels));
+            for (int c = 0; c < channels; ++c) {
+                const float v = px[c];
+                if (!std::isfinite(v)) {
+                    if (out_pixel_index) {
+                        *out_pixel_index = i;
+                    }
+                    if (out_value) {
+                        *out_value = v;
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     std::vector<float> BuildCubemapFaceFromEquirectangular(
@@ -580,6 +655,23 @@ namespace PAIN {
                     return;
                 }
                 std::cout << "Loaded HDR texture: " << width << "x" << height << " (" << channels << " channels)" << std::endl;
+                const bool is_hdr_skybox = IsHdrSkyboxCandidate(asset_info, width, height);
+                const size_t initial_pixel_count = static_cast<size_t>(width) * static_cast<size_t>(height);
+                const HdrSanitizeStats initial_sanitize_stats = SanitizeHdrPixels(
+                    raw_pixels,
+                    initial_pixel_count,
+                    channels,
+                    is_hdr_skybox,
+                    kHdrExportMaxRadiance
+                );
+                if (initial_sanitize_stats.non_finite > 0 ||
+                    initial_sanitize_stats.clamped_negative > 0 ||
+                    initial_sanitize_stats.clamped_high > 0) {
+                    std::cout << "Sanitized HDR source '" << asset_info.raw_path.filename().string()
+                        << "' (initial): non-finite=" << initial_sanitize_stats.non_finite
+                        << ", negative-clamped=" << initial_sanitize_stats.clamped_negative
+                        << ", high-clamped=" << initial_sanitize_stats.clamped_high << std::endl;
+                }
 
                 // ========================================
                 // STEP 1: ENSURE BLOCK ALIGNMENT (HDR)
@@ -657,6 +749,35 @@ namespace PAIN {
                     return;
                 }
 
+                const size_t post_resize_pixel_count = static_cast<size_t>(width) * static_cast<size_t>(height);
+                const HdrSanitizeStats post_resize_sanitize_stats = SanitizeHdrPixels(
+                    raw_pixels,
+                    post_resize_pixel_count,
+                    channels,
+                    is_hdr_skybox,
+                    kHdrExportMaxRadiance
+                );
+                if (post_resize_sanitize_stats.non_finite > 0 ||
+                    post_resize_sanitize_stats.clamped_negative > 0 ||
+                    post_resize_sanitize_stats.clamped_high > 0) {
+                    std::cout << "Sanitized HDR source '" << asset_info.raw_path.filename().string()
+                        << "' (post-resize): non-finite=" << post_resize_sanitize_stats.non_finite
+                        << ", negative-clamped=" << post_resize_sanitize_stats.clamped_negative
+                        << ", high-clamped=" << post_resize_sanitize_stats.clamped_high << std::endl;
+                }
+
+                if (is_hdr_skybox) {
+                    size_t bad_pixel = 0;
+                    float bad_value = 0.0f;
+                    if (HasNonFiniteHdrPixels(raw_pixels, post_resize_pixel_count, channels, &bad_pixel, &bad_value)) {
+                        std::cout << "ERROR: Skybox HDR still has non-finite pixels after sanitize at pixel "
+                            << bad_pixel << " (value=" << bad_value << "). Aborting texture compilation."
+                            << std::endl;
+                        stbi_image_free(raw_pixels);
+                        return;
+                    }
+                }
+
                 const bool bake_android_cubemap =
                     platform == Platform::Android &&
                     desc_file.import_settings.value("android_bake_cubemap", false) &&
@@ -671,6 +792,37 @@ namespace PAIN {
                         cubemap_faces[face] = BuildCubemapFaceFromEquirectangular(
                             raw_pixels, width, height, channels, face, face_size
                         );
+                        HdrSanitizeStats face_stats = SanitizeHdrPixels(
+                            cubemap_faces[face].data(),
+                            static_cast<size_t>(face_size) * static_cast<size_t>(face_size),
+                            channels,
+                            true,
+                            kHdrExportMaxRadiance
+                        );
+                        if (face_stats.non_finite > 0 ||
+                            face_stats.clamped_negative > 0 ||
+                            face_stats.clamped_high > 0) {
+                            std::cout << "Sanitized baked skybox face " << face
+                                << ": non-finite=" << face_stats.non_finite
+                                << ", negative-clamped=" << face_stats.clamped_negative
+                                << ", high-clamped=" << face_stats.clamped_high << std::endl;
+                        }
+
+                        size_t bad_face_pixel = 0;
+                        float bad_face_value = 0.0f;
+                        if (HasNonFiniteHdrPixels(
+                                cubemap_faces[face].data(),
+                                static_cast<size_t>(face_size) * static_cast<size_t>(face_size),
+                                channels,
+                                &bad_face_pixel,
+                                &bad_face_value)) {
+                            std::cout << "ERROR: Baked skybox face " << face
+                                << " still has non-finite pixel at index " << bad_face_pixel
+                                << " (value=" << bad_face_value << "). Aborting texture compilation."
+                                << std::endl;
+                            stbi_image_free(raw_pixels);
+                            return;
+                        }
                     }
 
                     std::cout << "Baking Android skybox cubemap at " << face_size << "x" << face_size
@@ -1783,12 +1935,9 @@ namespace PAIN {
                 cmd << " -f " << format;
                 cmd << " -Q " << settings.value("quality", "normal");
                 cmd << " -s rgbx";
-                if (format.rfind("ASTC_", 0) == 0) {
-                    cmd << " -t ufloat";
-                }
-                else {
-                    cmd << " -t float";
-                }
+                // HDR radiance/environment data should remain non-negative.
+                // Use unsigned-float transfer so BC6H stays UF16 and avoids signed artifacts.
+                cmd << " -t ufloat";
                 cmd << " -o \"" << output_path << "\"";
                 cmd << " --create-dir";
 
@@ -1859,12 +2008,9 @@ namespace PAIN {
                 cmd << " -f " << format;
                 cmd << " -Q " << settings.value("quality", "normal");
                 cmd << " -s rgbx";
-                if (format.rfind("ASTC_", 0) == 0) {
-                    cmd << " -t ufloat";
-                }
-                else {
-                    cmd << " -t float";
-                }
+                // HDR radiance/environment data should remain non-negative.
+                // Use unsigned-float transfer so BC6H stays UF16 and avoids signed artifacts.
+                cmd << " -t ufloat";
                 cmd << " -o \"" << output_path << "\"";
                 cmd << " --create-dir";
 
