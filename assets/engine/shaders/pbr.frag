@@ -50,6 +50,11 @@ uniform float u_UseIbl;
 uniform float u_IblDiffuseStrength;
 uniform float u_IblSpecularStrength;
 uniform float u_IblMaxReflectionLod;
+uniform float u_IblRoughnessBias;
+uniform float u_IblSpecularMipBias;
+uniform float u_IblSpecularStrengthScale;
+uniform float u_IblSpecularPrefilterLumaClamp;
+uniform float u_IblSpecularFireflyClamp;
 uniform samplerCube irradianceMap;
 uniform samplerCube prefilterMap;
 uniform sampler2D brdfLut;
@@ -207,7 +212,6 @@ const int IBL_DIFFUSE = IBL_DEBUG_TYPE_BASE + 3;
 const int IBL_SPECULAR = IBL_DEBUG_TYPE_BASE + 4;
 const int DIRECT_LIGHTING = IBL_DEBUG_TYPE_BASE + 5;
 const bool IBL_FLIP_Y_AXIS = true;
-const float IBL_SPECULAR_FIRELFY_CLAMP = 32.0;
 const float SPECULAR_AA_VARIANCE_SCALE = 0.15;
 const float SPECULAR_AA_MAX_ADDITION = 0.35;
 
@@ -220,6 +224,18 @@ vec3 SanitizeIblSample(vec3 value) {
         return vec3(0.0);
     }
     return max(value, vec3(0.0));
+}
+
+vec3 ClampLuminance(vec3 value, float maxLuma) {
+    if (maxLuma <= 0.0) {
+        return value;
+    }
+    const vec3 lumaWeights = vec3(0.2126, 0.7152, 0.0722);
+    float luma = dot(value, lumaWeights);
+    if (luma > maxLuma && luma > 0.0001) {
+        value *= (maxLuma / luma);
+    }
+    return value;
 }
 
 float ApplySpecularAA(float roughness, vec3 N) {
@@ -317,20 +333,21 @@ void main() {
         
         vec3 F0 = vec3(0.04);
         F0 = mix(F0, material.color, material.metal);
+        float iblRoughness = clamp(material.rough + u_IblRoughnessBias, 0.04, 1.0);
         
         float NdotV = clamp(dot(N, V), 0.001, 1.0);
 
         // debug brdf lut. should look like gradient red/orange
         if (dbg == IBL_DEBUG_BRDFLUT)
         {
-            vec2 brdf = texture(brdfLut, vec2(NdotV, material.rough)).rg;
+            vec2 brdf = texture(brdfLut, vec2(NdotV, iblRoughness)).rg;
             brdf = clamp(brdf, vec2(0.0), vec2(1.0));
             FragColor = vec4(brdf.r, brdf.g, 0.0, 1.0);
             return;
         }
 
 
-        vec3 F = fresnelSchlickRoughness(NdotV, F0, material.rough);
+        vec3 F = fresnelSchlickRoughness(NdotV, F0, iblRoughness);
         
         // Diffuse component
         vec3 kD = clamp((1.0 - F) * (1.0 - material.metal), vec3(0.0), vec3(1.0));
@@ -353,13 +370,19 @@ void main() {
         {
             // somehow flooring the mipLevel, no interpolation fixes aura issue?
             // !TODO: jspoh figure out why and a proper fix
-            float mipLevel = material.rough * u_IblMaxReflectionLod;
+            float mipLevel = iblRoughness * u_IblMaxReflectionLod;
             mipLevel = floor(mipLevel); // Force discrete mip levels, no interpolation
             prefilteredColor = SanitizeIblSample(textureLod(prefilterMap, R, mipLevel).rgb);
         }
 #endif
 
-        prefilteredColor = SanitizeIblSample(textureLod(prefilterMap, R, material.rough * u_IblMaxReflectionLod).rgb);
+        float reflectionLod = clamp(
+            iblRoughness * u_IblMaxReflectionLod + u_IblSpecularMipBias,
+            0.0,
+            u_IblMaxReflectionLod
+        );
+        prefilteredColor = SanitizeIblSample(textureLod(prefilterMap, R, reflectionLod).rgb);
+        prefilteredColor = ClampLuminance(prefilteredColor, u_IblSpecularPrefilterLumaClamp);
 
 #ifdef DEBUG_MIP
         {
@@ -370,14 +393,14 @@ void main() {
 
         // prefilteredColor = prefilteredColor / (prefilteredColor + vec3(1.0));  // Reinhard tone mapping
 
-        vec2 envBRDF = texture(brdfLut, vec2(NdotV, material.rough)).rg;
+        vec2 envBRDF = texture(brdfLut, vec2(NdotV, iblRoughness)).rg;
         envBRDF = clamp(envBRDF, vec2(0.0), vec2(1.0));
         vec3 specularTerm = max(F * envBRDF.x + envBRDF.y, vec3(0.0));
-        vec3 specular = prefilteredColor * specularTerm * u_IblSpecularStrength;
+        vec3 specular = prefilteredColor * specularTerm * (u_IblSpecularStrength * u_IblSpecularStrengthScale);
         specular = SanitizeIblSample(specular);
         float peak = max(specular.r, max(specular.g, specular.b));
-        if (peak > IBL_SPECULAR_FIRELFY_CLAMP) {
-            specular *= IBL_SPECULAR_FIRELFY_CLAMP / peak;
+        if (u_IblSpecularFireflyClamp > 0.0 && peak > u_IblSpecularFireflyClamp) {
+            specular *= u_IblSpecularFireflyClamp / peak;
         }
 
         if (dbg == IBL_SPECULAR) {

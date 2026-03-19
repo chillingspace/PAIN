@@ -14,8 +14,10 @@
 #include "CoreSystems/Renderer/text.h"
 #include "CoreSystems/Windows/Window.h"
 #include "ECS/Controller.h"
+#include <cstring>
 
 namespace {
+	constexpr int kMaxPbrLights = 16;
 	constexpr int kMaxVolumetricLights = 4;
 	constexpr int kVolumetricFirstShadowTextureUnit = 2;
 	constexpr int kGBufferTextureCount = 5;
@@ -45,6 +47,36 @@ namespace {
 		default: return "GL_UNKNOWN_ERROR";
 		}
 	}
+
+#if defined(GL_TEXTURE_MAX_ANISOTROPY_EXT) && defined(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT)
+	bool IsTextureAnisotropySupported() {
+#ifdef PN_PLATFORM_WINDOWS
+		return GLEW_EXT_texture_filter_anisotropic == GL_TRUE ||
+			   GLEW_ARB_texture_filter_anisotropic == GL_TRUE;
+#else
+		const char* extensions = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
+		return extensions != nullptr &&
+			   std::strstr(extensions, "GL_EXT_texture_filter_anisotropic") != nullptr;
+#endif
+	}
+
+	void TryApplyMaxAnisotropy(GLenum target) {
+		static int supportState = -1;
+		static GLfloat cachedMaxAniso = 1.0f;
+		if (supportState < 0) {
+			supportState = IsTextureAnisotropySupported() ? 1 : 0;
+			if (supportState == 1) {
+				glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &cachedMaxAniso);
+				cachedMaxAniso = std::max(1.0f, cachedMaxAniso);
+			}
+		}
+		if (supportState == 1) {
+			glTexParameterf(target, GL_TEXTURE_MAX_ANISOTROPY_EXT, cachedMaxAniso);
+		}
+	}
+#else
+	void TryApplyMaxAnisotropy(GLenum) {}
+#endif
 
 	struct SavedGlState {
 		GLint framebuffer = 0;
@@ -275,6 +307,47 @@ namespace {
 				out.direction[i] = prefix + "direction";
 				out.innerCutoff[i] = prefix + "innerCutoff";
 				out.outerCutoff[i] = prefix + "outerCutoff";
+			}
+			return out;
+		}();
+
+		return names;
+	}
+
+	struct PbrUniformNames {
+		std::array<std::string, kMaxPbrLights> position;
+		std::array<std::string, kMaxPbrLights> intensity;
+		std::array<std::string, kMaxPbrLights> view;
+		std::array<std::string, kMaxPbrLights> projection;
+		std::array<std::string, kMaxPbrLights> shadowMapIdx;
+		std::array<std::string, kMaxPbrLights> type;
+		std::array<std::string, kMaxPbrLights> direction;
+		std::array<std::string, kMaxPbrLights> innerCutoff;
+		std::array<std::string, kMaxPbrLights> outerCutoff;
+		std::array<std::string, kMaxPbrShadowMaps> shadowSamplers;
+	};
+
+	const PbrUniformNames& GetPbrUniformNames() {
+		static const PbrUniformNames names = [] {
+			PbrUniformNames out{};
+			for (int i = 0; i < kMaxPbrLights; ++i) {
+				const std::string prefix = "u_Lights[" + std::to_string(i) + "].";
+				out.position[i] = prefix + "position";
+				out.intensity[i] = prefix + "L";
+				out.view[i] = prefix + "V";
+				out.projection[i] = prefix + "P";
+				out.shadowMapIdx[i] = prefix + "shadowMapIdx";
+				out.type[i] = prefix + "type";
+				out.direction[i] = prefix + "direction";
+				out.innerCutoff[i] = prefix + "innerCutoff";
+				out.outerCutoff[i] = prefix + "outerCutoff";
+			}
+			for (int i = 0; i < kMaxPbrShadowMaps; ++i) {
+#ifdef PN_PLATFORM_WINDOWS
+				out.shadowSamplers[i] = "u_ShadowMaps[" + std::to_string(i) + "]";
+#else
+				out.shadowSamplers[i] = "u_ShadowMap" + std::to_string(i);
+#endif
 			}
 			return out;
 		}();
@@ -647,6 +720,8 @@ namespace PAIN {
 
 		void ApplyGeometryMaterialState(const std::shared_ptr<Assets::Shader>& geometry_shader,
 									  const GeometryMaterialState& state) {
+			geometry_shader->SetUniform("u_DecodeAlbedoInShader",
+				GraphicsSettings::get().decode_albedo_in_shader ? 1.0f : 0.0f);
 			geometry_shader->SetUniform("material.rough", state.roughness);
 			geometry_shader->SetUniform("material.metal", state.metallic);
 			geometry_shader->SetUniform("material.color", state.baseColor);
@@ -768,9 +843,7 @@ namespace PAIN {
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-			GLfloat maxAniso = 1.0f;
-			glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso);
-			glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAniso);
+			TryApplyMaxAnisotropy(GL_TEXTURE_CUBE_MAP);
 
 			size_t dataIndex = 0;
 			for (int face = 0; face < 6; ++face) {
@@ -841,9 +914,7 @@ namespace PAIN {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-			GLfloat maxAniso = 1.0f;
-			glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso);
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAniso);
+			TryApplyMaxAnisotropy(GL_TEXTURE_2D);
 
 			for (uint32_t mip = 0; mip < tex->mips; ++mip) {
 				if (mip >= tex->mipOffsets.size()) {
@@ -2401,10 +2472,12 @@ namespace PAIN {
 		//	return;
 		//}
 
+#ifdef _DEBUG
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err before lighting pass: {}", err);
 		}
+#endif
 
 		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
 		glViewport(0, 0, winWidth, winHeight);
@@ -2447,115 +2520,68 @@ namespace PAIN {
 				glBindTexture(GL_TEXTURE_2D, emission_texture);
 			}
 
+#ifdef _DEBUG
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
 				PN_CORE_ERROR("OpenGL err after binding gbuffer textures: {}", err);
 			}
+#endif
 
 			for (int shadowSlot = 0; shadowSlot < kMaxPbrShadowMaps; ++shadowSlot) {
 				glActiveTexture(GL_TEXTURE0 + kFixedShadowTextureUnitStart + shadowSlot);
 				glBindTexture(GL_TEXTURE_2D, 0);
-#ifdef PN_PLATFORM_WINDOWS
-				pbr_shader->SetUniform("u_ShadowMaps[" + std::to_string(shadowSlot) + "]",
+				pbr_shader->SetUniform(GetPbrUniformNames().shadowSamplers[shadowSlot],
 									   kFixedShadowTextureUnitStart + shadowSlot);
-#else
-				pbr_shader->SetUniform("u_ShadowMap" + std::to_string(shadowSlot),
-									   kFixedShadowTextureUnitStart + shadowSlot);
-#endif
 			}
 
 			int shadowMapCount = 0;
 			int i{};
+			const auto& uniformNames = GetPbrUniformNames();
 			const auto allLights = lights.getAll();
 			for (const Light& l : allLights) {
-				std::stringstream ss;
+				if (i >= kMaxPbrLights) {
+					PN_CORE_WARN("[GL] Skipping extra light because shader budget is {}", kMaxPbrLights);
+					break;
+				}
 				if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
 					if (shadowMapCount >= kMaxPbrShadowMaps) {
 						PN_CORE_WARN("[GL] Skipping extra mapped shadow light at index {} because PBR shadow map budget is {}",
 									 i, kMaxPbrShadowMaps);
-						ss << "u_Lights[" << i << "].shadowMapIdx";
-						pbr_shader->SetUniform(ss.str(), -1.f);
-						ss.str("");
-						ss.clear();
+						pbr_shader->SetUniform(uniformNames.shadowMapIdx[i], -1.f);
 					}
 					else {
 						glActiveTexture(GL_TEXTURE0 + kFixedShadowTextureUnitStart + shadowMapCount);
-					glBindTexture(GL_TEXTURE_2D, l.getShadowTexture());
+						glBindTexture(GL_TEXTURE_2D, l.getShadowTexture());
 
-#ifdef PN_PLATFORM_WINDOWS
-						ss << "u_ShadowMaps[" << shadowMapCount << "]";
-#else
-						ss << "u_ShadowMap" << shadowMapCount;
-#endif
-
-						pbr_shader->SetUniform(ss.str(), kFixedShadowTextureUnitStart + shadowMapCount);
-						ss.str("");
-						ss.clear();
-
-						ss << "u_Lights[" << i << "].shadowMapIdx";
-						pbr_shader->SetUniform(ss.str(), static_cast<float>(shadowMapCount));
-						ss.str("");
-						ss.clear();
+						pbr_shader->SetUniform(uniformNames.shadowSamplers[shadowMapCount],
+											   kFixedShadowTextureUnitStart + shadowMapCount);
+						pbr_shader->SetUniform(uniformNames.shadowMapIdx[i], static_cast<float>(shadowMapCount));
 
 						++shadowMapCount;
 					}
 				} else {
-					ss << "u_Lights[" << i << "].shadowMapIdx";
-					pbr_shader->SetUniform(ss.str(), -1.f);
-					ss.str("");
-					ss.clear();
+					pbr_shader->SetUniform(uniformNames.shadowMapIdx[i], -1.f);
 				}
 
-				ss << "u_Lights[" << i << "].position";
-				pbr_shader->SetUniform(ss.str(), l.position);
-				ss.str("");
-				ss.clear();
-
-				ss << "u_Lights[" << i << "].V";
-				pbr_shader->SetUniform(ss.str(), l.view());
-				ss.str("");
-				ss.clear();
-
-				ss << "u_Lights[" << i << "].P";
-				pbr_shader->SetUniform(ss.str(), l.projection());
-				ss.str("");
-				ss.clear();
-
-				ss << "u_Lights[" << i << "].type";
-				pbr_shader->SetUniform(ss.str(), static_cast<float>(l.type));
-				ss.str("");
-				ss.clear();
-
-				// For spotlights
-				ss << "u_Lights[" << i << "].innerCutoff";
-				pbr_shader->SetUniform(ss.str(), glm::cos(glm::radians(l.inner_angle)));
-				ss.str("");
-				ss.clear();
-
-				ss << "u_Lights[" << i << "].outerCutoff";
-				pbr_shader->SetUniform(ss.str(), glm::cos(glm::radians(l.outer_angle)));
-				ss.str("");
-				ss.clear();
-
-				ss << "u_Lights[" << i << "].direction";
-				pbr_shader->SetUniform(ss.str(),
-									   l.direction); // or l.direction if you renamed it
-				ss.str("");
-				ss.clear();
-
-				ss << "u_Lights[" << i << "].L";
-				pbr_shader->SetUniform(ss.str(),
+				pbr_shader->SetUniform(uniformNames.position[i], l.position);
+				pbr_shader->SetUniform(uniformNames.view[i], l.view());
+				pbr_shader->SetUniform(uniformNames.projection[i], l.projection());
+				pbr_shader->SetUniform(uniformNames.type[i], static_cast<float>(l.type));
+				pbr_shader->SetUniform(uniformNames.innerCutoff[i], glm::cos(glm::radians(l.inner_angle)));
+				pbr_shader->SetUniform(uniformNames.outerCutoff[i], glm::cos(glm::radians(l.outer_angle)));
+				pbr_shader->SetUniform(uniformNames.direction[i], l.direction);
+				pbr_shader->SetUniform(uniformNames.intensity[i],
 									   lights.lightsOn ? l.L_intensity : glm::vec3(0.0f));
-				ss.str("");
-				ss.clear();
 
 				i++;
 			}
 
+#ifdef _DEBUG
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
 				PN_CORE_ERROR("OpenGL err after setting light uniforms: {}", err);
 			}
+#endif
 
 			pbr_shader->SetUniform("DEBUG_TYPE",
 								   (float)GraphicsSettings::get().DEBUG_PBR_MAP_TYPE);
@@ -2573,10 +2599,12 @@ namespace PAIN {
 			pbr_shader->SetUniform("u_NumLights", static_cast<float>(i));
 			pbr_shader->SetUniform("u_AmbientLight", GraphicsSettings::get().AMBIENT_LIGHT);
 
+#ifdef _DEBUG
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
 				PN_CORE_ERROR("OpenGL err after setting lighting pbr uniforms: {}", err);
 			}
+#endif
 
 			// for image based lighting
 			pbr_shader->SetUniform("u_CamPos", scene->GetActiveCamera()->pos);
@@ -2595,6 +2623,11 @@ namespace PAIN {
 			pbr_shader->SetUniform("u_UseIbl", iblAvailable ? 1.f : 0.f);
 			pbr_shader->SetUniform("u_IblDiffuseStrength", GraphicsSettings::get().ibl_diffuse_strength);
 			pbr_shader->SetUniform("u_IblSpecularStrength", GraphicsSettings::get().ibl_specular_strength);
+			pbr_shader->SetUniform("u_IblRoughnessBias", GraphicsSettings::get().ibl_roughness_bias);
+			pbr_shader->SetUniform("u_IblSpecularMipBias", GraphicsSettings::get().ibl_specular_mip_bias);
+			pbr_shader->SetUniform("u_IblSpecularStrengthScale", GraphicsSettings::get().ibl_specular_strength_scale);
+			pbr_shader->SetUniform("u_IblSpecularPrefilterLumaClamp", GraphicsSettings::get().ibl_specular_prefilter_luma_clamp);
+			pbr_shader->SetUniform("u_IblSpecularFireflyClamp", GraphicsSettings::get().ibl_specular_firefly_clamp);
 			const float maxReflectionLod = std::min(
 				GraphicsSettings::get().ibl_max_reflection_lod,
 				Skybox::get().getPrefilterMaxReflectionLod());
@@ -2612,11 +2645,14 @@ namespace PAIN {
 			glBindTexture(GL_TEXTURE_2D, Skybox::get().getBrdfLUT());
 			pbr_shader->SetUniform("brdfLut", kBrdfLutTextureUnit);
 
+#ifdef _DEBUG
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
 				PN_CORE_ERROR("OpenGL err after setting ibl uniforms: {}", err);
 			}
+#endif
 
+#ifdef _DEBUG
 			auto abortLightingPass = [&]() {
 				glEnable(GL_DEPTH_TEST);
 				glDepthMask(GL_TRUE);
@@ -2675,10 +2711,12 @@ namespace PAIN {
 				abortLightingPass();
 				return;
 			}
+#endif
 
 			// #endif
 
 			glBindVertexArray(passthrough_vao);
+#ifdef _DEBUG
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
 				PN_CORE_ERROR("OpenGL err after binding lighting VAO: {} ({})", err, DescribeGlError(err));
@@ -2690,9 +2728,11 @@ namespace PAIN {
 				abortLightingPass();
 				return;
 			}
+#endif
 
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 
+#ifdef _DEBUG
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
 				PN_CORE_ERROR("OpenGL err after drawing lighting pass: {} ({})", err, DescribeGlError(err));
@@ -2702,6 +2742,7 @@ namespace PAIN {
 					final_fbo,
 					kLightingTextureUnitsUsed);
 			}
+#endif
 		}
 
 		glEnable(GL_DEPTH_TEST);
@@ -2713,11 +2754,13 @@ namespace PAIN {
 		glBlitFramebuffer(0, 0, winWidth, winHeight, 0, 0, winWidth, winHeight,
 						  GL_DEPTH_BUFFER_BIT, GL_NEAREST); // Copy depth only
 
+#ifdef _DEBUG
 		err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after blitting depth buffer: {} ({})", err, DescribeGlError(err));
 			LogDepthBlitDiagnostics(ds_fbo, final_fbo);
 		}
+#endif
 
 		// Now final_fbo has depth info. Render skybox:
 		{
@@ -2732,10 +2775,12 @@ namespace PAIN {
 			glDepthFunc(GL_LESS);
 		}
 
+#ifdef _DEBUG
 		err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after drawing skybox in lighting pass: {}", err);
 		}
+#endif
 	}
 
 	void WindowsRenderer::DebugPass(const glm::vec3& min_p, const glm::vec3& max_p,
@@ -3198,9 +3243,15 @@ namespace PAIN {
 			if (packed.shadowMapIdx >= 0) {
 				glActiveTexture(GL_TEXTURE0 + packed.shadowTextureUnit);
 				glBindTexture(GL_TEXTURE_2D, l.getShadowTexture());
+#ifdef PN_PLATFORM_WINDOWS
 				volumetric_shader->SetUniform(
 					"u_ShadowMaps[" + std::to_string(packed.shadowMapIdx) + "]",
 					packed.shadowTextureUnit);
+#else
+				volumetric_shader->SetUniform(
+					"u_ShadowMap" + std::to_string(packed.shadowMapIdx),
+					packed.shadowTextureUnit);
+#endif
 				volumetric_shader->SetUniform(uniformNames.shadowMapIdx[lightIdx],
 											  static_cast<float>(packed.shadowMapIdx));
 			}

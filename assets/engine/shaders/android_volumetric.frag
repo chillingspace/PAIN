@@ -21,12 +21,15 @@ struct Light {
 };
 
 #define MAX_LIGHTS 4
-#define MAX_SHADOWMAPPED_LIGHTS 1
+#define MAX_SHADOWMAPPED_LIGHTS 4
 #define MAX_VOLUMETRIC_STEPS 64
 
 uniform Light u_Lights[MAX_LIGHTS];
 uniform int u_NumLights;
-uniform sampler2D u_ShadowMaps[MAX_SHADOWMAPPED_LIGHTS];
+uniform sampler2D u_ShadowMap0;
+uniform sampler2D u_ShadowMap1;
+uniform sampler2D u_ShadowMap2;
+uniform sampler2D u_ShadowMap3;
 
 uniform vec3 u_CamPos;
 uniform mat4 u_InvVP;
@@ -75,7 +78,14 @@ float sampleShadow(int shadowIdx, vec3 worldPos, Light light) {
         return 0.0;
     }
 
-    float shadowDepth = texture(u_ShadowMaps[0], projCoords.xy).r;
+    float shadowDepth = texture(u_ShadowMap0, projCoords.xy).r;
+    if (shadowIdx == 1) {
+        shadowDepth = texture(u_ShadowMap1, projCoords.xy).r;
+    } else if (shadowIdx == 2) {
+        shadowDepth = texture(u_ShadowMap2, projCoords.xy).r;
+    } else if (shadowIdx == 3) {
+        shadowDepth = texture(u_ShadowMap3, projCoords.xy).r;
+    }
     if (shadowDepth >= 0.99) {
         return 0.0;
     }

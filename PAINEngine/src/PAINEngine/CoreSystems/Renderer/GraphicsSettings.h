@@ -56,6 +56,7 @@ namespace PAIN {
 
 		// actual settings
 		bool draw_floor = false;
+		bool decode_albedo_in_shader = true; // Set false when albedo textures are uploaded as sRGB formats with hardware decode.
 
 		struct RenderStats {
 			int objects_culled = 0;
@@ -90,6 +91,19 @@ namespace PAIN {
 		float ibl_diffuse_strength = 1.0f;
 		float ibl_specular_strength = 1.0f;
 		float ibl_max_reflection_lod = 4.0f;
+#ifdef PN_PLATFORM_ANDROID
+		float ibl_roughness_bias = 0.07f;
+		float ibl_specular_mip_bias = 0.9f;
+		float ibl_specular_strength_scale = 0.82f;
+		float ibl_specular_prefilter_luma_clamp = 16.0f;
+		float ibl_specular_firefly_clamp = 9.0f;
+#else
+		float ibl_roughness_bias = 0.0f;
+		float ibl_specular_mip_bias = 0.0f;
+		float ibl_specular_strength_scale = 1.0f;
+		float ibl_specular_prefilter_luma_clamp = 0.0f;
+		float ibl_specular_firefly_clamp = 32.0f;
+#endif
 
 		// volumetric lighting (god rays / light shafts)
 		bool volumetric = true;

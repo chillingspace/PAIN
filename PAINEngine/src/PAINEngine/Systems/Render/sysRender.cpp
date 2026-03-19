@@ -219,10 +219,12 @@ namespace PAIN {
 				int editor_debug_mode = 0;
 #endif
 
+#ifdef _DEBUG
 				GLenum err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err on update loop begin: {}", err);
 				}
+#endif
 				auto syncCameraLightFromActiveCamera = [&]() {
 					auto sceneManager = services.lock()->get<Scene::SceneManager>();
 					if (!sceneManager) {
@@ -274,10 +276,12 @@ namespace PAIN {
 				glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+#ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err before render passes: {}", err);
 				}
+#endif
 
 				// Render all passes
 				GraphicsSettings::get().stats.objects_culled = 0;
@@ -286,56 +290,67 @@ namespace PAIN {
 				GraphicsSettings::get().stats.shadow_objects_rendered = 0;
 
 				// Current frame order:
-				// shadow -> geometry -> minimap -> reflections -> lighting
+				// shadow -> geometry -> minimap -> lighting
 				// -> volumetrics -> particles -> debug overlays -> post process -> UI
 				// Future refactors should keep ownership here and only move work between
 				// passes when both Windows and Android follow the same contract.
 				shadowPass(registry);
+#ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after shadow pass: {}", err);
 				}
+#endif
 				geometryPass(registry);
+#ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after geometry pass: {}", err);
 				}
+#endif
 				minimapPass(registry);
+#ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after minimap pass: {}", err);
 				}
-				reflectionPass(registry);
-				err = glGetError();
-				if (err != GL_NO_ERROR) {
-					PN_CORE_ERROR("OpenGL err after reflection pass: {}", err);
-				}
+#endif
 				lightingPass(registry);
+#ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after lighting pass: {}", err);
 				}
+#endif
 				volumetricPass(registry);
+#ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after volumetric pass: {}", err);
 				}
+#endif
 				particlePass(registry);
+#ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after particle pass: {}", err);
 				}
+#endif
 				debugPass(registry, editor_debug_mode);
+#ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after debug pass: {}", err);
 				}
+#endif
 				
 				services.lock()->get<sRenderer>()->postProcessPass(!editor_visible);
+#ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after post process pass: {}", err);
 				}
+#endif
 
 				if (editor_visible) {
 					glBindFramebuffer(GL_FRAMEBUFFER, rendererService->getFinalFbo());
@@ -345,19 +360,23 @@ namespace PAIN {
 				}
 
 				uiPass(registry);
+#ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after UI pass: {}", err);
 				}
+#endif
 
 				glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
 			}
 
+#ifdef _DEBUG
 			GLenum err = glGetError();
 			while (err != GL_NO_ERROR) {
 				PN_CORE_ERROR("OpenGL err on update loop end: {}", err);
 				err = glGetError();
 			}
+#endif
 		}
 
 		void System::onFixedUpdate(AppTiming timing, entt::registry& registry) {

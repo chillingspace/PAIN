@@ -50,6 +50,11 @@ uniform float u_UseIbl;
 uniform float u_IblDiffuseStrength;
 uniform float u_IblSpecularStrength;
 uniform float u_IblMaxReflectionLod;
+uniform float u_IblRoughnessBias;
+uniform float u_IblSpecularMipBias;
+uniform float u_IblSpecularStrengthScale;
+uniform float u_IblSpecularPrefilterLumaClamp;
+uniform float u_IblSpecularFireflyClamp;
 uniform samplerCube irradianceMap;
 uniform samplerCube prefilterMap;
 uniform sampler2D brdfLut;
@@ -220,11 +225,6 @@ const int IBL_DIFFUSE = IBL_DEBUG_TYPE_BASE + 3;
 const int IBL_SPECULAR = IBL_DEBUG_TYPE_BASE + 4;
 const int DIRECT_LIGHTING = IBL_DEBUG_TYPE_BASE + 5;
 const bool IBL_FLIP_Y_AXIS = true;
-const float IBL_SPECULAR_FIRELFY_CLAMP = 9.0;
-const float IBL_SPECULAR_PREFILTER_LUMA_CLAMP = 16.0;
-const float IBL_SPECULAR_MIP_BIAS = 0.9;
-const float ANDROID_IBL_SPECULAR_STRENGTH_SCALE = 0.82;
-const float ANDROID_IBL_ROUGHNESS_BIAS = 0.07;
 const float SPECULAR_AA_VARIANCE_SCALE = 0.15;
 const float SPECULAR_AA_MAX_ADDITION = 0.35;
 
@@ -240,6 +240,9 @@ vec3 SanitizeIblSample(vec3 value) {
 }
 
 vec3 ClampLuminance(vec3 value, float maxLuma) {
+    if (maxLuma <= 0.0) {
+        return value;
+    }
     const vec3 lumaWeights = vec3(0.2126, 0.7152, 0.0722);
     float luma = dot(value, lumaWeights);
     if (luma > maxLuma && luma > 0.0001) {
@@ -343,7 +346,7 @@ void main() {
         
         vec3 F0 = vec3(0.04);
         F0 = mix(F0, material.color, material.metal);
-        float iblRoughness = clamp(material.rough + ANDROID_IBL_ROUGHNESS_BIAS, 0.04, 1.0);
+        float iblRoughness = clamp(material.rough + u_IblRoughnessBias, 0.04, 1.0);
         
         float NdotV = clamp(dot(N, V), 0.001, 1.0);
 
@@ -387,12 +390,12 @@ void main() {
 #endif
 
         float reflectionLod = clamp(
-            iblRoughness * u_IblMaxReflectionLod + IBL_SPECULAR_MIP_BIAS,
+            iblRoughness * u_IblMaxReflectionLod + u_IblSpecularMipBias,
             0.0,
             u_IblMaxReflectionLod
         );
         prefilteredColor = SanitizeIblSample(textureLod(prefilterMap, R, reflectionLod).rgb);
-        prefilteredColor = ClampLuminance(prefilteredColor, IBL_SPECULAR_PREFILTER_LUMA_CLAMP);
+        prefilteredColor = ClampLuminance(prefilteredColor, u_IblSpecularPrefilterLumaClamp);
 
 #ifdef DEBUG_MIP
         {
@@ -406,11 +409,11 @@ void main() {
         vec2 envBRDF = texture(brdfLut, vec2(NdotV, iblRoughness)).rg;
         envBRDF = clamp(envBRDF, vec2(0.0), vec2(1.0));
         vec3 specularTerm = max(F * envBRDF.x + envBRDF.y, vec3(0.0));
-        vec3 specular = prefilteredColor * specularTerm * (u_IblSpecularStrength * ANDROID_IBL_SPECULAR_STRENGTH_SCALE);
+        vec3 specular = prefilteredColor * specularTerm * (u_IblSpecularStrength * u_IblSpecularStrengthScale);
         specular = SanitizeIblSample(specular);
         float peak = max(specular.r, max(specular.g, specular.b));
-        if (peak > IBL_SPECULAR_FIRELFY_CLAMP) {
-            specular *= IBL_SPECULAR_FIRELFY_CLAMP / peak;
+        if (u_IblSpecularFireflyClamp > 0.0 && peak > u_IblSpecularFireflyClamp) {
+            specular *= u_IblSpecularFireflyClamp / peak;
         }
 
         if (dbg == IBL_SPECULAR) {

@@ -40,6 +40,7 @@ struct Material {
 uniform Material material;
 uniform vec3 u_EmissionOverride;
 uniform float u_UseEmissionOverride;
+uniform float u_DecodeAlbedoInShader;
 uniform float DEBUG_TYPE;
 
 const int IBL_DEBUG_TYPE = 8;
@@ -167,7 +168,11 @@ vec3 ResolveGeometryColor() {
         return material.color;
     }
 
-    return pow(texture(material.tex, vTexCoords).rgb, vec3(2.2));
+    vec3 albedo = texture(material.tex, vTexCoords).rgb;
+    if (u_DecodeAlbedoInShader > 0.5) {
+        return pow(albedo, vec3(2.2));
+    }
+    return albedo;
 }
 
 void main() {

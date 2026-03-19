@@ -975,6 +975,7 @@ namespace PAIN {
 
             GLint numUniforms = 0;
             glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &numUniforms);
+#ifdef _DEBUG
             PN_CORE_INFO("Linked program {} has {} active uniforms", program, numUniforms);
 
             for (int i = 0; i < numUniforms; i++) {
@@ -985,6 +986,7 @@ namespace PAIN {
                 glGetActiveUniform(program, i, 256, &length, &size, &type, name);
                 PN_CORE_INFO("  Uniform {}: '{}'", i, name);
             }
+#endif
 
             if (!CheckProgram(program)) {
 #ifdef PN_PLATFORM_ANDROID
