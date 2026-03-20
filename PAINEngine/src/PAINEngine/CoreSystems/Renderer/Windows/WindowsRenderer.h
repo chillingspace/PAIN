@@ -171,6 +171,9 @@ namespace PAIN {
 		void VolumetricPass(std::shared_ptr<Scene::SceneManager> scene,
 						   const LightSources& lights);
 		void PostProcessPass(bool presentToSwapchain);
+		void InvalidateFramebufferAttachments(GLuint fbo, bool invalidateColor = false,
+											 bool invalidateDepth = false,
+											 bool invalidateStencil = false);
 
 		void Render2DTexture(GLuint texture_id, const glm::vec2& pos,
 							 glm::vec2& scale,

@@ -3789,11 +3789,54 @@ namespace PAIN {
 
 		restorePassState();
 
+#ifdef PN_PLATFORM_ANDROID
+		InvalidateFramebufferAttachments(pp_fbo, true, false, false);
+		InvalidateFramebufferAttachments(pp2_fbo, true, false, false);
+#endif
+
 #ifdef _DEBUG
 		err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after PostProcessPass: {}", err);
 		}
+#endif
+	}
+
+	void WindowsRenderer::InvalidateFramebufferAttachments(GLuint fbo, bool invalidateColor,
+											 bool invalidateDepth,
+											 bool invalidateStencil) {
+#ifdef PN_PLATFORM_ANDROID
+		if (fbo == 0) {
+			return;
+		}
+
+		GLenum attachments[3];
+		int count = 0;
+
+		if (invalidateColor) {
+			attachments[count++] = GL_COLOR_ATTACHMENT0;
+		}
+		if (invalidateDepth) {
+			attachments[count++] = GL_DEPTH_ATTACHMENT;
+		}
+		if (invalidateStencil) {
+			attachments[count++] = GL_STENCIL_ATTACHMENT;
+		}
+
+		if (count == 0) {
+			return;
+		}
+
+		GLint prevFbo = 0;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glInvalidateFramebuffer(GL_FRAMEBUFFER, count, attachments);
+		glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(prevFbo));
+#else
+		(void)fbo;
+		(void)invalidateColor;
+		(void)invalidateDepth;
+		(void)invalidateStencil;
 #endif
 	}
 

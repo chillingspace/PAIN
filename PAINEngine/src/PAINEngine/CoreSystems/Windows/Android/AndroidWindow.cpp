@@ -580,6 +580,18 @@ namespace PAIN {
             return frame_buffer;
         }
 
+        std::string Android_Window::getWritablePath() const {
+            if (m_App && m_App->activity) {
+                if (m_App->activity->externalDataPath) {
+                    return std::string(m_App->activity->externalDataPath);
+                }
+                if (m_App->activity->internalDataPath) {
+                    return std::string(m_App->activity->internalDataPath);
+                }
+            }
+            return "";
+        }
+
         void Android_Window::safeShutdown() {
             //auto* pain_app = static_cast<PAIN::Application*>(m_EventPackage.app);
             //if (pain_app) {

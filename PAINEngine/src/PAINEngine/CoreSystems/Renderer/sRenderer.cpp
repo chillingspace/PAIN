@@ -10,11 +10,15 @@
 #include "CoreSystems/Path/Path.h"
 #include "CoreSystems/Audio/Audio.h"
 #include "CoreSystems/Renderer/skybox.h"
+#include "GraphicsSettings.h"
+#include "ThermalProfiler.h"
+#include <filesystem>
 
 // For windows event include
 #include "CoreSystems/Events/GLFW/WindowEvents.h"
 #ifdef PN_PLATFORM_ANDROID
 #include "../Events/Android/SurfaceEvents.h"
+#include "../Windows/Android/AndroidWindow.h"
 #endif
 
 #include "ECS/Controller.h"
@@ -35,16 +39,32 @@ namespace PAIN {
 		w_renderer = nullptr;
 	}
 	void sRenderer::onAttach() {
+		g_ThermalProfiler = std::make_unique<ThermalProfiler>();
+		g_ThermalProfiler->Init();
 
-		//Create window render
+#ifdef PN_PLATFORM_ANDROID
+		if (g_ThermalProfiler) {
+			auto window_sys = services->get<Window::Window>();
+			auto* androidWindow = static_cast<Window::Android_Window*>(window_sys.get());
+			std::string writablePath = androidWindow ? androidWindow->getWritablePath() : "";
+			if (!writablePath.empty()) {
+				std::filesystem::path logDir = std::filesystem::path(writablePath) / "PAIN";
+				std::error_code ec;
+				std::filesystem::create_directories(logDir, ec);
+				if (!ec) {
+					g_ThermalProfiler->EnableLogging((logDir / "thermal_profile.csv").string());
+				} else {
+					PN_CORE_WARN("Failed to create thermal log directory: {}", ec.message());
+				}
+			} else {
+				PN_CORE_WARN("Android writable path unavailable, thermal CSV logging disabled");
+			}
+		}
+#endif
+
 		w_renderer = std::make_unique<WindowsRenderer>();
-
 		w_renderer->Init(services);
 
-		//Init scene
-		//m_Scene = services->get<Scene::SceneManager>();
-
-		//Call update one frame to ensure initialization
 		onUpdate(AppTiming());
 
 		GLenum err = glGetError();
@@ -65,6 +85,34 @@ namespace PAIN {
 		}
 		//Upload textures
 		if(getPendingTexUploadCount() > 0) processUploads();
+
+#ifdef PN_PLATFORM_ANDROID
+		if (timing.dt > 0.0f) {
+			static float smoothedFrameMs = 16.67f;
+			static bool thermalReduced = false;
+			const float frameMs = timing.dt * 1000.0f;
+			smoothedFrameMs = smoothedFrameMs * 0.92f + frameMs * 0.08f;
+
+			auto& gs = GraphicsSettings::get();
+			if (!thermalReduced && smoothedFrameMs > 27.0f) {
+				thermalReduced = true;
+				gs.android_battery_saver_mode = true;
+				gs.android_target_fps = gs.android_battery_saver_fps;
+				gs.bloom_quality = std::max(1, gs.bloom_quality - 1);
+				gs.volumetric_steps = std::max(6, gs.volumetric_steps - 2);
+				gs.volumetric_resolution_scale = std::max(0.3f, gs.volumetric_resolution_scale - 0.1f);
+				PN_CORE_WARN("Android thermal guard enabled (smoothed {:.2f} ms)", smoothedFrameMs);
+			} else if (thermalReduced && smoothedFrameMs < 19.0f) {
+				thermalReduced = false;
+				gs.android_battery_saver_mode = false;
+				gs.android_target_fps = 0;
+				gs.bloom_quality = std::max(gs.bloom_quality, 2);
+				gs.volumetric_steps = std::max(gs.volumetric_steps, 10);
+				gs.volumetric_resolution_scale = std::max(gs.volumetric_resolution_scale, 0.4f);
+				PN_CORE_INFO("Android thermal guard disabled (smoothed {:.2f} ms)", smoothedFrameMs);
+			}
+		}
+#endif
 	}
 
 	void sRenderer::queueTexUpload(std::shared_ptr<Assets::Texture> tex) {

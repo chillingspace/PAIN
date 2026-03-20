@@ -3,6 +3,7 @@
 
 #include "CoreSystems/Renderer/Light.h"
 #include "CoreSystems/Renderer/sRenderer.h"
+#include "CoreSystems/Renderer/ThermalProfiler.h"
 #include "CoreSystems/Renderer/text.h"
 #include "CoreSystems/Scene/Scene.h"	  
 #include "ECS/Controller.h"
@@ -208,6 +209,9 @@ namespace PAIN {
 		}
 
 		void System::onUpdate(AppTiming timing, entt::registry& registry) {
+			if (g_ThermalProfiler) {
+				g_ThermalProfiler->BeginFrame();
+			}
 			{
 #ifdef _DEBUG
 				auto editor = services.lock()->get<Editor::Editor>();
@@ -295,6 +299,7 @@ namespace PAIN {
 				// Future refactors should keep ownership here and only move work between
 				// passes when both Windows and Android follow the same contract.
 				shadowPass(registry);
+				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("shadow");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
@@ -302,6 +307,8 @@ namespace PAIN {
 				}
 #endif
 				geometryPass(registry);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("shadow");
+				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("geometry");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
@@ -309,6 +316,8 @@ namespace PAIN {
 				}
 #endif
 				minimapPass(registry);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("geometry");
+				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("minimap");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
@@ -316,6 +325,8 @@ namespace PAIN {
 				}
 #endif
 				lightingPass(registry);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("minimap");
+				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("lighting");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
@@ -323,6 +334,8 @@ namespace PAIN {
 				}
 #endif
 				volumetricPass(registry);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("lighting");
+				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("volumetric");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
@@ -330,6 +343,8 @@ namespace PAIN {
 				}
 #endif
 				particlePass(registry);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("volumetric");
+				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("particle");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
@@ -337,6 +352,8 @@ namespace PAIN {
 				}
 #endif
 				debugPass(registry, editor_debug_mode);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("particle");
+				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("debug");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
@@ -345,6 +362,8 @@ namespace PAIN {
 #endif
 				
 				services.lock()->get<sRenderer>()->postProcessPass(!editor_visible);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("debug");
+				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("postprocess");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
@@ -359,25 +378,33 @@ namespace PAIN {
 					glBindFramebuffer(GL_FRAMEBUFFER, 0);
 				}
 
-				uiPass(registry);
+			uiPass(registry);
+			if (g_ThermalProfiler) g_ThermalProfiler->EndPass("postprocess");
+			if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("ui");
 #ifdef _DEBUG
-				err = glGetError();
-				if (err != GL_NO_ERROR) {
-					PN_CORE_ERROR("OpenGL err after UI pass: {}", err);
-				}
-#endif
-
-				glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
-			}
-
-#ifdef _DEBUG
-			GLenum err = glGetError();
-			while (err != GL_NO_ERROR) {
-				PN_CORE_ERROR("OpenGL err on update loop end: {}", err);
-				err = glGetError();
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after UI pass: {}", err);
 			}
 #endif
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
+
+		if (g_ThermalProfiler) g_ThermalProfiler->EndPass("ui");
+
+		if (g_ThermalProfiler) {
+			g_ThermalProfiler->EndFrame();
+		}
+
+#ifdef _DEBUG
+		GLenum err = glGetError();
+		while (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err on update loop end: {}", err);
+			err = glGetError();
+		}
+#endif
+	}
 
 		void System::onFixedUpdate(AppTiming timing, entt::registry& registry) {
 			// Rendering doesn't need fixed updates
