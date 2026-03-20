@@ -96,3 +96,6 @@ installer/INSTALLERFILES
 
 # do not ignore assets
 !assets/**
+
+# Local git worktrees
+.worktrees/

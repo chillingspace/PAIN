@@ -14,8 +14,10 @@
 #include "CoreSystems/Renderer/text.h"
 #include "CoreSystems/Windows/Window.h"
 #include "ECS/Controller.h"
+#include <cstring>
 
 namespace {
+	constexpr int kMaxPbrLights = 16;
 	constexpr int kMaxVolumetricLights = 4;
 	constexpr int kVolumetricFirstShadowTextureUnit = 2;
 	constexpr int kGBufferTextureCount = 5;
@@ -25,6 +27,16 @@ namespace {
 	constexpr int kPrefilterTextureUnit = kIrradianceTextureUnit + 1;
 	constexpr int kBrdfLutTextureUnit = kPrefilterTextureUnit + 1;
 	constexpr int kLightingTextureUnitsUsed = kBrdfLutTextureUnit + 1;
+	constexpr GLuint kPbrLightUboBindingPoint = 0;
+
+	struct alignas(16) PbrLightGpuData {
+		glm::vec4 position_type = glm::vec4(0.0f); // xyz + light type
+		glm::vec4 intensity_shadow = glm::vec4(0.0f, 0.0f, 0.0f, -1.0f); // rgb + shadow map index
+		glm::vec4 direction_inner = glm::vec4(0.0f, 0.0f, -1.0f, 0.0f); // xyz + inner cutoff
+		glm::vec4 outer_padding = glm::vec4(0.0f); // x = outer cutoff
+		glm::mat4 view = glm::mat4(1.0f);
+		glm::mat4 projection = glm::mat4(1.0f);
+	};
 
 	const char* DescribeGlError(GLenum err) {
 		switch (err) {
@@ -46,6 +58,94 @@ namespace {
 		}
 	}
 
+#if defined(GL_TEXTURE_MAX_ANISOTROPY_EXT) && defined(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT)
+	bool IsTextureAnisotropySupported() {
+#ifdef PN_PLATFORM_WINDOWS
+		return GLEW_EXT_texture_filter_anisotropic == GL_TRUE ||
+			   GLEW_ARB_texture_filter_anisotropic == GL_TRUE;
+#else
+		const char* extensions = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
+		return extensions != nullptr &&
+			   std::strstr(extensions, "GL_EXT_texture_filter_anisotropic") != nullptr;
+#endif
+	}
+
+	void TryApplyMaxAnisotropy(GLenum target) {
+		static int supportState = -1;
+		static GLfloat cachedMaxAniso = 1.0f;
+		if (supportState < 0) {
+			supportState = IsTextureAnisotropySupported() ? 1 : 0;
+			if (supportState == 1) {
+				glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &cachedMaxAniso);
+				cachedMaxAniso = std::max(1.0f, cachedMaxAniso);
+			}
+		}
+		if (supportState == 1) {
+			glTexParameterf(target, GL_TEXTURE_MAX_ANISOTROPY_EXT, cachedMaxAniso);
+		}
+	}
+#else
+	void TryApplyMaxAnisotropy(GLenum) {}
+#endif
+
+	struct SavedGlState {
+		GLint framebuffer = 0;
+		GLint viewport[4] = {0, 0, 0, 0};
+		GLfloat clearColor[4] = {0.f, 0.f, 0.f, 0.f};
+		GLboolean depthTest = GL_FALSE;
+		GLboolean depthMask = GL_TRUE;
+		GLboolean blend = GL_FALSE;
+		GLint blendSrcRgb = GL_ONE;
+		GLint blendDstRgb = GL_ZERO;
+		GLint blendSrcAlpha = GL_ONE;
+		GLint blendDstAlpha = GL_ZERO;
+	};
+
+	SavedGlState CaptureGlState() {
+		SavedGlState state{};
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &state.framebuffer);
+		glGetIntegerv(GL_VIEWPORT, state.viewport);
+		glGetFloatv(GL_COLOR_CLEAR_VALUE, state.clearColor);
+		state.depthTest = glIsEnabled(GL_DEPTH_TEST);
+		glGetBooleanv(GL_DEPTH_WRITEMASK, &state.depthMask);
+		state.blend = glIsEnabled(GL_BLEND);
+		glGetIntegerv(GL_BLEND_SRC_RGB, &state.blendSrcRgb);
+		glGetIntegerv(GL_BLEND_DST_RGB, &state.blendDstRgb);
+		glGetIntegerv(GL_BLEND_SRC_ALPHA, &state.blendSrcAlpha);
+		glGetIntegerv(GL_BLEND_DST_ALPHA, &state.blendDstAlpha);
+		return state;
+	}
+
+	void RestoreGlState(const SavedGlState& state) {
+		glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(state.framebuffer));
+		glViewport(state.viewport[0], state.viewport[1], state.viewport[2], state.viewport[3]);
+		glClearColor(state.clearColor[0], state.clearColor[1], state.clearColor[2], state.clearColor[3]);
+		if (state.depthTest) {
+			glEnable(GL_DEPTH_TEST);
+		} else {
+			glDisable(GL_DEPTH_TEST);
+		}
+		glDepthMask(state.depthMask == GL_TRUE ? GL_TRUE : GL_FALSE);
+		if (state.blend) {
+			glEnable(GL_BLEND);
+		} else {
+			glDisable(GL_BLEND);
+		}
+		glBlendFuncSeparate(state.blendSrcRgb, state.blendDstRgb, state.blendSrcAlpha, state.blendDstAlpha);
+	}
+
+	bool ValidateFramebufferBinding(GLuint fbo, const char* label) {
+		GLint previousFramebuffer = 0;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &previousFramebuffer);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(previousFramebuffer));
+		if (status != GL_FRAMEBUFFER_COMPLETE) {
+			PN_CORE_ERROR("{} is incomplete! Status: 0x{:x}", label, status);
+			return false;
+		}
+		return true;
+	}
 	bool ValidateProgramForDraw(GLuint program, const char* label) {
 		if (program == 0 || !glIsProgram(program)) {
 			PN_CORE_ERROR("[GL] {} program handle is invalid: {}", label, program);
@@ -217,6 +317,26 @@ namespace {
 				out.direction[i] = prefix + "direction";
 				out.innerCutoff[i] = prefix + "innerCutoff";
 				out.outerCutoff[i] = prefix + "outerCutoff";
+			}
+			return out;
+		}();
+
+		return names;
+	}
+
+	struct PbrUniformNames {
+		std::array<std::string, kMaxPbrShadowMaps> shadowSamplers;
+	};
+
+	const PbrUniformNames& GetPbrUniformNames() {
+		static const PbrUniformNames names = [] {
+			PbrUniformNames out{};
+			for (int i = 0; i < kMaxPbrShadowMaps; ++i) {
+#ifdef PN_PLATFORM_WINDOWS
+				out.shadowSamplers[i] = "u_ShadowMaps[" + std::to_string(i) + "]";
+#else
+				out.shadowSamplers[i] = "u_ShadowMap" + std::to_string(i);
+#endif
 			}
 			return out;
 		}();
@@ -427,6 +547,229 @@ namespace {
 }
 
 namespace PAIN {
+	namespace {
+		std::string ToLowerAsciiCopy(std::string value) {
+			std::transform(value.begin(), value.end(), value.begin(),
+				[](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+			return value;
+		}
+
+		bool ContainsAnyToken(const std::string& value, std::initializer_list<const char*> needles) {
+			for (const char* needle : needles) {
+				if (value.find(needle) != std::string::npos) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		bool IsLikelyPackedOrmPath(const std::filesystem::path& texturePath) {
+			if (texturePath.empty()) {
+				return false;
+			}
+			const std::string lower = ToLowerAsciiCopy(texturePath.lexically_normal().generic_string());
+			return ContainsAnyToken(lower, {
+				"occlusionroughnessmetallic",
+				"metallicroughness",
+				"_orm",
+				"_mrao",
+				"_rma",
+				"_arm",
+				"_mra"
+			});
+		}
+
+		struct GeometryMaterialState {
+			GLuint albedoTexture = 0;
+			GLuint aoTexture = 0;
+			GLuint normalTexture = 0;
+			GLuint roughnessTexture = 0;
+			GLuint metallicTexture = 0;
+			GLuint emissionTexture = 0;
+			glm::vec3 aoChannelMask = glm::vec3(1.0f, 0.0f, 0.0f);
+			glm::vec3 roughnessChannelMask = glm::vec3(1.0f, 0.0f, 0.0f);
+			glm::vec3 metallicChannelMask = glm::vec3(1.0f, 0.0f, 0.0f);
+			glm::vec3 baseColor = glm::vec3(1.0f);
+			float roughness = 0.5f;
+			float metallic = 0.0f;
+			bool useEmissionOverride = false;
+			glm::vec3 emissionOverride = glm::vec3(0.0f);
+		};
+
+		GLuint ResolveMaterialTexture(const std::shared_ptr<Assets::Manager>& assetManager,
+									 const MaterialInstance& material,
+									 const std::filesystem::path& assetPath,
+									 const Assets::GUID& overrideGuid,
+									 bool enabled) {
+			if (!enabled) {
+				return 0;
+			}
+
+			auto texOpt = material.useOverrides
+				? assetManager->getAsset<Assets::Texture>(overrideGuid)
+				: assetManager->getAsset<Assets::Texture>(assetPath);
+			return texOpt.has_value() && texOpt.value() ? texOpt.value()->gl_texture : 0u;
+		}
+
+		GeometryMaterialState BuildGeometryMaterialState(const std::shared_ptr<Assets::Manager>& assetManager,
+											 const ModelRenderer& component,
+											 size_t submeshIndex) {
+			GeometryMaterialState state{};
+			if (!component.cachedModelAsset || submeshIndex >= component.cachedModelAsset->submeshes.size()) {
+				return state;
+			}
+
+			const auto& submesh = component.cachedModelAsset->submeshes[submeshIndex];
+			if (submesh.materialIndex >= component.materials.size()) {
+				return state;
+			}
+
+			const MaterialInstance& material = component.materials[submesh.materialIndex];
+			state.useEmissionOverride = material.useOverrides;
+			state.emissionOverride = material.emissiveOverride;
+
+			// Resolve live material state every draw. Submesh caches are initialized once
+			// and are not currently invalidated on editor/runtime material edits, so using
+			// them here can produce stale G-buffer results.
+
+			auto materialAssetOpt = assetManager->getAsset<Assets::Material>(material.materialGUID);
+			auto materialAsset = materialAssetOpt.has_value() ? materialAssetOpt.value() : nullptr;
+			if (!materialAsset) {
+				return state;
+			}
+
+			const auto& gs = GraphicsSettings::get();
+			state.albedoTexture = ResolveMaterialTexture(assetManager, material, materialAsset->albedoTexturePath,
+				material.albedoTextureOverride, gs.DEBUG_USE_DIFFUSE_MAP);
+			state.aoTexture = ResolveMaterialTexture(assetManager, material, materialAsset->aoTexturePath,
+				material.aoTextureOverride, gs.DEBUG_USE_AO_MAP);
+			state.normalTexture = ResolveMaterialTexture(assetManager, material, materialAsset->normalTexturePath,
+				material.normalTextureOverride, gs.DEBUG_USE_NORMAL_MAP);
+			state.roughnessTexture = ResolveMaterialTexture(assetManager, material, materialAsset->roughnessTexturePath,
+				material.roughnessTextureOverride, gs.DEBUG_USE_ROUGHNESSMETALLIC_MAP);
+			state.metallicTexture = ResolveMaterialTexture(assetManager, material, materialAsset->metallicTexturePath,
+				material.metallicTextureOverride, gs.DEBUG_USE_ROUGHNESSMETALLIC_MAP);
+			state.emissionTexture = ResolveMaterialTexture(assetManager, material, materialAsset->emissiveTexturePath,
+				material.emissiveTextureOverride, gs.DEBUG_USE_EMISSION_MAP);
+			state.baseColor = material.useOverrides ? material.baseColorOverride : materialAsset->baseColor;
+			state.metallic = material.useOverrides ? material.metallicOverride : materialAsset->metallic;
+			state.roughness = material.useOverrides ? material.roughnessOverride : materialAsset->roughness;
+
+			const std::string roughnessPathLower = ToLowerAsciiCopy(materialAsset->roughnessTexturePath.lexically_normal().generic_string());
+			const std::string metallicPathLower = ToLowerAsciiCopy(materialAsset->metallicTexturePath.lexically_normal().generic_string());
+			const std::string aoPathLower = ToLowerAsciiCopy(materialAsset->aoTexturePath.lexically_normal().generic_string());
+
+			const bool sameRoughMetalTexture = state.roughnessTexture != 0 && state.roughnessTexture == state.metallicTexture;
+			const bool sameAoRoughTexture = state.aoTexture != 0 && state.aoTexture == state.roughnessTexture;
+			const bool sameRoughMetalPath = !roughnessPathLower.empty() && roughnessPathLower == metallicPathLower;
+			const bool sameAoRoughPath = !aoPathLower.empty() && aoPathLower == roughnessPathLower;
+
+			const bool sameRoughMetalOverride = material.useOverrides &&
+				material.roughnessTextureOverride.IsValid() &&
+				material.roughnessTextureOverride == material.metallicTextureOverride;
+			const bool sameAoRoughOverride = material.useOverrides &&
+				material.aoTextureOverride.IsValid() &&
+				material.aoTextureOverride == material.roughnessTextureOverride;
+			const bool allowPathHeuristics = !material.useOverrides;
+
+			const bool roughMetalLinked = sameRoughMetalTexture ||
+				sameRoughMetalOverride ||
+				(allowPathHeuristics && sameRoughMetalPath);
+			const bool aoRoughLinked = sameAoRoughTexture ||
+				sameAoRoughOverride ||
+				(allowPathHeuristics && sameAoRoughPath);
+
+			const bool packedHint = (allowPathHeuristics && (
+				IsLikelyPackedOrmPath(materialAsset->roughnessTexturePath) ||
+				IsLikelyPackedOrmPath(materialAsset->metallicTexturePath) ||
+				IsLikelyPackedOrmPath(materialAsset->aoTexturePath)
+				)) || aoRoughLinked;
+
+			const bool usePackedMetalRough = state.roughnessTexture != 0 &&
+				state.metallicTexture != 0 &&
+				roughMetalLinked &&
+				(packedHint || aoRoughLinked);
+
+			if (usePackedMetalRough) {
+				// glTF ORM convention: R=AO, G=Roughness, B=Metallic.
+				state.roughnessChannelMask = glm::vec3(0.0f, 1.0f, 0.0f);
+				state.metallicChannelMask = glm::vec3(0.0f, 0.0f, 1.0f);
+			}
+
+			const bool usePackedAo = state.aoTexture != 0 &&
+				aoRoughLinked &&
+				(usePackedMetalRough || packedHint);
+
+			if (usePackedAo) {
+				state.aoChannelMask = glm::vec3(1.0f, 0.0f, 0.0f);
+			}
+
+			return state;
+		}
+
+		void ApplyGeometryMaterialState(const std::shared_ptr<Assets::Shader>& geometry_shader,
+									  const GeometryMaterialState& state) {
+			geometry_shader->SetUniform("u_DecodeAlbedoInShader",
+				GraphicsSettings::get().decode_albedo_in_shader ? 1.0f : 0.0f);
+			geometry_shader->SetUniform("material.rough", state.roughness);
+			geometry_shader->SetUniform("material.metal", state.metallic);
+			geometry_shader->SetUniform("material.color", state.baseColor);
+			geometry_shader->SetUniform("u_UseEmissionOverride", state.useEmissionOverride ? 1.0f : 0.0f);
+			geometry_shader->SetUniform("u_EmissionOverride",
+				state.useEmissionOverride ? state.emissionOverride : glm::vec3(0.0f));
+			geometry_shader->SetUniform("material.ao_channel_mask", state.aoChannelMask);
+			geometry_shader->SetUniform("material.roughness_channel_mask", state.roughnessChannelMask);
+			geometry_shader->SetUniform("material.metallic_channel_mask", state.metallicChannelMask);
+
+			const bool hasTexture = state.albedoTexture != 0;
+			geometry_shader->SetUniform("material.useTex", hasTexture ? 1.0f : 0.0f);
+			if (hasTexture) {
+				glActiveTexture(GL_TEXTURE6);
+				glBindTexture(GL_TEXTURE_2D, state.albedoTexture);
+				geometry_shader->SetUniform("material.tex", 6);
+			}
+
+			const bool useAo = state.aoTexture != 0;
+			geometry_shader->SetUniform("material.use_ao", useAo ? 1.0f : 0.0f);
+			if (useAo) {
+				glActiveTexture(GL_TEXTURE7);
+				glBindTexture(GL_TEXTURE_2D, state.aoTexture);
+				geometry_shader->SetUniform("material.ao_map", 7);
+			}
+
+			const bool useNormal = state.normalTexture != 0;
+			geometry_shader->SetUniform("material.use_normal", useNormal ? 1.0f : 0.0f);
+			if (useNormal) {
+				glActiveTexture(GL_TEXTURE8);
+				glBindTexture(GL_TEXTURE_2D, state.normalTexture);
+				geometry_shader->SetUniform("material.normal_map", 8);
+			}
+
+			const bool useRoughness = state.roughnessTexture != 0;
+			geometry_shader->SetUniform("material.use_roughness", useRoughness ? 1.0f : 0.0f);
+			if (useRoughness) {
+				glActiveTexture(GL_TEXTURE9);
+				glBindTexture(GL_TEXTURE_2D, state.roughnessTexture);
+				geometry_shader->SetUniform("material.roughness_map", 9);
+			}
+
+			const bool useMetallic = state.metallicTexture != 0;
+			geometry_shader->SetUniform("material.use_metallic", useMetallic ? 1.0f : 0.0f);
+			if (useMetallic) {
+				glActiveTexture(GL_TEXTURE10);
+				glBindTexture(GL_TEXTURE_2D, state.metallicTexture);
+				geometry_shader->SetUniform("material.metallic_map", 10);
+			}
+
+			const bool useEmission = state.emissionTexture != 0;
+			geometry_shader->SetUniform("material.use_emission", useEmission ? 1.0f : 0.0f);
+			if (useEmission) {
+				glActiveTexture(GL_TEXTURE11);
+				glBindTexture(GL_TEXTURE_2D, state.emissionTexture);
+				geometry_shader->SetUniform("material.emission_map", 11);
+			}
+		}
+	}
 	// Light light = {
 	//	{2.f, 3.f, 2.f},	// position
 	//	{0.2f, 0.2f, 0.2f},					// intensity
@@ -449,9 +792,11 @@ namespace PAIN {
 		GLint activeTextureUnit = 0;
 		GLint previousTex2D = 0;
 		GLint previousTexCube = 0;
+		GLint previousUnpackAlignment = 4;
 		glGetIntegerv(GL_ACTIVE_TEXTURE, &activeTextureUnit);
 		glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTex2D);
 		glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &previousTexCube);
+		glGetIntegerv(GL_UNPACK_ALIGNMENT, &previousUnpackAlignment);
 
 		PN_CORE_TRACE("Texture load started, active unit: GL_TEXTURE{}", activeTextureUnit - GL_TEXTURE0);
 
@@ -460,6 +805,9 @@ namespace PAIN {
 		// ========================================
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, 0);
+		if (!tex->is_compressed) {
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		}
 
 		// VALIDATE EXTRACTED DATA
 		if (tex->mipOffsets.size() != tex->mipSizes.size()) {
@@ -484,9 +832,7 @@ namespace PAIN {
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-			GLfloat maxAniso = 1.0f;
-			glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso);
-			glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAniso);
+			TryApplyMaxAnisotropy(GL_TEXTURE_CUBE_MAP);
 
 			size_t dataIndex = 0;
 			for (int face = 0; face < 6; ++face) {
@@ -507,16 +853,33 @@ namespace PAIN {
 							std::to_string(face) + " mip " + std::to_string(mip));
 					}
 
-					glCompressedTexImage2D(
-						GL_TEXTURE_CUBE_MAP_POSITIVE_X + face,
-						mip,
-						tex->glTexFormat,
-						mipW,
-						mipH,
-						0,
-						static_cast<GLsizei>(mipSize),
-						tex->data.data() + offset
-					);
+					const uint8_t* uploadData = tex->data.data() + offset;
+
+					if (tex->is_compressed) {
+						glCompressedTexImage2D(
+							GL_TEXTURE_CUBE_MAP_POSITIVE_X + face,
+							mip,
+							tex->glTexFormat,
+							mipW,
+							mipH,
+							0,
+							static_cast<GLsizei>(mipSize),
+							uploadData
+						);
+					}
+					else {
+						glTexImage2D(
+							GL_TEXTURE_CUBE_MAP_POSITIVE_X + face,
+							mip,
+							tex->glTexFormat,
+							mipW,
+							mipH,
+							0,
+							tex->glBaseFormat,
+							tex->glDataType,
+							uploadData
+						);
+					}
 
 					GLenum err = glGetError();
 					if (err != GL_NO_ERROR) {
@@ -540,9 +903,7 @@ namespace PAIN {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-			GLfloat maxAniso = 1.0f;
-			glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso);
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAniso);
+			TryApplyMaxAnisotropy(GL_TEXTURE_2D);
 
 			for (uint32_t mip = 0; mip < tex->mips; ++mip) {
 				if (mip >= tex->mipOffsets.size()) {
@@ -563,16 +924,31 @@ namespace PAIN {
 					throw std::runtime_error("Mip data overflow at mip " + std::to_string(mip));
 				}
 
-				glCompressedTexImage2D(
-					GL_TEXTURE_2D,
-					mip,
-					tex->glTexFormat,
-					mipW,
-					mipH,
-					0,
-					static_cast<GLsizei>(mipSize),
-					tex->data.data() + offset
-				);
+				if (tex->is_compressed) {
+					glCompressedTexImage2D(
+						GL_TEXTURE_2D,
+						mip,
+						tex->glTexFormat,
+						mipW,
+						mipH,
+						0,
+						static_cast<GLsizei>(mipSize),
+						tex->data.data() + offset
+					);
+				}
+				else {
+					glTexImage2D(
+						GL_TEXTURE_2D,
+						mip,
+						tex->glTexFormat,
+						mipW,
+						mipH,
+						0,
+						tex->glBaseFormat,
+						tex->glDataType,
+						tex->data.data() + offset
+					);
+				}
 
 				GLenum err = glGetError();
 				if (err != GL_NO_ERROR) {
@@ -599,6 +975,7 @@ namespace PAIN {
 		// ========================================
 		// RESTORE TEXTURE STATE
 		// ========================================
+		glPixelStorei(GL_UNPACK_ALIGNMENT, previousUnpackAlignment);
 		glActiveTexture(activeTextureUnit);
 		glBindTexture(GL_TEXTURE_2D, previousTex2D);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, previousTexCube);
@@ -732,7 +1109,7 @@ namespace PAIN {
 		appendToBuffer(shadow_ebo, GL_ELEMENT_ARRAY_BUFFER,
 			existingIndexBytes, newIndices.data(), newIndexBytes);
 
-		// Pre-size the instance matrix buffer — filled per-frame in DrawGeometryInstanced.
+		// Pre-size the instance matrix buffer - filled per-frame in DrawGeometryInstanced.
 		// Reserve space for MAX_INSTANCES matrices upfront to avoid per-frame realloc.
 		static constexpr int MAX_INSTANCES = 4096;
 		if (geometry_ibo) {
@@ -848,6 +1225,28 @@ namespace PAIN {
 			PN_CORE_ERROR("Failed to create shader program for pbr");
 			throw std::runtime_error("");
 			return;
+		}
+
+		if (pbr_light_ubo == 0) {
+			glGenBuffers(1, &pbr_light_ubo);
+			glBindBuffer(GL_UNIFORM_BUFFER, pbr_light_ubo);
+			glBufferData(
+				GL_UNIFORM_BUFFER,
+				static_cast<GLsizeiptr>(sizeof(PbrLightGpuData) * kMaxPbrLights),
+				nullptr,
+				GL_DYNAMIC_DRAW);
+			glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		}
+
+		const GLuint pbrProgram = pbr_shader->GetRendererID();
+		const GLuint lightBlockIndex = glGetUniformBlockIndex(pbrProgram, "PbrLightBlock");
+		if (lightBlockIndex == GL_INVALID_INDEX) {
+			PN_CORE_ERROR("PBR shader missing required PbrLightBlock uniform block");
+			throw std::runtime_error("");
+			return;
+		} else {
+			glUniformBlockBinding(pbrProgram, lightBlockIndex, kPbrLightUboBindingPoint);
+			pbr_light_ubo_bound_program = pbrProgram;
 		}
 
 		// Geometry shader
@@ -980,7 +1379,10 @@ namespace PAIN {
 
 	void WindowsRenderer::_createDeferredShadingBuffer(unsigned int& tex,
 													   int num_channels,
-													   int gl_color_attachment) {
+													   int gl_color_attachment,
+													   GLenum internal_format_override,
+													   GLenum format_override,
+													   GLenum type_override) {
 		glGenTextures(1, &tex);
 		if (!tex) {
 			PN_CORE_ERROR("Failed to gen texture");
@@ -990,25 +1392,38 @@ namespace PAIN {
 
 		glBindTexture(GL_TEXTURE_2D, tex);
 
-		switch (num_channels) {
-		case 2:
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, winWidth, winHeight, 0, GL_RG,
-						 GL_FLOAT, nullptr);
-			break;
-		case 3:
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, winWidth, winHeight, 0, GL_RGB,
-						 GL_FLOAT, nullptr);
-			break;
-		case 4:
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, winWidth, winHeight, 0, GL_RGBA,
-						 GL_FLOAT, nullptr);
-			break;
-		default:
-			PN_CORE_ERROR(
-				"{} channels isn't supported(by me lol not opengl so need to add)!",
-				num_channels);
-			break;
-		};
+		if (internal_format_override != 0 && format_override != 0 && type_override != 0) {
+			glTexImage2D(
+				GL_TEXTURE_2D,
+				0,
+				static_cast<GLint>(internal_format_override),
+				winWidth,
+				winHeight,
+				0,
+				format_override,
+				type_override,
+				nullptr);
+		} else {
+			switch (num_channels) {
+			case 2:
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, winWidth, winHeight, 0, GL_RG,
+							 GL_FLOAT, nullptr);
+				break;
+			case 3:
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, winWidth, winHeight, 0, GL_RGB,
+							 GL_FLOAT, nullptr);
+				break;
+			case 4:
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, winWidth, winHeight, 0, GL_RGBA,
+							 GL_FLOAT, nullptr);
+				break;
+			default:
+				PN_CORE_ERROR(
+					"{} channels isn't supported(by me lol not opengl so need to add)!",
+					num_channels);
+				break;
+			};
+		}
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
 						GL_NEAREST); // DO NOT USE GL_LINEAR
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -1095,12 +1510,19 @@ namespace PAIN {
 			glGenFramebuffers(1, &ds_fbo);
 			glBindFramebuffer(GL_FRAMEBUFFER, ds_fbo);
 
+#ifdef PN_PLATFORM_ANDROID
+			_createDeferredShadingBuffer(pos_texture, 3, GL_COLOR_ATTACHMENT0);
+			_createDeferredShadingBuffer(col_texture, 3, GL_COLOR_ATTACHMENT1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+			_createDeferredShadingBuffer(norm_texture, 3, GL_COLOR_ATTACHMENT2);
+			_createDeferredShadingBuffer(material_properties_texture, 3, GL_COLOR_ATTACHMENT3, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+			_createDeferredShadingBuffer(emission_texture, 3, GL_COLOR_ATTACHMENT4, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+#else
 			_createDeferredShadingBuffer(pos_texture, 3, GL_COLOR_ATTACHMENT0);
 			_createDeferredShadingBuffer(col_texture, 3, GL_COLOR_ATTACHMENT1);
 			_createDeferredShadingBuffer(norm_texture, 3, GL_COLOR_ATTACHMENT2);
-			_createDeferredShadingBuffer(material_properties_texture, 3,
-										 GL_COLOR_ATTACHMENT3);
+			_createDeferredShadingBuffer(material_properties_texture, 3, GL_COLOR_ATTACHMENT3);
 			_createDeferredShadingBuffer(emission_texture, 3, GL_COLOR_ATTACHMENT4);
+#endif
 
 			static constexpr int NUM_GBUFFERS = 5;
 
@@ -1262,7 +1684,12 @@ namespace PAIN {
 			// minimap framebuffer
 			const glm::vec2 minimap_size = GraphicsSettings::get().minimap_size_px;
 			minimap_width = std::max(64, static_cast<int>(minimap_size.x));
-			minimap_height = std::max(64, static_cast<int>(minimap_size.y));
+			// Runtime validation: for circular minimap, clamp height to width for perfect circle
+			if (GraphicsSettings::get().minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
+				minimap_height = std::max(64, static_cast<int>(glm::min(minimap_size.x, minimap_size.y)));
+			} else {
+				minimap_height = std::max(64, static_cast<int>(minimap_size.y));
+			}
 
 			glGenFramebuffers(1, &minimap_fbo);
 			glBindFramebuffer(GL_FRAMEBUFFER, minimap_fbo);
@@ -1416,7 +1843,7 @@ namespace PAIN {
 		}
 
 		_initDeferredShadingBuffers(); // FBOs/textures only
-		_initGeometryBuffers();        // VAOs/VBOs � called ONCE, never on resize
+		_initGeometryBuffers();        // VAOs/VBOs called ONCE, never on resize
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
@@ -1504,16 +1931,96 @@ namespace PAIN {
 		glUseProgram(currentProgram);
 	}
 
-	void WindowsRenderer::BeginShadowPass(const Light& l) {
-		glBindFramebuffer(GL_FRAMEBUFFER, l.getShadowFbo());
-		// glClearDepth(1.0f);  // Explicitly set clear value
+	void WindowsRenderer::Render2DTextureCircular(GLuint texture_id, const glm::vec2& pos,
+										  glm::vec2& scale,
+										  const glm::vec4& uv_transform) {
+		if (texture_id == 0) {
+			PN_CORE_ERROR("Invalid texture_id in Render2DTextureCircular");
+			return;
+		}
 
+		if (!texture2d_shader) {
+			PN_CORE_ERROR("Unable to find texture2d_shader for circular minimap");
+			return;
+		}
+
+		// ========================================
+		// SAVE STATE
+		// ========================================
+		GLint currentActiveTexture;
+		glGetIntegerv(GL_ACTIVE_TEXTURE, &currentActiveTexture);
+		GLint currentTexture;
+		glGetIntegerv(GL_TEXTURE_BINDING_2D, &currentTexture);
+		GLint currentVAO;
+		glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &currentVAO);
+		GLint currentProgram;
+		glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
+
+		auto window_service = services->get<Window::Window>();
+		auto framebuffer = window_service->getFrameBuffer();
+		float aspect_ratio = static_cast<float>(framebuffer.x) / static_cast<float>(framebuffer.y);
+		glm::vec2 corrected_scale = glm::vec2(scale.x / aspect_ratio, scale.y);
+
+		// ========================================
+		// RENDER TEXTURE WITH CIRCULAR CLIPPING (shader-based)
+		// ========================================
+		glDisable(GL_DEPTH_TEST);
+		glDepthMask(GL_FALSE);
+
+		texture2d_shader->Bind();
+		texture2d_shader->SetUniform("pos", pos);
+		texture2d_shader->SetUniform("ndc_scale", corrected_scale);
+		texture2d_shader->SetUniform("uv_transform", uv_transform);
+		
+		// Enable circular clipping in shader (shader clips based on UV coords, center=0.5, radius=0.5)
+		texture2d_shader->SetUniform("u_ClipCircle", 1);
+
+		glActiveTexture(GL_TEXTURE6);
+		glBindTexture(GL_TEXTURE_2D, texture_id);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		texture2d_shader->SetUniform("tex", 6);
+
+		glBindVertexArray(passthrough_vao);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+		// Reset clip uniform for subsequent draws
+		texture2d_shader->SetUniform("u_ClipCircle", 0);
+
+		// ========================================
+		// RESTORE STATE
+		// ========================================
+		glDepthMask(GL_TRUE);
+		glActiveTexture(currentActiveTexture);
+		glBindTexture(GL_TEXTURE_2D, currentTexture);
+		glBindVertexArray(currentVAO);
+		glUseProgram(currentProgram);
+	}
+
+	// Shadow pass entry point: sysRender selects which light to render,
+	// while the renderer owns framebuffer binding and per-pass GPU state.
+	void WindowsRenderer::BeginShadowPass(const Light& l) {
+		if (l.getShadowFbo() == 0 || l.getShadowTexture() == 0) {
+			PN_CORE_WARN("[GL] Skipping shadow pass because the mapped light has no valid shadow targets.");
+			return;
+		}
+
+		glBindFramebuffer(GL_FRAMEBUFFER, l.getShadowFbo());
+		glViewport(0, 0, l.getShadowResolution(), l.getShadowResolution());
+		glEnable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
+		glDisable(GL_BLEND);
+		// Two-sided shadow casting avoids leakage through thin/open geometry.
+		glDisable(GL_CULL_FACE);
 #ifdef PN_PLATFORM_ANDROID
-		// critical for Mali GPU on android
-		// disable color writes
+		// critical for Mali GPU on android depth-only shadow rendering
 		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 #endif
-
+		#ifdef PN_PLATFORM_ANDROID
+		glClearDepthf(1.0f);
+#else
+		glClearDepth(1.0f);
+#endif
 		glClear(GL_DEPTH_BUFFER_BIT);
 	}
 
@@ -1567,14 +2074,15 @@ namespace PAIN {
 
 	void WindowsRenderer::EndShadowPass() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
 #ifdef PN_PLATFORM_ANDROID
-		// critical for Mali GPU on android
-		// reenable color writes
 		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 #endif
 	}
 
+	// Geometry pass entry point: sysRender has already selected the scene and
+	// camera; the renderer owns G-buffer binding, viewport, and draw state.
 	void WindowsRenderer::BeginGeometryPass(
 		std::shared_ptr<Scene::SceneManager> scene) {
 		// PN_CORE_INFO("Viewport: {}, {}", winWidth, winHeight);
@@ -1622,6 +2130,10 @@ namespace PAIN {
 		geometry_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
 		geometry_shader->SetUniform("u_P", scene->GetActiveCamera()->projection());
 		geometry_shader->SetUniform("u_Instanced", 0.f);
+		geometry_shader->SetUniform("u_Animated", 0.f);
+		geometry_shader->SetUniform("u_InvertUvY", 0.f);
+		geometry_shader->SetUniform("u_UseEmissionOverride", 0.f);
+		geometry_shader->SetUniform("u_EmissionOverride", glm::vec3(0.0f));
 	}
 
 	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene::SceneManager> scene,
@@ -1682,194 +2194,9 @@ namespace PAIN {
 				continue; // Skip this submesh
 			}
 
-			MaterialInstance* material = &component.materials[submesh.materialIndex];
-
-			// GPU texture handles (uploaded once, reused)
-			unsigned int albedoTexture = 0;
-			unsigned int normalTexture = 0;
-			unsigned int metallicTexture = 0;
-			unsigned int roughnessTexture = 0;
-			unsigned int aoTexture = 0;
-			unsigned int emissiveTexture = 0;
-			unsigned int heightTexture = 0;
-			unsigned int opacityTexture = 0;
-
-			// optional material asset
-			auto materialAssetOpt =
-				assetManager->getAsset<Assets::Material>(material->materialGUID);
-
-			// Load material asset
-			auto materialAsset =
-				materialAssetOpt.has_value() ? materialAssetOpt.value() : nullptr;
-
-			// Check material asset
-			if (materialAsset) {
-
-				{
-					// Albedo Texture
-					std::optional<std::shared_ptr<Assets::Texture>> tex_opt =
-						material->useOverrides ? assetManager->getAsset<Assets::Texture>(
-													 material->albedoTextureOverride)
-											   : assetManager->getAsset<Assets::Texture>(
-													 materialAsset->albedoTexturePath);
-
-					if (tex_opt.has_value() && GS.DEBUG_USE_DIFFUSE_MAP) {
-						albedoTexture = tex_opt.value()->gl_texture;
-					}
-
-					// Normal texture
-					tex_opt = material->useOverrides
-								  ? assetManager->getAsset<Assets::Texture>(
-										material->normalTextureOverride)
-								  : assetManager->getAsset<Assets::Texture>(
-										materialAsset->normalTexturePath);
-
-					if (tex_opt.has_value() && GS.DEBUG_USE_NORMAL_MAP) {
-						normalTexture = tex_opt.value()->gl_texture;
-					}
-
-					// Metallic texture
-					tex_opt = material->useOverrides
-								  ? assetManager->getAsset<Assets::Texture>(
-										material->metallicTextureOverride)
-								  : assetManager->getAsset<Assets::Texture>(
-										materialAsset->metallicTexturePath);
-
-					if (tex_opt.has_value() && GS.DEBUG_USE_ROUGHNESSMETALLIC_MAP) {
-						metallicTexture = tex_opt.value()->gl_texture;
-					}
-
-					// Roughness texture
-					tex_opt = material->useOverrides
-								  ? assetManager->getAsset<Assets::Texture>(
-										material->roughnessTextureOverride)
-								  : assetManager->getAsset<Assets::Texture>(
-										materialAsset->roughnessTexturePath);
-
-					if (tex_opt.has_value() && GS.DEBUG_USE_ROUGHNESSMETALLIC_MAP) {
-						roughnessTexture = tex_opt.value()->gl_texture;
-					}
-
-					// AO texture
-					tex_opt = material->useOverrides
-								  ? assetManager->getAsset<Assets::Texture>(
-										material->aoTextureOverride)
-								  : assetManager->getAsset<Assets::Texture>(
-										materialAsset->aoTexturePath);
-
-					if (tex_opt.has_value() && GS.DEBUG_USE_AO_MAP) {
-						aoTexture = tex_opt.value()->gl_texture;
-					}
-
-					// Emissive texture
-					tex_opt = material->useOverrides
-								  ? assetManager->getAsset<Assets::Texture>(
-										material->emissiveTextureOverride)
-								  : assetManager->getAsset<Assets::Texture>(
-										materialAsset->emissiveTexturePath);
-
-					if (tex_opt.has_value() && GS.DEBUG_USE_EMISSION_MAP) {
-						emissiveTexture = tex_opt.value()->gl_texture;
-					}
-
-					if (material->useOverrides) {
-						geometry_shader->SetUniform("u_UseEmissionOverride", 1.f);
-						geometry_shader->SetUniform("u_EmissionOverride", material->emissiveOverride);
-						// geometry_shader->SetUniform("u_EmissionOverride", {1,0,1});
-					}
-					else {
-						geometry_shader->SetUniform("u_UseEmissionOverride", 0.f);
-					}
-
-					// Height texture
-					/*
-        tex_opt = material->useOverrides ?
-                assetManager->getAsset<Assets::Texture>(material->heightTextureOverride)
-                :
-        assetManager->getAsset<Assets::Texture>(materialAsset->heightTexturePath);
-
-        if (tex_opt.has_value()) {
-                heightTexture = tex_opt.value()->gl_texture;
-        }
-        */
-
-					// Opacity texture
-					tex_opt = material->useOverrides
-								  ? assetManager->getAsset<Assets::Texture>(
-										material->opacityTextureOverride)
-								  : assetManager->getAsset<Assets::Texture>(
-										materialAsset->opacityTexturePath);
-
-					if (tex_opt.has_value()) {
-						opacityTexture = tex_opt.value()->gl_texture;
-					}
-
-					// Use override or asset default
-					glm::vec3 baseColor = material->useOverrides
-											  ? material->baseColorOverride
-											  : materialAsset->baseColor;
-
-					float metallic = material->useOverrides ? material->metallicOverride
-															: materialAsset->metallic;
-
-					float roughness = material->useOverrides ? material->roughnessOverride
-															 : materialAsset->roughness;
-
-					geometry_shader->SetUniform("material.rough", roughness);
-					geometry_shader->SetUniform("material.metal", metallic);
-					geometry_shader->SetUniform("material.color", baseColor);
-				}
-			}
-
-			// Bind textures from MaterialInstance
-			bool hasTexture = albedoTexture != 0;
-			geometry_shader->SetUniform("material.useTex", hasTexture ? 1.0f : 0.0f);
-			// geometry_shader->SetUniform("material.alwaysLit", emissiveTexture ? 1.f :
-			// 0.f);
-
-			if (hasTexture && GS.DEBUG_USE_DIFFUSE_MAP) {
-				glActiveTexture(GL_TEXTURE6);
-				glBindTexture(GL_TEXTURE_2D, albedoTexture);
-				geometry_shader->SetUniform("material.tex", 6);
-			} else {
-				geometry_shader->SetUniform("material.useTex", 0.f);
-			}
-
-			if (GraphicsSettings::get().DEBUG_USE_AO_MAP && aoTexture != 0) {
-				glActiveTexture(GL_TEXTURE7);
-				glBindTexture(GL_TEXTURE_2D, aoTexture);
-				geometry_shader->SetUniform("material.ao_map", 7);
-				geometry_shader->SetUniform("material.use_ao", 1.0f);
-			} else {
-				geometry_shader->SetUniform("material.use_ao", 0.0f);
-			}
-
-			if (GS.DEBUG_USE_NORMAL_MAP && normalTexture) {
-				glActiveTexture(GL_TEXTURE8);
-				glBindTexture(GL_TEXTURE_2D, normalTexture);
-				geometry_shader->SetUniform("material.normal_map", 8);
-				geometry_shader->SetUniform("material.use_normal", 1.f);
-			} else {
-				geometry_shader->SetUniform("material.use_normal", 0.f);
-			}
-
-			if (GS.DEBUG_USE_ROUGHNESSMETALLIC_MAP && roughnessTexture) {
-				glActiveTexture(GL_TEXTURE9);
-				glBindTexture(GL_TEXTURE_2D, roughnessTexture);
-				geometry_shader->SetUniform("material.roughnessmetallic_map", 9);
-				geometry_shader->SetUniform("material.use_roughnessmetallic", 1.f);
-			} else {
-				geometry_shader->SetUniform("material.use_roughnessmetallic", 0.f);
-			}
-
-			if (GS.DEBUG_USE_EMISSION_MAP && emissiveTexture) {
-				glActiveTexture(GL_TEXTURE10);
-				glBindTexture(GL_TEXTURE_2D, emissiveTexture);
-				geometry_shader->SetUniform("material.use_emission", 1.f);
-				geometry_shader->SetUniform("material.emission_map", 10);
-			} else {
-				geometry_shader->SetUniform("material.use_emission", 0.f);
-			}
+			const GeometryMaterialState materialState =
+				BuildGeometryMaterialState(assetManager, component, i);
+			ApplyGeometryMaterialState(geometry_shader, materialState);
 
 			// animation
 
@@ -2015,9 +2342,8 @@ namespace PAIN {
 		const GLsizeiptr needed = instanceCount * sizeof(glm::mat4);
 		GLint currentSize = 0;
 		glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &currentSize);
-		if (currentSize < (GLint)needed) {
-			glBufferData(GL_ARRAY_BUFFER, needed * 2, nullptr, GL_DYNAMIC_DRAW);
-		}
+		const GLsizeiptr uploadCapacity = currentSize < needed ? needed * 2 : currentSize;
+		glBufferData(GL_ARRAY_BUFFER, uploadCapacity, nullptr, GL_DYNAMIC_DRAW);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, needed, matrices.data());
 
 		geometry_shader->SetUniform("u_Instanced", 1.0f);
@@ -2035,64 +2361,9 @@ namespace PAIN {
 			if (submesh.materialIndex >= component.materials.size())
 				continue;
 
-			// Resolve material from the representative component (same for all instances)
-			MaterialInstance* mat = &component.materials[submesh.materialIndex];
-			auto materialAssetOpt = assetManager->getAsset<Assets::Material>(mat->materialGUID);
-			auto materialAsset = materialAssetOpt.has_value() ? materialAssetOpt.value() : nullptr;
-
-			unsigned int albedoTex = 0, normalTex = 0, metallicTex = 0;
-			unsigned int roughnessTex = 0, aoTex = 0, emissiveTex = 0;
-			glm::vec3 baseColor(1.f);
-			float metallic = 0.f, roughness = 0.5f;
-
-			if (materialAsset) {
-				auto getTex = [&](const std::filesystem::path& p) -> unsigned int {
-					auto opt = assetManager->getAsset<Assets::Texture>(p);
-					return opt.has_value() ? opt.value()->gl_texture : 0u;
-				};
-				albedoTex   = getTex(materialAsset->albedoTexturePath);
-				normalTex   = getTex(materialAsset->normalTexturePath);
-				metallicTex = getTex(materialAsset->metallicTexturePath);
-				roughnessTex= getTex(materialAsset->roughnessTexturePath);
-				aoTex       = getTex(materialAsset->aoTexturePath);
-				emissiveTex = getTex(materialAsset->emissiveTexturePath);
-				baseColor   = materialAsset->baseColor;
-				metallic    = materialAsset->metallic;
-				roughness   = materialAsset->roughness;
-			}
-
-			geometry_shader->SetUniform("material.rough", roughness);
-			geometry_shader->SetUniform("material.metal",  metallic);
-			geometry_shader->SetUniform("material.color",  baseColor);
-			geometry_shader->SetUniform("u_UseEmissionOverride", 0.f);
-
-			const bool hasTex = albedoTex != 0 && GS.DEBUG_USE_DIFFUSE_MAP;
-			geometry_shader->SetUniform("material.useTex", hasTex ? 1.f : 0.f);
-			if (hasTex) { glActiveTexture(GL_TEXTURE6);  glBindTexture(GL_TEXTURE_2D, albedoTex);    geometry_shader->SetUniform("material.tex", 6); }
-
-			if (aoTex && GS.DEBUG_USE_AO_MAP) {
-				glActiveTexture(GL_TEXTURE7); glBindTexture(GL_TEXTURE_2D, aoTex);
-				geometry_shader->SetUniform("material.ao_map", 7);
-				geometry_shader->SetUniform("material.use_ao", 1.f);
-			} else { geometry_shader->SetUniform("material.use_ao", 0.f); }
-
-			if (normalTex && GS.DEBUG_USE_NORMAL_MAP) {
-				glActiveTexture(GL_TEXTURE8); glBindTexture(GL_TEXTURE_2D, normalTex);
-				geometry_shader->SetUniform("material.normal_map", 8);
-				geometry_shader->SetUniform("material.use_normal", 1.f);
-			} else { geometry_shader->SetUniform("material.use_normal", 0.f); }
-
-			if (roughnessTex && GS.DEBUG_USE_ROUGHNESSMETALLIC_MAP) {
-				glActiveTexture(GL_TEXTURE9); glBindTexture(GL_TEXTURE_2D, roughnessTex);
-				geometry_shader->SetUniform("material.roughnessmetallic_map", 9);
-				geometry_shader->SetUniform("material.use_roughnessmetallic", 1.f);
-			} else { geometry_shader->SetUniform("material.use_roughnessmetallic", 0.f); }
-
-			if (emissiveTex && GS.DEBUG_USE_EMISSION_MAP) {
-				glActiveTexture(GL_TEXTURE10); glBindTexture(GL_TEXTURE_2D, emissiveTex);
-				geometry_shader->SetUniform("material.use_emission", 1.f);
-				geometry_shader->SetUniform("material.emission_map", 10);
-			} else { geometry_shader->SetUniform("material.use_emission", 0.f); }
+			const GeometryMaterialState state =
+				BuildGeometryMaterialState(assetManager, component, i);
+			ApplyGeometryMaterialState(geometry_shader, state);
 
 			glDrawElementsInstanced(
 				GL_TRIANGLES, submesh.indexCount, GL_UNSIGNED_INT,
@@ -2102,10 +2373,23 @@ namespace PAIN {
 
 		// Restore non-instanced mode for subsequent DrawGeometry calls
 		geometry_shader->SetUniform("u_Instanced", 0.0f);
+		geometry_shader->SetUniform("u_Animated", 0.0f);
+		geometry_shader->SetUniform("u_UseEmissionOverride", 0.0f);
 		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
 	void WindowsRenderer::EndGeometryPass() {
+		if (geometry_shader) {
+			geometry_shader->Bind();
+			geometry_shader->SetUniform("u_Instanced", 0.0f);
+			geometry_shader->SetUniform("u_Animated", 0.0f);
+			geometry_shader->SetUniform("u_InvertUvY", 0.0f);
+			geometry_shader->SetUniform("u_UseEmissionOverride", 0.0f);
+			geometry_shader->SetUniform("u_EmissionOverride", glm::vec3(0.0f));
+		}
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
@@ -2118,11 +2402,23 @@ namespace PAIN {
 		glGetIntegerv(GL_VIEWPORT, minimap_prev_viewport);
 		glGetFloatv(GL_COLOR_CLEAR_VALUE, minimap_prev_clear_color);
 		minimap_prev_depth_test = glIsEnabled(GL_DEPTH_TEST);
+		glGetBooleanv(GL_DEPTH_WRITEMASK, &minimap_prev_depth_mask);
+		minimap_prev_blend = glIsEnabled(GL_BLEND);
+		glGetIntegerv(GL_BLEND_SRC_RGB, &minimap_prev_blend_src_rgb);
+		glGetIntegerv(GL_BLEND_DST_RGB, &minimap_prev_blend_dst_rgb);
+		glGetIntegerv(GL_BLEND_SRC_ALPHA, &minimap_prev_blend_src_alpha);
+		glGetIntegerv(GL_BLEND_DST_ALPHA, &minimap_prev_blend_dst_alpha);
 		minimap_state_saved = true;
 
 		const glm::vec2 minimap_size = GraphicsSettings::get().minimap_size_px;
 		const int target_width = std::max(64, static_cast<int>(minimap_size.x));
-		const int target_height = std::max(64, static_cast<int>(minimap_size.y));
+		// Runtime validation: for circular minimap, clamp height to width for perfect circle
+		int target_height;
+		if (GraphicsSettings::get().minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
+			target_height = std::max(64, static_cast<int>(glm::min(minimap_size.x, minimap_size.y)));
+		} else {
+			target_height = std::max(64, static_cast<int>(minimap_size.y));
+		}
 
 		if (target_width != minimap_width || target_height != minimap_height) {
 			minimap_width = target_width;
@@ -2193,6 +2489,14 @@ namespace PAIN {
 		} else {
 			glDisable(GL_DEPTH_TEST);
 		}
+		glDepthMask(minimap_prev_depth_mask == GL_TRUE ? GL_TRUE : GL_FALSE);
+		if (minimap_prev_blend) {
+			glEnable(GL_BLEND);
+		} else {
+			glDisable(GL_BLEND);
+		}
+		glBlendFuncSeparate(minimap_prev_blend_src_rgb, minimap_prev_blend_dst_rgb,
+			minimap_prev_blend_src_alpha, minimap_prev_blend_dst_alpha);
 
 		minimap_state_saved = false;
 	}
@@ -2263,6 +2567,8 @@ namespace PAIN {
 		// }
 	}
 
+	// Lighting pass entry point: sysRender dispatches the frame stage, while the
+	// renderer consumes the G-buffer, light data, and IBL inputs to fill final_fbo.
 	void WindowsRenderer::LightingPass(std::shared_ptr<Scene::SceneManager> scene,
 									   const LightSources& lights) {
 		//{
@@ -2281,10 +2587,12 @@ namespace PAIN {
 		//	return;
 		//}
 
+#ifdef _DEBUG
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err before lighting pass: {}", err);
 		}
+#endif
 
 		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
 		glViewport(0, 0, winWidth, winHeight);
@@ -2327,115 +2635,137 @@ namespace PAIN {
 				glBindTexture(GL_TEXTURE_2D, emission_texture);
 			}
 
+#ifdef _DEBUG
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
 				PN_CORE_ERROR("OpenGL err after binding gbuffer textures: {}", err);
 			}
+#endif
 
 			for (int shadowSlot = 0; shadowSlot < kMaxPbrShadowMaps; ++shadowSlot) {
 				glActiveTexture(GL_TEXTURE0 + kFixedShadowTextureUnitStart + shadowSlot);
 				glBindTexture(GL_TEXTURE_2D, 0);
-#ifdef PN_PLATFORM_WINDOWS
-				pbr_shader->SetUniform("u_ShadowMaps[" + std::to_string(shadowSlot) + "]",
+				pbr_shader->SetUniform(GetPbrUniformNames().shadowSamplers[shadowSlot],
 									   kFixedShadowTextureUnitStart + shadowSlot);
-#else
-				pbr_shader->SetUniform("u_ShadowMap" + std::to_string(shadowSlot),
-									   kFixedShadowTextureUnitStart + shadowSlot);
-#endif
 			}
+
+			struct ShadowMapCandidate {
+				int gpuLightIndex = -1;
+				std::string key;
+				GLuint shadowTexture = 0;
+				int priority = 0;
+				int insertionOrder = 0;
+			};
+
+			static std::unordered_set<std::string> loggedShadowBudgetDrops;
 
 			int shadowMapCount = 0;
 			int i{};
-			for (const Light& l : LightSources::get().getAll()) {
-				std::stringstream ss;
-				if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
-					if (shadowMapCount >= kMaxPbrShadowMaps) {
-						PN_CORE_WARN("[GL] Skipping extra mapped shadow light at index {} because PBR shadow map budget is {}",
-									 i, kMaxPbrShadowMaps);
-						ss << "u_Lights[" << i << "].shadowMapIdx";
-						pbr_shader->SetUniform(ss.str(), -1.f);
-						ss.str("");
-						ss.clear();
-					}
-					else {
-						glActiveTexture(GL_TEXTURE0 + kFixedShadowTextureUnitStart + shadowMapCount);
-					glBindTexture(GL_TEXTURE_2D, l.getShadowTexture());
+			int mappedLightOrder = 0;
+			std::array<PbrLightGpuData, kMaxPbrLights> gpuLights{};
+			std::vector<ShadowMapCandidate> shadowCandidates;
+			shadowCandidates.reserve(kMaxPbrLights);
 
-#ifdef PN_PLATFORM_WINDOWS
-						ss << "u_ShadowMaps[" << shadowMapCount << "]";
-#else
-						ss << "u_ShadowMap" << shadowMapCount;
-#endif
-
-						pbr_shader->SetUniform(ss.str(), kFixedShadowTextureUnitStart + shadowMapCount);
-						ss.str("");
-						ss.clear();
-
-						ss << "u_Lights[" << i << "].shadowMapIdx";
-						pbr_shader->SetUniform(ss.str(), static_cast<float>(shadowMapCount));
-						ss.str("");
-						ss.clear();
-
-						++shadowMapCount;
-					}
-				} else {
-					ss << "u_Lights[" << i << "].shadowMapIdx";
-					pbr_shader->SetUniform(ss.str(), -1.f);
-					ss.str("");
-					ss.clear();
+			const auto allLightsWithKeys = lights.getAllWithKeys();
+			for (const auto& [lightKey, lightRef] : allLightsWithKeys) {
+				const Light& l = lightRef.get();
+				if (i >= kMaxPbrLights) {
+					PN_CORE_WARN("[GL] Skipping extra light because shader budget is {}", kMaxPbrLights);
+					break;
 				}
 
-				ss << "u_Lights[" << i << "].position";
-				pbr_shader->SetUniform(ss.str(), l.position);
-				ss.str("");
-				ss.clear();
+				PbrLightGpuData& gpuLight = gpuLights[i];
+				gpuLight.position_type = glm::vec4(l.position, static_cast<float>(l.type));
+				gpuLight.intensity_shadow = glm::vec4(
+					lights.lightsOn ? l.L_intensity : glm::vec3(0.0f),
+					-1.0f);
+				gpuLight.direction_inner = glm::vec4(
+					l.direction,
+					glm::cos(glm::radians(l.inner_angle)));
+				gpuLight.outer_padding = glm::vec4(
+					glm::cos(glm::radians(l.outer_angle)),
+					0.0f,
+					0.0f,
+					0.0f);
+				gpuLight.view = l.view();
+				gpuLight.projection = l.projection();
 
-				ss << "u_Lights[" << i << "].V";
-				pbr_shader->SetUniform(ss.str(), l.view());
-				ss.str("");
-				ss.clear();
+				if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED &&
+					l.getShadowTexture() != 0) {
+					int priority = 0;
+					if (l.type == Light::TYPES::SPOTLIGHT) priority += 60;
+					if (l.volumetric) priority += 30;
+					if (l.volumetric && l.type == Light::TYPES::SPOTLIGHT) priority += 40;
+					if (lightKey == "world") priority += 5;
 
-				ss << "u_Lights[" << i << "].P";
-				pbr_shader->SetUniform(ss.str(), l.projection());
-				ss.str("");
-				ss.clear();
-
-				ss << "u_Lights[" << i << "].type";
-				pbr_shader->SetUniform(ss.str(), static_cast<float>(l.type));
-				ss.str("");
-				ss.clear();
-
-				// For spotlights
-				ss << "u_Lights[" << i << "].innerCutoff";
-				pbr_shader->SetUniform(ss.str(), glm::cos(glm::radians(l.inner_angle)));
-				ss.str("");
-				ss.clear();
-
-				ss << "u_Lights[" << i << "].outerCutoff";
-				pbr_shader->SetUniform(ss.str(), glm::cos(glm::radians(l.outer_angle)));
-				ss.str("");
-				ss.clear();
-
-				ss << "u_Lights[" << i << "].direction";
-				pbr_shader->SetUniform(ss.str(),
-									   l.direction); // or l.direction if you renamed it
-				ss.str("");
-				ss.clear();
-
-				if (LightSources::get().lightsOn) {
-					ss << "u_Lights[" << i << "].L";
-					pbr_shader->SetUniform(ss.str(), l.L_intensity);
-					ss.str("");
-					ss.clear();
+					shadowCandidates.push_back({
+						i,
+						lightKey,
+						l.getShadowTexture(),
+						priority,
+						mappedLightOrder++
+					});
 				}
 
 				i++;
 			}
 
+			std::sort(shadowCandidates.begin(), shadowCandidates.end(),
+				[](const ShadowMapCandidate& lhs, const ShadowMapCandidate& rhs) {
+					if (lhs.priority != rhs.priority) {
+						return lhs.priority > rhs.priority;
+					}
+					return lhs.insertionOrder < rhs.insertionOrder;
+				});
+
+			for (const ShadowMapCandidate& candidate : shadowCandidates) {
+				if (shadowMapCount >= kMaxPbrShadowMaps) {
+					if (loggedShadowBudgetDrops.insert(candidate.key).second) {
+						PN_CORE_WARN(
+							"[GL] Shadow budget drop: light '{}' did not get a shadow map slot (budget={})",
+							candidate.key,
+							kMaxPbrShadowMaps);
+					}
+					continue;
+				}
+
+				glActiveTexture(GL_TEXTURE0 + kFixedShadowTextureUnitStart + shadowMapCount);
+				glBindTexture(GL_TEXTURE_2D, candidate.shadowTexture);
+				gpuLights[candidate.gpuLightIndex].intensity_shadow.w =
+					static_cast<float>(shadowMapCount);
+				loggedShadowBudgetDrops.erase(candidate.key);
+				++shadowMapCount;
+			}
+
+			if (pbr_light_ubo != 0) {
+				const GLuint pbrProgram = pbr_shader->GetRendererID();
+				if (pbrProgram != pbr_light_ubo_bound_program) {
+					const GLuint lightBlockIndex = glGetUniformBlockIndex(pbrProgram, "PbrLightBlock");
+					if (lightBlockIndex == GL_INVALID_INDEX) {
+						PN_CORE_ERROR("PBR shader program {} missing PbrLightBlock; aborting LightingPass", pbrProgram);
+						glEnable(GL_DEPTH_TEST);
+						glDepthMask(GL_TRUE);
+						return;
+					}
+					glUniformBlockBinding(pbrProgram, lightBlockIndex, kPbrLightUboBindingPoint);
+					pbr_light_ubo_bound_program = pbrProgram;
+				}
+				glBindBuffer(GL_UNIFORM_BUFFER, pbr_light_ubo);
+				glBufferSubData(
+					GL_UNIFORM_BUFFER,
+					0,
+					static_cast<GLsizeiptr>(sizeof(PbrLightGpuData) * kMaxPbrLights),
+					gpuLights.data());
+				glBindBufferBase(GL_UNIFORM_BUFFER, kPbrLightUboBindingPoint, pbr_light_ubo);
+				glBindBuffer(GL_UNIFORM_BUFFER, 0);
+			}
+
+#ifdef _DEBUG
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
 				PN_CORE_ERROR("OpenGL err after setting light uniforms: {}", err);
 			}
+#endif
 
 			pbr_shader->SetUniform("DEBUG_TYPE",
 								   (float)GraphicsSettings::get().DEBUG_PBR_MAP_TYPE);
@@ -2450,17 +2780,42 @@ namespace PAIN {
 			pbr_shader->SetUniform("gEmission", 4);
 
 			pbr_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
-			pbr_shader->SetUniform("u_NumLights", LightSources::get().getCount() * 1.f);
-			pbr_shader->SetUniform("u_AmbientLight", LightSources::get().AMBIENT_LIGHT);
+			pbr_shader->SetUniform("u_NumLights", static_cast<float>(i));
+			pbr_shader->SetUniform("u_AmbientLight", GraphicsSettings::get().AMBIENT_LIGHT);
 
+#ifdef _DEBUG
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
 				PN_CORE_ERROR("OpenGL err after setting lighting pbr uniforms: {}", err);
 			}
+#endif
 
 			// for image based lighting
 			pbr_shader->SetUniform("u_CamPos", scene->GetActiveCamera()->pos);
-			pbr_shader->SetUniform("u_UseIbl", GraphicsSettings::get().ibl ? 1.f : 0.f);
+			const bool iblAvailable = GraphicsSettings::get().ibl
+				&& Skybox::get().getIrradianceMap() != 0
+				&& Skybox::get().getPrefilterMap() != 0
+				&& Skybox::get().getBrdfLUT() != 0;
+			static bool loggedMissingIbl = false;
+			if (GraphicsSettings::get().ibl && !iblAvailable && !loggedMissingIbl) {
+				PN_CORE_WARN("[GL] IBL requested but irradiance/prefilter/BRDF resources are incomplete. Falling back to ambient lighting.");
+				loggedMissingIbl = true;
+			}
+			if (iblAvailable) {
+				loggedMissingIbl = false;
+			}
+			pbr_shader->SetUniform("u_UseIbl", iblAvailable ? 1.f : 0.f);
+			pbr_shader->SetUniform("u_IblDiffuseStrength", GraphicsSettings::get().ibl_diffuse_strength);
+			pbr_shader->SetUniform("u_IblSpecularStrength", GraphicsSettings::get().ibl_specular_strength);
+			pbr_shader->SetUniform("u_IblRoughnessBias", GraphicsSettings::get().ibl_roughness_bias);
+			pbr_shader->SetUniform("u_IblSpecularMipBias", GraphicsSettings::get().ibl_specular_mip_bias);
+			pbr_shader->SetUniform("u_IblSpecularStrengthScale", GraphicsSettings::get().ibl_specular_strength_scale);
+			pbr_shader->SetUniform("u_IblSpecularPrefilterLumaClamp", GraphicsSettings::get().ibl_specular_prefilter_luma_clamp);
+			pbr_shader->SetUniform("u_IblSpecularFireflyClamp", GraphicsSettings::get().ibl_specular_firefly_clamp);
+			const float maxReflectionLod = std::min(
+				GraphicsSettings::get().ibl_max_reflection_lod,
+				Skybox::get().getPrefilterMaxReflectionLod());
+			pbr_shader->SetUniform("u_IblMaxReflectionLod", maxReflectionLod);
 
 			glActiveTexture(GL_TEXTURE0 + kIrradianceTextureUnit);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, Skybox::get().getIrradianceMap());
@@ -2474,11 +2829,14 @@ namespace PAIN {
 			glBindTexture(GL_TEXTURE_2D, Skybox::get().getBrdfLUT());
 			pbr_shader->SetUniform("brdfLut", kBrdfLutTextureUnit);
 
+#ifdef _DEBUG
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
 				PN_CORE_ERROR("OpenGL err after setting ibl uniforms: {}", err);
 			}
+#endif
 
+#ifdef _DEBUG
 			auto abortLightingPass = [&]() {
 				glEnable(GL_DEPTH_TEST);
 				glDepthMask(GL_TRUE);
@@ -2537,10 +2895,12 @@ namespace PAIN {
 				abortLightingPass();
 				return;
 			}
+#endif
 
 			// #endif
 
 			glBindVertexArray(passthrough_vao);
+#ifdef _DEBUG
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
 				PN_CORE_ERROR("OpenGL err after binding lighting VAO: {} ({})", err, DescribeGlError(err));
@@ -2552,9 +2912,11 @@ namespace PAIN {
 				abortLightingPass();
 				return;
 			}
+#endif
 
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 
+#ifdef _DEBUG
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
 				PN_CORE_ERROR("OpenGL err after drawing lighting pass: {} ({})", err, DescribeGlError(err));
@@ -2564,6 +2926,7 @@ namespace PAIN {
 					final_fbo,
 					kLightingTextureUnitsUsed);
 			}
+#endif
 		}
 
 		glEnable(GL_DEPTH_TEST);
@@ -2575,11 +2938,13 @@ namespace PAIN {
 		glBlitFramebuffer(0, 0, winWidth, winHeight, 0, 0, winWidth, winHeight,
 						  GL_DEPTH_BUFFER_BIT, GL_NEAREST); // Copy depth only
 
+#ifdef _DEBUG
 		err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after blitting depth buffer: {} ({})", err, DescribeGlError(err));
 			LogDepthBlitDiagnostics(ds_fbo, final_fbo);
 		}
+#endif
 
 		// Now final_fbo has depth info. Render skybox:
 		{
@@ -2594,10 +2959,12 @@ namespace PAIN {
 			glDepthFunc(GL_LESS);
 		}
 
+#ifdef _DEBUG
 		err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after drawing skybox in lighting pass: {}", err);
 		}
+#endif
 	}
 
 	void WindowsRenderer::DebugPass(const glm::vec3& min_p, const glm::vec3& max_p,
@@ -2889,6 +3256,8 @@ namespace PAIN {
 		glBindVertexArray(0);
 	}
 
+	// Volumetric pass entry point: the renderer accumulates screen-space fog/light
+	// history after direct lighting and before particles, debug overlays, and post FX.
 	void WindowsRenderer::VolumetricPass(std::shared_ptr<Scene::SceneManager> scene,
 										 const LightSources& lights) {
 		(void)lights;
@@ -2996,9 +3365,6 @@ namespace PAIN {
 			if (static_cast<int>(packedLights.size()) >= maxVolumetricLights) {
 				break;
 			}
-			if (!candidate.inCameraView) {
-				break;
-			}
 
 			PackedVolumetricLight packed{};
 			packed.light = candidate.light;
@@ -3058,9 +3424,15 @@ namespace PAIN {
 			if (packed.shadowMapIdx >= 0) {
 				glActiveTexture(GL_TEXTURE0 + packed.shadowTextureUnit);
 				glBindTexture(GL_TEXTURE_2D, l.getShadowTexture());
+#ifdef PN_PLATFORM_WINDOWS
 				volumetric_shader->SetUniform(
 					"u_ShadowMaps[" + std::to_string(packed.shadowMapIdx) + "]",
 					packed.shadowTextureUnit);
+#else
+				volumetric_shader->SetUniform(
+					"u_ShadowMap" + std::to_string(packed.shadowMapIdx),
+					packed.shadowTextureUnit);
+#endif
 				volumetric_shader->SetUniform(uniformNames.shadowMapIdx[lightIdx],
 											  static_cast<float>(packed.shadowMapIdx));
 			}
@@ -3118,13 +3490,40 @@ namespace PAIN {
 		volumetric_history_index = currentHistoryIndex;
 		volumetric_history_valid = true;
 
+#ifdef _DEBUG
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after VolumetricPass: {}", err);
 		}
+#endif
 	}
 
-	void WindowsRenderer::PostProcessPass() {
+	// Post-process entry point: final_texture remains the renderer-owned scene output,
+	// while sysRender decides whether the frame is ultimately presented to editor or swapchain.
+	void WindowsRenderer::PostProcessPass(bool presentToSwapchain) {
+#ifdef _DEBUG
+		const auto savedState = CaptureGlState();
+		auto restorePassState = [&]() {
+			RestoreGlState(savedState);
+		};
+#else
+		auto restorePassState = []() {};
+#endif
+
+		if (final_texture == 0) {
+			PN_CORE_ERROR("[GL] PostProcessPass aborted because final_texture is invalid.");
+			restorePassState();
+			return;
+		}
+#ifdef _DEBUG
+		if (!ValidateFramebufferBinding(final_fbo, "Post-process final framebuffer") ||
+			!ValidateFramebufferBinding(pp_fbo, "Post-process ping framebuffer") ||
+			!ValidateFramebufferBinding(pp2_fbo, "Post-process pong framebuffer")) {
+			restorePassState();
+			return;
+		}
+#endif
+
 		// ========================================
 		// POST-PROCESS: ALWAYS DISABLE DEPTH TEST
 		// Full-screen quads must not be rejected by
@@ -3132,12 +3531,14 @@ namespace PAIN {
 		// ========================================
 		glDisable(GL_DEPTH_TEST);
 		glDepthMask(GL_FALSE);
+		glDisable(GL_BLEND);
 
-
+#ifdef _DEBUG
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err before tone mapping pass: {}", err);
 		}
+#endif
 
 		int postprocess_passes = 0;
 
@@ -3265,10 +3666,12 @@ namespace PAIN {
 			glCheck(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
 			++postprocess_passes;
 		}
+#ifdef _DEBUG
 		err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after tone mapping pass: {}", err);
 		}
+#endif
 
 		// blur pass
 		if (GraphicsSettings::get().blur_strength) {
@@ -3293,10 +3696,12 @@ namespace PAIN {
 				++postprocess_passes;
 			}
 		}
+#ifdef _DEBUG
 		err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after blur pass: {}", err);
 		}
+#endif
 
 		// gamma correction
 		if (GraphicsSettings::get().gamma_correction) {
@@ -3316,10 +3721,12 @@ namespace PAIN {
 			++postprocess_passes;
 		}
 
+#ifdef _DEBUG
 		err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after gamma pass: {}", err);
 		}
+#endif
 
 		// make sure final_texture now holds the gamma corrected texture
 		// use passthrough to render pp_texture to final_texture if odd number of
@@ -3333,36 +3740,116 @@ namespace PAIN {
 			glBindVertexArray(passthrough_vao);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 		}
+#ifdef _DEBUG
 		err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after finalizing post process pass: {}", err);
 		}
+#endif
 
-		// set back to use final_fbo and final_texture for further rendering
-		;
+		// Keep final_fbo/final_texture as the renderer-owned postprocess output.
 		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
-		// glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-		// final_texture, 0);
 
-		// render to actual screen
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		passthrough_shader->Bind();
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, final_texture);
-		passthrough_shader->SetUniform("tex", 0);
-		glBindVertexArray(passthrough_vao);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		if (presentToSwapchain) {
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			passthrough_shader->Bind();
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, final_texture);
+			passthrough_shader->SetUniform("tex", 0);
+			glBindVertexArray(passthrough_vao);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+		}
 
-		glEnable(GL_DEPTH_TEST);
-		glDepthMask(GL_TRUE);
+		restorePassState();
 
+#ifdef _DEBUG
 		err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after PostProcessPass: {}", err);
 		}
+#endif
+	}
+
+	void WindowsRenderer::BeginCircularStencilClip(const glm::vec2& center_ndc, const glm::vec2& radius_ndc) {
+		if (!debug_shader) return;
+
+		// Save current state
+		GLboolean colorMask[4];
+		glGetBooleanv(GL_COLOR_WRITEMASK, colorMask);
+
+		// Clear stencil
+		glClear(GL_STENCIL_BUFFER_BIT);
+
+		// Draw filled circle to stencil buffer
+		const int segments = 64;
+		std::vector<float> verts;
+		verts.reserve(static_cast<size_t>(segments) * 3 * 7);
+
+		for (int i = 0; i < segments; ++i) {
+			const float a0 = (static_cast<float>(i) / static_cast<float>(segments)) * glm::two_pi<float>();
+			const float a1 = (static_cast<float>(i + 1) / static_cast<float>(segments)) * glm::two_pi<float>();
+
+			const glm::vec2 p0(center_ndc.x + std::cos(a0) * radius_ndc.x,
+							   center_ndc.y + std::sin(a0) * radius_ndc.y);
+			const glm::vec2 p1(center_ndc.x + std::cos(a1) * radius_ndc.x,
+							   center_ndc.y + std::sin(a1) * radius_ndc.y);
+
+			// Triangle: center, p0, p1
+			verts.insert(verts.end(), {center_ndc.x, center_ndc.y, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f});
+			verts.insert(verts.end(), {p0.x, p0.y, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f});
+			verts.insert(verts.end(), {p1.x, p1.y, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f});
+		}
+
+		glBindVertexArray(debug_VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
+		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(), GL_DYNAMIC_DRAW);
+
+		// Color mask off - only writing to stencil
+		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+
+		// Setup stencil to write 1 where the circle triangles pass
+		glEnable(GL_STENCIL_TEST);
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		glStencilMask(0xFF);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
+		debug_shader->Bind();
+		glm::mat4 ortho_proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
+		debug_shader->SetUniform("u_V", glm::mat4(1.0f));
+		debug_shader->SetUniform("u_P", ortho_proj);
+
+		glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(verts.size() / 7));
+
+		// Restore color mask
+		glColorMask(colorMask[0], colorMask[1], colorMask[2], colorMask[3]);
+
+		// Enable stencil test for subsequent draws (only pass where stencil == 1)
+		glStencilFunc(GL_EQUAL, 1, 0xFF);
+		glStencilMask(0x00); // Don't modify stencil
+		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+	}
+
+	void WindowsRenderer::EndCircularStencilClip() {
+		glDisable(GL_STENCIL_TEST);
 	}
 
 	void WindowsRenderer::Cleanup() {
+		if (passthrough_vao != 0) {
+			glDeleteVertexArrays(1, &passthrough_vao);
+			passthrough_vao = 0;
+		}
+
+		if (passthrough_vbo != 0) {
+			glDeleteBuffers(1, &passthrough_vbo);
+			passthrough_vbo = 0;
+		}
+
+		if (pbr_light_ubo != 0) {
+			glDeleteBuffers(1, &pbr_light_ubo);
+			pbr_light_ubo = 0;
+			pbr_light_ubo_bound_program = 0;
+		}
+
 		if (geometry_vao != 0) {
 			glDeleteVertexArrays(1, &geometry_vao);
 			geometry_vao = 0;

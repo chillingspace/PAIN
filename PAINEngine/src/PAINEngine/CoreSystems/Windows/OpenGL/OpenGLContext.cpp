@@ -56,7 +56,6 @@ namespace PAIN {
 	void OpenGLContext::SwapBuffers()
 	{
 		glfwSwapBuffers(m_WindowHandle);
-		glClear(GL_COLOR_BUFFER_BIT);
 	}
 }
 

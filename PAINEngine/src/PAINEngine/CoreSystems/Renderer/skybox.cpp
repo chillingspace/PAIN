@@ -19,18 +19,126 @@
 #include "CoreSystems/Windows/Window.h"
 #include "CoreSystems/Renderer/sRenderer.h"
 
+namespace {
+	constexpr GLenum kHdrCubemapInternalFormat = GL_RGBA16F;
+	constexpr GLenum kHdrCubemapBaseFormat = GL_RGBA;
+	GLuint g_skyboxCubeVAO = 0;
+	GLuint g_skyboxCubeVBO = 0;
+	GLuint g_skyboxQuadVAO = 0;
+	GLuint g_skyboxQuadVBO = 0;
+
+	struct ScopedSkyboxCaptureState {
+		GLint framebuffer = 0;
+		GLint renderbuffer = 0;
+		GLint viewport[4] = { 0, 0, 0, 0 };
+		GLint activeTexture = GL_TEXTURE0;
+		GLint texture2D = 0;
+		GLint textureCube = 0;
+		GLint currentProgram = 0;
+		GLint vertexArray = 0;
+		GLint depthFunc = GL_LESS;
+		GLboolean depthTest = GL_FALSE;
+		GLboolean depthMask = GL_TRUE;
+		GLboolean blend = GL_FALSE;
+		GLboolean cullFace = GL_FALSE;
+		GLboolean colorMask[4] = { GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE };
+	};
+
+	ScopedSkyboxCaptureState CaptureSkyboxState() {
+		ScopedSkyboxCaptureState state{};
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &state.framebuffer);
+		glGetIntegerv(GL_RENDERBUFFER_BINDING, &state.renderbuffer);
+		glGetIntegerv(GL_VIEWPORT, state.viewport);
+		glGetIntegerv(GL_ACTIVE_TEXTURE, &state.activeTexture);
+		glGetIntegerv(GL_TEXTURE_BINDING_2D, &state.texture2D);
+		glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &state.textureCube);
+		glGetIntegerv(GL_CURRENT_PROGRAM, &state.currentProgram);
+		glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &state.vertexArray);
+		glGetIntegerv(GL_DEPTH_FUNC, &state.depthFunc);
+		state.depthTest = glIsEnabled(GL_DEPTH_TEST);
+		glGetBooleanv(GL_DEPTH_WRITEMASK, &state.depthMask);
+		state.blend = glIsEnabled(GL_BLEND);
+		state.cullFace = glIsEnabled(GL_CULL_FACE);
+		glGetBooleanv(GL_COLOR_WRITEMASK, state.colorMask);
+		return state;
+	}
+
+	void RestoreSkyboxState(const ScopedSkyboxCaptureState& state) {
+		glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(state.framebuffer));
+		glBindRenderbuffer(GL_RENDERBUFFER, static_cast<GLuint>(state.renderbuffer));
+		glViewport(state.viewport[0], state.viewport[1], state.viewport[2], state.viewport[3]);
+		glActiveTexture(state.activeTexture);
+		glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(state.texture2D));
+		glBindTexture(GL_TEXTURE_CUBE_MAP, static_cast<GLuint>(state.textureCube));
+		glUseProgram(static_cast<GLuint>(state.currentProgram));
+		glBindVertexArray(static_cast<GLuint>(state.vertexArray));
+		glDepthFunc(state.depthFunc);
+		if (state.depthTest) {
+			glEnable(GL_DEPTH_TEST);
+		}
+		else {
+			glDisable(GL_DEPTH_TEST);
+		}
+		glDepthMask(state.depthMask);
+		if (state.blend) {
+			glEnable(GL_BLEND);
+		}
+		else {
+			glDisable(GL_BLEND);
+		}
+		if (state.cullFace) {
+			glEnable(GL_CULL_FACE);
+		}
+		else {
+			glDisable(GL_CULL_FACE);
+		}
+		glColorMask(state.colorMask[0], state.colorMask[1], state.colorMask[2], state.colorMask[3]);
+	}
+
+	void PrepareSkyboxCapturePass() {
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LESS);
+		glDepthMask(GL_TRUE);
+		glDisable(GL_BLEND);
+		glDisable(GL_CULL_FACE);
+		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	}
+}
+
 namespace PAIN {
 	Skybox::Skybox() {
 	}
 
 	Skybox::~Skybox() {
+		releaseGeneratedTextures();
+		conversionShader.reset();
+		shader.reset();
+
+		// Singleton static may outlive GL context; skip teardown if context is gone.
+		if (glGetString(GL_VERSION) == nullptr) {
+			return;
+		}
+
+		if (g_skyboxCubeVAO != 0) {
+			glDeleteVertexArrays(1, &g_skyboxCubeVAO);
+			g_skyboxCubeVAO = 0;
+		}
+		if (g_skyboxCubeVBO != 0) {
+			glDeleteBuffers(1, &g_skyboxCubeVBO);
+			g_skyboxCubeVBO = 0;
+		}
+		if (g_skyboxQuadVAO != 0) {
+			glDeleteVertexArrays(1, &g_skyboxQuadVAO);
+			g_skyboxQuadVAO = 0;
+		}
+		if (g_skyboxQuadVBO != 0) {
+			glDeleteBuffers(1, &g_skyboxQuadVBO);
+			g_skyboxQuadVBO = 0;
+		}
 	}
 
 	void Skybox::renderCube() {
-		static unsigned int cubeVAO = 0;
-		static unsigned int cubeVBO = 0;
-
-		if (cubeVAO == 0) {
+		if (g_skyboxCubeVAO == 0) {
 			float vertices[] = {
 				// Back face
 				-1.0f, -1.0f, -1.0f,
@@ -76,37 +184,98 @@ namespace PAIN {
 				 -1.0f,  1.0f,  1.0f
 			};
 
-			glGenVertexArrays(1, &cubeVAO);
-			glGenBuffers(1, &cubeVBO);
-			glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+			glGenVertexArrays(1, &g_skyboxCubeVAO);
+			glGenBuffers(1, &g_skyboxCubeVBO);
+			glBindBuffer(GL_ARRAY_BUFFER, g_skyboxCubeVBO);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-			glBindVertexArray(cubeVAO);
+			glBindVertexArray(g_skyboxCubeVAO);
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 		}
 
-		glBindVertexArray(cubeVAO);
+		glBindVertexArray(g_skyboxCubeVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
 	}
 
+	void Skybox::ConfigureSourceCubemapForIblSampling() {
+		if (!cubemap_tex) {
+			return;
+		}
+
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	}
+
+	void Skybox::releaseGeneratedTextures() {
+		if (cubemap_tex && !cubemap_owned_by_skybox) {
+			glDeleteTextures(1, &cubemap_tex);
+		}
+		cubemap_tex = 0;
+		cubemap_owned_by_skybox = false;
+
+		if (irradiance_map) {
+			glDeleteTextures(1, &irradiance_map);
+			irradiance_map = 0;
+		}
+		if (prefilter_map) {
+			glDeleteTextures(1, &prefilter_map);
+			prefilter_map = 0;
+		}
+		if (brdf_tex) {
+			glDeleteTextures(1, &brdf_tex);
+			brdf_tex = 0;
+		}
+	}
+
+	void Skybox::bindResolvedSkyboxTexture(const std::shared_ptr<Assets::Texture>& texture_asset) {
+		if (!texture_asset) {
+			return;
+		}
+
+		const ScopedSkyboxCaptureState savedState = CaptureSkyboxState();
+		PrepareSkyboxCapturePass();
+
+		skybox_tex = texture_asset->gl_texture;
+		releaseGeneratedTextures();
+
+		if (texture_asset->is_cube_map) {
+			cubemap_tex = texture_asset->gl_texture;
+			cubemap_owned_by_skybox = true;
+			ConfigureSourceCubemapForIblSampling();
+			PN_CORE_INFO("Using precompiled cubemap skybox for {}", texture_asset->shipped_relative_path.string());
+		}
+		else {
+			convertEquirectangularToCubemap();
+		}
+
+		generateIrradianceMap();
+		generatePrefilterMap();
+		generateBRDFLUT();
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
+
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err after Skybox set texture: {}", err);
+		}
+
+		RestoreSkyboxState(savedState);
+	}
+
 	void Skybox::convertEquirectangularToCubemap() {
-
-		// ========================================
-		// SET CORRECT RENDER STATE FOR CONVERSION
-		// ========================================
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LESS);
-		glDepthMask(GL_TRUE);  // CRITICAL: Enable depth writes
-
-		glDisable(GL_BLEND);  // CRITICAL: Disable blending
-		glDisable(GL_CULL_FACE);  // We're inside the cube
+		PrepareSkyboxCapturePass();
 
 		glGenTextures(1, &cubemap_tex);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
 
 		for (unsigned int i = 0; i < 6; ++i) {
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 512, 512, 0, GL_RGB, GL_FLOAT, nullptr);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, kHdrCubemapInternalFormat, 512, 512, 0, kHdrCubemapBaseFormat, GL_FLOAT, nullptr);
 		}
 
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -121,16 +290,13 @@ namespace PAIN {
 			unsigned int mipSize = static_cast<unsigned int>(512 * std::pow(0.5, mip));
 			if (mipSize < 1) break;
 			for (unsigned int i = 0; i < 6; ++i) {
-				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, mip, GL_RGB16F,
-					mipSize, mipSize, 0, GL_RGB, GL_FLOAT, nullptr);
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, mip, kHdrCubemapInternalFormat,
+					mipSize, mipSize, 0, kHdrCubemapBaseFormat, GL_FLOAT, nullptr);
 			}
 		}
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 9);
 #endif
-
-		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
 		unsigned int captureFBO, captureRBO;
 		glGenFramebuffers(1, &captureFBO);
@@ -197,8 +363,12 @@ namespace PAIN {
 		}
 #endif
 
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
+		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+		ConfigureSourceCubemapForIblSampling();
+		cubemap_owned_by_skybox = false;
+
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glViewport(0, 0, WindowsRenderer::winWidth, WindowsRenderer::winHeight);
 		glDeleteFramebuffers(1, &captureFBO);
 		glDeleteRenderbuffers(1, &captureRBO);
 
@@ -249,53 +419,21 @@ namespace PAIN {
 
 	void Skybox::setTexture(Assets::GUID const& id) {
 		auto sky_box_tex_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(id);
-		if (sky_box_tex_opt.has_value() && !sky_box_tex_opt.value()->gl_texture) services->get<sRenderer>()->uploadTexture(sky_box_tex_opt.value());
-		skybox_tex = sky_box_tex_opt.has_value() ? sky_box_tex_opt.value()->gl_texture : skybox_tex;
-
-		// Clean up old resources
-		if (cubemap_tex) { glDeleteTextures(1, &cubemap_tex); cubemap_tex = 0; }
-		if (irradiance_map) { glDeleteTextures(1, &irradiance_map); irradiance_map = 0; }
-		if (prefilter_map) { glDeleteTextures(1, &prefilter_map); prefilter_map = 0; }
-		if (brdf_tex) { glDeleteTextures(1, &brdf_tex); brdf_tex = 0; }
-
-		// generate IBL textures
-		convertEquirectangularToCubemap();
-		generateIrradianceMap();
-		generatePrefilterMap();
-		generateBRDFLUT();
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
-
-		GLenum err = glGetError();
-		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("OpenGL err after Skybox set texture: {}", err);
+		if (sky_box_tex_opt.has_value() && !sky_box_tex_opt.value()->gl_texture) {
+			services->get<sRenderer>()->uploadTexture(sky_box_tex_opt.value());
+		}
+		if (sky_box_tex_opt.has_value()) {
+			bindResolvedSkyboxTexture(sky_box_tex_opt.value());
 		}
 	}
 
 	void Skybox::setTexture(const std::filesystem::path& skybox_path) {
 		auto sky_box_tex_opt = services->get<Assets::Manager>()->getAsset<Assets::Texture>(skybox_path);
-		if (sky_box_tex_opt.has_value() && !sky_box_tex_opt.value()->gl_texture) services->get<sRenderer>()->uploadTexture(sky_box_tex_opt.value());
-		skybox_tex = sky_box_tex_opt.has_value() ? sky_box_tex_opt.value()->gl_texture : skybox_tex;
-
-		// Clean up old resources
-		if (cubemap_tex) { glDeleteTextures(1, &cubemap_tex); cubemap_tex = 0; }
-		if (irradiance_map) { glDeleteTextures(1, &irradiance_map); irradiance_map = 0; }
-		if (prefilter_map) { glDeleteTextures(1, &prefilter_map); prefilter_map = 0; }
-		if (brdf_tex) { glDeleteTextures(1, &brdf_tex); brdf_tex = 0; }
-
-		//generate IBL textures
-		convertEquirectangularToCubemap();
-		generateIrradianceMap();
-		generatePrefilterMap();
-		generateBRDFLUT();
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
-
-		GLenum err = glGetError();
-		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("OpenGL err after Skybox set texture: {}", err);
+		if (sky_box_tex_opt.has_value() && !sky_box_tex_opt.value()->gl_texture) {
+			services->get<sRenderer>()->uploadTexture(sky_box_tex_opt.value());
+		}
+		if (sky_box_tex_opt.has_value()) {
+			bindResolvedSkyboxTexture(sky_box_tex_opt.value());
 		}
 	}
 
@@ -325,6 +463,7 @@ namespace PAIN {
 		GLenum err;
 
 		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error before generateIrradianceMap: {}", err);
+		PrepareSkyboxCapturePass();
 
 		// Create irradiance cubemap
 		glGenTextures(1, &irradiance_map);
@@ -332,8 +471,8 @@ namespace PAIN {
 
 		// Irradiance map is typically smaller (32x32 is enough)
 		for (unsigned int i = 0; i < 6; ++i) {
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F,
-				32, 32, 0, GL_RGB, GL_FLOAT, nullptr);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, kHdrCubemapInternalFormat,
+				32, 32, 0, kHdrCubemapBaseFormat, GL_FLOAT, nullptr);
 		}
 
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -351,10 +490,6 @@ namespace PAIN {
 		glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
-
-		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-			PN_CORE_ERROR("CaptureFBO in generateIrradianceMap not complete!");
-		}
 
 		// Same projection and views as your existing code
 		glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
@@ -375,13 +510,19 @@ namespace PAIN {
 
 		// Load irradiance shader
 		auto irradianceShader_opt = services->get<Assets::Manager>()->getAsset<Assets::Shader>(irradiance_shader_path);
-		if (irradianceShader_opt.has_value()) {
-			auto irradianceShader = irradianceShader_opt.value();
+		if (!irradianceShader_opt.has_value()) {
+			PN_CORE_ERROR("Failed to load irradiance shader; disabling irradiance map generation.");
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glDeleteFramebuffers(1, &captureFBO);
+			glDeleteRenderbuffers(1, &captureRBO);
+			glDeleteTextures(1, &irradiance_map);
+			irradiance_map = 0;
+			return;
+		}
 
-			// Force complete mipmap chain OR disable mipmaps
-			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // NO mipmaps
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		auto irradianceShader = irradianceShader_opt.value();
+
+			ConfigureSourceCubemapForIblSampling();
 
 			// debug
 			{
@@ -414,6 +555,7 @@ namespace PAIN {
 				}
 			}
 
+			bool captureFailed = false;
 			// Render to each cubemap face
 			for (unsigned int i = 0; i < 6; ++i) {
 				irradianceShader->SetUniform("view", captureViews[i]);
@@ -433,11 +575,22 @@ namespace PAIN {
 						PN_CORE_ERROR("Unknown FBO error: {}", status); break;
 					}
 					while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error in glCheckFramebufferStatus: {}", err);
+					captureFailed = true;
+					break;
 				}
 
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 				renderCube();
+			}
+
+			if (captureFailed) {
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+				glDeleteFramebuffers(1, &captureFBO);
+				glDeleteRenderbuffers(1, &captureRBO);
+				glDeleteTextures(1, &irradiance_map);
+				irradiance_map = 0;
+				return;
 			}
 
 			// debug
@@ -457,14 +610,13 @@ namespace PAIN {
 			}
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			glViewport(0, 0, WindowsRenderer::winWidth, WindowsRenderer::winHeight);
 
 			glDeleteFramebuffers(1, &captureFBO);
+			glDeleteRenderbuffers(1, &captureRBO);
 
 			while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error after generateIrradianceMap: {}", err);
 
 			PN_CORE_INFO("Irradiance map generated, ID: {}", irradiance_map);
-		}
 	}
 
 
@@ -474,6 +626,7 @@ namespace PAIN {
 	void Skybox::generatePrefilterMap() {
 		GLenum err;
 		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error before generatePrefilterMap: {}", err);
+		PrepareSkyboxCapturePass();
 
 		// Create prefiltered cubemap
 		glGenTextures(1, &prefilter_map);
@@ -487,7 +640,7 @@ namespace PAIN {
 		//	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, MIP_WIDTH, MIP_WIDTH, 0, GL_RGB, GL_FLOAT, nullptr);
 		//}
 		static constexpr int maxMipLevels = 5;
-		glTexStorage2D(GL_TEXTURE_CUBE_MAP, maxMipLevels, GL_RGB16F, MIP_WIDTH, MIP_WIDTH);
+		glTexStorage2D(GL_TEXTURE_CUBE_MAP, maxMipLevels, kHdrCubemapInternalFormat, MIP_WIDTH, MIP_WIDTH);
 		//glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -504,8 +657,14 @@ namespace PAIN {
 
 		// Load prefilter shader
 		auto prefilterShader_opt = services->get<Assets::Manager>()->getAsset<Assets::Shader>(prefilter_shader_path);
-		if (prefilterShader_opt.has_value()) {
-			auto prefilterShader = prefilterShader_opt.value();
+		if (!prefilterShader_opt.has_value()) {
+			PN_CORE_ERROR("Failed to load prefilter shader; disabling prefiltered env map generation.");
+			glDeleteTextures(1, &prefilter_map);
+			prefilter_map = 0;
+			return;
+		}
+
+		auto prefilterShader = prefilterShader_opt.value();
 
 			// Setup projection and views (same as before)
 			glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
@@ -522,15 +681,20 @@ namespace PAIN {
 			prefilterShader->SetUniform("environmentMap", 0);
 			prefilterShader->SetUniform("projection", captureProjection);
 
+			ConfigureSourceCubemapForIblSampling();
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_tex);
 
-			unsigned int captureFBO;
+			unsigned int captureFBO, captureRBO;
 			glGenFramebuffers(1, &captureFBO);
+			glGenRenderbuffers(1, &captureRBO);
 			glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+			glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
 
 			while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error before rendering to mipmap: {}", err);
 
+			bool captureFailed = false;
 			// Render for each mip level (each roughness level)
 			for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
 			{
@@ -540,6 +704,8 @@ namespace PAIN {
 
 
 				glViewport(0, 0, mipWidth, mipWidth);
+				glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+				glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipWidth);
 
 				float roughness = (float)mip / (float)(maxMipLevels - 1);
 				prefilterShader->SetUniform("roughness", roughness);
@@ -564,6 +730,8 @@ namespace PAIN {
 							PN_CORE_ERROR("Unknown FBO error: {}", status); break;
 						}
 						while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error in glCheckFramebufferStatus: {}", err);
+						captureFailed = true;
+						break;
 					}
 
 					glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -572,6 +740,18 @@ namespace PAIN {
 					renderCube();
 					while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error after renderCube in generatePrefilterMap: {}", err);
 				}
+				if (captureFailed) {
+					break;
+				}
+			}
+
+			if (captureFailed) {
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+				glDeleteFramebuffers(1, &captureFBO);
+				glDeleteRenderbuffers(1, &captureRBO);
+				glDeleteTextures(1, &prefilter_map);
+				prefilter_map = 0;
+				return;
 			}
 
 			glBindTexture(GL_TEXTURE_CUBE_MAP, prefilter_map);
@@ -595,12 +775,11 @@ namespace PAIN {
 			}
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			glViewport(0, 0, WindowsRenderer::winWidth, WindowsRenderer::winHeight);
 
 			glDeleteFramebuffers(1, &captureFBO);
+			glDeleteRenderbuffers(1, &captureRBO);
 
 			PN_CORE_INFO("Prefiltered map generated, ID: {}", prefilter_map);
-		}
 	}
 
 
@@ -610,6 +789,7 @@ namespace PAIN {
 
 		GLenum err;
 		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error before generateBRDFLUT: {}", err);
+		PrepareSkyboxCapturePass();
 
 		// Create BRDF LUT texture
 		glGenTextures(1, &brdf_tex);
@@ -637,6 +817,11 @@ namespace PAIN {
 
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 			PN_CORE_ERROR("CaptureFBO in generateBRDFLUT not complete!");
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glDeleteFramebuffers(1, &captureFBO);
+			glDeleteTextures(1, &brdf_tex);
+			brdf_tex = 0;
+			return;
 		}
 
 		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error after generating fbo: {}", err);
@@ -650,38 +835,40 @@ namespace PAIN {
 
 		// Load BRDF shader
 		auto brdfShader_opt = services->get<Assets::Manager>()->getAsset<Assets::Shader>(brdf_shader_path);
-		if (brdfShader_opt.has_value()) {
-			auto brdfShader = brdfShader_opt.value();
-
-			glViewport(0, 0, 512, 512);
-			brdfShader->Bind();
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-			while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error before renderQuad: {}", err);
-
-			renderQuad(); // Render a fullscreen quad (see below)
-
-			while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error after renderQuad: {}", err);
-
+		if (!brdfShader_opt.has_value()) {
+			PN_CORE_ERROR("Failed to load BRDF shader; disabling BRDF LUT generation.");
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			glViewport(0, 0, WindowsRenderer::winWidth, WindowsRenderer::winHeight);
-
 			glDeleteFramebuffers(1, &captureFBO);
-			//glDeleteRenderbuffers(1, &captureRBO);
-
-			PN_CORE_INFO("BRDF LUT generated, ID: {}", brdf_tex);
-			while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error at the end of generateBRDFLUT: {}", err);
+			glDeleteTextures(1, &brdf_tex);
+			brdf_tex = 0;
+			return;
 		}
+
+		auto brdfShader = brdfShader_opt.value();
+
+		glViewport(0, 0, 512, 512);
+		brdfShader->Bind();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error before renderQuad: {}", err);
+
+		renderQuad(); // Render a fullscreen quad (see below)
+
+		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error after renderQuad: {}", err);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glDeleteFramebuffers(1, &captureFBO);
+		//glDeleteRenderbuffers(1, &captureRBO);
+
+		PN_CORE_INFO("BRDF LUT generated, ID: {}", brdf_tex);
+		while ((err = glGetError()) != GL_NO_ERROR) PN_CORE_ERROR("OpenGL error at the end of generateBRDFLUT: {}", err);
 	}
 
 
 
 
 	void Skybox::renderQuad() {
-		static unsigned int quadVAO = 0;
-		static unsigned int quadVBO = 0;
-
-		if (quadVAO == 0) {
+		if (g_skyboxQuadVAO == 0) {
 			float quadVertices[] = {
 				// positions        // texture Coords
 				-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
@@ -690,10 +877,10 @@ namespace PAIN {
 				 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
 			};
 
-			glGenVertexArrays(1, &quadVAO);
-			glGenBuffers(1, &quadVBO);
-			glBindVertexArray(quadVAO);
-			glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+			glGenVertexArrays(1, &g_skyboxQuadVAO);
+			glGenBuffers(1, &g_skyboxQuadVBO);
+			glBindVertexArray(g_skyboxQuadVAO);
+			glBindBuffer(GL_ARRAY_BUFFER, g_skyboxQuadVBO);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
@@ -701,7 +888,7 @@ namespace PAIN {
 			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 		}
 
-		glBindVertexArray(quadVAO);
+		glBindVertexArray(g_skyboxQuadVAO);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
 	}

@@ -331,6 +331,9 @@ namespace PAIN {
 			//Setup gs
 			gs.world_light = env.useWorldLight;
 			gs.ibl = env.useIBL;
+			gs.ibl_diffuse_strength = env.iblDiffuseStrength;
+			gs.ibl_specular_strength = env.iblSpecularStrength;
+			gs.ibl_max_reflection_lod = env.iblMaxReflectionLod;
 			gs.DEBUG_USE_DIFFUSE_MAP = env.useDiffuseMap;
 			gs.DEBUG_USE_AO_MAP = env.useAOMap;
 			gs.DEBUG_USE_NORMAL_MAP = env.useNormalMap;
@@ -349,6 +352,7 @@ namespace PAIN {
 			getCameraLight()->L_intensity = env.cameraLightIntensity;
 
 			//Set up world light
+			cached_world_light_intensity = env.worldLightIntensity;
 			if (gs.world_light) {
 				if (!getWorldLight()) {
 					LightSources::get().create(world_light_name);
@@ -359,34 +363,37 @@ namespace PAIN {
 				getWorldLight()->type = Light::TYPES::DIRECTIONAL;
 			}
 
-			//Load Skybox GUID
+			//Select the skybox, but don't bind it yet.
+			//configScene() clears the texture cache after this step, so binding here would
+			//leave Skybox holding deleted GL texture handles on the first scene load.
 			if (env.skyboxGUID.IsValid()) {
 				curr_skybox_id = env.skyboxGUID;
-				Skybox::get().setTexture(curr_skybox_id);
-				PN_CORE_INFO("[SceneManager] Set skybox with texture of GUID: {}", curr_skybox_id.ToString());
+				PN_CORE_INFO("[SceneManager] Queued skybox GUID for scene: {}", curr_skybox_id.ToString());
 			}
 			else {
-
 #ifdef PN_PLATFORM_WINDOWS
 				std::filesystem::path sb_path = "engine/textures/skybox2.hdr";
 #else
 				std::filesystem::path sb_path = "engine\\\\textures\\\\skybox2.hdr";
 #endif
-				//Set skybox id
 				curr_skybox_id = services->get<Assets::Manager>()->findGUID(sb_path);
-
-				//Default skybox texture
-				Skybox::get().setTexture(sb_path);
-				PN_CORE_INFO("[SceneManager] Set default skybox");
+				PN_CORE_INFO("[SceneManager] Queued default skybox GUID: {}", curr_skybox_id.ToString());
 			}
 
 			// Minimap settings
 			gs.minimap_enabled = minimap.enabled;
 			gs.minimap_radius = minimap.radius;
 			gs.minimap_size_px = minimap.size_px;
+			// Validate minimap size - for circle, x and y must be equal (clamp to smaller)
+			if (minimap.shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
+				float smaller = glm::min(gs.minimap_size_px.x, gs.minimap_size_px.y);
+				gs.minimap_size_px.x = smaller;
+				gs.minimap_size_px.y = smaller;
+			}
 			gs.minimap_pos_px = minimap.pos_px;
 			gs.minimap_override_position = minimap.override_position;
 			gs.minimap_recommended_position = minimap.recommended_position;
+			gs.minimap_shape = minimap.shape;
 			gs.minimap_rotate_with_player = minimap.rotate_with_player;
 			gs.minimap_show_player = minimap.show_player;
 			gs.minimap_show_danger = minimap.show_danger;
@@ -804,6 +811,9 @@ namespace PAIN {
 			//Other graphic settings
 			scene_asset.environment.useWorldLight = gs.world_light;
 			scene_asset.environment.useIBL = gs.ibl;
+			scene_asset.environment.iblDiffuseStrength = gs.ibl_diffuse_strength;
+			scene_asset.environment.iblSpecularStrength = gs.ibl_specular_strength;
+			scene_asset.environment.iblMaxReflectionLod = gs.ibl_max_reflection_lod;
 			scene_asset.environment.useDiffuseMap = gs.DEBUG_USE_DIFFUSE_MAP;
 			scene_asset.environment.useAOMap = gs.DEBUG_USE_AO_MAP;
 			scene_asset.environment.useNormalMap = gs.DEBUG_USE_NORMAL_MAP;
@@ -851,10 +861,17 @@ namespace PAIN {
 			// Capture minimap settings
 			scene_asset.minimap.enabled = gs.minimap_enabled;
 			scene_asset.minimap.radius = gs.minimap_radius;
-			scene_asset.minimap.size_px = gs.minimap_size_px;
+			// Validate minimap size - for circle, x and y must be equal (clamp to smaller)
+			if (gs.minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
+				float smaller = glm::min(gs.minimap_size_px.x, gs.minimap_size_px.y);
+				scene_asset.minimap.size_px = glm::vec2(smaller, smaller);
+			} else {
+				scene_asset.minimap.size_px = gs.minimap_size_px;
+			}
 			scene_asset.minimap.pos_px = gs.minimap_pos_px;
 			scene_asset.minimap.override_position = gs.minimap_override_position;
 			scene_asset.minimap.recommended_position = gs.minimap_recommended_position;
+			scene_asset.minimap.shape = gs.minimap_shape;
 			scene_asset.minimap.rotate_with_player = gs.minimap_rotate_with_player;
 			scene_asset.minimap.show_player = gs.minimap_show_player;
 			scene_asset.minimap.show_danger = gs.minimap_show_danger;
@@ -949,6 +966,7 @@ namespace PAIN {
 				{"pos_px", {scn_asset.minimap.pos_px.x, scn_asset.minimap.pos_px.y}},
 				{"override_position", scn_asset.minimap.override_position},
 				{"recommended_position", static_cast<int>(scn_asset.minimap.recommended_position)},
+				{"shape", static_cast<int>(scn_asset.minimap.shape)},
 				{"rotate_with_player", scn_asset.minimap.rotate_with_player},
 				{"show_player", scn_asset.minimap.show_player},
 				{"show_danger", scn_asset.minimap.show_danger},
@@ -1128,6 +1146,15 @@ namespace PAIN {
 			loadingScreen->render();
 			PN_CORE_INFO("[SceneManager] Uploading textures to GPU");
 			assetManager->batchUploadAllCachedTextures();
+
+			if (curr_skybox_id.IsValid()) {
+				Skybox::get().setTexture(curr_skybox_id);
+				PN_CORE_INFO("[SceneManager] Bound skybox after scene texture upload: {}", curr_skybox_id.ToString());
+			}
+			else {
+				PN_CORE_WARN("[SceneManager] No valid skybox GUID available after scene texture upload");
+			}
+
 			loadingScreen->setStatus("Building Model's VBO...");
 			loadingScreen->setProgress(0.98f);
 			loadingScreen->render();
@@ -1348,12 +1375,13 @@ namespace PAIN {
 
 					if (!olc) {
 						LightSources::get().create("world");
-						getWorldLight()->L_intensity = glm::vec3(GraphicsSettings::get().global_light_intensity);
+						getWorldLight()->L_intensity = cached_world_light_intensity;
 						getWorldLight()->direction = glm::normalize(glm::vec3{ -0.5f, -0.5f, -0.2f });
 						getWorldLight()->setShadowType(Light::SHADOW_TYPES::MAPPED);
 						getWorldLight()->type = Light::TYPES::DIRECTIONAL;
 					}
 					else {
+						cached_world_light_intensity = olc->L_intensity;
 						olc->position = GetActiveCamera()->pos - glm::normalize(olc->direction) * olc->shadow_source_follow_distance;
 					}
 				}
@@ -1361,6 +1389,7 @@ namespace PAIN {
 					auto olc = LightSources::get().get("world");
 
 					if (olc) {
+						cached_world_light_intensity = olc->get().L_intensity;
 						LightSources::get().destroy("world");
 					}
 				}

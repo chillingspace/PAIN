@@ -21,11 +21,15 @@ namespace PAIN {
 		Skybox();
 		~Skybox();
 
-		unsigned int skybox_tex;
-		unsigned int cubemap_tex;
+		unsigned int skybox_tex = 0;
+		unsigned int cubemap_tex = 0;
+		bool cubemap_owned_by_skybox = false;
 
 		void convertEquirectangularToCubemap();
+		void ConfigureSourceCubemapForIblSampling();
 		void renderCube();
+		void releaseGeneratedTextures();
+		void bindResolvedSkyboxTexture(const std::shared_ptr<Assets::Texture>& texture_asset);
 
 		std::shared_ptr<Assets::Shader> conversionShader;
 		std::shared_ptr<Assets::Shader> shader;
@@ -37,13 +41,13 @@ namespace PAIN {
 	private:
 		// for image based lighting
 
-		unsigned int irradiance_map;
+		unsigned int irradiance_map = 0;
 		void generateIrradianceMap();
 
-		unsigned int prefilter_map;
+		unsigned int prefilter_map = 0;
 		void generatePrefilterMap();
 
-		unsigned int brdf_tex;
+		unsigned int brdf_tex = 0;
 		void generateBRDFLUT();
 
 		void renderQuad();
@@ -70,6 +74,11 @@ namespace PAIN {
 
 		unsigned int getPrefilterMap() const {
 			return prefilter_map;
+		}
+
+		float getPrefilterMaxReflectionLod() const {
+			// generatePrefilterMap allocates 5 mip levels [0..4].
+			return 4.0f;
 		}
 
 		unsigned int getBrdfLUT() const {
