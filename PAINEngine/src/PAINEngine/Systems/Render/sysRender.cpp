@@ -1766,7 +1766,11 @@ namespace PAIN {
 						const float border_thickness = glm::max(0.0f, gs.minimap_border_thickness);
 
 						const float map_w = glm::clamp(gs.minimap_size_px.x, 32.0f, fbw);
-						const float map_h = glm::clamp(gs.minimap_size_px.y, 32.0f, fbh);
+						float map_h = glm::clamp(gs.minimap_size_px.y, 32.0f, fbh);
+						// Runtime validation: for circular minimap, clamp h to w to ensure perfect circle
+						if (gs.minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
+							map_h = glm::min(map_w, map_h);
+						}
 						const float outer_w = map_w;
 						const float outer_h = map_h;
 

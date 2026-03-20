@@ -699,7 +699,27 @@ namespace PAIN {
 
                 ImGui::DragFloat("Minimap Radius", &gs.minimap_radius, 0.25f, 2.0f, 100.0f, "%.1f");
                 ImGui::DragFloat("Minimap Camera Height", &gs.minimap_camera_height, 0.25f, 2.0f, 200.0f, "%.1f");
-                ImGui::DragFloat2("Minimap Size (px)", glm::value_ptr(gs.minimap_size_px), 1.0f, 64.0f, 1024.0f, "%.0f");
+
+                static const char* minimapShapes[] = { "Square", "Circle" };
+                int minimapShape = static_cast<int>(gs.minimap_shape);
+                if (ImGui::Combo("Minimap Shape", &minimapShape, minimapShapes, IM_ARRAYSIZE(minimapShapes))) {
+                    gs.minimap_shape = static_cast<GraphicsSettings::MINIMAP_SHAPE>(minimapShape);
+                    if (gs.minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
+                        float smaller = glm::min(gs.minimap_size_px.x, gs.minimap_size_px.y);
+                        gs.minimap_size_px.x = smaller;
+                        gs.minimap_size_px.y = smaller;
+                    }
+                }
+
+                if (gs.minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
+                    float circleSize = gs.minimap_size_px.x;
+                    if (ImGui::DragFloat("Minimap Size (px)", &circleSize, 1.0f, 64.0f, 1024.0f, "%.0f")) {
+                        gs.minimap_size_px.x = circleSize;
+                        gs.minimap_size_px.y = circleSize;
+                    }
+                } else {
+                    ImGui::DragFloat2("Minimap Size (px)", glm::value_ptr(gs.minimap_size_px), 1.0f, 64.0f, 1024.0f, "%.0f");
+                }
 
                 static const char* recommendedPositions[] = {
                     "Top Left","Top Right","Bottom Left","Bottom Right","Top Middle","Bottom Middle"
@@ -707,11 +727,6 @@ namespace PAIN {
                 int recommendedPos = static_cast<int>(gs.minimap_recommended_position);
                 if (ImGui::Combo("Recommended Position", &recommendedPos, recommendedPositions, IM_ARRAYSIZE(recommendedPositions)))
                     gs.minimap_recommended_position = static_cast<GraphicsSettings::MINIMAP_RECOMMENDED_POSITION>(recommendedPos);
-
-                static const char* minimapShapes[] = { "Square", "Circle" };
-                int minimapShape = static_cast<int>(gs.minimap_shape);
-                if (ImGui::Combo("Minimap Shape", &minimapShape, minimapShapes, IM_ARRAYSIZE(minimapShapes)))
-                    gs.minimap_shape = static_cast<GraphicsSettings::MINIMAP_SHAPE>(minimapShape);
 
                 bool overridePos = gs.minimap_override_position;
                 if (ImGui::Checkbox("Override Position", &overridePos))

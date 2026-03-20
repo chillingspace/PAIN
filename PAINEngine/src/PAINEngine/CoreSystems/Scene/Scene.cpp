@@ -384,6 +384,12 @@ namespace PAIN {
 			gs.minimap_enabled = minimap.enabled;
 			gs.minimap_radius = minimap.radius;
 			gs.minimap_size_px = minimap.size_px;
+			// Validate minimap size - for circle, x and y must be equal (clamp to smaller)
+			if (minimap.shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
+				float smaller = glm::min(gs.minimap_size_px.x, gs.minimap_size_px.y);
+				gs.minimap_size_px.x = smaller;
+				gs.minimap_size_px.y = smaller;
+			}
 			gs.minimap_pos_px = minimap.pos_px;
 			gs.minimap_override_position = minimap.override_position;
 			gs.minimap_recommended_position = minimap.recommended_position;
@@ -855,7 +861,13 @@ namespace PAIN {
 			// Capture minimap settings
 			scene_asset.minimap.enabled = gs.minimap_enabled;
 			scene_asset.minimap.radius = gs.minimap_radius;
-			scene_asset.minimap.size_px = gs.minimap_size_px;
+			// Validate minimap size - for circle, x and y must be equal (clamp to smaller)
+			if (gs.minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
+				float smaller = glm::min(gs.minimap_size_px.x, gs.minimap_size_px.y);
+				scene_asset.minimap.size_px = glm::vec2(smaller, smaller);
+			} else {
+				scene_asset.minimap.size_px = gs.minimap_size_px;
+			}
 			scene_asset.minimap.pos_px = gs.minimap_pos_px;
 			scene_asset.minimap.override_position = gs.minimap_override_position;
 			scene_asset.minimap.recommended_position = gs.minimap_recommended_position;

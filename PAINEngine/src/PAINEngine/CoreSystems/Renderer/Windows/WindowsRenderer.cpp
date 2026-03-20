@@ -1684,7 +1684,12 @@ namespace PAIN {
 			// minimap framebuffer
 			const glm::vec2 minimap_size = GraphicsSettings::get().minimap_size_px;
 			minimap_width = std::max(64, static_cast<int>(minimap_size.x));
-			minimap_height = std::max(64, static_cast<int>(minimap_size.y));
+			// Runtime validation: for circular minimap, clamp height to width for perfect circle
+			if (GraphicsSettings::get().minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
+				minimap_height = std::max(64, static_cast<int>(glm::min(minimap_size.x, minimap_size.y)));
+			} else {
+				minimap_height = std::max(64, static_cast<int>(minimap_size.y));
+			}
 
 			glGenFramebuffers(1, &minimap_fbo);
 			glBindFramebuffer(GL_FRAMEBUFFER, minimap_fbo);
@@ -1967,10 +1972,8 @@ namespace PAIN {
 		texture2d_shader->SetUniform("ndc_scale", corrected_scale);
 		texture2d_shader->SetUniform("uv_transform", uv_transform);
 		
-		// Enable circular clipping in shader
+		// Enable circular clipping in shader (shader clips based on UV coords, center=0.5, radius=0.5)
 		texture2d_shader->SetUniform("u_ClipCircle", 1);
-		texture2d_shader->SetUniform("u_CircleCenter", pos);
-		texture2d_shader->SetUniform("u_CircleRadius", corrected_scale.x); // x scale is radius in NDC
 
 		glActiveTexture(GL_TEXTURE6);
 		glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -2409,7 +2412,13 @@ namespace PAIN {
 
 		const glm::vec2 minimap_size = GraphicsSettings::get().minimap_size_px;
 		const int target_width = std::max(64, static_cast<int>(minimap_size.x));
-		const int target_height = std::max(64, static_cast<int>(minimap_size.y));
+		// Runtime validation: for circular minimap, clamp height to width for perfect circle
+		int target_height;
+		if (GraphicsSettings::get().minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
+			target_height = std::max(64, static_cast<int>(glm::min(minimap_size.x, minimap_size.y)));
+		} else {
+			target_height = std::max(64, static_cast<int>(minimap_size.y));
+		}
 
 		if (target_width != minimap_width || target_height != minimap_height) {
 			minimap_width = target_width;
