@@ -26,15 +26,23 @@ jobs:
     - name: Run cppcheck
       run: |
         & "C:\Program Files\Cppcheck\cppcheck.exe" `
+          --error-exitcode=1 `
           --force `
           --enable=all `
           --inconclusive `
           --std=c++20 `
+          --suppress=missingIncludeSystem `
           -i vendor `
           -D PN_PLATFORM_WINDOWS `
           -D PN_PLATFORM_ANDROID `
           --check-level=exhaustive `
           --output-file=cppcheck_report.txt .
+    - name: Display Cppcheck report on failure
+      if: failure()
+      run: |
+        if (Test-Path cppcheck_report.txt) {
+          Get-Content cppcheck_report.txt
+        }
     - name: Upload Cppcheck report
       uses: actions/upload-artifact@v4
       with:
