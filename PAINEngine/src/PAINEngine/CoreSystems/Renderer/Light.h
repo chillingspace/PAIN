@@ -31,7 +31,11 @@ private:
 		unsigned int shadow_texture = 0;
 		int shadow_map_resolution = 1024;
 
-		void _createShadowMapBuffers() {
+		bool _createShadowMapBuffers() {
+			if (shadow_fbo || shadow_texture) {
+				_cleanup();
+			}
+
 			glGenFramebuffers(1, &shadow_fbo);
 			glBindFramebuffer(GL_FRAMEBUFFER, shadow_fbo);
 
@@ -79,9 +83,11 @@ private:
 #endif
 			if (status != GL_FRAMEBUFFER_COMPLETE) {
 				PN_CORE_ERROR("Shadow FBO is incomplete! Status: 0x{:x}", status);
-				return;
+				_cleanup();
+				return false;
 			}
 			PN_CORE_INFO("Shadow FBO is complete");
+			return true;
 		}
 
 		void _cleanup() {
@@ -171,26 +177,37 @@ private:
 
 		bool setShadowType(SHADOW_TYPES type) {
 			if (type == shadow_type) {
-				return false;
+				if (type == SHADOW_TYPES::MAPPED && shadow_type == SHADOW_TYPES::MAPPED) {
+					if (shadow_fbo == 0 || shadow_texture == 0) {
+						if (!_createShadowMapBuffers()) {
+							shadow_type = SHADOW_TYPES::NONE;
+							if (num_shadowmapped_lights > 0) {
+								--num_shadowmapped_lights;
+							}
+							return false;
+						}
+					}
+				}
+				return true;
 			}
 
-			if (type == SHADOW_TYPES::MAPPED && num_shadowmapped_lights >= MAX_SHADOWMAPPED_LIGHTS) {
-				return false;
-			}
-
-			if (type == SHADOW_TYPES::MAPPED && num_shadowmapped_lights < MAX_SHADOWMAPPED_LIGHTS) {
+			if (type == SHADOW_TYPES::MAPPED) {
+				if (num_shadowmapped_lights >= MAX_SHADOWMAPPED_LIGHTS) {
+					return false;
+				}
+				if (!_createShadowMapBuffers()) {
+					return false;
+				}
 				++num_shadowmapped_lights;
+				shadow_type = SHADOW_TYPES::MAPPED;
+				return true;
 			}
 
-			if (type != SHADOW_TYPES::MAPPED && shadow_type == SHADOW_TYPES::MAPPED) {
+			if (shadow_type == SHADOW_TYPES::MAPPED && num_shadowmapped_lights > 0) {
 				--num_shadowmapped_lights;
 			}
 
-			if (type == SHADOW_TYPES::MAPPED && shadow_fbo == 0) {
-				_createShadowMapBuffers();
-			}
-
-			if (type != SHADOW_TYPES::MAPPED && (shadow_fbo || shadow_texture)) {
+			if (shadow_fbo || shadow_texture) {
 				_cleanup();
 			}
 
@@ -202,9 +219,13 @@ private:
 		void setShadowResolution(int res) {
 			if (res == shadow_map_resolution) return;
 			shadow_map_resolution = res;
-			if (shadow_type == SHADOW_TYPES::MAPPED && shadow_fbo != 0) {
-				_cleanup();
-				_createShadowMapBuffers();
+			if (shadow_type == SHADOW_TYPES::MAPPED) {
+				if (!_createShadowMapBuffers()) {
+					shadow_type = SHADOW_TYPES::NONE;
+					if (num_shadowmapped_lights > 0) {
+						--num_shadowmapped_lights;
+					}
+				}
 			}
 		}
 

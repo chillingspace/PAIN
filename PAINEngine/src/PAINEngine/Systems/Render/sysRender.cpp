@@ -805,6 +805,21 @@ namespace PAIN {
 				}
 			}
 
+			// Purge stale dynamic lights before shadow budget resolution.
+			// Otherwise, lights from the previous scene/frame can continue to occupy
+			// the global mapped-shadow counter until end-of-pass cleanup.
+			for (auto& [key, lightRef] : LightSources::get().getAllWithKeys()) {
+				if (key == "cam" || key == "world") {
+					continue;
+				}
+				if (activeLightNames.find(key) == activeLightNames.end()) {
+					LightSources::get().destroy(key);
+					warnedShadowBudgetState.erase(key);
+					warnedVolumetricShadowState.erase(key);
+					mappedVisibilityGraceFrames.erase(key);
+				}
+			}
+
 			constexpr int kShadowMappedLightBudget = 4;
 			const int maxVolumetricLights =
 				std::clamp(GraphicsSettings::get().volumetric_max_lights, 1, 4);
@@ -834,6 +849,18 @@ namespace PAIN {
 					GraphicsSettings::get().world_light &&
 					worldLight.getShadowType() != Light::SHADOW_TYPES::MAPPED) {
 					worldLight.setShadowType(Light::SHADOW_TYPES::MAPPED);
+				}
+			}
+
+			// Recover from stale mapped-light state (e.g. shadow buffer creation failure).
+			// Mapped lights with no shadow texture should not consume the global mapped budget.
+			for (const auto& [key, lightRef] : LightSources::get().getAllWithKeys()) {
+				const Light& readOnlyLight = lightRef.get();
+				if (readOnlyLight.getShadowType() == Light::SHADOW_TYPES::MAPPED &&
+					readOnlyLight.getShadowTexture() == 0) {
+					if (auto mutableLightOpt = LightSources::get().get(key)) {
+						mutableLightOpt.value().get().setShadowType(Light::SHADOW_TYPES::NONE);
+					}
 				}
 			}
 
@@ -967,7 +994,7 @@ namespace PAIN {
 						lighting.volumetric &&
 						(!update.requireMappedForVolumetric || hasMappedShadow);
 
-					if (update.wantsMappedShadow && !hasMappedShadow) {
+					if (update.wantsMappedShadow && update.inCameraView && !hasMappedShadow) {
 						if (warnedShadowBudgetState.insert(update.lightName).second) {
 							PN_CORE_WARN(
 								"Light '{}' could not acquire mapped shadow (budget={}, reserved={}, type={}).",
@@ -982,7 +1009,7 @@ namespace PAIN {
 					}
 
 					if (lighting.volumetric &&
-						(update.requireMappedForVolumetric && !hasMappedShadow)) {
+						(update.requireMappedForVolumetric && update.inCameraView && !hasMappedShadow)) {
 						if (warnedVolumetricShadowState.insert(update.lightName).second) {
 							PN_CORE_WARN(
 								"Volumetric spotlight '{}' disabled: no mapped shadow texture available.",
@@ -999,20 +1026,6 @@ namespace PAIN {
 					// for spotlight only
 					light.inner_angle = lighting.inner_angle;
 					light.outer_angle = lighting.outer_angle;
-				}
-			}
-
-			// Remove lights no longer active
-			for (auto& [key, lightRef] : LightSources::get().getAllWithKeys()) {
-				const std::string& name = key;
-
-				// Skip the special lights "cam" and "world"
-				if (name == "cam" || name == "world") {
-					continue;
-				}
-
-				if (activeLightNames.find(name) == activeLightNames.end()) {
-					LightSources::get().destroy(name);
 				}
 			}
 
