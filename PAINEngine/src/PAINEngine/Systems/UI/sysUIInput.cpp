@@ -121,8 +121,6 @@ namespace PAIN {
 							glm::vec2 drag_offset = normalized_mouse - joystick.center_position;
 							float distance = glm::length(drag_offset);
 
-							int* ptr = new int[4];
-
 							// Start drag if moved beyond threshold
 							const float drag_threshold = 0.01f;
 							if (distance > drag_threshold && !joystick.is_dragging) {
