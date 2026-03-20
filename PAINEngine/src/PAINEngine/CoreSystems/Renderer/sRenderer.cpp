@@ -13,6 +13,9 @@
 
 // For windows event include
 #include "CoreSystems/Events/GLFW/WindowEvents.h"
+#ifdef PN_PLATFORM_ANDROID
+#include "../Events/Android/SurfaceEvents.h"
+#endif
 
 #include "ECS/Controller.h"
 #include "ECS/Components/cBoundingVolume.h"
@@ -120,6 +123,31 @@ namespace PAIN {
 			}
 
 		}
+#endif
+
+#ifdef PN_PLATFORM_ANDROID
+		Event::Dispatcher dispatcher(e);
+
+		dispatcher.Dispatch<Event::SurfaceCreated>([&](Event::SurfaceCreated& se) -> bool {
+			WindowsRenderer::winWidth = se.getWidth();
+			WindowsRenderer::winHeight = se.getHeight();
+			w_renderer->resizeDirty = true;
+			return false;
+		});
+
+		dispatcher.Dispatch<Event::SurfaceChanged>([&](Event::SurfaceChanged& se) -> bool {
+			WindowsRenderer::winWidth = se.getWidth();
+			WindowsRenderer::winHeight = se.getHeight();
+			w_renderer->resizeDirty = true;
+			return false;
+		});
+
+		dispatcher.Dispatch<Event::SurfaceDestroyed>([&](Event::SurfaceDestroyed&) -> bool {
+			WindowsRenderer::winWidth = 0;
+			WindowsRenderer::winHeight = 0;
+			w_renderer->resizeDirty = false;
+			return false;
+		});
 #endif
 	}
 

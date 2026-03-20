@@ -531,11 +531,39 @@ namespace PAIN {
         }
 
 
-        void Android_Window::swapBuffers() {
-            if (m_Display != EGL_NO_DISPLAY && m_Surface != EGL_NO_SURFACE) {
-                eglSwapBuffers(m_Display, m_Surface);
-            }
-        }
+		void Android_Window::swapBuffers() {
+			if (m_Display != EGL_NO_DISPLAY && m_Surface != EGL_NO_SURFACE) {
+				if (!eglSwapBuffers(m_Display, m_Surface)) {
+					const EGLint err = eglGetError();
+					PN_CORE_WARN("eglSwapBuffers failed: 0x{:X}", err);
+
+					if (err == EGL_BAD_SURFACE) {
+						destroySurface();
+						if (createSurface()) {
+							auto* e_app = static_cast<PAIN::Application*>(m_EventPackage.app);
+							if (e_app) {
+								e_app->pushEventQueue(std::make_shared<Event::SurfaceChanged>(
+									getNativeWindow(), frame_buffer.x, frame_buffer.y));
+							}
+						}
+						return;
+					}
+
+					if (err == EGL_CONTEXT_LOST || err == EGL_BAD_CONTEXT) {
+						destroySurface();
+						destroyContext();
+						if (createContext() && createSurface()) {
+							auto* e_app = static_cast<PAIN::Application*>(m_EventPackage.app);
+							if (e_app) {
+								e_app->pushEventQueue(std::make_shared<Event::SurfaceCreated>(
+									getNativeWindow(), frame_buffer.x, frame_buffer.y));
+							}
+						}
+						return;
+					}
+				}
+			}
+		}
 
         void Android_Window::onUpdate(AppTiming timing) {
 

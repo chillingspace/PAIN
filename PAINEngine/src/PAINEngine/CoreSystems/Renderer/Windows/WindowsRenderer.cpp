@@ -1524,16 +1524,21 @@ namespace PAIN {
 			_createDeferredShadingBuffer(emission_texture, 3, GL_COLOR_ATTACHMENT4);
 #endif
 
-			static constexpr int NUM_GBUFFERS = 5;
-
-			unsigned int attachments[NUM_GBUFFERS] = {
+			unsigned int attachments[5] = {
 				GL_COLOR_ATTACHMENT0,
 				GL_COLOR_ATTACHMENT1,
 				GL_COLOR_ATTACHMENT2,
 				GL_COLOR_ATTACHMENT3,
 				GL_COLOR_ATTACHMENT4,
 			};
-			glDrawBuffers(NUM_GBUFFERS, attachments);
+			glDrawBuffers(active_gbuffer_count, attachments);
+			if (active_gbuffer_count < 5) {
+				const GLenum emissionOnly = GL_COLOR_ATTACHMENT4;
+				glDrawBuffers(1, &emissionOnly);
+				glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+				glClear(GL_COLOR_BUFFER_BIT);
+				glDrawBuffers(active_gbuffer_count, attachments);
+			}
 
 			glGenTextures(1, &ds_depth_texture);
 			glBindTexture(GL_TEXTURE_2D, ds_depth_texture);
@@ -1833,6 +1838,14 @@ namespace PAIN {
 		auto window_service = services->get<Window::Window>();
 		winWidth = window_service->getFrameBuffer().x;
 		winHeight = window_service->getFrameBuffer().y;
+		glGetIntegerv(GL_MAX_DRAW_BUFFERS, &max_draw_buffers);
+		glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &max_color_attachments);
+		const int maxGBufferAttachments = static_cast<int>(std::min(max_draw_buffers, max_color_attachments));
+		active_gbuffer_count = std::clamp(maxGBufferAttachments, 3, 5);
+		if (active_gbuffer_count < 5) {
+			PN_CORE_WARN("Reducing active G-buffer draw attachments to {} (caps: drawBuffers={}, colorAttachments={})",
+				active_gbuffer_count, max_draw_buffers, max_color_attachments);
+		}
 
 		initShaders();
 
@@ -1863,9 +1876,6 @@ namespace PAIN {
 			return;
 		}
 
-		// ========================================
-		// SAVE STATE (Debug builds only - avoids costly glGet* in release)
-		// ========================================
 		#ifdef _DEBUG
 		GLint currentActiveTexture;
 		glGetIntegerv(GL_ACTIVE_TEXTURE, &currentActiveTexture);
@@ -1880,9 +1890,6 @@ namespace PAIN {
 		glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
 		#endif
 
-		// ========================================
-		// RENDER
-		// ========================================
 		auto window_service = services->get<Window::Window>();
 		auto framebuffer = window_service->getFrameBuffer();
 
@@ -1892,11 +1899,6 @@ namespace PAIN {
 
 		texture2d_shader->Bind();
 
-		GLenum err = glGetError();
-		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("Error after shader bind: 0x{:X}", err);
-		}
-
 		texture2d_shader->SetUniform("pos", pos);
 		texture2d_shader->SetUniform("ndc_scale", corrected_scale);
 		texture2d_shader->SetUniform("uv_transform",
@@ -1904,33 +1906,23 @@ namespace PAIN {
 
 		glActiveTexture(GL_TEXTURE6);
 		glBindTexture(GL_TEXTURE_2D, texture_id);
-
-		// Force clamp to edge to prevent bleeding from wrapping
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		if (clamp_configured_textures.find(texture_id) == clamp_configured_textures.end()) {
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			clamp_configured_textures.insert(texture_id);
+		}
 
 		texture2d_shader->SetUniform("tex", 6);
-
-		err = glGetError();
-		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("Error after texture bind: 0x{:X}", err);
-		}
 
 		glBindVertexArray(passthrough_vao);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-		err = glGetError();
-		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("Error after draw call: 0x{:X}", err);
-		}
-
-		// ========================================
-		// RESTORE STATE
-		// ========================================
+		#ifdef _DEBUG
 		glActiveTexture(currentActiveTexture);
 		glBindTexture(GL_TEXTURE_2D, currentTexture);
 		glBindVertexArray(currentVAO);
 		glUseProgram(currentProgram);
+		#endif
 	}
 
 	void WindowsRenderer::Render2DTextureCircular(GLuint texture_id, const glm::vec2& pos,
@@ -1979,8 +1971,11 @@ namespace PAIN {
 
 		glActiveTexture(GL_TEXTURE6);
 		glBindTexture(GL_TEXTURE_2D, texture_id);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		if (clamp_configured_textures.find(texture_id) == clamp_configured_textures.end()) {
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			clamp_configured_textures.insert(texture_id);
+		}
 		texture2d_shader->SetUniform("tex", 6);
 
 		glBindVertexArray(passthrough_vao);
@@ -2123,11 +2118,6 @@ namespace PAIN {
 			glBindVertexArray(0);
 		}
 
-		GLenum err = glGetError();
-		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("OpenGL error after drawing floor: {}", err);
-		}
-
 		geometry_shader->Bind();
 		geometry_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
 		geometry_shader->SetUniform("u_P", scene->GetActiveCamera()->projection());
@@ -2141,11 +2131,6 @@ namespace PAIN {
 	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene::SceneManager> scene,
 									   ModelRenderer& component,
 									   const glm::mat4& M) {
-
-		GLenum err = glGetError();
-		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("OpenGL error before DrawGeometry: {}", err);
-		}
 
 		if (!geometry_shader || !component.cachedModelAsset) {
 			return;
@@ -2320,11 +2305,6 @@ namespace PAIN {
 		// LogMemoryFullDiagnostic("After Rendering Sub Meshes.");
 
 		glBindVertexArray(0);
-
-		err = glGetError();
-		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("OpenGL error after DrawGeometry: {}", err);
-		}
 	}
 
 	void WindowsRenderer::DrawGeometryInstanced(
@@ -2339,13 +2319,12 @@ namespace PAIN {
 
 		const int instanceCount = static_cast<int>(matrices.size());
 
-		// Upload model matrices to the instance VBO
 		glBindBuffer(GL_ARRAY_BUFFER, geometry_ibo);
 		const GLsizeiptr needed = instanceCount * sizeof(glm::mat4);
-		GLint currentSize = 0;
-		glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &currentSize);
-		const GLsizeiptr uploadCapacity = currentSize < needed ? needed * 2 : currentSize;
-		glBufferData(GL_ARRAY_BUFFER, uploadCapacity, nullptr, GL_DYNAMIC_DRAW);
+		if (geometry_ibo_capacity < needed) {
+			geometry_ibo_capacity = needed * 2;
+			glBufferData(GL_ARRAY_BUFFER, geometry_ibo_capacity, nullptr, GL_DYNAMIC_DRAW);
+		}
 		glBufferSubData(GL_ARRAY_BUFFER, 0, needed, matrices.data());
 
 		geometry_shader->SetUniform("u_Instanced", 1.0f);
@@ -3001,8 +2980,12 @@ namespace PAIN {
 
 		glBindVertexArray(debug_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
-		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(),
-					 GL_DYNAMIC_DRAW);
+		const GLsizeiptr debugBytes = static_cast<GLsizeiptr>(verts.size() * sizeof(float));
+		if (debug_vbo_capacity < debugBytes) {
+			debug_vbo_capacity = debugBytes * 2;
+			glBufferData(GL_ARRAY_BUFFER, debug_vbo_capacity, nullptr, GL_DYNAMIC_DRAW);
+		}
+		glBufferSubData(GL_ARRAY_BUFFER, 0, debugBytes, verts.data());
 
 		debug_shader->Bind();
 		debug_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
@@ -3044,8 +3027,12 @@ namespace PAIN {
 
 		glBindVertexArray(debug_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
-		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(),
-					 GL_DYNAMIC_DRAW);
+		const GLsizeiptr debugBytes = static_cast<GLsizeiptr>(verts.size() * sizeof(float));
+		if (debug_vbo_capacity < debugBytes) {
+			debug_vbo_capacity = debugBytes * 2;
+			glBufferData(GL_ARRAY_BUFFER, debug_vbo_capacity, nullptr, GL_DYNAMIC_DRAW);
+		}
+		glBufferSubData(GL_ARRAY_BUFFER, 0, debugBytes, verts.data());
 
 		debug_shader->Bind();
 		debug_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
@@ -3090,8 +3077,12 @@ namespace PAIN {
 
 		glBindVertexArray(debug_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
-		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(),
-					 GL_DYNAMIC_DRAW);
+		const GLsizeiptr debugBytes = static_cast<GLsizeiptr>(verts.size() * sizeof(float));
+		if (debug_vbo_capacity < debugBytes) {
+			debug_vbo_capacity = debugBytes * 2;
+			glBufferData(GL_ARRAY_BUFFER, debug_vbo_capacity, nullptr, GL_DYNAMIC_DRAW);
+		}
+		glBufferSubData(GL_ARRAY_BUFFER, 0, debugBytes, verts.data());
 
 		debug_shader->Bind();
 		// For 2D UI, use orthographic projection
@@ -3117,8 +3108,12 @@ namespace PAIN {
 
 		glBindVertexArray(debug_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
-		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(),
-			GL_DYNAMIC_DRAW);
+		const GLsizeiptr debugBytes = static_cast<GLsizeiptr>(verts.size() * sizeof(float));
+		if (debug_vbo_capacity < debugBytes) {
+			debug_vbo_capacity = debugBytes * 2;
+			glBufferData(GL_ARRAY_BUFFER, debug_vbo_capacity, nullptr, GL_DYNAMIC_DRAW);
+		}
+		glBufferSubData(GL_ARRAY_BUFFER, 0, debugBytes, verts.data());
 
 		debug_shader->Bind();
 		glm::mat4 ortho_proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
@@ -3147,8 +3142,12 @@ namespace PAIN {
 
 		glBindVertexArray(debug_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
-		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(),
-			GL_DYNAMIC_DRAW);
+		const GLsizeiptr debugBytes = static_cast<GLsizeiptr>(verts.size() * sizeof(float));
+		if (debug_vbo_capacity < debugBytes) {
+			debug_vbo_capacity = debugBytes * 2;
+			glBufferData(GL_ARRAY_BUFFER, debug_vbo_capacity, nullptr, GL_DYNAMIC_DRAW);
+		}
+		glBufferSubData(GL_ARRAY_BUFFER, 0, debugBytes, verts.data());
 
 		debug_shader->Bind();
 		glm::mat4 ortho_proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
@@ -3175,8 +3174,12 @@ namespace PAIN {
 
 		glBindVertexArray(debug_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
-		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(),
-			GL_DYNAMIC_DRAW);
+		const GLsizeiptr debugBytes = static_cast<GLsizeiptr>(verts.size() * sizeof(float));
+		if (debug_vbo_capacity < debugBytes) {
+			debug_vbo_capacity = debugBytes * 2;
+			glBufferData(GL_ARRAY_BUFFER, debug_vbo_capacity, nullptr, GL_DYNAMIC_DRAW);
+		}
+		glBufferSubData(GL_ARRAY_BUFFER, 0, debugBytes, verts.data());
 
 		debug_shader->Bind();
 		glm::mat4 ortho_proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
@@ -3205,8 +3208,12 @@ namespace PAIN {
 
 		glBindVertexArray(debug_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
-		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(),
-			GL_DYNAMIC_DRAW);
+		const GLsizeiptr debugBytes = static_cast<GLsizeiptr>(verts.size() * sizeof(float));
+		if (debug_vbo_capacity < debugBytes) {
+			debug_vbo_capacity = debugBytes * 2;
+			glBufferData(GL_ARRAY_BUFFER, debug_vbo_capacity, nullptr, GL_DYNAMIC_DRAW);
+		}
+		glBufferSubData(GL_ARRAY_BUFFER, 0, debugBytes, verts.data());
 
 		debug_shader->Bind();
 		glm::mat4 ortho_proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
@@ -3245,8 +3252,12 @@ namespace PAIN {
 
 		glBindVertexArray(debug_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
-		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(),
-			GL_DYNAMIC_DRAW);
+		const GLsizeiptr debugBytes = static_cast<GLsizeiptr>(verts.size() * sizeof(float));
+		if (debug_vbo_capacity < debugBytes) {
+			debug_vbo_capacity = debugBytes * 2;
+			glBufferData(GL_ARRAY_BUFFER, debug_vbo_capacity, nullptr, GL_DYNAMIC_DRAW);
+		}
+		glBufferSubData(GL_ARRAY_BUFFER, 0, debugBytes, verts.data());
 
 		debug_shader->Bind();
 		glm::mat4 ortho_proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
@@ -3804,7 +3815,12 @@ namespace PAIN {
 
 		glBindVertexArray(debug_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
-		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(), GL_DYNAMIC_DRAW);
+		const GLsizeiptr debugBytes = static_cast<GLsizeiptr>(verts.size() * sizeof(float));
+		if (debug_vbo_capacity < debugBytes) {
+			debug_vbo_capacity = debugBytes * 2;
+			glBufferData(GL_ARRAY_BUFFER, debug_vbo_capacity, nullptr, GL_DYNAMIC_DRAW);
+		}
+		glBufferSubData(GL_ARRAY_BUFFER, 0, debugBytes, verts.data());
 
 		// Color mask off - only writing to stencil
 		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);

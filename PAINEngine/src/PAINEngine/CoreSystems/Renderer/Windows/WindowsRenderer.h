@@ -222,6 +222,9 @@ namespace PAIN {
 		unsigned int pp2_fbo = 0; // post-processing framebuffer 2 (for ping-pong)
 								  // needed for stuff like bloom
 		unsigned int out_fbo = 0; // output framebuffer (for imgui/display)
+		GLint max_draw_buffers = 0;
+		GLint max_color_attachments = 0;
+		int active_gbuffer_count = 5;
 
 		// === Textures ===
 		unsigned int pos_texture = 0;
@@ -239,6 +242,7 @@ namespace PAIN {
 		unsigned int geometry_vbo = 0;
 		unsigned int geometry_ebo = 0;
 		unsigned int geometry_ibo = 0;
+		GLsizeiptr geometry_ibo_capacity = 0;
 		unsigned int shadow_vao = 0;
 		unsigned int shadow_vbo = 0;
 		unsigned int shadow_ebo = 0;
@@ -280,6 +284,8 @@ namespace PAIN {
 		// === Debug Buffers ===
 		unsigned int debug_VAO = 0;
 		unsigned int debug_VBO = 0;
+		GLsizeiptr debug_vbo_capacity = 0;
+		std::unordered_set<unsigned int> clamp_configured_textures;
 
 		// === Minimap Wall GPU Buffers ===
 		unsigned int minimap_wall_vao = 0;
