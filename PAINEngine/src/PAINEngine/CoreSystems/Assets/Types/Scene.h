@@ -133,11 +133,11 @@ namespace PAIN {
                 bool use_icon_textures = false;
                 float icon_scale = 1.0f;
                 bool show_legend = false;
-                std::string icon_player_path;
-                std::string icon_danger_path;
-                std::string icon_item_path;
-                std::string icon_objective_path;
-                std::string icon_wall_path;
+                Assets::GUID icon_player_guid;
+                Assets::GUID icon_danger_guid;
+                Assets::GUID icon_item_guid;
+                Assets::GUID icon_objective_guid;
+                Assets::GUID icon_wall_guid;
                 float background_alpha = 0.5f;
                 float border_thickness = 2.0f;
                 glm::vec4 border_color{ 1.0f, 1.0f, 1.0f, 1.0f };

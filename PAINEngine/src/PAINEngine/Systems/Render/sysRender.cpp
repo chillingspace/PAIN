@@ -2078,20 +2078,20 @@ namespace PAIN {
 						GLuint itemIconTex = 0;
 						GLuint objectiveIconTex = 0;
 						if (gs.minimap_use_icon_textures && assetManager) {
-							auto resolveIcon = [&](const std::string& path) -> GLuint {
-								if (path.empty()) {
+							auto resolveIcon = [&](const Assets::GUID& guid) -> GLuint {
+								if (!guid.IsValid()) {
 									return 0;
 								}
-								auto iconOpt = assetManager->getAsset<Assets::Texture>(path);
+								auto iconOpt = assetManager->getAsset<Assets::Texture>(guid);
 								if (!iconOpt.has_value() || !iconOpt.value()) {
 									return 0;
 								}
 								return iconOpt.value()->gl_texture;
 								};
 
-							playerIconTex = resolveIcon(gs.minimap_icon_player_path);
-							itemIconTex = resolveIcon(gs.minimap_icon_item_path);
-							objectiveIconTex = resolveIcon(gs.minimap_icon_objective_path);
+							playerIconTex = resolveIcon(gs.minimap_icon_player_guid);
+							itemIconTex = resolveIcon(gs.minimap_icon_item_guid);
+							objectiveIconTex = resolveIcon(gs.minimap_icon_objective_guid);
 						}
 
 						auto drawMarker = [&](const glm::vec3& pos,
@@ -2395,6 +2395,7 @@ namespace PAIN {
 							appendDangerEntities("danger");
 							appendDangerEntities("Enemy");
 
+							// Draw danger zones as red circles
 							std::vector<glm::vec2> dangerLineVertices;
 							dangerLineVertices.reserve(dangerEntities.size() * 24 * 2);
 							for (entt::entity entity : dangerEntities) {

@@ -1546,20 +1546,20 @@ namespace PAIN {
                 if (minimap.contains("show_legend")) {
                     sceneAsset->minimap.show_legend = minimap["show_legend"].get<bool>();
                 }
-                if (minimap.contains("icon_player_path")) {
-                    sceneAsset->minimap.icon_player_path = minimap["icon_player_path"].get<std::string>();
+                if (minimap.contains("icon_player_guid")) {
+                    sceneAsset->minimap.icon_player_guid = Assets::GUID(minimap["icon_player_guid"].get<std::string>());
                 }
-                if (minimap.contains("icon_danger_path")) {
-                    sceneAsset->minimap.icon_danger_path = minimap["icon_danger_path"].get<std::string>();
+                if (minimap.contains("icon_danger_guid")) {
+                    sceneAsset->minimap.icon_danger_guid = Assets::GUID(minimap["icon_danger_guid"].get<std::string>());
                 }
-                if (minimap.contains("icon_item_path")) {
-                    sceneAsset->minimap.icon_item_path = minimap["icon_item_path"].get<std::string>();
+                if (minimap.contains("icon_item_guid")) {
+                    sceneAsset->minimap.icon_item_guid = Assets::GUID(minimap["icon_item_guid"].get<std::string>());
                 }
-                if (minimap.contains("icon_objective_path")) {
-                    sceneAsset->minimap.icon_objective_path = minimap["icon_objective_path"].get<std::string>();
+                if (minimap.contains("icon_objective_guid")) {
+                    sceneAsset->minimap.icon_objective_guid = Assets::GUID(minimap["icon_objective_guid"].get<std::string>());
                 }
-                if (minimap.contains("icon_wall_path")) {
-                    sceneAsset->minimap.icon_wall_path = minimap["icon_wall_path"].get<std::string>();
+                if (minimap.contains("icon_wall_guid")) {
+                    sceneAsset->minimap.icon_wall_guid = Assets::GUID(minimap["icon_wall_guid"].get<std::string>());
                 }
                 if (minimap.contains("background_alpha")) {
                     sceneAsset->minimap.background_alpha = minimap["background_alpha"].get<float>();

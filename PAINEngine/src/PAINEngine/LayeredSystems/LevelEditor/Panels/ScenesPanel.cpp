@@ -770,18 +770,23 @@ namespace PAIN {
                 ImGui::Checkbox("Use Icon Textures", &gs.minimap_use_icon_textures);
                 ImGui::DragFloat("Icon Scale", &gs.minimap_icon_scale, 0.05f, 0.2f, 4.0f, "%.2f");
 
-                auto drawPathField = [](const char* label, std::string& value) {
-                    char buffer[256]{};
-                    strncpy(buffer, value.c_str(), sizeof(buffer) - 1);
-                    if (ImGui::InputText(label, buffer, IM_ARRAYSIZE(buffer))) value = buffer;
-                    };
-
                 ImGui::BeginDisabled(!gs.minimap_use_icon_textures);
-                drawPathField("Player Icon Path", gs.minimap_icon_player_path);
-                drawPathField("Danger Icon Path", gs.minimap_icon_danger_path);
-                drawPathField("Item Icon Path", gs.minimap_icon_item_path);
-                drawPathField("Objective Icon Path", gs.minimap_icon_objective_path);
-                drawPathField("Wall Icon Path", gs.minimap_icon_wall_path);
+
+                if (DrawAssetSelectorField("Player Icon",
+                    gs.minimap_icon_player_guid,
+                    PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+                    services, false)) {}
+
+                if (DrawAssetSelectorField("Item Icon",
+                    gs.minimap_icon_item_guid,
+                    PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+                    services, false)) {}
+
+                if (DrawAssetSelectorField("Objective Icon",
+                    gs.minimap_icon_objective_guid,
+                    PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+                    services, false)) {}
+
                 ImGui::EndDisabled();
 
                 ImGui::Checkbox("Show Legend", &gs.minimap_show_legend);

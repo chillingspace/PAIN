@@ -1864,8 +1864,9 @@ namespace PAIN {
 		}
 
 		// ========================================
-		// SAVE STATE
+		// SAVE STATE (Debug builds only - avoids costly glGet* in release)
 		// ========================================
+		#ifdef _DEBUG
 		GLint currentActiveTexture;
 		glGetIntegerv(GL_ACTIVE_TEXTURE, &currentActiveTexture);
 
@@ -1877,6 +1878,7 @@ namespace PAIN {
 
 		GLint currentProgram;
 		glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
+		#endif
 
 		// ========================================
 		// RENDER
