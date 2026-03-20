@@ -405,11 +405,11 @@ namespace PAIN {
 			gs.minimap_use_icon_textures = minimap.use_icon_textures;
 			gs.minimap_icon_scale = minimap.icon_scale;
 			gs.minimap_show_legend = minimap.show_legend;
-			gs.minimap_icon_player_path = minimap.icon_player_path;
-			gs.minimap_icon_danger_path = minimap.icon_danger_path;
-			gs.minimap_icon_item_path = minimap.icon_item_path;
-			gs.minimap_icon_objective_path = minimap.icon_objective_path;
-			gs.minimap_icon_wall_path = minimap.icon_wall_path;
+			gs.minimap_icon_player_guid = minimap.icon_player_guid;
+			gs.minimap_icon_danger_guid = minimap.icon_danger_guid;
+			gs.minimap_icon_item_guid = minimap.icon_item_guid;
+			gs.minimap_icon_objective_guid = minimap.icon_objective_guid;
+			gs.minimap_icon_wall_guid = minimap.icon_wall_guid;
 			gs.minimap_background_alpha = minimap.background_alpha;
 			gs.minimap_border_thickness = minimap.border_thickness;
 			gs.minimap_border_color = minimap.border_color;
@@ -883,11 +883,11 @@ namespace PAIN {
 			scene_asset.minimap.use_icon_textures = gs.minimap_use_icon_textures;
 			scene_asset.minimap.icon_scale = gs.minimap_icon_scale;
 			scene_asset.minimap.show_legend = gs.minimap_show_legend;
-			scene_asset.minimap.icon_player_path = gs.minimap_icon_player_path;
-			scene_asset.minimap.icon_danger_path = gs.minimap_icon_danger_path;
-			scene_asset.minimap.icon_item_path = gs.minimap_icon_item_path;
-			scene_asset.minimap.icon_objective_path = gs.minimap_icon_objective_path;
-			scene_asset.minimap.icon_wall_path = gs.minimap_icon_wall_path;
+			scene_asset.minimap.icon_player_guid = gs.minimap_icon_player_guid;
+			scene_asset.minimap.icon_danger_guid = gs.minimap_icon_danger_guid;
+			scene_asset.minimap.icon_item_guid = gs.minimap_icon_item_guid;
+			scene_asset.minimap.icon_objective_guid = gs.minimap_icon_objective_guid;
+			scene_asset.minimap.icon_wall_guid = gs.minimap_icon_wall_guid;
 			scene_asset.minimap.background_alpha = gs.minimap_background_alpha;
 			scene_asset.minimap.border_thickness = gs.minimap_border_thickness;
 			scene_asset.minimap.border_color = gs.minimap_border_color;
@@ -978,11 +978,11 @@ namespace PAIN {
 				{"use_icon_textures", scn_asset.minimap.use_icon_textures},
 				{"icon_scale", scn_asset.minimap.icon_scale},
 				{"show_legend", scn_asset.minimap.show_legend},
-				{"icon_player_path", scn_asset.minimap.icon_player_path},
-				{"icon_danger_path", scn_asset.minimap.icon_danger_path},
-				{"icon_item_path", scn_asset.minimap.icon_item_path},
-				{"icon_objective_path", scn_asset.minimap.icon_objective_path},
-				{"icon_wall_path", scn_asset.minimap.icon_wall_path},
+				{"icon_player_guid", scn_asset.minimap.icon_player_guid.ToString()},
+				{"icon_danger_guid", scn_asset.minimap.icon_danger_guid.ToString()},
+				{"icon_item_guid", scn_asset.minimap.icon_item_guid.ToString()},
+				{"icon_objective_guid", scn_asset.minimap.icon_objective_guid.ToString()},
+				{"icon_wall_guid", scn_asset.minimap.icon_wall_guid.ToString()},
 				{"background_alpha", scn_asset.minimap.background_alpha},
 				{"border_thickness", scn_asset.minimap.border_thickness},
 				{"border_color", {

@@ -17,6 +17,8 @@
 
 #include <glm/glm.hpp>
 
+#include "AssetData.h"
+
 namespace PAIN {
 	class GraphicsSettings {
 	private:
@@ -239,11 +241,11 @@ namespace PAIN {
 		bool minimap_use_icon_textures = false;
 		float minimap_icon_scale = 1.0f;
 		bool minimap_show_legend = false;
-		std::string minimap_icon_player_path;
-		std::string minimap_icon_danger_path;
-		std::string minimap_icon_item_path;
-		std::string minimap_icon_objective_path;
-		std::string minimap_icon_wall_path;
+		Assets::GUID minimap_icon_player_guid;
+		Assets::GUID minimap_icon_danger_guid;
+		Assets::GUID minimap_icon_item_guid;
+		Assets::GUID minimap_icon_objective_guid;
+		Assets::GUID minimap_icon_wall_guid;
 		float minimap_background_alpha = 0.5f;
 		float minimap_border_thickness = 2.0f;
 		glm::vec4 minimap_border_color = glm::vec4(1.0f);
