@@ -722,7 +722,7 @@ namespace PAIN {
                 }
 
                 static const char* recommendedPositions[] = {
-                    "Top Left","Top Right","Bottom Left","Bottom Right","Top Middle","Bottom Middle"
+                    "Top Left","Top Right","Bottom Left","Bottom Right","Top Middle","Bottom Middle","Left Middle","Right Middle"
                 };
                 int recommendedPos = static_cast<int>(gs.minimap_recommended_position);
                 if (ImGui::Combo("Recommended Position", &recommendedPos, recommendedPositions, IM_ARRAYSIZE(recommendedPositions)))

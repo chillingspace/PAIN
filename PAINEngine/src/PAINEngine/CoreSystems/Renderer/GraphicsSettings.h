@@ -214,6 +214,8 @@ namespace PAIN {
 			BOTTOM_RIGHT,
 			TOP_MIDDLE,
 			BOTTOM_MIDDLE,
+			LEFT_MIDDLE,
+			RIGHT_MIDDLE,
 		};
 		float minimap_radius = 15.0f;
 		glm::vec2 minimap_size_px = glm::vec2(200.0f, 200.0f);

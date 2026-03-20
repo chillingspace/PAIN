@@ -1800,8 +1800,19 @@ namespace PAIN {
 								map_y = 20.0f;
 								break;
 							case GraphicsSettings::MINIMAP_RECOMMENDED_POSITION::BOTTOM_MIDDLE:
-							default:
 								map_x = (fbw - outer_w) * 0.5f;
+								map_y = fbh - outer_h - 20.0f;
+								break;
+							case GraphicsSettings::MINIMAP_RECOMMENDED_POSITION::LEFT_MIDDLE:
+								map_x = 20.0f;
+								map_y = (fbh - outer_h) * 0.5f;
+								break;
+							case GraphicsSettings::MINIMAP_RECOMMENDED_POSITION::RIGHT_MIDDLE:
+								map_x = fbw - outer_w - 20.0f;
+								map_y = (fbh - outer_h) * 0.5f;
+								break;
+							default:
+								map_x = fbw - outer_w - 20.0f;
 								map_y = fbh - outer_h - 20.0f;
 								break;
 							}
