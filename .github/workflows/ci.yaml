@@ -28,7 +28,7 @@ jobs:
         & "C:\Program Files\Cppcheck\cppcheck.exe" `
           --error-exitcode=1 `
           --force `
-          --enable=warning,style,error `
+          --enable=warning,style `
           --inconclusive `
           --std=c++20 `
           --suppress=missingIncludeSystem `
