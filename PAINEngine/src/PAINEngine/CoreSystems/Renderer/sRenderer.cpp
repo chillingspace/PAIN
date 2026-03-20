@@ -93,8 +93,12 @@ namespace PAIN {
 				w_renderer->uploadTexture(tex);
 			}
 
-			it = pending_textures.erase(it);
-			uploaded++;
+			if (tex->gl_texture) {
+				it = pending_textures.erase(it);
+				uploaded++;
+			} else {
+				++it;
+			}
 		}
 
 		//Reset batch upload flag
@@ -131,7 +135,13 @@ namespace PAIN {
 		dispatcher.Dispatch<Event::SurfaceCreated>([&](Event::SurfaceCreated& se) -> bool {
 			WindowsRenderer::winWidth = se.getWidth();
 			WindowsRenderer::winHeight = se.getHeight();
-			w_renderer->resizeDirty = true;
+			if (se.contextWasLost) {
+				PN_CORE_WARN("EGL context was lost - performing full renderer reinit");
+				w_renderer->Cleanup();
+				w_renderer->Init(services);
+			} else {
+				w_renderer->resizeDirty = true;
+			}
 			return false;
 		});
 

@@ -549,18 +549,22 @@ namespace PAIN {
 						return;
 					}
 
-					if (err == EGL_CONTEXT_LOST || err == EGL_BAD_CONTEXT) {
-						destroySurface();
-						destroyContext();
-						if (createContext() && createSurface()) {
-							auto* e_app = static_cast<PAIN::Application*>(m_EventPackage.app);
-							if (e_app) {
-								e_app->pushEventQueue(std::make_shared<Event::SurfaceCreated>(
-									getNativeWindow(), frame_buffer.x, frame_buffer.y));
-							}
+				if (err == EGL_CONTEXT_LOST || err == EGL_BAD_CONTEXT) {
+					destroySurface();
+					destroyContext();
+					if (createContext() && createSurface()) {
+						auto* e_app = static_cast<PAIN::Application*>(m_EventPackage.app);
+						if (e_app) {
+							// Emit SurfaceCreated with a flag indicating context was lost
+							// This tells the renderer to do full reinit, not just resize
+							auto evt = std::make_shared<Event::SurfaceCreated>(
+								getNativeWindow(), frame_buffer.x, frame_buffer.y);
+							evt->contextWasLost = true; // Add this flag to SurfaceCreated event
+							e_app->pushEventQueue(evt);
 						}
-						return;
 					}
+					return;
+				}
 				}
 			}
 		}

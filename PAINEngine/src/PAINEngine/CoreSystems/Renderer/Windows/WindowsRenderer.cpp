@@ -798,6 +798,16 @@ namespace PAIN {
 		glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &previousTexCube);
 		glGetIntegerv(GL_UNPACK_ALIGNMENT, &previousUnpackAlignment);
 
+#ifdef PN_PLATFORM_ANDROID
+		if (eglGetCurrentContext() == EGL_NO_CONTEXT ||
+			eglGetCurrentSurface(EGL_DRAW) == EGL_NO_SURFACE) {
+			PN_CORE_WARN("Deferring texture upload because EGL context/surface is not current yet");
+			return;
+		}
+#endif
+
+		while (glGetError() != GL_NO_ERROR) {}
+
 		PN_CORE_TRACE("Texture load started, active unit: GL_TEXTURE{}", activeTextureUnit - GL_TEXTURE0);
 
 		// ========================================
@@ -1515,13 +1525,17 @@ namespace PAIN {
 			_createDeferredShadingBuffer(col_texture, 3, GL_COLOR_ATTACHMENT1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
 			_createDeferredShadingBuffer(norm_texture, 3, GL_COLOR_ATTACHMENT2);
 			_createDeferredShadingBuffer(material_properties_texture, 3, GL_COLOR_ATTACHMENT3, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
-			_createDeferredShadingBuffer(emission_texture, 3, GL_COLOR_ATTACHMENT4, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+			if (active_gbuffer_count >= 5) {
+				_createDeferredShadingBuffer(emission_texture, 3, GL_COLOR_ATTACHMENT4, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+			}
 #else
 			_createDeferredShadingBuffer(pos_texture, 3, GL_COLOR_ATTACHMENT0);
 			_createDeferredShadingBuffer(col_texture, 3, GL_COLOR_ATTACHMENT1);
 			_createDeferredShadingBuffer(norm_texture, 3, GL_COLOR_ATTACHMENT2);
 			_createDeferredShadingBuffer(material_properties_texture, 3, GL_COLOR_ATTACHMENT3);
-			_createDeferredShadingBuffer(emission_texture, 3, GL_COLOR_ATTACHMENT4);
+			if (active_gbuffer_count >= 5) {
+				_createDeferredShadingBuffer(emission_texture, 3, GL_COLOR_ATTACHMENT4);
+			}
 #endif
 
 			unsigned int attachments[5] = {
@@ -1532,13 +1546,13 @@ namespace PAIN {
 				GL_COLOR_ATTACHMENT4,
 			};
 			glDrawBuffers(active_gbuffer_count, attachments);
-			if (active_gbuffer_count < 5) {
-				const GLenum emissionOnly = GL_COLOR_ATTACHMENT4;
-				glDrawBuffers(1, &emissionOnly);
-				glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			// Clear all active attachments to ensure clean state
+			for (int i = 0; i < active_gbuffer_count; ++i) {
+				glDrawBuffers(1, &attachments[i]);
+				glClearColor(0.0f, 0.0f, 0.0f, (i == 3) ? 0.0f : 1.0f); // material_properties alpha = 0
 				glClear(GL_COLOR_BUFFER_BIT);
-				glDrawBuffers(active_gbuffer_count, attachments);
 			}
+			glDrawBuffers(active_gbuffer_count, attachments);
 
 			glGenTextures(1, &ds_depth_texture);
 			glBindTexture(GL_TEXTURE_2D, ds_depth_texture);
@@ -3946,6 +3960,7 @@ namespace PAIN {
 				*tex = 0;
 			}
 		}
+		clamp_configured_textures.clear();
 
 		for (unsigned int* rbo : rbos) {
 			if (*rbo) {
