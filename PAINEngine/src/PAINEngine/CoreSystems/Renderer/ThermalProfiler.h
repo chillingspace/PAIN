@@ -2,6 +2,7 @@
 
 #include "pch.h"
 #include <chrono>
+#include <deque>
 #include <vector>
 #include <string>
 #include <fstream>
@@ -135,7 +136,7 @@ private:
 
     struct PendingQuery {
         unsigned int queryId;
-        uint64_t passInstanceId = 0;
+        std::string passName;
         uint64_t sourceFrame = 0;
     };
     struct ResolvedQuery {
@@ -144,7 +145,7 @@ private:
         uint64_t sourceFrame = 0;
     };
     std::vector<PendingQuery> pendingQueries;
-    std::unordered_map<uint64_t, ResolvedQuery> resolvedByPassInstance;
+    std::unordered_map<std::string, std::deque<ResolvedQuery>> resolvedByPass;
     int resolvedThisFrame = 0;
     unsigned int disjointOccurrences = 0;
 
