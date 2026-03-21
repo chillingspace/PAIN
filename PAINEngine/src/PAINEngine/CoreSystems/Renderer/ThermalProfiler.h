@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <functional>
 
 namespace PAIN {
 
@@ -16,6 +17,8 @@ struct PassTiming {
     float cpuTimeMs = 0.0f;
     int gpuStatus = 0;
     int gpuSampleAgeFrames = -1;
+    int64_t gpuSourceFrame = -1;
+    uint64_t gpuSourcePassInstanceId = 0;
     uint32_t queryStart = 0;
     uint32_t queryEnd = 0;
     bool active = false;
@@ -33,6 +36,10 @@ struct ThermalFrame {
     int gpuResolvedThisFrame = 0;
     int gpuPendingAfterFrame = 0;
     int gpuDisjointTotal = 0;
+    int gpuResolvedQueueSamples = 0;
+    int gpuTimedOutTotal = 0;
+    int gpuResolvedDroppedTotal = 0;
+    int gpuResetDiscardedTotal = 0;
     std::vector<PassTiming> passTimings;
     std::chrono::steady_clock::time_point timestamp;
 };
@@ -68,6 +75,21 @@ public:
     bool IsOverlayEnabled() const { return overlayEnabled; }
 
 private:
+    struct PassInstanceKey {
+        std::string name;
+        uint64_t instanceId = 0;
+
+        bool operator==(const PassInstanceKey& other) const {
+            return instanceId == other.instanceId && name == other.name;
+        }
+    };
+
+    struct PassInstanceKeyHash {
+        size_t operator()(const PassInstanceKey& key) const {
+            return std::hash<std::string>{}(key.name) ^ (std::hash<uint64_t>{}(key.instanceId) << 1);
+        }
+    };
+
     void WriteCSVHeader();
     void WriteCSVRow(const ThermalFrame& frame);
     void RotateQueryPool();
@@ -137,17 +159,22 @@ private:
     struct PendingQuery {
         unsigned int queryId;
         std::string passName;
+        uint64_t passInstanceId = 0;
         uint64_t sourceFrame = 0;
     };
     struct ResolvedQuery {
         float gpuTimeMs = -1.0f;
         int gpuStatus = -2;
+        uint64_t sourcePassInstanceId = 0;
         uint64_t sourceFrame = 0;
     };
     std::vector<PendingQuery> pendingQueries;
-    std::unordered_map<std::string, std::deque<ResolvedQuery>> resolvedByPass;
+    std::unordered_map<PassInstanceKey, std::deque<ResolvedQuery>, PassInstanceKeyHash> resolvedByPass;
     int resolvedThisFrame = 0;
     unsigned int disjointOccurrences = 0;
+    unsigned int timedOutQueryCount = 0;
+    unsigned int droppedResolvedSampleCount = 0;
+    unsigned int resetDiscardedSampleCount = 0;
 
     using ThermalGetHeadroomFn = float (*)(void* manager, int forecastSeconds);
     ThermalGetHeadroomFn thermalGetHeadroom = nullptr;

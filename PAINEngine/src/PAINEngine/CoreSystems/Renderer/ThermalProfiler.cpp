@@ -40,6 +40,10 @@ constexpr int kGpuStatusValid = 1;
 constexpr uint64_t kMaxPendingQueryAgeFrames = 240;
 constexpr size_t kMaxResolvedQueuePerPass = 16;
 
+bool IsGpuUnsupportedPass(const std::string& passName) {
+    return passName == "minimap";
+}
+
 std::string ReadSmallFile(const std::string& path) {
     int fd = open(path.c_str(), O_RDONLY);
     if (fd < 0) {
@@ -215,6 +219,9 @@ void ThermalProfiler::Init() {
     resolvedThisFrame = 0;
     pendingQueries.clear();
     resolvedByPass.clear();
+    timedOutQueryCount = 0;
+    droppedResolvedSampleCount = 0;
+    resetDiscardedSampleCount = 0;
     hasHeadroomSample = false;
 #endif
 
@@ -282,8 +289,20 @@ void ThermalProfiler::EndFrame() {
     currentFrame.gpuResolvedThisFrame = resolvedThisFrame;
     currentFrame.gpuPendingAfterFrame = static_cast<int>(pendingQueries.size());
     currentFrame.gpuDisjointTotal = static_cast<int>(disjointOccurrences);
+    int resolvedQueueSamples = 0;
+    for (const auto& bucket : resolvedByPass) {
+        resolvedQueueSamples += static_cast<int>(bucket.second.size());
+    }
+    currentFrame.gpuResolvedQueueSamples = resolvedQueueSamples;
+    currentFrame.gpuTimedOutTotal = static_cast<int>(timedOutQueryCount);
+    currentFrame.gpuResolvedDroppedTotal = static_cast<int>(droppedResolvedSampleCount);
+    currentFrame.gpuResetDiscardedTotal = static_cast<int>(resetDiscardedSampleCount);
 #else
     currentFrame.gpuDisjointTotal = 0;
+    currentFrame.gpuResolvedQueueSamples = 0;
+    currentFrame.gpuTimedOutTotal = 0;
+    currentFrame.gpuResolvedDroppedTotal = 0;
+    currentFrame.gpuResetDiscardedTotal = 0;
 #endif
 
     if (loggingEnabled && csvFile.is_open()) {
@@ -312,9 +331,9 @@ void ThermalProfiler::BeginPass(const std::string& passName) {
     timing.gpuSampleAgeFrames = -1;
 #else
     timing.gpuTimeMs = -1.0f;
-    timing.gpuStatus = gpuTimingSupported ? kGpuStatusPending : kGpuStatusUnsupported;
+    timing.gpuStatus = (gpuTimingSupported && !IsGpuUnsupportedPass(passName)) ? kGpuStatusPending : kGpuStatusUnsupported;
     timing.gpuSampleAgeFrames = -1;
-    if (gpuTimingSupported && glGenQueriesEXT && glBeginQueryEXT) {
+    if (gpuTimingSupported && !IsGpuUnsupportedPass(passName) && glGenQueriesEXT && glBeginQueryEXT) {
         unsigned int queryId = 0;
         glGenQueriesEXT(1, &queryId);
         if (queryId != 0) {
@@ -342,7 +361,7 @@ void ThermalProfiler::EndPass(const std::string& passName) {
 #else
             if (timing.queryStart != 0 && gpuTimingSupported && glEndQueryEXT) {
                 glEndQueryEXT(kTimeElapsedExt);
-                pendingQueries.push_back({ timing.queryStart, timing.name, currentFrame.frameNumber });
+                pendingQueries.push_back({ timing.queryStart, timing.name, timing.passInstanceId, currentFrame.frameNumber });
             }
 #endif
 
@@ -370,7 +389,9 @@ void ThermalProfiler::EndPass(const std::string& passName) {
                 timing.gpuSampleAgeFrames = 0;
             }
 #else
-            ApplyResolvedGpuTiming(timing);
+            if (timing.gpuStatus != kGpuStatusUnsupported) {
+                ApplyResolvedGpuTiming(timing);
+            }
 #endif
 
             timing.active = false;
@@ -381,10 +402,18 @@ void ThermalProfiler::EndPass(const std::string& passName) {
 
 void ThermalProfiler::ResetGraphicsContext() {
 #ifdef PN_PLATFORM_ANDROID
+    size_t discarded = pendingQueries.size();
+    for (const auto& entry : resolvedByPass) {
+        discarded += entry.second.size();
+    }
+    resetDiscardedSampleCount += static_cast<unsigned int>(discarded);
+
     ShutdownAndroidGpuTiming();
     pendingQueries.clear();
     resolvedByPass.clear();
     resolvedThisFrame = 0;
+    timedOutQueryCount = 0;
+    droppedResolvedSampleCount = 0;
 #endif
     cpuPassStart.clear();
     currentFrame.passTimings.clear();
@@ -420,7 +449,8 @@ void ThermalProfiler::WriteCSVHeader() {
     if (!csvFile.is_open()) return;
     csvFile << "FrameNumber,Timestamp,TotalFrameMs,ThermalState,ThermalHeadroom,GpuFreqMHz,"
             << "ThermalValid,GpuFreqValid,GpuTimingSupported,GpuResolvedThisFrame,GpuPendingAfterFrame,GpuDisjointTotal,"
-            << "PassName,GpuTimeMs,CpuTimeMs,GpuStatus,GpuSampleAgeFrames\n";
+            << "GpuResolvedQueueSamples,GpuTimedOutTotal,GpuResolvedDroppedTotal,GpuResetDiscardedTotal,"
+            << "PassName,PassInstanceId,GpuTimeMs,CpuTimeMs,GpuStatus,GpuSampleAgeFrames,GpuSourceFrame,GpuSourcePassInstanceId\n";
     csvFile.flush();
 }
 
@@ -437,7 +467,8 @@ void ThermalProfiler::WriteCSVRow(const ThermalFrame& frame) {
                 << frame.thermalValid << "," << frame.gpuFreqValid << ","
                 << frame.gpuTimingSupported << "," << frame.gpuResolvedThisFrame << ","
                 << frame.gpuPendingAfterFrame << "," << frame.gpuDisjointTotal << ","
-                << "N/A,-1,0,-2,-1\n";
+                << frame.gpuResolvedQueueSamples << "," << frame.gpuTimedOutTotal << "," << frame.gpuResolvedDroppedTotal << "," << frame.gpuResetDiscardedTotal << ","
+                << "N/A,0,-1,0,-2,-1,-1,0\n";
     } else {
         for (const auto& pass : frame.passTimings) {
             csvFile << frame.frameNumber << "," << timeMs << ","
@@ -446,8 +477,9 @@ void ThermalProfiler::WriteCSVRow(const ThermalFrame& frame) {
                     << frame.thermalValid << "," << frame.gpuFreqValid << ","
                     << frame.gpuTimingSupported << "," << frame.gpuResolvedThisFrame << ","
                     << frame.gpuPendingAfterFrame << "," << frame.gpuDisjointTotal << ","
-                    << pass.name << "," << pass.gpuTimeMs << "," << pass.cpuTimeMs << ","
-                    << pass.gpuStatus << "," << pass.gpuSampleAgeFrames << "\n";
+                    << frame.gpuResolvedQueueSamples << "," << frame.gpuTimedOutTotal << "," << frame.gpuResolvedDroppedTotal << "," << frame.gpuResetDiscardedTotal << ","
+                    << pass.name << "," << pass.passInstanceId << "," << pass.gpuTimeMs << "," << pass.cpuTimeMs << ","
+                    << pass.gpuStatus << "," << pass.gpuSampleAgeFrames << "," << pass.gpuSourceFrame << "," << pass.gpuSourcePassInstanceId << "\n";
         }
     }
     csvFile.flush();
@@ -566,11 +598,20 @@ bool ThermalProfiler::InitAndroidGpuTiming() {
     pendingQueries.clear();
     resolvedByPass.clear();
     resolvedThisFrame = 0;
+    timedOutQueryCount = 0;
+    droppedResolvedSampleCount = 0;
+    resetDiscardedSampleCount = 0;
     return true;
 }
 
 void ThermalProfiler::ShutdownAndroidGpuTiming() {
     const bool hasCurrentContext = eglGetCurrentContext() != EGL_NO_CONTEXT;
+    size_t discarded = pendingQueries.size();
+    for (const auto& entry : resolvedByPass) {
+        discarded += entry.second.size();
+    }
+    resetDiscardedSampleCount += static_cast<unsigned int>(discarded);
+
     for (const auto& pending : pendingQueries) {
         if (hasCurrentContext && pending.queryId != 0 && glDeleteQueriesEXT) {
             unsigned int q = pending.queryId;
@@ -578,6 +619,10 @@ void ThermalProfiler::ShutdownAndroidGpuTiming() {
         }
     }
     pendingQueries.clear();
+    resolvedByPass.clear();
+    resolvedThisFrame = 0;
+    timedOutQueryCount = 0;
+    droppedResolvedSampleCount = 0;
 
     glGenQueriesEXT = nullptr;
     glDeleteQueriesEXT = nullptr;
@@ -611,12 +656,14 @@ void ThermalProfiler::ProcessAndroidGpuQueries() {
 
             ResolvedQuery invalidated;
             invalidated.sourceFrame = pending.sourceFrame;
+            invalidated.sourcePassInstanceId = pending.passInstanceId;
             invalidated.gpuStatus = kGpuStatusDisjoint;
             invalidated.gpuTimeMs = -1.0f;
-            auto& queue = resolvedByPass[pending.passName];
+            auto& queue = resolvedByPass[PassInstanceKey{ pending.passName, pending.passInstanceId }];
             queue.push_back(invalidated);
             while (queue.size() > kMaxResolvedQueuePerPass) {
                 queue.pop_front();
+                droppedResolvedSampleCount++;
             }
             resolvedThisFrame++;
         }
@@ -630,6 +677,17 @@ void ThermalProfiler::ProcessAndroidGpuQueries() {
 
     for (const auto& pending : pendingQueries) {
         if (pending.queryId == 0) {
+            ResolvedQuery noQuery;
+            noQuery.sourceFrame = pending.sourceFrame;
+            noQuery.sourcePassInstanceId = pending.passInstanceId;
+            noQuery.gpuStatus = kGpuStatusInvalid;
+            auto& queue = resolvedByPass[PassInstanceKey{ pending.passName, pending.passInstanceId }];
+            queue.push_back(noQuery);
+            while (queue.size() > kMaxResolvedQueuePerPass) {
+                queue.pop_front();
+                droppedResolvedSampleCount++;
+            }
+            resolvedThisFrame++;
             continue;
         }
 
@@ -637,14 +695,17 @@ void ThermalProfiler::ProcessAndroidGpuQueries() {
         if (queryAge > kMaxPendingQueryAgeFrames) {
             ResolvedQuery timeout;
             timeout.sourceFrame = pending.sourceFrame;
+            timeout.sourcePassInstanceId = pending.passInstanceId;
             timeout.gpuStatus = kGpuStatusInvalid;
             timeout.gpuTimeMs = -1.0f;
-            auto& queue = resolvedByPass[pending.passName];
+            auto& queue = resolvedByPass[PassInstanceKey{ pending.passName, pending.passInstanceId }];
             queue.push_back(timeout);
             while (queue.size() > kMaxResolvedQueuePerPass) {
                 queue.pop_front();
+                droppedResolvedSampleCount++;
             }
             resolvedThisFrame++;
+            timedOutQueryCount++;
 
             unsigned int queryToDelete = pending.queryId;
             glDeleteQueriesEXT(1, &queryToDelete);
@@ -660,6 +721,7 @@ void ThermalProfiler::ProcessAndroidGpuQueries() {
 
         ResolvedQuery resolved;
         resolved.sourceFrame = pending.sourceFrame;
+        resolved.sourcePassInstanceId = pending.passInstanceId;
         resolved.gpuStatus = kGpuStatusInvalid;
         resolved.gpuTimeMs = -1.0f;
 
@@ -682,10 +744,11 @@ void ThermalProfiler::ProcessAndroidGpuQueries() {
             resolved.gpuStatus = kGpuStatusInvalid;
         }
 
-        auto& queue = resolvedByPass[pending.passName];
+        auto& queue = resolvedByPass[PassInstanceKey{ pending.passName, pending.passInstanceId }];
         queue.push_back(resolved);
         while (queue.size() > kMaxResolvedQueuePerPass) {
             queue.pop_front();
+            droppedResolvedSampleCount++;
         }
         resolvedThisFrame++;
 
@@ -699,13 +762,15 @@ void ThermalProfiler::ProcessAndroidGpuQueries() {
 void ThermalProfiler::ApplyResolvedGpuTiming(PassTiming& timing) {
     timing.gpuTimeMs = -1.0f;
     timing.gpuSampleAgeFrames = -1;
+    timing.gpuSourceFrame = -1;
+    timing.gpuSourcePassInstanceId = 0;
 
     if (!gpuTimingSupported) {
         timing.gpuStatus = kGpuStatusUnsupported;
         return;
     }
 
-    auto it = resolvedByPass.find(timing.name);
+    auto it = resolvedByPass.find(PassInstanceKey{ timing.name, timing.passInstanceId });
     if (it == resolvedByPass.end() || it->second.empty()) {
         timing.gpuStatus = kGpuStatusPending;
         return;
@@ -719,6 +784,8 @@ void ThermalProfiler::ApplyResolvedGpuTiming(PassTiming& timing) {
 
     timing.gpuStatus = resolved.gpuStatus;
     timing.gpuTimeMs = resolved.gpuStatus == kGpuStatusValid ? resolved.gpuTimeMs : -1.0f;
+    timing.gpuSourceFrame = static_cast<int64_t>(resolved.sourceFrame);
+    timing.gpuSourcePassInstanceId = resolved.sourcePassInstanceId;
     timing.gpuSampleAgeFrames = resolved.sourceFrame <= currentFrame.frameNumber
         ? static_cast<int>(currentFrame.frameNumber - resolved.sourceFrame)
         : -1;
