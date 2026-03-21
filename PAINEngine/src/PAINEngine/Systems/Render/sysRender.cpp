@@ -298,72 +298,72 @@ namespace PAIN {
 				// -> volumetrics -> particles -> debug overlays -> post process -> UI
 				// Future refactors should keep ownership here and only move work between
 				// passes when both Windows and Android follow the same contract.
-				shadowPass(registry);
 				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("shadow");
+				shadowPass(registry);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("shadow");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after shadow pass: {}", err);
 				}
 #endif
-				geometryPass(registry);
-				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("shadow");
 				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("geometry");
+				geometryPass(registry);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("geometry");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after geometry pass: {}", err);
 				}
 #endif
-				minimapPass(registry);
-				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("geometry");
 				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("minimap");
+				minimapPass(registry);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("minimap");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after minimap pass: {}", err);
 				}
 #endif
-				lightingPass(registry);
-				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("minimap");
 				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("lighting");
+				lightingPass(registry);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("lighting");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after lighting pass: {}", err);
 				}
 #endif
-				volumetricPass(registry);
-				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("lighting");
 				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("volumetric");
+				volumetricPass(registry);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("volumetric");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after volumetric pass: {}", err);
 				}
 #endif
-				particlePass(registry);
-				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("volumetric");
 				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("particle");
+				particlePass(registry);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("particle");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after particle pass: {}", err);
 				}
 #endif
-				debugPass(registry, editor_debug_mode);
-				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("particle");
 				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("debug");
+				debugPass(registry, editor_debug_mode);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("debug");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after debug pass: {}", err);
 				}
 #endif
-				
-				services.lock()->get<sRenderer>()->postProcessPass(!editor_visible);
-				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("debug");
 				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("postprocess");
+				services.lock()->get<sRenderer>()->postProcessPass(!editor_visible);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("postprocess");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
@@ -378,9 +378,9 @@ namespace PAIN {
 					glBindFramebuffer(GL_FRAMEBUFFER, 0);
 				}
 
-			uiPass(registry);
-			if (g_ThermalProfiler) g_ThermalProfiler->EndPass("postprocess");
 			if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("ui");
+			uiPass(registry);
+			if (g_ThermalProfiler) g_ThermalProfiler->EndPass("ui");
 #ifdef _DEBUG
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
@@ -390,8 +390,6 @@ namespace PAIN {
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
-
-		if (g_ThermalProfiler) g_ThermalProfiler->EndPass("ui");
 
 		if (g_ThermalProfiler) {
 			g_ThermalProfiler->EndFrame();

@@ -10,8 +10,11 @@ namespace PAIN {
 
 struct PassTiming {
     std::string name;
+    uint64_t passInstanceId = 0;
     float gpuTimeMs = 0.0f;
     float cpuTimeMs = 0.0f;
+    int gpuStatus = 0;
+    int gpuSampleAgeFrames = -1;
     uint32_t queryStart = 0;
     uint32_t queryEnd = 0;
     bool active = false;
@@ -21,7 +24,14 @@ struct ThermalFrame {
     uint64_t frameNumber = 0;
     float totalFrameTimeMs = 0.0f;
     float thermalState = 0.0f;
+    float thermalHeadroom = -1.0f;
     float gpuFrequencyMHz = 0.0f;
+    int thermalValid = 0;
+    int gpuFreqValid = 0;
+    int gpuTimingSupported = 0;
+    int gpuResolvedThisFrame = 0;
+    int gpuPendingAfterFrame = 0;
+    int gpuDisjointTotal = 0;
     std::vector<PassTiming> passTimings;
     std::chrono::steady_clock::time_point timestamp;
 };
@@ -39,6 +49,7 @@ public:
 
     void BeginPass(const std::string& passName);
     void EndPass(const std::string& passName);
+    void ResetGraphicsContext();
 
     void UpdateThermalState();
     float GetCurrentThermalState() const { return currentThermalState; }
@@ -78,16 +89,69 @@ private:
     uint32_t nextQueryIndex = 0;
 
     std::chrono::steady_clock::time_point frameStartCpu;
-    std::unordered_map<std::string, std::chrono::steady_clock::time_point> cpuPassStart;
+    std::unordered_map<uint64_t, std::chrono::steady_clock::time_point> cpuPassStart;
+    uint64_t nextPassInstanceId = 1;
+    bool gpuTimingSupported = true;
 
     float currentThermalState = 0.0f;
+    float currentThermalHeadroom = -1.0f;
     float currentGpuFreqMHz = 0.0f;
 
 #ifdef PN_PLATFORM_ANDROID
     int thermalFd = -1;
+    int gpuFreqFd = -1;
+    void* thermalManager = nullptr;
+    void* thermalLibHandle = nullptr;
+    std::string thermalPath;
+    std::string gpuFreqPath;
     void InitAndroidThermal();
     void UpdateAndroidThermal();
     void ShutdownAndroidThermal();
+
+    bool InitAndroidGpuTiming();
+    void ShutdownAndroidGpuTiming();
+    void ProcessAndroidGpuQueries();
+    void ApplyResolvedGpuTiming(PassTiming& timing);
+    bool androidGpuTimingInitialized = false;
+    bool hasDisjointTimerExt = false;
+
+    using PFNGLGENQUERIESEXTPROC = void (*)(int n, unsigned int* ids);
+    using PFNGLDELETEQUERIESEXTPROC = void (*)(int n, const unsigned int* ids);
+    using PFNGLBEGINQUERYEXTPROC = void (*)(unsigned int target, unsigned int id);
+    using PFNGLENDQUERYEXTPROC = void (*)(unsigned int target);
+    using PFNGLGETQUERYIVEXTPROC = void (*)(unsigned int target, unsigned int pname, int* params);
+    using PFNGLGETQUERYOBJECTIVEXTPROC = void (*)(unsigned int id, unsigned int pname, int* params);
+    using PFNGLGETQUERYOBJECTUIVEXTPROC = void (*)(unsigned int id, unsigned int pname, unsigned int* params);
+    using PFNGLGETQUERYOBJECTUI64VEXTPROC = void (*)(unsigned int id, unsigned int pname, unsigned long long* params);
+
+    PFNGLGENQUERIESEXTPROC glGenQueriesEXT = nullptr;
+    PFNGLDELETEQUERIESEXTPROC glDeleteQueriesEXT = nullptr;
+    PFNGLBEGINQUERYEXTPROC glBeginQueryEXT = nullptr;
+    PFNGLENDQUERYEXTPROC glEndQueryEXT = nullptr;
+    PFNGLGETQUERYIVEXTPROC glGetQueryivEXT = nullptr;
+    PFNGLGETQUERYOBJECTIVEXTPROC glGetQueryObjectivEXT = nullptr;
+    PFNGLGETQUERYOBJECTUIVEXTPROC glGetQueryObjectuivEXT = nullptr;
+    PFNGLGETQUERYOBJECTUI64VEXTPROC glGetQueryObjectui64vEXT = nullptr;
+
+    struct PendingQuery {
+        unsigned int queryId;
+        uint64_t passInstanceId = 0;
+        uint64_t sourceFrame = 0;
+    };
+    struct ResolvedQuery {
+        float gpuTimeMs = -1.0f;
+        int gpuStatus = -2;
+        uint64_t sourceFrame = 0;
+    };
+    std::vector<PendingQuery> pendingQueries;
+    std::unordered_map<uint64_t, ResolvedQuery> resolvedByPassInstance;
+    int resolvedThisFrame = 0;
+    unsigned int disjointOccurrences = 0;
+
+    using ThermalGetHeadroomFn = float (*)(void* manager, int forecastSeconds);
+    ThermalGetHeadroomFn thermalGetHeadroom = nullptr;
+    std::chrono::steady_clock::time_point lastHeadroomSampleTime{};
+    bool hasHeadroomSample = false;
 #endif
 };
 
