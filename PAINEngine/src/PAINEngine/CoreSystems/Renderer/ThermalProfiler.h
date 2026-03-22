@@ -40,6 +40,25 @@ struct ThermalFrame {
     int gpuTimedOutTotal = 0;
     int gpuResolvedDroppedTotal = 0;
     int gpuResetDiscardedTotal = 0;
+    int gpuDisjointThisFrame = 0;
+    int gpuDiagnosisReady = 0;
+    int gpuKeyPassesExpected = 0;
+    int gpuKeyPassesSeen = 0;
+    int gpuKeyPassesValid = 0;
+    int gpuKeyPassesDisjoint = 0;
+    int gpuKeyPassesPending = 0;
+    int gpuDisjointWindowFrames = 0;
+    int gpuDisjointWindowEvents = 0;
+    float gpuDisjointWindowRatio = 0.0f;
+    int gpuDisjointBreakerTriggered = 0;
+    int gpuDisjointBreakerTotal = 0;
+    int64_t gpuDisjointLastFrame = -1;
+    int gpuDisjointLastQueueDepth = 0;
+    int gpuDisjointLastReadySamples = 0;
+    int gpuDisjointLastMaxSampleAge = -1;
+    int gpuDisjointHighQueueTotal = 0;
+    int gpuDisjointStaleSampleTotal = 0;
+    int gpuContextResetEventsTotal = 0;
     std::vector<PassTiming> passTimings;
     std::chrono::steady_clock::time_point timestamp;
 };
@@ -75,21 +94,6 @@ public:
     bool IsOverlayEnabled() const { return overlayEnabled; }
 
 private:
-    struct PassInstanceKey {
-        std::string name;
-        uint64_t instanceId = 0;
-
-        bool operator==(const PassInstanceKey& other) const {
-            return instanceId == other.instanceId && name == other.name;
-        }
-    };
-
-    struct PassInstanceKeyHash {
-        size_t operator()(const PassInstanceKey& key) const {
-            return std::hash<std::string>{}(key.name) ^ (std::hash<uint64_t>{}(key.instanceId) << 1);
-        }
-    };
-
     void WriteCSVHeader();
     void WriteCSVRow(const ThermalFrame& frame);
     void RotateQueryPool();
@@ -169,12 +173,27 @@ private:
         uint64_t sourceFrame = 0;
     };
     std::vector<PendingQuery> pendingQueries;
-    std::unordered_map<PassInstanceKey, std::deque<ResolvedQuery>, PassInstanceKeyHash> resolvedByPass;
+    std::unordered_map<std::string, std::deque<ResolvedQuery>> resolvedByPass;
     int resolvedThisFrame = 0;
     unsigned int disjointOccurrences = 0;
     unsigned int timedOutQueryCount = 0;
     unsigned int droppedResolvedSampleCount = 0;
     unsigned int resetDiscardedSampleCount = 0;
+    bool disjointOccurredThisFrame = false;
+    int disjointReadySamplesThisFrame = 0;
+    int disjointMaxSampleAgeThisFrame = -1;
+    std::deque<int> disjointFrameWindow;
+    int disjointFramesInWindow = 0;
+    uint64_t lastDisjointBreakFrame = 0;
+    bool hasDisjointBreakFrame = false;
+    unsigned int disjointBreakerTriggeredCount = 0;
+    uint64_t lastDisjointEventFrame = 0;
+    int lastDisjointEventQueueDepth = 0;
+    int lastDisjointEventReadySamples = 0;
+    int lastDisjointEventMaxSampleAge = -1;
+    unsigned int disjointHighQueueCount = 0;
+    unsigned int disjointStaleSampleCount = 0;
+    unsigned int contextResetEventCount = 0;
 
     using ThermalGetHeadroomFn = float (*)(void* manager, int forecastSeconds);
     ThermalGetHeadroomFn thermalGetHeadroom = nullptr;

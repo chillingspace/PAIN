@@ -288,6 +288,9 @@ namespace PAIN {
 #endif
 
 				// Render all passes
+				if (g_ThermalProfiler) {
+					g_ThermalProfiler->BeginFrame();
+				}
 				GraphicsSettings::get().stats.objects_culled = 0;
 				GraphicsSettings::get().stats.objects_rendered = 0;
 				GraphicsSettings::get().stats.shadow_objects_culled = 0;
