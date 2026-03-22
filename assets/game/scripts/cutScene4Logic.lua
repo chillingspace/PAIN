@@ -1,3 +1,4 @@
+-- cutScene4Logic.lua (Cutscene 4)
 -- 1. DEFINE THESE OUTSIDE THE FUNCTION
 if currentFrame == nil then
     currentFrame = 1
@@ -6,6 +7,51 @@ local maxFrames = 9
 local G = _G_root
 
 G.MainMenuSceneName   = G.MainMenuSceneName  or "game/scenes/mainmenu.scn"
+
+-- ==================== CUTSCENE SFX ====================
+local SFX_PATH = "game/audio/sfx/cutscenes/"
+local FRAME_SFX = {
+    [1] = { SFX_PATH .. "fixing robot.wav" },
+    [2] = { SFX_PATH .. "gear turning cutscene.wav" },
+    [3] = { SFX_PATH .. "robot reboot ending cutscene.wav" },
+    -- [4] no SFX
+    [5] = { SFX_PATH .. "robot stand.wav" },
+    [6] = { SFX_PATH .. "robot hand.wav" },
+    -- [7] no SFX
+    [8] = { SFX_PATH .. "frog notice.wav" },
+    [9] = { SFX_PATH .. "robot walking.wav" },
+}
+
+local activeSfxChannels = {}
+
+local function stopPreviousSFX()
+    if audioStopChannel then
+        for _, chId in ipairs(activeSfxChannels) do
+            if chId >= 0 then audioStopChannel(chId) end
+        end
+    end
+    activeSfxChannels = {}
+end
+
+local function playCutsceneSFX(frame)
+    stopPreviousSFX()
+    local sfxList = FRAME_SFX[frame]
+    if not sfxList or not audioPlaySFX then return end
+    for _, sfxFile in ipairs(sfxList) do
+        local chId = audioPlaySFX(sfxFile, 0.0)
+        if chId and chId >= 0 then
+            table.insert(activeSfxChannels, chId)
+        end
+        print("[Cutscene4] Playing SFX for frame " .. frame .. ": " .. sfxFile)
+    end
+end
+
+-- Play SFX for the initial frame (frame 1 is already displayed when scene loads)
+-- Guard to prevent double-play if script is loaded more than once
+if not _G.cs4_sfx_init then
+    _G.cs4_sfx_init = true
+    playCutsceneSFX(1)
+end
 
 registerUpdate(function(dt)
     -- Check for mouse click
@@ -43,6 +89,9 @@ registerUpdate(function(dt)
             end
             return
         end
+        
+        -- Play SFX for the new frame
+        playCutsceneSFX(currentFrame)
         
         -- Determine file path based on platform
         local fileName = ""

@@ -1,3 +1,4 @@
+-- cutScene3Logic.lua (Cutscene 3)
 -- 1. DEFINE THESE OUTSIDE THE FUNCTION
 if currentFrame == nil then
     currentFrame = 1
@@ -6,6 +7,48 @@ local maxFrames = 6
 local G = _G_root
 
 G.Level2SceneName   = G.Level2SceneName  or "game/scenes/Level 2.scn"
+
+-- ==================== CUTSCENE SFX ====================
+local SFX_PATH = "game/audio/sfx/cutscenes/"
+local FRAME_SFX = {
+    -- [1] no SFX
+    [2] = { SFX_PATH .. "fixing robot.wav" },
+    [3] = { SFX_PATH .. "crow cawing x3 cs3.wav" },
+    -- [4] no SFX
+    -- [5] no SFX
+    [6] = { SFX_PATH .. "enemy walking cs2.wav" },
+}
+
+local activeSfxChannels = {}
+
+local function stopPreviousSFX()
+    if audioStopChannel then
+        for _, chId in ipairs(activeSfxChannels) do
+            if chId >= 0 then audioStopChannel(chId) end
+        end
+    end
+    activeSfxChannels = {}
+end
+
+local function playCutsceneSFX(frame)
+    stopPreviousSFX()
+    local sfxList = FRAME_SFX[frame]
+    if not sfxList or not audioPlaySFX then return end
+    for _, sfxFile in ipairs(sfxList) do
+        local chId = audioPlaySFX(sfxFile, 0.0)
+        if chId and chId >= 0 then
+            table.insert(activeSfxChannels, chId)
+        end
+        print("[Cutscene3] Playing SFX for frame " .. frame .. ": " .. sfxFile)
+    end
+end
+
+-- Play SFX for the initial frame (frame 1 is already displayed when scene loads)
+-- Guard to prevent double-play if script is loaded more than once
+if not _G.cs3_sfx_init then
+    _G.cs3_sfx_init = true
+    playCutsceneSFX(1)
+end
 
 registerUpdate(function(dt)
     -- Check for mouse click
@@ -43,6 +86,9 @@ registerUpdate(function(dt)
             end
             return
         end
+        
+        -- Play SFX for the new frame
+        playCutsceneSFX(currentFrame)
         
         -- Determine file path based on platform
         local fileName = ""

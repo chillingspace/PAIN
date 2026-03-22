@@ -1,4 +1,4 @@
-﻿/*****************************************************************//**
+/*****************************************************************//**
  * \file   sysUILayout.cpp
  * \brief  UI layout system definitions
  *
@@ -197,7 +197,7 @@ namespace PAIN {
                 // In updateFloatingLabels, after setting calculated_world_position:
                 float ndc_scale_y = (rect.size_delta.y * scale_factor) / viewport.y;
                 float ndc_scale_x = (rect.size_delta.x * scale_factor) / viewport.x;
-                rect.scale = glm::vec3(ndc_scale_x, ndc_scale_y, 1.0f);
+                rect.scale = glm::vec3(ndc_scale_x, ndc_scale_y, scale_factor);
                 
                 // Signal render system to apply these changes to Texture2D and UIText
                 rect.layout_dirty = true;

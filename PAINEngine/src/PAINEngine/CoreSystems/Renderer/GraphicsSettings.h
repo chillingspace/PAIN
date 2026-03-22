@@ -17,6 +17,8 @@
 
 #include <glm/glm.hpp>
 
+#include "AssetData.h"
+
 namespace PAIN {
 	class GraphicsSettings {
 	private:
@@ -56,6 +58,7 @@ namespace PAIN {
 
 		// actual settings
 		bool draw_floor = false;
+		bool decode_albedo_in_shader = true; // Set false when albedo textures are uploaded as sRGB formats with hardware decode.
 
 		struct RenderStats {
 			int objects_culled = 0;
@@ -64,7 +67,11 @@ namespace PAIN {
 			int shadow_objects_rendered = 0;
 		} stats;
 
+#ifdef PN_PLATFORM_ANDROID
+		SHADOW_TYPES shadow_type = SHADOW_TYPES::HARD;
+#else
 		SHADOW_TYPES shadow_type = SHADOW_TYPES::SOFT;
+#endif
 		bool gamma_correction = true;
 		float gamma_value = 2.2f;
 		glm::vec3 AMBIENT_LIGHT = glm::vec3(0.1f);
@@ -80,22 +87,63 @@ namespace PAIN {
 		float bloom_blur_strength = 1.f;	// generally [0.5,10] - higher = bloomier, BUT SLOWER. bloom blur strength is how big the blur radius is when blurring the bright areas.
 		float bloom_strength = 1.f;		// generally [0.0,5.0] - bloom strength is how visible the bloom is when blended back onto the scene. 
 		float global_light_intensity = 1.5f;
+		#ifdef PN_PLATFORM_ANDROID
+		int bloom_quality = 2;		// mobile default for lower thermal load
+		#else
 		int bloom_quality = 4;		// number of blur passes for bloom. higher = bloomier, REPRESENTS GAUSSIAN BLUR PASSES, SO MINIMALLY 2
+		#endif
 
 		TONE_MAPPING_TYPES tone_mapping_mode = TONE_MAPPING_TYPES::ACES;
 		float tone_mapping_exposure = 1.f;
 
 		// image based lighting
 		bool ibl = true;
+		float ibl_diffuse_strength = 1.0f;
+		float ibl_specular_strength = 1.0f;
+		float ibl_max_reflection_lod = 4.0f;
+#ifdef PN_PLATFORM_ANDROID
+		float ibl_roughness_bias = 0.10f;
+		float ibl_specular_mip_bias = 1.10f;
+		float ibl_specular_strength_scale = 0.75f;
+		float ibl_specular_prefilter_luma_clamp = 12.0f;
+		float ibl_specular_firefly_clamp = 7.5f;
+#else
+		float ibl_roughness_bias = 0.0f;
+		float ibl_specular_mip_bias = 0.0f;
+		float ibl_specular_strength_scale = 1.0f;
+		float ibl_specular_prefilter_luma_clamp = 0.0f;
+		float ibl_specular_firefly_clamp = 32.0f;
+#endif
+
+#ifdef PN_PLATFORM_ANDROID
+		// Android frame pacing and battery controls.
+		int android_swap_interval = 1; // 1 = vsync, 0 = uncapped.
+		int android_target_fps = 0; // 0 = no explicit software cap.
+		bool android_battery_saver_mode = false;
+		int android_battery_saver_fps = 30;
+#endif
 
 		// volumetric lighting (god rays / light shafts)
+#ifdef PN_PLATFORM_ANDROID
 		bool volumetric = true;
+#else
+		bool volumetric = true;
+#endif
 		float volumetric_intensity = 0.5f;   // overall brightness; start low
+#ifdef PN_PLATFORM_ANDROID
+		int   volumetric_steps = 10;           // mobile quality preset
+#else
 		int   volumetric_steps = 24;           // ray march steps; keep low and rely on lower-resolution upsampling
+#endif
 		float volumetric_max_dist = 40.0f;     // max ray length in world units
 		float volumetric_scatter = 0.f;       // Mie g: 0=uniform, 1=pure forward
+#ifdef PN_PLATFORM_ANDROID
+		float volumetric_resolution_scale = 0.4f; // mobile preset: lower resolution
+		int   volumetric_max_lights = 4;      // mobile preset cap
+#else
 		float volumetric_resolution_scale = 0.5f; // render volumetrics at reduced resolution, then upscale additively
 		int   volumetric_max_lights = 4;      // separate cap from total scene lights to control cost
+#endif
 		float volumetric_temporal_blend = 0.85f; // low-res history stabilization; higher = steadier but more trailing
 		float volumetric_jitter_strength = 1.0f; // offsets ray-march layers so temporal filtering can smooth them out
 		float volumetric_history_clamp = 0.35f; // reject stale history when current and previous lighting diverge
@@ -125,6 +173,9 @@ namespace PAIN {
 			IBL_IRRADIANCE,
 			IBL_PREFILTER,
 			IBL_BRDFLUT,
+			IBL_DIFFUSE,
+			IBL_SPECULAR,
+			DIRECT_LIGHTING,
 			NUM_PBR_MAP_TYPES,
 		};
 
@@ -140,6 +191,9 @@ namespace PAIN {
 			"IBL_IRRADIANCE",
 			"IBL_PREFILTER",
 			"IBL_BRDFLUT",
+			"IBL_DIFFUSE",
+			"IBL_SPECULAR",
+			"DIRECT_LIGHTING",
 			"NUM_PBR_MAP_TYPES",
 		};
 
@@ -150,6 +204,11 @@ namespace PAIN {
 
 		// minimap
 		bool minimap_enabled = false;
+		enum MINIMAP_SHAPE {
+			MINIMAP_SHAPE_SQUARE = 0,
+			MINIMAP_SHAPE_CIRCLE,
+		};
+		MINIMAP_SHAPE minimap_shape = MINIMAP_SHAPE_SQUARE;
 		enum MINIMAP_RECOMMENDED_POSITION {
 			TOP_LEFT = 0,
 			TOP_RIGHT,
@@ -157,6 +216,8 @@ namespace PAIN {
 			BOTTOM_RIGHT,
 			TOP_MIDDLE,
 			BOTTOM_MIDDLE,
+			LEFT_MIDDLE,
+			RIGHT_MIDDLE,
 		};
 		float minimap_radius = 15.0f;
 		glm::vec2 minimap_size_px = glm::vec2(200.0f, 200.0f);
@@ -180,11 +241,11 @@ namespace PAIN {
 		bool minimap_use_icon_textures = false;
 		float minimap_icon_scale = 1.0f;
 		bool minimap_show_legend = false;
-		std::string minimap_icon_player_path;
-		std::string minimap_icon_danger_path;
-		std::string minimap_icon_item_path;
-		std::string minimap_icon_objective_path;
-		std::string minimap_icon_wall_path;
+		Assets::GUID minimap_icon_player_guid;
+		Assets::GUID minimap_icon_danger_guid;
+		Assets::GUID minimap_icon_item_guid;
+		Assets::GUID minimap_icon_objective_guid;
+		Assets::GUID minimap_icon_wall_guid;
 		float minimap_background_alpha = 0.5f;
 		float minimap_border_thickness = 2.0f;
 		glm::vec4 minimap_border_color = glm::vec4(1.0f);

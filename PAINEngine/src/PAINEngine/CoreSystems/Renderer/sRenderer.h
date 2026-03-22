@@ -29,7 +29,7 @@ namespace PAIN {
 		void onDetach() override;
         void onAttach() override;
         void onFixedUpdate(AppTiming timing) override {};
-		void postProcessPass();
+		void postProcessPass(bool presentToSwapchain);
 
         void onUpdate(AppTiming timing) override;
 

@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "robot stand.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 6215623297044609583
+  },
+  "descriptor_version": 1,
+  "guid": "f4b4edcb-a272-3247-ad9e-9cb51f0ae3eb",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\cutscenes\\robot stand.wav"
+  }
+}

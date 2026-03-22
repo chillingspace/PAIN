@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "frog + robot footsteps.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 761969145715693204
+  },
+  "descriptor_version": 1,
+  "guid": "f767fb98-5474-2247-966f-a57349e3620d",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\cutscenes\\frog + robot footsteps.wav"
+  }
+}

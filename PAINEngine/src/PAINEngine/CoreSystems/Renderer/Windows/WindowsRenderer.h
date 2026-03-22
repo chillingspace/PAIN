@@ -170,12 +170,20 @@ namespace PAIN {
 							  const glm::vec4& color, int segments = 32);
 		void VolumetricPass(std::shared_ptr<Scene::SceneManager> scene,
 						   const LightSources& lights);
-		void PostProcessPass();
+		void PostProcessPass(bool presentToSwapchain);
 
 		void Render2DTexture(GLuint texture_id, const glm::vec2& pos,
 							 glm::vec2& scale,
 							 const glm::vec4& uv_transform = glm::vec4(1.0f, 1.0f,
 																	   0.0f, 0.0f));
+		void Render2DTextureCircular(GLuint texture_id, const glm::vec2& pos,
+							 glm::vec2& scale,
+							 const glm::vec4& uv_transform = glm::vec4(1.0f, 1.0f,
+																	   0.0f, 0.0f));
+
+		// Setup stencil buffer for circular clipping of subsequent draws
+		void BeginCircularStencilClip(const glm::vec2& center_ndc, const glm::vec2& radius_ndc);
+		void EndCircularStencilClip();
 
 		void Cleanup();
 
@@ -237,6 +245,8 @@ namespace PAIN {
 		unsigned int empty_vao = 0;
 		unsigned int passthrough_vao = 0;
 		unsigned int passthrough_vbo = 0;
+		unsigned int pbr_light_ubo = 0;
+		unsigned int pbr_light_ubo_bound_program = 0;
 
 		unsigned int final_texture = 0; // for imgui/post-processing/display
 		unsigned int pp_texture = 0;	// for ping-pong for post-processing
@@ -259,6 +269,12 @@ namespace PAIN {
 		GLint minimap_prev_viewport[4] = {0, 0, 0, 0};
 		GLfloat minimap_prev_clear_color[4] = {0.f, 0.f, 0.f, 0.f};
 		GLboolean minimap_prev_depth_test = GL_FALSE;
+		GLboolean minimap_prev_depth_mask = GL_TRUE;
+		GLboolean minimap_prev_blend = GL_FALSE;
+		GLint minimap_prev_blend_src_rgb = GL_ONE;
+		GLint minimap_prev_blend_dst_rgb = GL_ZERO;
+		GLint minimap_prev_blend_src_alpha = GL_ONE;
+		GLint minimap_prev_blend_dst_alpha = GL_ZERO;
 		bool minimap_state_saved = false;
 
 		// === Debug Buffers ===
@@ -322,7 +338,10 @@ namespace PAIN {
 		* HERE.
 		*/
 		void _createDeferredShadingBuffer(unsigned int& tex, int num_channels,
-										  int gl_color_attachment);
+										  int gl_color_attachment,
+										  GLenum internal_format_override = 0,
+										  GLenum format_override = 0,
+										  GLenum type_override = 0);
 
 	};
 } // namespace PAIN

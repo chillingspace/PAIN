@@ -78,7 +78,8 @@ float sampleShadow(int shadowIdx, vec3 worldPos, Light light) {
         return 0.0;
     }
 
-    return projCoords.z - 0.005 > shadowDepth ? 1.0 : 0.0;
+    float bias = int(light.type) == 2 ? 0.002 : 0.0035;
+    return projCoords.z - bias > shadowDepth ? 1.0 : 0.0;
 }
 
 void main() {

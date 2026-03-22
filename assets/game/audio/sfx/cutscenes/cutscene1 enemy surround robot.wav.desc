@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "cutscene1 enemy surround robot.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 2401640368345336032
+  },
+  "descriptor_version": 1,
+  "guid": "b2865bbd-20b6-d44a-9d66-7c26af8fc620",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\cutscenes\\cutscene1 enemy surround robot.wav"
+  }
+}

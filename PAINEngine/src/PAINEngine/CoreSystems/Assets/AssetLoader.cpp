@@ -5,6 +5,8 @@
 
 #ifdef PN_PLATFORM_ANDROID
 #include <ktx.h>
+#include <algorithm>
+#include <cctype>
 
 // ========================================
 // DEFINE MISSING ASTC sRGB CONSTANTS
@@ -72,6 +74,61 @@
 
 namespace PAIN {
 	namespace Assets {
+#ifdef PN_PLATFORM_ANDROID
+        namespace {
+            std::string ToLowerAscii(std::string value) {
+                std::transform(value.begin(), value.end(), value.begin(),
+                    [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+                return value;
+            }
+
+            bool ContainsAny(std::string const& value, std::initializer_list<const char*> needles) {
+                for (const char* needle : needles) {
+                    if (value.find(needle) != std::string::npos) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            bool IsLikelyLinearDataTexturePath(std::string const& virtual_path) {
+                const std::string lower = ToLowerAscii(virtual_path);
+
+                // Keep color/HDR cubemap paths untouched.
+                if (ContainsAny(lower, { "skybox", "cubemap", "ibl", "irradiance", "prefilter", "brdf" })) {
+                    return false;
+                }
+
+                return ContainsAny(lower, {
+                    "_normal", "normal_", "normalmap", "_nrm",
+                    "_ao", "ao_", "occlusion",
+                    "_rough", "roughness",
+                    "_metal", "metallic", "metalness",
+                    "_orm", "_rma", "_arm", "_mra", "_mrao"
+                });
+            }
+
+            GLenum ToLinearAstcFormat(GLenum format) {
+                switch (format) {
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR: return GL_COMPRESSED_RGBA_ASTC_4x4_KHR;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR: return GL_COMPRESSED_RGBA_ASTC_5x4_KHR;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR: return GL_COMPRESSED_RGBA_ASTC_5x5_KHR;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR: return GL_COMPRESSED_RGBA_ASTC_6x5_KHR;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR: return GL_COMPRESSED_RGBA_ASTC_6x6_KHR;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR: return GL_COMPRESSED_RGBA_ASTC_8x5_KHR;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR: return GL_COMPRESSED_RGBA_ASTC_8x6_KHR;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR: return GL_COMPRESSED_RGBA_ASTC_8x8_KHR;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR: return GL_COMPRESSED_RGBA_ASTC_10x5_KHR;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR: return GL_COMPRESSED_RGBA_ASTC_10x6_KHR;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR: return GL_COMPRESSED_RGBA_ASTC_10x8_KHR;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR: return GL_COMPRESSED_RGBA_ASTC_10x10_KHR;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR: return GL_COMPRESSED_RGBA_ASTC_12x10_KHR;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR: return GL_COMPRESSED_RGBA_ASTC_12x12_KHR;
+                default: return 0;
+                }
+            }
+        }
+#endif
 
         void Loader::RegisterLoader(Type const& type, LoaderFunc const& func) {
 
@@ -200,12 +257,27 @@ namespace PAIN {
             tex->mips = kTexture->numLevels ? static_cast<int>(kTexture->numLevels) : 1;
             int numFaces = kTexture->numFaces ? kTexture->numFaces : 1;
 
-            tex->format = TextureFormat::ASTC;
+            tex->format = TextureFormat::UNKNOWN;
             tex->is_cube_map = (numFaces == 6);
+            tex->is_compressed = kTexture->isCompressed == KTX_TRUE;
 
             // Get OpenGL format
             if (kTexture->classId == ktxTexture1_c) {
-                tex->glTexFormat = reinterpret_cast<ktxTexture1*>(kTexture)->glInternalformat;
+                ktxTexture1* ktx1 = reinterpret_cast<ktxTexture1*>(kTexture);
+                tex->glTexFormat = ktx1->glInternalformat;
+                tex->glBaseFormat = ktx1->glFormat;
+                tex->glDataType = ktx1->glType;
+
+                if (!tex->is_cube_map && IsLikelyLinearDataTexturePath(virtual_path)) {
+                    const GLenum linearAstc = ToLinearAstcFormat(static_cast<GLenum>(tex->glTexFormat));
+                    if (linearAstc != 0 && linearAstc != tex->glTexFormat) {
+                        PN_CORE_INFO(
+                            "Forcing linear ASTC decode for data texture '{}' (internal 0x{:X} -> 0x{:X})",
+                            virtual_path, tex->glTexFormat, linearAstc
+                        );
+                        tex->glTexFormat = linearAstc;
+                    }
+                }
             }
             else {
                 ktxTexture_Destroy(kTexture);
@@ -220,6 +292,7 @@ namespace PAIN {
             switch (tex->glTexFormat) {
             case GL_COMPRESSED_RGBA_ASTC_4x4_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 4;
                 tex->blockHeight = 4;
                 tex->blockSize = 16;
@@ -228,6 +301,7 @@ namespace PAIN {
 
             case GL_COMPRESSED_RGBA_ASTC_5x4_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 5;
                 tex->blockHeight = 4;
                 tex->blockSize = 16;
@@ -236,6 +310,7 @@ namespace PAIN {
 
             case GL_COMPRESSED_RGBA_ASTC_5x5_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 5;
                 tex->blockHeight = 5;
                 tex->blockSize = 16;
@@ -244,6 +319,7 @@ namespace PAIN {
 
             case GL_COMPRESSED_RGBA_ASTC_6x5_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 6;
                 tex->blockHeight = 5;
                 tex->blockSize = 16;
@@ -252,6 +328,7 @@ namespace PAIN {
 
             case GL_COMPRESSED_RGBA_ASTC_6x6_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 6;
                 tex->blockHeight = 6;
                 tex->blockSize = 16;
@@ -260,6 +337,7 @@ namespace PAIN {
 
             case GL_COMPRESSED_RGBA_ASTC_8x5_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 8;
                 tex->blockHeight = 5;
                 tex->blockSize = 16;
@@ -268,6 +346,7 @@ namespace PAIN {
 
             case GL_COMPRESSED_RGBA_ASTC_8x6_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 8;
                 tex->blockHeight = 6;
                 tex->blockSize = 16;
@@ -276,6 +355,7 @@ namespace PAIN {
 
             case GL_COMPRESSED_RGBA_ASTC_8x8_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 8;
                 tex->blockHeight = 8;
                 tex->blockSize = 16;
@@ -284,6 +364,7 @@ namespace PAIN {
 
             case GL_COMPRESSED_RGBA_ASTC_10x5_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 10;
                 tex->blockHeight = 5;
                 tex->blockSize = 16;
@@ -292,6 +373,7 @@ namespace PAIN {
 
             case GL_COMPRESSED_RGBA_ASTC_10x6_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 10;
                 tex->blockHeight = 6;
                 tex->blockSize = 16;
@@ -300,6 +382,7 @@ namespace PAIN {
 
             case GL_COMPRESSED_RGBA_ASTC_10x8_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 10;
                 tex->blockHeight = 8;
                 tex->blockSize = 16;
@@ -308,6 +391,7 @@ namespace PAIN {
 
             case GL_COMPRESSED_RGBA_ASTC_10x10_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 10;
                 tex->blockHeight = 10;
                 tex->blockSize = 16;
@@ -316,6 +400,7 @@ namespace PAIN {
 
             case GL_COMPRESSED_RGBA_ASTC_12x10_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 12;
                 tex->blockHeight = 10;
                 tex->blockSize = 16;
@@ -324,17 +409,31 @@ namespace PAIN {
 
             case GL_COMPRESSED_RGBA_ASTC_12x12_KHR:
             case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR:
+                tex->format = TextureFormat::ASTC;
                 tex->blockWidth = 12;
                 tex->blockHeight = 12;
                 tex->blockSize = 16;
                 PN_CORE_INFO("KTX Format: ASTC 12x12 RGBA");
                 break;
 
+            case GL_RGB16F:
+            case GL_RGBA16F:
+            case GL_R11F_G11F_B10F:
+                tex->format = TextureFormat::FLOAT_HDR;
+                tex->is_compressed = false;
+                tex->blockWidth = 1;
+                tex->blockHeight = 1;
+                tex->blockSize = 0;
+                PN_CORE_INFO("KTX Format: uncompressed HDR 0x{:X}, base format 0x{:X}, type 0x{:X}",
+                    tex->glTexFormat, tex->glBaseFormat, tex->glDataType);
+                break;
+
             default:
-                PN_CORE_WARN("Unknown ASTC format 0x{:X}, defaulting to 4x4", tex->glTexFormat);
-                tex->blockWidth = 4;
-                tex->blockHeight = 4;
-                tex->blockSize = 16;
+                PN_CORE_WARN("Unknown KTX format 0x{:X}, compressed={}, base format 0x{:X}, type 0x{:X}",
+                    tex->glTexFormat, tex->is_compressed, tex->glBaseFormat, tex->glDataType);
+                tex->blockWidth = tex->is_compressed ? 4 : 1;
+                tex->blockHeight = tex->is_compressed ? 4 : 1;
+                tex->blockSize = tex->is_compressed ? 16 : 0;
                 formatRecognized = false;
                 break;
             }
@@ -876,6 +975,7 @@ namespace PAIN {
 
             GLint numUniforms = 0;
             glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &numUniforms);
+#ifdef _DEBUG
             PN_CORE_INFO("Linked program {} has {} active uniforms", program, numUniforms);
 
             for (int i = 0; i < numUniforms; i++) {
@@ -886,6 +986,7 @@ namespace PAIN {
                 glGetActiveUniform(program, i, 256, &length, &size, &type, name);
                 PN_CORE_INFO("  Uniform {}: '{}'", i, name);
             }
+#endif
 
             if (!CheckProgram(program)) {
 #ifdef PN_PLATFORM_ANDROID
@@ -1407,6 +1508,10 @@ namespace PAIN {
                     sceneAsset->minimap.recommended_position =
                         static_cast<GraphicsSettings::MINIMAP_RECOMMENDED_POSITION>(minimap["recommended_position"].get<int>());
                 }
+                if (minimap.contains("shape")) {
+                    sceneAsset->minimap.shape =
+                        static_cast<GraphicsSettings::MINIMAP_SHAPE>(minimap["shape"].get<int>());
+                }
                 if (minimap.contains("rotate_with_player")) {
                     sceneAsset->minimap.rotate_with_player = minimap["rotate_with_player"].get<bool>();
                 }
@@ -1441,20 +1546,20 @@ namespace PAIN {
                 if (minimap.contains("show_legend")) {
                     sceneAsset->minimap.show_legend = minimap["show_legend"].get<bool>();
                 }
-                if (minimap.contains("icon_player_path")) {
-                    sceneAsset->minimap.icon_player_path = minimap["icon_player_path"].get<std::string>();
+                if (minimap.contains("icon_player_guid")) {
+                    sceneAsset->minimap.icon_player_guid = Assets::GUID(minimap["icon_player_guid"].get<std::string>());
                 }
-                if (minimap.contains("icon_danger_path")) {
-                    sceneAsset->minimap.icon_danger_path = minimap["icon_danger_path"].get<std::string>();
+                if (minimap.contains("icon_danger_guid")) {
+                    sceneAsset->minimap.icon_danger_guid = Assets::GUID(minimap["icon_danger_guid"].get<std::string>());
                 }
-                if (minimap.contains("icon_item_path")) {
-                    sceneAsset->minimap.icon_item_path = minimap["icon_item_path"].get<std::string>();
+                if (minimap.contains("icon_item_guid")) {
+                    sceneAsset->minimap.icon_item_guid = Assets::GUID(minimap["icon_item_guid"].get<std::string>());
                 }
-                if (minimap.contains("icon_objective_path")) {
-                    sceneAsset->minimap.icon_objective_path = minimap["icon_objective_path"].get<std::string>();
+                if (minimap.contains("icon_objective_guid")) {
+                    sceneAsset->minimap.icon_objective_guid = Assets::GUID(minimap["icon_objective_guid"].get<std::string>());
                 }
-                if (minimap.contains("icon_wall_path")) {
-                    sceneAsset->minimap.icon_wall_path = minimap["icon_wall_path"].get<std::string>();
+                if (minimap.contains("icon_wall_guid")) {
+                    sceneAsset->minimap.icon_wall_guid = Assets::GUID(minimap["icon_wall_guid"].get<std::string>());
                 }
                 if (minimap.contains("background_alpha")) {
                     sceneAsset->minimap.background_alpha = minimap["background_alpha"].get<float>();

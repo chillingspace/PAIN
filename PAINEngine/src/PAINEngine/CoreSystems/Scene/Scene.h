@@ -58,6 +58,7 @@ namespace PAIN {
 
             //Curr Skybox texure id
             Assets::GUID curr_skybox_id;
+            glm::vec3 cached_world_light_intensity{ GraphicsSettings::get().global_light_intensity };
 
             //Graphics settings
             GraphicsSettings& gs = GraphicsSettings::get();

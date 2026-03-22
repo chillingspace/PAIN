@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "robot lights turn on cs2.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 9746107458881000552
+  },
+  "descriptor_version": 1,
+  "guid": "029c54f9-24b1-c64f-84f9-cf11505c196c",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\cutscenes\\robot lights turn on cs2.wav"
+  }
+}

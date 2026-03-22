@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "sparkle sfx.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 8153394132961854736
+  },
+  "descriptor_version": 1,
+  "guid": "e6ca3928-76b6-c844-9e42-f9e0f3bf89b4",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\cutscenes\\sparkle sfx.wav"
+  }
+}

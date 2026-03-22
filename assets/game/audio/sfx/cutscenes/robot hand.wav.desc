@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "robot hand.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 12416603145983053712
+  },
+  "descriptor_version": 1,
+  "guid": "ceeb8a60-5601-dc4b-a8a7-e28f41001026",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\cutscenes\\robot hand.wav"
+  }
+}

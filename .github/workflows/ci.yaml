@@ -25,8 +25,27 @@ jobs:
         Start-Process msiexec.exe -Wait -ArgumentList '/I cppcheck-setup.msi /quiet'
     - name: Run cppcheck
       run: |
-        & "C:\Program Files\Cppcheck\cppcheck.exe" -i vendor --enable=all --inconclusive  --std=c++20 --output-file=cppcheck_report.txt . 2> cppcheck_report.txt
+        & "C:\Program Files\Cppcheck\cppcheck.exe" `
+          --error-exitcode=1 `
+          --force `
+          --enable=warning,style `
+          --inconclusive `
+          --std=c++20 `
+          --suppress=missingIncludeSystem `
+          --suppress=missingInclude `
+          -i vendor `
+          -D PN_PLATFORM_WINDOWS `
+          -D PN_PLATFORM_ANDROID `
+          --check-level=exhaustive `
+          --output-file=cppcheck_report.txt .
+    - name: Display Cppcheck report on failure
+      if: failure()
+      run: |
+        if (Test-Path cppcheck_report.txt) {
+          Get-Content cppcheck_report.txt
+        }
     - name: Upload Cppcheck report
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: cppcheck_report

@@ -4,6 +4,7 @@
 #include "CoreSystems/Windows/Window.h"
 #include "CoreSystems/Events/Event.h"
 #include "CoreSystems/Renderer/sRenderer.h"
+#include "CoreSystems/Renderer/GraphicsSettings.h"
 #include "CoreSystems/Audio/Audio.h"
 #include "CoreSystems/Scene/Scene.h"
 #include "CoreSystems/Scene/sCameraController.h"
@@ -218,6 +219,9 @@ namespace PAIN {
 
 		//Application loop - MODIFIED: Added g_shouldQuitApplication check
 		while (b_app_running && !g_shouldQuitApplication) {
+#ifdef PN_PLATFORM_ANDROID
+			const auto frameStart = std::chrono::steady_clock::now();
+#endif
 
 			//Poll events
 			auto window = services->get<Window::Window>();
@@ -332,8 +336,9 @@ namespace PAIN {
 			timing.alpha = static_cast<float>(accumulator / timing.fixed_dt);
 
 			// clear errors before next rendering loop
-
-			while (glGetError());
+#ifdef _DEBUG
+			while (glGetError()) {}
+#endif
 
 			//Update all core systems
 			for (auto& core : core_stack) {
@@ -349,6 +354,21 @@ namespace PAIN {
 
 			//Swap buffer
 			services->get<Window::Window>()->swapBuffers();
+
+#ifdef PN_PLATFORM_ANDROID
+			int targetFps = GraphicsSettings::get().android_target_fps;
+			if (GraphicsSettings::get().android_battery_saver_mode) {
+				const int saverFps = std::max(1, GraphicsSettings::get().android_battery_saver_fps);
+				targetFps = targetFps > 0 ? std::min(targetFps, saverFps) : saverFps;
+			}
+			if (targetFps > 0) {
+				const auto frameBudget = std::chrono::duration<float>(1.0f / static_cast<float>(targetFps));
+				const auto frameElapsed = std::chrono::steady_clock::now() - frameStart;
+				if (frameElapsed < frameBudget) {
+					std::this_thread::sleep_for(frameBudget - frameElapsed);
+				}
+			}
+#endif
 		}
 
 		// ADDED: Log graceful shutdown if quit was requested from script
