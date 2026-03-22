@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "sfx_text.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 16217332504686701647
+  },
+  "descriptor_version": 1,
+  "guid": "48f36598-b51f-b14a-973f-26b59e2b36c1",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\sfx_text.prefab"
+  }
+}

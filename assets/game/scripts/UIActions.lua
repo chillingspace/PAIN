@@ -16,6 +16,16 @@ G.TutorialSceneName   = G.TutorialSceneName  or "game/scenes/Tutorial.scn"
 -- -- Placeholder for next level
 G.NextLevelName       = G.NextLevelName      or "game/scenes/Tutorial.scn"
 
+local layers = {
+    DEFAULT = 0,
+    MAINMENU = 1,
+    QUIT = 2,
+    SETTINGS = 3,
+    AUDIO = 4,
+    GRAPHICS = 5,
+    CONTROLS = 6
+}
+
 -- ==================== GRAPHICS SETTINGS ====================
 G.GraphicsSettings = G.GraphicsSettings or {
     displayMode = "windowed"
@@ -712,6 +722,69 @@ local handlers = {
 
         updateGraphicsModeDisplay()
         printLog("[UI] graphics_Right -> " .. tostring(_G.GraphicsSettings.displayMode))
+    end,
+
+    ----------------------------------------------------------------------
+    -- SETTINGS MENU
+    ----------------------------------------------------------------------
+    -- Goes from main menu to settings
+    mainmenu_Settings = function(buttonEntity, payload)
+        playUIClick()
+
+        -- Disable main menu layer
+        setLayerEnabled(layers.MAINMENU, false)
+
+        -- Enable settings layer
+        setLayerEnabled(layers.SETTINGS, true)
+    end,
+
+    -- Goes back from settings to main menu
+    settings_Back = function(buttonEntity, payload)
+        playUIClick()
+
+        -- Disable settings layers
+        setLayerEnabled(layers.AUDIO, false)
+        setLayerEnabled(layers.GRAPHICS, false)
+        setLayerEnabled(layers.CONTROLS, false)
+        setLayerEnabled(layers.SETTINGS, false)
+        
+        -- Enable main menu layers
+        setLayerEnabled(layers.MAINMENU, true)
+    end,
+
+    -- Goes back from audio/graphics/controls to settings
+    settings_Sub_Back = function(buttonEntity, payload)
+        playUIClick()
+
+        -- Disable other settings ui layers
+        setLayerEnabled(layers.AUDIO, false)
+        setLayerEnabled(layers.GRAPHICS, false)
+        setLayerEnabled(layers.CONTROLS, false)
+        
+        -- Enable settingsUI layer
+        setLayerEnabled(layers.SETTINGS, true)
+    end,
+
+    settings_Next = function(buttonEntity, payload)
+        playUIClick()
+
+        -- Disable settingsUI layer
+        setLayerEnabled(layers.SETTINGS, false)
+
+        if payload == "audio" then
+            -- Enable audio layer   
+            setLayerEnabled(layers.AUDIO, true)
+        elseif payload == "graphics" then
+            -- Enable graphics layer
+            setLayerEnabled(layers.GRAPHICS, true)
+        elseif payload == "controls" then
+            -- Enable controls layer
+            setLayerEnabled(layers.CONTROLS, true)
+        else
+            -- You forgot to set payload
+            printLog("[UI] No payload for next settings UI")
+            setLayerEnabled(layers.SETTINGS, true)
+        end
     end,
 }
 

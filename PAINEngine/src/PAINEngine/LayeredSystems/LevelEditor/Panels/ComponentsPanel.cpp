@@ -823,7 +823,13 @@ namespace PAIN {
 							"howtoplay_Left",
 
 							"graphics_Left",
-							"graphics_Right"
+							"graphics_Right",
+
+							"mainmenu_Settings",
+							"settings_Back",
+							"settings_Sub_Back",
+							"settings_Next",
+
 						};
 
 						int action_idx = static_cast<int>(button.action);

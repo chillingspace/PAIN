@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "bgm_text.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 17954095881438713932
+  },
+  "descriptor_version": 1,
+  "guid": "31b77a36-065c-8b43-8e46-1087b3791bfc",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\bgm_text.prefab"
+  }
+}

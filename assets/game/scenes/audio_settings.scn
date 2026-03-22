@@ -135,10 +135,6 @@
                             "childrenGUIDs": [
                                 "7beaa535-462c-7f45-9d6d-4090ca227034",
                                 "9cd8f47f-6463-f747-9161-5941ccdd6c0a",
-                                "c57eafe9-91dc-e142-9cd0-f3b3a11de5e5",
-                                "1dfa2a4f-5d18-a541-8f42-a6eda9f34f29",
-                                "d3b0f1f6-95e2-a445-9590-c4ad1169da63",
-                                "954f7853-48b6-0044-b5ea-715aafb4a7dc",
                                 "f02eecce-bf53-1940-9990-80a6b0692ebd",
                                 "1915db12-41ad-e448-8ef7-34bb04aacfdb",
                                 "fffffce1-8726-8b49-af0e-06d51dbb42d5",
@@ -246,7 +242,12 @@
                             "guid": "9cd8f47f-6463-f747-9161-5941ccdd6c0a"
                         },
                         "Hierarchy": {
-                            "childrenGUIDs": [],
+                            "childrenGUIDs": [
+                                "c57eafe9-91dc-e142-9cd0-f3b3a11de5e5",
+                                "1dfa2a4f-5d18-a541-8f42-a6eda9f34f29",
+                                "954f7853-48b6-0044-b5ea-715aafb4a7dc",
+                                "d3b0f1f6-95e2-a445-9590-c4ad1169da63"
+                            ],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
                             "siblingIndex": 0
                         },
@@ -349,8 +350,8 @@
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
-                            "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 1
+                            "parentGUID": "9cd8f47f-6463-f747-9161-5941ccdd6c0a",
+                            "siblingIndex": 0
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -446,108 +447,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "GUID": {
-                            "guid": "1dfa2a4f-5d18-a541-8f42-a6eda9f34f29"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 2
-                        },
-                        "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "master_plus"
-                        },
-                        "Texture2D": {
-                            "pos": [
-                                0.4000000059604645,
-                                0.30000001192092896
-                            ],
-                            "texture_guid": "ec849340-a7c9-f84a-ad47-7dd6c877f30c",
-                            "texture_scale": [
-                                0.05000000074505806,
-                                0.05000000074505806
-                            ]
-                        },
-                        "UIElement": {
-                            "b_is_enabled": true,
-                            "b_is_interactable": true,
-                            "layer": 0
-                        },
-                        "UIRectTransform": {
-                            "anchor_max": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchor_min": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchored_position": [
-                                0.0,
-                                0.0
-                            ],
-                            "local_position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "offset_max": [
-                                0.0,
-                                0.0
-                            ],
-                            "offset_min": [
-                                0.0,
-                                0.0
-                            ],
-                            "pivot": [
-                                0.5,
-                                0.5
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "size_delta": [
-                                100.0,
-                                100.0
-                            ]
-                        }
-                    },
-                    "Name": "master_plus"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
                         "CustomHitbox2D": {
                             "max_point": [
                                 50.0,
@@ -567,8 +466,8 @@
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
-                            "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 3
+                            "parentGUID": "9cd8f47f-6463-f747-9161-5941ccdd6c0a",
+                            "siblingIndex": 1
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -677,8 +576,8 @@
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
-                            "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 4
+                            "parentGUID": "9cd8f47f-6463-f747-9161-5941ccdd6c0a",
+                            "siblingIndex": 2
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -775,12 +674,114 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
+                            "guid": "1dfa2a4f-5d18-a541-8f42-a6eda9f34f29"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "9cd8f47f-6463-f747-9161-5941ccdd6c0a",
+                            "siblingIndex": 3
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "master_plus"
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                0.4000000059604645,
+                                0.30000001192092896
+                            ],
+                            "texture_guid": "ec849340-a7c9-f84a-ad47-7dd6c877f30c",
+                            "texture_scale": [
+                                0.05000000074505806,
+                                0.05000000074505806
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "master_plus"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
                             "guid": "f02eecce-bf53-1940-9990-80a6b0692ebd"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 5
+                            "siblingIndex": 1
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -896,7 +897,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 6
+                            "siblingIndex": 2
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1006,7 +1007,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 7
+                            "siblingIndex": 3
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1108,7 +1109,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 8
+                            "siblingIndex": 4
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1210,7 +1211,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 9
+                            "siblingIndex": 5
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1312,7 +1313,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 10
+                            "siblingIndex": 6
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1428,7 +1429,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 11
+                            "siblingIndex": 7
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1538,7 +1539,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 12
+                            "siblingIndex": 8
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1640,7 +1641,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 13
+                            "siblingIndex": 9
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1742,7 +1743,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 14
+                            "siblingIndex": 10
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1876,7 +1877,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "68b02a54-55f5-b143-8b8a-f56aa1db959f",
-                            "siblingIndex": 15
+                            "siblingIndex": 11
                         },
                         "Layer": {
                             "layer_id": 1,
@@ -2029,7 +2030,7 @@
                             ]
                         },
                         "Name": {
-                            "name": "instructions1"
+                            "name": "audio_title"
                         },
                         "Texture2D": {
                             "pos": [
@@ -2094,7 +2095,7 @@
                             ]
                         }
                     },
-                    "Name": "instructions1"
+                    "Name": "audio_title"
                 }
             },
             {
@@ -2662,12 +2663,12 @@
         "border_thickness": 2.0,
         "camera_height": 30.0,
         "enabled": false,
-        "icon_danger_path": "",
-        "icon_item_path": "",
-        "icon_objective_path": "",
-        "icon_player_path": "",
+        "icon_danger_guid": "00000000-0000-0000-0000-000000000000",
+        "icon_item_guid": "00000000-0000-0000-0000-000000000000",
+        "icon_objective_guid": "00000000-0000-0000-0000-000000000000",
+        "icon_player_guid": "00000000-0000-0000-0000-000000000000",
         "icon_scale": 1.0,
-        "icon_wall_path": "",
+        "icon_wall_guid": "00000000-0000-0000-0000-000000000000",
         "override_position": false,
         "pos_px": [
             20.0,
@@ -2677,6 +2678,7 @@
         "recommended_position": 3,
         "rotate_with_player": true,
         "route_mode": 0,
+        "shape": 0,
         "show_danger": true,
         "show_items": true,
         "show_legend": false,

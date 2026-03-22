@@ -136,7 +136,12 @@ namespace PAIN {
 		howtoplay_Left,
 
 		graphics_Left,
-		graphics_Right
+		graphics_Right,
+
+		mainmenu_Settings,
+		settings_Back,
+		settings_Sub_Back,
+		settings_Next,
 	};
 
 	struct UIButton {
@@ -340,7 +345,13 @@ namespace PAIN {
 		{PAIN::UIAction::howtoplay_Left, "howtoplay_Left"},
 
 		{PAIN::UIAction::graphics_Left, "graphics_Left"},
-		{PAIN::UIAction::graphics_Right, "graphics_Right"}
+		{PAIN::UIAction::graphics_Right, "graphics_Right"},
+
+		{PAIN::UIAction::mainmenu_Settings, "mainmenu_Settings"},
+		{PAIN::UIAction::settings_Back, "settings_Back"},
+		{PAIN::UIAction::settings_Sub_Back, "settings_Sub_Back"},
+		{PAIN::UIAction::settings_Next, "settings_Next"},
+
 	})
 
 } // namespace PAIN
