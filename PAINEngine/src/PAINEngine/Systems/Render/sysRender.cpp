@@ -219,21 +219,47 @@ namespace PAIN {
 				int editor_debug_mode = 0;
 #endif
 
+#ifdef _DEBUG
 				GLenum err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err on update loop begin: {}", err);
 				}
+#endif
+				auto syncCameraLightFromActiveCamera = [&]() {
+					auto sceneManager = services.lock()->get<Scene::SceneManager>();
+					if (!sceneManager) {
+						return;
+					}
+
+					auto activeCamera = sceneManager->GetActiveCamera();
+					auto cameraLight = LightSources::get().get("cam");
+					if (!activeCamera || !cameraLight.has_value()) {
+						return;
+					}
+
+					Light& light = cameraLight->get();
+					light.position = activeCamera->pos;
+					light.position.y += 0.1f; // light on camera = grainy
+					light.fov = activeCamera->fov;
+					light.direction = activeCamera->forward;
+					light.aspect_ratio = activeCamera->aspect_ratio;
+				};
 
 				auto rendererService = services.lock()->get<sRenderer>();
 				if (!rendererService || !rendererService->w_renderer) {
 					return;
 				}
 
+				syncCameraLightFromActiveCamera();
 				if (rendererService->w_renderer->resizeDirty) {
 					rendererService->w_renderer->resizeDirty = false;
 					rendererService->w_renderer->_initDeferredShadingBuffers();
 				}
 
+				// Frame orchestration lives here:
+				// - sysRender extracts scene/editor state and chooses the presentation target
+				// - the renderer owns GPU state changes inside each pass entry point
+				// - post process produces the final scene image before UI overlays are composited
 				if (editor_visible) {
 					glBindFramebuffer(GL_FRAMEBUFFER,
 									  rendererService->getFinalFbo());
@@ -250,10 +276,12 @@ namespace PAIN {
 				glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+#ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err before render passes: {}", err);
 				}
+#endif
 
 				// Render all passes
 				GraphicsSettings::get().stats.objects_culled = 0;
@@ -261,51 +289,68 @@ namespace PAIN {
 				GraphicsSettings::get().stats.shadow_objects_culled = 0;
 				GraphicsSettings::get().stats.shadow_objects_rendered = 0;
 
+				// Current frame order:
+				// shadow -> geometry -> minimap -> lighting
+				// -> volumetrics -> particles -> debug overlays -> post process -> UI
+				// Future refactors should keep ownership here and only move work between
+				// passes when both Windows and Android follow the same contract.
 				shadowPass(registry);
+#ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after shadow pass: {}", err);
 				}
+#endif
 				geometryPass(registry);
+#ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after geometry pass: {}", err);
 				}
+#endif
 				minimapPass(registry);
+#ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after minimap pass: {}", err);
 				}
-				reflectionPass(registry);
-				err = glGetError();
-				if (err != GL_NO_ERROR) {
-					PN_CORE_ERROR("OpenGL err after reflection pass: {}", err);
-				}
-			lightingPass(registry);
+#endif
+				lightingPass(registry);
+#ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after lighting pass: {}", err);
 				}
+#endif
 				volumetricPass(registry);
+#ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after volumetric pass: {}", err);
 				}
+#endif
 				particlePass(registry);
+#ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after particle pass: {}", err);
 				}
+#endif
 				debugPass(registry, editor_debug_mode);
+#ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after debug pass: {}", err);
 				}
-				services.lock()->get<sRenderer>()->postProcessPass();
+#endif
+				
+				services.lock()->get<sRenderer>()->postProcessPass(!editor_visible);
+#ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after post process pass: {}", err);
 				}
+#endif
 
 				if (editor_visible) {
 					glBindFramebuffer(GL_FRAMEBUFFER, rendererService->getFinalFbo());
@@ -315,33 +360,23 @@ namespace PAIN {
 				}
 
 				uiPass(registry);
+#ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after UI pass: {}", err);
 				}
+#endif
 
 				glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
 			}
 
-			// set cam light to cam
-			auto olcam = LightSources::get().get("cam");
-			Light& lcam = olcam.value();
-			lcam.position =
-				services.lock()->get<Scene::SceneManager>()->GetActiveCamera()->pos;
-			lcam.position.y += 0.1f; // light on camera = grainy
-			lcam.fov =
-				services.lock()->get<Scene::SceneManager>()->GetActiveCamera()->fov;
-			lcam.direction =
-				services.lock()->get<Scene::SceneManager>()->GetActiveCamera()->forward;
-			lcam.aspect_ratio = services.lock()
-									->get<Scene::SceneManager>()
-									->GetActiveCamera()
-									->aspect_ratio;
-
+#ifdef _DEBUG
 			GLenum err = glGetError();
 			while (err != GL_NO_ERROR) {
 				PN_CORE_ERROR("OpenGL err on update loop end: {}", err);
+				err = glGetError();
 			}
+#endif
 		}
 
 		void System::onFixedUpdate(AppTiming timing, entt::registry& registry) {
@@ -356,39 +391,57 @@ namespace PAIN {
 			auto rendererService = services.lock()->get<sRenderer>();
 			if (!rendererService || !rendererService->w_renderer)
 				return;
+			static std::unordered_set<std::string> warnedNonShadowPipeAssets;
 
-			glViewport(0, 0, GraphicsSettings::get().getShadowMapWidth(),
-					   GraphicsSettings::get().getShadowMapWidth());
-
+			// Phase 1 keeps shadow rendering enabled, so the viewport must match the
+			// actual shadow target owned by each light rather than a stale global size.
 			auto renderGroup =
 				registry.group<ModelRenderer>(entt::get<WorldTransform, Entity::Layer>);
 
-				for (const Light& l : LightSources::get().getAll()) {
-					if (l.getShadowType() != Light::SHADOW_TYPES::MAPPED)
-						continue;
+			for (const Light& l : LightSources::get().getAll()) {
+				if (l.getShadowType() != Light::SHADOW_TYPES::MAPPED)
+					continue;
 
-					rendererService->w_renderer->BeginShadowPass(l);
-					
-					Frustum lightFrustum = l.getFrustum();
+				glViewport(0, 0, l.getShadowResolution(), l.getShadowResolution());
+				rendererService->w_renderer->BeginShadowPass(l);
 
-					for (auto [entity, model, transform, layer] : renderGroup.each()) {
+				Frustum lightFrustum = l.getFrustum();
 
-						glm::mat4 model_xform = transform.matrix;
+				for (auto [entity, model, transform, layer] : renderGroup.each()) {
+					glm::mat4 model_xform = transform.matrix;
 
-						if (model.visible && model.castShadows) {
-							// FRUSTUM CULLING FOR SHADOWS
-							auto* boundingVol = registry.try_get<BoundingVolume>(entity);
-							if (boundingVol && boundingVol->worldAABB.isValid()) {
-								if (!isAABBInFrustum(boundingVol->worldAABB, lightFrustum)) {
-									GraphicsSettings::get().stats.shadow_objects_culled++;
-									continue; // skip shadow casting for this object, outside light frustum
-								}
-							}
-						
-							GraphicsSettings::get().stats.shadow_objects_rendered++;
-							rendererService->w_renderer->DrawShadows(model, model_xform, l);
+					if (model.visible && !model.castShadows && model.cachedModelAsset) {
+						std::string assetPath = model.cachedModelAsset->vpath;
+						std::string loweredPath = assetPath;
+						std::transform(
+							loweredPath.begin(),
+							loweredPath.end(),
+							loweredPath.begin(),
+							[](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+
+						if (loweredPath.find("pipe") != std::string::npos &&
+							warnedNonShadowPipeAssets.insert(assetPath).second) {
+							PN_CORE_WARN(
+								"Pipe occluder '{}' has castShadows=false; spotlight + volumetric light can leak through it.",
+								assetPath);
 						}
 					}
+
+					if (model.visible && model.castShadows) {
+						// FRUSTUM CULLING FOR SHADOWS
+						auto* boundingVol = registry.try_get<BoundingVolume>(entity);
+						const bool allowFrustumCull = (l.type != Light::TYPES::SPOTLIGHT);
+						if (allowFrustumCull && boundingVol && boundingVol->worldAABB.isValid()) {
+							if (!isAABBInFrustum(boundingVol->worldAABB, lightFrustum)) {
+								GraphicsSettings::get().stats.shadow_objects_culled++;
+								continue; // skip shadow casting for this object, outside light frustum
+							}
+						}
+
+						GraphicsSettings::get().stats.shadow_objects_rendered++;
+						rendererService->w_renderer->DrawShadows(model, model_xform, l);
+					}
+				}
 
 				rendererService->w_renderer->EndShadowPass();
 			}
@@ -540,17 +593,9 @@ namespace PAIN {
 		}
 
 		void System::reflectionPass(entt::registry& registry) {
-
-			auto rendererService = services.lock()->get<sRenderer>();
-			if (!rendererService || !rendererService->w_renderer)
-				return;
-
-			auto renderGroup =
-				registry.group<ModelRenderer>(entt::get<WorldTransform, Entity::Layer>);
-
-			for (auto [entity, model, transform, layer] : renderGroup.each()) {
-				rendererService->w_renderer->ReflectionPass(model);
-			}
+			(void)registry;
+			// Reflection pass is intentionally disabled until a real implementation
+			// (SSR/planar/probe blend) is added.
 		}
 
 		void System::lightingPass(entt::registry& registry) {
@@ -571,34 +616,409 @@ namespace PAIN {
 
 			// Cache to track which lights are still active this frame
 			std::unordered_set<std::string> activeLightNames;
+			static std::unordered_set<std::string> warnedVolumetricShadowState;
+			static std::unordered_set<std::string> warnedShadowBudgetState;
+			static std::unordered_map<std::string, int> mappedVisibilityGraceFrames;
 
-			for (auto [entity, lighting, transform] : lightingGroup.each()) {
+			struct PendingLightUpdate {
+				entt::entity entity{};
+				Lighting* lighting = nullptr;
+				LocalTransform* transform = nullptr;
+				std::string lightName;
+				glm::vec3 worldPos = glm::vec3(0.0f);
+				Light::SHADOW_TYPES baseShadowType = Light::SHADOW_TYPES::NONE;
+				Light::SHADOW_TYPES resolvedShadowType = Light::SHADOW_TYPES::NONE;
+				bool requireMappedForVolumetric = false;
+				bool wantsMappedShadow = false;
+				bool inViewNow = false;
+				bool inCameraView = false;
+				bool wasMappedPreviousFrame = false;
+				float distanceToCamera = std::numeric_limits<float>::max();
+			};
 
-				std::string lightName = "light_" + std::to_string((uint32_t)entity);
-				activeLightNames.insert(lightName);
-
-				// Create light if new
-				if (!LightSources::get().get(lightName)) {
-					LightSources::get().create(lightName);
+			Camera* activeCamera = scene->GetActiveCamera();
+			const glm::mat4 cameraVP = activeCamera
+				? (activeCamera->projection() * activeCamera->view())
+				: glm::mat4(1.0f);
+			auto isPointInView = [&](const glm::vec3& worldPoint) -> bool {
+				if (!activeCamera) {
+					return false;
+				}
+				const glm::vec4 clip = cameraVP * glm::vec4(worldPoint, 1.0f);
+				if (clip.w <= 0.0001f) {
+					return false;
+				}
+				const glm::vec3 ndc = glm::vec3(clip) / clip.w;
+				return ndc.z >= -1.0f && ndc.z <= 1.0f &&
+					ndc.x >= -1.0f && ndc.x <= 1.0f &&
+					ndc.y >= -1.0f && ndc.y <= 1.0f;
+			};
+			auto isSphereInView = [&](const glm::vec3& worldCenter, float radius) -> bool {
+				if (!activeCamera) {
+					return false;
+				}
+				const Frustum cameraFrustum = activeCamera->getFrustum();
+				const Plane* planes[6] = {
+					&cameraFrustum.leftFace, &cameraFrustum.rightFace,
+					&cameraFrustum.bottomFace, &cameraFrustum.topFace,
+					&cameraFrustum.nearFace, &cameraFrustum.farFace
+				};
+				for (const Plane* plane : planes) {
+					if (plane->getSignedDistanceToPlane(worldCenter) < -radius) {
+						return false;
+					}
+				}
+				return true;
+			};
+			auto isSpotConeInView = [&](const glm::vec3& apex,
+										const glm::vec3& direction,
+										float outerAngleDeg) -> bool {
+				if (!activeCamera) {
+					return false;
 				}
 
-				if (auto lightOpt = LightSources::get().get(lightName)) {
+				const glm::vec3 dir =
+					glm::length(direction) > 0.0001f ? glm::normalize(direction) : glm::vec3(0.0f, -1.0f, 0.0f);
+				const float coneLength = glm::clamp(
+					GraphicsSettings::get().volumetric_max_dist,
+					6.0f,
+					40.0f);
+				const float fullConeRadius = std::tan(glm::radians(outerAngleDeg)) * coneLength;
+				const glm::vec3 center = apex + dir * (coneLength * 0.5f);
+				const float coneBoundingRadius = std::sqrt(
+					(coneLength * 0.5f) * (coneLength * 0.5f) + fullConeRadius * fullConeRadius);
+				if (isPointInView(apex) || isPointInView(center) || isPointInView(apex + dir * coneLength)) {
+					return true;
+				}
+				if (isSphereInView(center, coneBoundingRadius)) {
+					return true;
+				}
+
+				glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+				if (std::abs(glm::dot(dir, up)) > 0.95f) {
+					up = glm::vec3(1.0f, 0.0f, 0.0f);
+				}
+				const glm::vec3 right = glm::normalize(glm::cross(up, dir));
+				const glm::vec3 orthoUp = glm::normalize(glm::cross(dir, right));
+				const std::array<float, 4> coneTValues = { 0.2f, 0.45f, 0.7f, 1.0f };
+				for (float t : coneTValues) {
+					const glm::vec3 sliceCenter = apex + dir * (coneLength * t);
+					const float sliceRadius = fullConeRadius * t;
+					if (isPointInView(sliceCenter)) {
+						return true;
+					}
+					const std::array<glm::vec3, 4> ring = {
+						sliceCenter + right * sliceRadius,
+						sliceCenter - right * sliceRadius,
+						sliceCenter + orthoUp * sliceRadius,
+						sliceCenter - orthoUp * sliceRadius
+					};
+					for (const glm::vec3& p : ring) {
+						if (isPointInView(p)) {
+							return true;
+						}
+					}
+				}
+				const std::array<glm::vec3, 4> nearApexSamples = {
+					apex + right * (fullConeRadius * 0.1f),
+					apex - right * (fullConeRadius * 0.1f),
+					apex + orthoUp * (fullConeRadius * 0.1f),
+					apex - orthoUp * (fullConeRadius * 0.1f)
+				};
+				for (const glm::vec3& p : nearApexSamples) {
+					if (isPointInView(p)) {
+						return true;
+					}
+				}
+				return false;
+			};
+
+			std::vector<PendingLightUpdate> pending;
+			pending.reserve(lightingGroup.size());
+			for (auto [entity, lighting, transform] : lightingGroup.each()) {
+				PendingLightUpdate update{};
+				update.entity = entity;
+				update.lighting = &lighting;
+				update.transform = &transform;
+				update.lightName = "light_" + std::to_string((uint32_t)entity);
+				glm::vec3 entityWorldPos = transform.position;
+				if (auto* wt = registry.try_get<WorldTransform>(entity)) {
+					entityWorldPos = glm::vec3(wt->matrix[3]);
+				}
+				update.worldPos = entityWorldPos + lighting.offset;
+				update.baseShadowType = static_cast<Light::SHADOW_TYPES>(lighting.shadow_type);
+				update.requireMappedForVolumetric =
+					lighting.volumetric && lighting.light_type == TYPES::SPOTLIGHT;
+				update.wantsMappedShadow =
+					update.baseShadowType == Light::SHADOW_TYPES::MAPPED ||
+					update.requireMappedForVolumetric;
+
+				if (auto existingLight = LightSources::get().get(update.lightName)) {
+					const Light& priorLight = existingLight.value().get();
+					update.wasMappedPreviousFrame =
+						priorLight.getShadowType() == Light::SHADOW_TYPES::MAPPED &&
+						priorLight.getShadowTexture() != 0;
+				}
+
+				if (activeCamera) {
+					const bool isSpotlight = lighting.light_type == TYPES::SPOTLIGHT;
+					update.inViewNow = isSpotlight
+						? isSpotConeInView(update.worldPos, lighting.direction, lighting.outer_angle)
+						: isPointInView(update.worldPos);
+
+					constexpr int kVisibilityGraceFrames = 8;
+					int& grace = mappedVisibilityGraceFrames[update.lightName];
+					if (update.inViewNow) {
+						grace = kVisibilityGraceFrames;
+					}
+					else if (grace > 0) {
+						--grace;
+					}
+					update.inCameraView = update.inViewNow || grace > 0;
+
+					const glm::vec3 priorityTarget = isSpotlight
+						? (update.worldPos +
+							(glm::length(lighting.direction) > 0.0001f
+								? glm::normalize(lighting.direction)
+								: glm::vec3(0.0f, -1.0f, 0.0f)) *
+							(GraphicsSettings::get().volumetric_max_dist * 0.5f))
+						: update.worldPos;
+					update.distanceToCamera = glm::length(priorityTarget - activeCamera->pos);
+				}
+				else {
+					update.inViewNow = false;
+					update.inCameraView = false;
+					update.distanceToCamera = 0.0f;
+				}
+
+				activeLightNames.insert(update.lightName);
+				pending.push_back(update);
+			}
+
+			for (auto it = mappedVisibilityGraceFrames.begin();
+				 it != mappedVisibilityGraceFrames.end();) {
+				if (activeLightNames.find(it->first) == activeLightNames.end()) {
+					it = mappedVisibilityGraceFrames.erase(it);
+				}
+				else {
+					++it;
+				}
+			}
+
+			// Purge stale dynamic lights before shadow budget resolution.
+			// Otherwise, lights from the previous scene/frame can continue to occupy
+			// the global mapped-shadow counter until end-of-pass cleanup.
+			for (auto& [key, lightRef] : LightSources::get().getAllWithKeys()) {
+				if (key == "cam" || key == "world") {
+					continue;
+				}
+				if (activeLightNames.find(key) == activeLightNames.end()) {
+					LightSources::get().destroy(key);
+					warnedShadowBudgetState.erase(key);
+					warnedVolumetricShadowState.erase(key);
+					mappedVisibilityGraceFrames.erase(key);
+				}
+			}
+
+			constexpr int kShadowMappedLightBudget = 4;
+			const int maxVolumetricLights =
+				std::clamp(GraphicsSettings::get().volumetric_max_lights, 1, 4);
+			static int worldShadowRestoreCooldownFrames = 0;
+			if (worldShadowRestoreCooldownFrames > 0) {
+				--worldShadowRestoreCooldownFrames;
+			}
+
+			const int inViewVolumetricDemand = static_cast<int>(std::count_if(
+				pending.begin(),
+				pending.end(),
+				[](const PendingLightUpdate& update) {
+					return update.requireMappedForVolumetric && update.inCameraView;
+				}));
+
+			const bool requireFullDynamicShadowBudget =
+				inViewVolumetricDemand >= maxVolumetricLights;
+			if (auto worldLightOpt = LightSources::get().get("world")) {
+				Light& worldLight = worldLightOpt.value();
+				if (requireFullDynamicShadowBudget &&
+					worldLight.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
+					worldLight.setShadowType(Light::SHADOW_TYPES::NONE);
+					worldShadowRestoreCooldownFrames = 20;
+				}
+				else if (!requireFullDynamicShadowBudget &&
+					worldShadowRestoreCooldownFrames == 0 &&
+					GraphicsSettings::get().world_light &&
+					worldLight.getShadowType() != Light::SHADOW_TYPES::MAPPED) {
+					worldLight.setShadowType(Light::SHADOW_TYPES::MAPPED);
+				}
+			}
+
+			// Recover from stale mapped-light state (e.g. shadow buffer creation failure).
+			// Mapped lights with no shadow texture should not consume the global mapped budget.
+			for (const auto& [key, lightRef] : LightSources::get().getAllWithKeys()) {
+				const Light& readOnlyLight = lightRef.get();
+				if (readOnlyLight.getShadowType() == Light::SHADOW_TYPES::MAPPED &&
+					readOnlyLight.getShadowTexture() == 0) {
+					if (auto mutableLightOpt = LightSources::get().get(key)) {
+						mutableLightOpt.value().get().setShadowType(Light::SHADOW_TYPES::NONE);
+					}
+				}
+			}
+
+			int reservedShadowSlots = 0;
+			for (const auto& [key, lightRef] : LightSources::get().getAllWithKeys()) {
+				if (key != "world" && key != "cam") {
+					continue;
+				}
+				const Light& l = lightRef.get();
+				if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED &&
+					l.getShadowTexture() != 0) {
+					++reservedShadowSlots;
+				}
+			}
+			const int entityShadowBudget =
+				std::max(0, kShadowMappedLightBudget - reservedShadowSlots);
+
+			auto compareByFovThenDistance =
+				[](const PendingLightUpdate* lhs, const PendingLightUpdate* rhs) {
+				if (lhs->inCameraView != rhs->inCameraView) {
+					return lhs->inCameraView && !rhs->inCameraView;
+				}
+				if (lhs->inViewNow != rhs->inViewNow) {
+					return lhs->inViewNow && !rhs->inViewNow;
+				}
+				if (std::abs(lhs->distanceToCamera - rhs->distanceToCamera) > 0.001f) {
+					return lhs->distanceToCamera < rhs->distanceToCamera;
+				}
+				if (lhs->wasMappedPreviousFrame != rhs->wasMappedPreviousFrame) {
+					return lhs->wasMappedPreviousFrame && !rhs->wasMappedPreviousFrame;
+				}
+				return static_cast<uint32_t>(lhs->entity) < static_cast<uint32_t>(rhs->entity);
+			};
+
+			std::vector<PendingLightUpdate*> volumetricCandidates;
+			std::vector<PendingLightUpdate*> otherMappedCandidates;
+			for (auto& update : pending) {
+				if (!update.wantsMappedShadow) {
+					continue;
+				}
+				if (update.requireMappedForVolumetric) {
+					volumetricCandidates.push_back(&update);
+				}
+				else {
+					otherMappedCandidates.push_back(&update);
+				}
+			}
+
+			std::sort(
+				volumetricCandidates.begin(),
+				volumetricCandidates.end(),
+				compareByFovThenDistance);
+			std::sort(
+				otherMappedCandidates.begin(),
+				otherMappedCandidates.end(),
+				compareByFovThenDistance);
+
+			for (auto& update : pending) {
+				update.resolvedShadowType = update.baseShadowType;
+				if (update.wantsMappedShadow) {
+					update.resolvedShadowType = Light::SHADOW_TYPES::NONE;
+				}
+			}
+
+			int mappedAssigned = 0;
+			const int volumetricMappedBudget = std::min(entityShadowBudget, maxVolumetricLights);
+			for (auto* candidate : volumetricCandidates) {
+				if (mappedAssigned >= volumetricMappedBudget) {
+					break;
+				}
+				candidate->resolvedShadowType = Light::SHADOW_TYPES::MAPPED;
+				++mappedAssigned;
+			}
+
+			for (auto* candidate : otherMappedCandidates) {
+				if (mappedAssigned >= entityShadowBudget) {
+					break;
+				}
+				candidate->resolvedShadowType = Light::SHADOW_TYPES::MAPPED;
+				++mappedAssigned;
+			}
+
+			// Ensure all lights exist before resolving shadow state.
+			for (const auto& update : pending) {
+				if (!LightSources::get().get(update.lightName)) {
+					LightSources::get().create(update.lightName);
+				}
+			}
+
+			// Phase 1: demote non-mapped lights first so mapped slots are freed deterministically.
+			for (const auto& update : pending) {
+				if (update.resolvedShadowType == Light::SHADOW_TYPES::MAPPED) {
+					continue;
+				}
+				if (auto lightOpt = LightSources::get().get(update.lightName)) {
 					Light& light = lightOpt.value();
+					light.setShadowType(update.resolvedShadowType);
+				}
+			}
+
+			// Phase 2: promote mapped winners.
+			for (const auto& update : pending) {
+				if (update.resolvedShadowType != Light::SHADOW_TYPES::MAPPED) {
+					continue;
+				}
+				if (auto lightOpt = LightSources::get().get(update.lightName)) {
+					Light& light = lightOpt.value();
+					light.setShadowType(Light::SHADOW_TYPES::MAPPED);
+				}
+			}
+
+			for (const auto& update : pending) {
+				if (auto lightOpt = LightSources::get().get(update.lightName)) {
+					Light& light = lightOpt.value();
+					const Lighting& lighting = *update.lighting;
+					const LocalTransform& transform = *update.transform;
+
 					// Use WorldTransform so the spotlight renders at the correct world
 					// location even when the entity is a non-root child with a parent
 					// that has a non-zero position. Falls back to LocalTransform for
 					// root entities where WorldTransform may not yet be computed.
-					glm::vec3 entityWorldPos = transform.position;
-					if (auto* wt = registry.try_get<WorldTransform>(entity)) {
-						entityWorldPos = glm::vec3(wt->matrix[3]);
-					}
-					light.position = entityWorldPos + lighting.offset;
+					light.position = update.worldPos;
 					light.L_intensity = lighting.light_intensity;
 					light.type = static_cast<Light::TYPES>(lighting.light_type);
-					light.setShadowType(
-						static_cast<Light::SHADOW_TYPES>(lighting.shadow_type));
 					light.setShadowResolution(lighting.shadow_resolution);
-					light.volumetric = lighting.volumetric;
+
+					const bool hasMappedShadow =
+						light.getShadowType() == Light::SHADOW_TYPES::MAPPED &&
+						light.getShadowTexture() != 0;
+					light.volumetric =
+						lighting.volumetric &&
+						(!update.requireMappedForVolumetric || hasMappedShadow);
+
+					if (update.wantsMappedShadow && update.inCameraView && !hasMappedShadow) {
+						if (warnedShadowBudgetState.insert(update.lightName).second) {
+							PN_CORE_WARN(
+								"Light '{}' could not acquire mapped shadow (budget={}, reserved={}, type={}).",
+								update.lightName,
+								kShadowMappedLightBudget,
+								reservedShadowSlots,
+								static_cast<int>(lighting.light_type));
+						}
+					}
+					else {
+						warnedShadowBudgetState.erase(update.lightName);
+					}
+
+					if (lighting.volumetric &&
+						(update.requireMappedForVolumetric && update.inCameraView && !hasMappedShadow)) {
+						if (warnedVolumetricShadowState.insert(update.lightName).second) {
+							PN_CORE_WARN(
+								"Volumetric spotlight '{}' disabled: no mapped shadow texture available.",
+								update.lightName);
+						}
+					}
+					else {
+						warnedVolumetricShadowState.erase(update.lightName);
+					}
 
 					// works for non point light
 					light.direction = lighting.direction;
@@ -606,20 +1026,6 @@ namespace PAIN {
 					// for spotlight only
 					light.inner_angle = lighting.inner_angle;
 					light.outer_angle = lighting.outer_angle;
-				}
-			}
-
-			// Remove lights no longer active
-			for (auto& [key, lightRef] : LightSources::get().getAllWithKeys()) {
-				const std::string& name = key;
-
-				// Skip the special lights "cam" and "world"
-				if (name == "cam" || name == "world") {
-					continue;
-				}
-
-				if (activeLightNames.find(name) == activeLightNames.end()) {
-					LightSources::get().destroy(name);
 				}
 			}
 
@@ -642,6 +1048,7 @@ namespace PAIN {
 		// PARTICLE RENDER PASS - GPU Instanced Rendering
 		// ============================================
 		void System::particlePass(entt::registry& registry) {
+#ifdef _DEBUG
 			auto logParticleGLError = [](const char* stage) {
 				GLenum err = glGetError();
 				while (err != GL_NO_ERROR) {
@@ -651,6 +1058,9 @@ namespace PAIN {
 			};
 
 			while (glGetError() != GL_NO_ERROR) {}
+#else
+			auto logParticleGLError = [](const char*) {};
+#endif
 
 			auto rendererService = services.lock()->get<sRenderer>();
 			if (!rendererService || !rendererService->w_renderer)
@@ -738,6 +1148,23 @@ namespace PAIN {
 				return;
 			}
 
+			static GLuint cachedUniformProgram = 0;
+			static GLint locTexSampler = -1;
+			static GLint locView = -1;
+			static GLint locProjection = -1;
+			static GLint locUseTexture = -1;
+			static GLint locShape = -1;
+			static GLint locSoftEdge = -1;
+			if (cachedUniformProgram != particleProgram) {
+				cachedUniformProgram = particleProgram;
+				locTexSampler = glGetUniformLocation(particleProgram, "tex");
+				locView = glGetUniformLocation(particleProgram, "u_V");
+				locProjection = glGetUniformLocation(particleProgram, "u_P");
+				locUseTexture = glGetUniformLocation(particleProgram, "u_UseTexture");
+				locShape = glGetUniformLocation(particleProgram, "u_Shape");
+				locSoftEdge = glGetUniformLocation(particleProgram, "u_SoftEdge");
+			}
+
 			// Billboard quad vertices (centered at origin, facing +Z)
 			// These are per-vertex, not per-instance
 			static const float quadVertices[] = {
@@ -759,6 +1186,16 @@ namespace PAIN {
 			static GLuint quadEBO = 0;
 			static GLuint instanceVBO = 0;
 			static size_t instanceCapacity = 10000;
+
+			// Android can recreate GL context while these statics remain non-zero.
+			// Reset stale handles if the driver says they are no longer valid.
+			if (quadVAO != 0 && !glIsVertexArray(quadVAO)) {
+				quadVAO = 0;
+				quadVBO = 0;
+				quadEBO = 0;
+				instanceVBO = 0;
+				instanceCapacity = 10000;
+			}
 
 			if (quadVAO == 0) {
 				// Create quad VAO
@@ -833,12 +1270,18 @@ namespace PAIN {
 			// Use particle shader
 			glUseProgram(particleProgram);
 			logParticleGLError("use program");
-			glUniform1i(glGetUniformLocation(particleProgram, "tex"), 0);
+			if (locTexSampler >= 0) {
+				glUniform1i(locTexSampler, 0);
+			}
 			logParticleGLError("set tex uniform");
 
 			// Set view and projection matrices
-			glUniformMatrix4fv(glGetUniformLocation(particleProgram, "u_V"), 1, GL_FALSE, &activeCam->view()[0][0]);
-			glUniformMatrix4fv(glGetUniformLocation(particleProgram, "u_P"), 1, GL_FALSE, &activeCam->projection()[0][0]);
+			if (locView >= 0) {
+				glUniformMatrix4fv(locView, 1, GL_FALSE, &activeCam->view()[0][0]);
+			}
+			if (locProjection >= 0) {
+				glUniformMatrix4fv(locProjection, 1, GL_FALSE, &activeCam->projection()[0][0]);
+			}
 			logParticleGLError("set VP uniforms");
 
 			glBindVertexArray(quadVAO);
@@ -953,9 +1396,15 @@ namespace PAIN {
 					break;
 				}
 
-				glUniform1i(glGetUniformLocation(particleProgram, "u_UseTexture"), particleTextureId != 0 ? 1 : 0);
-				glUniform1i(glGetUniformLocation(particleProgram, "u_Shape"), static_cast<int>(ps.renderShape));
-				glUniform1f(glGetUniformLocation(particleProgram, "u_SoftEdge"), glm::clamp(ps.softEdge, 0.0f, 1.0f));
+				if (locUseTexture >= 0) {
+					glUniform1i(locUseTexture, particleTextureId != 0 ? 1 : 0);
+				}
+				if (locShape >= 0) {
+					glUniform1i(locShape, static_cast<int>(ps.renderShape));
+				}
+				if (locSoftEdge >= 0) {
+					glUniform1f(locSoftEdge, glm::clamp(ps.softEdge, 0.0f, 1.0f));
+				}
 				logParticleGLError("set particle uniforms");
 
 				glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
@@ -1289,10 +1738,12 @@ namespace PAIN {
 			// ========================================
 			// CLEAR ANY PRE-EXISTING ERRORS
 			// ========================================
-			GLenum err;
+			GLenum err = GL_NO_ERROR;
+#ifdef _DEBUG
 			while ((err = glGetError()) != GL_NO_ERROR) {
 				PN_CORE_WARN("[UI Pass] Clearing pre-existing GL error: 0x{:X}", err);
 			}
+#endif
 
 			// ========================================
 			// SET GL STATE ONCE FOR ENTIRE UI PASS
@@ -1302,10 +1753,12 @@ namespace PAIN {
 			glDisable(GL_DEPTH_TEST);
 			glDisable(GL_CULL_FACE); // UI usually doesn't need culling
 
+#ifdef _DEBUG
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
 				PN_CORE_ERROR("[UI Pass] Error setting initial GL state: 0x{:X}", err);
 			}
+#endif
 
 			//Graphics settings
 			auto& gs = GraphicsSettings::get();
@@ -1326,7 +1779,11 @@ namespace PAIN {
 						const float border_thickness = glm::max(0.0f, gs.minimap_border_thickness);
 
 						const float map_w = glm::clamp(gs.minimap_size_px.x, 32.0f, fbw);
-						const float map_h = glm::clamp(gs.minimap_size_px.y, 32.0f, fbh);
+						float map_h = glm::clamp(gs.minimap_size_px.y, 32.0f, fbh);
+						// Runtime validation: for circular minimap, clamp h to w to ensure perfect circle
+						if (gs.minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
+							map_h = glm::min(map_w, map_h);
+						}
 						const float outer_w = map_w;
 						const float outer_h = map_h;
 
@@ -1356,8 +1813,19 @@ namespace PAIN {
 								map_y = 20.0f;
 								break;
 							case GraphicsSettings::MINIMAP_RECOMMENDED_POSITION::BOTTOM_MIDDLE:
-							default:
 								map_x = (fbw - outer_w) * 0.5f;
+								map_y = fbh - outer_h - 20.0f;
+								break;
+							case GraphicsSettings::MINIMAP_RECOMMENDED_POSITION::LEFT_MIDDLE:
+								map_x = 20.0f;
+								map_y = (fbh - outer_h) * 0.5f;
+								break;
+							case GraphicsSettings::MINIMAP_RECOMMENDED_POSITION::RIGHT_MIDDLE:
+								map_x = fbw - outer_w - 20.0f;
+								map_y = (fbh - outer_h) * 0.5f;
+								break;
+							default:
+								map_x = fbw - outer_w - 20.0f;
 								map_y = fbh - outer_h - 20.0f;
 								break;
 							}
@@ -1387,8 +1855,14 @@ namespace PAIN {
 							(map_w / fbh),
 							(map_h / fbh));
 
-						rendererService->w_renderer->Render2DTexture(minimapTexture, minimap_pos,
-							minimap_scale);
+						// Render minimap texture with appropriate shape clipping
+						if (gs.minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
+							rendererService->w_renderer->Render2DTextureCircular(minimapTexture, minimap_pos,
+								minimap_scale);
+						} else {
+							rendererService->w_renderer->Render2DTexture(minimapTexture, minimap_pos,
+								minimap_scale);
+						}
 
 						auto toNdc = [&](float px, float py) {
 							return glm::vec2(
@@ -1404,26 +1878,62 @@ namespace PAIN {
 
 						const int border_layers = static_cast<int>(glm::round(border_thickness));
 						if (border_layers > 0) {
+							// For circular minimap, adjust size to fit within the circle
+							float effective_w = map_w;
+							float effective_h = map_h;
+							float center_x = center_x_px;
+							float center_y = center_y_px;
+							float diameter = glm::min(effective_w, effective_h);
+
+							if (gs.minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
+								// Use the smaller dimension as diameter for the circle
+								effective_w = diameter;
+								effective_h = diameter;
+							}
+
 							for (int i = 0; i < border_layers; ++i) {
 								const float inset = static_cast<float>(i) + 0.5f;
-								const float x0 = map_x + inset;
-								const float y0 = map_y + inset;
-								const float x1 = map_x + outer_w - inset;
-								const float y1 = map_y + outer_h - inset;
 
-								if (x1 <= x0 || y1 <= y0) {
-									break;
+								if (gs.minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
+									// Draw circular border using line segments
+									float outer_radius = (diameter * 0.5f) - inset;
+									if (outer_radius <= 0.0f) break;
+
+									const int segments = 64;
+									const float two_pi = glm::two_pi<float>();
+
+									// Convert center pixel position to NDC
+									glm::vec2 center_ndc(
+										(center_x / fbw) * 2.0f - 1.0f,
+										1.0f - (center_y / fbh) * 2.0f);
+
+									// Calculate radius in NDC units (approximate, using width for uniform scaling)
+									float radius_x = (outer_radius / fbw) * 2.0f;
+									float radius_y = (outer_radius / fbh) * 2.0f;
+									glm::vec2 radius_ndc(radius_x, radius_y);
+
+									rendererService->w_renderer->DebugPass2DCircle(center_ndc, radius_ndc, border_color, segments);
+								} else {
+									// Square border (existing code)
+									const float x0 = map_x + inset;
+									const float y0 = map_y + inset;
+									const float x1 = map_x + outer_w - inset;
+									const float y1 = map_y + outer_h - inset;
+
+									if (x1 <= x0 || y1 <= y0) {
+										break;
+									}
+
+									const glm::vec2 tl = toNdc(x0, y0);
+									const glm::vec2 tr = toNdc(x1, y0);
+									const glm::vec2 br = toNdc(x1, y1);
+									const glm::vec2 bl = toNdc(x0, y1);
+
+									rendererService->w_renderer->DebugPass2DLine(tl, tr, border_color);
+									rendererService->w_renderer->DebugPass2DLine(tr, br, border_color);
+									rendererService->w_renderer->DebugPass2DLine(br, bl, border_color);
+									rendererService->w_renderer->DebugPass2DLine(bl, tl, border_color);
 								}
-
-								const glm::vec2 tl = toNdc(x0, y0);
-								const glm::vec2 tr = toNdc(x1, y0);
-								const glm::vec2 br = toNdc(x1, y1);
-								const glm::vec2 bl = toNdc(x0, y1);
-
-								rendererService->w_renderer->DebugPass2DLine(tl, tr, border_color);
-								rendererService->w_renderer->DebugPass2DLine(tr, br, border_color);
-								rendererService->w_renderer->DebugPass2DLine(br, bl, border_color);
-								rendererService->w_renderer->DebugPass2DLine(bl, tl, border_color);
 							}
 						}
 
@@ -1568,20 +2078,20 @@ namespace PAIN {
 						GLuint itemIconTex = 0;
 						GLuint objectiveIconTex = 0;
 						if (gs.minimap_use_icon_textures && assetManager) {
-							auto resolveIcon = [&](const std::string& path) -> GLuint {
-								if (path.empty()) {
+							auto resolveIcon = [&](const Assets::GUID& guid) -> GLuint {
+								if (!guid.IsValid()) {
 									return 0;
 								}
-								auto iconOpt = assetManager->getAsset<Assets::Texture>(path);
+								auto iconOpt = assetManager->getAsset<Assets::Texture>(guid);
 								if (!iconOpt.has_value() || !iconOpt.value()) {
 									return 0;
 								}
 								return iconOpt.value()->gl_texture;
 								};
 
-							playerIconTex = resolveIcon(gs.minimap_icon_player_path);
-							itemIconTex = resolveIcon(gs.minimap_icon_item_path);
-							objectiveIconTex = resolveIcon(gs.minimap_icon_objective_path);
+							playerIconTex = resolveIcon(gs.minimap_icon_player_guid);
+							itemIconTex = resolveIcon(gs.minimap_icon_item_guid);
+							objectiveIconTex = resolveIcon(gs.minimap_icon_objective_guid);
 						}
 
 						auto drawMarker = [&](const glm::vec3& pos,
@@ -1737,6 +2247,19 @@ namespace PAIN {
 							static_cast<GLsizei>(draw_w),
 							static_cast<GLsizei>(draw_h));
 
+						// For circular minimap, also setup stencil clipping
+						if (gs.minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
+							float diameter = glm::min(map_w, map_h);
+							float radius_px = diameter * 0.5f;
+							glm::vec2 center_ndc(
+								(center_x_px / fbw) * 2.0f - 1.0f,
+								1.0f - (center_y_px / fbh) * 2.0f);
+							glm::vec2 radius_ndc(
+								(radius_px / fbw) * 2.0f,
+								(radius_px / fbh) * 2.0f);
+							rendererService->w_renderer->BeginCircularStencilClip(center_ndc, radius_ndc);
+						}
+
 						if (gs.minimap_show_walls) {
                             uint64_t currentWallSignature = 1469598103934665603ull;
 							for (const entt::entity entity : wallEntities) {
@@ -1872,6 +2395,7 @@ namespace PAIN {
 							appendDangerEntities("danger");
 							appendDangerEntities("Enemy");
 
+							// Draw danger zones as red circles
 							std::vector<glm::vec2> dangerLineVertices;
 							dangerLineVertices.reserve(dangerEntities.size() * 24 * 2);
 							for (entt::entity entity : dangerEntities) {
@@ -2063,6 +2587,11 @@ namespace PAIN {
 								glm::vec4(0.2f, 1.0f, 0.2f, 1.0f));
 						}
 
+						// Disable circular stencil clip if it was enabled
+						if (gs.minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
+							rendererService->w_renderer->EndCircularStencilClip();
+						}
+
 						glDisable(GL_SCISSOR_TEST);
 					}
 				}
@@ -2182,12 +2711,14 @@ namespace PAIN {
 				TextRenderer::get().renderText(text_comp);
 
 				// CHECK FOR ERRORS AFTER EACH TEXT RENDER
+#ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR(
 						"[Render System] GL error after rendering font '{}': 0x{:X}",
 						font_opt.value()->name, err);
 				}
+#endif
 			}
 
 			// ========================================
@@ -2218,10 +2749,12 @@ namespace PAIN {
 			glDisable(GL_BLEND);
 			glEnable(GL_CULL_FACE);
 
+#ifdef _DEBUG
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
 				PN_CORE_ERROR("[UI Pass] Error restoring GL state: 0x{:X}", err);
 			}
+#endif
 		}
 
 	} // namespace Render

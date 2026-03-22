@@ -8,6 +8,196 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <array>
+#include <algorithm>
+#include <cmath>
+#include <limits>
+
+namespace {
+    constexpr float kPi = 3.14159265358979323846f;
+    constexpr float kHdrExportMaxRadiance = 60000.0f;
+
+    bool IsHdrSkyboxCandidate(const PAIN::Assets::Info& asset, int width, int height) {
+        if (height <= 0) {
+            return false;
+        }
+
+        const float aspect = static_cast<float>(width) / static_cast<float>(height);
+        const bool is_equirectangular = std::abs(aspect - 2.0f) < 0.15f;
+        const std::string lower_name = PAIN::Assets::toLowerCase(asset.raw_path.stem().string());
+        const bool name_matches = lower_name.find("sky") != std::string::npos ||
+            lower_name.find("env") != std::string::npos ||
+            lower_name.find("ibl") != std::string::npos;
+
+        return is_equirectangular && name_matches;
+    }
+
+    glm::vec3 CubemapDirectionForFace(int face, float u, float v) {
+        switch (face) {
+        case 0: return glm::normalize(glm::vec3(1.0f, -v, -u));   // +X
+        case 1: return glm::normalize(glm::vec3(-1.0f, -v, u));   // -X
+        case 2: return glm::normalize(glm::vec3(u, 1.0f, v));     // +Y
+        case 3: return glm::normalize(glm::vec3(u, -1.0f, -v));   // -Y
+        case 4: return glm::normalize(glm::vec3(u, -v, 1.0f));    // +Z
+        default: return glm::normalize(glm::vec3(-u, -v, -1.0f)); // -Z
+        }
+    }
+
+    float WrapUnit(float value) {
+        value = std::fmod(value, 1.0f);
+        if (value < 0.0f) {
+            value += 1.0f;
+        }
+        return value;
+    }
+
+    struct HdrSanitizeStats {
+        size_t non_finite = 0;
+        size_t clamped_negative = 0;
+        size_t clamped_high = 0;
+    };
+
+    HdrSanitizeStats SanitizeHdrPixels(
+        float* pixels,
+        size_t pixel_count,
+        int channels,
+        bool clamp_negative_rgb,
+        float max_radiance
+    ) {
+        HdrSanitizeStats stats{};
+        if (!pixels || pixel_count == 0 || channels <= 0) {
+            return stats;
+        }
+
+        const int rgb_channels = std::min(3, channels);
+        for (size_t i = 0; i < pixel_count; ++i) {
+            float* px = pixels + (i * static_cast<size_t>(channels));
+            for (int c = 0; c < channels; ++c) {
+                float& v = px[c];
+                if (!std::isfinite(v)) {
+                    ++stats.non_finite;
+                    v = (c == 3) ? 1.0f : 0.0f;
+                    continue;
+                }
+
+                if (c < rgb_channels) {
+                    if (clamp_negative_rgb && v < 0.0f) {
+                        ++stats.clamped_negative;
+                        v = 0.0f;
+                    }
+                    if (v > max_radiance) {
+                        ++stats.clamped_high;
+                        v = max_radiance;
+                    }
+                }
+            }
+        }
+        return stats;
+    }
+
+    bool HasNonFiniteHdrPixels(
+        const float* pixels,
+        size_t pixel_count,
+        int channels,
+        size_t* out_pixel_index = nullptr,
+        float* out_value = nullptr
+    ) {
+        if (!pixels || pixel_count == 0 || channels <= 0) {
+            return false;
+        }
+
+        for (size_t i = 0; i < pixel_count; ++i) {
+            const float* px = pixels + (i * static_cast<size_t>(channels));
+            for (int c = 0; c < channels; ++c) {
+                const float v = px[c];
+                if (!std::isfinite(v)) {
+                    if (out_pixel_index) {
+                        *out_pixel_index = i;
+                    }
+                    if (out_value) {
+                        *out_value = v;
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    const char* GetCuttlefishHdrTypeForFormat(const std::string& format) {
+        // KTX doesn't accept ufloat for plain R16G16B16A16-style formats.
+        // BC6H/ASTC HDR paths should remain ufloat to preserve non-negative radiance.
+        if (format == "R16" ||
+            format == "R16G16" ||
+            format == "R16G16B16" ||
+            format == "R16G16B16A16" ||
+            format == "R32" ||
+            format == "R32G32" ||
+            format == "R32G32B32" ||
+            format == "R32G32B32A32") {
+            return "float";
+        }
+        return "ufloat";
+    }
+
+    std::vector<float> BuildCubemapFaceFromEquirectangular(
+        const float* pixels,
+        int width,
+        int height,
+        int channels,
+        int face,
+        int face_size
+    ) {
+        std::vector<float> face_pixels(static_cast<size_t>(face_size) * face_size * channels);
+
+        auto sample = [&](float u, float v, int channel) -> float {
+            const float wrapped_u = WrapUnit(u);
+            const float clamped_v = std::clamp(v, 0.0f, 1.0f);
+
+            const float x = wrapped_u * static_cast<float>(width - 1);
+            const float y = clamped_v * static_cast<float>(height - 1);
+
+            const int x0 = static_cast<int>(std::floor(x));
+            const int y0 = static_cast<int>(std::floor(y));
+            const int x1 = (x0 + 1) % width;
+            const int y1 = std::min(y0 + 1, height - 1);
+
+            const float tx = x - static_cast<float>(x0);
+            const float ty = y - static_cast<float>(y0);
+
+            auto at = [&](int sx, int sy) -> float {
+                return pixels[(static_cast<size_t>(sy) * width + sx) * channels + channel];
+            };
+
+            const float c00 = at(x0, y0);
+            const float c10 = at(x1, y0);
+            const float c01 = at(x0, y1);
+            const float c11 = at(x1, y1);
+
+            const float cx0 = c00 + (c10 - c00) * tx;
+            const float cx1 = c01 + (c11 - c01) * tx;
+            return cx0 + (cx1 - cx0) * ty;
+        };
+
+        for (int y = 0; y < face_size; ++y) {
+            for (int x = 0; x < face_size; ++x) {
+                const float u = (2.0f * (static_cast<float>(x) + 0.5f) / static_cast<float>(face_size)) - 1.0f;
+                const float v = (2.0f * (static_cast<float>(y) + 0.5f) / static_cast<float>(face_size)) - 1.0f;
+                const glm::vec3 dir = CubemapDirectionForFace(face, u, v);
+
+                const float sample_u = std::atan2(dir.z, dir.x) / (2.0f * kPi) + 0.5f;
+                const float sample_v = std::asin(std::clamp(dir.y, -1.0f, 1.0f)) / kPi + 0.5f;
+
+                const size_t dst = (static_cast<size_t>(y) * face_size + x) * channels;
+                for (int c = 0; c < channels; ++c) {
+                    face_pixels[dst + c] = sample(sample_u, sample_v, c);
+                }
+            }
+        }
+
+        return face_pixels;
+    }
+}
 
 
 namespace PAIN {
@@ -78,7 +268,10 @@ namespace PAIN {
             case Type::Texture: {
                 bool higher_quality = asset.raw_path.extension() == ".hdr" || asset.raw_path.extension() == ".exr" ? true : false;
                 settings["window_compression"] = higher_quality ? "BC6H" : "BC7";
-                settings["android_compression"] = "ASTC_4x4";
+                settings["android_compression"] = higher_quality ? "R16G16B16A16" : "ASTC_4x4";
+                settings["android_allow_astc_hdr"] = false;
+                settings["android_bake_cubemap"] = false;
+                settings["android_skybox_source_format"] = "R16G16B16A16";
                 settings["generate_mipmaps"] = true;
                 settings["max_size"] = higher_quality ? 2048 : 1024;
                 break;
@@ -436,12 +629,22 @@ namespace PAIN {
                 break;
             case Platform::Android:
                 output_extension = ".ktx";
-                compression_format = desc_file.import_settings.value("android_compression", "ASTC_4x4");
+                compression_format = desc_file.import_settings.value("android_compression", higher_quality ? "R16G16B16A16" : "ASTC_4x4");
                 asset_info.shipped_path = output_dir / asset_info.relative_folder / (asset_info.raw_path.stem().string() + output_extension);
                 break;
             default:
                 std::cout << "WARNING: Unsupported platform for texture compilation" << std::endl;
                 return;
+            }
+
+            if (platform == Platform::Android && higher_quality) {
+                const bool allow_astc_hdr = desc_file.import_settings.value("android_allow_astc_hdr", false);
+                if (!allow_astc_hdr && compression_format.rfind("ASTC_", 0) == 0) {
+                    std::cout << "WARNING: HDR texture requested ASTC format (" << compression_format
+                        << "). Overriding to R16G16B16A16 to preserve HDR IBL parity. "
+                        << "Set android_allow_astc_hdr=true to keep ASTC." << std::endl;
+                    compression_format = "R16G16B16A16";
+                }
             }
 
             //Check if recompilation is needed
@@ -468,6 +671,23 @@ namespace PAIN {
                     return;
                 }
                 std::cout << "Loaded HDR texture: " << width << "x" << height << " (" << channels << " channels)" << std::endl;
+                const bool is_hdr_skybox = IsHdrSkyboxCandidate(asset_info, width, height);
+                const size_t initial_pixel_count = static_cast<size_t>(width) * static_cast<size_t>(height);
+                const HdrSanitizeStats initial_sanitize_stats = SanitizeHdrPixels(
+                    raw_pixels,
+                    initial_pixel_count,
+                    channels,
+                    is_hdr_skybox,
+                    kHdrExportMaxRadiance
+                );
+                if (initial_sanitize_stats.non_finite > 0 ||
+                    initial_sanitize_stats.clamped_negative > 0 ||
+                    initial_sanitize_stats.clamped_high > 0) {
+                    std::cout << "Sanitized HDR source '" << asset_info.raw_path.filename().string()
+                        << "' (initial): non-finite=" << initial_sanitize_stats.non_finite
+                        << ", negative-clamped=" << initial_sanitize_stats.clamped_negative
+                        << ", high-clamped=" << initial_sanitize_stats.clamped_high << std::endl;
+                }
 
                 // ========================================
                 // STEP 1: ENSURE BLOCK ALIGNMENT (HDR)
@@ -545,12 +765,101 @@ namespace PAIN {
                     return;
                 }
 
-                //Compress HDR texture
-                compression_success = CuttlefishCompressor(
-                    raw_pixels, width, height, channels,
-                    asset_info.shipped_path.string(),
-                    compression_format, desc_file.import_settings
+                const size_t post_resize_pixel_count = static_cast<size_t>(width) * static_cast<size_t>(height);
+                const HdrSanitizeStats post_resize_sanitize_stats = SanitizeHdrPixels(
+                    raw_pixels,
+                    post_resize_pixel_count,
+                    channels,
+                    is_hdr_skybox,
+                    kHdrExportMaxRadiance
                 );
+                if (post_resize_sanitize_stats.non_finite > 0 ||
+                    post_resize_sanitize_stats.clamped_negative > 0 ||
+                    post_resize_sanitize_stats.clamped_high > 0) {
+                    std::cout << "Sanitized HDR source '" << asset_info.raw_path.filename().string()
+                        << "' (post-resize): non-finite=" << post_resize_sanitize_stats.non_finite
+                        << ", negative-clamped=" << post_resize_sanitize_stats.clamped_negative
+                        << ", high-clamped=" << post_resize_sanitize_stats.clamped_high << std::endl;
+                }
+
+                if (is_hdr_skybox) {
+                    size_t bad_pixel = 0;
+                    float bad_value = 0.0f;
+                    if (HasNonFiniteHdrPixels(raw_pixels, post_resize_pixel_count, channels, &bad_pixel, &bad_value)) {
+                        std::cout << "ERROR: Skybox HDR still has non-finite pixels after sanitize at pixel "
+                            << bad_pixel << " (value=" << bad_value << "). Aborting texture compilation."
+                            << std::endl;
+                        stbi_image_free(raw_pixels);
+                        return;
+                    }
+                }
+
+                const bool bake_android_cubemap =
+                    platform == Platform::Android &&
+                    desc_file.import_settings.value("android_bake_cubemap", false) &&
+                    IsHdrSkyboxCandidate(asset_info, width, height);
+
+                if (bake_android_cubemap) {
+                    const std::string skybox_source_format =
+                        desc_file.import_settings.value("android_skybox_source_format", "R16G16B16A16");
+                    const int face_size = std::max(32, desc_file.import_settings.value("max_size", 2048) / 4);
+                    std::array<std::vector<float>, 6> cubemap_faces;
+                    for (int face = 0; face < 6; ++face) {
+                        cubemap_faces[face] = BuildCubemapFaceFromEquirectangular(
+                            raw_pixels, width, height, channels, face, face_size
+                        );
+                        HdrSanitizeStats face_stats = SanitizeHdrPixels(
+                            cubemap_faces[face].data(),
+                            static_cast<size_t>(face_size) * static_cast<size_t>(face_size),
+                            channels,
+                            true,
+                            kHdrExportMaxRadiance
+                        );
+                        if (face_stats.non_finite > 0 ||
+                            face_stats.clamped_negative > 0 ||
+                            face_stats.clamped_high > 0) {
+                            std::cout << "Sanitized baked skybox face " << face
+                                << ": non-finite=" << face_stats.non_finite
+                                << ", negative-clamped=" << face_stats.clamped_negative
+                                << ", high-clamped=" << face_stats.clamped_high << std::endl;
+                        }
+
+                        size_t bad_face_pixel = 0;
+                        float bad_face_value = 0.0f;
+                        if (HasNonFiniteHdrPixels(
+                                cubemap_faces[face].data(),
+                                static_cast<size_t>(face_size) * static_cast<size_t>(face_size),
+                                channels,
+                                &bad_face_pixel,
+                                &bad_face_value)) {
+                            std::cout << "ERROR: Baked skybox face " << face
+                                << " still has non-finite pixel at index " << bad_face_pixel
+                                << " (value=" << bad_face_value << "). Aborting texture compilation."
+                                << std::endl;
+                            stbi_image_free(raw_pixels);
+                            return;
+                        }
+                    }
+
+                    std::cout << "Baking Android skybox cubemap at " << face_size << "x" << face_size
+                        << " per face using float source format " << skybox_source_format << std::endl;
+                    compression_success = CuttlefishCubemapCompressor(
+                        cubemap_faces,
+                        face_size,
+                        channels,
+                        asset_info.shipped_path.string(),
+                        skybox_source_format,
+                        desc_file.import_settings
+                    );
+                }
+                else {
+                    //Compress HDR texture
+                    compression_success = CuttlefishCompressor(
+                        raw_pixels, width, height, channels,
+                        asset_info.shipped_path.string(),
+                        compression_format, desc_file.import_settings
+                    );
+                }
 
                 //Free loaded image
                 stbi_image_free(raw_pixels);
@@ -667,8 +976,13 @@ namespace PAIN {
             }
             else {
                 std::cout << "WARNING: Texture compilation failed for: " << asset_info.raw_path.filename() << std::endl;
-                asset_info.shipped_path.extension().replace_extension(asset_info.raw_path.extension());
-                copyFile(asset_info.raw_path, asset_info.shipped_path);
+                if (std::filesystem::exists(asset_info.shipped_path)) {
+                    std::cout << "Keeping existing compiled texture: " << asset_info.shipped_path << std::endl;
+                }
+                else {
+                    std::cout << "ERROR: No previous compiled texture exists at: "
+                        << asset_info.shipped_path << std::endl;
+                }
             }
         }
 
@@ -1642,6 +1956,8 @@ namespace PAIN {
                 cmd << " -f " << format;
                 cmd << " -Q " << settings.value("quality", "normal");
                 cmd << " -s rgbx";
+                const char* hdr_type = GetCuttlefishHdrTypeForFormat(format);
+                cmd << " -t " << hdr_type;
                 cmd << " -o \"" << output_path << "\"";
                 cmd << " --create-dir";
 
@@ -1670,6 +1986,82 @@ namespace PAIN {
             }
             catch (const std::exception& e) {
                 std::cout << "Cuttlefish HDR compression failed: " << e.what() << std::endl;
+                return false;
+            }
+        }
+
+        bool Compiler::CuttlefishCubemapCompressor(const std::array<std::vector<float>, 6>& face_pixels,
+            int face_size, int channels, const std::string& output_path,
+            const std::string& format, const nlohmann::json& settings) const {
+            static const std::array<const char*, 6> face_names = { "+x", "-x", "+y", "-y", "+z", "-z" };
+
+            std::vector<std::string> temp_inputs;
+            temp_inputs.reserve(face_names.size());
+
+            try {
+                for (size_t i = 0; i < face_names.size(); ++i) {
+                    std::string temp_input = "temp_" + std::to_string(getCurrentTimeStamp()) + "_" + face_names[i] + ".hdr";
+                    std::replace(temp_input.begin(), temp_input.end(), '+', 'p');
+                    std::replace(temp_input.begin(), temp_input.end(), '-', 'n');
+
+                    if (!stbi_write_hdr(temp_input.c_str(), face_size, face_size, channels, face_pixels[i].data())) {
+                        std::cout << "Failed to write temporary cubemap face (" << temp_input << ")" << std::endl;
+                        for (const auto& temp : temp_inputs) {
+                            std::filesystem::remove(temp);
+                        }
+                        return false;
+                    }
+
+                    temp_inputs.push_back(temp_input);
+                }
+
+                std::filesystem::create_directories(std::filesystem::path(output_path).parent_path());
+
+                std::stringstream cmd;
+                std::string cuttlefish_exe = GetCuttlefishExecutable();
+
+                cmd << "\"";
+                cmd << "\"" << cuttlefish_exe << "\"";
+                for (size_t i = 0; i < face_names.size(); ++i) {
+                    cmd << " -c " << face_names[i] << " \"" << temp_inputs[i] << "\"";
+                }
+                cmd << " -f " << format;
+                cmd << " -Q " << settings.value("quality", "normal");
+                cmd << " -s rgbx";
+                const char* hdr_type = GetCuttlefishHdrTypeForFormat(format);
+                cmd << " -t " << hdr_type;
+                cmd << " -o \"" << output_path << "\"";
+                cmd << " --create-dir";
+
+                if (settings.value("generate_mipmaps", true)) {
+                    cmd << " -m";
+                }
+
+                cmd << "\"";
+
+                const std::string final_command = cmd.str();
+                std::cout << "Running: " << final_command << std::endl;
+
+                const int result = system(final_command.c_str());
+
+                for (const auto& temp : temp_inputs) {
+                    std::filesystem::remove(temp);
+                }
+
+                if (result == 0) {
+                    std::cout << "Cuttlefish cubemap compression successful" << std::endl;
+                }
+                else {
+                    std::cout << "Cuttlefish cubemap compression failed with code: " << result << std::endl;
+                }
+
+                return result == 0;
+            }
+            catch (const std::exception& e) {
+                for (const auto& temp : temp_inputs) {
+                    std::filesystem::remove(temp);
+                }
+                std::cout << "Cuttlefish cubemap compression failed: " << e.what() << std::endl;
                 return false;
             }
         }

@@ -699,10 +699,30 @@ namespace PAIN {
 
                 ImGui::DragFloat("Minimap Radius", &gs.minimap_radius, 0.25f, 2.0f, 100.0f, "%.1f");
                 ImGui::DragFloat("Minimap Camera Height", &gs.minimap_camera_height, 0.25f, 2.0f, 200.0f, "%.1f");
-                ImGui::DragFloat2("Minimap Size (px)", glm::value_ptr(gs.minimap_size_px), 1.0f, 64.0f, 1024.0f, "%.0f");
+
+                static const char* minimapShapes[] = { "Square", "Circle" };
+                int minimapShape = static_cast<int>(gs.minimap_shape);
+                if (ImGui::Combo("Minimap Shape", &minimapShape, minimapShapes, IM_ARRAYSIZE(minimapShapes))) {
+                    gs.minimap_shape = static_cast<GraphicsSettings::MINIMAP_SHAPE>(minimapShape);
+                    if (gs.minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
+                        float smaller = glm::min(gs.minimap_size_px.x, gs.minimap_size_px.y);
+                        gs.minimap_size_px.x = smaller;
+                        gs.minimap_size_px.y = smaller;
+                    }
+                }
+
+                if (gs.minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
+                    float circleSize = gs.minimap_size_px.x;
+                    if (ImGui::DragFloat("Minimap Size (px)", &circleSize, 1.0f, 64.0f, 1024.0f, "%.0f")) {
+                        gs.minimap_size_px.x = circleSize;
+                        gs.minimap_size_px.y = circleSize;
+                    }
+                } else {
+                    ImGui::DragFloat2("Minimap Size (px)", glm::value_ptr(gs.minimap_size_px), 1.0f, 64.0f, 1024.0f, "%.0f");
+                }
 
                 static const char* recommendedPositions[] = {
-                    "Top Left","Top Right","Bottom Left","Bottom Right","Top Middle","Bottom Middle"
+                    "Top Left","Top Right","Bottom Left","Bottom Right","Top Middle","Bottom Middle","Left Middle","Right Middle"
                 };
                 int recommendedPos = static_cast<int>(gs.minimap_recommended_position);
                 if (ImGui::Combo("Recommended Position", &recommendedPos, recommendedPositions, IM_ARRAYSIZE(recommendedPositions)))
@@ -750,18 +770,23 @@ namespace PAIN {
                 ImGui::Checkbox("Use Icon Textures", &gs.minimap_use_icon_textures);
                 ImGui::DragFloat("Icon Scale", &gs.minimap_icon_scale, 0.05f, 0.2f, 4.0f, "%.2f");
 
-                auto drawPathField = [](const char* label, std::string& value) {
-                    char buffer[256]{};
-                    strncpy(buffer, value.c_str(), sizeof(buffer) - 1);
-                    if (ImGui::InputText(label, buffer, IM_ARRAYSIZE(buffer))) value = buffer;
-                    };
-
                 ImGui::BeginDisabled(!gs.minimap_use_icon_textures);
-                drawPathField("Player Icon Path", gs.minimap_icon_player_path);
-                drawPathField("Danger Icon Path", gs.minimap_icon_danger_path);
-                drawPathField("Item Icon Path", gs.minimap_icon_item_path);
-                drawPathField("Objective Icon Path", gs.minimap_icon_objective_path);
-                drawPathField("Wall Icon Path", gs.minimap_icon_wall_path);
+
+                if (DrawAssetSelectorField("Player Icon",
+                    gs.minimap_icon_player_guid,
+                    PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+                    services, false)) {}
+
+                if (DrawAssetSelectorField("Item Icon",
+                    gs.minimap_icon_item_guid,
+                    PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+                    services, false)) {}
+
+                if (DrawAssetSelectorField("Objective Icon",
+                    gs.minimap_icon_objective_guid,
+                    PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+                    services, false)) {}
+
                 ImGui::EndDisabled();
 
                 ImGui::Checkbox("Show Legend", &gs.minimap_show_legend);

@@ -6,6 +6,7 @@ out vec2 FragColor;
 in vec2 TexCoords;
 
 const float PI = 3.14159265359;
+const float EPSILON = 0.0001;
 
 float RadicalInverse_VdC(uint bits) 
 {
@@ -53,7 +54,7 @@ float GeometrySchlickGGX(float NdotV, float roughness)
     float nom = NdotV;
     float denom = NdotV * (1.0 - k) + k;
 
-    return nom / denom;
+    return nom / max(denom, EPSILON);
 }
 
 float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
@@ -68,6 +69,9 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 
 vec2 IntegrateBRDF(float NdotV, float roughness)
 {
+    NdotV = clamp(NdotV, 0.001, 1.0);
+    roughness = clamp(roughness, 0.04, 1.0);
+
     vec3 V;
     V.x = sqrt(1.0 - NdotV * NdotV);
     V.y = 0.0;
@@ -92,7 +96,8 @@ vec2 IntegrateBRDF(float NdotV, float roughness)
         if (NdotL > 0.0)
         {
             float G = GeometrySmith(N, V, L, roughness);
-            float G_Vis = (G * VdotH) / (NdotH * NdotV);
+            float denom = max(NdotH * NdotV, EPSILON);
+            float G_Vis = (G * VdotH) / denom;
             float Fc = pow(1.0 - VdotH, 5.0);
 
             A += (1.0 - Fc) * G_Vis;
@@ -101,7 +106,11 @@ vec2 IntegrateBRDF(float NdotV, float roughness)
     }
     A /= float(SAMPLE_COUNT);
     B /= float(SAMPLE_COUNT);
-    return vec2(A, B);
+    vec2 brdf = vec2(A, B);
+    if (any(isnan(brdf)) || any(isinf(brdf))) {
+        brdf = vec2(0.0);
+    }
+    return max(brdf, vec2(0.0));
 }
 
 void main() 

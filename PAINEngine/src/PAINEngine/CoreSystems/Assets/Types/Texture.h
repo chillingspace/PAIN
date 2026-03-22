@@ -16,7 +16,7 @@ namespace PAIN {
 
         //Texture format
         enum class TextureFormat {
-            UNKNOWN, BC1, BC3, BC6H, BC7, ASTC, // add more as needed
+            UNKNOWN, BC1, BC3, BC6H, BC7, ASTC, FLOAT_HDR, // add more as needed
         };
 
         //Texture class
@@ -32,6 +32,9 @@ namespace PAIN {
             TextureFormat format = TextureFormat::BC7;
             unsigned int glTexFormat = GL_COMPRESSED_RGBA_BPTC_UNORM_ARB;
 #endif
+            unsigned int glBaseFormat = 0;
+            unsigned int glDataType = 0;
+            bool is_compressed = true;
             bool is_cube_map = false;
             GLuint gl_texture = 0;
 

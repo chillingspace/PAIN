@@ -156,6 +156,7 @@ using json = nlohmann::json;
 #include "./Utility/AndroidFs.h"
 #endif
 
+#if defined(_DEBUG)
 #define glCheck(call) \
     call; \
     { \
@@ -164,5 +165,8 @@ using json = nlohmann::json;
             PN_CORE_ERROR("OpenGL error {} at {}:{} - {}", err, __FILE__, __LINE__, #call); \
         } \
     }
+#else
+#define glCheck(call) call
+#endif
 
 #endif //PCH_H

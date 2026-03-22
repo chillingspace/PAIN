@@ -50,9 +50,9 @@ namespace PAIN {
 		}
 	}
 
-	void sRenderer::postProcessPass()
+	void sRenderer::postProcessPass(bool presentToSwapchain)
 	{
-		w_renderer->PostProcessPass();
+		w_renderer->PostProcessPass(presentToSwapchain);
 	}
 
 	void sRenderer::onUpdate(AppTiming timing) {
