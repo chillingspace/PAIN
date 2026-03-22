@@ -147,19 +147,19 @@
         "bookmarks": [
             {
                 "forward": [
-                    0.0,
-                    0.0,
-                    0.0
+                    -0.40015286207199097,
+                    -0.9155635833740234,
+                    0.040262073278427124
                 ],
-                "occupied": false,
+                "occupied": true,
                 "pos": [
-                    0.0,
-                    0.0,
-                    0.0
+                    5.3375444412231445,
+                    14.457279205322266,
+                    -11.501388549804688
                 ],
                 "up": [
                     0.0,
-                    0.0,
+                    1.0,
                     0.0
                 ]
             },
@@ -238,16 +238,16 @@
         ],
         "farPlane": 100.0,
         "forward": [
-            -0.5737726092338562,
-            -0.8190107941627502,
-            -0.002547865267843008
+            -0.40015286207199097,
+            -0.9155635833740234,
+            0.040262073278427124
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            7.82649564743042,
-            20.152084350585938,
-            -11.751818656921387
+            5.3375444412231445,
+            14.457279205322266,
+            -11.501388549804688
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 31.100000381469727,
@@ -12524,7 +12524,8 @@
                             "childrenGUIDs": [
                                 "7f20ef65-a9d5-4541-859b-ff911ea58a59",
                                 "c8989800-69e0-aa48-a789-d62df22f9123",
-                                "4e5ea470-34ff-6f48-8638-d4a6ece31fa1"
+                                "4e5ea470-34ff-6f48-8638-d4a6ece31fa1",
+                                "69424346-0c66-da46-bbd0-b8fa598880f2"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 20
@@ -13064,6 +13065,137 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
+                            "guid": "69424346-0c66-da46-bbd0-b8fa598880f2"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "08f7b37b-512b-8046-aa8f-df4df3c659da",
+                            "siblingIndex": 1
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "ui_text"
+                        },
+                        "UIElement": {
+                            "b_is_enabled": false,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIFollowsWorldEntity": {
+                            "entity_target_guid": "e79e676d-f2bb-1c48-939f-e4d29593bfbf",
+                            "world_offset": [
+                                0.0,
+                                2.0,
+                                0.0
+                            ]
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.04118214547634125,
+                                0.07321270555257797,
+                                0.65891432762146
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        },
+                        "UIText": {
+                            "alignment": "Center",
+                            "color": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "display_text": "cfccccc",
+                            "font_guid": "d8686eae-3f4c-d948-9902-6c9942842042",
+                            "font_size": 12.0,
+                            "line_height": 1.2000000476837158,
+                            "max_length": 0,
+                            "outline_color": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "outline_thickness": 0.0,
+                            "shadow_color": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.5
+                            ],
+                            "shadow_offset": [
+                                0.0,
+                                0.0
+                            ],
+                            "word_wrap": false,
+                            "wrap_width": 0.0
+                        }
+                    },
+                    "Name": "ui_text"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
                             "guid": "7f20ef65-a9d5-4541-859b-ff911ea58a59"
                         },
                         "Hierarchy": {
@@ -13073,7 +13205,7 @@
                                 "919b7422-5e7c-c140-b2c0-91ef65fa8262"
                             ],
                             "parentGUID": "08f7b37b-512b-8046-aa8f-df4df3c659da",
-                            "siblingIndex": 1
+                            "siblingIndex": 2
                         },
                         "Layer": {
                             "layer_id": 1,
@@ -13448,7 +13580,7 @@
                                 "157603af-dcd7-7d45-8b77-72548d088eac"
                             ],
                             "parentGUID": "08f7b37b-512b-8046-aa8f-df4df3c659da",
-                            "siblingIndex": 2
+                            "siblingIndex": 3
                         },
                         "Layer": {
                             "layer_id": 1,
@@ -13485,7 +13617,7 @@
                                         "157603af-dcd7-7d45-8b77-72548d088eac"
                                     ],
                                     "parentGUID": "08f7b37b-512b-8046-aa8f-df4df3c659da",
-                                    "siblingIndex": 2
+                                    "siblingIndex": 3
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -27937,7 +28069,7 @@
                             "visible": true
                         },
                         "Name": {
-                            "name": "OilDrumBlue"
+                            "name": "OilDrumBlue_1"
                         },
                         "PrefabInstance": {
                             "componentOverrides": {
@@ -27971,6 +28103,9 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "8d11b148-504f-3542-bba4-1ab53b217669",
                                     "siblingIndex": 9
+                                },
+                                "Name": {
+                                    "name": "OilDrumBlue_1"
                                 },
                                 "RigidBody3D": {
                                     "angular_velocity": [
@@ -28034,7 +28169,7 @@
                             ]
                         }
                     },
-                    "Name": "OilDrumBlue"
+                    "Name": "OilDrumBlue_1"
                 }
             },
             {
@@ -30553,12 +30688,12 @@
         "border_thickness": 2.0,
         "camera_height": 30.0,
         "enabled": true,
-        "icon_danger_path": "",
-        "icon_item_path": "",
-        "icon_objective_path": "",
-        "icon_player_path": "",
+        "icon_danger_guid": "00000000-0000-0000-0000-000000000000",
+        "icon_item_guid": "00000000-0000-0000-0000-000000000000",
+        "icon_objective_guid": "00000000-0000-0000-0000-000000000000",
+        "icon_player_guid": "00000000-0000-0000-0000-000000000000",
         "icon_scale": 1.0,
-        "icon_wall_path": "",
+        "icon_wall_guid": "00000000-0000-0000-0000-000000000000",
         "override_position": false,
         "pos_px": [
             20.0,
@@ -30568,6 +30703,7 @@
         "recommended_position": 5,
         "rotate_with_player": true,
         "route_mode": 0,
+        "shape": 0,
         "show_danger": true,
         "show_items": true,
         "show_legend": false,
