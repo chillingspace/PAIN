@@ -1927,10 +1927,12 @@ namespace PAIN {
 		// ========================================
 		// RESTORE STATE
 		// ========================================
+#ifdef _DEBUG
 		glActiveTexture(currentActiveTexture);
 		glBindTexture(GL_TEXTURE_2D, currentTexture);
 		glBindVertexArray(currentVAO);
 		glUseProgram(currentProgram);
+#endif
 	}
 
 	void WindowsRenderer::Render2DTextureCircular(GLuint texture_id, const glm::vec2& pos,
