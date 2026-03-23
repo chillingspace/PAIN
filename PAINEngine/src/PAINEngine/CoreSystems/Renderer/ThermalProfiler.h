@@ -42,6 +42,15 @@ struct ThermalFrame {
     int gpuResetDiscardedTotal = 0;
     int gpuDisjointThisFrame = 0;
     int gpuDiagnosisReady = 0;
+    int gpuDiagnosisAvailable = 0;
+    int gpuDiagnosisPartial = 0;
+    int gpuDiagnosisLifecycleState = 0;
+    int gpuDiagnosisRetryCount = 0;
+    int gpuRecoveryWaitRemaining = 0;
+    int gpuRecoveryClearCount = 0;
+    int gpuRecoveryClearTarget = 0;
+    int gpuGlContextValid = 0;
+    int gpuGlErrorDuringRecovery = 0;
     int gpuKeyPassesExpected = 0;
     int gpuKeyPassesSeen = 0;
     int gpuKeyPassesValid = 0;
@@ -50,7 +59,11 @@ struct ThermalFrame {
     int gpuDisjointWindowFrames = 0;
     int gpuDisjointWindowEvents = 0;
     float gpuDisjointWindowRatio = 0.0f;
+    int gpuHotReadyWindowFrames = 0;
+    int gpuHotReadyWindowReady = 0;
+    float gpuHotReadyWindowRatio = 0.0f;
     int gpuDisjointBreakerTriggered = 0;
+    int gpuDisjointBreakerReason = 0;
     int gpuDisjointBreakerTotal = 0;
     int64_t gpuDisjointLastFrame = -1;
     int gpuDisjointLastQueueDepth = 0;
@@ -65,6 +78,14 @@ struct ThermalFrame {
 
 class ThermalProfiler {
 public:
+    enum class GpuDiagnosisLifecycle {
+        Inactive = 0,
+        Probing = 1,
+        Active = 2,
+        Cooldown = 3,
+        Failed = 4
+    };
+
     ThermalProfiler();
     ~ThermalProfiler();
 
@@ -136,9 +157,11 @@ private:
     void ShutdownAndroidThermal();
 
     bool InitAndroidGpuTiming();
-    void ShutdownAndroidGpuTiming();
+    void ShutdownAndroidGpuTiming(bool resetRecoveryWindows = false);
     void ProcessAndroidGpuQueries();
     void ApplyResolvedGpuTiming(PassTiming& timing);
+    bool ValidateAndroidGlContext();
+    void DrainAndroidGlErrors();
     bool androidGpuTimingInitialized = false;
     bool hasDisjointTimerExt = false;
 
@@ -184,8 +207,17 @@ private:
     int disjointMaxSampleAgeThisFrame = -1;
     std::deque<int> disjointFrameWindow;
     int disjointFramesInWindow = 0;
+    std::deque<int> hotReadyFrameWindow;
+    int hotReadyFramesInWindow = 0;
     uint64_t lastDisjointBreakFrame = 0;
     bool hasDisjointBreakFrame = false;
+    GpuDiagnosisLifecycle gpuDiagnosisLifecycle = GpuDiagnosisLifecycle::Inactive;
+    int diagnosisRetryCount = 0;
+    int disjointRecoveryWaitFrames = 0;
+    int disjointRecoveryClearFrames = 0;
+    int disjointRecoveryPollFrames = 0;
+    bool glContextValidThisFrame = false;
+    bool glErrorDuringRecoveryThisFrame = false;
     unsigned int disjointBreakerTriggeredCount = 0;
     uint64_t lastDisjointEventFrame = 0;
     int lastDisjointEventQueueDepth = 0;

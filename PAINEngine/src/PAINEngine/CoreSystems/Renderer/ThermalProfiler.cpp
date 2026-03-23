@@ -42,8 +42,15 @@ constexpr int kGpuStatusValid = 1;
 constexpr uint64_t kMaxPendingQueryAgeFrames = 240;
 constexpr size_t kMaxResolvedQueuePerPass = 16;
 constexpr int kDisjointWindowSizeFrames = 300;
-constexpr float kDisjointWindowBreakRatio = 0.20f;
+constexpr float kDisjointWindowBreakRatio = 0.15f;
+constexpr int kHotReadyWindowSizeFrames = 180;
+constexpr float kHotReadyWindowMinRatio = 0.30f;
 constexpr int kDisjointBreakerCooldownFrames = 300;
+constexpr int kCooldownFramesBeforeRetry = 120;
+constexpr int kDisjointRecoveryClearFramesRequired = 8;
+constexpr int kMaxDiagnosisRetries = 3;
+constexpr int kMaxRecoveryPollFrames = 240;
+constexpr int kDisjointDrainIntervalFrames = 20;
 constexpr int kDisjointHighQueueThreshold = 12;
 constexpr int kDisjointStaleSampleAgeThreshold = 8;
 
@@ -138,7 +145,13 @@ std::string FindGpuFreqPath() {
     static const char* kKnownCandidates[] = {
         "/sys/class/kgsl/kgsl-3d0/clock_mhz",
         "/sys/class/kgsl/kgsl-3d0/gpuclk",
+        "/sys/class/kgsl/kgsl-3d0/devfreq/cur_freq",
+        "/sys/devices/platform/kgsl-3d0.0/kgsl/kgsl-3d0/gpuclk",
+        "/sys/devices/platform/kgsl-3d0.0/kgsl/kgsl-3d0/devfreq/cur_freq",
+        "/sys/devices/platform/gpusysfs/gpu_clock",
         "/sys/class/misc/mali0/device/clock",
+        "/sys/devices/platform/mali/clock",
+        "/sys/devices/platform/mali.0/devfreq/cur_freq",
         "/sys/devices/platform/mali-utgard/devfreq/governor-0/cur_freq"
     };
 
@@ -234,7 +247,16 @@ void ThermalProfiler::Init() {
     disjointMaxSampleAgeThisFrame = -1;
     disjointFrameWindow.clear();
     disjointFramesInWindow = 0;
+    hotReadyFrameWindow.clear();
+    hotReadyFramesInWindow = 0;
     hasDisjointBreakFrame = false;
+    gpuDiagnosisLifecycle = GpuDiagnosisLifecycle::Inactive;
+    diagnosisRetryCount = 0;
+    disjointRecoveryWaitFrames = 0;
+    disjointRecoveryClearFrames = 0;
+    disjointRecoveryPollFrames = 0;
+    glContextValidThisFrame = false;
+    glErrorDuringRecoveryThisFrame = false;
     disjointBreakerTriggeredCount = 0;
     lastDisjointEventFrame = 0;
     lastDisjointEventQueueDepth = 0;
@@ -268,7 +290,14 @@ void ThermalProfiler::Shutdown() {
     }
 
 #ifdef PN_PLATFORM_ANDROID
-    ShutdownAndroidGpuTiming();
+    ShutdownAndroidGpuTiming(true);
+    gpuDiagnosisLifecycle = GpuDiagnosisLifecycle::Inactive;
+    diagnosisRetryCount = 0;
+    disjointRecoveryWaitFrames = 0;
+    disjointRecoveryClearFrames = 0;
+    disjointRecoveryPollFrames = 0;
+    glContextValidThisFrame = false;
+    glErrorDuringRecoveryThisFrame = false;
     ShutdownAndroidThermal();
 #endif
 
@@ -282,10 +311,89 @@ void ThermalProfiler::BeginFrame() {
     disjointOccurredThisFrame = false;
     disjointReadySamplesThisFrame = 0;
     disjointMaxSampleAgeThisFrame = -1;
-    if (!androidGpuTimingInitialized) {
-        androidGpuTimingInitialized = InitAndroidGpuTiming();
+
+    glContextValidThisFrame = false;
+    glErrorDuringRecoveryThisFrame = false;
+
+    if (gpuDiagnosisLifecycle == GpuDiagnosisLifecycle::Inactive && !androidGpuTimingInitialized) {
+        gpuDiagnosisLifecycle = GpuDiagnosisLifecycle::Probing;
     }
-    ProcessAndroidGpuQueries();
+
+    if (gpuDiagnosisLifecycle == GpuDiagnosisLifecycle::Cooldown) {
+        if (disjointRecoveryWaitFrames > 0) {
+            disjointRecoveryWaitFrames--;
+            // Periodically drain the driver-level disjoint flag latch during wait
+            if ((disjointRecoveryWaitFrames % kDisjointDrainIntervalFrames) == 0 && ValidateAndroidGlContext()) {
+                DrainAndroidGlErrors();
+                int drainDummy = 0;
+                glGetIntegerv(kGpuDisjointExt, &drainDummy);
+                glGetError();
+            }
+        } else {
+            disjointRecoveryPollFrames++;
+            if (disjointRecoveryPollFrames > kMaxRecoveryPollFrames) {
+                gpuDiagnosisLifecycle = GpuDiagnosisLifecycle::Failed;
+                disjointRecoveryWaitFrames = 0;
+                disjointRecoveryClearFrames = 0;
+                disjointRecoveryPollFrames = 0;
+            } else if (!ValidateAndroidGlContext()) {
+                glContextValidThisFrame = false;
+            } else {
+                glContextValidThisFrame = true;
+
+                DrainAndroidGlErrors();
+                int disjoint = 1;
+                glGetIntegerv(kGpuDisjointExt, &disjoint);
+                const GLenum disjointErr = glGetError();
+                glErrorDuringRecoveryThisFrame = disjointErr != GL_NO_ERROR;
+
+                if (disjointErr == GL_NO_ERROR) {
+                    if (disjoint == 0) {
+                        disjointRecoveryClearFrames++;
+                    } else {
+                        disjointRecoveryClearFrames = 0;
+                    }
+                }
+
+                if (disjointRecoveryClearFrames >= kDisjointRecoveryClearFramesRequired) {
+                    disjointRecoveryWaitFrames = 0;
+                    disjointRecoveryClearFrames = 0;
+                    disjointRecoveryPollFrames = 0;
+                    gpuDiagnosisLifecycle = GpuDiagnosisLifecycle::Probing;
+                }
+            }
+        }
+    }
+
+    if (!androidGpuTimingInitialized && gpuDiagnosisLifecycle == GpuDiagnosisLifecycle::Probing) {
+        DrainAndroidGlErrors();
+        androidGpuTimingInitialized = InitAndroidGpuTiming();
+        if (androidGpuTimingInitialized) {
+            gpuDiagnosisLifecycle = GpuDiagnosisLifecycle::Active;
+            diagnosisRetryCount = 0;
+            disjointRecoveryWaitFrames = 0;
+            disjointRecoveryClearFrames = 0;
+            disjointRecoveryPollFrames = 0;
+        } else {
+            const int cooldownFrames = kCooldownFramesBeforeRetry * (1 << diagnosisRetryCount);
+            diagnosisRetryCount++;
+            if (diagnosisRetryCount >= kMaxDiagnosisRetries) {
+                gpuDiagnosisLifecycle = GpuDiagnosisLifecycle::Failed;
+                disjointRecoveryWaitFrames = 0;
+                disjointRecoveryClearFrames = 0;
+                disjointRecoveryPollFrames = 0;
+            } else {
+                gpuDiagnosisLifecycle = GpuDiagnosisLifecycle::Cooldown;
+                disjointRecoveryWaitFrames = cooldownFrames;
+                disjointRecoveryClearFrames = 0;
+                disjointRecoveryPollFrames = 0;
+            }
+        }
+    }
+
+    if (androidGpuTimingInitialized) {
+        ProcessAndroidGpuQueries();
+    }
 #endif
 
     frameStartCpu = std::chrono::steady_clock::now();
@@ -321,8 +429,6 @@ void ThermalProfiler::EndFrame() {
     currentFrame.gpuTimedOutTotal = static_cast<int>(timedOutQueryCount);
     currentFrame.gpuResolvedDroppedTotal = static_cast<int>(droppedResolvedSampleCount);
     currentFrame.gpuResetDiscardedTotal = static_cast<int>(resetDiscardedSampleCount);
-    currentFrame.gpuDisjointThisFrame = disjointOccurredThisFrame ? 1 : 0;
-
     static const std::array<std::string_view, 8> kDiagnosisPasses = {
         "shadow", "geometry", "lighting", "volumetric", "particle", "debug", "postprocess", "ui"
     };
@@ -351,12 +457,47 @@ void ThermalProfiler::EndFrame() {
         }
     }
 
-    currentFrame.gpuDiagnosisReady =
+    const bool diagnosisSamplingAvailable = androidGpuTimingInitialized &&
+        gpuDiagnosisLifecycle == GpuDiagnosisLifecycle::Active;
+    currentFrame.gpuDiagnosisAvailable = diagnosisSamplingAvailable ? 1 : 0;
+    currentFrame.gpuDiagnosisPartial = diagnosisSamplingAvailable &&
+        (currentFrame.gpuKeyPassesValid >= 4) &&
+        (currentFrame.gpuKeyPassesDisjoint == 0);
+    currentFrame.gpuDiagnosisReady = diagnosisSamplingAvailable &&
         (currentFrame.gpuKeyPassesSeen == currentFrame.gpuKeyPassesExpected) &&
         (currentFrame.gpuKeyPassesValid == currentFrame.gpuKeyPassesExpected) &&
-        (currentFrame.gpuDisjointThisFrame == 0);
+        (currentFrame.gpuKeyPassesDisjoint == 0);
 
-    const int disjointBit = currentFrame.gpuDisjointThisFrame;
+    currentFrame.gpuDiagnosisLifecycleState = static_cast<int>(gpuDiagnosisLifecycle);
+    currentFrame.gpuDiagnosisRetryCount = diagnosisRetryCount;
+    currentFrame.gpuRecoveryWaitRemaining = disjointRecoveryWaitFrames;
+    currentFrame.gpuRecoveryClearCount = disjointRecoveryClearFrames;
+    currentFrame.gpuRecoveryClearTarget = kDisjointRecoveryClearFramesRequired;
+    currentFrame.gpuGlContextValid = glContextValidThisFrame ? 1 : 0;
+    currentFrame.gpuGlErrorDuringRecovery = glErrorDuringRecoveryThisFrame ? 1 : 0;
+
+    const int disjointBit = (disjointOccurredThisFrame || currentFrame.gpuKeyPassesDisjoint > 0) ? 1 : 0;
+    currentFrame.gpuDisjointThisFrame = disjointBit;
+
+    if (currentFrame.gpuKeyPassesDisjoint > 0 && !disjointOccurredThisFrame) {
+        lastDisjointEventFrame = currentFrame.frameNumber;
+        lastDisjointEventQueueDepth = static_cast<int>(pendingQueries.size());
+        lastDisjointEventReadySamples = 0;
+        int maxAge = -1;
+        for (const auto& pass : currentFrame.passTimings) {
+            if (pass.gpuStatus == kGpuStatusDisjoint && pass.gpuSampleAgeFrames > maxAge) {
+                maxAge = pass.gpuSampleAgeFrames;
+            }
+        }
+        lastDisjointEventMaxSampleAge = maxAge;
+        if (lastDisjointEventQueueDepth >= kDisjointHighQueueThreshold) {
+            disjointHighQueueCount++;
+        }
+        if (lastDisjointEventMaxSampleAge >= kDisjointStaleSampleAgeThreshold) {
+            disjointStaleSampleCount++;
+        }
+    }
+
     disjointFrameWindow.push_back(disjointBit);
     disjointFramesInWindow += disjointBit;
     if (static_cast<int>(disjointFrameWindow.size()) > kDisjointWindowSizeFrames) {
@@ -370,16 +511,44 @@ void ThermalProfiler::EndFrame() {
         ? static_cast<float>(disjointFramesInWindow) / static_cast<float>(currentFrame.gpuDisjointWindowFrames)
         : 0.0f;
 
+    if (currentFrame.thermalState >= 1.0f && currentFrame.gpuDiagnosisAvailable != 0) {
+        hotReadyFrameWindow.push_back(currentFrame.gpuDiagnosisReady);
+        hotReadyFramesInWindow += currentFrame.gpuDiagnosisReady;
+        if (static_cast<int>(hotReadyFrameWindow.size()) > kHotReadyWindowSizeFrames) {
+            hotReadyFramesInWindow -= hotReadyFrameWindow.front();
+            hotReadyFrameWindow.pop_front();
+        }
+    }
+
+    currentFrame.gpuHotReadyWindowFrames = static_cast<int>(hotReadyFrameWindow.size());
+    currentFrame.gpuHotReadyWindowReady = hotReadyFramesInWindow;
+    currentFrame.gpuHotReadyWindowRatio = currentFrame.gpuHotReadyWindowFrames > 0
+        ? static_cast<float>(hotReadyFramesInWindow) / static_cast<float>(currentFrame.gpuHotReadyWindowFrames)
+        : 0.0f;
+
     const bool cooldownElapsed = !hasDisjointBreakFrame ||
         (currentFrame.frameNumber >= lastDisjointBreakFrame + static_cast<uint64_t>(kDisjointBreakerCooldownFrames));
-    const bool shouldBreak = currentFrame.gpuDisjointWindowFrames >= kDisjointWindowSizeFrames &&
+    const bool shouldBreakByDisjoint = currentFrame.gpuDisjointWindowFrames >= kDisjointWindowSizeFrames &&
         currentFrame.gpuDisjointWindowRatio > kDisjointWindowBreakRatio && cooldownElapsed;
+    const bool shouldBreakByHotReady = currentFrame.gpuHotReadyWindowFrames >= kHotReadyWindowSizeFrames &&
+        currentFrame.gpuHotReadyWindowRatio < kHotReadyWindowMinRatio && cooldownElapsed;
+    const bool shouldBreak = (shouldBreakByDisjoint || shouldBreakByHotReady) &&
+        gpuDiagnosisLifecycle == GpuDiagnosisLifecycle::Active;
 
     currentFrame.gpuDisjointBreakerTriggered = shouldBreak ? 1 : 0;
+    currentFrame.gpuDisjointBreakerReason = shouldBreakByHotReady ? 2 : (shouldBreakByDisjoint ? 1 : 0);
     if (shouldBreak) {
         disjointBreakerTriggeredCount++;
         hasDisjointBreakFrame = true;
         lastDisjointBreakFrame = currentFrame.frameNumber;
+        disjointFrameWindow.clear();
+        disjointFramesInWindow = 0;
+        hotReadyFrameWindow.clear();
+        hotReadyFramesInWindow = 0;
+        gpuDiagnosisLifecycle = GpuDiagnosisLifecycle::Cooldown;
+        disjointRecoveryWaitFrames = kCooldownFramesBeforeRetry;
+        disjointRecoveryClearFrames = 0;
+        disjointRecoveryPollFrames = 0;
     }
     currentFrame.gpuDisjointBreakerTotal = static_cast<int>(disjointBreakerTriggeredCount);
     currentFrame.gpuDisjointLastFrame = lastDisjointEventFrame > 0 ? static_cast<int64_t>(lastDisjointEventFrame) : -1;
@@ -397,6 +566,15 @@ void ThermalProfiler::EndFrame() {
     currentFrame.gpuResetDiscardedTotal = 0;
     currentFrame.gpuDisjointThisFrame = 0;
     currentFrame.gpuDiagnosisReady = 0;
+    currentFrame.gpuDiagnosisAvailable = 0;
+    currentFrame.gpuDiagnosisPartial = 0;
+    currentFrame.gpuDiagnosisLifecycleState = static_cast<int>(GpuDiagnosisLifecycle::Inactive);
+    currentFrame.gpuDiagnosisRetryCount = 0;
+    currentFrame.gpuRecoveryWaitRemaining = 0;
+    currentFrame.gpuRecoveryClearCount = 0;
+    currentFrame.gpuRecoveryClearTarget = 0;
+    currentFrame.gpuGlContextValid = 0;
+    currentFrame.gpuGlErrorDuringRecovery = 0;
     currentFrame.gpuKeyPassesExpected = 0;
     currentFrame.gpuKeyPassesSeen = 0;
     currentFrame.gpuKeyPassesValid = 0;
@@ -405,7 +583,11 @@ void ThermalProfiler::EndFrame() {
     currentFrame.gpuDisjointWindowFrames = 0;
     currentFrame.gpuDisjointWindowEvents = 0;
     currentFrame.gpuDisjointWindowRatio = 0.0f;
+    currentFrame.gpuHotReadyWindowFrames = 0;
+    currentFrame.gpuHotReadyWindowReady = 0;
+    currentFrame.gpuHotReadyWindowRatio = 0.0f;
     currentFrame.gpuDisjointBreakerTriggered = 0;
+    currentFrame.gpuDisjointBreakerReason = 0;
     currentFrame.gpuDisjointBreakerTotal = 0;
     currentFrame.gpuDisjointLastFrame = -1;
     currentFrame.gpuDisjointLastQueueDepth = 0;
@@ -429,7 +611,7 @@ void ThermalProfiler::EndFrame() {
 
 #ifdef PN_PLATFORM_ANDROID
     if (currentFrame.gpuDisjointBreakerTriggered != 0) {
-        ShutdownAndroidGpuTiming();
+        ShutdownAndroidGpuTiming(true);
     }
 #endif
 }
@@ -520,7 +702,14 @@ void ThermalProfiler::EndPass(const std::string& passName) {
 void ThermalProfiler::ResetGraphicsContext() {
 #ifdef PN_PLATFORM_ANDROID
     contextResetEventCount++;
-    ShutdownAndroidGpuTiming();
+    ShutdownAndroidGpuTiming(false);
+    gpuDiagnosisLifecycle = GpuDiagnosisLifecycle::Inactive;
+    diagnosisRetryCount = 0;
+    disjointRecoveryWaitFrames = 0;
+    disjointRecoveryClearFrames = 0;
+    disjointRecoveryPollFrames = 0;
+    glContextValidThisFrame = false;
+    glErrorDuringRecoveryThisFrame = false;
 #endif
     cpuPassStart.clear();
     currentFrame.passTimings.clear();
@@ -557,8 +746,9 @@ void ThermalProfiler::WriteCSVHeader() {
     csvFile << "FrameNumber,Timestamp,TotalFrameMs,ThermalState,ThermalHeadroom,GpuFreqMHz,"
             << "ThermalValid,GpuFreqValid,GpuTimingSupported,GpuResolvedThisFrame,GpuPendingAfterFrame,GpuDisjointTotal,"
             << "GpuResolvedQueueSamples,GpuTimedOutTotal,GpuResolvedDroppedTotal,GpuResetDiscardedTotal,"
-            << "GpuDisjointThisFrame,GpuDiagnosisReady,GpuKeyPassesExpected,GpuKeyPassesSeen,GpuKeyPassesValid,GpuKeyPassesDisjoint,GpuKeyPassesPending,"
-            << "GpuDisjointWindowFrames,GpuDisjointWindowEvents,GpuDisjointWindowRatio,GpuDisjointBreakerTriggered,GpuDisjointBreakerTotal,"
+            << "GpuDisjointThisFrame,GpuDiagnosisReady,GpuDiagnosisAvailable,GpuDiagnosisPartial,GpuDiagnosisLifecycleState,GpuDiagnosisRetryCount,GpuRecoveryWaitRemaining,GpuRecoveryClearCount,GpuRecoveryClearTarget,GpuGlContextValid,GpuGlErrorDuringRecovery,"
+            << "GpuKeyPassesExpected,GpuKeyPassesSeen,GpuKeyPassesValid,GpuKeyPassesDisjoint,GpuKeyPassesPending,"
+            << "GpuDisjointWindowFrames,GpuDisjointWindowEvents,GpuDisjointWindowRatio,GpuHotReadyWindowFrames,GpuHotReadyWindowReady,GpuHotReadyWindowRatio,GpuDisjointBreakerTriggered,GpuDisjointBreakerReason,GpuDisjointBreakerTotal,"
             << "GpuDisjointLastFrame,GpuDisjointLastQueueDepth,GpuDisjointLastReadySamples,GpuDisjointLastMaxSampleAge,"
             << "GpuDisjointHighQueueTotal,GpuDisjointStaleSampleTotal,GpuContextResetEventsTotal,"
             << "PassName,PassInstanceId,GpuTimeMs,CpuTimeMs,GpuStatus,GpuSampleAgeFrames,GpuSourceFrame,GpuSourcePassInstanceId\n";
@@ -579,8 +769,10 @@ void ThermalProfiler::WriteCSVRow(const ThermalFrame& frame) {
                 << frame.gpuTimingSupported << "," << frame.gpuResolvedThisFrame << ","
                 << frame.gpuPendingAfterFrame << "," << frame.gpuDisjointTotal << ","
                 << frame.gpuResolvedQueueSamples << "," << frame.gpuTimedOutTotal << "," << frame.gpuResolvedDroppedTotal << "," << frame.gpuResetDiscardedTotal << ","
-                << frame.gpuDisjointThisFrame << "," << frame.gpuDiagnosisReady << "," << frame.gpuKeyPassesExpected << "," << frame.gpuKeyPassesSeen << "," << frame.gpuKeyPassesValid << "," << frame.gpuKeyPassesDisjoint << "," << frame.gpuKeyPassesPending << ","
-                << frame.gpuDisjointWindowFrames << "," << frame.gpuDisjointWindowEvents << "," << frame.gpuDisjointWindowRatio << "," << frame.gpuDisjointBreakerTriggered << "," << frame.gpuDisjointBreakerTotal << ","
+                << frame.gpuDisjointThisFrame << "," << frame.gpuDiagnosisReady << "," << frame.gpuDiagnosisAvailable << "," << frame.gpuDiagnosisPartial << ","
+                << frame.gpuDiagnosisLifecycleState << "," << frame.gpuDiagnosisRetryCount << "," << frame.gpuRecoveryWaitRemaining << "," << frame.gpuRecoveryClearCount << "," << frame.gpuRecoveryClearTarget << "," << frame.gpuGlContextValid << "," << frame.gpuGlErrorDuringRecovery << ","
+                << frame.gpuKeyPassesExpected << "," << frame.gpuKeyPassesSeen << "," << frame.gpuKeyPassesValid << "," << frame.gpuKeyPassesDisjoint << "," << frame.gpuKeyPassesPending << ","
+                << frame.gpuDisjointWindowFrames << "," << frame.gpuDisjointWindowEvents << "," << frame.gpuDisjointWindowRatio << "," << frame.gpuHotReadyWindowFrames << "," << frame.gpuHotReadyWindowReady << "," << frame.gpuHotReadyWindowRatio << "," << frame.gpuDisjointBreakerTriggered << "," << frame.gpuDisjointBreakerReason << "," << frame.gpuDisjointBreakerTotal << ","
                 << frame.gpuDisjointLastFrame << "," << frame.gpuDisjointLastQueueDepth << "," << frame.gpuDisjointLastReadySamples << "," << frame.gpuDisjointLastMaxSampleAge << ","
                 << frame.gpuDisjointHighQueueTotal << "," << frame.gpuDisjointStaleSampleTotal << "," << frame.gpuContextResetEventsTotal << ","
                 << "N/A,0,-1,0,-2,-1,-1,0\n";
@@ -593,8 +785,10 @@ void ThermalProfiler::WriteCSVRow(const ThermalFrame& frame) {
                     << frame.gpuTimingSupported << "," << frame.gpuResolvedThisFrame << ","
                     << frame.gpuPendingAfterFrame << "," << frame.gpuDisjointTotal << ","
                     << frame.gpuResolvedQueueSamples << "," << frame.gpuTimedOutTotal << "," << frame.gpuResolvedDroppedTotal << "," << frame.gpuResetDiscardedTotal << ","
-                    << frame.gpuDisjointThisFrame << "," << frame.gpuDiagnosisReady << "," << frame.gpuKeyPassesExpected << "," << frame.gpuKeyPassesSeen << "," << frame.gpuKeyPassesValid << "," << frame.gpuKeyPassesDisjoint << "," << frame.gpuKeyPassesPending << ","
-                    << frame.gpuDisjointWindowFrames << "," << frame.gpuDisjointWindowEvents << "," << frame.gpuDisjointWindowRatio << "," << frame.gpuDisjointBreakerTriggered << "," << frame.gpuDisjointBreakerTotal << ","
+                    << frame.gpuDisjointThisFrame << "," << frame.gpuDiagnosisReady << "," << frame.gpuDiagnosisAvailable << "," << frame.gpuDiagnosisPartial << ","
+                    << frame.gpuDiagnosisLifecycleState << "," << frame.gpuDiagnosisRetryCount << "," << frame.gpuRecoveryWaitRemaining << "," << frame.gpuRecoveryClearCount << "," << frame.gpuRecoveryClearTarget << "," << frame.gpuGlContextValid << "," << frame.gpuGlErrorDuringRecovery << ","
+                    << frame.gpuKeyPassesExpected << "," << frame.gpuKeyPassesSeen << "," << frame.gpuKeyPassesValid << "," << frame.gpuKeyPassesDisjoint << "," << frame.gpuKeyPassesPending << ","
+                    << frame.gpuDisjointWindowFrames << "," << frame.gpuDisjointWindowEvents << "," << frame.gpuDisjointWindowRatio << "," << frame.gpuHotReadyWindowFrames << "," << frame.gpuHotReadyWindowReady << "," << frame.gpuHotReadyWindowRatio << "," << frame.gpuDisjointBreakerTriggered << "," << frame.gpuDisjointBreakerReason << "," << frame.gpuDisjointBreakerTotal << ","
                     << frame.gpuDisjointLastFrame << "," << frame.gpuDisjointLastQueueDepth << "," << frame.gpuDisjointLastReadySamples << "," << frame.gpuDisjointLastMaxSampleAge << ","
                     << frame.gpuDisjointHighQueueTotal << "," << frame.gpuDisjointStaleSampleTotal << "," << frame.gpuContextResetEventsTotal << ","
                     << pass.name << "," << pass.passInstanceId << "," << pass.gpuTimeMs << "," << pass.cpuTimeMs << ","
@@ -678,6 +872,26 @@ void ThermalProfiler::InitAndroidThermal() {
     currentThermalHeadroom = -1.0f;
 }
 
+bool ThermalProfiler::ValidateAndroidGlContext() {
+    if (eglGetCurrentContext() == EGL_NO_CONTEXT) {
+        return false;
+    }
+
+    DrainAndroidGlErrors();
+    GLint maxTextureSize = 0;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+    return glGetError() == GL_NO_ERROR;
+}
+
+void ThermalProfiler::DrainAndroidGlErrors() {
+    constexpr int kMaxDrainPasses = 32;
+    for (int i = 0; i < kMaxDrainPasses; ++i) {
+        if (glGetError() == GL_NO_ERROR) {
+            break;
+        }
+    }
+}
+
 bool ThermalProfiler::InitAndroidGpuTiming() {
     const char* ext = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
     if (!ext || std::strstr(ext, "GL_EXT_disjoint_timer_query") == nullptr) {
@@ -720,7 +934,7 @@ bool ThermalProfiler::InitAndroidGpuTiming() {
     return true;
 }
 
-void ThermalProfiler::ShutdownAndroidGpuTiming() {
+void ThermalProfiler::ShutdownAndroidGpuTiming(bool resetRecoveryWindows) {
     const bool hasCurrentContext = eglGetCurrentContext() != EGL_NO_CONTEXT;
     size_t discarded = pendingQueries.size();
     for (const auto& entry : resolvedByPass) {
@@ -737,6 +951,12 @@ void ThermalProfiler::ShutdownAndroidGpuTiming() {
     pendingQueries.clear();
     resolvedByPass.clear();
     resolvedThisFrame = 0;
+    if (resetRecoveryWindows) {
+        disjointFrameWindow.clear();
+        disjointFramesInWindow = 0;
+        hotReadyFrameWindow.clear();
+        hotReadyFramesInWindow = 0;
+    }
 
     glGenQueriesEXT = nullptr;
     glDeleteQueriesEXT = nullptr;
@@ -961,6 +1181,16 @@ void ThermalProfiler::UpdateAndroidThermal() {
         }
     }
 
+    if (gpuFreqFd < 0 && (frameCounter % 300 == 0)) {
+        gpuFreqPath = FindGpuFreqPath();
+        if (!gpuFreqPath.empty()) {
+            gpuFreqFd = open(gpuFreqPath.c_str(), O_RDONLY);
+            if (gpuFreqFd < 0) {
+                PN_CORE_WARN("Failed to reopen GPU frequency monitor path (path='{}')", gpuFreqPath);
+            }
+        }
+    }
+
     if (gpuFreqFd >= 0) {
         char buf[32];
         lseek(gpuFreqFd, 0, SEEK_SET);
@@ -968,7 +1198,8 @@ void ThermalProfiler::UpdateAndroidThermal() {
         if (len > 0) {
             buf[len] = '\0';
             const float rawFreq = std::strtof(buf, nullptr);
-            currentGpuFreqMHz = NormalizeFreqToMHz(rawFreq);
+            const float normalized = NormalizeFreqToMHz(rawFreq);
+            currentGpuFreqMHz = (std::isfinite(normalized) && normalized > 0.0f) ? normalized : -1.0f;
         } else {
             currentGpuFreqMHz = -1.0f;
         }
