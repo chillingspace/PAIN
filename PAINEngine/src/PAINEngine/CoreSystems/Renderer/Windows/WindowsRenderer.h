@@ -171,6 +171,7 @@ namespace PAIN {
 		void VolumetricPass(std::shared_ptr<Scene::SceneManager> scene,
 						   const LightSources& lights);
 		void PostProcessPass(bool presentToSwapchain);
+		void BlitFinalToScreen();  // Simple blit without post-processing
 		void InvalidateFramebufferAttachments(GLuint fbo, bool invalidateColor = false,
 											 bool invalidateDepth = false,
 											 bool invalidateStencil = false);

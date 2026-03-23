@@ -1434,7 +1434,7 @@ namespace PAIN {
 			return;
 		}
 
-	// Debug shader
+		// Debug shader
 		shader_opt = assets_loader->getAsset<Assets::Shader>(debug_geometry_path);
 		debug_shader = shader_opt.has_value() ? shader_opt.value() : debug_shader;
 
@@ -1762,6 +1762,10 @@ namespace PAIN {
 				return;
 			}
 
+			// Clear pp_texture to black to avoid garbage data on first frame
+			glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+			glClear(GL_COLOR_BUFFER_BIT);
+
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 			// pp2_texture for ping-pong if needed in post-processing
@@ -1788,6 +1792,10 @@ namespace PAIN {
 				failInit("Post-process framebuffer (pp2_fbo)");
 				return;
 			}
+
+			// Clear pp2_texture to black to avoid garbage data on first frame
+			glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+			glClear(GL_COLOR_BUFFER_BIT);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -3943,6 +3951,23 @@ namespace PAIN {
 			PN_CORE_ERROR("OpenGL err after PostProcessPass: {}", err);
 		}
 #endif
+	}
+
+	void WindowsRenderer::BlitFinalToScreen()
+	{
+		// Simple blit from final_fbo to screen without any post-processing
+		// Used when postprocess is disabled
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, winWidth, winHeight);
+		
+		passthrough_shader->Bind();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, final_texture);
+		passthrough_shader->SetUniform("tex", 0);
+		
+		glBindVertexArray(passthrough_vao);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glBindVertexArray(0);
 	}
 
 	void WindowsRenderer::InvalidateFramebufferAttachments(GLuint fbo, bool invalidateColor,

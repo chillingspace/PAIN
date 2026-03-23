@@ -82,6 +82,9 @@ namespace PAIN {
 		// using hdr, so range of [0,inf)
 		float blur_strength = 0.f;
 
+		// Master post-process toggle - disables all post-processing effects when false
+		bool postprocess = true;
+
 		bool bloom = true;
 		float global_light_intensity = 1.5f;
 

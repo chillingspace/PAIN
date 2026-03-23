@@ -79,6 +79,12 @@ namespace PAIN {
 
 	void sRenderer::postProcessPass(bool presentToSwapchain)
 	{
+		// Skip post-processing if disabled
+		if (!GraphicsSettings::get().postprocess) {
+			// Just blit the final_fbo to screen without any post-processing
+			w_renderer->BlitFinalToScreen();
+			return;
+		}
 		w_renderer->PostProcessPass(presentToSwapchain);
 	}
 

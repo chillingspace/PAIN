@@ -656,6 +656,42 @@ namespace PAIN {
                 if (ImGui::IsItemHovered()) ImGui::SetTooltip("Batches identical non-animated objects into one draw call.");
                 ImGui::Separator();
 
+                // Post-process toggle
+                bool using_postprocess = gs.postprocess;
+                if (ImGui::Checkbox("Post Processing", &using_postprocess))
+                    gs.postprocess = using_postprocess;
+                if (ImGui::IsItemHovered()) ImGui::SetTooltip("Enable/disable all post-processing effects (bloom, tone mapping, gamma correction).");
+                
+                // Bloom settings (only show if post-process is enabled)
+                if (gs.postprocess) {
+                    bool using_bloom = gs.bloom;
+                    if (ImGui::Checkbox("Bloom", &using_bloom))
+                        gs.bloom = using_bloom;
+                    if (gs.bloom) {
+                        ImGui::SliderInt("Bloom Quality", &gs.bloom_quality, 1, 8);
+                        ImGui::SliderFloat("Bloom Threshold", &gs.bloom_threshold, 0.5f, 3.0f);
+                        ImGui::SliderFloat("Bloom Strength", &gs.bloom_strength, 0.0f, 2.0f);
+                        ImGui::SliderFloat("Bloom Blur Strength", &gs.bloom_blur_strength, 0.1f, 5.0f);
+                    }
+                    
+                    bool using_gamma = gs.gamma_correction;
+                    if (ImGui::Checkbox("Gamma Correction", &using_gamma))
+                        gs.gamma_correction = using_gamma;
+                    if (gs.gamma_correction) {
+                        ImGui::SliderFloat("Gamma Value", &gs.gamma_value, 1.0f, 3.0f);
+                    }
+                    
+                    bool using_blur = gs.blur_strength > 0.0f;
+                    if (ImGui::Checkbox("Screen Blur", &using_blur)) {
+                        gs.blur_strength = using_blur ? 1.0f : 0.0f;
+                    }
+                    if (gs.blur_strength > 0.0f) {
+                        ImGui::SliderInt("Blur Quality", &gs.blur_quality, 1, 10);
+                        ImGui::SliderFloat("Blur Strength", &gs.blur_strength, 0.1f, 10.0f);
+                    }
+                }
+                ImGui::Separator();
+
                 bool using_diffuse = gs.DEBUG_USE_DIFFUSE_MAP;
                 if (ImGui::Checkbox("Using Diffuse Map", &using_diffuse))
                     gs.DEBUG_USE_DIFFUSE_MAP = using_diffuse;

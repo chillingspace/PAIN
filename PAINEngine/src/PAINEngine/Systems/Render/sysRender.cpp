@@ -152,9 +152,15 @@ namespace PAIN {
 						if (!guid.IsValid())
 							return 0;
 						auto texOpt = assetManager->getAsset<Assets::Texture>(guid);
-						return (texOpt.has_value() && texOpt.value())
-								   ? texOpt.value()->gl_texture
-								   : 0;
+						if (!texOpt.has_value() || !texOpt.value())
+							return 0;
+						
+						auto tex = texOpt.value();
+						// Ensure texture is uploaded to GPU before caching the handle
+						if (tex->gl_texture == 0) {
+							services.lock()->get<sRenderer>()->uploadTexture(tex);
+						}
+						return tex->gl_texture;
 					};
 
 					// Cache all texture handles (look up ONCE during initialization)
