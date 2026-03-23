@@ -363,6 +363,15 @@ namespace PAIN {
         return { 0.f, 0.f, 0.f };
     }
 
+    glm::vec3 EngineAPIAdapter::GetWorldForward(entt::entity entityId)
+    {
+        if (auto opt = ecs_.getEntityComponent<PAIN::WorldTransform>(entityId)) {
+            const glm::mat4& m = opt->get().matrix;
+            return glm::normalize(glm::vec3(-m[2][0], -m[2][1], -m[2][2]));
+        }
+        return { 0.f, 0.f, -1.f };
+    }
+
     void EngineAPIAdapter::SetRotation(entt::entity entityId, glm::vec3 r)
     {
         auto& reg = ecs_.getRegistry();

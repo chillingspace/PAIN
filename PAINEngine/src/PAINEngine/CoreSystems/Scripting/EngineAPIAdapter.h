@@ -94,6 +94,7 @@ namespace PAIN {
         void SetScale(entt::entity entityId, glm::vec3 s) override;
         glm::vec3 GetRotation(entt::entity entityId) override;
         void SetRotation(entt::entity entityId, glm::vec3 r) override;
+        glm::vec3 GetWorldForward(entt::entity entityId) override;
 
         /* =========================================================================== */
         /*                                  Physics                                    */

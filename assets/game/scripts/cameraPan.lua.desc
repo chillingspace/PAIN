@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "cameraPan.lua",
+    "type": "Script"
+  },
+  "build_data": {
+    "hash": 13986615512602879988
+  },
+  "descriptor_version": 1,
+  "guid": "bd6a281d-ba07-8247-9acd-36698b1ddaea",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\scripts\\cameraPan.lua"
+  }
+}

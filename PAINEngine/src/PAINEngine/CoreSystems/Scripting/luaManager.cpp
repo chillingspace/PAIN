@@ -594,6 +594,11 @@ namespace PAIN {
             auto r = api_->GetRotation(entityId);
             return std::make_tuple(r.x, r.y, r.z);
             });
+        lua_.set_function("getWorldForward", [this](entt::entity entityId) {
+            if (!api_) return std::make_tuple(0.f, 0.f, -1.f);
+            auto f = api_->GetWorldForward(entityId);
+            return std::make_tuple(f.x, f.y, f.z);
+            });
 
         lua_.set_function("setRotation", [this](entt::entity entityId, float x, float y, float z) {
             if (!api_) return;

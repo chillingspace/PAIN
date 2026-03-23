@@ -80,6 +80,7 @@ namespace PAIN {
         virtual void SetScale(entt::entity entityId, glm::vec3 s) = 0;
         virtual glm::vec3 GetRotation(entt::entity entityId) = 0;
         virtual void SetRotation(entt::entity entityId, glm::vec3 r) = 0;
+        virtual glm::vec3 GetWorldForward(entt::entity entityId) = 0;
 
         /* =========================================================================== */
         /*                                  Physics                                    */

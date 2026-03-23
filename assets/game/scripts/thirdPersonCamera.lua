@@ -1,3 +1,100 @@
+-- ============================================================
+-- Camera Pan State Machine
+-- ============================================================
+
+_G.CameraPan = _G.CameraPan or { active = false }
+
+local pan = nil  -- nil = inactive
+
+local function easeSmooth(t)
+    return t * t * (3.0 - 2.0 * t)
+end
+
+local function lerpV(ax, ay, az, bx, by, bz, t)
+    return ax + (bx - ax) * t,
+           ay + (by - ay) * t,
+           az + (bz - az) * t
+end
+
+
+-- Resolves a waypoint name into {px,py,pz, lx,ly,lz} in world space
+local function resolveWaypoint(name)
+    local e = findEntity(name)
+    if not e then
+        log("[CameraPan] WARNING: could not find waypoint entity '" .. name .. "'")
+        return nil
+    end
+    local px, py, pz = getWorldPosition(e)
+    local fx, fy, fz = getWorldForward(e)
+    -- look target = world pos + world forward * 10
+    return { px=px, py=py, pz=pz,
+             lx=px+fx*10, ly=py+fy*10, lz=pz+fz*10 }
+end
+
+--[[
+  StartCameraPan(waypointNames, options)
+    waypointNames : array of entity name strings
+    options       : {
+        duration       = 2.0,  -- seconds to travel between each pair of waypoints
+        holdDuration   = 0.0,  -- seconds to hold at EACH waypoint (override per-waypoint not needed)
+        returnDuration = 1.5,  -- seconds to smoothly return to player follow-cam
+        easing         = "smoothstep" | "linear",
+        onComplete     = function() end,
+    }
+]]
+_G.StartCameraPan = function(waypointNames, options)
+    if _G.CameraPan.active then
+        log("[CameraPan] Pan already active, ignoring new request")
+        return
+    end
+    if not waypointNames or #waypointNames < 1 then
+        log("[CameraPan] No waypoints provided")
+        return
+    end
+
+    local opts = options or {}
+    local waypoints = {}
+    for _, name in ipairs(waypointNames) do
+        local wp = resolveWaypoint(name)
+        if wp then table.insert(waypoints, wp) end
+    end
+
+    if #waypoints < 1 then
+        log("[CameraPan] No valid waypoints resolved")
+        return
+    end
+
+    pan = {
+        waypoints      = waypoints,
+        current        = 1,          -- index of destination waypoint
+        duration       = opts.duration       or 2.0,
+        holdDuration   = opts.holdDuration   or 0.0,
+        returnDuration = opts.returnDuration or 1.5,
+        useSmooth      = (opts.easing ~= "linear"),
+        onComplete     = opts.onComplete,
+        elapsed        = 0.0,
+        phase          = "travel",   -- "travel" | "hold" | "return"
+        -- start position captured when pan begins (set on first update)
+        startPx = nil,
+        -- return phase start/end captured when return begins
+        retSrcX=nil, retSrcY=nil, retSrcZ=nil,
+        retSrcLx=nil, retSrcLy=nil, retSrcLz=nil,
+        retElapsed = 0.0,
+    }
+
+    _G.CameraPan.active = true
+    log("[CameraPan] Pan started with " .. #waypoints .. " waypoints")
+end
+
+_G.CancelCameraPan = function()
+    if pan then
+        pan = nil
+        _G.CameraPan.active = false
+        log("[CameraPan] Pan cancelled")
+    end
+end
+
+-- ============================================================
 -- Default Configs
 local config = {
     offX = 0.0,
@@ -70,6 +167,124 @@ registerUpdate(function(dt)
         return
     end
     
+    -- ============================================================
+    -- Camera Pan Update
+    -- ============================================================
+    if pan then
+        pan.elapsed = pan.elapsed + dt
+
+        if pan.phase == "travel" then
+            local wp = pan.waypoints[pan.current]
+            local prevWp = pan.waypoints[pan.current - 1]
+
+            -- Capture travel start position on first tick of each segment
+            if pan.startPx == nil then
+                -- Start from current camera position and look target
+                pan.startPx = frozenCx or px
+                pan.startPy = frozenCy or py
+                pan.startPz = frozenCz or pz
+                pan.startLx = frozenTx or px
+                pan.startLy = frozenTy or (py + 0.1)
+                pan.startLz = frozenTz or pz
+            end
+
+            local t = math.min(pan.elapsed / pan.duration, 1.0)
+            if pan.useSmooth then t = easeSmooth(t) end
+
+            local cx, cy, cz = lerpV(pan.startPx, pan.startPy, pan.startPz,
+                                     wp.px, wp.py, wp.pz, t)
+            local lx, ly, lz = lerpV(pan.startLx, pan.startLy, pan.startLz,
+                                     wp.lx, wp.ly, wp.lz, t)
+
+            cameraSetTransform(cx, cy, cz, lx, ly, lz, 0.0, 1.0, 0.0)
+            frozenCx, frozenCy, frozenCz = cx, cy, cz
+            frozenTx, frozenTy, frozenTz = lx, ly, lz
+
+            if pan.elapsed >= pan.duration then
+                -- Snap exactly to waypoint
+                cameraSetTransform(wp.px, wp.py, wp.pz, wp.lx, wp.ly, wp.lz, 0.0, 1.0, 0.0)
+                frozenCx, frozenCy, frozenCz = wp.px, wp.py, wp.pz
+                frozenTx, frozenTy, frozenTz = wp.lx, wp.ly, wp.lz
+                pan.elapsed = 0.0
+                pan.startPx = nil
+
+                if pan.holdDuration > 0.0 then
+                    pan.phase = "hold"
+                elseif pan.current < #pan.waypoints then
+                    pan.current = pan.current + 1
+                else
+                    pan.phase = "return"
+                end
+            end
+
+        elseif pan.phase == "hold" then
+            local wp = pan.waypoints[pan.current]
+            cameraSetTransform(wp.px, wp.py, wp.pz, wp.lx, wp.ly, wp.lz, 0.0, 1.0, 0.0)
+
+            if pan.elapsed >= pan.holdDuration then
+                pan.elapsed = 0.0
+                if pan.current < #pan.waypoints then
+                    pan.current = pan.current + 1
+                    pan.phase = "travel"
+                else
+                    pan.phase = "return"
+                end
+            end
+
+        elseif pan.phase == "return" then
+            -- Capture return source on first tick
+            if pan.retSrcX == nil then
+                pan.retSrcX = frozenCx
+                pan.retSrcY = frozenCy
+                pan.retSrcZ = frozenCz
+                pan.retSrcLx = frozenTx
+                pan.retSrcLy = frozenTy
+                pan.retSrcLz = frozenTz
+                pan.retElapsed = 0.0
+            end
+
+            pan.retElapsed = pan.retElapsed + dt
+
+            -- Compute where the follow-cam would be right now
+            local cosY2, sinY2 = math.cos(yaw), math.sin(yaw)
+            local cosP2, sinP2 = math.cos(pitch), math.sin(pitch)
+            local pitchY2 = config.offY * cosP2 - config.offZ * sinP2
+            local pitchZ2 = config.offY * sinP2 + config.offZ * cosP2
+            local rx2 = config.offX * cosY2 + pitchZ2 * sinY2
+            local rz2 = -config.offX * sinY2 + pitchZ2 * cosY2
+            local targetCx = (smoothX or px) + rx2
+            local targetCy = (smoothY or py) + pitchY2
+            local targetCz = (smoothZ or pz) + rz2
+            local targetLx = smoothX or px
+            local targetLy = (smoothY or py) + 0.1
+            local targetLz = smoothZ or pz
+
+            local t = math.min(pan.retElapsed / pan.returnDuration, 1.0)
+            if pan.useSmooth then t = easeSmooth(t) end
+
+            local cx, cy, cz = lerpV(pan.retSrcX, pan.retSrcY, pan.retSrcZ,
+                                     targetCx, targetCy, targetCz, t)
+            local lx, ly, lz = lerpV(pan.retSrcLx, pan.retSrcLy, pan.retSrcLz,
+                                     targetLx, targetLy, targetLz, t)
+
+            cameraSetTransform(cx, cy, cz, lx, ly, lz, 0.0, 1.0, 0.0)
+            frozenCx, frozenCy, frozenCz = cx, cy, cz
+            frozenTx, frozenTy, frozenTz = lx, ly, lz
+
+            if pan.retElapsed >= pan.returnDuration then
+                -- Pan complete
+                local cb = pan.onComplete
+                pan = nil
+                _G.CameraPan.active = false
+                log("[CameraPan] Pan complete, returning to follow-cam")
+                if cb then cb() end
+            end
+        end
+
+        return  -- skip normal follow logic while panning
+    end
+    -- ============================================================
+
     -- FORCE CAMERA TO DEFAULT POSITION ON FIRST FRAME
     if firstFrame then
         log("[Camera] FIRST FRAME - Setting default camera position")
