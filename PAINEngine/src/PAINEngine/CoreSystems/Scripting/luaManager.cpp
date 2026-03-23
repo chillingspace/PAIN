@@ -1474,6 +1474,9 @@ namespace PAIN {
         });
         lua_.set_function("setLightInnerAngle", [this](entt::entity entityId, float degrees) { if (api_) api_->SetLightInnerAngle(entityId, degrees); });
         lua_.set_function("setShadowType", [this](entt::entity entityId, int shadowTypeInt) {if (api_) api_->SetShadowType(entityId, shadowTypeInt); });
+        lua_.set_function("hasLineOfSight", [this](float x1, float y1, float z1, float x2, float y2, float z2) -> bool {
+            return api_ ? api_->HasLineOfSight({x1, y1, z1}, {x2, y2, z2}) : true;
+        });
 
         /* =========================================================================== */
         /*                                 Animations                                  */

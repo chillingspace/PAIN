@@ -88,6 +88,13 @@ registerUpdate(function(dt)
                or  pointInCone(px, py + PLAYER_HEIGHT*0.5, pz, ox, oy, oz, ldx, ldy, ldz, halfTan)
                or  pointInCone(px, py + PLAYER_HEIGHT,     pz, ox, oy, oz, ldx, ldy, ldz, halfTan)
 
+    -- If inside the cone, also verify no geometry blocks line of sight
+    if inCone then
+        inCone = hasLineOfSight(ox, oy, oz, px, py, pz)
+              or hasLineOfSight(ox, oy, oz, px, py + PLAYER_HEIGHT * 0.5, pz)
+              or hasLineOfSight(ox, oy, oz, px, py + PLAYER_HEIGHT, pz)
+    end
+
     if inCone then
         loseSightTimer = 0.0
 

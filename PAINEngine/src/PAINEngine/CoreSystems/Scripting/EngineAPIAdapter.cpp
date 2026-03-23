@@ -748,6 +748,16 @@ namespace PAIN {
         );
     }
 
+    bool EngineAPIAdapter::HasLineOfSight(const glm::vec3& from, const glm::vec3& to)
+    {
+        if (!scene_) return true;
+        auto collisionSystem = scene_->getCameraCollisionSystem();
+        if (!collisionSystem) return true;
+        
+        float frac = collisionSystem->raycastToPosition(from, to);
+        return frac >= 1.0f;
+    }
+
     /* =========================================================================== */
     /*                                Particles                                    */
     /* =========================================================================== */
