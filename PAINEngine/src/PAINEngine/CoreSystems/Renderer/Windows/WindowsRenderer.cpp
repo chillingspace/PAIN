@@ -769,6 +769,73 @@ namespace PAIN {
 				geometry_shader->SetUniform("material.emission_map", 11);
 			}
 		}
+
+		// ========================================
+		// OPTIMIZED: ApplyCachedGeometryMaterialState
+		// Uses pre-cached SubmeshTextureCache to avoid per-frame asset lookups
+		// ========================================
+		void ApplyCachedGeometryMaterialState(const std::shared_ptr<Assets::Shader>& shader,
+			const ModelRenderer::SubmeshTextureCache& cache) {
+			shader->SetUniform("u_DecodeAlbedoInShader",
+				GraphicsSettings::get().decode_albedo_in_shader ? 1.0f : 0.0f);
+			shader->SetUniform("material.rough", cache.roughness);
+			shader->SetUniform("material.metal", cache.metallic);
+			shader->SetUniform("material.color", cache.baseColor);
+			shader->SetUniform("u_UseEmissionOverride", cache.useEmissionOverride ? 1.0f : 0.0f);
+			shader->SetUniform("u_EmissionOverride",
+				cache.useEmissionOverride ? cache.emissionOverride : glm::vec3(0.0f));
+			shader->SetUniform("material.ao_channel_mask", cache.aoChannelMask);
+			shader->SetUniform("material.roughness_channel_mask", cache.roughnessChannelMask);
+			shader->SetUniform("material.metallic_channel_mask", cache.metallicChannelMask);
+
+			const bool hasTexture = cache.albedoTexture != 0;
+			shader->SetUniform("material.useTex", hasTexture ? 1.0f : 0.0f);
+			if (hasTexture) {
+				glActiveTexture(GL_TEXTURE6);
+				glBindTexture(GL_TEXTURE_2D, cache.albedoTexture);
+				shader->SetUniform("material.tex", 6);
+			}
+
+			const bool useAo = cache.aoTexture != 0;
+			shader->SetUniform("material.use_ao", useAo ? 1.0f : 0.0f);
+			if (useAo) {
+				glActiveTexture(GL_TEXTURE7);
+				glBindTexture(GL_TEXTURE_2D, cache.aoTexture);
+				shader->SetUniform("material.ao_map", 7);
+			}
+
+			const bool useNormal = cache.normalTexture != 0;
+			shader->SetUniform("material.use_normal", useNormal ? 1.0f : 0.0f);
+			if (useNormal) {
+				glActiveTexture(GL_TEXTURE8);
+				glBindTexture(GL_TEXTURE_2D, cache.normalTexture);
+				shader->SetUniform("material.normal_map", 8);
+			}
+
+			const bool useRoughness = cache.roughnessTexture != 0;
+			shader->SetUniform("material.use_roughness", useRoughness ? 1.0f : 0.0f);
+			if (useRoughness) {
+				glActiveTexture(GL_TEXTURE9);
+				glBindTexture(GL_TEXTURE_2D, cache.roughnessTexture);
+				shader->SetUniform("material.roughness_map", 9);
+			}
+
+			const bool useMetallic = cache.metallicTexture != 0;
+			shader->SetUniform("material.use_metallic", useMetallic ? 1.0f : 0.0f);
+			if (useMetallic) {
+				glActiveTexture(GL_TEXTURE10);
+				glBindTexture(GL_TEXTURE_2D, cache.metallicTexture);
+				shader->SetUniform("material.metallic_map", 10);
+			}
+
+			const bool useEmission = cache.emissiveTexture != 0;
+			shader->SetUniform("material.use_emission", useEmission ? 1.0f : 0.0f);
+			if (useEmission) {
+				glActiveTexture(GL_TEXTURE11);
+				glBindTexture(GL_TEXTURE_2D, cache.emissiveTexture);
+				shader->SetUniform("material.emission_map", 11);
+			}
+		}
 	}
 	// Light light = {
 	//	{2.f, 3.f, 2.f},	// position
@@ -1312,6 +1379,20 @@ namespace PAIN {
 			return;
 		}
 
+		// Combined tone + gamma shader (optimization: merges two passes into one)
+#ifdef PN_PLATFORM_ANDROID
+		std::filesystem::path tone_gamma_path = "engine/shaders/android_tone_gamma.vert";
+#else
+		std::filesystem::path tone_gamma_path = "engine/shaders/tone_gamma.vert";
+#endif
+		shader_opt = assets_loader->getAsset<Assets::Shader>(tone_gamma_path);
+		tone_gamma_shader = shader_opt.has_value() ? shader_opt.value() : tone_gamma_shader;
+
+		if (!tone_gamma_shader || tone_gamma_shader->GetRendererID() == 0) {
+			PN_CORE_WARN("Failed to create tone_gamma shader, falling back to separate tone+gamma passes");
+			tone_gamma_shader = nullptr;
+		}
+
 		// Bloom shader
 		shader_opt = assets_loader->getAsset<Assets::Shader>(bloom_path);
 		bloom_shader = shader_opt.has_value() ? shader_opt.value() : bloom_shader;
@@ -1647,6 +1728,16 @@ namespace PAIN {
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 			// pp_texture for ping-pong if needed in post-processing
+			// OPTIMIZATION: For Android, render post-process at reduced resolution
+#ifdef PN_PLATFORM_ANDROID
+			const float pp_scale = glm::clamp(GraphicsSettings::get().postprocess_resolution_scale, 0.25f, 1.0f);
+			pp_width = std::max(1, static_cast<int>(std::round(winWidth * pp_scale)));
+			pp_height = std::max(1, static_cast<int>(std::round(winHeight * pp_scale)));
+			PN_CORE_INFO("Post-process buffers at {}x{} ({} scale)", pp_width, pp_height, pp_scale);
+#else
+			pp_width = winWidth;
+			pp_height = winHeight;
+#endif
 			glGenFramebuffers(1, &pp_fbo);
 			glBindFramebuffer(GL_FRAMEBUFFER, pp_fbo);
 
@@ -1657,7 +1748,7 @@ namespace PAIN {
 				return;
 			}
 			glBindTexture(GL_TEXTURE_2D, pp_texture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, winWidth, winHeight, 0, GL_RGBA,
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, pp_width, pp_height, 0, GL_RGBA,
 						 GL_FLOAT, nullptr);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -1684,7 +1775,7 @@ namespace PAIN {
 				return;
 			}
 			glBindTexture(GL_TEXTURE_2D, pp2_texture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, winWidth, winHeight, 0, GL_RGBA,
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, pp_width, pp_height, 0, GL_RGBA,
 						 GL_FLOAT, nullptr);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -2195,9 +2286,19 @@ namespace PAIN {
 				continue; // Skip this submesh
 			}
 
-			const GeometryMaterialState materialState =
-				BuildGeometryMaterialState(assetManager, component, i);
-			ApplyGeometryMaterialState(geometry_shader, materialState);
+			// ========================================
+			// PERFORMANCE OPTIMIZATION: Use Cached Material State
+			// submeshCaches are populated once in InitializeModelRenderer
+			// Avoids per-frame BuildGeometryMaterialState asset lookups
+			// ========================================
+			if (i < component.submeshCaches.size() && component.submeshCaches[i].cacheValid) {
+				ApplyCachedGeometryMaterialState(geometry_shader, component.submeshCaches[i]);
+			} else {
+				// Fallback: build material state per-frame (shouldn't happen normally)
+				const GeometryMaterialState materialState =
+					BuildGeometryMaterialState(assetManager, component, i);
+				ApplyGeometryMaterialState(geometry_shader, materialState);
+			}
 
 			// animation
 
@@ -2356,9 +2457,17 @@ namespace PAIN {
 			if (submesh.materialIndex >= component.materials.size())
 				continue;
 
-			const GeometryMaterialState state =
-				BuildGeometryMaterialState(assetManager, component, i);
-			ApplyGeometryMaterialState(geometry_shader, state);
+			// ========================================
+			// PERFORMANCE OPTIMIZATION: Use Cached Material State
+			// ========================================
+			if (i < component.submeshCaches.size() && component.submeshCaches[i].cacheValid) {
+				ApplyCachedGeometryMaterialState(geometry_shader, component.submeshCaches[i]);
+			} else {
+				// Fallback: build material state per-frame
+				const GeometryMaterialState state =
+					BuildGeometryMaterialState(assetManager, component, i);
+				ApplyGeometryMaterialState(geometry_shader, state);
+			}
 
 			glDrawElementsInstanced(
 				GL_TRIANGLES, submesh.indexCount, GL_UNSIGNED_INT,
@@ -3574,6 +3683,7 @@ namespace PAIN {
 			// save scene_tex to final_texture first
 			if (postprocess_passes % 2) {
 				glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+				glViewport(0, 0, winWidth, winHeight);
 				passthrough_shader->Bind();
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, pp_texture);
@@ -3588,6 +3698,7 @@ namespace PAIN {
 				const unsigned int src_tex = final_texture;
 
 				glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
+				glViewport(0, 0, pp_width, pp_height);
 				bloom_shader->Bind();
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, src_tex);
@@ -3618,6 +3729,7 @@ namespace PAIN {
 						postprocess_passes % 2 == 0 ? pp_texture : pp2_texture;
 
 					glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
+					glViewport(0, 0, pp_width, pp_height);
 
 					glActiveTexture(GL_TEXTURE0);
 					glBindTexture(GL_TEXTURE_2D, src_tex);
@@ -3637,6 +3749,7 @@ namespace PAIN {
 				const unsigned int bloom_tex = pp_texture;
 
 				glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
+				glViewport(0, 0, pp_width, pp_height);
 				bloom_blend_shader->Bind();
 
 				glActiveTexture(GL_TEXTURE0);
@@ -3659,6 +3772,7 @@ namespace PAIN {
 				const unsigned int src_tex = pp2_texture;
 
 				glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+				glViewport(0, 0, winWidth, winHeight);
 				passthrough_shader->Bind();
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, src_tex);
@@ -3673,6 +3787,7 @@ namespace PAIN {
 
 		// tone mapping pass
 		// do after bloom for HDR rendering!
+		// OPTIMIZATION: Combine tone mapping + gamma into single pass when tone_gamma_shader available
 		{
 			const unsigned int dest_fbo =
 				postprocess_passes % 2 == 0 ? pp_fbo : final_fbo;
@@ -3680,15 +3795,36 @@ namespace PAIN {
 				postprocess_passes % 2 == 0 ? final_texture : pp_texture;
 
 			glCheck(glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo));
-			tone_shader->Bind();
-			glCheck(glActiveTexture(GL_TEXTURE0));
-			glCheck(glBindTexture(GL_TEXTURE_2D, src_tex));
-			glCheck(tone_shader->SetUniform("tex", 0));
-			glCheck(tone_shader->SetUniform(
-				"exposure", GraphicsSettings::get().tone_mapping_exposure));
-			glCheck(tone_shader->SetUniform(
-				"toneMapMode",
-				static_cast<float>(GraphicsSettings::get().tone_mapping_mode)));
+			// Set viewport: use pp resolution for pp_fbo, full resolution for final_fbo
+			glCheck(glViewport(0, 0, dest_fbo == pp_fbo ? pp_width : winWidth, 
+							  dest_fbo == pp_fbo ? pp_height : winHeight));
+			
+			// Use combined tone+gamma shader if available (eliminates one full-screen pass)
+			if (tone_gamma_shader) {
+				tone_gamma_shader->Bind();
+				glCheck(glActiveTexture(GL_TEXTURE0));
+				glCheck(glBindTexture(GL_TEXTURE_2D, src_tex));
+				glCheck(tone_gamma_shader->SetUniform("tex", 0));
+				glCheck(tone_gamma_shader->SetUniform(
+					"exposure", GraphicsSettings::get().tone_mapping_exposure));
+				glCheck(tone_gamma_shader->SetUniform(
+					"toneMapMode",
+					static_cast<float>(GraphicsSettings::get().tone_mapping_mode)));
+				glCheck(tone_gamma_shader->SetUniform(
+					"u_gamma", GraphicsSettings::get().gamma_value));
+			}
+			else {
+				tone_shader->Bind();
+				glCheck(glActiveTexture(GL_TEXTURE0));
+				glCheck(glBindTexture(GL_TEXTURE_2D, src_tex));
+				glCheck(tone_shader->SetUniform("tex", 0));
+				glCheck(tone_shader->SetUniform(
+					"exposure", GraphicsSettings::get().tone_mapping_exposure));
+				glCheck(tone_shader->SetUniform(
+					"toneMapMode",
+					static_cast<float>(GraphicsSettings::get().tone_mapping_mode)));
+			}
+			
 			glCheck(glBindVertexArray(empty_vao));
 			glCheck(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
 			++postprocess_passes;
@@ -3715,6 +3851,8 @@ namespace PAIN {
 					postprocess_passes % 2 == 0 ? final_texture : pp_texture;
 
 				glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
+				glViewport(0, 0, dest_fbo == pp_fbo ? pp_width : winWidth, 
+						  dest_fbo == pp_fbo ? pp_height : winHeight);
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, src_tex);
 				blur_shader->SetUniform("is_horizontal_pass", i % 2 ? 0.f : 1.f);
@@ -3731,13 +3869,16 @@ namespace PAIN {
 #endif
 
 		// gamma correction
-		if (GraphicsSettings::get().gamma_correction) {
+		// OPTIMIZATION: Skip if using combined tone+gamma shader
+		if (GraphicsSettings::get().gamma_correction && !tone_gamma_shader) {
 			const unsigned int dest_fbo =
 				postprocess_passes % 2 == 0 ? pp_fbo : final_fbo;
 			const unsigned int src_tex =
 				postprocess_passes % 2 == 0 ? final_texture : pp_texture;
 
 			glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
+			glViewport(0, 0, dest_fbo == pp_fbo ? pp_width : winWidth, 
+					  dest_fbo == pp_fbo ? pp_height : winHeight);
 			gamma_shader->Bind();
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, src_tex);
@@ -3760,6 +3901,7 @@ namespace PAIN {
 		// passes
 		if (postprocess_passes % 2) {
 			glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+			glViewport(0, 0, winWidth, winHeight);
 			passthrough_shader->Bind();
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, pp_texture);
@@ -3779,6 +3921,7 @@ namespace PAIN {
 
 		if (presentToSwapchain) {
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glViewport(0, 0, winWidth, winHeight);
 			passthrough_shader->Bind();
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, final_texture);

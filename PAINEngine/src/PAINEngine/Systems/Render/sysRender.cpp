@@ -143,6 +143,10 @@ namespace PAIN {
 					cache.roughness = material->useOverrides ? material->roughnessOverride
 															 : materialAsset->roughness;
 
+					// Cache emission override state
+					cache.useEmissionOverride = material->useOverrides;
+					cache.emissionOverride = material->useOverrides ? material->emissiveOverride : glm::vec3(0.0f);
+
 					// Helper lambda to get GL texture handle from GUID
 					auto getTextureHandle = [&](const Assets::GUID& guid) -> GLuint {
 						if (!guid.IsValid())
@@ -188,6 +192,24 @@ namespace PAIN {
 						material->useOverrides
 							? material->opacityTextureOverride
 							: assetManager->findGUID(materialAsset->opacityTexturePath));
+
+					// ========================================
+					// ORM Channel Mask Detection
+					// Detect if roughness/metallic/ao textures are packed into a single ORM texture
+					// ========================================
+					const bool sameRoughMetalTexture = cache.roughnessTexture != 0 && 
+						cache.roughnessTexture == cache.metallicTexture;
+					const bool sameAoRoughTexture = cache.aoTexture != 0 && 
+						cache.aoTexture == cache.roughnessTexture;
+
+					// If textures are shared, likely packed ORM
+					if (sameRoughMetalTexture) {
+						cache.roughnessChannelMask = glm::vec3(0.0f, 1.0f, 0.0f);  // G = Roughness
+						cache.metallicChannelMask = glm::vec3(0.0f, 0.0f, 1.0f);   // B = Metallic
+					}
+					if (sameAoRoughTexture) {
+						cache.aoChannelMask = glm::vec3(1.0f, 0.0f, 0.0f);  // R = AO
+					}
 
 					cache.cacheValid = true;
 				}

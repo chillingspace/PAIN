@@ -262,6 +262,8 @@ namespace PAIN {
 		std::array<unsigned int, 2> volumetric_textures{0, 0};
 		int minimap_width = 0;
 		int minimap_height = 0;
+		int pp_width = 0;  // post-process render width (may be < winWidth on Android)
+		int pp_height = 0; // post-process render height (may be < winHeight on Android)
 		int volumetric_width = 0;
 		int volumetric_height = 0;
 		int volumetric_history_index = 0;
@@ -307,6 +309,7 @@ namespace PAIN {
 		std::shared_ptr<Assets::Shader> blur_shader = nullptr;
 		std::shared_ptr<Assets::Shader> bloom_shader = nullptr;
 		std::shared_ptr<Assets::Shader> tone_shader = nullptr;
+		std::shared_ptr<Assets::Shader> tone_gamma_shader = nullptr;
 		std::shared_ptr<Assets::Shader> bloom_blend_shader = nullptr;
 		std::shared_ptr<Assets::Shader> minimap_wall_shader = nullptr;
 		std::shared_ptr<Assets::Shader> volumetric_shader = nullptr;

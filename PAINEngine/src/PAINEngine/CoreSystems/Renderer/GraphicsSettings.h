@@ -83,14 +83,20 @@ namespace PAIN {
 		float blur_strength = 0.f;
 
 		bool bloom = true;
-		float bloom_threshold = 2.f;			// generally [0.8,1.5] - min brightness to bloom. 0 = disabled(technically blooms everything but why would we want that)
-		float bloom_blur_strength = 1.f;	// generally [0.5,10] - higher = bloomier, BUT SLOWER. bloom blur strength is how big the blur radius is when blurring the bright areas.
-		float bloom_strength = 1.f;		// generally [0.0,5.0] - bloom strength is how visible the bloom is when blended back onto the scene. 
 		float global_light_intensity = 1.5f;
+
+		// Bloom settings - use macros to set platform-specific defaults
 		#ifdef PN_PLATFORM_ANDROID
-		int bloom_quality = 2;		// mobile default for lower thermal load
+		// OPTIMIZED: Reduced bloom for mobile thermal performance
+		int bloom_quality = 2;					// mobile default for lower thermal load
+		float bloom_blur_strength = 0.8f;		// reduced from 1.0f for mobile
+		float bloom_strength = 0.8f;			// reduced from 1.0f, compensated by threshold
+		float bloom_threshold = 1.8f;			// slightly lower to catch more blooms with lower strength
 		#else
-		int bloom_quality = 4;		// number of blur passes for bloom. higher = bloomier, REPRESENTS GAUSSIAN BLUR PASSES, SO MINIMALLY 2
+		int bloom_quality = 4;					// number of blur passes for bloom
+		float bloom_blur_strength = 1.f;		// generally [0.5,10] - higher = bloomier, BUT SLOWER
+		float bloom_strength = 1.f;				// generally [0.0,5.0] - bloom strength is how visible the bloom is
+		float bloom_threshold = 2.f;			// generally [0.8,1.5] - min brightness to bloom
 		#endif
 
 		TONE_MAPPING_TYPES tone_mapping_mode = TONE_MAPPING_TYPES::ACES;
@@ -121,33 +127,42 @@ namespace PAIN {
 		int android_target_fps = 0; // 0 = no explicit software cap.
 		bool android_battery_saver_mode = false;
 		int android_battery_saver_fps = 30;
+
+		// OPTIMIZED: Post-process at reduced resolution to reduce thermal load
+		// Renders bloom/blur/tone-map at scale*full_resolution, then upscales to full
+		// Default 0.75 balances quality vs performance; use 0.5 for maximum savings
+		float postprocess_resolution_scale = 0.75f;
 #endif
 
 		// volumetric lighting (god rays / light shafts)
 #ifdef PN_PLATFORM_ANDROID
+		// OPTIMIZED: Reduced volumetric steps for mobile thermal performance
+		// Previous: volumetric_steps = 10, temporal_blend = 0.85
+		// Now: volumetric_steps = 6, temporal_blend = 0.90 (smoother at lower steps)
 		bool volumetric = true;
+		float volumetric_intensity = 0.5f;
+		int   volumetric_steps = 6;           // reduced from 10 for mobile GPU
+		float volumetric_max_dist = 40.0f;
+		float volumetric_scatter = 0.f;
+		float volumetric_resolution_scale = 0.4f; // already conservative
+		int   volumetric_max_lights = 4;      // mobile preset cap
+		float volumetric_temporal_blend = 0.90f; // increased from 0.85 for smoother at lower steps
+		float volumetric_jitter_strength = 1.0f;
+		float volumetric_history_clamp = 0.35f;
+		int   volumetric_selection_hysteresis_frames = 3;
 #else
 		bool volumetric = true;
-#endif
 		float volumetric_intensity = 0.5f;   // overall brightness; start low
-#ifdef PN_PLATFORM_ANDROID
-		int   volumetric_steps = 10;           // mobile quality preset
-#else
 		int   volumetric_steps = 24;           // ray march steps; keep low and rely on lower-resolution upsampling
-#endif
 		float volumetric_max_dist = 40.0f;     // max ray length in world units
 		float volumetric_scatter = 0.f;       // Mie g: 0=uniform, 1=pure forward
-#ifdef PN_PLATFORM_ANDROID
-		float volumetric_resolution_scale = 0.4f; // mobile preset: lower resolution
-		int   volumetric_max_lights = 4;      // mobile preset cap
-#else
 		float volumetric_resolution_scale = 0.5f; // render volumetrics at reduced resolution, then upscale additively
 		int   volumetric_max_lights = 4;      // separate cap from total scene lights to control cost
-#endif
 		float volumetric_temporal_blend = 0.85f; // low-res history stabilization; higher = steadier but more trailing
 		float volumetric_jitter_strength = 1.0f; // offsets ray-march layers so temporal filtering can smooth them out
 		float volumetric_history_clamp = 0.35f; // reject stale history when current and previous lighting diverge
 		int   volumetric_selection_hysteresis_frames = 3; // keep recently visible cones alive briefly near frustum edges
+#endif
 
 		// animation
 		bool interpolate_animation{ true };		// smoother animations at the expense of performance
@@ -201,6 +216,46 @@ namespace PAIN {
 
 		// optimisation
 		bool use_instanced_rendering = true;
+
+		// ========================================
+		// THERMAL THROTTLE SYSTEM
+		// Dynamic quality scaling based on GPU thermal state
+		// ========================================
+		struct ThermalThrottleState {
+			bool enabled = false;
+			int frame_count = 0;
+			float gpu_time_avg = 0.0f;
+			float threshold_ms = 4.0f;  // If frame > 4ms, reduce quality
+			
+			enum class QualityLevel : int {
+				ULTRA = 0,   // Full quality (default)
+				HIGH = 1,     // -1 bloom quality, reduced volumetric
+				MEDIUM = 2,   // -2 bloom quality, minimal volumetric  
+				LOW = 3,      // No bloom, disabled volumetric
+			};
+			QualityLevel currentLevel = QualityLevel::ULTRA;
+			
+			// Quality level presets
+			struct QualityPreset {
+				int bloom_quality_override = -1;  // -1 = use default
+				int volumetric_steps_override = -1;
+				float volumetric_resolution_scale_override = -1.0f;
+				bool volumetric_enabled = true;
+			};
+			
+			// Static presets that don't change at runtime
+			static constexpr QualityPreset presets[4] = {
+				{-1, -1, -1.0f, true},           // ULTRA: use defaults
+				{1, 4, 0.3f, true},              // HIGH: reduced bloom, volumetric
+				{1, 2, 0.25f, true},            // MEDIUM: minimal bloom and volumetric
+				{0, 2, 0.2f, false}             // LOW: no bloom, minimal volumetric
+			};
+			
+			// Runtime state for smooth transitions
+			float transition_timer = 0.0f;
+			static constexpr float MIN_STABLE_FRAMES_BEFORE_RECOVERY = 120.0f;  // 2 seconds at 60fps
+			static constexpr float RECOVERY_THRESHOLD_MS = 3.0f;  // Must be below this for 2 seconds to recover
+		} thermalThrottle;
 
 		// minimap
 		bool minimap_enabled = false;

@@ -82,8 +82,9 @@ namespace PAIN {
         // ========================================
         // PERFORMANCE OPTIMIZATION: Texture Cache
         // ========================================
-        // Caches texture handles to avoid AssetManager lookups every frame
+        // Caches texture handles AND material properties to avoid AssetManager lookups every frame
         struct SubmeshTextureCache {
+            // Texture handles (GLuint = 0 means no texture)
             GLuint albedoTexture = 0;
             GLuint normalTexture = 0;
             GLuint metallicTexture = 0;
@@ -92,10 +93,19 @@ namespace PAIN {
             GLuint emissiveTexture = 0;
             GLuint opacityTexture = 0;
             
-            // Material properties (avoid lookups)
+            // Material properties
             glm::vec3 baseColor = glm::vec3(1.0f);
             float metallic = 0.0f;
             float roughness = 0.5f;
+            
+            // Emission override state (needed for geometry shader)
+            bool useEmissionOverride = false;
+            glm::vec3 emissionOverride = glm::vec3(0.0f);
+            
+            // Packed texture channel masks (for ORM textures)
+            glm::vec3 aoChannelMask = glm::vec3(1.0f, 0.0f, 0.0f);
+            glm::vec3 roughnessChannelMask = glm::vec3(0.0f, 1.0f, 0.0f);
+            glm::vec3 metallicChannelMask = glm::vec3(0.0f, 0.0f, 1.0f);
             
             bool cacheValid = false;
         };
