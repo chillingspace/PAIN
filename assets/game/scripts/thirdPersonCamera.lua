@@ -128,6 +128,12 @@ local CAM_PULL_IN_SPEED  = 5.0  -- fast snap-in when a wall is hit
 local CAM_PULL_OUT_SPEED =  2.0  -- slow ease-out when the wall clears
 local CAM_FORGET_SPEED   =  1.0  -- how fast minSafeDist recovers after clearing (lower, less jitter)
 
+-- Pipe traversal camera
+local pipeCamX, pipeCamY, pipeCamZ = nil, nil, nil
+local PIPE_CAM_BACK   = 2.0   -- units behind the player along the pipe axis
+local PIPE_CAM_UP     = 0.35  -- camera raised above pipe axis
+local PIPE_CAM_SMOOTH = 10.0  -- how fast the camera slides to the pipe view
+
 _G.CameraState = { yaw = yaw, pitch = pitch }
 local frozenCx, frozenCy, frozenCz = nil, nil, nil
 local frozenTx, frozenTy, frozenTz = nil, nil, nil
@@ -143,6 +149,7 @@ function _G.ResetThirdPersonCamera()
     lastMouseY = nil
     currentCamDist = nil
     minSafeDist    = nil
+    pipeCamX, pipeCamY, pipeCamZ = nil, nil, nil
     log("[Camera] Camera reset called externally")
 end
 
@@ -424,6 +431,56 @@ registerUpdate(function(dt)
     smoothX = smoothX + (px - smoothX) * smoothFactor * dt
     smoothY = smoothY + (py - smoothY) * smoothFactor * dt
     smoothZ = smoothZ + (pz - smoothZ) * smoothFactor * dt
+
+    -- Pipe traversal: camera follows player along pipe axis, staying behind them
+    local PS = _G.PlayerState
+    if PS and PS.inPipe and PS.pipeEntrancePos then
+        local ep = PS.pipeEntrancePos
+        local dirX, dirY, dirZ = PS.pipeDirX, PS.pipeDirY, PS.pipeDirZ
+
+        -- Project actual player pos onto the pipe axis to get traversal depth
+        local progress = (px - ep.x) * dirX + (py - ep.y) * dirY + (pz - ep.z) * dirZ
+
+        -- Camera sits PIPE_CAM_BACK units behind the player, raised above pipe axis.
+        -- Offset tapers to 0 over the last PIPE_CAM_BACK units so the camera
+        -- catches up to the exit instead of stopping short.
+        local fadeOut = math.max(0.0, math.min(1.0, (PS.pipeLen - progress) / PIPE_CAM_BACK))
+        local camT = progress - PIPE_CAM_BACK * fadeOut
+        local tx = ep.x + dirX * camT
+        local ty = ep.y + dirY * camT + PIPE_CAM_UP
+        local tz = ep.z + dirZ * camT
+
+        -- Look target: just ahead of the player along the pipe, same elevation as camera
+        local lookT = progress + 0.5
+        local lx = ep.x + dirX * lookT
+        local ly = ep.y + dirY * lookT + PIPE_CAM_UP
+        local lz = ep.z + dirZ * lookT
+
+        -- Use Z-forward as up if pipe is nearly vertical
+        local upX, upY, upZ = 0.0, 1.0, 0.0
+        if math.abs(dirY) > 0.9 then upX, upY, upZ = 0.0, 0.0, 1.0 end
+
+        -- Seed XZ from last camera position for smooth horizontal entry,
+        -- snap Y immediately so camera never tilts during descent
+        if not pipeCamX then
+            pipeCamX = frozenCx or tx
+            pipeCamY = ty
+            pipeCamZ = frozenCz or tz
+        end
+
+        local t = 1.0 - math.exp(-PIPE_CAM_SMOOTH * dt)
+        pipeCamX = pipeCamX + (tx - pipeCamX) * t
+        pipeCamY = pipeCamY + (ty - pipeCamY) * t
+        pipeCamZ = pipeCamZ + (tz - pipeCamZ) * t
+
+        frozenCx, frozenCy, frozenCz = pipeCamX, pipeCamY, pipeCamZ
+        frozenTx, frozenTy, frozenTz = lx, ly, lz
+
+        cameraSetTransform(pipeCamX, pipeCamY, pipeCamZ, lx, ly, lz, upX, upY, upZ)
+        return
+    end
+    -- Not in pipe: reset so next entry transitions from current position
+    pipeCamX, pipeCamY, pipeCamZ = nil, nil, nil
 
     -- Desired camera offset distance from the smoothed player position
     local desiredDist = math.sqrt(rx*rx + ry*ry + rz*rz)
