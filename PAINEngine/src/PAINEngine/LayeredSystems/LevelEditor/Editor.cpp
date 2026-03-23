@@ -15,6 +15,7 @@
 #include "Panels/DebugPanel.h"
 #include "Panels/PrefabsPanel.h"
 #include "Panels/AnimationPanel.h"
+#include "Panels/ScriptPanel.h"
 
 #include "CoreSystems/Renderer/sRenderer.h"
 #include "CoreSystems/Serialization/sSerialization.h"
@@ -79,6 +80,7 @@ namespace PAIN {
             registerPanel(std::make_shared<Panel::Tools>());
             registerPanel(std::make_shared<Panel::ResourcePanel>());
             registerPanel(std::make_shared<Panel::PrefabPanel>());
+            registerPanel(std::make_shared<Panel::ScriptPanel>());
 #endif
             
             // Call onAttach on all registered panels
