@@ -2131,7 +2131,8 @@ namespace PAIN {
 
 	// Shadow pass entry point: sysRender selects which light to render,
 	// while the renderer owns framebuffer binding and per-pass GPU state.
-	void WindowsRenderer::BeginShadowPass(const Light& l) {
+	// clearDepth: false when rendering dynamic shadows over cached static shadows
+	void WindowsRenderer::BeginShadowPass(const Light& l, bool clearDepth) {
 		if (l.getShadowFbo() == 0 || l.getShadowTexture() == 0) {
 			PN_CORE_WARN("[GL] Skipping shadow pass because the mapped light has no valid shadow targets.");
 			return;
@@ -2151,12 +2152,16 @@ namespace PAIN {
 		// critical for Mali GPU on android depth-only shadow rendering
 		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 #endif
-		#ifdef PN_PLATFORM_ANDROID
-		glClearDepthf(1.0f);
+		// Only clear depth buffer if this is a full shadow pass (static + dynamic)
+		// For dynamic-only passes over cached static shadows, skip clearing
+		if (clearDepth) {
+#ifdef PN_PLATFORM_ANDROID
+			glClearDepthf(1.0f);
 #else
-		glClearDepth(1.0f);
+			glClearDepth(1.0f);
 #endif
-		glClear(GL_DEPTH_BUFFER_BIT);
+			glClear(GL_DEPTH_BUFFER_BIT);
+		}
 	}
 
 	void WindowsRenderer::DrawShadows(const ModelRenderer& component,
@@ -3499,10 +3504,10 @@ namespace PAIN {
 			}
 			const bool hasShadowMap =
 				l.getShadowType() == Light::SHADOW_TYPES::MAPPED && l.getShadowTexture() != 0;
-			const bool supportsUnshadowedVolumetrics =
-				l.type == Light::TYPES::SPOTLIGHT || l.type == Light::TYPES::POINT;
-
-			if (!hasShadowMap && !supportsUnshadowedVolumetrics) {
+			
+			// REQUIRE shadow map for all volumetric lights to prevent light leaking
+			// through geometry. Without a shadow map, we cannot determine occlusion.
+			if (!hasShadowMap) {
 				continue;
 			}
 

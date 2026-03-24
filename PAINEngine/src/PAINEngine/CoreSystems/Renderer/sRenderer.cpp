@@ -195,15 +195,9 @@ namespace PAIN {
 			WindowsRenderer::winHeight = se.getHeight();
 			if (se.contextWasLost) {
 				PN_CORE_WARN("EGL context was lost - performing full renderer reinit");
-				if (g_ThermalProfiler) {
-					g_ThermalProfiler->ResetGraphicsContext();
-				}
 				w_renderer->Cleanup();
 				w_renderer->Init(services);
 			} else {
-				if (g_ThermalProfiler) {
-					g_ThermalProfiler->ResetGraphicsContext();
-				}
 				w_renderer->resizeDirty = true;
 			}
 			return false;
@@ -217,9 +211,6 @@ namespace PAIN {
 		});
 
 		dispatcher.Dispatch<Event::SurfaceDestroyed>([&](Event::SurfaceDestroyed&) -> bool {
-			if (g_ThermalProfiler) {
-				g_ThermalProfiler->ResetGraphicsContext();
-			}
 			WindowsRenderer::winWidth = 0;
 			WindowsRenderer::winHeight = 0;
 			w_renderer->resizeDirty = false;

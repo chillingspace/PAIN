@@ -115,7 +115,7 @@ namespace PAIN {
 		void clearBuffers();
 
 		// PASSES
-		void BeginShadowPass(const Light& l);
+		void BeginShadowPass(const Light& l, bool clearDepth = true);
 		void DrawShadows(const ModelRenderer& component, const glm::mat4& M,
 						 const Light& l);
 		void EndShadowPass();

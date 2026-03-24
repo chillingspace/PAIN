@@ -275,6 +275,7 @@ namespace PAIN {
 					light.fov = activeCamera->fov;
 					light.direction = activeCamera->forward;
 					light.aspect_ratio = activeCamera->aspect_ratio;
+					light.enableStaticShadowCaching = false;  // Camera light moves every frame
 				};
 
 				auto rendererService = services.lock()->get<sRenderer>();
@@ -449,53 +450,44 @@ namespace PAIN {
 				return;
 			static std::unordered_set<std::string> warnedNonShadowPipeAssets;
 
-			// Phase 1 keeps shadow rendering enabled, so the viewport must match the
-			// actual shadow target owned by each light rather than a stale global size.
 			auto renderGroup =
 				registry.group<ModelRenderer>(entt::get<WorldTransform, Entity::Layer>);
 
-			for (const Light& l : LightSources::get().getAll()) {
+			// Get mutable access to lights for shadow caching
+			auto& lightSources = LightSources::get();
+
+			for (auto& [lightKey, lightRef] : lightSources.getAllWithKeysMutable()) {
+				Light& l = lightRef.get();
 				if (l.getShadowType() != Light::SHADOW_TYPES::MAPPED)
 					continue;
 
 				glViewport(0, 0, l.getShadowResolution(), l.getShadowResolution());
-				rendererService->w_renderer->BeginShadowPass(l);
-
 				Frustum lightFrustum = l.getFrustum();
 
-				for (auto [entity, model, transform, layer] : renderGroup.each()) {
-					glm::mat4 model_xform = transform.matrix;
+				// Check if we need to update static shadows
+				const bool needsStaticUpdate = l.needsStaticShadowUpdate();
+				
+				// Phase 1: Render static shadow casters (only if dirty)
+				if (needsStaticUpdate) {
+					rendererService->w_renderer->BeginShadowPass(l, true); // Clear depth buffer
 
-					if (model.visible && !model.castShadows && model.cachedModelAsset) {
-						std::string assetPath = model.cachedModelAsset->vpath;
-						std::string loweredPath = assetPath;
-						std::transform(
-							loweredPath.begin(),
-							loweredPath.end(),
-							loweredPath.begin(),
-							[](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+					for (auto [entity, model, transform, layer] : renderGroup.each()) {
+						if (!model.visible || !model.castShadows || !model.isStatic)
+							continue;
 
-						if (loweredPath.find("pipe") != std::string::npos &&
-							warnedNonShadowPipeAssets.insert(assetPath).second) {
-							PN_CORE_WARN(
-								"Pipe occluder '{}' has castShadows=false; spotlight + volumetric light can leak through it.",
-								assetPath);
-						}
-					}
+						glm::mat4 model_xform = transform.matrix;
 
-					if (model.visible && model.castShadows) {
 						// FRUSTUM CULLING FOR SHADOWS
 						auto* boundingVol = registry.try_get<BoundingVolume>(entity);
 						const bool allowFrustumCull = (l.type != Light::TYPES::SPOTLIGHT);
 						if (allowFrustumCull && boundingVol && boundingVol->worldAABB.isValid()) {
 							if (!isAABBInFrustum(boundingVol->worldAABB, lightFrustum)) {
 								GraphicsSettings::get().stats.shadow_objects_culled++;
-								continue; // skip shadow casting for this object, outside light frustum
+								continue;
 							}
 						}
 
-						// OPTIMIZATION: Disable culling for thin geometry to prevent light leaks
-						// Default is front-face culling (set in BeginShadowPass) which reduces overdraw
+						// Handle double-sided shadows
 						if (model.doubleSidedShadows) {
 							glDisable(GL_CULL_FACE);
 						}
@@ -503,11 +495,46 @@ namespace PAIN {
 						GraphicsSettings::get().stats.shadow_objects_rendered++;
 						rendererService->w_renderer->DrawShadows(model, model_xform, l);
 
-						// Reset to front-face culling for next object
 						if (model.doubleSidedShadows) {
 							glEnable(GL_CULL_FACE);
 							glCullFace(GL_FRONT);
 						}
+					}
+
+					l.markStaticShadowsRendered();
+				} else {
+					// Static shadows are cached, start without clearing
+					rendererService->w_renderer->BeginShadowPass(l, false); // Preserve depth buffer
+				}
+
+				// Phase 2: Render dynamic shadow casters (every frame)
+				for (auto [entity, model, transform, layer] : renderGroup.each()) {
+					if (!model.visible || !model.castShadows || model.isStatic)
+						continue; // Skip static (already rendered or cached)
+
+					glm::mat4 model_xform = transform.matrix;
+
+					// FRUSTUM CULLING FOR SHADOWS
+					auto* boundingVol = registry.try_get<BoundingVolume>(entity);
+					const bool allowFrustumCull = (l.type != Light::TYPES::SPOTLIGHT);
+					if (allowFrustumCull && boundingVol && boundingVol->worldAABB.isValid()) {
+						if (!isAABBInFrustum(boundingVol->worldAABB, lightFrustum)) {
+							GraphicsSettings::get().stats.shadow_objects_culled++;
+							continue;
+						}
+					}
+
+					// Handle double-sided shadows
+					if (model.doubleSidedShadows) {
+						glDisable(GL_CULL_FACE);
+					}
+
+					GraphicsSettings::get().stats.shadow_objects_rendered++;
+					rendererService->w_renderer->DrawShadows(model, model_xform, l);
+
+					if (model.doubleSidedShadows) {
+						glEnable(GL_CULL_FACE);
+						glCullFace(GL_FRONT);
 					}
 				}
 
@@ -1054,6 +1081,10 @@ namespace PAIN {
 					light.L_intensity = lighting.light_intensity;
 					light.type = static_cast<Light::TYPES>(lighting.light_type);
 					light.setShadowResolution(lighting.shadow_resolution);
+
+					// Disable static shadow caching for spotlights since they can move with entities
+					// Directional lights (world light) can benefit from caching if they don't move
+					light.enableStaticShadowCaching = (light.type != Light::TYPES::SPOTLIGHT);
 
 					const bool hasMappedShadow =
 						light.getShadowType() == Light::SHADOW_TYPES::MAPPED &&

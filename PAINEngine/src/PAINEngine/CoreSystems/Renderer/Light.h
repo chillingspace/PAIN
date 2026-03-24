@@ -30,6 +30,7 @@ private:
 		unsigned int shadow_fbo = 0;
 		unsigned int shadow_texture = 0;
 		int shadow_map_resolution = 1024;
+		bool staticShadowsDirty = true;  // Static shadows need rendering initially
 
 		bool _createShadowMapBuffers() {
 			if (shadow_fbo || shadow_texture) {
@@ -115,6 +116,7 @@ private:
 		glm::vec3 position{};
 		glm::vec3 L_intensity = glm::vec3(0.1f);
 		TYPES type = TYPES::POINT;
+		bool enableStaticShadowCaching = true;  // Can be disabled for moving lights
 
 		// dont touch these values unless you know what youre doing
 		float aspect_ratio = 1.f / 1.f;
@@ -240,6 +242,31 @@ private:
 		int getShadowResolution() const {
 			return shadow_map_resolution;
 		}
+
+		// ========================================
+		// SHADOW CACHING SUPPORT
+		// ========================================
+		// For static objects, we can cache their shadow depth to avoid re-rendering every frame.
+		// This is particularly useful for directional lights where the light frustum is stable.
+		// IMPORTANT: Static shadow caching should be disabled for lights that move (camera light, spotlights following entities).
+		
+		// Returns true if static shadows need to be re-rendered
+		bool needsStaticShadowUpdate() const { 
+			return staticShadowsDirty || !enableStaticShadowCaching; 
+		}
+		
+		// Marks static shadows as dirty (need re-render)
+		void invalidateStaticShadows() { staticShadowsDirty = true; }
+		
+		// Marks static shadows as up-to-date (after rendering)
+		void markStaticShadowsRendered() { 
+			if (enableStaticShadowCaching) {
+				staticShadowsDirty = false; 
+			}
+		}
+		
+		// Called when shadow map is recreated (resolution change, etc.)
+		void onShadowMapRecreated() { staticShadowsDirty = true; }
 	};
 
 	class LightSources {
@@ -359,6 +386,34 @@ private:
 
 		std::vector<std::pair<std::string, std::reference_wrapper<const Light>>> getAllWithKeys() const {
 			std::vector<std::pair<std::string, std::reference_wrapper<const Light>>> out;
+			out.reserve(sources.size());
+
+			for (auto& [k, v] : sources) {
+				out.emplace_back(k, std::ref(v));
+			}
+
+			auto lightOrder = [](const std::string& key) {
+				if (key == "world") return 0;
+				if (key == "cam") return 1;
+				return 2;
+			};
+
+			std::stable_sort(out.begin(), out.end(), [&](const auto& lhs, const auto& rhs) {
+				const int lhsOrder = lightOrder(lhs.first);
+				const int rhsOrder = lightOrder(rhs.first);
+				if (lhsOrder != rhsOrder) {
+					return lhsOrder < rhsOrder;
+				}
+				return lhs.first < rhs.first;
+			});
+
+			return out;
+		}
+
+		// Mutable version for shadow caching and other modifications
+		std::vector<std::pair<std::string, std::reference_wrapper<Light>>>& getAllWithKeysMutable() {
+			static thread_local std::vector<std::pair<std::string, std::reference_wrapper<Light>>> out;
+			out.clear();
 			out.reserve(sources.size());
 
 			for (auto& [k, v] : sources) {
