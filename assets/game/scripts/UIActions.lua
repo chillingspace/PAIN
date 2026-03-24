@@ -682,10 +682,10 @@ local handlers = {
             setFullscreen(_G.GraphicsSettings.displayMode == "fullscreen")
         end
 
-        -- Save to settings file
-        if settingsSave then
-            settingsSave("gfx_displaymode", _G.GraphicsSettings.displayMode)
-        end
+        -- Save to settings file (disabled: fullscreen should not persist across launches)
+        -- if settingsSave then
+        --     settingsSave("gfx_displaymode", _G.GraphicsSettings.displayMode)
+        -- end
 
         updateGraphicsModeDisplay()
         printLog("[UI] graphics_Left -> " .. tostring(_G.GraphicsSettings.displayMode))
@@ -705,10 +705,10 @@ local handlers = {
             setFullscreen(_G.GraphicsSettings.displayMode == "fullscreen")
         end
 
-        -- Save to settings file
-        if settingsSave then
-            settingsSave("gfx_displaymode", _G.GraphicsSettings.displayMode)
-        end
+        -- Save to settings file (disabled: fullscreen should not persist across launches)
+        -- if settingsSave then
+        --     settingsSave("gfx_displaymode", _G.GraphicsSettings.displayMode)
+        -- end
 
         updateGraphicsModeDisplay()
         printLog("[UI] graphics_Right -> " .. tostring(_G.GraphicsSettings.displayMode))

@@ -294,16 +294,16 @@ registerUpdate(function(dt)
                     end
                 end
 
-                -- Fullscreen/Windowed (PC only)
-                if setFullscreen then
-                    local saved = settingsLoad("gfx_displaymode", "")
-                    if saved ~= "" then
-                        _G.GraphicsSettings = _G.GraphicsSettings or {}
-                        _G.GraphicsSettings.displayMode = saved
-                        setFullscreen(saved == "fullscreen")
-                        log("[GlobalAudio] Loaded display mode = " .. saved)
-                    end
-                end
+                -- Fullscreen/Windowed (disabled: always start windowed, don't persist across launches)
+                -- if setFullscreen then
+                --     local saved = settingsLoad("gfx_displaymode", "")
+                --     if saved ~= "" then
+                --         _G.GraphicsSettings = _G.GraphicsSettings or {}
+                --         _G.GraphicsSettings.displayMode = saved
+                --         setFullscreen(saved == "fullscreen")
+                --         log("[GlobalAudio] Loaded display mode = " .. saved)
+                --     end
+                -- end
             end
         end
     end

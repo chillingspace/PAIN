@@ -2723,12 +2723,10 @@ namespace PAIN {
 			glm::vec2 render_scale = texture_comp.texture_scale;
 			
 			if (registry.all_of<UIFollowsWorldEntity>(entity)) {
-				if (rect_comp.layout_dirty) {
-					// Write back so pos stays valid even when not dirty
-					texture_comp.pos = rect_comp.calculated_world_position;
-					texture_comp.texture_scale = glm::vec2(rect_comp.scale.x, rect_comp.scale.y);
-					rect_comp.layout_dirty = false;
-				}
+				// Write back so pos stays valid
+				texture_comp.pos = rect_comp.calculated_world_position;
+				texture_comp.texture_scale = glm::vec2(rect_comp.scale.x, rect_comp.scale.y);
+
 				render_pos = texture_comp.pos;
 				render_scale = texture_comp.texture_scale;
 			}
@@ -2763,12 +2761,16 @@ namespace PAIN {
 
 				// Only recalculate text_pos when layout changes
 				if (registry.all_of<UIFollowsWorldEntity>(entity)) {
-					if (rect_comp.layout_dirty) {
-						text_comp.text_pos = rect_comp.calculated_world_position;
-						text_comp.scale_factor = rect_comp.scale.x;
-						rect_comp.layout_dirty = false;
-					}
-					// text_comp.text_pos is now always valid even without dirty
+					auto window_service = services.lock()->get<Window::Window>();
+					glm::vec2 viewport = window_service->getFrameBuffer();
+
+					glm::vec2 screen_pos;
+					screen_pos.x = (rect_comp.calculated_world_position.x + 1.0f) * 0.5f * viewport.x;
+					screen_pos.y = (rect_comp.calculated_world_position.y + 1.0f) * 0.5f * viewport.y;
+
+					text_comp.text_pos = screen_pos;
+					// scale factor for floating UI is stored in z
+					text_comp.scale_factor = rect_comp.scale.z;
 				}
 				else if (rect_comp.layout_dirty) {
 					text_comp.text_pos = rect_comp.calculated_world_position;

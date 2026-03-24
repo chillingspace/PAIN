@@ -94,6 +94,7 @@ namespace PAIN {
         void SetScale(entt::entity entityId, glm::vec3 s) override;
         glm::vec3 GetRotation(entt::entity entityId) override;
         void SetRotation(entt::entity entityId, glm::vec3 r) override;
+        glm::vec3 GetWorldForward(entt::entity entityId) override;
 
         /* =========================================================================== */
         /*                                  Physics                                    */
@@ -146,6 +147,7 @@ namespace PAIN {
         std::pair<glm::vec3, glm::vec3> GetCameraOffsets(entt::entity entityId) override;
         glm::vec3 Camera_ResolveCollision(const glm::vec3& proposedPos, const glm::vec3& currentPos) override;
         glm::vec3 Camera_GetPositionWithCollision(const glm::vec3& playerPos, const glm::vec3& desiredPos, const entt::entity& e) override;
+        bool HasLineOfSight(const glm::vec3& from, const glm::vec3& to) override;
 
         /* =========================================================================== */
         /*                                Particles                                    */

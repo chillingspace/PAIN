@@ -80,6 +80,7 @@ namespace PAIN {
         virtual void SetScale(entt::entity entityId, glm::vec3 s) = 0;
         virtual glm::vec3 GetRotation(entt::entity entityId) = 0;
         virtual void SetRotation(entt::entity entityId, glm::vec3 r) = 0;
+        virtual glm::vec3 GetWorldForward(entt::entity entityId) = 0;
 
         /* =========================================================================== */
         /*                                  Physics                                    */
@@ -131,6 +132,7 @@ namespace PAIN {
         virtual std::pair<glm::vec3, glm::vec3> GetCameraOffsets(entt::entity entityId) = 0;
         virtual glm::vec3 Camera_ResolveCollision(const glm::vec3& proposedPos, const glm::vec3& currentPos) = 0;
         virtual glm::vec3 Camera_GetPositionWithCollision(const glm::vec3& playerPos, const glm::vec3& desiredPos, const entt::entity& e) = 0;
+        virtual bool HasLineOfSight(const glm::vec3& from, const glm::vec3& to) = 0;
 
         /* =========================================================================== */
         /*                                Particles                                    */

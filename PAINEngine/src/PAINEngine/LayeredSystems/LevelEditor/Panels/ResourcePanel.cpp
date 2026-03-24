@@ -13,6 +13,7 @@
 #include "ECS/Controller.h"
 #include "LayeredSystems/LevelEditor/Panels/ReflectionUI.h"
 #include "CoreSystems/Renderer/sRenderer.h"
+#include "ScriptPanel.h"
 
 std::shared_ptr<PAIN::Assets::Model> PAIN::Editor::Panel::ResourcePanel::MaterialPreview::sphere_model = nullptr;
 std::shared_ptr<PAIN::Assets::Shader> PAIN::Editor::Panel::ResourcePanel::MaterialPreview::shader = nullptr;
@@ -659,14 +660,13 @@ namespace PAIN {
 					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 					ImGui::ImageButton(std::string("##" + file.file_name).c_str(), icon, ImVec2(icon_size.x, icon_size.y), uv0, uv1);
 					if (ImGui::IsItemActivated() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-						addFilesToOpen(file);
-					}
-					
-					if (ImGui::IsItemActivated() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && file.type == Assets::Type::Script){
-
-						openPopUp("Script Editor");
-						current_script_file = file.path.string();
-						setScriptSaved(true);
+						if (file.type == Assets::Type::Script) {
+							if (m_script_panel)
+								m_script_panel->openScript(file.path.string());
+						}
+						else {
+							addFilesToOpen(file);
+						}
 					}
 
 					ImGui::PopStyleColor();
@@ -1827,6 +1827,9 @@ namespace PAIN {
 				path_service = services->get<Path::Path>();
 				asset_service = services->get<Assets::Manager>();
 
+				//Get script panel reference
+				m_script_panel = services->get<Editor>()->getPanel<ScriptPanel>().get();
+
 				//Init material preview
 				MaterialPreview temp_mat_prev;
 				temp_mat_prev.init(services);
@@ -1839,8 +1842,6 @@ namespace PAIN {
 				registerPopUp("New Folder", newFolderPopup("New Folder"));
 				registerPopUp("New Material", newMaterialPopup("New Material"));
 				registerPopUp("Info", defPopUp("Info"));
-
-				registerPopUp("Script Editor", scriptEditorPopup("Script Editor"), ImGuiWindowFlags_None);
 
 				//Initialize root and current path
 #ifdef PN_PLATFORM_ANDROID

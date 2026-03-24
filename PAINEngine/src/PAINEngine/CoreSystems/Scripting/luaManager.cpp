@@ -594,6 +594,11 @@ namespace PAIN {
             auto r = api_->GetRotation(entityId);
             return std::make_tuple(r.x, r.y, r.z);
             });
+        lua_.set_function("getWorldForward", [this](entt::entity entityId) {
+            if (!api_) return std::make_tuple(0.f, 0.f, -1.f);
+            auto f = api_->GetWorldForward(entityId);
+            return std::make_tuple(f.x, f.y, f.z);
+            });
 
         lua_.set_function("setRotation", [this](entt::entity entityId, float x, float y, float z) {
             if (!api_) return;
@@ -1469,6 +1474,9 @@ namespace PAIN {
         });
         lua_.set_function("setLightInnerAngle", [this](entt::entity entityId, float degrees) { if (api_) api_->SetLightInnerAngle(entityId, degrees); });
         lua_.set_function("setShadowType", [this](entt::entity entityId, int shadowTypeInt) {if (api_) api_->SetShadowType(entityId, shadowTypeInt); });
+        lua_.set_function("hasLineOfSight", [this](float x1, float y1, float z1, float x2, float y2, float z2) -> bool {
+            return api_ ? api_->HasLineOfSight({x1, y1, z1}, {x2, y2, z2}) : true;
+        });
 
         /* =========================================================================== */
         /*                                 Animations                                  */
