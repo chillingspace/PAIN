@@ -111,9 +111,9 @@ namespace PAIN {
 		float ibl_specular_strength = 1.0f;
 		float ibl_max_reflection_lod = 4.0f;
 #ifdef PN_PLATFORM_ANDROID
-		float ibl_roughness_bias = 0.10f;
-		float ibl_specular_mip_bias = 1.10f;
-		float ibl_specular_strength_scale = 0.75f;
+		float ibl_roughness_bias = 0.10f;       // compensates for ASTC vs BC7 roughness compression artifacts
+		float ibl_specular_mip_bias = 0.80f;    // reduced - was over-compensating for quantization artifacts
+		float ibl_specular_strength_scale = 0.80f;  // slight reduction for GPU sampling differences
 		float ibl_specular_prefilter_luma_clamp = 12.0f;
 		float ibl_specular_firefly_clamp = 7.5f;
 #else

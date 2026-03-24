@@ -1603,9 +1603,9 @@ namespace PAIN {
 
 #ifdef PN_PLATFORM_ANDROID
 			_createDeferredShadingBuffer(pos_texture, 3, GL_COLOR_ATTACHMENT0);
-			_createDeferredShadingBuffer(col_texture, 3, GL_COLOR_ATTACHMENT1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+			_createDeferredShadingBuffer(col_texture, 3, GL_COLOR_ATTACHMENT1);  // GL_RGBA16F — matches Windows precision for linear-space albedo after pow(2.2)
 			_createDeferredShadingBuffer(norm_texture, 3, GL_COLOR_ATTACHMENT2);
-			_createDeferredShadingBuffer(material_properties_texture, 3, GL_COLOR_ATTACHMENT3, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+			_createDeferredShadingBuffer(material_properties_texture, 3, GL_COLOR_ATTACHMENT3);  // GL_RGB16F — fixes roughness quantization causing mirror-like reflections
 			if (active_gbuffer_count >= 5) {
 				_createDeferredShadingBuffer(emission_texture, 3, GL_COLOR_ATTACHMENT4, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
 			}

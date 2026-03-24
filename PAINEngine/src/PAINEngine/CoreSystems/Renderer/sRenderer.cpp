@@ -43,10 +43,10 @@ namespace PAIN {
 		w_renderer = nullptr;
 	}
 	void sRenderer::onAttach() {
+#ifdef PN_PLATFORM_ANDROID
 		g_ThermalProfiler = std::make_unique<ThermalProfiler>();
 		g_ThermalProfiler->Init();
 
-#ifdef PN_PLATFORM_ANDROID
 		if (g_ThermalProfiler) {
 			auto window_sys = services->get<Window::Window>();
 			auto* androidWindow = static_cast<Window::Android_Window*>(window_sys.get());
