@@ -27,9 +27,14 @@ struct ThermalFrame {
     // GPU frequency (from sysfs on Android)
     float gpuFrequencyMHz = -1.0f;
     
+    // GPU utilization (from sysfs on Android, or estimated from frequency)
+    float gpuLoadPct = -1.0f;        // 0-100%, -1 if unavailable
+    
     // Validity flags
     int thermalValid = 0;
     int gpuFreqValid = 0;
+    int gpuLoadValid = 0;
+    int gpuLoadEstimated = 0;        // 1 if load was estimated from frequency
     
     std::vector<PassTiming> passTimings;
     std::chrono::steady_clock::time_point timestamp;
@@ -52,6 +57,7 @@ public:
     void UpdateThermalState();
     float GetCurrentThermalState() const { return currentThermalState; }
     float GetCurrentGpuFrequency() const { return currentGpuFreqMHz; }
+    float GetCurrentGpuLoad() const { return currentGpuLoadPct; }
 
     void EnableLogging(const std::string& csvPath);
     void DisableLogging();
@@ -85,14 +91,23 @@ private:
     float currentThermalState = -1.0f;
     float currentThermalHeadroom = -1.0f;
     float currentGpuFreqMHz = -1.0f;
+    float currentGpuLoadPct = -1.0f;
+    
+    // GPU frequency range for load estimation
+    float gpuFreqMinMHz = -1.0f;
+    float gpuFreqMaxMHz = -1.0f;
+    bool gpuLoadEstimated = false;  // True if load is estimated from frequency
 
 #ifdef PN_PLATFORM_ANDROID
     int thermalFd = -1;
     int gpuFreqFd = -1;
+    int gpuLoadFd = -1;
     void* thermalManager = nullptr;
     void* thermalLibHandle = nullptr;
     std::string thermalPath;
     std::string gpuFreqPath;
+    std::string gpuLoadPath;
+    std::string gpuAvailFreqPath;  // For load estimation
     
     void InitAndroidThermal();
     void UpdateAndroidThermal();

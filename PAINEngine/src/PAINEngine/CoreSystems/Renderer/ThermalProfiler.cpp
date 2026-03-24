@@ -70,6 +70,7 @@ void ThermalProfiler::EndFrame() {
 
     currentFrame.thermalValid = currentThermalState >= 0.0f ? 1 : 0;
     currentFrame.gpuFreqValid = currentGpuFreqMHz >= 0.0f ? 1 : 0;
+    currentFrame.gpuLoadValid = currentGpuLoadPct >= 0.0f ? 1 : 0;
 
     if (loggingEnabled && csvFile.is_open()) {
         WriteCSVRow(currentFrame);
@@ -113,6 +114,8 @@ void ThermalProfiler::UpdateThermalState() {
     currentFrame.thermalState = currentThermalState;
     currentFrame.thermalHeadroom = currentThermalHeadroom;
     currentFrame.gpuFrequencyMHz = currentGpuFreqMHz;
+    currentFrame.gpuLoadPct = currentGpuLoadPct;
+    currentFrame.gpuLoadEstimated = gpuLoadEstimated ? 1 : 0;
 }
 
 void ThermalProfiler::EnableLogging(const std::string& path) {
@@ -134,8 +137,8 @@ void ThermalProfiler::DisableLogging() {
 
 void ThermalProfiler::WriteCSVHeader() {
     if (!csvFile.is_open()) return;
-    csvFile << "FrameNumber,Timestamp,TotalFrameMs,ThermalState,ThermalHeadroom,GpuFreqMHz,"
-            << "ThermalValid,GpuFreqValid,PassName,CpuTimeMs\n";
+    csvFile << "FrameNumber,Timestamp,TotalFrameMs,ThermalState,ThermalHeadroom,GpuFreqMHz,GpuLoadPct,GpuLoadEst,"
+            << "ThermalValid,GpuFreqValid,GpuLoadValid,PassName,CpuTimeMs\n";
     csvFile.flush();
 }
 
@@ -149,14 +152,18 @@ void ThermalProfiler::WriteCSVRow(const ThermalFrame& frame) {
         csvFile << frame.frameNumber << "," << timeMs << ","
                 << frame.totalFrameTimeMs << "," << frame.thermalState << ","
                 << frame.thermalHeadroom << "," << frame.gpuFrequencyMHz << ","
+                << frame.gpuLoadPct << "," << frame.gpuLoadEstimated << ","
                 << frame.thermalValid << "," << frame.gpuFreqValid << ","
+                << frame.gpuLoadValid << ","
                 << "N/A,0\n";
     } else {
         for (const auto& pass : frame.passTimings) {
             csvFile << frame.frameNumber << "," << timeMs << ","
                     << frame.totalFrameTimeMs << "," << frame.thermalState << ","
                     << frame.thermalHeadroom << "," << frame.gpuFrequencyMHz << ","
+                    << frame.gpuLoadPct << "," << frame.gpuLoadEstimated << ","
                     << frame.thermalValid << "," << frame.gpuFreqValid << ","
+                    << frame.gpuLoadValid << ","
                     << pass.name << "," << pass.cpuTimeMs << "\n";
         }
     }
@@ -269,6 +276,13 @@ std::string FindThermalTempPath() {
 std::string FindGpuFreqPath() {
     namespace fs = std::filesystem;
     std::error_code ec;
+
+    // Google Pixel/Tensor Mali GPU (exact path)
+    static const char* pixelMaliFreq = "/sys/devices/platform/1f000000.mali/cur_freq";
+    if (fs::exists(pixelMaliFreq, ec) && !ec) {
+        return pixelMaliFreq;
+    }
+    ec.clear();
     
     static const char* kKnownCandidates[] = {
         "/sys/class/kgsl/kgsl-3d0/clock_mhz",
@@ -303,6 +317,106 @@ std::string FindGpuFreqPath() {
         const fs::path curFreq = entry.path() / "cur_freq";
         if (fs::exists(curFreq, ec) && !ec) return curFreq.string();
         ec.clear();
+    }
+
+    return "";
+}
+
+// GPU utilization/load paths
+// Qualcomm Adreno: /sys/class/kgsl/kgsl-3d0/gpubusy (format: "busy total")
+// ARM Mali: /sys/devices/platform/mali/utilisation (format: percentage)
+// Generic devfreq: /sys/class/devfreq/<gpu>/load (format: percentage)
+// Google Tensor/Pixel: Various paths under /sys/devices/platform/
+std::string FindGpuLoadPath() {
+    namespace fs = std::filesystem;
+    std::error_code ec;
+
+    // Qualcomm Adreno - gpubusy format: "busy_cycles total_cycles"
+    static const char* adrenoCandidates[] = {
+        "/sys/class/kgsl/kgsl-3d0/gpubusy",
+        "/sys/devices/platform/kgsl-3d0.0/kgsl/kgsl-3d0/gpubusy"
+    };
+
+    for (const char* candidate : adrenoCandidates) {
+        if (fs::exists(candidate, ec) && !ec) {
+            return std::string(candidate) + ":adreno";  // Tag to identify format
+        }
+        ec.clear();
+    }
+
+    // ARM Mali - utilisation format: percentage or "utilisation percentage"
+    // Includes Pixel/Tensor specific paths
+    static const char* maliCandidates[] = {
+        "/sys/devices/platform/mali/utilisation",
+        "/sys/devices/platform/mali.0/utilisation",
+        "/sys/devices/platform/mali-utgard/utilisation",
+        "/sys/class/misc/mali0/device/utilisation",
+        // Pixel/Tensor specific paths
+        "/sys/devices/platform/soc/enable_gpu_active_cycles",
+        "/sys/devices/platform/gpu/utilisation",
+        "/sys/devices/platform/gpu.0/utilisation",
+        "/sys/class/misc/gpu/device/utilisation"
+    };
+
+    for (const char* candidate : maliCandidates) {
+        if (fs::exists(candidate, ec) && !ec) {
+            return std::string(candidate) + ":mali";  // Tag to identify format
+        }
+        ec.clear();
+    }
+
+    // Generic devfreq - try to find GPU devfreq device with load
+    const fs::path devfreqRoot("/sys/class/devfreq");
+    if (fs::exists(devfreqRoot, ec) && !ec) {
+        for (const auto& entry : fs::directory_iterator(devfreqRoot, ec)) {
+            if (ec || !entry.is_directory(ec)) { ec.clear(); continue; }
+
+            const std::string name = ToLower(entry.path().filename().string());
+            // Check for GPU-related devfreq devices
+            if (name.find("gpu") == std::string::npos &&
+                name.find("kgsl") == std::string::npos &&
+                name.find("mali") == std::string::npos &&
+                name.find("adreno") == std::string::npos &&
+                name.find("3d") == std::string::npos) {
+                ec.clear();
+                continue;
+            }
+
+            // Check for various load/utilization files
+            static const char* loadFiles[] = {"load", "utilisation", "utilization", "busy_time", "gpu_load"};
+            for (const char* loadFile : loadFiles) {
+                const fs::path loadPath = entry.path() / loadFile;
+                if (fs::exists(loadPath, ec) && !ec) {
+                    return loadPath.string() + ":devfreq";
+                }
+                ec.clear();
+            }
+        }
+    }
+
+    // Try to find any device with "gpu" in the name under /sys/devices/platform
+    const fs::path platformRoot("/sys/devices/platform");
+    if (fs::exists(platformRoot, ec) && !ec) {
+        for (const auto& entry : fs::directory_iterator(platformRoot, ec)) {
+            if (ec || !entry.is_directory(ec)) { ec.clear(); continue; }
+
+            const std::string name = ToLower(entry.path().filename().string());
+            if (name.find("gpu") == std::string::npos &&
+                name.find("mali") == std::string::npos) {
+                ec.clear();
+                continue;
+            }
+
+            // Check for utilisation/load files
+            static const char* loadFiles[] = {"utilisation", "utilization", "load", "gpu_load", "busy_time"};
+            for (const char* loadFile : loadFiles) {
+                const fs::path loadPath = entry.path() / loadFile;
+                if (fs::exists(loadPath, ec) && !ec) {
+                    return loadPath.string() + ":mali";
+                }
+                ec.clear();
+            }
+        }
     }
 
     return "";
@@ -351,6 +465,71 @@ void ThermalProfiler::InitAndroidThermal() {
     gpuFreqPath = FindGpuFreqPath();
     if (!gpuFreqPath.empty()) {
         gpuFreqFd = open(gpuFreqPath.c_str(), O_RDONLY);
+        if (gpuFreqFd >= 0) {
+            PN_CORE_INFO("GPU frequency monitoring enabled: {}", gpuFreqPath);
+            
+            // Try to find available_frequencies for load estimation
+            gpuAvailFreqPath = gpuFreqPath.substr(0, gpuFreqPath.rfind('/')) + "/available_frequencies";
+            int availFd = open(gpuAvailFreqPath.c_str(), O_RDONLY);
+            if (availFd >= 0) {
+                char buf[1024];
+                ssize_t len = read(availFd, buf, sizeof(buf) - 1);
+                close(availFd);
+                if (len > 0) {
+                    buf[len] = '\0';
+                    // Parse space-separated frequencies (in kHz)
+                    // Format: "940000 890000 850000 ... 150000"
+                    float minFreqKHz = 1e15f, maxFreqKHz = 0.0f;
+                    std::string_view sv(buf, len);
+                    size_t pos = 0;
+                    while (pos < sv.size()) {
+                        // Skip whitespace
+                        while (pos < sv.size() && (sv[pos] == ' ' || sv[pos] == '\n')) pos++;
+                        if (pos >= sv.size()) break;
+                        
+                        // Parse number
+                        size_t end = pos;
+                        while (end < sv.size() && sv[end] != ' ' && sv[end] != '\n') end++;
+                        
+                        std::string numStr(sv.substr(pos, end - pos));
+                        float freqKHz = std::strtof(numStr.c_str(), nullptr);
+                        if (freqKHz > 0) {
+                            if (freqKHz < minFreqKHz) minFreqKHz = freqKHz;
+                            if (freqKHz > maxFreqKHz) maxFreqKHz = freqKHz;
+                        }
+                        pos = end;
+                    }
+                    if (minFreqKHz < maxFreqKHz && minFreqKHz > 0) {
+                        gpuFreqMinMHz = minFreqKHz / 1000.0f;  // kHz to MHz
+                        gpuFreqMaxMHz = maxFreqKHz / 1000.0f;  // kHz to MHz
+                        PN_CORE_INFO("GPU frequency range: {:.0f} - {:.0f} MHz", gpuFreqMinMHz, gpuFreqMaxMHz);
+                    } else {
+                        PN_CORE_WARN("Failed to parse GPU available_frequencies");
+                    }
+                }
+            }
+        }
+    }
+
+    gpuLoadPath = FindGpuLoadPath();
+    if (!gpuLoadPath.empty()) {
+        // Extract the actual path (before the format tag)
+        size_t colonPos = gpuLoadPath.find(':');
+        std::string actualPath = (colonPos != std::string::npos) 
+            ? gpuLoadPath.substr(0, colonPos) : gpuLoadPath;
+        gpuLoadFd = open(actualPath.c_str(), O_RDONLY);
+        if (gpuLoadFd >= 0) {
+            PN_CORE_INFO("GPU load monitoring enabled: {}", actualPath);
+        } else {
+            PN_CORE_WARN("GPU load path found but not readable: {} (errno: {})", actualPath, errno);
+        }
+    } else {
+        PN_CORE_WARN("GPU load monitoring unavailable - no readable sysfs path found");
+    }
+    
+    // Log if we can estimate from frequency
+    if (gpuFreqMinMHz > 0 && gpuFreqMaxMHz > gpuFreqMinMHz) {
+        PN_CORE_INFO("GPU load estimation enabled (from frequency range {:.0f}-{:.0f} MHz)", gpuFreqMinMHz, gpuFreqMaxMHz);
     }
 
     currentThermalHeadroom = -1.0f;
@@ -414,6 +593,52 @@ void ThermalProfiler::UpdateAndroidThermal() {
     } else {
         currentGpuFreqMHz = -1.0f;
     }
+
+    // Get GPU utilization/load (direct or estimated)
+    gpuLoadEstimated = false;
+    currentGpuLoadPct = -1.0f;  // Reset before attempting to read/estimate
+    
+    if (gpuLoadFd >= 0 && !gpuLoadPath.empty()) {
+        char buf[128];
+        lseek(gpuLoadFd, 0, SEEK_SET);
+        ssize_t len = read(gpuLoadFd, buf, sizeof(buf) - 1);
+        if (len > 0) {
+            buf[len] = '\0';
+            
+            // Determine format from the path tag
+            if (gpuLoadPath.find(":adreno") != std::string::npos) {
+                // Adreno format: "busy_cycles total_cycles"
+                float busy = 0.0f, total = 0.0f;
+                if (sscanf(buf, "%f %f", &busy, &total) == 2 && total > 0.0f) {
+                    currentGpuLoadPct = (busy / total) * 100.0f;
+                } else {
+                    currentGpuLoadPct = -1.0f;
+                }
+            } else if (gpuLoadPath.find(":mali") != std::string::npos || 
+                       gpuLoadPath.find(":devfreq") != std::string::npos) {
+                // Mali/devfreq format: percentage (may have extra text)
+                float load = std::strtof(buf, nullptr);
+                currentGpuLoadPct = (std::isfinite(load) && load >= 0.0f && load <= 100.0f) ? load : -1.0f;
+            } else {
+                // Unknown format, try parsing as percentage
+                float load = std::strtof(buf, nullptr);
+                currentGpuLoadPct = (std::isfinite(load) && load >= 0.0f && load <= 100.0f) ? load : -1.0f;
+            }
+        }
+    }
+    
+    // Fallback: Estimate GPU load from frequency if direct reading unavailable
+    if (currentGpuLoadPct < 0.0f && currentGpuFreqMHz > 0.0f && gpuFreqMinMHz > 0.0f && gpuFreqMaxMHz > gpuFreqMinMHz) {
+        // Estimate load as frequency position in range
+        // Low freq = low load, high freq = high load
+        float freqRange = gpuFreqMaxMHz - gpuFreqMinMHz;
+        float freqAboveMin = currentGpuFreqMHz - gpuFreqMinMHz;
+        currentGpuLoadPct = (freqAboveMin / freqRange) * 100.0f;
+        currentGpuLoadPct = std::max(0.0f, std::min(100.0f, currentGpuLoadPct));
+        gpuLoadEstimated = true;
+    } else if (currentGpuLoadPct < 0.0f) {
+        currentGpuLoadPct = -1.0f;
+    }
 }
 
 void ThermalProfiler::ShutdownAndroidThermal() {
@@ -431,6 +656,7 @@ void ThermalProfiler::ShutdownAndroidThermal() {
     thermalGetHeadroom = nullptr;
     hasHeadroomSample = false;
     currentThermalHeadroom = -1.0f;
+    currentGpuLoadPct = -1.0f;
 
     if (thermalFd >= 0) {
         close(thermalFd);
@@ -439,6 +665,10 @@ void ThermalProfiler::ShutdownAndroidThermal() {
     if (gpuFreqFd >= 0) {
         close(gpuFreqFd);
         gpuFreqFd = -1;
+    }
+    if (gpuLoadFd >= 0) {
+        close(gpuLoadFd);
+        gpuLoadFd = -1;
     }
 }
 
