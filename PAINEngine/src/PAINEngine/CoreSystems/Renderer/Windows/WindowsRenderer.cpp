@@ -1337,6 +1337,28 @@ namespace PAIN {
 			return;
 		}
 
+		// OPTIMIZATION: Create bone matrix UBO for animated meshes
+		// This replaces 100+ individual SetUniform calls with a single buffer update
+		if (bone_matrix_ubo == 0) {
+			glGenBuffers(1, &bone_matrix_ubo);
+			glBindBuffer(GL_UNIFORM_BUFFER, bone_matrix_ubo);
+			// MAX_BONES * sizeof(mat4) = 100 * 64 = 6400 bytes
+			glBufferData(
+				GL_UNIFORM_BUFFER,
+				static_cast<GLsizeiptr>(MAX_BONES * sizeof(glm::mat4)),
+				nullptr,
+				GL_DYNAMIC_DRAW);
+			glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		}
+
+		// Bind bone UBO to the geometry shader
+		const GLuint geometryProgram = geometry_shader->GetRendererID();
+		const GLuint boneBlockIndex = glGetUniformBlockIndex(geometryProgram, "BoneBlock");
+		if (boneBlockIndex != GL_INVALID_INDEX) {
+			glUniformBlockBinding(geometryProgram, boneBlockIndex, 1); // binding = 1 in shader
+			bone_matrix_ubo_bound_program = geometryProgram;
+		}
+
 		// Pass through shader
 		shader_opt = assets_loader->getAsset<Assets::Shader>(passthrough_path);
 		passthrough_shader =
@@ -2120,8 +2142,11 @@ namespace PAIN {
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 		glDisable(GL_BLEND);
-		// Two-sided shadow casting avoids leakage through thin/open geometry.
-		glDisable(GL_CULL_FACE);
+		// OPTIMIZATION: Use front-face culling for shadows by default.
+		// This reduces overdraw and shadow acne. Objects with doubleSidedShadows
+		// will temporarily disable culling to handle thin geometry.
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_FRONT);
 #ifdef PN_PLATFORM_ANDROID
 		// critical for Mali GPU on android depth-only shadow rendering
 		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
@@ -2314,13 +2339,30 @@ namespace PAIN {
 			if (!component.boneTransforms.empty()) {
 
 				// Animation calculation now handled in animation system
-				const auto& matrices = component.boneTransforms; // OR renderer.boneTransforms, depending on where you stored it
+				const auto& matrices = component.boneTransforms;
 
 				if (!matrices.empty()) {
-					for (size_t i = 0; i < matrices.size() && i < 100; ++i) { // 100 = MAX_BONES
-						std::string uniform_name = "u_BoneMatrices[" + std::to_string(i) + "]";
-						geometry_shader->SetUniform(uniform_name, matrices[i]);
+					// OPTIMIZATION: Use UBO for bone matrices instead of 100+ SetUniform calls
+					// Single buffer update is much faster than individual uniform calls
+					
+					// Rebind UBO if geometry shader program changed (hot-reload support)
+					const GLuint geometryProgram = geometry_shader->GetRendererID();
+					if (geometryProgram != bone_matrix_ubo_bound_program) {
+						const GLuint boneBlockIndex = glGetUniformBlockIndex(geometryProgram, "BoneBlock");
+						if (boneBlockIndex != GL_INVALID_INDEX) {
+							glUniformBlockBinding(geometryProgram, boneBlockIndex, 1); // binding = 1
+							bone_matrix_ubo_bound_program = geometryProgram;
+						}
 					}
+					
+					const size_t boneCount = std::min(matrices.size(), static_cast<size_t>(MAX_BONES));
+					const GLsizeiptr dataSize = static_cast<GLsizeiptr>(boneCount * sizeof(glm::mat4));
+					
+					glBindBuffer(GL_UNIFORM_BUFFER, bone_matrix_ubo);
+					glBufferSubData(GL_UNIFORM_BUFFER, 0, dataSize, matrices.data());
+					glBindBufferBase(GL_UNIFORM_BUFFER, 1, bone_matrix_ubo); // binding = 1
+					glBindBuffer(GL_UNIFORM_BUFFER, 0);
+					
 					geometry_shader->SetUniform("u_Animated", 1.0f);
 				}
 
@@ -4091,6 +4133,12 @@ namespace PAIN {
 			glDeleteBuffers(1, &pbr_light_ubo);
 			pbr_light_ubo = 0;
 			pbr_light_ubo_bound_program = 0;
+		}
+
+		if (bone_matrix_ubo != 0) {
+			glDeleteBuffers(1, &bone_matrix_ubo);
+			bone_matrix_ubo = 0;
+			bone_matrix_ubo_bound_program = 0;
 		}
 
 		if (geometry_vao != 0) {

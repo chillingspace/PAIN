@@ -30,8 +30,13 @@ layout(location = 2) uniform mat4 u_P;
 uniform float u_InvertUvY;
 uniform float u_Instanced;
 
+// OPTIMIZATION: Use UBO for bone matrices instead of individual uniforms
+// This reduces CPU overhead from 100+ SetUniform calls to a single buffer update
 const int MAX_BONES = 100;
-uniform mat4 u_BoneMatrices[MAX_BONES];
+layout(std140, binding = 1) uniform BoneBlock {
+    mat4 u_BoneMatrices[MAX_BONES];
+};
+
 uniform float u_Animated;
 
 mat4 ResolveModelMatrix() {

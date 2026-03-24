@@ -61,6 +61,8 @@ namespace PAIN {
         bool visible = true;
         bool castShadows = true;
         bool receiveShadows = true;
+        bool isStatic = false;              // Static objects can have cached shadows
+        bool doubleSidedShadows = false;    // Disable culling for thin geometry (prevents light leaks)
         uint32_t renderLayer = 0;
         int currentLOD = 0;
 
@@ -153,6 +155,8 @@ REFL_FIELD(materials)
 REFL_FIELD(visible)
 REFL_FIELD(castShadows)
 REFL_FIELD(receiveShadows)
+REFL_FIELD(isStatic, PAIN::Editor::Attributes::Tooltip("Mark as static for shadow caching optimization"))
+REFL_FIELD(doubleSidedShadows, PAIN::Editor::Attributes::Tooltip("Disable culling for thin geometry to prevent light leaks"))
 REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::ModelRenderer>);

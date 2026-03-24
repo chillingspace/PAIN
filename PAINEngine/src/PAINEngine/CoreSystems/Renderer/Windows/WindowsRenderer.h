@@ -256,6 +256,11 @@ namespace PAIN {
 		unsigned int pbr_light_ubo = 0;
 		unsigned int pbr_light_ubo_bound_program = 0;
 
+		// OPTIMIZATION: UBO for bone matrices (avoids 100+ SetUniform calls per animated mesh)
+		static constexpr int MAX_BONES = 100;
+		unsigned int bone_matrix_ubo = 0;
+		unsigned int bone_matrix_ubo_bound_program = 0;
+
 		unsigned int final_texture = 0; // for imgui/post-processing/display
 		unsigned int pp_texture = 0;	// for ping-pong for post-processing
 		unsigned int pp2_texture = 0;	// for ping-pong for post-processing (bloom etc)

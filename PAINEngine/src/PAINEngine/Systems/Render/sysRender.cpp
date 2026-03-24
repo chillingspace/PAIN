@@ -494,8 +494,20 @@ namespace PAIN {
 							}
 						}
 
+						// OPTIMIZATION: Disable culling for thin geometry to prevent light leaks
+						// Default is front-face culling (set in BeginShadowPass) which reduces overdraw
+						if (model.doubleSidedShadows) {
+							glDisable(GL_CULL_FACE);
+						}
+
 						GraphicsSettings::get().stats.shadow_objects_rendered++;
 						rendererService->w_renderer->DrawShadows(model, model_xform, l);
+
+						// Reset to front-face culling for next object
+						if (model.doubleSidedShadows) {
+							glEnable(GL_CULL_FACE);
+							glCullFace(GL_FRONT);
+						}
 					}
 				}
 
