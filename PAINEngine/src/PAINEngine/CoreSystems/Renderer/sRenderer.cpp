@@ -42,8 +42,12 @@ namespace PAIN {
 		}
 		w_renderer = nullptr;
 	}
+
+	// Thermal Profiler - Set to 1 to enable, 0 to disable
+#define PN_ENABLE_THERMAL_PROFILER 0
+
 	void sRenderer::onAttach() {
-#ifdef PN_PLATFORM_ANDROID
+#if PN_ENABLE_THERMAL_PROFILER && defined(PN_PLATFORM_ANDROID)
 		g_ThermalProfiler = std::make_unique<ThermalProfiler>();
 		g_ThermalProfiler->Init();
 
