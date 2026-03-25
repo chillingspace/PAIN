@@ -182,12 +182,14 @@ private:
 				if (type == SHADOW_TYPES::MAPPED && shadow_type == SHADOW_TYPES::MAPPED) {
 					if (shadow_fbo == 0 || shadow_texture == 0) {
 						if (!_createShadowMapBuffers()) {
+							PN_CORE_ERROR("[Light] setShadowType: Failed to create shadow buffers for existing MAPPED light");
 							shadow_type = SHADOW_TYPES::NONE;
 							if (num_shadowmapped_lights > 0) {
 								--num_shadowmapped_lights;
 							}
 							return false;
 						}
+						invalidateStaticShadows(); // New buffers created, need to re-render static shadows
 					}
 				}
 				return true;
@@ -195,13 +197,17 @@ private:
 
 			if (type == SHADOW_TYPES::MAPPED) {
 				if (num_shadowmapped_lights >= MAX_SHADOWMAPPED_LIGHTS) {
+					PN_CORE_WARN("[Light] setShadowType: Shadow budget exceeded ({}/{})", num_shadowmapped_lights, MAX_SHADOWMAPPED_LIGHTS);
 					return false;
 				}
 				if (!_createShadowMapBuffers()) {
+					PN_CORE_ERROR("[Light] setShadowType: Failed to create shadow buffers");
 					return false;
 				}
 				++num_shadowmapped_lights;
 				shadow_type = SHADOW_TYPES::MAPPED;
+				invalidateStaticShadows(); // New buffers created, need to re-render static shadows
+				PN_CORE_INFO("[Light] setShadowType: Successfully set to MAPPED (count={})", num_shadowmapped_lights);
 				return true;
 			}
 
@@ -227,6 +233,8 @@ private:
 					if (num_shadowmapped_lights > 0) {
 						--num_shadowmapped_lights;
 					}
+				} else {
+					invalidateStaticShadows(); // Resolution changed, need to re-render static shadows
 				}
 			}
 		}

@@ -278,12 +278,37 @@ namespace PAIN {
 					light.enableStaticShadowCaching = false;  // Camera light moves every frame
 				};
 
+				auto syncWorldLightFromActiveCamera = [&]() {
+					auto sceneManager = services.lock()->get<Scene::SceneManager>();
+					if (!sceneManager) {
+						return;
+					}
+
+					auto activeCamera = sceneManager->GetActiveCamera();
+					auto worldLightOpt = LightSources::get().get("world");
+					if (!activeCamera || !worldLightOpt.has_value()) {
+						return;
+					}
+
+					Light& worldLight = worldLightOpt.value();
+					// Position the directional light's shadow camera to follow the player
+					// The position is offset opposite to the light direction so the shadow map
+					// covers the area around the player
+					glm::vec3 lightDir = glm::normalize(worldLight.direction);
+					worldLight.position = activeCamera->pos - lightDir * worldLight.shadow_source_follow_distance;
+					
+					// Since the world light follows the camera, static shadow caching is not effective
+					// The light frustum changes as the camera moves
+					worldLight.enableStaticShadowCaching = false;
+				};
+
 				auto rendererService = services.lock()->get<sRenderer>();
 				if (!rendererService || !rendererService->w_renderer) {
 					return;
 				}
 
 				syncCameraLightFromActiveCamera();
+				syncWorldLightFromActiveCamera();
 				if (rendererService->w_renderer->resizeDirty) {
 					rendererService->w_renderer->resizeDirty = false;
 					rendererService->w_renderer->_initDeferredShadingBuffers();
@@ -449,6 +474,21 @@ namespace PAIN {
 			if (!rendererService || !rendererService->w_renderer)
 				return;
 			static std::unordered_set<std::string> warnedNonShadowPipeAssets;
+
+			// DEBUG: Log world light shadow state
+			if (auto worldLightOpt = LightSources::get().get("world")) {
+				Light& wl = worldLightOpt.value();
+				static int logCounter = 0;
+				if (++logCounter >= 300) { // Log every 300 frames (~5 seconds at 60fps)
+					logCounter = 0;
+					PN_CORE_INFO("[ShadowPass] World light: shadowType={}, shadowFBO={}, shadowTex={}, staticShadowsDirty={}, enableStaticShadowCaching={}",
+						static_cast<int>(wl.getShadowType()),
+						wl.getShadowFbo(),
+						wl.getShadowTexture(),
+						wl.needsStaticShadowUpdate(),
+						wl.enableStaticShadowCaching);
+				}
+			}
 
 			auto renderGroup =
 				registry.group<ModelRenderer>(entt::get<WorldTransform, Entity::Layer>);
@@ -918,34 +958,6 @@ namespace PAIN {
 			constexpr int kShadowMappedLightBudget = 4;
 			const int maxVolumetricLights =
 				std::clamp(GraphicsSettings::get().volumetric_max_lights, 1, 4);
-			static int worldShadowRestoreCooldownFrames = 0;
-			if (worldShadowRestoreCooldownFrames > 0) {
-				--worldShadowRestoreCooldownFrames;
-			}
-
-			const int inViewVolumetricDemand = static_cast<int>(std::count_if(
-				pending.begin(),
-				pending.end(),
-				[](const PendingLightUpdate& update) {
-					return update.requireMappedForVolumetric && update.inCameraView;
-				}));
-
-			const bool requireFullDynamicShadowBudget =
-				inViewVolumetricDemand >= maxVolumetricLights;
-			if (auto worldLightOpt = LightSources::get().get("world")) {
-				Light& worldLight = worldLightOpt.value();
-				if (requireFullDynamicShadowBudget &&
-					worldLight.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
-					worldLight.setShadowType(Light::SHADOW_TYPES::NONE);
-					worldShadowRestoreCooldownFrames = 20;
-				}
-				else if (!requireFullDynamicShadowBudget &&
-					worldShadowRestoreCooldownFrames == 0 &&
-					GraphicsSettings::get().world_light &&
-					worldLight.getShadowType() != Light::SHADOW_TYPES::MAPPED) {
-					worldLight.setShadowType(Light::SHADOW_TYPES::MAPPED);
-				}
-			}
 
 			// Recover from stale mapped-light state (e.g. shadow buffer creation failure).
 			// Mapped lights with no shadow texture should not consume the global mapped budget.
@@ -960,16 +972,18 @@ namespace PAIN {
 			}
 
 			int reservedShadowSlots = 0;
+			// Reserve slots for world and cam lights if they have MAPPED shadows enabled
 			for (const auto& [key, lightRef] : LightSources::get().getAllWithKeys()) {
 				if (key != "world" && key != "cam") {
 					continue;
 				}
 				const Light& l = lightRef.get();
-				if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED &&
-					l.getShadowTexture() != 0) {
+				// Reserve slot if the light wants MAPPED shadows (regardless of texture state)
+				if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
 					++reservedShadowSlots;
 				}
 			}
+			
 			const int entityShadowBudget =
 				std::max(0, kShadowMappedLightBudget - reservedShadowSlots);
 
@@ -1064,6 +1078,53 @@ namespace PAIN {
 				if (auto lightOpt = LightSources::get().get(update.lightName)) {
 					Light& light = lightOpt.value();
 					light.setShadowType(Light::SHADOW_TYPES::MAPPED);
+				}
+			}
+
+			// Phase 3: Ensure world light gets shadows if user enabled them (evict entity lights if needed)
+			// Only act if world light has MAPPED shadows enabled but no shadow texture (budget pressure)
+			{
+				auto worldLightOpt = LightSources::get().get("world");
+				if (worldLightOpt) {
+					Light& worldLight = worldLightOpt.value();
+					// Only help if user explicitly enabled shadows (shadowType is MAPPED)
+					// but the light doesn't have a shadow texture (couldn't get a slot)
+					if (worldLight.getShadowType() == Light::SHADOW_TYPES::MAPPED &&
+						worldLight.getShadowTexture() == 0) {
+						// Count how many entity lights have MAPPED shadows
+						int entityMappedCount = 0;
+						for (const auto& [key, lightRef] : LightSources::get().getAllWithKeys()) {
+							if (key == "world" || key == "cam") continue;
+							if (lightRef.get().getShadowType() == Light::SHADOW_TYPES::MAPPED) {
+								++entityMappedCount;
+							}
+						}
+						// If budget is full, evict the furthest entity light
+						if (entityMappedCount >= kShadowMappedLightBudget) {
+							// Find the entity light furthest from camera and demote it
+							float maxDist = -1.0f;
+							std::string toEvict;
+							for (const auto& [key, lightRef] : LightSources::get().getAllWithKeys()) {
+								if (key == "world" || key == "cam") continue;
+								const Light& l = lightRef.get();
+								if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
+									// Find matching update to get distance
+									for (const auto& update : pending) {
+										if (update.lightName == key && update.distanceToCamera > maxDist) {
+											maxDist = update.distanceToCamera;
+											toEvict = key;
+										}
+									}
+								}
+							}
+							if (!toEvict.empty()) {
+								if (auto evictLightOpt = LightSources::get().get(toEvict)) {
+									evictLightOpt.value().get().setShadowType(Light::SHADOW_TYPES::NONE);
+									PN_CORE_INFO("[LightingPass] Evicted entity light '{}' to make room for world light shadows", toEvict);
+								}
+							}
+						}
+					}
 				}
 			}
 

@@ -6,6 +6,7 @@
 #include "ECS/Controller.h"
 #include "CoreSystems/Scene/Scene.h"
 #include <CoreSystems/Scripting/EngineAPIAdapter.h>
+#include "CoreSystems/Renderer/Light.h"
 
 #include "LayeredSystems/LevelEditor/Panels/ReflectionUI.h"
 #include "CoreSystems/Windows/Window.h"
@@ -638,6 +639,57 @@ namespace PAIN {
                 bool using_wlight = gs.world_light;
                 if (ImGui::Checkbox("Using World Light", &using_wlight))
                     gs.world_light = using_wlight;
+
+                // World Light Shadow Settings
+                if (gs.world_light && scn_service->getWorldLight()) {
+                    Light* worldLight = scn_service->getWorldLight();
+                    ImGui::Indent(10.0f);
+                    
+                    ImGui::Text("World Light Shadow Settings");
+                    ImGui::Separator();
+                    
+                    // Direction
+                    if (ImGui::DragFloat3("Direction", glm::value_ptr(worldLight->direction), 0.01f, -1.0f, 1.0f)) {
+                        worldLight->direction = glm::normalize(worldLight->direction);
+                    }
+                    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Direction the light is shining (normalized).");
+                    
+                    // Position (for shadow camera placement)
+                    if (ImGui::DragFloat3("Shadow Position", glm::value_ptr(worldLight->position), 0.5f)) {}
+                    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Position of the shadow camera. For directional lights, this follows the camera when 'Follow Camera' is enabled.");
+                    
+                    // Shadow follow distance
+                    if (ImGui::DragFloat("Shadow Follow Distance", &worldLight->shadow_source_follow_distance, 1.0f, 5.0f, 100.0f)) {}
+                    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Distance the shadow camera follows the player. Larger values = wider shadow coverage.");
+                    
+                    // Shadow resolution
+                    int shadowRes = worldLight->getShadowResolution();
+                    if (ImGui::SliderInt("Shadow Resolution", &shadowRes, 512, 4096)) {
+                        worldLight->setShadowResolution(shadowRes);
+                    }
+                    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Higher resolution = sharper shadows but more GPU memory.");
+                    
+                    // Far plane (shadow rendering distance)
+                    if (ImGui::DragFloat("Shadow Far Plane", &worldLight->far_plane, 1.0f, 10.0f, 100.0f)) {}
+                    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Maximum distance shadows are rendered from the shadow camera.");
+                    
+                    // Shadow type toggle
+                    bool hasMappedShadow = worldLight->getShadowType() == Light::SHADOW_TYPES::MAPPED;
+                    if (ImGui::Checkbox("Enable Shadows", &hasMappedShadow)) {
+                        bool result = worldLight->setShadowType(hasMappedShadow ? Light::SHADOW_TYPES::MAPPED : Light::SHADOW_TYPES::NONE);
+                        if (!result && hasMappedShadow) {
+                            PN_CORE_WARN("[ScenesPanel] Failed to enable world light shadows - shadow budget exceeded");
+                        }
+                    }
+                    if (!hasMappedShadow && worldLight->getShadowType() != Light::SHADOW_TYPES::MAPPED) {
+                        ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.0f, 1.0f), "Shadow budget full - reduce entity shadows");
+                    }
+                    
+                    // Debug info
+                    ImGui::Text("Shadow FBO: %d, Texture: %d", worldLight->getShadowFbo(), worldLight->getShadowTexture());
+                    
+                    ImGui::Unindent(10.0f);
+                }
 
                 bool using_ibl = gs.ibl;
                 if (ImGui::Checkbox("Using IBL", &using_ibl))
