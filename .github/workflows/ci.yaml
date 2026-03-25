@@ -91,39 +91,43 @@ jobs:
 
       - name: Setup Software OpenGL (Mesa)
         run: |
-          # Download Mesa for Windows (software rendering for OpenGL 4.5 support)
+          # Download Mesa
           Invoke-WebRequest -Uri "https://github.com/pal1000/mesa-dist-win/releases/download/24.0.3/mesa3d-24.0.3-release-msvc.7z" -OutFile "mesa.7z"
           
-          # Extract the opengl32.dll (Requires 7zip, which is on windows-latest)
-          7z e mesa.7z x64/opengl32.dll -y
+          # Extract everything to a temp folder first
+          7z x mesa.7z -omesa_temp -y
           
-          # Copy to BOTH bin/Debug and bin/Release
-          # (One will fail depending on matrix, so we use -ErrorAction SilentlyContinue)
-          Copy-Item "opengl32.dll" "bin/${{ matrix.configuration }}/" -ErrorAction SilentlyContinue
+          # Find where opengl32.dll actually is and copy it
+          $mesaDll = Get-ChildItem -Path "mesa_temp" -Filter "opengl32.dll" -Recurse | Select-Object -First 1
+          if ($mesaDll) {
+            Copy-Item $mesaDll.FullName "bin/${{ matrix.configuration }}/"
+            Write-Host "Successfully copied opengl32.dll to bin/${{ matrix.configuration }}/"
+          } else {
+            Write-Error "Could not find opengl32.dll in Mesa archive!"
+          }
         shell: pwsh
 
       - name: Run executable and test for graceful exit
         run: |
           cd bin/${{ matrix.configuration }}
           
-          # Start the process
-          $proc = Start-Process .\Friends-Frog-ever.exe -PassThru
+          # Start process and REDIRECT output to a log file
+          $proc = Start-Process .\Friends-Frog-ever.exe -PassThru -RedirectStandardOutput "app_stdout.log" -RedirectStandardError "app_stderr.log"
           Write-Host "Process started with PID: $($proc.Id)"
           
-          # Wait for it to initialize
-          Start-Sleep -Seconds 10
+          Start-Sleep -Seconds 15 # Give it more time to init
           
-          # DIAGNOSTICS: Check if still running
           if ($proc.HasExited) {
-             Write-Error "Application exited unexpectedly with code $($proc.ExitCode) before test started."
+             Write-Host "--- APP STDOUT ---"
+             Get-Content "app_stdout.log" -ErrorAction SilentlyContinue
+             Write-Host "--- APP STDERR ---"
+             Get-Content "app_stderr.log" -ErrorAction SilentlyContinue
+             Write-Error "Application exited unexpectedly with code $($proc.ExitCode)."
              exit 1
           }
 
-          # DIAGNOSTICS: Check for Window Handle
           Write-Host "MainWindowHandle: $($proc.MainWindowHandle)"
           
-          # Attempt graceful close
-          Write-Host "Attempting CloseMainWindow()..."
           $success = $proc.CloseMainWindow()
           Write-Host "CloseMainWindow returned: $success"
 
@@ -132,14 +136,17 @@ jobs:
              taskkill /IM Friends-Frog-ever.exe 
           }
 
-          # Wait for exit
           $proc.WaitForExit(5000)
+          
+          # Print logs regardless of success to help debug
+          Write-Host "--- APP STDOUT ---"
+          Get-Content "app_stdout.log" -ErrorAction SilentlyContinue
+          
           if (!$proc.HasExited) {
-              Write-Error "${{ matrix.configuration }} build failed to exit gracefully."
               Stop-Process -Id $proc.Id -Force
+              Write-Error "${{ matrix.configuration }} build failed to exit gracefully."
               exit 1
           }
-          Write-Host "Application exited gracefully."
         shell: pwsh
 
   build-android:
