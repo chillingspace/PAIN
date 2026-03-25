@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Build3.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 3442968362014398986
+  },
+  "descriptor_version": 1,
+  "guid": "1eb84c15-dddb-a141-87cb-fc6117158943",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Build3.material"
+  }
+}

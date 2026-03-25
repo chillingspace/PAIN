@@ -13,9 +13,9 @@
                 },
                 "LocalTransform": {
                     "position": [
-                        23.85873031616211,
+                        7.071907043457031,
                         0.0,
-                        17.64920425415039
+                        11.774810791015625
                     ],
                     "rotation": [
                         0.0,
@@ -35,8 +35,8 @@
                     "isStatic": false,
                     "materials": [
                         {
-                            "albedoTextureOverride": "1c3470fa-7502-ed43-8d9e-123f089cc779",
-                            "aoTextureOverride": "033d5b32-dede-f947-af8e-9cca54d7f135",
+                            "albedoTextureOverride": "a7d20d82-edcf-9e43-a472-fcdf3d3d6a8c",
+                            "aoTextureOverride": "42a098c2-0b8b-c241-9ebe-8e44a9fe815b",
                             "baseColorOverride": [
                                 1.0,
                                 1.0,
@@ -49,22 +49,22 @@
                             ],
                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "materialGUID": "d623b3f8-5caf-e649-a783-729e6026dfb2",
+                            "materialGUID": "c1a6b5fd-5b24-6545-9358-65dd293c1d5e",
                             "metallicOverride": 1.0,
-                            "metallicTextureOverride": "033d5b32-dede-f947-af8e-9cca54d7f135",
-                            "normalTextureOverride": "0201b174-c121-9c4b-8920-c3ef05bb6ad5",
+                            "metallicTextureOverride": "42a098c2-0b8b-c241-9ebe-8e44a9fe815b",
+                            "normalTextureOverride": "d087bd8e-0cb4-ee4c-85bc-8ad4cb2a25e1",
                             "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "roughnessOverride": 1.0,
-                            "roughnessTextureOverride": "033d5b32-dede-f947-af8e-9cca54d7f135",
+                            "roughnessTextureOverride": "42a098c2-0b8b-c241-9ebe-8e44a9fe815b",
                             "useOverrides": false
                         }
                     ],
-                    "modelGUID": "154c6c51-982f-d845-b493-e30d07a80100",
+                    "modelGUID": "f89629ad-fef5-bf45-8454-eeb919b907ed",
                     "receiveShadows": true,
                     "visible": true
                 },
                 "Name": {
-                    "name": "Build2"
+                    "name": "Oiltank"
                 },
                 "RigidBody3D": {
                     "angular_velocity": [
@@ -74,13 +74,13 @@
                     ],
                     "collider_offset": [
                         0.0,
-                        3.5999999046325684,
+                        2.5,
                         0.0
                     ],
                     "collider_scale": [
-                        14.300000190734863,
-                        7.400000095367432,
-                        13.600000381469727
+                        3.4000000953674316,
+                        4.900000095367432,
+                        3.4000000953674316
                     ],
                     "motion_type": 0,
                     "physics_behavior": {
@@ -95,9 +95,9 @@
                     ]
                 }
             },
-            "entityGUID": "9deb9768-61b8-9846-bfdd-9bf720e4fdf3"
+            "entityGUID": "57da3616-98c8-b442-9c4e-d12d6be656c9"
         }
     ],
-    "prefabName": "Build2",
-    "rootEntityGUID": "9deb9768-61b8-9846-bfdd-9bf720e4fdf3"
+    "prefabName": "Oiltank",
+    "rootEntityGUID": "57da3616-98c8-b442-9c4e-d12d6be656c9"
 }

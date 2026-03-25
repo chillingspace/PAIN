@@ -1,0 +1,23 @@
+{
+  "asset_info": {
+    "name": "Oiltank_normal.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 7794760394787482675
+  },
+  "descriptor_version": 1,
+  "guid": "d087bd8e-0cb4-ee4c-85bc-8ad4cb2a25e1",
+  "import_settings": {
+    "android_allow_astc_hdr": false,
+    "android_bake_cubemap": false,
+    "android_compression": "ASTC_4x4",
+    "android_skybox_source_format": "R16G16B16A16",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Oiltank_normal.png"
+  }
+}

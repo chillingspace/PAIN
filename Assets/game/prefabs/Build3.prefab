@@ -13,15 +13,15 @@
                 },
                 "LocalTransform": {
                     "position": [
-                        23.85873031616211,
+                        7.698953628540039,
                         0.0,
-                        17.64920425415039
+                        13.349529266357422
                     ],
                     "rotation": [
-                        0.0,
-                        0.0,
-                        0.0,
-                        1.0
+                        -9.099629210140847e-07,
+                        -1.0,
+                        9.099629210140847e-07,
+                        8.280325210219264e-13
                     ],
                     "scale": [
                         1.0,
@@ -35,8 +35,8 @@
                     "isStatic": false,
                     "materials": [
                         {
-                            "albedoTextureOverride": "1c3470fa-7502-ed43-8d9e-123f089cc779",
-                            "aoTextureOverride": "033d5b32-dede-f947-af8e-9cca54d7f135",
+                            "albedoTextureOverride": "885b6561-18d4-984f-965c-83745c37a8c6",
+                            "aoTextureOverride": "59f54326-092b-944e-8d1b-044dc749ea17",
                             "baseColorOverride": [
                                 1.0,
                                 1.0,
@@ -49,22 +49,22 @@
                             ],
                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "materialGUID": "d623b3f8-5caf-e649-a783-729e6026dfb2",
+                            "materialGUID": "1eb84c15-dddb-a141-87cb-fc6117158943",
                             "metallicOverride": 1.0,
-                            "metallicTextureOverride": "033d5b32-dede-f947-af8e-9cca54d7f135",
-                            "normalTextureOverride": "0201b174-c121-9c4b-8920-c3ef05bb6ad5",
+                            "metallicTextureOverride": "59f54326-092b-944e-8d1b-044dc749ea17",
+                            "normalTextureOverride": "8e038399-9b38-454d-b050-63959ae5e80d",
                             "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "roughnessOverride": 1.0,
-                            "roughnessTextureOverride": "033d5b32-dede-f947-af8e-9cca54d7f135",
+                            "roughnessTextureOverride": "59f54326-092b-944e-8d1b-044dc749ea17",
                             "useOverrides": false
                         }
                     ],
-                    "modelGUID": "154c6c51-982f-d845-b493-e30d07a80100",
+                    "modelGUID": "d8c08d15-abf9-694a-a6e1-4b5d1f370185",
                     "receiveShadows": true,
                     "visible": true
                 },
                 "Name": {
-                    "name": "Build2"
+                    "name": "Build3"
                 },
                 "RigidBody3D": {
                     "angular_velocity": [
@@ -74,13 +74,13 @@
                     ],
                     "collider_offset": [
                         0.0,
-                        3.5999999046325684,
+                        1.899999976158142,
                         0.0
                     ],
                     "collider_scale": [
-                        14.300000190734863,
-                        7.400000095367432,
-                        13.600000381469727
+                        6.800000190734863,
+                        4.0,
+                        6.599999904632568
                     ],
                     "motion_type": 0,
                     "physics_behavior": {
@@ -95,9 +95,9 @@
                     ]
                 }
             },
-            "entityGUID": "9deb9768-61b8-9846-bfdd-9bf720e4fdf3"
+            "entityGUID": "e8743470-68ac-e446-ac63-3c3392dfd092"
         }
     ],
-    "prefabName": "Build2",
-    "rootEntityGUID": "9deb9768-61b8-9846-bfdd-9bf720e4fdf3"
+    "prefabName": "Build3",
+    "rootEntityGUID": "e8743470-68ac-e446-ac63-3c3392dfd092"
 }

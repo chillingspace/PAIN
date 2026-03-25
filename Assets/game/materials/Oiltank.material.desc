@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Oiltank.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 16300439499978347237
+  },
+  "descriptor_version": 1,
+  "guid": "c1a6b5fd-5b24-6545-9358-65dd293c1d5e",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Oiltank.material"
+  }
+}
