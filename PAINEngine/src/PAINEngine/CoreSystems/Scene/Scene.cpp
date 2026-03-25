@@ -28,7 +28,6 @@
 
 #include <thread>
 #include <atomic>
-#include <fstream>
 
 #ifdef PN_PLATFORM_ANDROID
 #include <CoreSystems/Events/Android/FocusEvents.h>
@@ -43,15 +42,25 @@ namespace PAIN {
                 }
             }
 
-            std::optional<std::string> ReadTextFile(const std::filesystem::path& path) {
-                std::ifstream stream(path, std::ios::in | std::ios::binary);
-                if (!stream.is_open()) {
+            std::optional<std::string> ReadTextFile(const std::shared_ptr<Path::Path>& pathService,
+                                                    const std::string& virtualPath) {
+                if (!pathService) {
                     return std::nullopt;
                 }
 
-                return std::string(
-                    std::istreambuf_iterator<char>(stream),
-                    std::istreambuf_iterator<char>());
+                auto stream = pathService->createFileStream(virtualPath, Path::FileMode::Read, true);
+                if (!stream || !stream->good()) {
+                    return std::nullopt;
+                }
+
+                const size_t byteCount = stream->size();
+                std::string text(byteCount, '\0');
+                if (byteCount > 0) {
+                    const size_t readBytes = stream->read(text.data(), byteCount);
+                    text.resize(readBytes);
+                }
+
+                return text;
             }
 
             void InsertMaterialDependencies(const std::shared_ptr<Assets::Manager>& assetManager,
@@ -130,10 +139,9 @@ namespace PAIN {
 
                 const std::string virtualPath =
                     pathService->aliasCombineRelative(Path::assets_alias, scriptMeta->shipped_relative_path.string());
-                const std::filesystem::path resolvedPath = pathService->resolvePath(virtualPath);
-                const auto source = ReadTextFile(resolvedPath);
+                const auto source = ReadTextFile(pathService, virtualPath);
                 if (!source.has_value()) {
-                    PN_CORE_WARN("[SceneManager] Failed to read script for preload scan: {}", resolvedPath.string());
+                    PN_CORE_WARN("[SceneManager] Failed to read script for preload scan: {}", virtualPath);
                     return;
                 }
 
