@@ -1107,6 +1107,32 @@ namespace PAIN {
 		unsigned int indexOffset = currentIndexCount;
 
 		auto ecs = services->get<ECS::Controller>();
+        auto assetManager = services->get<Assets::Manager>();
+        auto sceneManager = services->get<Scene::SceneManager>();
+
+        auto appendModelAsset = [&](const std::shared_ptr<Assets::Model>& modelAsset) {
+            if (!modelAsset || modelAsset->type != Assets::Type::Model) {
+                return;
+            }
+
+            if (instanced_offsets.find(modelAsset->vpath) != instanced_offsets.end()) {
+                return;
+            }
+
+            instanced_offsets[modelAsset->vpath] = {
+                indexOffset, static_cast<unsigned int>(modelAsset->indices.size()) };
+
+            for (const auto& v : modelAsset->vertices) {
+                newVertices.push_back(v);
+            }
+
+            for (unsigned int idx : modelAsset->indices) {
+                newIndices.push_back(vertexOffset + idx);
+            }
+
+            vertexOffset += static_cast<unsigned int>(modelAsset->vertices.size());
+            indexOffset += static_cast<unsigned int>(modelAsset->indices.size());
+        };
 
 		for (auto registryId : ecs->getAllRegistryIDs()) {
 			auto& registry = ecs->getRegistry(registryId);
@@ -1117,30 +1143,21 @@ namespace PAIN {
 				if (!mdl.has_value())
 					continue;
 
-				auto mdl_opt = services->get<Assets::Manager>()->getAsset<Assets::Model>(
-					mdl.value().get().modelGUID);
+				auto mdl_opt = assetManager->getAsset<Assets::Model>(mdl.value().get().modelGUID);
 				if (!mdl_opt.has_value() || mdl_opt.value()->type != Assets::Type::Model)
 					continue;
-				const auto& modelAsset = mdl_opt.value();
-
-				// SKIP if already on GPU
-				if (instanced_offsets.find(modelAsset->vpath) != instanced_offsets.end())
-					continue;
-
-				// Register offset BEFORE appending so it's atomic
-				instanced_offsets[modelAsset->vpath] = {
-					indexOffset, (unsigned int)modelAsset->indices.size() };
-
-				for (const auto& v : modelAsset->vertices)
-					newVertices.push_back(v);
-
-				for (unsigned int idx : modelAsset->indices)
-					newIndices.push_back(vertexOffset + idx);
-
-				vertexOffset += (unsigned int)modelAsset->vertices.size();
-				indexOffset += (unsigned int)modelAsset->indices.size();
+                appendModelAsset(mdl_opt.value());
 			}
 		}
+
+        if (sceneManager) {
+            for (const auto& modelGuid : sceneManager->getPreloadedModelGUIDs()) {
+                auto mdlOpt = assetManager->getAsset<Assets::Model>(modelGuid);
+                if (mdlOpt.has_value()) {
+                    appendModelAsset(mdlOpt.value());
+                }
+            }
+        }
 
 		// Nothing new to upload - exit early, no GPU calls
 		if (newVertices.empty()) {

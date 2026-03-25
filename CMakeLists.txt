@@ -100,7 +100,9 @@ endif()
 
 # --- Add Subprojects ---
 add_subdirectory(PAINEngine)
-#add_subdirectory(Tests/LuaBridgeSmoke)
+if (NOT ANDROID)
+add_subdirectory(Tests/ScenePreload)
+endif()
 add_subdirectory(Game)
 
 if (ANDROID)

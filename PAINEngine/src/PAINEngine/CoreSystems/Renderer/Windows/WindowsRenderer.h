@@ -110,6 +110,9 @@ namespace PAIN {
 		void Init(std::shared_ptr<Services> app_services);
 		void uploadTexture(std::shared_ptr<Assets::Texture> tex);
 		void initSceneVbo();
+		bool hasUploadedModel(const std::string& modelVPath) const {
+			return instanced_offsets.find(modelVPath) != instanced_offsets.end();
+		}
 		void _initDeferredShadingBuffers();
 		void _initGeometryBuffers();
 		void clearBuffers();

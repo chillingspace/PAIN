@@ -32,13 +32,11 @@ namespace PAIN {
 
 			// Get asset manager
 			auto assetManager = services.lock()->get<Assets::Manager>();
+            auto rendererService = services.lock()->get<sRenderer>();
 
 			// Check for valid GUID
 			if (!component.modelGUID.IsValid())
 				return;
-
-			// Initiate scene VBO update
-			services.lock()->get<sRenderer>()->w_renderer->vboDirty = true;
 
 			// Set prev GUID
 			component.prevModelGUID = component.modelGUID;
@@ -58,6 +56,11 @@ namespace PAIN {
 				PN_CORE_ERROR("Failed to load model asset for entity {}", (uint32_t)entity);
 				return;
 			}
+
+            if (rendererService && rendererService->w_renderer &&
+                !rendererService->w_renderer->hasUploadedModel(component.cachedModelAsset->vpath)) {
+                rendererService->w_renderer->vboDirty = true;
+            }
 
 			// Cache model
 			const auto& modelAsset = component.cachedModelAsset;
