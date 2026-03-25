@@ -295,7 +295,40 @@ namespace PAIN {
 					// The position is offset opposite to the light direction so the shadow map
 					// covers the area around the player
 					glm::vec3 lightDir = glm::normalize(worldLight.direction);
-					worldLight.position = activeCamera->pos - lightDir * worldLight.shadow_source_follow_distance;
+					glm::vec3 targetPos = activeCamera->pos - lightDir * worldLight.shadow_source_follow_distance;
+					
+					// Proper shadow stabilization for directional lights:
+					// Snap the target position to texel boundaries in light space,
+					// not world space. This prevents shadow "swimming" when camera moves.
+					float orthoSize = worldLight.shadow_source_follow_distance;
+					int shadowRes = worldLight.getShadowResolution();
+					float texelSize = (orthoSize * 2.0f) / static_cast<float>(shadowRes);
+					
+					// Create light's view matrix to transform world position to light space
+					glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+					if (std::abs(glm::dot(lightDir, up)) > 0.99f) {
+						up = glm::vec3(1.0f, 0.0f, 0.0f);
+					}
+					glm::mat4 lightView = glm::lookAt(
+						glm::vec3(0.0f),  // origin (we just want the rotation)
+						lightDir,
+						up
+					);
+					
+					// Transform target position to light space
+					glm::vec4 targetLightSpace = lightView * glm::vec4(targetPos, 1.0f);
+					
+					// Snap to texel boundaries in light space
+					targetLightSpace.x = std::round(targetLightSpace.x / texelSize) * texelSize;
+					targetLightSpace.y = std::round(targetLightSpace.y / texelSize) * texelSize;
+					// Z (depth) snapping helps with aliasing at distance
+					targetLightSpace.z = std::round(targetLightSpace.z / texelSize) * texelSize;
+					
+					// Transform back to world space
+					glm::mat4 invLightView = glm::inverse(lightView);
+					glm::vec4 snappedWorldPos = invLightView * targetLightSpace;
+					
+					worldLight.position = glm::vec3(snappedWorldPos);
 					
 					// Since the world light follows the camera, static shadow caching is not effective
 					// The light frustum changes as the camera moves
