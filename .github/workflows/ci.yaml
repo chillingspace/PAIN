@@ -84,42 +84,59 @@ jobs:
       - name: Setup MSBuild.exe
         uses: microsoft/setup-msbuild@v2
 
-      - name: Configure and Build (build.bat)
+      - name: Build Windows
         run: |
-          .\build.bat
-          cmake --build build --config ${{ matrix.configuration }} -j 8
+          # build.bat already runs cmake configure and cmake build
+          .\build.bat ${{ matrix.configuration }}
+        env:
+          CMAKE_BUILD_PARALLEL_LEVEL: 8
 
       - name: Setup Software OpenGL (Mesa)
         run: |
           # Download Mesa
           Invoke-WebRequest -Uri "https://github.com/pal1000/mesa-dist-win/releases/download/24.0.3/mesa3d-24.0.3-release-msvc.7z" -OutFile "mesa.7z"
           
-          # Extract everything to a temp folder first
+          # Extract
           7z x mesa.7z -omesa_temp -y
           
-          # Find where opengl32.dll actually is and copy it
+          # Force the bin directory to exist just in case
+          if (!(Test-Path "bin/${{ matrix.configuration }}")) {
+             New-Item -ItemType Directory -Force -Path "bin/${{ matrix.configuration }}"
+          }
+
           $mesaDll = Get-ChildItem -Path "mesa_temp" -Filter "opengl32.dll" -Recurse | Select-Object -First 1
           if ($mesaDll) {
             Copy-Item $mesaDll.FullName "bin/${{ matrix.configuration }}/"
             Write-Host "Successfully copied opengl32.dll to bin/${{ matrix.configuration }}/"
-          } else {
-            Write-Error "Could not find opengl32.dll in Mesa archive!"
           }
         shell: pwsh
 
       - name: Run executable and test for graceful exit
         run: |
-          cd bin/${{ matrix.configuration }}
+          # Absolute path check
+          $baseDir = Get-Location
+          $targetDir = Join-Path $baseDir "bin/${{ matrix.configuration }}"
+          Write-Host "Target Directory: $targetDir"
           
-          # DIAGNOSTICS: List all files in the directory to check for missing DLLs
-          Write-Host "--- Directory Listing for bin/${{ matrix.configuration }} ---"
+          if (!(Test-Path $targetDir)) {
+              Write-Error "Directory $targetDir does not exist!"
+              exit 1
+          }
+
+          cd $targetDir
+          
+          Write-Host "--- Directory Listing ---"
           Get-ChildItem | Select-Object Name, Length
           
-          # Start process and REDIRECT output to a log file
+          if (!(Test-Path "Friends-Frog-ever.exe")) {
+              Write-Error "Executable not found in $targetDir"
+              exit 1
+          }
+
           $proc = Start-Process .\Friends-Frog-ever.exe -PassThru -RedirectStandardOutput "app_stdout.log" -RedirectStandardError "app_stderr.log"
           Write-Host "Process started with PID: $($proc.Id)"
           
-          Start-Sleep -Seconds 15 # Give it more time to init
+          Start-Sleep -Seconds 15
           
           if ($proc.HasExited) {
              Write-Host "--- APP STDOUT ---"
@@ -130,25 +147,12 @@ jobs:
              exit 1
           }
 
-          Write-Host "MainWindowHandle: $($proc.MainWindowHandle)"
-          
           $success = $proc.CloseMainWindow()
-          Write-Host "CloseMainWindow returned: $success"
-
-          if (!$success) { 
-             Write-Host "Falling back to taskkill (graceful)..."
-             taskkill /IM Friends-Frog-ever.exe 
-          }
-
+          if (!$success) { taskkill /IM Friends-Frog-ever.exe }
           $proc.WaitForExit(5000)
-          
-          # Print logs regardless of success to help debug
-          Write-Host "--- APP STDOUT ---"
-          Get-Content "app_stdout.log" -ErrorAction SilentlyContinue
           
           if (!$proc.HasExited) {
               Stop-Process -Id $proc.Id -Force
-              Write-Error "${{ matrix.configuration }} build failed to exit gracefully."
               exit 1
           }
         shell: pwsh
