@@ -26,6 +26,11 @@ local function resolveWaypoint(name)
     end
     local px, py, pz = getWorldPosition(e)
     local fx, fy, fz = getWorldForward(e)
+    -- Guard: if forward is zero/nil (entity has no rotation data), fall back to world -Z
+    if not fx or (fx*fx + fy*fy + fz*fz) < 1e-6 then
+        log("[CameraPan] WARNING: waypoint '" .. name .. "' has zero/nil forward, using default (0,0,-1)")
+        fx, fy, fz = 0.0, 0.0, -1.0
+    end
     -- look target = world pos + world forward * 10
     return { px=px, py=py, pz=pz,
              lx=px+fx*10, ly=py+fy*10, lz=pz+fz*10 }
