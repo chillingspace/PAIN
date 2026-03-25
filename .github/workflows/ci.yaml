@@ -6,23 +6,34 @@ on:
   push:
     branches:
       - main
+      - more-cicd
   pull_request:
     branches: 
       - main
+
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  CMAKE_BUILD_PARALLEL_LEVEL: 8
 
 jobs:
   cppcheck:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v5
-    - name: Download Cppcheck MSI installer
+    
+    - name: Cache Cppcheck
+      id: cache-cppcheck
+      uses: actions/cache@v4
+      with:
+        path: "C:\\Program Files\\Cppcheck"
+        key: cppcheck-2.18.0
+
+    - name: Download and Install Cppcheck
+      if: steps.cache-cppcheck.outputs.cache-hit != 'true'
       run: |
         Invoke-WebRequest -Uri "https://github.com/danmar/cppcheck/releases/download/2.18.0/cppcheck-2.18.0-x64-Setup.msi" -OutFile "cppcheck-setup.msi"
-    - name: Install Cppcheck
-      run: |
         Start-Process msiexec.exe -Wait -ArgumentList '/I cppcheck-setup.msi /quiet'
+
     - name: Run cppcheck
       run: |
         & "C:\Program Files\Cppcheck\cppcheck.exe" `
@@ -38,100 +49,92 @@ jobs:
           -D PN_PLATFORM_ANDROID `
           --check-level=exhaustive `
           --output-file=cppcheck_report.txt .
+          
     - name: Display Cppcheck report on failure
       if: failure()
       run: |
         if (Test-Path cppcheck_report.txt) {
           Get-Content cppcheck_report.txt
         }
+        
     - name: Upload Cppcheck report
       if: always()
       uses: actions/upload-artifact@v4
       with:
         name: cppcheck_report
         path: cppcheck_report.txt
+
   build-windows:
     runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [Debug, Release]
     steps:
       - uses: actions/checkout@v5
-#      - name: Cache _deps directory
-#        uses: actions/cache@v3
-#        with:
-#          path: build/_deps
-#          key: ${{ runner.os }}-windows-_deps-${{ hashFiles('**/ImportDependencies.txt') }}
-#          restore-keys: |
-#            ${{ runner.os }}-windows-_deps-
+
+      - name: Cache CMake _deps
+        uses: actions/cache@v4
+        with:
+          path: build/_deps
+          key: ${{ runner.os }}-windows-deps-${{ hashFiles('**/CMakeLists.txt', 'cmake/*.cmake') }}
+          restore-keys: |
+            ${{ runner.os }}-windows-deps-
+
       - name: Setup MSBuild.exe
         uses: microsoft/setup-msbuild@v2
-      - name: Clean Windows
-        run: echo y | .\clean.bat
-      - name: Build Windows (build.bat)
-        run: .\build.bat  
-        env:
-          CMAKE_BUILD_PARALLEL_LEVEL: 8
-      - name: Build Debug solution
+
+      - name: Configure and Build (build.bat)
         run: |
-          cd build
-          msbuild pain.sln /p:Configuration=Debug
-      - name: Run Debug executable and test for leaks/crashes
+          .\build.bat
+          cmake --build build --config ${{ matrix.configuration }} -j 8
+
+      - name: Run executable and test for graceful exit
         run: |
-          cd bin/Debug
-          # Start the exe, wait 10s, kill if still running
-          Start-Process .\Friends-Frog-ever.exe
+          cd bin/${{ matrix.configuration }}
+          $proc = Start-Process .\Friends-Frog-ever.exe -PassThru
           Start-Sleep -Seconds 10
-          Stop-Process -Name Friends-Frog-ever -ErrorAction SilentlyContinue
+          if (!$proc.CloseMainWindow()) { 
+             taskkill /IM Friends-Frog-ever.exe 
+          }
+          $proc.WaitForExit(5000)
+          if (!$proc.HasExited) {
+              Write-Error "${{ matrix.configuration }} build failed to exit gracefully."
+              Stop-Process -Id $proc.Id -Force
+              exit 1
+          }
         shell: pwsh
 
-      - name: Build Release solution
-        run: |
-          cd build
-          msbuild pain.sln /p:Configuration=Release
-      - name: Run Release executable and test for crashes
-        run: |
-          cd bin/Release
-          Start-Process .\Friends-Frog-ever.exe
-          Start-Sleep -Seconds 10
-          Stop-Process -Name Friends-Frog-ever -ErrorAction SilentlyContinue
-        shell: pwsh
   build-android:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
-#      - name: Cache _deps directory
-#        uses: actions/cache@v3
-#        with:
-#          path: build/_deps
-#          key: ${{ runner.os }}-android-_deps-${{ hashFiles('**/ImportDependencies.txt') }}
-#          restore-keys: |
-#            ${{ runner.os }}-android-_deps-
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'  
+          java-version: '17'
+          cache: 'gradle'
+
       - name: Install NDK 27.0.12077973
         run: |
           $sdkmanager = "$env:ANDROID_HOME\cmdline-tools\latest\bin\sdkmanager"
           & $sdkmanager "ndk;27.0.12077973"
+
       - name: Setup MSBuild.exe
         uses: microsoft/setup-msbuild@v2
-      - name: Run clean.bat
-        run: echo y | .\clean.bat
-      - name: Run build.bat first
+
+      - name: Configure cross-platform files
         run: .\build.bat
-        env:
-          CMAKE_BUILD_PARALLEL_LEVEL: 8
-      - name: Build Android app (Debug x86_64)
+
+      - name: Build Android app
         working-directory: android
+        run: .\gradlew.bat assembleDebug assembleRelease --stacktrace --parallel
         env:
-          CI_ABI: x86_64
-        run: .\gradlew.bat assembleDebug --stacktrace
-      - name: Build Release APK (Check)
-        working-directory: android 
-        run: .\gradlew.bat assembleRelease --stacktrace
-        env:          
-          # We might not have the signing keys in CI, so this check ensures the release build can succeed without signing
           SKIP_SIGNING: true 
+          CI_ABI: x86_64
+
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
