@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Build4.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 12015844009238096868
+  },
+  "descriptor_version": 1,
+  "guid": "fc457245-ebcc-c540-93da-5894b534699b",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Build4.prefab"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Build4.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 7927497170556522577
+  },
+  "descriptor_version": 1,
+  "guid": "945433d9-fbd3-7e44-ad93-e7d2e13f863a",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Build4.material"
+  }
+}

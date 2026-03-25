@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Build5.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 852414226300309764
+  },
+  "descriptor_version": 1,
+  "guid": "6c98f32d-a500-1444-b5fb-76c22d684baa",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Build5.prefab"
+  }
+}

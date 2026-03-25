@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Build5.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 12211638322923045546
+  },
+  "descriptor_version": 1,
+  "guid": "475d1357-2edb-4842-b2fc-15416c5202db",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\Build5.glb"
+  }
+}
