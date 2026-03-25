@@ -18,6 +18,10 @@ namespace PAIN {
             std::vector<entt::entity> minimap_danger_entities_;
             std::vector<glm::vec2> minimap_danger_fill_vertices_;
             std::vector<glm::vec2> minimap_danger_line_vertices_;
+            std::vector<glm::vec2> minimap_danger_inner_fill_vertices_;
+            std::vector<glm::vec2> minimap_danger_inner_line_vertices_;
+            std::vector<glm::vec2> minimap_grid_minor_line_vertices_;
+            std::vector<glm::vec2> minimap_grid_major_line_vertices_;
             std::vector<MinimapWallCacheFingerprintEntry> minimap_wall_fingerprint_entries_;
             std::unordered_set<uint32_t> minimap_entity_dedupe_;
 

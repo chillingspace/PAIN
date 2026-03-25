@@ -63,11 +63,20 @@ bool TestDangerStyleComesFromSingleHelper() {
         styleA.edgeColor.a > styleA.fillColor.a,
         "TestDangerStyleComesFromSingleHelper",
         "expected danger edge alpha to exceed fill alpha");
+    const bool innerFillOk = ExpectTrue(
+        styleA.innerFillColor.a > styleA.fillColor.a &&
+        styleA.innerFillColor.a < styleA.edgeColor.a,
+        "TestDangerStyleComesFromSingleHelper",
+        "expected inner danger fill alpha to sit between fill and edge");
+    const bool innerRadiusOk = ExpectTrue(
+        styleA.innerRadiusScale > 0.5f && styleA.innerRadiusScale < 1.0f,
+        "TestDangerStyleComesFromSingleHelper",
+        "expected inner danger radius scale to stay inside the true radius");
     const bool pulseOk = ExpectTrue(
         !NearlyEqual(styleA.edgeColor.a, styleB.edgeColor.a, 0.0001f),
         "TestDangerStyleComesFromSingleHelper",
         "expected helper-driven pulse to change edge alpha over time");
-    return fillAlphaOk && edgeAlphaOk && pulseOk;
+    return fillAlphaOk && edgeAlphaOk && innerFillOk && innerRadiusOk && pulseOk;
 }
 
 bool TestWallStyleProvidesFallbackOutline() {
@@ -152,6 +161,29 @@ bool TestBackgroundTargetSpecUsesLowCostSettings() {
     return formatOk && depthOk;
 }
 
+bool TestTacticalGridGeneratesMinorAndMajorLines() {
+    using PAIN::Render::AppendMinimapTacticalGridLines;
+
+    std::vector<glm::vec2> minorLines;
+    std::vector<glm::vec2> majorLines;
+    AppendMinimapTacticalGridLines(
+        minorLines,
+        majorLines,
+        glm::vec2(10.0f, 20.0f),
+        glm::vec2(110.0f, 120.0f),
+        4);
+
+    const bool minorOk = ExpectTrue(
+        minorLines.size() == 8,
+        "TestTacticalGridGeneratesMinorAndMajorLines",
+        "expected 4 minor line segments for a 4-division grid");
+    const bool majorOk = ExpectTrue(
+        majorLines.size() == 4,
+        "TestTacticalGridGeneratesMinorAndMajorLines",
+        "expected 2 major center line segments");
+    return minorOk && majorOk;
+}
+
 }
 
 int main() {
@@ -162,7 +194,8 @@ int main() {
         TestWallStyleProvidesFallbackOutline() &&
         TestLightConeTopDownRadiusMatchesLegacyShape() &&
         TestWallCacheSignatureChangesWithTransformAndModel() &&
-        TestBackgroundTargetSpecUsesLowCostSettings();
+        TestBackgroundTargetSpecUsesLowCostSettings() &&
+        TestTacticalGridGeneratesMinorAndMajorLines();
 
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

@@ -89,6 +89,33 @@ namespace PAIN::Render {
         AppendMinimapCircleCoverage(fillTriangles, outlineLines, center, radius, segments);
     }
 
+    void AppendMinimapTacticalGridLines(std::vector<glm::vec2>& minorLines,
+                                        std::vector<glm::vec2>& majorLines,
+                                        const glm::vec2& topLeft,
+                                        const glm::vec2& bottomRight,
+                                        int divisions) {
+        const glm::vec2 size = bottomRight - topLeft;
+        const int safeDivisions = std::max(2, divisions);
+        if (size.x <= 0.0f || size.y <= 0.0f) {
+            return;
+        }
+
+        minorLines.reserve(minorLines.size() + static_cast<size_t>(safeDivisions - 2) * 4);
+        majorLines.reserve(majorLines.size() + 4);
+
+        for (int i = 1; i < safeDivisions; ++i) {
+            const float t = static_cast<float>(i) / static_cast<float>(safeDivisions);
+            const bool isCenter = std::abs(t - 0.5f) <= 0.0001f;
+            auto& target = isCenter ? majorLines : minorLines;
+
+            const float x = glm::mix(topLeft.x, bottomRight.x, t);
+            AppendLine(target, glm::vec2(x, topLeft.y), glm::vec2(x, bottomRight.y));
+
+            const float y = glm::mix(topLeft.y, bottomRight.y, t);
+            AppendLine(target, glm::vec2(topLeft.x, y), glm::vec2(bottomRight.x, y));
+        }
+    }
+
     MinimapWallVisualStyle BuildMinimapWallStyle(float timeSeconds) {
         MinimapWallVisualStyle style;
         style.fillColor = glm::vec4(0.18f, 0.26f, 0.31f, 0.78f);
@@ -105,7 +132,18 @@ namespace PAIN::Render {
 
         MinimapDangerVisualStyle style;
         style.fillColor = glm::vec4(0.95f, 0.34f, 0.10f, 0.10f + 0.08f * pulse);
+        style.innerFillColor = glm::vec4(1.0f, 0.52f, 0.16f, 0.18f + 0.08f * pulse);
+        style.innerEdgeColor = glm::vec4(1.0f, 0.74f, 0.30f, 0.38f + 0.14f * pulse);
         style.edgeColor = glm::vec4(1.0f, 0.62f, 0.22f, 0.62f + 0.18f * pulse);
+        style.innerRadiusScale = 0.72f;
+        return style;
+    }
+
+    MinimapGridVisualStyle BuildMinimapGridStyle() {
+        MinimapGridVisualStyle style;
+        style.minorLineColor = glm::vec4(0.42f, 0.62f, 0.66f, 0.10f);
+        style.majorLineColor = glm::vec4(0.66f, 0.86f, 0.90f, 0.18f);
+        style.divisions = 4;
         return style;
     }
 

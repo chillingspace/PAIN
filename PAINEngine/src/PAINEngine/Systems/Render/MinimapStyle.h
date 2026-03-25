@@ -18,7 +18,16 @@ namespace PAIN::Render {
 
     struct MinimapDangerVisualStyle {
         glm::vec4 fillColor = glm::vec4(0.0f);
+        glm::vec4 innerFillColor = glm::vec4(0.0f);
+        glm::vec4 innerEdgeColor = glm::vec4(0.0f);
         glm::vec4 edgeColor = glm::vec4(0.0f);
+        float innerRadiusScale = 0.72f;
+    };
+
+    struct MinimapGridVisualStyle {
+        glm::vec4 minorLineColor = glm::vec4(0.0f);
+        glm::vec4 majorLineColor = glm::vec4(0.0f);
+        int divisions = 4;
     };
 
     struct MinimapCoverageGeometry {
@@ -62,9 +71,17 @@ namespace PAIN::Render {
                                      float radius,
                                      int segments);
 
+    void AppendMinimapTacticalGridLines(std::vector<glm::vec2>& minorLines,
+                                        std::vector<glm::vec2>& majorLines,
+                                        const glm::vec2& topLeft,
+                                        const glm::vec2& bottomRight,
+                                        int divisions);
+
     MinimapWallVisualStyle BuildMinimapWallStyle(float timeSeconds);
 
     MinimapDangerVisualStyle BuildMinimapDangerStyle(float timeSeconds);
+
+    MinimapGridVisualStyle BuildMinimapGridStyle();
 
     float ComputeLightConeTopDownRadius(float planeHeightDelta,
                                         float maxDistance,

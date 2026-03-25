@@ -2600,6 +2600,36 @@ namespace PAIN {
 							rendererService->w_renderer->BeginCircularStencilClip(center_ndc, radius_ndc);
 						}
 
+						{
+							const MinimapGridVisualStyle gridStyle = BuildMinimapGridStyle();
+							minimap_grid_minor_line_vertices_.clear();
+							minimap_grid_major_line_vertices_.clear();
+							AppendMinimapTacticalGridLines(
+								minimap_grid_minor_line_vertices_,
+								minimap_grid_major_line_vertices_,
+								glm::vec2(draw_x, draw_y),
+								glm::vec2(draw_x + draw_w, draw_y + draw_h),
+								gridStyle.divisions);
+
+							for (glm::vec2& vertexPx : minimap_grid_minor_line_vertices_) {
+								vertexPx = pixelsToNdc(vertexPx);
+							}
+							for (glm::vec2& vertexPx : minimap_grid_major_line_vertices_) {
+								vertexPx = pixelsToNdc(vertexPx);
+							}
+
+							if (!minimap_grid_minor_line_vertices_.empty()) {
+								rendererService->w_renderer->DebugPass2DLines(
+									minimap_grid_minor_line_vertices_,
+									gridStyle.minorLineColor);
+							}
+							if (!minimap_grid_major_line_vertices_.empty()) {
+								rendererService->w_renderer->DebugPass2DLines(
+									minimap_grid_major_line_vertices_,
+									gridStyle.majorLineColor);
+							}
+						}
+
 						if (gs.minimap_show_walls) {
                             const MinimapWallVisualStyle wallStyle = BuildMinimapWallStyle(minimap_threat_time_);
 							minimap_wall_fingerprint_entries_.clear();
@@ -2755,6 +2785,8 @@ namespace PAIN {
 							const MinimapDangerVisualStyle dangerStyle = BuildMinimapDangerStyle(minimap_threat_time_);
 							minimap_danger_fill_vertices_.clear();
 							minimap_danger_line_vertices_.clear();
+							minimap_danger_inner_fill_vertices_.clear();
+							minimap_danger_inner_line_vertices_.clear();
 							const size_t estimatedDangerCount = minimap_danger_entities_.size();
 							const size_t estimatedFillVertices = estimatedDangerCount * 24ull * 3ull;
 							const size_t estimatedLineVertices = estimatedDangerCount * 24ull * 2ull;
@@ -2763,6 +2795,12 @@ namespace PAIN {
 							}
 							if (minimap_danger_line_vertices_.capacity() < estimatedLineVertices) {
 								minimap_danger_line_vertices_.reserve(estimatedLineVertices);
+							}
+							if (minimap_danger_inner_fill_vertices_.capacity() < estimatedFillVertices) {
+								minimap_danger_inner_fill_vertices_.reserve(estimatedFillVertices);
+							}
+							if (minimap_danger_inner_line_vertices_.capacity() < estimatedLineVertices) {
+								minimap_danger_inner_line_vertices_.reserve(estimatedLineVertices);
 							}
 
 							for (entt::entity entity : minimap_danger_entities_) {
@@ -2798,11 +2836,19 @@ namespace PAIN {
 								const float radiusPx = (danger_radius / (2.0f * glm::max(1.0f, gs.minimap_radius))) * draw_min;
 								const size_t fillStart = minimap_danger_fill_vertices_.size();
 								const size_t lineStart = minimap_danger_line_vertices_.size();
+								const size_t innerFillStart = minimap_danger_inner_fill_vertices_.size();
+								const size_t innerLineStart = minimap_danger_inner_line_vertices_.size();
 								AppendMinimapDangerCoverage(
 									minimap_danger_fill_vertices_,
 									minimap_danger_line_vertices_,
 									centerPx,
 									radiusPx,
+									24);
+								AppendMinimapDangerCoverage(
+									minimap_danger_inner_fill_vertices_,
+									minimap_danger_inner_line_vertices_,
+									centerPx,
+									radiusPx * dangerStyle.innerRadiusScale,
 									24);
 								for (size_t i = fillStart; i < minimap_danger_fill_vertices_.size(); ++i) {
 									minimap_danger_fill_vertices_[i] = pixelsToNdc(minimap_danger_fill_vertices_[i]);
@@ -2810,12 +2856,28 @@ namespace PAIN {
 								for (size_t i = lineStart; i < minimap_danger_line_vertices_.size(); ++i) {
 									minimap_danger_line_vertices_[i] = pixelsToNdc(minimap_danger_line_vertices_[i]);
 								}
+								for (size_t i = innerFillStart; i < minimap_danger_inner_fill_vertices_.size(); ++i) {
+									minimap_danger_inner_fill_vertices_[i] = pixelsToNdc(minimap_danger_inner_fill_vertices_[i]);
+								}
+								for (size_t i = innerLineStart; i < minimap_danger_inner_line_vertices_.size(); ++i) {
+									minimap_danger_inner_line_vertices_[i] = pixelsToNdc(minimap_danger_inner_line_vertices_[i]);
+								}
 							}
 
 							if (!minimap_danger_fill_vertices_.empty()) {
 								rendererService->w_renderer->DebugPass2DTrianglesFilled(
 									minimap_danger_fill_vertices_,
 									dangerStyle.fillColor);
+							}
+							if (!minimap_danger_inner_fill_vertices_.empty()) {
+								rendererService->w_renderer->DebugPass2DTrianglesFilled(
+									minimap_danger_inner_fill_vertices_,
+									dangerStyle.innerFillColor);
+							}
+							if (!minimap_danger_inner_line_vertices_.empty()) {
+								rendererService->w_renderer->DebugPass2DLines(
+									minimap_danger_inner_line_vertices_,
+									dangerStyle.innerEdgeColor);
 							}
 							if (!minimap_danger_line_vertices_.empty()) {
 								rendererService->w_renderer->DebugPass2DLines(
