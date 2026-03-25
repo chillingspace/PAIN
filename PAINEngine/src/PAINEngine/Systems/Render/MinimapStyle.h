@@ -97,4 +97,6 @@ namespace PAIN::Render {
 
     MinimapBackgroundTargetSpec BuildMinimapBackgroundTargetSpec();
 
+    int ComputeMinimapBorderLayerCount(float borderThickness);
+
 }

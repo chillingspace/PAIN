@@ -192,4 +192,8 @@ namespace PAIN::Render {
         };
     }
 
+    int ComputeMinimapBorderLayerCount(float borderThickness) {
+        return static_cast<int>(glm::round(glm::max(0.0f, borderThickness)));
+    }
+
 }

@@ -184,6 +184,20 @@ bool TestTacticalGridGeneratesMinorAndMajorLines() {
     return minorOk && majorOk;
 }
 
+bool TestBorderLayerCountRoundsConfiguredThickness() {
+    using PAIN::Render::ComputeMinimapBorderLayerCount;
+
+    const bool zeroOk = ExpectTrue(
+        ComputeMinimapBorderLayerCount(0.0f) == 0,
+        "TestBorderLayerCountRoundsConfiguredThickness",
+        "expected zero border layers for zero thickness");
+    const bool roundedOk = ExpectTrue(
+        ComputeMinimapBorderLayerCount(2.6f) == 3,
+        "TestBorderLayerCountRoundsConfiguredThickness",
+        "expected border thickness to round to the nearest whole layer");
+    return zeroOk && roundedOk;
+}
+
 }
 
 int main() {
@@ -195,7 +209,8 @@ int main() {
         TestLightConeTopDownRadiusMatchesLegacyShape() &&
         TestWallCacheSignatureChangesWithTransformAndModel() &&
         TestBackgroundTargetSpecUsesLowCostSettings() &&
-        TestTacticalGridGeneratesMinorAndMajorLines();
+        TestTacticalGridGeneratesMinorAndMajorLines() &&
+        TestBorderLayerCountRoundsConfiguredThickness();
 
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

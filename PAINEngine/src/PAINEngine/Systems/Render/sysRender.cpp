@@ -2186,17 +2186,17 @@ namespace PAIN {
 							gs.minimap_border_color.b,
 							glm::max(0.2f, gs.minimap_border_color.a));
 
-						const int border_layers = static_cast<int>(glm::round(border_thickness));
-						if (border_layers > 0) {
-							// For circular minimap, adjust size to fit within the circle
+						const auto drawMinimapBorderOverlay = [&]() {
+							const int border_layers = ComputeMinimapBorderLayerCount(border_thickness);
+							if (border_layers <= 0) {
+								return;
+							}
+
 							float effective_w = map_w;
 							float effective_h = map_h;
-							float center_x = center_x_px;
-							float center_y = center_y_px;
 							float diameter = glm::min(effective_w, effective_h);
 
 							if (gs.minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
-								// Use the smaller dimension as diameter for the circle
 								effective_w = diameter;
 								effective_h = diameter;
 							}
@@ -2205,26 +2205,24 @@ namespace PAIN {
 								const float inset = static_cast<float>(i) + 0.5f;
 
 								if (gs.minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
-									// Draw circular border using line segments
-									float outer_radius = (diameter * 0.5f) - inset;
-									if (outer_radius <= 0.0f) break;
+									const float outer_radius = (diameter * 0.5f) - inset;
+									if (outer_radius <= 0.0f) {
+										break;
+									}
 
-									const int segments = 64;
-									const float two_pi = glm::two_pi<float>();
-
-									// Convert center pixel position to NDC
-									glm::vec2 center_ndc(
-										(center_x / fbw) * 2.0f - 1.0f,
-										1.0f - (center_y / fbh) * 2.0f);
-
-									// Calculate radius in NDC units (approximate, using width for uniform scaling)
-									float radius_x = (outer_radius / fbw) * 2.0f;
-									float radius_y = (outer_radius / fbh) * 2.0f;
-									glm::vec2 radius_ndc(radius_x, radius_y);
-
-									rendererService->w_renderer->DebugPass2DCircle(center_ndc, radius_ndc, border_color, segments);
-								} else {
-									// Square border (existing code)
+									const glm::vec2 center_ndc(
+										(center_x_px / fbw) * 2.0f - 1.0f,
+										1.0f - (center_y_px / fbh) * 2.0f);
+									const glm::vec2 radius_ndc(
+										(outer_radius / fbw) * 2.0f,
+										(outer_radius / fbh) * 2.0f);
+									rendererService->w_renderer->DebugPass2DCircle(
+										center_ndc,
+										radius_ndc,
+										border_color,
+										64);
+								}
+								else {
 									const float x0 = map_x + inset;
 									const float y0 = map_y + inset;
 									const float x1 = map_x + outer_w - inset;
@@ -2245,7 +2243,7 @@ namespace PAIN {
 									rendererService->w_renderer->DebugPass2DLine(bl, tl, border_color);
 								}
 							}
-						}
+						};
 
 						glm::vec3 player_pos(0.0f);
 						glm::vec3 player_forward = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -3023,6 +3021,7 @@ namespace PAIN {
 						}
 
 						glDisable(GL_SCISSOR_TEST);
+						drawMinimapBorderOverlay();
 					}
 				}
 			}
