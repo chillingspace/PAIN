@@ -676,9 +676,32 @@ namespace PAIN {
                     // Shadow type toggle
                     bool hasMappedShadow = worldLight->getShadowType() == Light::SHADOW_TYPES::MAPPED;
                     if (ImGui::Checkbox("Enable Shadows", &hasMappedShadow)) {
-                        bool result = worldLight->setShadowType(hasMappedShadow ? Light::SHADOW_TYPES::MAPPED : Light::SHADOW_TYPES::NONE);
-                        if (!result && hasMappedShadow) {
-                            PN_CORE_WARN("[ScenesPanel] Failed to enable world light shadows - shadow budget exceeded");
+                        if (hasMappedShadow) {
+                            // World light has priority - evict entity lights if budget is full
+                            // Try to enable shadows first
+                            bool result = worldLight->setShadowType(Light::SHADOW_TYPES::MAPPED);
+                            if (!result) {
+                                // Budget full - evict entity lights to make room
+                                int evicted = 0;
+                                auto& allLights = LightSources::get().getAllWithKeysMutable();
+                                for (auto& [key, lightRef] : allLights) {
+                                    if (key == "world" || key == "cam") continue;
+                                    Light& l = lightRef.get();
+                                    if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
+                                        l.setShadowType(Light::SHADOW_TYPES::NONE);
+                                        ++evicted;
+                                        PN_CORE_INFO("[ScenesPanel] Evicted entity light '{}' to make room for world light shadows", key);
+                                        break; // Only evict one
+                                    }
+                                }
+                                // Try again after eviction
+                                result = worldLight->setShadowType(Light::SHADOW_TYPES::MAPPED);
+                                if (!result) {
+                                    PN_CORE_WARN("[ScenesPanel] Failed to enable world light shadows even after eviction");
+                                }
+                            }
+                        } else {
+                            worldLight->setShadowType(Light::SHADOW_TYPES::NONE);
                         }
                     }
                     if (!hasMappedShadow && worldLight->getShadowType() != Light::SHADOW_TYPES::MAPPED) {

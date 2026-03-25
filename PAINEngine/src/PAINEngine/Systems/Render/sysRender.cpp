@@ -1081,14 +1081,13 @@ namespace PAIN {
 				}
 			}
 
-			// Phase 3: Ensure world light gets shadows if user enabled them (evict entity lights if needed)
-			// Only act if world light has MAPPED shadows enabled but no shadow texture (budget pressure)
+			// Phase 3: Ensure world light has priority over entity lights
+			// If world light wants shadows but couldn't get a slot, evict entity lights
 			{
 				auto worldLightOpt = LightSources::get().get("world");
 				if (worldLightOpt) {
 					Light& worldLight = worldLightOpt.value();
-					// Only help if user explicitly enabled shadows (shadowType is MAPPED)
-					// but the light doesn't have a shadow texture (couldn't get a slot)
+					// Check if world light has MAPPED shadows but no texture (budget pressure prevented allocation)
 					if (worldLight.getShadowType() == Light::SHADOW_TYPES::MAPPED &&
 						worldLight.getShadowTexture() == 0) {
 						// Count how many entity lights have MAPPED shadows
@@ -1124,6 +1123,8 @@ namespace PAIN {
 								}
 							}
 						}
+						// Try to re-allocate shadow buffers for world light
+						worldLight.setShadowType(Light::SHADOW_TYPES::MAPPED);
 					}
 				}
 			}
