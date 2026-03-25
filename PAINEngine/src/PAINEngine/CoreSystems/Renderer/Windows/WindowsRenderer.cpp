@@ -2814,7 +2814,11 @@ namespace PAIN {
 									   const glm::vec2& invDoubleRadius,
 									   const glm::vec2& ndcBase,
 									   const glm::vec2& ndcScale,
-									   const glm::vec4& color) {
+									   const glm::vec4& color,
+									   const glm::vec4& accentColor,
+									   float patternStrength,
+									   float patternScale,
+									   float patternPhase) {
 		if (!minimap_wall_shader || minimap_wall_vao == 0 || minimap_wall_vertex_count == 0) {
 			return;
 		}
@@ -2829,6 +2833,10 @@ namespace PAIN {
 		minimap_wall_shader->SetUniform("u_NdcBase", ndcBase);
 		minimap_wall_shader->SetUniform("u_NdcScale", ndcScale);
 		minimap_wall_shader->SetUniform("u_Color", color);
+		minimap_wall_shader->SetUniform("u_AccentColor", accentColor);
+		minimap_wall_shader->SetUniform("u_PatternStrength", patternStrength);
+		minimap_wall_shader->SetUniform("u_PatternScale", patternScale);
+		minimap_wall_shader->SetUniform("u_PatternPhase", patternPhase);
 
 		glBindVertexArray(minimap_wall_vao);
 		glDrawArrays(GL_TRIANGLES, 0, minimap_wall_vertex_count);

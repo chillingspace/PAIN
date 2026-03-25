@@ -12,6 +12,7 @@ namespace PAIN {
         //Rendering system
         class System : public ECS::System::ISystem {
         private:
+            float minimap_threat_time_ = 0.0f;
 
             //Internal helpers
             void InitializeModelRenderer(entt::entity entity, ModelRenderer& component);

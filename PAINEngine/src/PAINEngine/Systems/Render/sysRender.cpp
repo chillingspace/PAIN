@@ -13,6 +13,7 @@
 #include "Systems/Particle/sysParticleSystem.h"
 #include "CoreSystems/Assets/Types/Shader.h"
 #include "CoreSystems/Assets/Types/Texture.h"
+#include "Systems/Render/MinimapStyle.h"
 
 #ifdef _DEBUG
 #include "LayeredSystems/LevelEditor/Editor.h"
@@ -280,6 +281,7 @@ namespace PAIN {
 		}
 
 		void System::onUpdate(AppTiming timing, entt::registry& registry) {
+            minimap_threat_time_ += glm::max(0.0f, timing.unscaled_dt);
 			if (g_ThermalProfiler) {
 				g_ThermalProfiler->BeginFrame();
 			}
@@ -2345,7 +2347,7 @@ namespace PAIN {
 							return false;
 							};
 
-						auto worldToMinimapNdc = [&](const glm::vec3& worldPos, bool clampToEdge) {
+						auto worldToMinimapPx = [&](const glm::vec3& worldPos, bool clampToEdge) {
 							const glm::vec2 delta(worldPos.x - player_pos.x, worldPos.z - player_pos.z);
 							float local_x = delta.x;
 							float local_y = -delta.y;
@@ -2368,9 +2370,17 @@ namespace PAIN {
 							const float px = draw_x + u_draw * draw_w;
 							const float py = draw_y + (1.0f - v_draw) * draw_h;
 
+							return glm::vec2(px, py);
+							};
+
+						auto pixelsToNdc = [&](const glm::vec2& pxPos) {
 							return glm::vec2(
-								(px / fbw) * 2.0f - 1.0f,
-								1.0f - (py / fbh) * 2.0f);
+								(pxPos.x / fbw) * 2.0f - 1.0f,
+								1.0f - (pxPos.y / fbh) * 2.0f);
+							};
+
+						auto worldToMinimapNdc = [&](const glm::vec3& worldPos, bool clampToEdge) {
+							return pixelsToNdc(worldToMinimapPx(worldPos, clampToEdge));
 							};
 
 						auto drawDot = [&](const glm::vec3& pos, float radiusPx, const glm::vec4& color) {
@@ -2568,6 +2578,7 @@ namespace PAIN {
 						}
 
 						if (gs.minimap_show_walls) {
+                            const MinimapWallVisualStyle wallStyle = BuildMinimapWallStyle(minimap_threat_time_);
                             uint64_t currentWallSignature = 1469598103934665603ull;
 							for (const entt::entity entity : wallEntities) {
 								currentWallSignature ^= static_cast<uint64_t>(entity);
@@ -2619,12 +2630,16 @@ namespace PAIN {
 								rendererService->w_renderer->DrawMinimapWalls(
 									playerXZ, transformCol0, transformCol1,
 									invDoubleRadius, ndcBase, ndcScale,
-									glm::vec4(0.75f, 0.75f, 0.75f, 0.35f));
+									wallStyle.fillColor,
+									wallStyle.accentColor,
+									wallStyle.patternStrength,
+									wallStyle.patternScale,
+									wallStyle.patternPhase);
 							}
 							else {
 								// Fallback to AABB outline when no triangle data available
 								for (const entt::entity wallEntity : wallEntities) {
-									drawWallFootprint(wallEntity, glm::vec4(0.75f, 0.75f, 0.75f, 1.0f));
+									drawWallFootprint(wallEntity, wallStyle.fallbackOutlineColor);
 								}
 							}
 						}
@@ -2702,9 +2717,10 @@ namespace PAIN {
 							appendDangerEntities("danger");
 							appendDangerEntities("Enemy");
 
-							// Draw danger zones as red circles
+							std::vector<glm::vec2> dangerFillVertices;
 							std::vector<glm::vec2> dangerLineVertices;
-							dangerLineVertices.reserve(dangerEntities.size() * 24 * 2);
+							const MinimapDangerVisualStyle dangerStyle = BuildMinimapDangerStyle(minimap_threat_time_);
+
 							for (entt::entity entity : dangerEntities) {
 								glm::vec3 pos(0.0f);
 								if (!getEntityWorldPos(entity, pos)) {
@@ -2716,12 +2732,10 @@ namespace PAIN {
 									const float maxDistance = 9.0f;
 									const float coneAngleDeg = 32.0f;
 									const float heightDelta = glm::abs(pos.y - player_pos.y);
-									const float coneRadius = glm::tan(glm::radians(coneAngleDeg)) * heightDelta;
-									const float sphereRadius =
-										heightDelta >= maxDistance
-										? 0.0f
-										: std::sqrt(maxDistance * maxDistance - heightDelta * heightDelta);
-									danger_radius = glm::max(0.25f, glm::min(coneRadius, sphereRadius));
+									danger_radius = ComputeLightConeTopDownRadius(
+										heightDelta,
+										maxDistance,
+										glm::radians(coneAngleDeg));
 								}
 								else if (metadata_service->hasTag(entity, "danger_collision")) {
 									danger_radius = 0.5f;
@@ -2736,30 +2750,27 @@ namespace PAIN {
 									continue;
 								}
 
-								const glm::vec2 centerNdc = worldToMinimapNdc(pos, false);
+								const glm::vec2 centerPx = worldToMinimapPx(pos, false);
 								const float radiusPx = (danger_radius / (2.0f * glm::max(1.0f, gs.minimap_radius))) * draw_min;
-								const glm::vec2 radiusNdc((radiusPx / fbw) * 2.0f, (radiusPx / fbh) * 2.0f);
+								MinimapCoverageGeometry coverage = BuildMinimapDangerCoverage(centerPx, radiusPx, 24);
 
-								for (int i = 0; i < 24; ++i) {
-									const float a0 = (static_cast<float>(i) / 24.0f) * glm::two_pi<float>();
-									const float a1 = (static_cast<float>(i + 1) / 24.0f) * glm::two_pi<float>();
-
-									const glm::vec2 p0(
-										centerNdc.x + std::cos(a0) * radiusNdc.x,
-										centerNdc.y + std::sin(a0) * radiusNdc.y);
-									const glm::vec2 p1(
-										centerNdc.x + std::cos(a1) * radiusNdc.x,
-										centerNdc.y + std::sin(a1) * radiusNdc.y);
-
-									dangerLineVertices.push_back(p0);
-									dangerLineVertices.push_back(p1);
+								for (const glm::vec2& vertexPx : coverage.fillTriangles) {
+									dangerFillVertices.push_back(pixelsToNdc(vertexPx));
+								}
+								for (const glm::vec2& vertexPx : coverage.outlineLines) {
+									dangerLineVertices.push_back(pixelsToNdc(vertexPx));
 								}
 							}
 
+							if (!dangerFillVertices.empty()) {
+								rendererService->w_renderer->DebugPass2DTrianglesFilled(
+									dangerFillVertices,
+									dangerStyle.fillColor);
+							}
 							if (!dangerLineVertices.empty()) {
 								rendererService->w_renderer->DebugPass2DLines(
 									dangerLineVertices,
-									glm::vec4(1.0f, 0.15f, 0.15f, 1.0f));
+									dangerStyle.edgeColor);
 							}
 						}
 

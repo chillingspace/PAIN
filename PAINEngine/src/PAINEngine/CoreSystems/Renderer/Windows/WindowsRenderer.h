@@ -146,7 +146,11 @@ namespace PAIN {
 							 const glm::vec2& invDoubleRadius,
 							 const glm::vec2& ndcBase,
 							 const glm::vec2& ndcScale,
-							 const glm::vec4& color);
+							 const glm::vec4& color,
+							 const glm::vec4& accentColor,
+							 float patternStrength,
+							 float patternScale,
+							 float patternPhase);
 		bool hasMinimapWallData() const { return minimap_wall_vertex_count > 0; }
 
 		void ReflectionPass(const ModelRenderer& component);

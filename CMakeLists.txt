@@ -102,6 +102,7 @@ endif()
 add_subdirectory(PAINEngine)
 if (NOT ANDROID)
 add_subdirectory(Tests/ScenePreload)
+add_subdirectory(Tests/MinimapStyle)
 endif()
 add_subdirectory(Game)
 
