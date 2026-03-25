@@ -769,6 +769,73 @@ namespace PAIN {
 				geometry_shader->SetUniform("material.emission_map", 11);
 			}
 		}
+
+		// ========================================
+		// OPTIMIZED: ApplyCachedGeometryMaterialState
+		// Uses pre-cached SubmeshTextureCache to avoid per-frame asset lookups
+		// ========================================
+		void ApplyCachedGeometryMaterialState(const std::shared_ptr<Assets::Shader>& shader,
+			const ModelRenderer::SubmeshTextureCache& cache) {
+			shader->SetUniform("u_DecodeAlbedoInShader",
+				GraphicsSettings::get().decode_albedo_in_shader ? 1.0f : 0.0f);
+			shader->SetUniform("material.rough", cache.roughness);
+			shader->SetUniform("material.metal", cache.metallic);
+			shader->SetUniform("material.color", cache.baseColor);
+			shader->SetUniform("u_UseEmissionOverride", cache.useEmissionOverride ? 1.0f : 0.0f);
+			shader->SetUniform("u_EmissionOverride",
+				cache.useEmissionOverride ? cache.emissionOverride : glm::vec3(0.0f));
+			shader->SetUniform("material.ao_channel_mask", cache.aoChannelMask);
+			shader->SetUniform("material.roughness_channel_mask", cache.roughnessChannelMask);
+			shader->SetUniform("material.metallic_channel_mask", cache.metallicChannelMask);
+
+			const bool hasTexture = cache.albedoTexture != 0;
+			shader->SetUniform("material.useTex", hasTexture ? 1.0f : 0.0f);
+			if (hasTexture) {
+				glActiveTexture(GL_TEXTURE6);
+				glBindTexture(GL_TEXTURE_2D, cache.albedoTexture);
+				shader->SetUniform("material.tex", 6);
+			}
+
+			const bool useAo = cache.aoTexture != 0;
+			shader->SetUniform("material.use_ao", useAo ? 1.0f : 0.0f);
+			if (useAo) {
+				glActiveTexture(GL_TEXTURE7);
+				glBindTexture(GL_TEXTURE_2D, cache.aoTexture);
+				shader->SetUniform("material.ao_map", 7);
+			}
+
+			const bool useNormal = cache.normalTexture != 0;
+			shader->SetUniform("material.use_normal", useNormal ? 1.0f : 0.0f);
+			if (useNormal) {
+				glActiveTexture(GL_TEXTURE8);
+				glBindTexture(GL_TEXTURE_2D, cache.normalTexture);
+				shader->SetUniform("material.normal_map", 8);
+			}
+
+			const bool useRoughness = cache.roughnessTexture != 0;
+			shader->SetUniform("material.use_roughness", useRoughness ? 1.0f : 0.0f);
+			if (useRoughness) {
+				glActiveTexture(GL_TEXTURE9);
+				glBindTexture(GL_TEXTURE_2D, cache.roughnessTexture);
+				shader->SetUniform("material.roughness_map", 9);
+			}
+
+			const bool useMetallic = cache.metallicTexture != 0;
+			shader->SetUniform("material.use_metallic", useMetallic ? 1.0f : 0.0f);
+			if (useMetallic) {
+				glActiveTexture(GL_TEXTURE10);
+				glBindTexture(GL_TEXTURE_2D, cache.metallicTexture);
+				shader->SetUniform("material.metallic_map", 10);
+			}
+
+			const bool useEmission = cache.emissiveTexture != 0;
+			shader->SetUniform("material.use_emission", useEmission ? 1.0f : 0.0f);
+			if (useEmission) {
+				glActiveTexture(GL_TEXTURE11);
+				glBindTexture(GL_TEXTURE_2D, cache.emissiveTexture);
+				shader->SetUniform("material.emission_map", 11);
+			}
+		}
 	}
 	// Light light = {
 	//	{2.f, 3.f, 2.f},	// position
@@ -797,6 +864,16 @@ namespace PAIN {
 		glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousTex2D);
 		glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &previousTexCube);
 		glGetIntegerv(GL_UNPACK_ALIGNMENT, &previousUnpackAlignment);
+
+#ifdef PN_PLATFORM_ANDROID
+		if (eglGetCurrentContext() == EGL_NO_CONTEXT ||
+			eglGetCurrentSurface(EGL_DRAW) == EGL_NO_SURFACE) {
+			PN_CORE_WARN("Deferring texture upload because EGL context/surface is not current yet");
+			return;
+		}
+#endif
+
+		while (glGetError() != GL_NO_ERROR) {}
 
 		PN_CORE_TRACE("Texture load started, active unit: GL_TEXTURE{}", activeTextureUnit - GL_TEXTURE0);
 
@@ -1260,6 +1337,28 @@ namespace PAIN {
 			return;
 		}
 
+		// OPTIMIZATION: Create bone matrix UBO for animated meshes
+		// This replaces 100+ individual SetUniform calls with a single buffer update
+		if (bone_matrix_ubo == 0) {
+			glGenBuffers(1, &bone_matrix_ubo);
+			glBindBuffer(GL_UNIFORM_BUFFER, bone_matrix_ubo);
+			// MAX_BONES * sizeof(mat4) = 100 * 64 = 6400 bytes
+			glBufferData(
+				GL_UNIFORM_BUFFER,
+				static_cast<GLsizeiptr>(MAX_BONES * sizeof(glm::mat4)),
+				nullptr,
+				GL_DYNAMIC_DRAW);
+			glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		}
+
+		// Bind bone UBO to the geometry shader
+		const GLuint geometryProgram = geometry_shader->GetRendererID();
+		const GLuint boneBlockIndex = glGetUniformBlockIndex(geometryProgram, "BoneBlock");
+		if (boneBlockIndex != GL_INVALID_INDEX) {
+			glUniformBlockBinding(geometryProgram, boneBlockIndex, 1); // binding = 1 in shader
+			bone_matrix_ubo_bound_program = geometryProgram;
+		}
+
 		// Pass through shader
 		shader_opt = assets_loader->getAsset<Assets::Shader>(passthrough_path);
 		passthrough_shader =
@@ -1300,6 +1399,20 @@ namespace PAIN {
 			PN_CORE_ERROR("Failed to create shader program for tone");
 			throw std::runtime_error("");
 			return;
+		}
+
+		// Combined tone + gamma shader (optimization: merges two passes into one)
+#ifdef PN_PLATFORM_ANDROID
+		std::filesystem::path tone_gamma_path = "engine/shaders/android_tone_gamma.vert";
+#else
+		std::filesystem::path tone_gamma_path = "engine/shaders/tone_gamma.vert";
+#endif
+		shader_opt = assets_loader->getAsset<Assets::Shader>(tone_gamma_path);
+		tone_gamma_shader = shader_opt.has_value() ? shader_opt.value() : tone_gamma_shader;
+
+		if (!tone_gamma_shader || tone_gamma_shader->GetRendererID() == 0) {
+			PN_CORE_WARN("Failed to create tone_gamma shader, falling back to separate tone+gamma passes");
+			tone_gamma_shader = nullptr;
 		}
 
 		// Bloom shader
@@ -1343,7 +1456,7 @@ namespace PAIN {
 			return;
 		}
 
-	// Debug shader
+		// Debug shader
 		shader_opt = assets_loader->getAsset<Assets::Shader>(debug_geometry_path);
 		debug_shader = shader_opt.has_value() ? shader_opt.value() : debug_shader;
 
@@ -1512,28 +1625,37 @@ namespace PAIN {
 
 #ifdef PN_PLATFORM_ANDROID
 			_createDeferredShadingBuffer(pos_texture, 3, GL_COLOR_ATTACHMENT0);
-			_createDeferredShadingBuffer(col_texture, 3, GL_COLOR_ATTACHMENT1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+			_createDeferredShadingBuffer(col_texture, 3, GL_COLOR_ATTACHMENT1);  // GL_RGBA16F — matches Windows precision for linear-space albedo after pow(2.2)
 			_createDeferredShadingBuffer(norm_texture, 3, GL_COLOR_ATTACHMENT2);
-			_createDeferredShadingBuffer(material_properties_texture, 3, GL_COLOR_ATTACHMENT3, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
-			_createDeferredShadingBuffer(emission_texture, 3, GL_COLOR_ATTACHMENT4, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+			_createDeferredShadingBuffer(material_properties_texture, 3, GL_COLOR_ATTACHMENT3);  // GL_RGB16F — fixes roughness quantization causing mirror-like reflections
+			if (active_gbuffer_count >= 5) {
+				_createDeferredShadingBuffer(emission_texture, 3, GL_COLOR_ATTACHMENT4, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+			}
 #else
 			_createDeferredShadingBuffer(pos_texture, 3, GL_COLOR_ATTACHMENT0);
 			_createDeferredShadingBuffer(col_texture, 3, GL_COLOR_ATTACHMENT1);
 			_createDeferredShadingBuffer(norm_texture, 3, GL_COLOR_ATTACHMENT2);
 			_createDeferredShadingBuffer(material_properties_texture, 3, GL_COLOR_ATTACHMENT3);
-			_createDeferredShadingBuffer(emission_texture, 3, GL_COLOR_ATTACHMENT4);
+			if (active_gbuffer_count >= 5) {
+				_createDeferredShadingBuffer(emission_texture, 3, GL_COLOR_ATTACHMENT4);
+			}
 #endif
 
-			static constexpr int NUM_GBUFFERS = 5;
-
-			unsigned int attachments[NUM_GBUFFERS] = {
+			unsigned int attachments[5] = {
 				GL_COLOR_ATTACHMENT0,
 				GL_COLOR_ATTACHMENT1,
 				GL_COLOR_ATTACHMENT2,
 				GL_COLOR_ATTACHMENT3,
 				GL_COLOR_ATTACHMENT4,
 			};
-			glDrawBuffers(NUM_GBUFFERS, attachments);
+			glDrawBuffers(active_gbuffer_count, attachments);
+			// Clear all active attachments to ensure clean state
+			for (int i = 0; i < active_gbuffer_count; ++i) {
+				glDrawBuffers(1, &attachments[i]);
+				glClearColor(0.0f, 0.0f, 0.0f, (i == 3) ? 0.0f : 1.0f); // material_properties alpha = 0
+				glClear(GL_COLOR_BUFFER_BIT);
+			}
+			glDrawBuffers(active_gbuffer_count, attachments);
 
 			glGenTextures(1, &ds_depth_texture);
 			glBindTexture(GL_TEXTURE_2D, ds_depth_texture);
@@ -1628,6 +1750,16 @@ namespace PAIN {
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 			// pp_texture for ping-pong if needed in post-processing
+			// OPTIMIZATION: For Android, render post-process at reduced resolution
+#ifdef PN_PLATFORM_ANDROID
+			const float pp_scale = glm::clamp(GraphicsSettings::get().postprocess_resolution_scale, 0.25f, 1.0f);
+			pp_width = std::max(1, static_cast<int>(std::round(winWidth * pp_scale)));
+			pp_height = std::max(1, static_cast<int>(std::round(winHeight * pp_scale)));
+			PN_CORE_INFO("Post-process buffers at {}x{} ({} scale)", pp_width, pp_height, pp_scale);
+#else
+			pp_width = winWidth;
+			pp_height = winHeight;
+#endif
 			glGenFramebuffers(1, &pp_fbo);
 			glBindFramebuffer(GL_FRAMEBUFFER, pp_fbo);
 
@@ -1638,7 +1770,7 @@ namespace PAIN {
 				return;
 			}
 			glBindTexture(GL_TEXTURE_2D, pp_texture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, winWidth, winHeight, 0, GL_RGBA,
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, pp_width, pp_height, 0, GL_RGBA,
 						 GL_FLOAT, nullptr);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -1651,6 +1783,10 @@ namespace PAIN {
 				failInit("Post-process framebuffer (pp_fbo)");
 				return;
 			}
+
+			// Clear pp_texture to black to avoid garbage data on first frame
+			glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+			glClear(GL_COLOR_BUFFER_BIT);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -1665,7 +1801,7 @@ namespace PAIN {
 				return;
 			}
 			glBindTexture(GL_TEXTURE_2D, pp2_texture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, winWidth, winHeight, 0, GL_RGBA,
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, pp_width, pp_height, 0, GL_RGBA,
 						 GL_FLOAT, nullptr);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -1678,6 +1814,10 @@ namespace PAIN {
 				failInit("Post-process framebuffer (pp2_fbo)");
 				return;
 			}
+
+			// Clear pp2_texture to black to avoid garbage data on first frame
+			glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+			glClear(GL_COLOR_BUFFER_BIT);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -1833,6 +1973,14 @@ namespace PAIN {
 		auto window_service = services->get<Window::Window>();
 		winWidth = window_service->getFrameBuffer().x;
 		winHeight = window_service->getFrameBuffer().y;
+		glGetIntegerv(GL_MAX_DRAW_BUFFERS, &max_draw_buffers);
+		glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &max_color_attachments);
+		const int maxGBufferAttachments = static_cast<int>(std::min(max_draw_buffers, max_color_attachments));
+		active_gbuffer_count = std::clamp(maxGBufferAttachments, 3, 5);
+		if (active_gbuffer_count < 5) {
+			PN_CORE_WARN("Reducing active G-buffer draw attachments to {} (caps: drawBuffers={}, colorAttachments={})",
+				active_gbuffer_count, max_draw_buffers, max_color_attachments);
+		}
 
 		initShaders();
 
@@ -1863,9 +2011,6 @@ namespace PAIN {
 			return;
 		}
 
-		// ========================================
-		// SAVE STATE (Debug builds only - avoids costly glGet* in release)
-		// ========================================
 		#ifdef _DEBUG
 		GLint currentActiveTexture;
 		glGetIntegerv(GL_ACTIVE_TEXTURE, &currentActiveTexture);
@@ -1880,9 +2025,6 @@ namespace PAIN {
 		glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
 		#endif
 
-		// ========================================
-		// RENDER
-		// ========================================
 		auto window_service = services->get<Window::Window>();
 		auto framebuffer = window_service->getFrameBuffer();
 
@@ -1892,11 +2034,6 @@ namespace PAIN {
 
 		texture2d_shader->Bind();
 
-		GLenum err = glGetError();
-		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("Error after shader bind: 0x{:X}", err);
-		}
-
 		texture2d_shader->SetUniform("pos", pos);
 		texture2d_shader->SetUniform("ndc_scale", corrected_scale);
 		texture2d_shader->SetUniform("uv_transform",
@@ -1904,35 +2041,23 @@ namespace PAIN {
 
 		glActiveTexture(GL_TEXTURE6);
 		glBindTexture(GL_TEXTURE_2D, texture_id);
-
-		// Force clamp to edge to prevent bleeding from wrapping
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		if (clamp_configured_textures.find(texture_id) == clamp_configured_textures.end()) {
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			clamp_configured_textures.insert(texture_id);
+		}
 
 		texture2d_shader->SetUniform("tex", 6);
-
-		err = glGetError();
-		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("Error after texture bind: 0x{:X}", err);
-		}
 
 		glBindVertexArray(passthrough_vao);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-		err = glGetError();
-		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("Error after draw call: 0x{:X}", err);
-		}
-
-		// ========================================
-		// RESTORE STATE
-		// ========================================
-#ifdef _DEBUG
+		#ifdef _DEBUG
 		glActiveTexture(currentActiveTexture);
 		glBindTexture(GL_TEXTURE_2D, currentTexture);
 		glBindVertexArray(currentVAO);
 		glUseProgram(currentProgram);
-#endif
+		#endif
 	}
 
 	void WindowsRenderer::Render2DTextureCircular(GLuint texture_id, const glm::vec2& pos,
@@ -1981,8 +2106,11 @@ namespace PAIN {
 
 		glActiveTexture(GL_TEXTURE6);
 		glBindTexture(GL_TEXTURE_2D, texture_id);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		if (clamp_configured_textures.find(texture_id) == clamp_configured_textures.end()) {
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			clamp_configured_textures.insert(texture_id);
+		}
 		texture2d_shader->SetUniform("tex", 6);
 
 		glBindVertexArray(passthrough_vao);
@@ -2003,7 +2131,8 @@ namespace PAIN {
 
 	// Shadow pass entry point: sysRender selects which light to render,
 	// while the renderer owns framebuffer binding and per-pass GPU state.
-	void WindowsRenderer::BeginShadowPass(const Light& l) {
+	// clearDepth: false when rendering dynamic shadows over cached static shadows
+	void WindowsRenderer::BeginShadowPass(const Light& l, bool clearDepth) {
 		if (l.getShadowFbo() == 0 || l.getShadowTexture() == 0) {
 			PN_CORE_WARN("[GL] Skipping shadow pass because the mapped light has no valid shadow targets.");
 			return;
@@ -2014,18 +2143,25 @@ namespace PAIN {
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 		glDisable(GL_BLEND);
-		// Two-sided shadow casting avoids leakage through thin/open geometry.
-		glDisable(GL_CULL_FACE);
+		// OPTIMIZATION: Use front-face culling for shadows by default.
+		// This reduces overdraw and shadow acne. Objects with doubleSidedShadows
+		// will temporarily disable culling to handle thin geometry.
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_FRONT);
 #ifdef PN_PLATFORM_ANDROID
 		// critical for Mali GPU on android depth-only shadow rendering
 		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 #endif
-		#ifdef PN_PLATFORM_ANDROID
-		glClearDepthf(1.0f);
+		// Only clear depth buffer if this is a full shadow pass (static + dynamic)
+		// For dynamic-only passes over cached static shadows, skip clearing
+		if (clearDepth) {
+#ifdef PN_PLATFORM_ANDROID
+			glClearDepthf(1.0f);
 #else
-		glClearDepth(1.0f);
+			glClearDepth(1.0f);
 #endif
-		glClear(GL_DEPTH_BUFFER_BIT);
+			glClear(GL_DEPTH_BUFFER_BIT);
+		}
 	}
 
 	void WindowsRenderer::DrawShadows(const ModelRenderer& component,
@@ -2125,11 +2261,6 @@ namespace PAIN {
 			glBindVertexArray(0);
 		}
 
-		GLenum err = glGetError();
-		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("OpenGL error after drawing floor: {}", err);
-		}
-
 		geometry_shader->Bind();
 		geometry_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
 		geometry_shader->SetUniform("u_P", scene->GetActiveCamera()->projection());
@@ -2143,11 +2274,6 @@ namespace PAIN {
 	void WindowsRenderer::DrawGeometry(std::shared_ptr<Scene::SceneManager> scene,
 									   ModelRenderer& component,
 									   const glm::mat4& M) {
-
-		GLenum err = glGetError();
-		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("OpenGL error before DrawGeometry: {}", err);
-		}
 
 		if (!geometry_shader || !component.cachedModelAsset) {
 			return;
@@ -2198,9 +2324,19 @@ namespace PAIN {
 				continue; // Skip this submesh
 			}
 
-			const GeometryMaterialState materialState =
-				BuildGeometryMaterialState(assetManager, component, i);
-			ApplyGeometryMaterialState(geometry_shader, materialState);
+			// ========================================
+			// PERFORMANCE OPTIMIZATION: Use Cached Material State
+			// submeshCaches are populated once in InitializeModelRenderer
+			// Avoids per-frame BuildGeometryMaterialState asset lookups
+			// ========================================
+			if (i < component.submeshCaches.size() && component.submeshCaches[i].cacheValid) {
+				ApplyCachedGeometryMaterialState(geometry_shader, component.submeshCaches[i]);
+			} else {
+				// Fallback: build material state per-frame (shouldn't happen normally)
+				const GeometryMaterialState materialState =
+					BuildGeometryMaterialState(assetManager, component, i);
+				ApplyGeometryMaterialState(geometry_shader, materialState);
+			}
 
 			// animation
 
@@ -2208,13 +2344,30 @@ namespace PAIN {
 			if (!component.boneTransforms.empty()) {
 
 				// Animation calculation now handled in animation system
-				const auto& matrices = component.boneTransforms; // OR renderer.boneTransforms, depending on where you stored it
+				const auto& matrices = component.boneTransforms;
 
 				if (!matrices.empty()) {
-					for (size_t i = 0; i < matrices.size() && i < 100; ++i) { // 100 = MAX_BONES
-						std::string uniform_name = "u_BoneMatrices[" + std::to_string(i) + "]";
-						geometry_shader->SetUniform(uniform_name, matrices[i]);
+					// OPTIMIZATION: Use UBO for bone matrices instead of 100+ SetUniform calls
+					// Single buffer update is much faster than individual uniform calls
+					
+					// Rebind UBO if geometry shader program changed (hot-reload support)
+					const GLuint geometryProgram = geometry_shader->GetRendererID();
+					if (geometryProgram != bone_matrix_ubo_bound_program) {
+						const GLuint boneBlockIndex = glGetUniformBlockIndex(geometryProgram, "BoneBlock");
+						if (boneBlockIndex != GL_INVALID_INDEX) {
+							glUniformBlockBinding(geometryProgram, boneBlockIndex, 1); // binding = 1
+							bone_matrix_ubo_bound_program = geometryProgram;
+						}
 					}
+					
+					const size_t boneCount = std::min(matrices.size(), static_cast<size_t>(MAX_BONES));
+					const GLsizeiptr dataSize = static_cast<GLsizeiptr>(boneCount * sizeof(glm::mat4));
+					
+					glBindBuffer(GL_UNIFORM_BUFFER, bone_matrix_ubo);
+					glBufferSubData(GL_UNIFORM_BUFFER, 0, dataSize, matrices.data());
+					glBindBufferBase(GL_UNIFORM_BUFFER, 1, bone_matrix_ubo); // binding = 1
+					glBindBuffer(GL_UNIFORM_BUFFER, 0);
+					
 					geometry_shader->SetUniform("u_Animated", 1.0f);
 				}
 
@@ -2322,11 +2475,6 @@ namespace PAIN {
 		// LogMemoryFullDiagnostic("After Rendering Sub Meshes.");
 
 		glBindVertexArray(0);
-
-		err = glGetError();
-		if (err != GL_NO_ERROR) {
-			PN_CORE_ERROR("OpenGL error after DrawGeometry: {}", err);
-		}
 	}
 
 	void WindowsRenderer::DrawGeometryInstanced(
@@ -2341,13 +2489,12 @@ namespace PAIN {
 
 		const int instanceCount = static_cast<int>(matrices.size());
 
-		// Upload model matrices to the instance VBO
 		glBindBuffer(GL_ARRAY_BUFFER, geometry_ibo);
 		const GLsizeiptr needed = instanceCount * sizeof(glm::mat4);
-		GLint currentSize = 0;
-		glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &currentSize);
-		const GLsizeiptr uploadCapacity = currentSize < needed ? needed * 2 : currentSize;
-		glBufferData(GL_ARRAY_BUFFER, uploadCapacity, nullptr, GL_DYNAMIC_DRAW);
+		if (geometry_ibo_capacity < needed) {
+			geometry_ibo_capacity = needed * 2;
+			glBufferData(GL_ARRAY_BUFFER, geometry_ibo_capacity, nullptr, GL_DYNAMIC_DRAW);
+		}
 		glBufferSubData(GL_ARRAY_BUFFER, 0, needed, matrices.data());
 
 		geometry_shader->SetUniform("u_Instanced", 1.0f);
@@ -2365,9 +2512,17 @@ namespace PAIN {
 			if (submesh.materialIndex >= component.materials.size())
 				continue;
 
-			const GeometryMaterialState state =
-				BuildGeometryMaterialState(assetManager, component, i);
-			ApplyGeometryMaterialState(geometry_shader, state);
+			// ========================================
+			// PERFORMANCE OPTIMIZATION: Use Cached Material State
+			// ========================================
+			if (i < component.submeshCaches.size() && component.submeshCaches[i].cacheValid) {
+				ApplyCachedGeometryMaterialState(geometry_shader, component.submeshCaches[i]);
+			} else {
+				// Fallback: build material state per-frame
+				const GeometryMaterialState state =
+					BuildGeometryMaterialState(assetManager, component, i);
+				ApplyGeometryMaterialState(geometry_shader, state);
+			}
 
 			glDrawElementsInstanced(
 				GL_TRIANGLES, submesh.indexCount, GL_UNSIGNED_INT,
@@ -3003,8 +3158,12 @@ namespace PAIN {
 
 		glBindVertexArray(debug_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
-		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(),
-					 GL_DYNAMIC_DRAW);
+		const GLsizeiptr debugBytes = static_cast<GLsizeiptr>(verts.size() * sizeof(float));
+		if (debug_vbo_capacity < debugBytes) {
+			debug_vbo_capacity = debugBytes * 2;
+			glBufferData(GL_ARRAY_BUFFER, debug_vbo_capacity, nullptr, GL_DYNAMIC_DRAW);
+		}
+		glBufferSubData(GL_ARRAY_BUFFER, 0, debugBytes, verts.data());
 
 		debug_shader->Bind();
 		debug_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
@@ -3046,8 +3205,12 @@ namespace PAIN {
 
 		glBindVertexArray(debug_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
-		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(),
-					 GL_DYNAMIC_DRAW);
+		const GLsizeiptr debugBytes = static_cast<GLsizeiptr>(verts.size() * sizeof(float));
+		if (debug_vbo_capacity < debugBytes) {
+			debug_vbo_capacity = debugBytes * 2;
+			glBufferData(GL_ARRAY_BUFFER, debug_vbo_capacity, nullptr, GL_DYNAMIC_DRAW);
+		}
+		glBufferSubData(GL_ARRAY_BUFFER, 0, debugBytes, verts.data());
 
 		debug_shader->Bind();
 		debug_shader->SetUniform("u_V", scene->GetActiveCamera()->view());
@@ -3092,8 +3255,12 @@ namespace PAIN {
 
 		glBindVertexArray(debug_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
-		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(),
-					 GL_DYNAMIC_DRAW);
+		const GLsizeiptr debugBytes = static_cast<GLsizeiptr>(verts.size() * sizeof(float));
+		if (debug_vbo_capacity < debugBytes) {
+			debug_vbo_capacity = debugBytes * 2;
+			glBufferData(GL_ARRAY_BUFFER, debug_vbo_capacity, nullptr, GL_DYNAMIC_DRAW);
+		}
+		glBufferSubData(GL_ARRAY_BUFFER, 0, debugBytes, verts.data());
 
 		debug_shader->Bind();
 		// For 2D UI, use orthographic projection
@@ -3119,8 +3286,12 @@ namespace PAIN {
 
 		glBindVertexArray(debug_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
-		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(),
-			GL_DYNAMIC_DRAW);
+		const GLsizeiptr debugBytes = static_cast<GLsizeiptr>(verts.size() * sizeof(float));
+		if (debug_vbo_capacity < debugBytes) {
+			debug_vbo_capacity = debugBytes * 2;
+			glBufferData(GL_ARRAY_BUFFER, debug_vbo_capacity, nullptr, GL_DYNAMIC_DRAW);
+		}
+		glBufferSubData(GL_ARRAY_BUFFER, 0, debugBytes, verts.data());
 
 		debug_shader->Bind();
 		glm::mat4 ortho_proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
@@ -3149,8 +3320,12 @@ namespace PAIN {
 
 		glBindVertexArray(debug_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
-		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(),
-			GL_DYNAMIC_DRAW);
+		const GLsizeiptr debugBytes = static_cast<GLsizeiptr>(verts.size() * sizeof(float));
+		if (debug_vbo_capacity < debugBytes) {
+			debug_vbo_capacity = debugBytes * 2;
+			glBufferData(GL_ARRAY_BUFFER, debug_vbo_capacity, nullptr, GL_DYNAMIC_DRAW);
+		}
+		glBufferSubData(GL_ARRAY_BUFFER, 0, debugBytes, verts.data());
 
 		debug_shader->Bind();
 		glm::mat4 ortho_proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
@@ -3177,8 +3352,12 @@ namespace PAIN {
 
 		glBindVertexArray(debug_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
-		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(),
-			GL_DYNAMIC_DRAW);
+		const GLsizeiptr debugBytes = static_cast<GLsizeiptr>(verts.size() * sizeof(float));
+		if (debug_vbo_capacity < debugBytes) {
+			debug_vbo_capacity = debugBytes * 2;
+			glBufferData(GL_ARRAY_BUFFER, debug_vbo_capacity, nullptr, GL_DYNAMIC_DRAW);
+		}
+		glBufferSubData(GL_ARRAY_BUFFER, 0, debugBytes, verts.data());
 
 		debug_shader->Bind();
 		glm::mat4 ortho_proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
@@ -3207,8 +3386,12 @@ namespace PAIN {
 
 		glBindVertexArray(debug_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
-		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(),
-			GL_DYNAMIC_DRAW);
+		const GLsizeiptr debugBytes = static_cast<GLsizeiptr>(verts.size() * sizeof(float));
+		if (debug_vbo_capacity < debugBytes) {
+			debug_vbo_capacity = debugBytes * 2;
+			glBufferData(GL_ARRAY_BUFFER, debug_vbo_capacity, nullptr, GL_DYNAMIC_DRAW);
+		}
+		glBufferSubData(GL_ARRAY_BUFFER, 0, debugBytes, verts.data());
 
 		debug_shader->Bind();
 		glm::mat4 ortho_proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
@@ -3247,8 +3430,12 @@ namespace PAIN {
 
 		glBindVertexArray(debug_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
-		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(),
-			GL_DYNAMIC_DRAW);
+		const GLsizeiptr debugBytes = static_cast<GLsizeiptr>(verts.size() * sizeof(float));
+		if (debug_vbo_capacity < debugBytes) {
+			debug_vbo_capacity = debugBytes * 2;
+			glBufferData(GL_ARRAY_BUFFER, debug_vbo_capacity, nullptr, GL_DYNAMIC_DRAW);
+		}
+		glBufferSubData(GL_ARRAY_BUFFER, 0, debugBytes, verts.data());
 
 		debug_shader->Bind();
 		glm::mat4 ortho_proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
@@ -3317,10 +3504,10 @@ namespace PAIN {
 			}
 			const bool hasShadowMap =
 				l.getShadowType() == Light::SHADOW_TYPES::MAPPED && l.getShadowTexture() != 0;
-			const bool supportsUnshadowedVolumetrics =
-				l.type == Light::TYPES::SPOTLIGHT || l.type == Light::TYPES::POINT;
-
-			if (!hasShadowMap && !supportsUnshadowedVolumetrics) {
+			
+			// REQUIRE shadow map for all volumetric lights to prevent light leaking
+			// through geometry. Without a shadow map, we cannot determine occlusion.
+			if (!hasShadowMap) {
 				continue;
 			}
 
@@ -3551,6 +3738,7 @@ namespace PAIN {
 			// save scene_tex to final_texture first
 			if (postprocess_passes % 2) {
 				glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+				glViewport(0, 0, winWidth, winHeight);
 				passthrough_shader->Bind();
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, pp_texture);
@@ -3565,6 +3753,7 @@ namespace PAIN {
 				const unsigned int src_tex = final_texture;
 
 				glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
+				glViewport(0, 0, pp_width, pp_height);
 				bloom_shader->Bind();
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, src_tex);
@@ -3595,6 +3784,7 @@ namespace PAIN {
 						postprocess_passes % 2 == 0 ? pp_texture : pp2_texture;
 
 					glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
+					glViewport(0, 0, pp_width, pp_height);
 
 					glActiveTexture(GL_TEXTURE0);
 					glBindTexture(GL_TEXTURE_2D, src_tex);
@@ -3614,6 +3804,7 @@ namespace PAIN {
 				const unsigned int bloom_tex = pp_texture;
 
 				glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
+				glViewport(0, 0, pp_width, pp_height);
 				bloom_blend_shader->Bind();
 
 				glActiveTexture(GL_TEXTURE0);
@@ -3636,6 +3827,7 @@ namespace PAIN {
 				const unsigned int src_tex = pp2_texture;
 
 				glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+				glViewport(0, 0, winWidth, winHeight);
 				passthrough_shader->Bind();
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, src_tex);
@@ -3650,6 +3842,7 @@ namespace PAIN {
 
 		// tone mapping pass
 		// do after bloom for HDR rendering!
+		// OPTIMIZATION: Combine tone mapping + gamma into single pass when tone_gamma_shader available
 		{
 			const unsigned int dest_fbo =
 				postprocess_passes % 2 == 0 ? pp_fbo : final_fbo;
@@ -3657,15 +3850,36 @@ namespace PAIN {
 				postprocess_passes % 2 == 0 ? final_texture : pp_texture;
 
 			glCheck(glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo));
-			tone_shader->Bind();
-			glCheck(glActiveTexture(GL_TEXTURE0));
-			glCheck(glBindTexture(GL_TEXTURE_2D, src_tex));
-			glCheck(tone_shader->SetUniform("tex", 0));
-			glCheck(tone_shader->SetUniform(
-				"exposure", GraphicsSettings::get().tone_mapping_exposure));
-			glCheck(tone_shader->SetUniform(
-				"toneMapMode",
-				static_cast<float>(GraphicsSettings::get().tone_mapping_mode)));
+			// Set viewport: use pp resolution for pp_fbo, full resolution for final_fbo
+			glCheck(glViewport(0, 0, dest_fbo == pp_fbo ? pp_width : winWidth, 
+							  dest_fbo == pp_fbo ? pp_height : winHeight));
+			
+			// Use combined tone+gamma shader if available (eliminates one full-screen pass)
+			if (tone_gamma_shader) {
+				tone_gamma_shader->Bind();
+				glCheck(glActiveTexture(GL_TEXTURE0));
+				glCheck(glBindTexture(GL_TEXTURE_2D, src_tex));
+				glCheck(tone_gamma_shader->SetUniform("tex", 0));
+				glCheck(tone_gamma_shader->SetUniform(
+					"exposure", GraphicsSettings::get().tone_mapping_exposure));
+				glCheck(tone_gamma_shader->SetUniform(
+					"toneMapMode",
+					static_cast<float>(GraphicsSettings::get().tone_mapping_mode)));
+				glCheck(tone_gamma_shader->SetUniform(
+					"u_gamma", GraphicsSettings::get().gamma_value));
+			}
+			else {
+				tone_shader->Bind();
+				glCheck(glActiveTexture(GL_TEXTURE0));
+				glCheck(glBindTexture(GL_TEXTURE_2D, src_tex));
+				glCheck(tone_shader->SetUniform("tex", 0));
+				glCheck(tone_shader->SetUniform(
+					"exposure", GraphicsSettings::get().tone_mapping_exposure));
+				glCheck(tone_shader->SetUniform(
+					"toneMapMode",
+					static_cast<float>(GraphicsSettings::get().tone_mapping_mode)));
+			}
+			
 			glCheck(glBindVertexArray(empty_vao));
 			glCheck(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
 			++postprocess_passes;
@@ -3692,6 +3906,8 @@ namespace PAIN {
 					postprocess_passes % 2 == 0 ? final_texture : pp_texture;
 
 				glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
+				glViewport(0, 0, dest_fbo == pp_fbo ? pp_width : winWidth, 
+						  dest_fbo == pp_fbo ? pp_height : winHeight);
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, src_tex);
 				blur_shader->SetUniform("is_horizontal_pass", i % 2 ? 0.f : 1.f);
@@ -3708,13 +3924,16 @@ namespace PAIN {
 #endif
 
 		// gamma correction
-		if (GraphicsSettings::get().gamma_correction) {
+		// OPTIMIZATION: Skip if using combined tone+gamma shader
+		if (GraphicsSettings::get().gamma_correction && !tone_gamma_shader) {
 			const unsigned int dest_fbo =
 				postprocess_passes % 2 == 0 ? pp_fbo : final_fbo;
 			const unsigned int src_tex =
 				postprocess_passes % 2 == 0 ? final_texture : pp_texture;
 
 			glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
+			glViewport(0, 0, dest_fbo == pp_fbo ? pp_width : winWidth, 
+					  dest_fbo == pp_fbo ? pp_height : winHeight);
 			gamma_shader->Bind();
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, src_tex);
@@ -3737,6 +3956,7 @@ namespace PAIN {
 		// passes
 		if (postprocess_passes % 2) {
 			glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+			glViewport(0, 0, winWidth, winHeight);
 			passthrough_shader->Bind();
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, pp_texture);
@@ -3756,6 +3976,7 @@ namespace PAIN {
 
 		if (presentToSwapchain) {
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glViewport(0, 0, winWidth, winHeight);
 			passthrough_shader->Bind();
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, final_texture);
@@ -3766,11 +3987,71 @@ namespace PAIN {
 
 		restorePassState();
 
+#ifdef PN_PLATFORM_ANDROID
+		InvalidateFramebufferAttachments(pp_fbo, true, false, false);
+		InvalidateFramebufferAttachments(pp2_fbo, true, false, false);
+#endif
+
 #ifdef _DEBUG
 		err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after PostProcessPass: {}", err);
 		}
+#endif
+	}
+
+	void WindowsRenderer::BlitFinalToScreen()
+	{
+		// Simple blit from final_fbo to screen without any post-processing
+		// Used when postprocess is disabled
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, winWidth, winHeight);
+		
+		passthrough_shader->Bind();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, final_texture);
+		passthrough_shader->SetUniform("tex", 0);
+		
+		glBindVertexArray(passthrough_vao);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glBindVertexArray(0);
+	}
+
+	void WindowsRenderer::InvalidateFramebufferAttachments(GLuint fbo, bool invalidateColor,
+											 bool invalidateDepth,
+											 bool invalidateStencil) {
+#ifdef PN_PLATFORM_ANDROID
+		if (fbo == 0) {
+			return;
+		}
+
+		GLenum attachments[3];
+		int count = 0;
+
+		if (invalidateColor) {
+			attachments[count++] = GL_COLOR_ATTACHMENT0;
+		}
+		if (invalidateDepth) {
+			attachments[count++] = GL_DEPTH_ATTACHMENT;
+		}
+		if (invalidateStencil) {
+			attachments[count++] = GL_STENCIL_ATTACHMENT;
+		}
+
+		if (count == 0) {
+			return;
+		}
+
+		GLint prevFbo = 0;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glInvalidateFramebuffer(GL_FRAMEBUFFER, count, attachments);
+		glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(prevFbo));
+#else
+		(void)fbo;
+		(void)invalidateColor;
+		(void)invalidateDepth;
+		(void)invalidateStencil;
 #endif
 	}
 
@@ -3806,7 +4087,12 @@ namespace PAIN {
 
 		glBindVertexArray(debug_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
-		glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(), GL_DYNAMIC_DRAW);
+		const GLsizeiptr debugBytes = static_cast<GLsizeiptr>(verts.size() * sizeof(float));
+		if (debug_vbo_capacity < debugBytes) {
+			debug_vbo_capacity = debugBytes * 2;
+			glBufferData(GL_ARRAY_BUFFER, debug_vbo_capacity, nullptr, GL_DYNAMIC_DRAW);
+		}
+		glBufferSubData(GL_ARRAY_BUFFER, 0, debugBytes, verts.data());
 
 		// Color mask off - only writing to stencil
 		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
@@ -3852,6 +4138,12 @@ namespace PAIN {
 			glDeleteBuffers(1, &pbr_light_ubo);
 			pbr_light_ubo = 0;
 			pbr_light_ubo_bound_program = 0;
+		}
+
+		if (bone_matrix_ubo != 0) {
+			glDeleteBuffers(1, &bone_matrix_ubo);
+			bone_matrix_ubo = 0;
+			bone_matrix_ubo_bound_program = 0;
 		}
 
 		if (geometry_vao != 0) {
@@ -3932,6 +4224,7 @@ namespace PAIN {
 				*tex = 0;
 			}
 		}
+		clamp_configured_textures.clear();
 
 		for (unsigned int* rbo : rbos) {
 			if (*rbo) {

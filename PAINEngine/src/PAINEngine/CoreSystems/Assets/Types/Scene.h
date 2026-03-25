@@ -70,6 +70,13 @@ namespace PAIN {
                 glm::vec3 cameraLightIntensity{ 0.01f };
                 glm::vec3 worldLightIntensity{ GraphicsSettings::get().global_light_intensity };
                 bool useWorldLight = true;
+                // World light shadow settings
+                glm::vec3 worldLightDirection{ -0.5f, -0.8f, -0.2f };  // Direction of sunlight (normalized on load)
+                glm::vec3 worldLightPosition{ 0.0f, 30.0f, 0.0f };      // Shadow camera position (follows player in game)
+                float worldLightShadowFollowDistance{ 22.5f };          // Distance shadow camera follows player
+                int worldLightShadowResolution{ 1024 };                  // Shadow map resolution
+                float worldLightFarPlane{ 30.0f };                       // Shadow rendering distance
+                bool worldLightShadowsEnabled{ true };                   // Enable/disable world light shadows
                 bool useIBL = true;
                 float iblDiffuseStrength = 1.0f;
                 float iblSpecularStrength = 1.0f;

@@ -154,6 +154,17 @@ local VOL_PLAYER_HOP = 1.0
 local VOL_PLAYER_IDLE = 0.7
 
 registerUpdate(function(dt)
+    -- EARLY EXIT: If camera is panning, freeze player completely
+    if _G.CameraPan and _G.CameraPan.active then
+        if walkingSoundPlaying and audioStop then
+            audioStop(entityId)
+            walkingSoundPlaying = false
+        end
+        joystickDirX = 0.0
+        joystickDirY = 0.0
+        return
+    end
+
     -- EARLY EXIT: If game is paused, freeze player completely
     if IsGamePaused() then
         -- Stop walking audio

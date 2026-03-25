@@ -1307,6 +1307,35 @@ namespace PAIN {
                 if (env.contains("useWorldLight")) {
                     sceneAsset->environment.useWorldLight = env["useWorldLight"].get<bool>();
                 }
+                
+                // World light shadow settings
+                if (env.contains("worldLightDirection") && env["worldLightDirection"].is_array() && env["worldLightDirection"].size() >= 3) {
+                    sceneAsset->environment.worldLightDirection = glm::normalize(glm::vec3(
+                        env["worldLightDirection"][0].get<float>(),
+                        env["worldLightDirection"][1].get<float>(),
+                        env["worldLightDirection"][2].get<float>()
+                    ));
+                }
+                if (env.contains("worldLightPosition") && env["worldLightPosition"].is_array() && env["worldLightPosition"].size() >= 3) {
+                    sceneAsset->environment.worldLightPosition = glm::vec3(
+                        env["worldLightPosition"][0].get<float>(),
+                        env["worldLightPosition"][1].get<float>(),
+                        env["worldLightPosition"][2].get<float>()
+                    );
+                }
+                if (env.contains("worldLightShadowFollowDistance")) {
+                    sceneAsset->environment.worldLightShadowFollowDistance = env["worldLightShadowFollowDistance"].get<float>();
+                }
+                if (env.contains("worldLightShadowResolution")) {
+                    sceneAsset->environment.worldLightShadowResolution = env["worldLightShadowResolution"].get<int>();
+                }
+                if (env.contains("worldLightFarPlane")) {
+                    sceneAsset->environment.worldLightFarPlane = env["worldLightFarPlane"].get<float>();
+                }
+                if (env.contains("worldLightShadowsEnabled")) {
+                    sceneAsset->environment.worldLightShadowsEnabled = env["worldLightShadowsEnabled"].get<bool>();
+                }
+                
                 if (env.contains("useIBL")) {
                     sceneAsset->environment.useIBL = env["useIBL"].get<bool>();
                 }

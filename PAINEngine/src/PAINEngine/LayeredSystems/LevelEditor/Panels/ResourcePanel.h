@@ -45,6 +45,9 @@ namespace std {
     };
 }
 
+// Forward declare ScriptPanel so ResourcePanel can hold a pointer to it
+namespace PAIN::Editor::Panel { class ScriptPanel; }
+
 // ========================================
 // Platform-specific ResourcePanel class
 // ========================================
@@ -270,6 +273,11 @@ namespace PAIN {
 
                 std::weak_ptr<EntityPanel> entities_panel;
                 std::weak_ptr<ComponentsPanel> components_panel;
+
+                // ----------------------------
+                // Script Panel Reference
+                // ----------------------------
+                ScriptPanel* m_script_panel = nullptr;
             };
 
         } // namespace Panel

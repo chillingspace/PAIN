@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "android_tone_gamma.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 5518583814516295820
+  },
+  "descriptor_version": 1,
+  "guid": "2bebb645-7ccb-8d4e-9e44-16413bf7f073",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_tone_gamma.frag"
+  }
+}

@@ -3,6 +3,7 @@
 
 #include "CoreSystems/Renderer/Light.h"
 #include "CoreSystems/Renderer/sRenderer.h"
+#include "CoreSystems/Renderer/ThermalProfiler.h"
 #include "CoreSystems/Renderer/text.h"
 #include "CoreSystems/Scene/Scene.h"	  
 #include "ECS/Controller.h"
@@ -142,14 +143,24 @@ namespace PAIN {
 					cache.roughness = material->useOverrides ? material->roughnessOverride
 															 : materialAsset->roughness;
 
+					// Cache emission override state
+					cache.useEmissionOverride = material->useOverrides;
+					cache.emissionOverride = material->useOverrides ? material->emissiveOverride : glm::vec3(0.0f);
+
 					// Helper lambda to get GL texture handle from GUID
 					auto getTextureHandle = [&](const Assets::GUID& guid) -> GLuint {
 						if (!guid.IsValid())
 							return 0;
 						auto texOpt = assetManager->getAsset<Assets::Texture>(guid);
-						return (texOpt.has_value() && texOpt.value())
-								   ? texOpt.value()->gl_texture
-								   : 0;
+						if (!texOpt.has_value() || !texOpt.value())
+							return 0;
+						
+						auto tex = texOpt.value();
+						// Ensure texture is uploaded to GPU before caching the handle
+						if (tex->gl_texture == 0) {
+							services.lock()->get<sRenderer>()->uploadTexture(tex);
+						}
+						return tex->gl_texture;
 					};
 
 					// Cache all texture handles (look up ONCE during initialization)
@@ -188,6 +199,24 @@ namespace PAIN {
 							? material->opacityTextureOverride
 							: assetManager->findGUID(materialAsset->opacityTexturePath));
 
+					// ========================================
+					// ORM Channel Mask Detection
+					// Detect if roughness/metallic/ao textures are packed into a single ORM texture
+					// ========================================
+					const bool sameRoughMetalTexture = cache.roughnessTexture != 0 && 
+						cache.roughnessTexture == cache.metallicTexture;
+					const bool sameAoRoughTexture = cache.aoTexture != 0 && 
+						cache.aoTexture == cache.roughnessTexture;
+
+					// If textures are shared, likely packed ORM
+					if (sameRoughMetalTexture) {
+						cache.roughnessChannelMask = glm::vec3(0.0f, 1.0f, 0.0f);  // G = Roughness
+						cache.metallicChannelMask = glm::vec3(0.0f, 0.0f, 1.0f);   // B = Metallic
+					}
+					if (sameAoRoughTexture) {
+						cache.aoChannelMask = glm::vec3(1.0f, 0.0f, 0.0f);  // R = AO
+					}
+
 					cache.cacheValid = true;
 				}
 			}
@@ -208,6 +237,9 @@ namespace PAIN {
 		}
 
 		void System::onUpdate(AppTiming timing, entt::registry& registry) {
+			if (g_ThermalProfiler) {
+				g_ThermalProfiler->BeginFrame();
+			}
 			{
 #ifdef _DEBUG
 				auto editor = services.lock()->get<Editor::Editor>();
@@ -243,6 +275,64 @@ namespace PAIN {
 					light.fov = activeCamera->fov;
 					light.direction = activeCamera->forward;
 					light.aspect_ratio = activeCamera->aspect_ratio;
+					light.enableStaticShadowCaching = false;  // Camera light moves every frame
+				};
+
+				auto syncWorldLightFromActiveCamera = [&]() {
+					auto sceneManager = services.lock()->get<Scene::SceneManager>();
+					if (!sceneManager) {
+						return;
+					}
+
+					auto activeCamera = sceneManager->GetActiveCamera();
+					auto worldLightOpt = LightSources::get().get("world");
+					if (!activeCamera || !worldLightOpt.has_value()) {
+						return;
+					}
+
+					Light& worldLight = worldLightOpt.value();
+					// Position the directional light's shadow camera to follow the player
+					// The position is offset opposite to the light direction so the shadow map
+					// covers the area around the player
+					glm::vec3 lightDir = glm::normalize(worldLight.direction);
+					glm::vec3 targetPos = activeCamera->pos - lightDir * worldLight.shadow_source_follow_distance;
+					
+					// Proper shadow stabilization for directional lights:
+					// Snap the target position to texel boundaries in light space,
+					// not world space. This prevents shadow "swimming" when camera moves.
+					float orthoSize = worldLight.shadow_source_follow_distance;
+					int shadowRes = worldLight.getShadowResolution();
+					float texelSize = (orthoSize * 2.0f) / static_cast<float>(shadowRes);
+					
+					// Create light's view matrix to transform world position to light space
+					glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+					if (std::abs(glm::dot(lightDir, up)) > 0.99f) {
+						up = glm::vec3(1.0f, 0.0f, 0.0f);
+					}
+					glm::mat4 lightView = glm::lookAt(
+						glm::vec3(0.0f),  // origin (we just want the rotation)
+						lightDir,
+						up
+					);
+					
+					// Transform target position to light space
+					glm::vec4 targetLightSpace = lightView * glm::vec4(targetPos, 1.0f);
+					
+					// Snap to texel boundaries in light space
+					targetLightSpace.x = std::round(targetLightSpace.x / texelSize) * texelSize;
+					targetLightSpace.y = std::round(targetLightSpace.y / texelSize) * texelSize;
+					// Z (depth) snapping helps with aliasing at distance
+					targetLightSpace.z = std::round(targetLightSpace.z / texelSize) * texelSize;
+					
+					// Transform back to world space
+					glm::mat4 invLightView = glm::inverse(lightView);
+					glm::vec4 snappedWorldPos = invLightView * targetLightSpace;
+					
+					worldLight.position = glm::vec3(snappedWorldPos);
+					
+					// Since the world light follows the camera, static shadow caching is not effective
+					// The light frustum changes as the camera moves
+					worldLight.enableStaticShadowCaching = false;
 				};
 
 				auto rendererService = services.lock()->get<sRenderer>();
@@ -251,6 +341,7 @@ namespace PAIN {
 				}
 
 				syncCameraLightFromActiveCamera();
+				syncWorldLightFromActiveCamera();
 				if (rendererService->w_renderer->resizeDirty) {
 					rendererService->w_renderer->resizeDirty = false;
 					rendererService->w_renderer->_initDeferredShadingBuffers();
@@ -284,6 +375,9 @@ namespace PAIN {
 #endif
 
 				// Render all passes
+				if (g_ThermalProfiler) {
+					g_ThermalProfiler->BeginFrame();
+				}
 				GraphicsSettings::get().stats.objects_culled = 0;
 				GraphicsSettings::get().stats.objects_rendered = 0;
 				GraphicsSettings::get().stats.shadow_objects_culled = 0;
@@ -294,57 +388,72 @@ namespace PAIN {
 				// -> volumetrics -> particles -> debug overlays -> post process -> UI
 				// Future refactors should keep ownership here and only move work between
 				// passes when both Windows and Android follow the same contract.
+				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("shadow");
 				shadowPass(registry);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("shadow");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after shadow pass: {}", err);
 				}
 #endif
+				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("geometry");
 				geometryPass(registry);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("geometry");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after geometry pass: {}", err);
 				}
 #endif
+				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("minimap");
 				minimapPass(registry);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("minimap");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after minimap pass: {}", err);
 				}
 #endif
+				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("lighting");
 				lightingPass(registry);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("lighting");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after lighting pass: {}", err);
 				}
 #endif
+				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("volumetric");
 				volumetricPass(registry);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("volumetric");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after volumetric pass: {}", err);
 				}
 #endif
+				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("particle");
 				particlePass(registry);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("particle");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after particle pass: {}", err);
 				}
 #endif
+				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("debug");
 				debugPass(registry, editor_debug_mode);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("debug");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after debug pass: {}", err);
 				}
 #endif
-				
+				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("postprocess");
 				services.lock()->get<sRenderer>()->postProcessPass(!editor_visible);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("postprocess");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
@@ -359,25 +468,31 @@ namespace PAIN {
 					glBindFramebuffer(GL_FRAMEBUFFER, 0);
 				}
 
-				uiPass(registry);
+			if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("ui");
+			uiPass(registry);
+			if (g_ThermalProfiler) g_ThermalProfiler->EndPass("ui");
 #ifdef _DEBUG
-				err = glGetError();
-				if (err != GL_NO_ERROR) {
-					PN_CORE_ERROR("OpenGL err after UI pass: {}", err);
-				}
-#endif
-
-				glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
-			}
-
-#ifdef _DEBUG
-			GLenum err = glGetError();
-			while (err != GL_NO_ERROR) {
-				PN_CORE_ERROR("OpenGL err on update loop end: {}", err);
-				err = glGetError();
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after UI pass: {}", err);
 			}
 #endif
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
+
+		if (g_ThermalProfiler) {
+			g_ThermalProfiler->EndFrame();
+		}
+
+#ifdef _DEBUG
+		GLenum err = glGetError();
+		while (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err on update loop end: {}", err);
+			err = glGetError();
+		}
+#endif
+	}
 
 		void System::onFixedUpdate(AppTiming timing, entt::registry& registry) {
 			// Rendering doesn't need fixed updates
@@ -393,53 +508,106 @@ namespace PAIN {
 				return;
 			static std::unordered_set<std::string> warnedNonShadowPipeAssets;
 
-			// Phase 1 keeps shadow rendering enabled, so the viewport must match the
-			// actual shadow target owned by each light rather than a stale global size.
+			// DEBUG: Log world light shadow state
+			if (auto worldLightOpt = LightSources::get().get("world")) {
+				Light& wl = worldLightOpt.value();
+				static int logCounter = 0;
+				if (++logCounter >= 300) { // Log every 300 frames (~5 seconds at 60fps)
+					logCounter = 0;
+					PN_CORE_INFO("[ShadowPass] World light: shadowType={}, shadowFBO={}, shadowTex={}, staticShadowsDirty={}, enableStaticShadowCaching={}",
+						static_cast<int>(wl.getShadowType()),
+						wl.getShadowFbo(),
+						wl.getShadowTexture(),
+						wl.needsStaticShadowUpdate(),
+						wl.enableStaticShadowCaching);
+				}
+			}
+
 			auto renderGroup =
 				registry.group<ModelRenderer>(entt::get<WorldTransform, Entity::Layer>);
 
-			for (const Light& l : LightSources::get().getAll()) {
+			// Get mutable access to lights for shadow caching
+			auto& lightSources = LightSources::get();
+
+			for (auto& [lightKey, lightRef] : lightSources.getAllWithKeysMutable()) {
+				Light& l = lightRef.get();
 				if (l.getShadowType() != Light::SHADOW_TYPES::MAPPED)
 					continue;
 
 				glViewport(0, 0, l.getShadowResolution(), l.getShadowResolution());
-				rendererService->w_renderer->BeginShadowPass(l);
-
 				Frustum lightFrustum = l.getFrustum();
 
-				for (auto [entity, model, transform, layer] : renderGroup.each()) {
-					glm::mat4 model_xform = transform.matrix;
+				// Check if we need to update static shadows
+				const bool needsStaticUpdate = l.needsStaticShadowUpdate();
+				
+				// Phase 1: Render static shadow casters (only if dirty)
+				if (needsStaticUpdate) {
+					rendererService->w_renderer->BeginShadowPass(l, true); // Clear depth buffer
 
-					if (model.visible && !model.castShadows && model.cachedModelAsset) {
-						std::string assetPath = model.cachedModelAsset->vpath;
-						std::string loweredPath = assetPath;
-						std::transform(
-							loweredPath.begin(),
-							loweredPath.end(),
-							loweredPath.begin(),
-							[](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+					for (auto [entity, model, transform, layer] : renderGroup.each()) {
+						if (!model.visible || !model.castShadows || !model.isStatic)
+							continue;
 
-						if (loweredPath.find("pipe") != std::string::npos &&
-							warnedNonShadowPipeAssets.insert(assetPath).second) {
-							PN_CORE_WARN(
-								"Pipe occluder '{}' has castShadows=false; spotlight + volumetric light can leak through it.",
-								assetPath);
-						}
-					}
+						glm::mat4 model_xform = transform.matrix;
 
-					if (model.visible && model.castShadows) {
 						// FRUSTUM CULLING FOR SHADOWS
 						auto* boundingVol = registry.try_get<BoundingVolume>(entity);
 						const bool allowFrustumCull = (l.type != Light::TYPES::SPOTLIGHT);
 						if (allowFrustumCull && boundingVol && boundingVol->worldAABB.isValid()) {
 							if (!isAABBInFrustum(boundingVol->worldAABB, lightFrustum)) {
 								GraphicsSettings::get().stats.shadow_objects_culled++;
-								continue; // skip shadow casting for this object, outside light frustum
+								continue;
 							}
+						}
+
+						// Handle double-sided shadows
+						if (model.doubleSidedShadows) {
+							glDisable(GL_CULL_FACE);
 						}
 
 						GraphicsSettings::get().stats.shadow_objects_rendered++;
 						rendererService->w_renderer->DrawShadows(model, model_xform, l);
+
+						if (model.doubleSidedShadows) {
+							glEnable(GL_CULL_FACE);
+							glCullFace(GL_FRONT);
+						}
+					}
+
+					l.markStaticShadowsRendered();
+				} else {
+					// Static shadows are cached, start without clearing
+					rendererService->w_renderer->BeginShadowPass(l, false); // Preserve depth buffer
+				}
+
+				// Phase 2: Render dynamic shadow casters (every frame)
+				for (auto [entity, model, transform, layer] : renderGroup.each()) {
+					if (!model.visible || !model.castShadows || model.isStatic)
+						continue; // Skip static (already rendered or cached)
+
+					glm::mat4 model_xform = transform.matrix;
+
+					// FRUSTUM CULLING FOR SHADOWS
+					auto* boundingVol = registry.try_get<BoundingVolume>(entity);
+					const bool allowFrustumCull = (l.type != Light::TYPES::SPOTLIGHT);
+					if (allowFrustumCull && boundingVol && boundingVol->worldAABB.isValid()) {
+						if (!isAABBInFrustum(boundingVol->worldAABB, lightFrustum)) {
+							GraphicsSettings::get().stats.shadow_objects_culled++;
+							continue;
+						}
+					}
+
+					// Handle double-sided shadows
+					if (model.doubleSidedShadows) {
+						glDisable(GL_CULL_FACE);
+					}
+
+					GraphicsSettings::get().stats.shadow_objects_rendered++;
+					rendererService->w_renderer->DrawShadows(model, model_xform, l);
+
+					if (model.doubleSidedShadows) {
+						glEnable(GL_CULL_FACE);
+						glCullFace(GL_FRONT);
 					}
 				}
 
@@ -823,34 +991,6 @@ namespace PAIN {
 			constexpr int kShadowMappedLightBudget = 4;
 			const int maxVolumetricLights =
 				std::clamp(GraphicsSettings::get().volumetric_max_lights, 1, 4);
-			static int worldShadowRestoreCooldownFrames = 0;
-			if (worldShadowRestoreCooldownFrames > 0) {
-				--worldShadowRestoreCooldownFrames;
-			}
-
-			const int inViewVolumetricDemand = static_cast<int>(std::count_if(
-				pending.begin(),
-				pending.end(),
-				[](const PendingLightUpdate& update) {
-					return update.requireMappedForVolumetric && update.inCameraView;
-				}));
-
-			const bool requireFullDynamicShadowBudget =
-				inViewVolumetricDemand >= maxVolumetricLights;
-			if (auto worldLightOpt = LightSources::get().get("world")) {
-				Light& worldLight = worldLightOpt.value();
-				if (requireFullDynamicShadowBudget &&
-					worldLight.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
-					worldLight.setShadowType(Light::SHADOW_TYPES::NONE);
-					worldShadowRestoreCooldownFrames = 20;
-				}
-				else if (!requireFullDynamicShadowBudget &&
-					worldShadowRestoreCooldownFrames == 0 &&
-					GraphicsSettings::get().world_light &&
-					worldLight.getShadowType() != Light::SHADOW_TYPES::MAPPED) {
-					worldLight.setShadowType(Light::SHADOW_TYPES::MAPPED);
-				}
-			}
 
 			// Recover from stale mapped-light state (e.g. shadow buffer creation failure).
 			// Mapped lights with no shadow texture should not consume the global mapped budget.
@@ -865,16 +1005,18 @@ namespace PAIN {
 			}
 
 			int reservedShadowSlots = 0;
+			// Reserve slots for world and cam lights if they have MAPPED shadows enabled
 			for (const auto& [key, lightRef] : LightSources::get().getAllWithKeys()) {
 				if (key != "world" && key != "cam") {
 					continue;
 				}
 				const Light& l = lightRef.get();
-				if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED &&
-					l.getShadowTexture() != 0) {
+				// Reserve slot if the light wants MAPPED shadows (regardless of texture state)
+				if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
 					++reservedShadowSlots;
 				}
 			}
+			
 			const int entityShadowBudget =
 				std::max(0, kShadowMappedLightBudget - reservedShadowSlots);
 
@@ -972,6 +1114,54 @@ namespace PAIN {
 				}
 			}
 
+			// Phase 3: Ensure world light has priority over entity lights
+			// If world light wants shadows but couldn't get a slot, evict entity lights
+			{
+				auto worldLightOpt = LightSources::get().get("world");
+				if (worldLightOpt) {
+					Light& worldLight = worldLightOpt.value();
+					// Check if world light has MAPPED shadows but no texture (budget pressure prevented allocation)
+					if (worldLight.getShadowType() == Light::SHADOW_TYPES::MAPPED &&
+						worldLight.getShadowTexture() == 0) {
+						// Count how many entity lights have MAPPED shadows
+						int entityMappedCount = 0;
+						for (const auto& [key, lightRef] : LightSources::get().getAllWithKeys()) {
+							if (key == "world" || key == "cam") continue;
+							if (lightRef.get().getShadowType() == Light::SHADOW_TYPES::MAPPED) {
+								++entityMappedCount;
+							}
+						}
+						// If budget is full, evict the furthest entity light
+						if (entityMappedCount >= kShadowMappedLightBudget) {
+							// Find the entity light furthest from camera and demote it
+							float maxDist = -1.0f;
+							std::string toEvict;
+							for (const auto& [key, lightRef] : LightSources::get().getAllWithKeys()) {
+								if (key == "world" || key == "cam") continue;
+								const Light& l = lightRef.get();
+								if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
+									// Find matching update to get distance
+									for (const auto& update : pending) {
+										if (update.lightName == key && update.distanceToCamera > maxDist) {
+											maxDist = update.distanceToCamera;
+											toEvict = key;
+										}
+									}
+								}
+							}
+							if (!toEvict.empty()) {
+								if (auto evictLightOpt = LightSources::get().get(toEvict)) {
+									evictLightOpt.value().get().setShadowType(Light::SHADOW_TYPES::NONE);
+									PN_CORE_INFO("[LightingPass] Evicted entity light '{}' to make room for world light shadows", toEvict);
+								}
+							}
+						}
+						// Try to re-allocate shadow buffers for world light
+						worldLight.setShadowType(Light::SHADOW_TYPES::MAPPED);
+					}
+				}
+			}
+
 			for (const auto& update : pending) {
 				if (auto lightOpt = LightSources::get().get(update.lightName)) {
 					Light& light = lightOpt.value();
@@ -986,6 +1176,10 @@ namespace PAIN {
 					light.L_intensity = lighting.light_intensity;
 					light.type = static_cast<Light::TYPES>(lighting.light_type);
 					light.setShadowResolution(lighting.shadow_resolution);
+
+					// Disable static shadow caching for spotlights since they can move with entities
+					// Directional lights (world light) can benefit from caching if they don't move
+					light.enableStaticShadowCaching = (light.type != Light::TYPES::SPOTLIGHT);
 
 					const bool hasMappedShadow =
 						light.getShadowType() == Light::SHADOW_TYPES::MAPPED &&

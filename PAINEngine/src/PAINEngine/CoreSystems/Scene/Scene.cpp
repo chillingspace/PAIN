@@ -358,8 +358,16 @@ namespace PAIN {
 					LightSources::get().create(world_light_name);
 				}
 				getWorldLight()->L_intensity = env.worldLightIntensity;
-				getWorldLight()->direction = glm::normalize(glm::vec3{ -0.5f, -0.5f, -0.2f });
-				getWorldLight()->setShadowType(Light::SHADOW_TYPES::MAPPED);
+				getWorldLight()->direction = glm::normalize(env.worldLightDirection);
+				getWorldLight()->position = env.worldLightPosition;
+				getWorldLight()->shadow_source_follow_distance = env.worldLightShadowFollowDistance;
+				getWorldLight()->far_plane = env.worldLightFarPlane;
+				getWorldLight()->setShadowResolution(env.worldLightShadowResolution);
+				bool shadowResult = getWorldLight()->setShadowType(
+					env.worldLightShadowsEnabled ? Light::SHADOW_TYPES::MAPPED : Light::SHADOW_TYPES::NONE);
+				PN_CORE_INFO("[SceneManager] World light shadow setup: result={}, shadowType={}, shadowTex={}, pos=({:.1f},{:.1f},{:.1f})",
+					shadowResult, static_cast<int>(getWorldLight()->getShadowType()), getWorldLight()->getShadowTexture(),
+					env.worldLightPosition.x, env.worldLightPosition.y, env.worldLightPosition.z);
 				getWorldLight()->type = Light::TYPES::DIRECTIONAL;
 			}
 
@@ -808,6 +816,17 @@ namespace PAIN {
 			scene_asset.environment.worldLightIntensity = getWorldLight() ? getWorldLight()->L_intensity : scene_asset.environment.worldLightIntensity;
 			scene_asset.environment.skyboxGUID = curr_skybox_id;
 
+			// Capture world light shadow settings from live light
+			if (getWorldLight()) {
+				Light* wl = getWorldLight();
+				scene_asset.environment.worldLightDirection = wl->direction;
+				scene_asset.environment.worldLightPosition = wl->position;
+				scene_asset.environment.worldLightShadowFollowDistance = wl->shadow_source_follow_distance;
+				scene_asset.environment.worldLightShadowResolution = wl->getShadowResolution();
+				scene_asset.environment.worldLightFarPlane = wl->far_plane;
+				scene_asset.environment.worldLightShadowsEnabled = (wl->getShadowType() == Light::SHADOW_TYPES::MAPPED);
+			}
+
 			//Other graphic settings
 			scene_asset.environment.useWorldLight = gs.world_light;
 			scene_asset.environment.useIBL = gs.ibl;
@@ -924,6 +943,12 @@ namespace PAIN {
 				{"cameraLightIntensity", {scn_asset.environment.cameraLightIntensity.x, scn_asset.environment.cameraLightIntensity.y, scn_asset.environment.cameraLightIntensity.z}},
 				{"worldLightIntensity", {scn_asset.environment.worldLightIntensity.x, scn_asset.environment.worldLightIntensity.y, scn_asset.environment.worldLightIntensity.z}},
 				{"useWorldLight", scn_asset.environment.useWorldLight},
+				{"worldLightDirection", {scn_asset.environment.worldLightDirection.x, scn_asset.environment.worldLightDirection.y, scn_asset.environment.worldLightDirection.z}},
+				{"worldLightPosition", {scn_asset.environment.worldLightPosition.x, scn_asset.environment.worldLightPosition.y, scn_asset.environment.worldLightPosition.z}},
+				{"worldLightShadowFollowDistance", scn_asset.environment.worldLightShadowFollowDistance},
+				{"worldLightShadowResolution", scn_asset.environment.worldLightShadowResolution},
+				{"worldLightFarPlane", scn_asset.environment.worldLightFarPlane},
+				{"worldLightShadowsEnabled", scn_asset.environment.worldLightShadowsEnabled},
 				{"useIBL", scn_asset.environment.useIBL},
 				{"useDiffuseMap", scn_asset.environment.useDiffuseMap},
 				{"useAOMap", scn_asset.environment.useAOMap},

@@ -3,6 +3,7 @@
 #version 330 core
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_ARB_explicit_uniform_location : enable
+#extension GL_ARB_shading_language_420pack : enable
 
 layout(location = 0) in vec3 aPos;
 layout(location = 1) in vec3 aNormal;
@@ -30,8 +31,13 @@ layout(location = 2) uniform mat4 u_P;
 uniform float u_InvertUvY;
 uniform float u_Instanced;
 
+// OPTIMIZATION: Use UBO for bone matrices instead of individual uniforms
+// This reduces CPU overhead from 100+ SetUniform calls to a single buffer update
 const int MAX_BONES = 100;
-uniform mat4 u_BoneMatrices[MAX_BONES];
+layout(std140, binding = 1) uniform BoneBlock {
+    mat4 u_BoneMatrices[MAX_BONES];
+};
+
 uniform float u_Animated;
 
 mat4 ResolveModelMatrix() {

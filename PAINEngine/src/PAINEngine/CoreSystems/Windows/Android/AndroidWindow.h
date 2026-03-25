@@ -79,6 +79,7 @@ namespace PAIN {
 
 			//Get android native window
 			void* getNativeWindow() const override { return m_Window; }
+			std::string getWritablePath() const override;
 
 			//Poll for android window events
 			void pollEvents() override;

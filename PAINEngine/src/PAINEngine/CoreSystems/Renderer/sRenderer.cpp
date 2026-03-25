@@ -10,9 +10,16 @@
 #include "CoreSystems/Path/Path.h"
 #include "CoreSystems/Audio/Audio.h"
 #include "CoreSystems/Renderer/skybox.h"
+#include "GraphicsSettings.h"
+#include "ThermalProfiler.h"
+#include <filesystem>
 
 // For windows event include
 #include "CoreSystems/Events/GLFW/WindowEvents.h"
+#ifdef PN_PLATFORM_ANDROID
+#include "../Events/Android/SurfaceEvents.h"
+#include "../Windows/Android/AndroidWindow.h"
+#endif
 
 #include "ECS/Controller.h"
 #include "ECS/Components/cBoundingVolume.h"
@@ -29,19 +36,43 @@ namespace PAIN {
 
 	void sRenderer::onDetach()
 	{
+		if (g_ThermalProfiler) {
+			g_ThermalProfiler->Shutdown();
+			g_ThermalProfiler.reset();
+		}
 		w_renderer = nullptr;
 	}
+
+	// Thermal Profiler - Set to 1 to enable, 0 to disable
+#define PN_ENABLE_THERMAL_PROFILER 0
+
 	void sRenderer::onAttach() {
+#if PN_ENABLE_THERMAL_PROFILER && defined(PN_PLATFORM_ANDROID)
+		g_ThermalProfiler = std::make_unique<ThermalProfiler>();
+		g_ThermalProfiler->Init();
 
-		//Create window render
+		if (g_ThermalProfiler) {
+			auto window_sys = services->get<Window::Window>();
+			auto* androidWindow = static_cast<Window::Android_Window*>(window_sys.get());
+			std::string writablePath = androidWindow ? androidWindow->getWritablePath() : "";
+			if (!writablePath.empty()) {
+				std::filesystem::path logDir = std::filesystem::path(writablePath) / "PAIN";
+				std::error_code ec;
+				std::filesystem::create_directories(logDir, ec);
+				if (!ec) {
+					g_ThermalProfiler->EnableLogging((logDir / "thermal_profile.csv").string());
+				} else {
+					PN_CORE_WARN("Failed to create thermal log directory: {}", ec.message());
+				}
+			} else {
+				PN_CORE_WARN("Android writable path unavailable, thermal CSV logging disabled");
+			}
+		}
+#endif
+
 		w_renderer = std::make_unique<WindowsRenderer>();
-
 		w_renderer->Init(services);
 
-		//Init scene
-		//m_Scene = services->get<Scene::SceneManager>();
-
-		//Call update one frame to ensure initialization
 		onUpdate(AppTiming());
 
 		GLenum err = glGetError();
@@ -52,6 +83,12 @@ namespace PAIN {
 
 	void sRenderer::postProcessPass(bool presentToSwapchain)
 	{
+		// Skip post-processing if disabled
+		if (!GraphicsSettings::get().postprocess) {
+			// Just blit the final_fbo to screen without any post-processing
+			w_renderer->BlitFinalToScreen();
+			return;
+		}
 		w_renderer->PostProcessPass(presentToSwapchain);
 	}
 
@@ -62,6 +99,34 @@ namespace PAIN {
 		}
 		//Upload textures
 		if(getPendingTexUploadCount() > 0) processUploads();
+
+#ifdef PN_PLATFORM_ANDROID
+		if (timing.dt > 0.0f) {
+			static float smoothedFrameMs = 16.67f;
+			static bool thermalReduced = false;
+			const float frameMs = timing.dt * 1000.0f;
+			smoothedFrameMs = smoothedFrameMs * 0.92f + frameMs * 0.08f;
+
+			auto& gs = GraphicsSettings::get();
+			if (!thermalReduced && smoothedFrameMs > 27.0f) {
+				thermalReduced = true;
+				gs.android_battery_saver_mode = true;
+				gs.android_target_fps = gs.android_battery_saver_fps;
+				gs.bloom_quality = std::max(1, gs.bloom_quality - 1);
+				gs.volumetric_steps = std::max(6, gs.volumetric_steps - 2);
+				gs.volumetric_resolution_scale = std::max(0.3f, gs.volumetric_resolution_scale - 0.1f);
+				PN_CORE_WARN("Android thermal guard enabled (smoothed {:.2f} ms)", smoothedFrameMs);
+			} else if (thermalReduced && smoothedFrameMs < 19.0f) {
+				thermalReduced = false;
+				gs.android_battery_saver_mode = false;
+				gs.android_target_fps = 0;
+				gs.bloom_quality = std::max(gs.bloom_quality, 2);
+				gs.volumetric_steps = std::max(gs.volumetric_steps, 10);
+				gs.volumetric_resolution_scale = std::max(gs.volumetric_resolution_scale, 0.4f);
+				PN_CORE_INFO("Android thermal guard disabled (smoothed {:.2f} ms)", smoothedFrameMs);
+			}
+		}
+#endif
 	}
 
 	void sRenderer::queueTexUpload(std::shared_ptr<Assets::Texture> tex) {
@@ -90,8 +155,12 @@ namespace PAIN {
 				w_renderer->uploadTexture(tex);
 			}
 
-			it = pending_textures.erase(it);
-			uploaded++;
+			if (tex->gl_texture) {
+				it = pending_textures.erase(it);
+				uploaded++;
+			} else {
+				++it;
+			}
 		}
 
 		//Reset batch upload flag
@@ -120,6 +189,37 @@ namespace PAIN {
 			}
 
 		}
+#endif
+
+#ifdef PN_PLATFORM_ANDROID
+		Event::Dispatcher dispatcher(e);
+
+		dispatcher.Dispatch<Event::SurfaceCreated>([&](Event::SurfaceCreated& se) -> bool {
+			WindowsRenderer::winWidth = se.getWidth();
+			WindowsRenderer::winHeight = se.getHeight();
+			if (se.contextWasLost) {
+				PN_CORE_WARN("EGL context was lost - performing full renderer reinit");
+				w_renderer->Cleanup();
+				w_renderer->Init(services);
+			} else {
+				w_renderer->resizeDirty = true;
+			}
+			return false;
+		});
+
+		dispatcher.Dispatch<Event::SurfaceChanged>([&](Event::SurfaceChanged& se) -> bool {
+			WindowsRenderer::winWidth = se.getWidth();
+			WindowsRenderer::winHeight = se.getHeight();
+			w_renderer->resizeDirty = true;
+			return false;
+		});
+
+		dispatcher.Dispatch<Event::SurfaceDestroyed>([&](Event::SurfaceDestroyed&) -> bool {
+			WindowsRenderer::winWidth = 0;
+			WindowsRenderer::winHeight = 0;
+			w_renderer->resizeDirty = false;
+			return false;
+		});
 #endif
 	}
 
