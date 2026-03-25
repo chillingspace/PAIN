@@ -113,26 +113,26 @@ jobs:
 
       - name: Run executable and test for graceful exit
         run: |
-          # Absolute path check
-          $baseDir = Get-Location
-          $targetDir = Join-Path $baseDir "bin/${{ matrix.configuration }}"
-          Write-Host "Target Directory: $targetDir"
+          # 1. FIND where the executable actually ended up
+          Write-Host "Searching for Friends-Frog-ever.exe..."
+          $exePath = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Filter "Friends-Frog-ever.exe" -Recurse | Select-Object -First 1
           
-          if (!(Test-Path $targetDir)) {
-              Write-Error "Directory $targetDir does not exist!"
+          if (!$exePath) {
+              Write-Error "Could not find Friends-Frog-ever.exe anywhere in the workspace!"
               exit 1
           }
 
+          $targetDir = $exePath.DirectoryName
+          Write-Host "Found executable at: $($exePath.FullName)"
+          Write-Host "Target Directory: $targetDir"
+          
           cd $targetDir
           
+          # 2. List files to verify DLLs are present
           Write-Host "--- Directory Listing ---"
           Get-ChildItem | Select-Object Name, Length
           
-          if (!(Test-Path "Friends-Frog-ever.exe")) {
-              Write-Error "Executable not found in $targetDir"
-              exit 1
-          }
-
+          # 3. Start the process
           $proc = Start-Process .\Friends-Frog-ever.exe -PassThru -RedirectStandardOutput "app_stdout.log" -RedirectStandardError "app_stderr.log"
           Write-Host "Process started with PID: $($proc.Id)"
           
