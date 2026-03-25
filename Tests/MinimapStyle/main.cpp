@@ -103,6 +103,55 @@ bool TestLightConeTopDownRadiusMatchesLegacyShape() {
         "expected legacy light cone top-down radius");
 }
 
+bool TestWallCacheSignatureChangesWithTransformAndModel() {
+    using PAIN::Render::BuildMinimapWallCacheSignature;
+    using PAIN::Render::MinimapWallCacheFingerprintEntry;
+
+    std::vector<MinimapWallCacheFingerprintEntry> entriesA = {
+        {
+            1u,
+            100u,
+            glm::mat4(1.0f)
+        }
+    };
+
+    std::vector<MinimapWallCacheFingerprintEntry> entriesB = entriesA;
+    entriesB[0].worldMatrix[3][0] = 2.0f;
+
+    std::vector<MinimapWallCacheFingerprintEntry> entriesC = entriesA;
+    entriesC[0].modelKey = 200u;
+
+    const uint64_t sigA = BuildMinimapWallCacheSignature(entriesA);
+    const uint64_t sigB = BuildMinimapWallCacheSignature(entriesB);
+    const uint64_t sigC = BuildMinimapWallCacheSignature(entriesC);
+
+    const bool transformOk = ExpectTrue(
+        sigA != sigB,
+        "TestWallCacheSignatureChangesWithTransformAndModel",
+        "expected transform changes to invalidate the wall cache signature");
+    const bool modelOk = ExpectTrue(
+        sigA != sigC,
+        "TestWallCacheSignatureChangesWithTransformAndModel",
+        "expected model changes to invalidate the wall cache signature");
+    return transformOk && modelOk;
+}
+
+bool TestBackgroundTargetSpecUsesLowCostSettings() {
+    using PAIN::Render::BuildMinimapBackgroundTargetSpec;
+    using PAIN::Render::MinimapColorFormat;
+
+    const auto spec = BuildMinimapBackgroundTargetSpec();
+    const bool formatOk = ExpectTrue(
+        spec.colorFormat == MinimapColorFormat::RGBA8,
+        "TestBackgroundTargetSpecUsesLowCostSettings",
+        "expected minimap background target to use RGBA8");
+    const bool depthOk = ExpectTrue(
+        !spec.needsDepthStencil,
+        "TestBackgroundTargetSpecUsesLowCostSettings",
+        "expected minimap background target to avoid depth/stencil");
+    return formatOk && depthOk;
+}
+
 }
 
 int main() {
@@ -111,7 +160,9 @@ int main() {
         TestDangerCoverageUsesCircleGeometry() &&
         TestDangerStyleComesFromSingleHelper() &&
         TestWallStyleProvidesFallbackOutline() &&
-        TestLightConeTopDownRadiusMatchesLegacyShape();
+        TestLightConeTopDownRadiusMatchesLegacyShape() &&
+        TestWallCacheSignatureChangesWithTransformAndModel() &&
+        TestBackgroundTargetSpecUsesLowCostSettings();
 
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

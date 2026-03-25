@@ -2,12 +2,28 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstring>
 
 #include <glm/gtc/constants.hpp>
 
 namespace PAIN::Render {
 
     namespace {
+
+        constexpr uint64_t kFnvOffset = 1469598103934665603ull;
+        constexpr uint64_t kFnvPrime = 1099511628211ull;
+
+        void HashCombineU64(uint64_t& hash, uint64_t value) {
+            hash ^= value;
+            hash *= kFnvPrime;
+        }
+
+        void HashCombineFloat(uint64_t& hash, float value) {
+            static_assert(sizeof(float) == sizeof(uint32_t));
+            uint32_t bits = 0;
+            std::memcpy(&bits, &value, sizeof(bits));
+            HashCombineU64(hash, static_cast<uint64_t>(bits));
+        }
 
         void AppendLine(std::vector<glm::vec2>& lines,
                         const glm::vec2& a,
@@ -22,13 +38,27 @@ namespace PAIN::Render {
                                                        float radius,
                                                        int segments) {
         MinimapCoverageGeometry geometry;
+        AppendMinimapCircleCoverage(
+            geometry.fillTriangles,
+            geometry.outlineLines,
+            center,
+            radius,
+            segments);
+        return geometry;
+    }
+
+    void AppendMinimapCircleCoverage(std::vector<glm::vec2>& fillTriangles,
+                                     std::vector<glm::vec2>& outlineLines,
+                                     const glm::vec2& center,
+                                     float radius,
+                                     int segments) {
         if (radius <= 0.0f) {
-            return geometry;
+            return;
         }
 
         const int safeSegments = std::max(3, segments);
-        geometry.fillTriangles.reserve(static_cast<size_t>(safeSegments) * 3);
-        geometry.outlineLines.reserve(static_cast<size_t>(safeSegments) * 2);
+        fillTriangles.reserve(fillTriangles.size() + static_cast<size_t>(safeSegments) * 3);
+        outlineLines.reserve(outlineLines.size() + static_cast<size_t>(safeSegments) * 2);
 
         for (int i = 0; i < safeSegments; ++i) {
             const float a0 = (static_cast<float>(i) / static_cast<float>(safeSegments)) * glm::two_pi<float>();
@@ -37,20 +67,26 @@ namespace PAIN::Render {
             const glm::vec2 p0 = center + glm::vec2(std::cos(a0), std::sin(a0)) * radius;
             const glm::vec2 p1 = center + glm::vec2(std::cos(a1), std::sin(a1)) * radius;
 
-            geometry.fillTriangles.push_back(center);
-            geometry.fillTriangles.push_back(p0);
-            geometry.fillTriangles.push_back(p1);
+            fillTriangles.push_back(center);
+            fillTriangles.push_back(p0);
+            fillTriangles.push_back(p1);
 
-            AppendLine(geometry.outlineLines, p0, p1);
+            AppendLine(outlineLines, p0, p1);
         }
-
-        return geometry;
     }
 
     MinimapCoverageGeometry BuildMinimapDangerCoverage(const glm::vec2& center,
                                                        float radius,
                                                        int segments) {
         return BuildMinimapCircleCoverage(center, radius, segments);
+    }
+
+    void AppendMinimapDangerCoverage(std::vector<glm::vec2>& fillTriangles,
+                                     std::vector<glm::vec2>& outlineLines,
+                                     const glm::vec2& center,
+                                     float radius,
+                                     int segments) {
+        AppendMinimapCircleCoverage(fillTriangles, outlineLines, center, radius, segments);
     }
 
     MinimapWallVisualStyle BuildMinimapWallStyle(float timeSeconds) {
@@ -93,6 +129,29 @@ namespace PAIN::Render {
         const float hi = std::max(minValue, maxValue);
         const float phase = 0.5f + 0.5f * std::sin(timeSeconds * glm::two_pi<float>() * std::max(0.0f, frequencyHz));
         return glm::mix(lo, hi, phase);
+    }
+
+    uint64_t BuildMinimapWallCacheSignature(
+        const std::vector<MinimapWallCacheFingerprintEntry>& entries) {
+        uint64_t hash = kFnvOffset;
+        for (const MinimapWallCacheFingerprintEntry& entry : entries) {
+            HashCombineU64(hash, entry.entityKey);
+            HashCombineU64(hash, entry.modelKey);
+
+            for (int column = 0; column < 4; ++column) {
+                for (int row = 0; row < 4; ++row) {
+                    HashCombineFloat(hash, entry.worldMatrix[column][row]);
+                }
+            }
+        }
+        return hash;
+    }
+
+    MinimapBackgroundTargetSpec BuildMinimapBackgroundTargetSpec() {
+        return MinimapBackgroundTargetSpec{
+            MinimapColorFormat::RGBA8,
+            false,
+        };
     }
 
 }

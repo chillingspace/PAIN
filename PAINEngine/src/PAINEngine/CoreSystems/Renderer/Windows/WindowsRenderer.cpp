@@ -13,6 +13,7 @@
 #include "CoreSystems/Renderer/skybox.h"
 #include "CoreSystems/Renderer/text.h"
 #include "CoreSystems/Renderer/TextureUnits.h"
+#include "Systems/Render/MinimapStyle.h"
 #include "CoreSystems/Windows/Window.h"
 #include "ECS/Controller.h"
 #include <cstring>
@@ -1884,6 +1885,16 @@ namespace PAIN {
 
 			// minimap framebuffer
 			const glm::vec2 minimap_size = GraphicsSettings::get().minimap_size_px;
+			const PAIN::Render::MinimapBackgroundTargetSpec minimapTargetSpec =
+				PAIN::Render::BuildMinimapBackgroundTargetSpec();
+			const GLint minimapInternalFormat =
+				minimapTargetSpec.colorFormat == PAIN::Render::MinimapColorFormat::RGBA16F
+				? GL_RGBA16F
+				: GL_RGBA8;
+			const GLenum minimapPixelType =
+				minimapTargetSpec.colorFormat == PAIN::Render::MinimapColorFormat::RGBA16F
+				? GL_FLOAT
+				: GL_UNSIGNED_BYTE;
 			minimap_width = std::max(64, static_cast<int>(minimap_size.x));
 			// Runtime validation: for circular minimap, clamp height to width for perfect circle
 			if (GraphicsSettings::get().minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
@@ -1897,8 +1908,8 @@ namespace PAIN {
 
 			glGenTextures(1, &minimap_texture);
 			glBindTexture(GL_TEXTURE_2D, minimap_texture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, minimap_width, minimap_height, 0,
-				GL_RGBA, GL_FLOAT, nullptr);
+			glTexImage2D(GL_TEXTURE_2D, 0, minimapInternalFormat, minimap_width, minimap_height, 0,
+				GL_RGBA, minimapPixelType, nullptr);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -1906,12 +1917,18 @@ namespace PAIN {
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
 				minimap_texture, 0);
 
-			glGenRenderbuffers(1, &minimap_rbo);
-			glBindRenderbuffer(GL_RENDERBUFFER, minimap_rbo);
-			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, minimap_width,
-				minimap_height);
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-				GL_RENDERBUFFER, minimap_rbo);
+			if (minimapTargetSpec.needsDepthStencil) {
+				glGenRenderbuffers(1, &minimap_rbo);
+				glBindRenderbuffer(GL_RENDERBUFFER, minimap_rbo);
+				glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, minimap_width,
+					minimap_height);
+				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+					GL_RENDERBUFFER, minimap_rbo);
+			}
+			else {
+				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+					GL_RENDERBUFFER, 0);
+			}
 
 			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 				PN_CORE_ERROR("Minimap framebuffer is incomplete");
@@ -2673,6 +2690,16 @@ namespace PAIN {
 		const glm::mat4& proj) {
 		(void)view;
 		(void)proj;
+		const PAIN::Render::MinimapBackgroundTargetSpec minimapTargetSpec =
+			PAIN::Render::BuildMinimapBackgroundTargetSpec();
+		const GLint minimapInternalFormat =
+			minimapTargetSpec.colorFormat == PAIN::Render::MinimapColorFormat::RGBA16F
+			? GL_RGBA16F
+			: GL_RGBA8;
+		const GLenum minimapPixelType =
+			minimapTargetSpec.colorFormat == PAIN::Render::MinimapColorFormat::RGBA16F
+			? GL_FLOAT
+			: GL_UNSIGNED_BYTE;
 
 		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &minimap_prev_fbo);
 		glGetIntegerv(GL_VIEWPORT, minimap_prev_viewport);
@@ -2714,8 +2741,8 @@ namespace PAIN {
 
 			glGenTextures(1, &minimap_texture);
 			glBindTexture(GL_TEXTURE_2D, minimap_texture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, minimap_width, minimap_height, 0,
-				GL_RGBA, GL_FLOAT, nullptr);
+			glTexImage2D(GL_TEXTURE_2D, 0, minimapInternalFormat, minimap_width, minimap_height, 0,
+				GL_RGBA, minimapPixelType, nullptr);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -2723,12 +2750,18 @@ namespace PAIN {
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
 				minimap_texture, 0);
 
-			glGenRenderbuffers(1, &minimap_rbo);
-			glBindRenderbuffer(GL_RENDERBUFFER, minimap_rbo);
-			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, minimap_width,
-				minimap_height);
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-				GL_RENDERBUFFER, minimap_rbo);
+			if (minimapTargetSpec.needsDepthStencil) {
+				glGenRenderbuffers(1, &minimap_rbo);
+				glBindRenderbuffer(GL_RENDERBUFFER, minimap_rbo);
+				glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, minimap_width,
+					minimap_height);
+				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+					GL_RENDERBUFFER, minimap_rbo);
+			}
+			else {
+				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+					GL_RENDERBUFFER, 0);
+			}
 
 			GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 			if (status != GL_FRAMEBUFFER_COMPLETE) {
@@ -2739,12 +2772,13 @@ namespace PAIN {
 
 		glBindFramebuffer(GL_FRAMEBUFFER, minimap_fbo);
 		glViewport(0, 0, minimap_width, minimap_height);
-		glEnable(GL_DEPTH_TEST);
+		glDisable(GL_DEPTH_TEST);
+		glDepthMask(GL_FALSE);
 
 		const float bg_alpha = glm::clamp(GraphicsSettings::get().minimap_background_alpha,
 			0.0f, 1.0f);
 		glClearColor(0.02f, 0.02f, 0.02f, bg_alpha);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT);
 	}
 
 	void WindowsRenderer::EndMinimapPass() {

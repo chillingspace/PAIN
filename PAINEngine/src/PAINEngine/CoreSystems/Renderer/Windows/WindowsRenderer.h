@@ -152,6 +152,7 @@ namespace PAIN {
 							 float patternScale,
 							 float patternPhase);
 		bool hasMinimapWallData() const { return minimap_wall_vertex_count > 0; }
+		bool canDrawMinimapWalls() const { return minimap_wall_shader != nullptr && minimap_wall_vertex_count > 0; }
 
 		void ReflectionPass(const ModelRenderer& component);
 		void LightingPass(std::shared_ptr<Scene::SceneManager> scene,

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -25,13 +26,41 @@ namespace PAIN::Render {
         std::vector<glm::vec2> outlineLines;
     };
 
+    enum class MinimapColorFormat {
+        RGBA8,
+        RGBA16F,
+    };
+
+    struct MinimapBackgroundTargetSpec {
+        MinimapColorFormat colorFormat = MinimapColorFormat::RGBA8;
+        bool needsDepthStencil = false;
+    };
+
+    struct MinimapWallCacheFingerprintEntry {
+        uint64_t entityKey = 0;
+        uint64_t modelKey = 0;
+        glm::mat4 worldMatrix = glm::mat4(1.0f);
+    };
+
     MinimapCoverageGeometry BuildMinimapCircleCoverage(const glm::vec2& center,
                                                        float radius,
                                                        int segments);
 
+    void AppendMinimapCircleCoverage(std::vector<glm::vec2>& fillTriangles,
+                                     std::vector<glm::vec2>& outlineLines,
+                                     const glm::vec2& center,
+                                     float radius,
+                                     int segments);
+
     MinimapCoverageGeometry BuildMinimapDangerCoverage(const glm::vec2& center,
                                                        float radius,
                                                        int segments);
+
+    void AppendMinimapDangerCoverage(std::vector<glm::vec2>& fillTriangles,
+                                     std::vector<glm::vec2>& outlineLines,
+                                     const glm::vec2& center,
+                                     float radius,
+                                     int segments);
 
     MinimapWallVisualStyle BuildMinimapWallStyle(float timeSeconds);
 
@@ -45,5 +74,10 @@ namespace PAIN::Render {
                                     float minValue = 0.7f,
                                     float maxValue = 1.0f,
                                     float frequencyHz = 0.8f);
+
+    uint64_t BuildMinimapWallCacheSignature(
+        const std::vector<MinimapWallCacheFingerprintEntry>& entries);
+
+    MinimapBackgroundTargetSpec BuildMinimapBackgroundTargetSpec();
 
 }

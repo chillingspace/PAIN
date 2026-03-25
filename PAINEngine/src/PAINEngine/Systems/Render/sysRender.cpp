@@ -14,6 +14,7 @@
 #include "CoreSystems/Assets/Types/Shader.h"
 #include "CoreSystems/Assets/Types/Texture.h"
 #include "Systems/Render/MinimapStyle.h"
+#include <glm/gtc/matrix_transform.hpp>
 
 #ifdef _DEBUG
 #include "LayeredSystems/LevelEditor/Editor.h"
@@ -2467,7 +2468,8 @@ namespace PAIN {
 
 						static WallMinimapCache wallCache;
 
-						auto rebuildWallCache = [&](const std::vector<entt::entity>& wallEntities) {
+						auto rebuildWallCache = [&](const std::vector<entt::entity>& wallEntities,
+							uint64_t wallSignature) {
 							wallCache.triangleVerticesXZ.clear();
 
 							for (const entt::entity entity : wallEntities) {
@@ -2517,12 +2519,7 @@ namespace PAIN {
 
 							wallCache.sourceRegistry = &registry;
 							wallCache.wallEntityCount = wallEntities.size();
-                            uint64_t signature = 1469598103934665603ull;
-							for (const entt::entity entity : wallEntities) {
-								signature ^= static_cast<uint64_t>(entity);
-								signature *= 1099511628211ull;
-							}
-							wallCache.wallEntitySignature = signature;
+							wallCache.wallEntitySignature = wallSignature;
 							wallCache.built = true;
 							wallCache.gpuDirty = true;
 							};
@@ -2534,27 +2531,53 @@ namespace PAIN {
 						float nearest_item_dist2 = std::numeric_limits<float>::max();
 						float nearest_objective_dist2 = std::numeric_limits<float>::max();
 
-						std::unordered_set<uint32_t> uniqueMarkerEntities;
-						std::vector<entt::entity> markerEntities;
 						const std::vector<entt::entity> wallEntities = metadata_service->getEntitiesByTag("wall");
-						auto appendTaggedEntities = [&](const char* tag) {
-							for (entt::entity entity : metadata_service->getEntitiesByTag(tag)) {
-								const uint32_t key = static_cast<uint32_t>(entity);
-								if (uniqueMarkerEntities.insert(key).second) {
-									markerEntities.push_back(entity);
+						const auto playerEntities = metadata_service->getEntitiesByTag("Player");
+						const auto enemyEntities = metadata_service->getEntitiesByTag("Enemy");
+						const auto itemEntities = metadata_service->getEntitiesByTag("item");
+						const auto objectiveEntities = metadata_service->getEntitiesByTag("objective");
+						const auto collectibleEntities = metadata_service->getEntitiesByTag("letter_collectible");
+						const auto carriedLetterEntities = metadata_service->getEntitiesByTag("letter_carried");
+						const auto collectionEntities = metadata_service->getEntitiesByTag("letter_collection");
+						const auto taggedDangerEntities = metadata_service->getEntitiesByTag("danger");
+
+						minimap_entity_dedupe_.clear();
+						minimap_marker_entities_.clear();
+						minimap_marker_entities_.reserve(
+							playerEntities.size() +
+							enemyEntities.size() +
+							itemEntities.size() +
+							objectiveEntities.size() +
+							collectibleEntities.size() +
+							carriedLetterEntities.size() +
+							collectionEntities.size());
+
+						auto appendUniqueEntities = [&](const std::vector<entt::entity>& entities,
+							std::vector<entt::entity>& out) {
+								for (const entt::entity entity : entities) {
+									const uint32_t key = static_cast<uint32_t>(entity);
+									if (minimap_entity_dedupe_.insert(key).second) {
+										out.push_back(entity);
+									}
 								}
-							}
 							};
 
-						appendTaggedEntities("Player");
-						appendTaggedEntities("Enemy");
-						appendTaggedEntities("item");
-						appendTaggedEntities("objective");
-						appendTaggedEntities("letter_collectible");
-						appendTaggedEntities("letter_carried");
-						appendTaggedEntities("letter_collection");
+						appendUniqueEntities(playerEntities, minimap_marker_entities_);
+						appendUniqueEntities(enemyEntities, minimap_marker_entities_);
+						appendUniqueEntities(itemEntities, minimap_marker_entities_);
+						appendUniqueEntities(objectiveEntities, minimap_marker_entities_);
+						appendUniqueEntities(collectibleEntities, minimap_marker_entities_);
+						appendUniqueEntities(carriedLetterEntities, minimap_marker_entities_);
+						appendUniqueEntities(collectionEntities, minimap_marker_entities_);
 
-						const bool has_carried_letter = !metadata_service->getEntitiesByTag("letter_carried").empty();
+						minimap_entity_dedupe_.clear();
+						minimap_danger_entities_.clear();
+						minimap_danger_entities_.reserve(
+							taggedDangerEntities.size() + enemyEntities.size());
+						appendUniqueEntities(taggedDangerEntities, minimap_danger_entities_);
+						appendUniqueEntities(enemyEntities, minimap_danger_entities_);
+
+						const bool has_carried_letter = !carriedLetterEntities.empty();
 
 						// Clip all minimap overlays (walls, markers, danger, route, legend, arrows)
 						glEnable(GL_SCISSOR_TEST);
@@ -2579,11 +2602,36 @@ namespace PAIN {
 
 						if (gs.minimap_show_walls) {
                             const MinimapWallVisualStyle wallStyle = BuildMinimapWallStyle(minimap_threat_time_);
-                            uint64_t currentWallSignature = 1469598103934665603ull;
+							minimap_wall_fingerprint_entries_.clear();
+							minimap_wall_fingerprint_entries_.reserve(wallEntities.size());
 							for (const entt::entity entity : wallEntities) {
-								currentWallSignature ^= static_cast<uint64_t>(entity);
-								currentWallSignature *= 1099511628211ull;
+								if (!registry.valid(entity)) {
+									continue;
+								}
+
+								MinimapWallCacheFingerprintEntry entry;
+								entry.entityKey = static_cast<uint64_t>(static_cast<uint32_t>(entity));
+
+								if (auto* model = registry.try_get<ModelRenderer>(entity)) {
+									entry.modelKey = model->modelGUID.IsValid()
+										? static_cast<uint64_t>(std::hash<Assets::GUID>{}(model->modelGUID))
+										: 0ull;
+								}
+
+								if (auto* wt = registry.try_get<WorldTransform>(entity)) {
+									entry.worldMatrix = wt->matrix;
+								}
+								else if (auto* lt = registry.try_get<LocalTransform>(entity)) {
+									const glm::mat4 translate = glm::translate(glm::mat4(1.0f), lt->position);
+									const glm::mat4 rotate = glm::mat4_cast(lt->rotation);
+									const glm::mat4 scale = glm::scale(glm::mat4(1.0f), lt->scale);
+									entry.worldMatrix = translate * rotate * scale;
+								}
+
+								minimap_wall_fingerprint_entries_.push_back(entry);
 							}
+							const uint64_t currentWallSignature =
+								BuildMinimapWallCacheSignature(minimap_wall_fingerprint_entries_);
 
 							const bool needsRebuild =
 								!wallCache.built ||
@@ -2592,7 +2640,7 @@ namespace PAIN {
 								wallCache.wallEntitySignature != currentWallSignature;
 
 							if (needsRebuild) {
-								rebuildWallCache(wallEntities);
+								rebuildWallCache(wallEntities, currentWallSignature);
 							}
 
 							// Upload wall vertices to GPU when cache was rebuilt
@@ -2602,7 +2650,7 @@ namespace PAIN {
 							}
 
 							// GPU draw path: single draw call with scissor clipping
-							if (rendererService->w_renderer->hasMinimapWallData()) {
+							if (rendererService->w_renderer->canDrawMinimapWalls()) {
 								const float minimapRadius = glm::max(1.0f, gs.minimap_radius);
 								const glm::vec2 playerXZ(player_pos.x, player_pos.z);
 
@@ -2644,7 +2692,7 @@ namespace PAIN {
 							}
 						}
 
-						for (entt::entity entity : markerEntities) {
+						for (entt::entity entity : minimap_marker_entities_) {
 							glm::vec3 pos(0.0f);
 							if (!getEntityWorldPos(entity, pos)) {
 								continue;
@@ -2704,24 +2752,20 @@ namespace PAIN {
 						}
 
 						if (gs.minimap_show_danger) {
-							std::unordered_set<uint32_t> uniqueDangerEntities;
-							std::vector<entt::entity> dangerEntities;
-							auto appendDangerEntities = [&](const char* tag) {
-								for (entt::entity entity : metadata_service->getEntitiesByTag(tag)) {
-									const uint32_t key = static_cast<uint32_t>(entity);
-									if (uniqueDangerEntities.insert(key).second) {
-										dangerEntities.push_back(entity);
-									}
-								}
-								};
-							appendDangerEntities("danger");
-							appendDangerEntities("Enemy");
-
-							std::vector<glm::vec2> dangerFillVertices;
-							std::vector<glm::vec2> dangerLineVertices;
 							const MinimapDangerVisualStyle dangerStyle = BuildMinimapDangerStyle(minimap_threat_time_);
+							minimap_danger_fill_vertices_.clear();
+							minimap_danger_line_vertices_.clear();
+							const size_t estimatedDangerCount = minimap_danger_entities_.size();
+							const size_t estimatedFillVertices = estimatedDangerCount * 24ull * 3ull;
+							const size_t estimatedLineVertices = estimatedDangerCount * 24ull * 2ull;
+							if (minimap_danger_fill_vertices_.capacity() < estimatedFillVertices) {
+								minimap_danger_fill_vertices_.reserve(estimatedFillVertices);
+							}
+							if (minimap_danger_line_vertices_.capacity() < estimatedLineVertices) {
+								minimap_danger_line_vertices_.reserve(estimatedLineVertices);
+							}
 
-							for (entt::entity entity : dangerEntities) {
+							for (entt::entity entity : minimap_danger_entities_) {
 								glm::vec3 pos(0.0f);
 								if (!getEntityWorldPos(entity, pos)) {
 									continue;
@@ -2752,24 +2796,30 @@ namespace PAIN {
 
 								const glm::vec2 centerPx = worldToMinimapPx(pos, false);
 								const float radiusPx = (danger_radius / (2.0f * glm::max(1.0f, gs.minimap_radius))) * draw_min;
-								MinimapCoverageGeometry coverage = BuildMinimapDangerCoverage(centerPx, radiusPx, 24);
-
-								for (const glm::vec2& vertexPx : coverage.fillTriangles) {
-									dangerFillVertices.push_back(pixelsToNdc(vertexPx));
+								const size_t fillStart = minimap_danger_fill_vertices_.size();
+								const size_t lineStart = minimap_danger_line_vertices_.size();
+								AppendMinimapDangerCoverage(
+									minimap_danger_fill_vertices_,
+									minimap_danger_line_vertices_,
+									centerPx,
+									radiusPx,
+									24);
+								for (size_t i = fillStart; i < minimap_danger_fill_vertices_.size(); ++i) {
+									minimap_danger_fill_vertices_[i] = pixelsToNdc(minimap_danger_fill_vertices_[i]);
 								}
-								for (const glm::vec2& vertexPx : coverage.outlineLines) {
-									dangerLineVertices.push_back(pixelsToNdc(vertexPx));
+								for (size_t i = lineStart; i < minimap_danger_line_vertices_.size(); ++i) {
+									minimap_danger_line_vertices_[i] = pixelsToNdc(minimap_danger_line_vertices_[i]);
 								}
 							}
 
-							if (!dangerFillVertices.empty()) {
+							if (!minimap_danger_fill_vertices_.empty()) {
 								rendererService->w_renderer->DebugPass2DTrianglesFilled(
-									dangerFillVertices,
+									minimap_danger_fill_vertices_,
 									dangerStyle.fillColor);
 							}
-							if (!dangerLineVertices.empty()) {
+							if (!minimap_danger_line_vertices_.empty()) {
 								rendererService->w_renderer->DebugPass2DLines(
-									dangerLineVertices,
+									minimap_danger_line_vertices_,
 									dangerStyle.edgeColor);
 							}
 						}
