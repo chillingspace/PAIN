@@ -82,6 +82,11 @@ namespace PAIN {
 					// Check valid material asset
 					if (materialAsset) {
 						matInstance.materialGUID = materialAsset->guid;
+						
+						// DEBUG: Log material GUID assignment
+						if (!materialAsset->guid.IsValid()) {
+							PN_CORE_TRACE("[Material Load] Material {} has invalid GUID!", materialPath.string());
+						}
 
 						// Init material overrides
 						matInstance.albedoTextureOverride =
@@ -118,10 +123,17 @@ namespace PAIN {
 			component.submeshCaches.clear();
 			component.submeshCaches.resize(modelAsset->submeshes.size());
 
+			// DEBUG: Log material/submesh counts
+			PN_CORE_TRACE("[Material Cache] Model {} has {} submeshes, {} materials",
+				modelAsset->vpath, modelAsset->submeshes.size(), component.materials.size());
+
 			for (size_t i = 0; i < modelAsset->submeshes.size(); ++i) {
 				const auto& submesh = modelAsset->submeshes[i];
 
+				// DEBUG: Log submesh material index
 				if (submesh.materialIndex >= component.materials.size()) {
+					PN_CORE_WARN("[Material Cache] Submesh {} has invalid materialIndex {} (only {} materials available)", 
+						i, submesh.materialIndex, component.materials.size());
 					continue;
 				}
 
@@ -133,6 +145,12 @@ namespace PAIN {
 					assetManager->getAsset<Assets::Material>(material->materialGUID);
 				auto materialAsset =
 					materialAssetOpt.has_value() ? materialAssetOpt.value() : nullptr;
+
+				if (!materialAsset) {
+					// DEBUG: Log why material lookup failed
+					PN_CORE_WARN("[Material Cache] Submesh {} material lookup failed. GUID: {} (valid: {})", 
+						i, material->materialGUID.ToString(), material->materialGUID.IsValid());
+				}
 
 				if (materialAsset) {
 					// Cache base material properties
@@ -147,18 +165,30 @@ namespace PAIN {
 					cache.useEmissionOverride = material->useOverrides;
 					cache.emissionOverride = material->useOverrides ? material->emissiveOverride : glm::vec3(0.0f);
 
-					// Helper lambda to get GL texture handle from GUID
-					auto getTextureHandle = [&](const Assets::GUID& guid) -> GLuint {
-						if (!guid.IsValid())
+					// Helper lambda to get GL texture handle from GUID with debug logging
+					// Only logs warnings for non-empty paths (empty paths are expected for solid-color materials)
+					auto getTextureHandle = [&](const Assets::GUID& guid, const char* textureType, const std::filesystem::path& texturePath) -> GLuint {
+						// Skip logging for empty paths - these are expected for solid-color materials
+						if (!guid.IsValid()) {
+							if (!texturePath.empty()) {
+								PN_CORE_TRACE("[Texture Cache] Invalid GUID for {} texture (path: {})", textureType, texturePath.string());
+							}
 							return 0;
+						}
 						auto texOpt = assetManager->getAsset<Assets::Texture>(guid);
-						if (!texOpt.has_value() || !texOpt.value())
+						if (!texOpt.has_value() || !texOpt.value()) {
+							PN_CORE_WARN("[Texture Cache] Failed to load {} texture asset (GUID: {}, path: {})", textureType, guid.ToString(), texturePath.string());
 							return 0;
+						}
 						
 						auto tex = texOpt.value();
 						// Ensure texture is uploaded to GPU before caching the handle
 						if (tex->gl_texture == 0) {
 							services.lock()->get<sRenderer>()->uploadTexture(tex);
+							if (tex->gl_texture == 0) {
+								PN_CORE_WARN("[Texture Cache] Failed to upload {} texture to GPU (path: {})", textureType, texturePath.string());
+								return 0;
+							}
 						}
 						return tex->gl_texture;
 					};
@@ -167,37 +197,44 @@ namespace PAIN {
 					cache.albedoTexture = getTextureHandle(
 						material->useOverrides
 							? material->albedoTextureOverride
-							: assetManager->findGUID(materialAsset->albedoTexturePath));
+							: assetManager->findGUID(materialAsset->albedoTexturePath),
+						"albedo", materialAsset->albedoTexturePath);
 
 					cache.normalTexture = getTextureHandle(
 						material->useOverrides
 							? material->normalTextureOverride
-							: assetManager->findGUID(materialAsset->normalTexturePath));
+							: assetManager->findGUID(materialAsset->normalTexturePath),
+						"normal", materialAsset->normalTexturePath);
 
 					cache.metallicTexture = getTextureHandle(
 						material->useOverrides
 							? material->metallicTextureOverride
-							: assetManager->findGUID(materialAsset->metallicTexturePath));
+							: assetManager->findGUID(materialAsset->metallicTexturePath),
+						"metallic", materialAsset->metallicTexturePath);
 
 					cache.roughnessTexture = getTextureHandle(
 						material->useOverrides
 							? material->roughnessTextureOverride
-							: assetManager->findGUID(materialAsset->roughnessTexturePath));
+							: assetManager->findGUID(materialAsset->roughnessTexturePath),
+						"roughness", materialAsset->roughnessTexturePath);
 
 					cache.aoTexture = getTextureHandle(
 						material->useOverrides
 							? material->aoTextureOverride
-							: assetManager->findGUID(materialAsset->aoTexturePath));
+							: assetManager->findGUID(materialAsset->aoTexturePath),
+						"ao", materialAsset->aoTexturePath);
 
 					cache.emissiveTexture = getTextureHandle(
 						material->useOverrides
 							? material->emissiveTextureOverride
-							: assetManager->findGUID(materialAsset->emissiveTexturePath));
+							: assetManager->findGUID(materialAsset->emissiveTexturePath),
+						"emissive", materialAsset->emissiveTexturePath);
 
 					cache.opacityTexture = getTextureHandle(
 						material->useOverrides
 							? material->opacityTextureOverride
-							: assetManager->findGUID(materialAsset->opacityTexturePath));
+							: assetManager->findGUID(materialAsset->opacityTexturePath),
+						"opacity", materialAsset->opacityTexturePath);
 
 					// ========================================
 					// ORM Channel Mask Detection
@@ -218,6 +255,9 @@ namespace PAIN {
 					}
 
 					cache.cacheValid = true;
+				} else {
+					PN_CORE_WARN("[Texture Cache] Material asset not found for submesh {} (GUID: {})", 
+						i, material->materialGUID.ToString());
 				}
 			}
 
@@ -375,9 +415,6 @@ namespace PAIN {
 #endif
 
 				// Render all passes
-				if (g_ThermalProfiler) {
-					g_ThermalProfiler->BeginFrame();
-				}
 				GraphicsSettings::get().stats.objects_culled = 0;
 				GraphicsSettings::get().stats.objects_rendered = 0;
 				GraphicsSettings::get().stats.shadow_objects_culled = 0;
@@ -508,6 +545,7 @@ namespace PAIN {
 				return;
 			static std::unordered_set<std::string> warnedNonShadowPipeAssets;
 
+#ifdef _DEBUG
 			// DEBUG: Log world light shadow state
 			if (auto worldLightOpt = LightSources::get().get("world")) {
 				Light& wl = worldLightOpt.value();
@@ -522,6 +560,7 @@ namespace PAIN {
 						wl.enableStaticShadowCaching);
 				}
 			}
+#endif
 
 			auto renderGroup =
 				registry.group<ModelRenderer>(entt::get<WorldTransform, Entity::Layer>);
@@ -661,6 +700,63 @@ namespace PAIN {
 			};
 			std::unordered_map<std::string, InstanceGroup> instanceGroups;
 
+			// OPTIMIZATION: Material-sorted render items for non-instanced draws
+			// Reduces texture bindings and state changes between draws
+			struct RenderItem {
+				ModelRenderer* component;
+				glm::mat4 modelMatrix;
+				uint64_t sortKey;  // Material-based sort key for batching
+				
+				static uint64_t HashFNV1a(const void* data, size_t size, uint64_t seed) {
+					const auto* bytes = static_cast<const unsigned char*>(data);
+					uint64_t hash = seed;
+					for (size_t i = 0; i < size; ++i) {
+						hash ^= static_cast<uint64_t>(bytes[i]);
+						hash *= 1099511628211ull;
+					}
+					return hash;
+				}
+
+				static uint64_t HashString(const std::string& value, uint64_t seed) {
+					return HashFNV1a(value.data(), value.size(), seed);
+				}
+
+				// Compute sort key from model + full material set.
+				static uint64_t ComputeSortKey(const ModelRenderer& model) {
+					uint64_t key = 1469598103934665603ull;
+
+					if (model.cachedModelAsset) {
+						const std::string modelPath = model.cachedModelAsset->vpath;
+						key = HashString(modelPath, key);
+					} else {
+						const std::string modelGuid = model.modelGUID.ToString(false);
+						key = HashString(modelGuid, key);
+					}
+
+					for (const auto& mat : model.materials) {
+						const std::string materialGuid = mat.materialGUID.ToString(false);
+						key = HashString(materialGuid, key);
+
+						const unsigned char overrideFlag = mat.useOverrides ? 1u : 0u;
+						key = HashFNV1a(&overrideFlag, sizeof(overrideFlag), key);
+
+						if (mat.useOverrides) {
+							key = HashFNV1a(&mat.baseColorOverride, sizeof(mat.baseColorOverride), key);
+							key = HashFNV1a(&mat.metallicOverride, sizeof(mat.metallicOverride), key);
+							key = HashFNV1a(&mat.roughnessOverride, sizeof(mat.roughnessOverride), key);
+						}
+					}
+
+					key &= 0x7FFFFFFFFFFFFFFFull;
+					if (!model.boneTransforms.empty()) {
+						key |= (1ull << 63);
+					}
+					return key;
+				}
+			};
+			std::vector<RenderItem> renderItems;
+			renderItems.reserve(256);  // Pre-allocate for typical scene size
+
 			// Use structured bindings with .each() for proper group iteration
 			for (auto [entity, model, transform, layer] : renderGroup.each()) {
 				// Components guaranteed to exist by group - no try_get needed!
@@ -717,10 +813,24 @@ namespace PAIN {
 					}
 				}
 
-				// Non-instanced fallback
+				// Collect for material-sorted rendering (non-instanced path)
+				RenderItem item;
+				item.component = &const_cast<ModelRenderer&>(model);
+				item.modelMatrix = model_xform;
+				item.sortKey = RenderItem::ComputeSortKey(model);
+				renderItems.push_back(item);
+			}
+
+			// OPTIMIZATION: Sort render items by material key to reduce state changes
+			std::sort(renderItems.begin(), renderItems.end(),
+				[](const RenderItem& a, const RenderItem& b) {
+					return a.sortKey < b.sortKey;
+				});
+
+			// Render material-sorted items
+			for (const auto& item : renderItems) {
 				rendererService->w_renderer->DrawGeometry(
-					rendererService->m_Scene, const_cast<ModelRenderer&>(model),
-					model_xform);
+					rendererService->m_Scene, *item.component, item.modelMatrix);
 			}
 
 			// Flush instanced batches

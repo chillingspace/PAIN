@@ -37,6 +37,9 @@ namespace PAIN {
             // Set a uniform var of type glm::mat4
             void SetUniform(const std::string& name, const glm::mat4& m);
 
+            // Set a uniform var of type glm::mat3
+            void SetUniform(const std::string& name, const glm::mat3& m);
+
             // Set a uniform var of type glm::vec4
             void SetUniform(const std::string& name, const glm::vec4& val);
 

@@ -239,6 +239,8 @@ namespace PAIN {
 		unsigned int material_properties_texture =
 			0; // 2D to store roughness, metallic properties
 		unsigned int emission_texture = 0;
+		unsigned int fallback_material_texture = 0;
+		unsigned int fallback_emission_texture = 0;
 
 		// !TODO: jspoh cleanup memory
 		// === Geometry Buffers ===
@@ -330,13 +332,15 @@ namespace PAIN {
 			&minimap_fbo,
 		};
 		std::array<unsigned int*, 2> rbos{&final_rbo, &minimap_rbo};
-		std::array<unsigned int*, 10> texs{
+		std::array<unsigned int*, 12> texs{
 			&ds_depth_texture,
 			&pos_texture,
 			&col_texture,
 			&norm_texture,
 			&material_properties_texture,
 			&emission_texture,
+			&fallback_material_texture,
+			&fallback_emission_texture,
 			//&shadow_texture,
 			&final_texture,
 			&pp_texture,
