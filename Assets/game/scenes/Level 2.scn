@@ -1,5 +1,15 @@
 {
     "assets": [
+        "a0a3a240-e263-0c4a-9374-11662265d6f0",
+        "f59e4cbd-b183-3541-9531-bd14b87115de",
+        "39040d83-c6c4-d64f-9043-9f95bcec758f",
+        "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
+        "6100a187-8732-804d-903d-32a5c3dc0576",
+        "3b99f393-1f31-b847-933d-0f10509c199a",
+        "4a319130-c746-0d4d-9463-ea992d847946",
+        "1eb84c15-dddb-a141-87cb-fc6117158943",
+        "370df759-71e5-3e49-bf8b-55152b0ae22c",
+        "80f91347-fd0a-1c41-b7ca-79f38b83d77b",
         "14c2b2ac-66d8-104e-98f3-96bbd5bc18b6",
         "b3f81bf0-716b-6e48-92ab-3bffc63be450",
         "ea2431c4-c2c5-724e-a713-daf897030244",
@@ -16,7 +26,6 @@
         "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
         "12519c04-c5f6-5f4a-adc5-78b1afbbc8ca",
         "bb0bc5a8-5546-514f-adbb-ed84183437d2",
-        "a0a3a240-e263-0c4a-9374-11662265d6f0",
         "3011af4e-f4a8-e647-989d-60420ed4920b",
         "3f468909-625d-7c43-b4fb-723833864d62",
         "a58a1f11-44e2-484a-a527-4f00c4780139",
@@ -79,7 +88,6 @@
         "d716543f-207b-5a47-9496-b5ccafe42b6b",
         "366edb10-25c3-e24c-8c2f-44e4be46953b",
         "d8c08d15-abf9-694a-a6e1-4b5d1f370185",
-        "1eb84c15-dddb-a141-87cb-fc6117158943",
         "945433d9-fbd3-7e44-ad93-e7d2e13f863a",
         "885b6561-18d4-984f-965c-83745c37a8c6",
         "ecc50f9b-7cb8-274e-afdf-1ab2b89c6d8c",
@@ -158,9 +166,6 @@
         "49d7ac6d-d4e0-d349-b827-1216277cf07e",
         "7ac9b6ad-27f0-f348-af2c-d2520b9fa417",
         "f0a3d787-fa47-9c42-9b50-e8ee35bbcb26",
-        "c93a4751-e6a7-444b-b39d-ab09f8155a2a",
-        "6100a187-8732-804d-903d-32a5c3dc0576",
-        "3b99f393-1f31-b847-933d-0f10509c199a",
         "b27dcc69-a3d9-0440-9d50-5885f3230eba",
         "148002de-981f-c14e-8ee0-a0c654bfe4c8",
         "0ff82290-b7e5-3549-a21b-006d1e00f0ab",
@@ -190,7 +195,6 @@
         "65365c00-7be8-7b48-9780-ed46b6ef0404",
         "5118d991-2d48-3545-8b17-c9b991d368d0",
         "5c00815c-1692-6e45-b852-06a086a81b0d",
-        "1fe7b95c-7093-7f44-8aac-322eae96b634",
         "b264fed7-6c6f-8344-a856-9d4094c5f8c5",
         "e60f5690-3ae8-a142-b726-5ea017a209e9",
         "0b9ad008-e8ad-144b-855d-115dd4683035",
@@ -239,6 +243,7 @@
         "06cab9b7-c91a-6948-bb59-426b8032ea12",
         "eb0d9fb3-a21c-4f49-87e8-c225bd47653e",
         "a5302a28-588d-fc4d-a39a-57873647e5c1",
+        "5ce8d5b8-cfe1-324e-9d35-a6f9345529bb",
         "a5dee0ac-d873-6648-bb32-5bea6e1322b6"
     ],
     "camera": {
@@ -339,16 +344,16 @@
         ],
         "farPlane": 100.0,
         "forward": [
-            -0.4635527729988098,
-            -0.8351642489433289,
-            -0.29600608348846436
+            0.3706079125404358,
+            -0.6704286336898804,
+            -0.6427871584892273
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            14.583479881286621,
-            16.81871223449707,
-            34.16997528076172
+            -8.58411979675293,
+            44.018035888671875,
+            22.283716201782227
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 31.100000381469727,
@@ -360,6 +365,80 @@
     },
     "ecs": {
         "Entities": [
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "0eda54c8-b9a0-0349-84ca-0d6ae79c1711"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                25.1159610748291,
+                                0.0,
+                                17.406383514404297
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.5800000429153442,
+                                0.5800000429153442,
+                                0.5800000429153442
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "doubleSidedShadows": false,
+                            "isStatic": false,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "4a319130-c746-0d4d-9463-ea992d847946",
+                                    "aoTextureOverride": "80f91347-fd0a-1c41-b7ca-79f38b83d77b",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "39040d83-c6c4-d64f-9043-9f95bcec758f",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "80f91347-fd0a-1c41-b7ca-79f38b83d77b",
+                                    "normalTextureOverride": "370df759-71e5-3e49-bf8b-55152b0ae22c",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "80f91347-fd0a-1c41-b7ca-79f38b83d77b",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "f59e4cbd-b183-3541-9531-bd14b87115de",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Fakekybox"
+                        }
+                    },
+                    "Name": "Fakekybox"
+                }
+            },
             {
                 "Entity": {
                     "Components": {
@@ -48467,7 +48546,7 @@
                         "LocalTransform": {
                             "position": [
                                 -27.36662483215332,
-                                0.0,
+                                -4.76837158203125e-07,
                                 -12.495877265930176
                             ],
                             "rotation": [
@@ -48529,7 +48608,7 @@
                                 "LocalTransform": {
                                     "position": [
                                         -27.36662483215332,
-                                        0.0,
+                                        -4.76837158203125e-07,
                                         -12.495877265930176
                                     ],
                                     "rotation": [
@@ -56903,12 +56982,12 @@
     },
     "environment": {
         "cameraLightIntensity": [
-            0.009999999776482582,
-            0.009999999776482582,
-            0.009999999776482582
+            0.0,
+            0.0,
+            0.0
         ],
         "pbr_map": 0,
-        "skyboxGUID": "1fe7b95c-7093-7f44-8aac-322eae96b634",
+        "skyboxGUID": "5ce8d5b8-cfe1-324e-9d35-a6f9345529bb",
         "useAOMap": true,
         "useDiffuseMap": true,
         "useEmissionMap": true,
@@ -56923,14 +57002,14 @@
         ],
         "worldLightFarPlane": 30.0,
         "worldLightIntensity": [
-            1.0,
-            1.0,
-            1.0
+            0.0,
+            0.3995101749897003,
+            0.7990195751190186
         ],
         "worldLightPosition": [
-            26.249187469482422,
-            35.48384094238281,
-            38.83625793457031
+            3.0815868377685547,
+            62.68316650390625,
+            26.94999885559082
         ],
         "worldLightShadowFollowDistance": 22.5,
         "worldLightShadowResolution": 1024,
