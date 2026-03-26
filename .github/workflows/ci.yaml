@@ -113,35 +113,36 @@ jobs:
           # 2. FORCE SYNC ALL DEPENDENCIES
           Write-Host "Syncing all dependencies to $targetDir..."
           
-          # Always copy Assets to the target bin folder
-          Write-Host "Copying assets..."
+          # Copy Assets
           Copy-Item -Path "assets" -Destination $targetDir -Recurse -Force -ErrorAction SilentlyContinue
 
           # Copy Tools
           foreach ($tool in @("cuttlefish", "ffmpeg")) {
-              Write-Host "Checking for tool: $tool"
               $toolSource = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Directory -Filter $tool -Recurse | Select-Object -First 1
-              if ($toolSource) { 
-                  Copy-Item -Path $toolSource.FullName -Destination $targetDir -Recurse -Force 
-              }
+              if ($toolSource) { Copy-Item -Path $toolSource.FullName -Destination $targetDir -Recurse -Force }
           }
 
-          # Copy ALL x64 DLLs from vendor
-          Write-Host "Copying vendor DLLs..."
-          Get-ChildItem -Path "vendor" -Filter "*.dll" -Recurse | Where-Object { $_.FullName -match "x64" -or $_.FullName -notmatch "x86|arm" } | ForEach-Object {
+          # Copy ONLY x64 DLLs from vendor (strictly filter for x64 or neutral paths)
+          Write-Host "Copying vendor x64 DLLs..."
+          Get-ChildItem -Path "vendor" -Filter "*.dll" -Recurse | Where-Object { $_.FullName -match "x64" } | ForEach-Object {
               Copy-Item $_.FullName $targetDir -Force
+              Write-Host "Synced: $($_.Name)"
           }
 
-          # Copy Mesa Software OpenGL
-          $mesaDll = Get-ChildItem -Path "mesa_temp" -Filter "opengl32.dll" -Recurse | Select-Object -First 1
+          # Copy Mesa Software OpenGL (Specifically x64 llvmpipe)
+          # We search for the large opengl32.dll in the x64 folder of mesa_temp
+          $mesaDll = Get-ChildItem -Path "mesa_temp" -Filter "opengl32.dll" -Recurse | Where-Object { $_.FullName -match "x64" -and $_.Length -gt 10MB } | Select-Object -First 1
           if ($mesaDll) {
               Copy-Item $mesaDll.FullName $targetDir -Force
+              Write-Host "Synced x64 Mesa: $($mesaDll.FullName) ($([math]::round($mesaDll.Length/1MB, 2)) MB)"
+          } else {
+              Write-Error "Could not find a valid x64 Mesa opengl32.dll (>10MB)!"
           }
 
           # 3. VERIFY directory content
           cd $targetDir
           Write-Host "--- Final Directory Listing ($targetDir) ---"
-          Get-ChildItem | Select-Object Name, @{Name="KB";Expression={[math]::round($_.Length / 1KB, 2)}} | Out-Host
+          Get-ChildItem | Select-Object Name, @{Name="MB";Expression={[math]::round($_.Length / 1MB, 2)}} | Out-Host
           
           # 4. START PROCESS
           $proc = Start-Process .\Friends-Frog-ever.exe -PassThru -RedirectStandardOutput "app_stdout.log" -RedirectStandardError "app_stderr.log"
