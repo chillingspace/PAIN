@@ -126,39 +126,35 @@ jobs:
           Write-Host "Found executable at: $($exePath.FullName)"
           Write-Host "Target Directory: $targetDir"
 
-          # 2. COPY ALL DEPENDENCIES to the target directory
+          # 2. SYNC ALL DLLs and Dependencies
           Write-Host "Syncing all dependencies to $targetDir..."
           
-          # Copy Assets (if they exist in the root)
-          if (Test-Path "bin/${{ matrix.configuration }}/assets") {
-              Write-Host "Assets already in bin folder."
-          } else {
-              Write-Host "Copying assets from root..."
-              Copy-Item -Path "assets" -Destination $targetDir -Recurse -Force -ErrorAction SilentlyContinue
-          }
-
-          # Copy Tools (cuttlefish, ffmpeg) from bin if they exist, otherwise from source
-          foreach ($tool in @("cuttlefish", "ffmpeg")) {
-              if (!(Test-Path "$targetDir/$tool")) {
-                  Write-Host "Copying $tool..."
-                  # Try to find tool in the workspace
-                  $toolSource = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Directory -Filter $tool -Recurse | Select-Object -First 1
-                  if ($toolSource) {
-                      Copy-Item -Path $toolSource.FullName -Destination $targetDir -Recurse -Force
-                  }
+          # Copy every DLL found in the vendor folder to the target
+          Get-ChildItem -Path "vendor" -Filter "*.dll" -Recurse | ForEach-Object {
+              if ($_.FullName -match "x64" -or $_.FullName -notmatch "x86|arm") {
+                  Copy-Item $_.FullName $targetDir -Force
+                  Write-Host "Synced DLL: $($_.Name)"
               }
           }
 
-          # Copy Vendor DLLs (FMOD, Lua, etc.)
-          Write-Host "Copying vendor DLLs..."
-          $fmodDlls = Get-ChildItem -Path "vendor/FMOD" -Filter "*.dll" -Recurse | Where-Object { $_.FullName -match "x64" }
-          foreach ($dll in $fmodDlls) {
-              Copy-Item $dll.FullName $targetDir -Force
+          # Specifically ensure Mesa opengl32.dll is there
+          $mesaDll = Get-ChildItem -Path "mesa_temp" -Filter "opengl32.dll" -Recurse | Select-Object -First 1
+          if ($mesaDll) {
+              Copy-Item $mesaDll.FullName $targetDir -Force
+              Write-Host "Synced Mesa: opengl32.dll"
           }
 
-          $luaLibs = Get-ChildItem -Path "vendor/lua" -Filter "*.lib" -Recurse
-          foreach ($lib in $luaLibs) {
-              Copy-Item $lib.FullName $targetDir -Force
+          # Copy Assets
+          if (!(Test-Path "$targetDir/assets")) {
+              Copy-Item -Path "assets" -Destination $targetDir -Recurse -Force
+          }
+
+          # Copy Tools
+          foreach ($tool in @("cuttlefish", "ffmpeg")) {
+              if (!(Test-Path "$targetDir/$tool")) {
+                  $toolSource = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Directory -Filter $tool -Recurse | Select-Object -First 1
+                  if ($toolSource) { Copy-Item -Path $toolSource.FullName -Destination $targetDir -Recurse -Force }
+              }
           }
           
           cd $targetDir
@@ -169,6 +165,28 @@ jobs:
           
           # 4. Start the process
           $proc = Start-Process .\Friends-Frog-ever.exe -PassThru -RedirectStandardOutput "app_stdout.log" -RedirectStandardError "app_stderr.log"
+          Write-Host "Process started with PID: $($proc.Id)"
+          
+          Start-Sleep -Seconds 15
+          
+          if ($proc.HasExited) {
+             Write-Host "--- APP STDOUT ---"
+             Get-Content "app_stdout.log" -ErrorAction SilentlyContinue
+             Write-Host "--- APP STDERR ---"
+             Get-Content "app_stderr.log" -ErrorAction SilentlyContinue
+             Write-Error "Application exited unexpectedly with code $($proc.ExitCode)."
+             exit 1
+          }
+
+          $success = $proc.CloseMainWindow()
+          if (!$success) { taskkill /IM Friends-Frog-ever.exe }
+          $proc.WaitForExit(5000)
+          
+          if (!$proc.HasExited) {
+              Stop-Process -Id $proc.Id -Force
+              exit 1
+          }
+        shell: pwsh
           Write-Host "Process started with PID: $($proc.Id)"
           
           Start-Sleep -Seconds 15
