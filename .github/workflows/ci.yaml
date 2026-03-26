@@ -125,14 +125,49 @@ jobs:
           $targetDir = $exePath.DirectoryName
           Write-Host "Found executable at: $($exePath.FullName)"
           Write-Host "Target Directory: $targetDir"
+
+          # 2. COPY ALL DEPENDENCIES to the target directory
+          Write-Host "Syncing all dependencies to $targetDir..."
+          
+          # Copy Assets (if they exist in the root)
+          if (Test-Path "bin/${{ matrix.configuration }}/assets") {
+              Write-Host "Assets already in bin folder."
+          } else {
+              Write-Host "Copying assets from root..."
+              Copy-Item -Path "assets" -Destination $targetDir -Recurse -Force -ErrorAction SilentlyContinue
+          }
+
+          # Copy Tools (cuttlefish, ffmpeg) from bin if they exist, otherwise from source
+          foreach ($tool in @("cuttlefish", "ffmpeg")) {
+              if (!(Test-Path "$targetDir/$tool")) {
+                  Write-Host "Copying $tool..."
+                  # Try to find tool in the workspace
+                  $toolSource = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Directory -Filter $tool -Recurse | Select-Object -First 1
+                  if ($toolSource) {
+                      Copy-Item -Path $toolSource.FullName -Destination $targetDir -Recurse -Force
+                  }
+              }
+          }
+
+          # Copy Vendor DLLs (FMOD, Lua, etc.)
+          Write-Host "Copying vendor DLLs..."
+          $fmodDlls = Get-ChildItem -Path "vendor/FMOD" -Filter "*.dll" -Recurse | Where-Object { $_.FullName -match "x64" }
+          foreach ($dll in $fmodDlls) {
+              Copy-Item $dll.FullName $targetDir -Force
+          }
+
+          $luaLibs = Get-ChildItem -Path "vendor/lua" -Filter "*.lib" -Recurse
+          foreach ($lib in $luaLibs) {
+              Copy-Item $lib.FullName $targetDir -Force
+          }
           
           cd $targetDir
           
-          # 2. List files to verify DLLs are present
-          Write-Host "--- Directory Listing ---"
-          Get-ChildItem | Select-Object Name, Length
+          # 3. Final Directory Check
+          Write-Host "--- Final Directory Listing ---"
+          Get-ChildItem | Select-Object Name, @{Name="KiloBytes";Expression={$_.Length / 1KB}}
           
-          # 3. Start the process
+          # 4. Start the process
           $proc = Start-Process .\Friends-Frog-ever.exe -PassThru -RedirectStandardOutput "app_stdout.log" -RedirectStandardError "app_stderr.log"
           Write-Host "Process started with PID: $($proc.Id)"
           
