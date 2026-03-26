@@ -36,7 +36,7 @@ jobs:
 
     - name: Run cppcheck
       run: |
-        & "C:\Program Files\Cppcheck\cppcheck.exe" `
+        & "C:\\Program Files\\Cppcheck\\cppcheck.exe" `
           --error-exitcode=1 `
           --force `
           --enable=warning,style `
@@ -86,29 +86,14 @@ jobs:
 
       - name: Build Windows
         run: |
-          # build.bat already runs cmake configure and cmake build
           .\build.bat ${{ matrix.configuration }}
         env:
           CMAKE_BUILD_PARALLEL_LEVEL: 8
 
       - name: Setup Software OpenGL (Mesa)
         run: |
-          # Download Mesa
           Invoke-WebRequest -Uri "https://github.com/pal1000/mesa-dist-win/releases/download/24.0.3/mesa3d-24.0.3-release-msvc.7z" -OutFile "mesa.7z"
-          
-          # Extract
           7z x mesa.7z -omesa_temp -y
-          
-          # Force the bin directory to exist just in case
-          if (!(Test-Path "bin/${{ matrix.configuration }}")) {
-             New-Item -ItemType Directory -Force -Path "bin/${{ matrix.configuration }}"
-          }
-
-          $mesaDll = Get-ChildItem -Path "mesa_temp" -Filter "opengl32.dll" -Recurse | Select-Object -First 1
-          if ($mesaDll) {
-            Copy-Item $mesaDll.FullName "bin/${{ matrix.configuration }}/"
-            Write-Host "Successfully copied opengl32.dll to bin/${{ matrix.configuration }}/"
-          }
         shell: pwsh
 
       - name: Run executable and test for graceful exit
@@ -129,12 +114,12 @@ jobs:
           # 2. SYNC ALL DLLs and Dependencies
           Write-Host "Syncing all dependencies to $targetDir..."
           
-          # Copy every DLL found in the vendor folder to the target
-          Get-ChildItem -Path "vendor" -Filter "*.dll" -Recurse | ForEach-Object {
-              if ($_.FullName -match "x64" -or $_.FullName -notmatch "x86|arm") {
-                  Copy-Item $_.FullName $targetDir -Force
-                  Write-Host "Synced DLL: $($_.Name)"
-              }
+          # Copy FMOD DLLs specifically for the current configuration
+          $fmodPattern = if ("${{ matrix.configuration }}" -eq "Debug") { "fmodL.dll" } else { "fmod.dll" }
+          $fmodSource = Get-ChildItem -Path "vendor/FMOD" -Filter $fmodPattern -Recurse | Where-Object { $_.FullName -match "x64" } | Select-Object -First 1
+          if ($fmodSource) {
+              Copy-Item $fmodSource.FullName $targetDir -Force
+              Write-Host "Synced FMOD: $($fmodSource.Name)"
           }
 
           # Specifically ensure Mesa opengl32.dll is there
@@ -144,12 +129,12 @@ jobs:
               Write-Host "Synced Mesa: opengl32.dll"
           }
 
-          # Copy Assets
+          # Copy Assets (if not already there)
           if (!(Test-Path "$targetDir/assets")) {
-              Copy-Item -Path "assets" -Destination $targetDir -Recurse -Force
+              Copy-Item -Path "assets" -Destination $targetDir -Recurse -Force -ErrorAction SilentlyContinue
           }
 
-          # Copy Tools
+          # Copy Tools (cuttlefish, ffmpeg)
           foreach ($tool in @("cuttlefish", "ffmpeg")) {
               if (!(Test-Path "$targetDir/$tool")) {
                   $toolSource = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Directory -Filter $tool -Recurse | Select-Object -First 1
@@ -161,7 +146,7 @@ jobs:
           
           # 3. Final Directory Check
           Write-Host "--- Final Directory Listing ---"
-          Get-ChildItem | Select-Object Name, @{Name="KiloBytes";Expression={$_.Length / 1KB}}
+          Get-ChildItem | Select-Object Name, @{Name="KB";Expression={[math]::round($_.Length / 1KB, 2)}}
           
           # 4. Start the process
           $proc = Start-Process .\Friends-Frog-ever.exe -PassThru -RedirectStandardOutput "app_stdout.log" -RedirectStandardError "app_stderr.log"
@@ -178,36 +163,23 @@ jobs:
              exit 1
           }
 
+          Write-Host "MainWindowHandle: $($proc.MainWindowHandle)"
+          
           $success = $proc.CloseMainWindow()
-          if (!$success) { taskkill /IM Friends-Frog-ever.exe }
+          Write-Host "CloseMainWindow returned: $success"
+          if (!$success) { 
+              Write-Host "Falling back to taskkill..."
+              taskkill /IM Friends-Frog-ever.exe 
+          }
+          
           $proc.WaitForExit(5000)
           
           if (!$proc.HasExited) {
+              Write-Host "Process did not exit, forcing stop..."
               Stop-Process -Id $proc.Id -Force
               exit 1
           }
-        shell: pwsh
-          Write-Host "Process started with PID: $($proc.Id)"
-          
-          Start-Sleep -Seconds 15
-          
-          if ($proc.HasExited) {
-             Write-Host "--- APP STDOUT ---"
-             Get-Content "app_stdout.log" -ErrorAction SilentlyContinue
-             Write-Host "--- APP STDERR ---"
-             Get-Content "app_stderr.log" -ErrorAction SilentlyContinue
-             Write-Error "Application exited unexpectedly with code $($proc.ExitCode)."
-             exit 1
-          }
-
-          $success = $proc.CloseMainWindow()
-          if (!$success) { taskkill /IM Friends-Frog-ever.exe }
-          $proc.WaitForExit(5000)
-          
-          if (!$proc.HasExited) {
-              Stop-Process -Id $proc.Id -Force
-              exit 1
-          }
+          Write-Host "Process exited successfully."
         shell: pwsh
 
   build-android:
