@@ -1,0 +1,23 @@
+{
+  "asset_info": {
+    "name": "Build6_baseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 10721336459064357175
+  },
+  "descriptor_version": 1,
+  "guid": "2675eeff-5329-9d40-b56f-6f613855b441",
+  "import_settings": {
+    "android_allow_astc_hdr": false,
+    "android_bake_cubemap": false,
+    "android_compression": "ASTC_4x4",
+    "android_skybox_source_format": "R16G16B16A16",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Build6_baseColor.png"
+  }
+}
