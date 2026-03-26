@@ -98,57 +98,52 @@ jobs:
 
       - name: Run executable and test for graceful exit
         run: |
-          # 1. FIND where the executable actually ended up
-          Write-Host "Searching for Friends-Frog-ever.exe..."
-          $exePath = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Filter "Friends-Frog-ever.exe" -Recurse | Select-Object -First 1
+          # 1. FIND the executable in the bin folder
+          Write-Host "Searching for Friends-Frog-ever.exe in bin/..."
+          $exe = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Filter "Friends-Frog-ever.exe" -Recurse | Where-Object { $_.FullName -match "bin" } | Select-Object -First 1
           
-          if (!$exePath) {
-              Write-Error "Could not find Friends-Frog-ever.exe anywhere in the workspace!"
+          if (!$exe) {
+              Write-Error "Could not find Friends-Frog-ever.exe in any bin directory!"
               exit 1
           }
 
-          $targetDir = $exePath.DirectoryName
-          Write-Host "Found executable at: $($exePath.FullName)"
-          Write-Host "Target Directory: $targetDir"
+          $targetDir = $exe.DirectoryName
+          Write-Host "Target Directory identified: $targetDir"
 
-          # 2. SYNC ALL DLLs and Dependencies
+          # 2. FORCE SYNC ALL DEPENDENCIES
           Write-Host "Syncing all dependencies to $targetDir..."
           
-          # Copy FMOD DLLs specifically for the current configuration
-          $fmodPattern = if ("${{ matrix.configuration }}" -eq "Debug") { "fmodL.dll" } else { "fmod.dll" }
-          $fmodSource = Get-ChildItem -Path "vendor/FMOD" -Filter $fmodPattern -Recurse | Where-Object { $_.FullName -match "x64" } | Select-Object -First 1
-          if ($fmodSource) {
-              Copy-Item $fmodSource.FullName $targetDir -Force
-              Write-Host "Synced FMOD: $($fmodSource.Name)"
+          # Always copy Assets to the target bin folder
+          Write-Host "Copying assets..."
+          Copy-Item -Path "assets" -Destination $targetDir -Recurse -Force -ErrorAction SilentlyContinue
+
+          # Copy Tools
+          foreach ($tool in @("cuttlefish", "ffmpeg")) {
+              Write-Host "Checking for tool: $tool"
+              $toolSource = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Directory -Filter $tool -Recurse | Select-Object -First 1
+              if ($toolSource) { 
+                  Copy-Item -Path $toolSource.FullName -Destination $targetDir -Recurse -Force 
+              }
           }
 
-          # Specifically ensure Mesa opengl32.dll is there
+          # Copy ALL x64 DLLs from vendor
+          Write-Host "Copying vendor DLLs..."
+          Get-ChildItem -Path "vendor" -Filter "*.dll" -Recurse | Where-Object { $_.FullName -match "x64" -or $_.FullName -notmatch "x86|arm" } | ForEach-Object {
+              Copy-Item $_.FullName $targetDir -Force
+          }
+
+          # Copy Mesa Software OpenGL
           $mesaDll = Get-ChildItem -Path "mesa_temp" -Filter "opengl32.dll" -Recurse | Select-Object -First 1
           if ($mesaDll) {
               Copy-Item $mesaDll.FullName $targetDir -Force
-              Write-Host "Synced Mesa: opengl32.dll"
           }
 
-          # Copy Assets (if not already there)
-          if (!(Test-Path "$targetDir/assets")) {
-              Copy-Item -Path "assets" -Destination $targetDir -Recurse -Force -ErrorAction SilentlyContinue
-          }
-
-          # Copy Tools (cuttlefish, ffmpeg)
-          foreach ($tool in @("cuttlefish", "ffmpeg")) {
-              if (!(Test-Path "$targetDir/$tool")) {
-                  $toolSource = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Directory -Filter $tool -Recurse | Select-Object -First 1
-                  if ($toolSource) { Copy-Item -Path $toolSource.FullName -Destination $targetDir -Recurse -Force }
-              }
-          }
-          
+          # 3. VERIFY directory content
           cd $targetDir
+          Write-Host "--- Final Directory Listing ($targetDir) ---"
+          Get-ChildItem | Select-Object Name, @{Name="KB";Expression={[math]::round($_.Length / 1KB, 2)}} | Out-Host
           
-          # 3. Final Directory Check
-          Write-Host "--- Final Directory Listing ---"
-          Get-ChildItem | Select-Object Name, @{Name="KB";Expression={[math]::round($_.Length / 1KB, 2)}}
-          
-          # 4. Start the process
+          # 4. START PROCESS
           $proc = Start-Process .\Friends-Frog-ever.exe -PassThru -RedirectStandardOutput "app_stdout.log" -RedirectStandardError "app_stderr.log"
           Write-Host "Process started with PID: $($proc.Id)"
           
@@ -156,9 +151,9 @@ jobs:
           
           if ($proc.HasExited) {
              Write-Host "--- APP STDOUT ---"
-             Get-Content "app_stdout.log" -ErrorAction SilentlyContinue
+             Get-Content "app_stdout.log" -ErrorAction SilentlyContinue | Out-Host
              Write-Host "--- APP STDERR ---"
-             Get-Content "app_stderr.log" -ErrorAction SilentlyContinue
+             Get-Content "app_stderr.log" -ErrorAction SilentlyContinue | Out-Host
              Write-Error "Application exited unexpectedly with code $($proc.ExitCode)."
              exit 1
           }
