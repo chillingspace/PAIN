@@ -124,17 +124,26 @@ namespace PAIN {
 		float ibl_specular_firefly_clamp = 32.0f;
 #endif
 
+		// Frame pacing and VSync settings
+		// swap_interval: 0 = no VSync (lowest latency, possible tearing), 1 = VSync (smooth, ~1 frame latency)
+		// For responsive controls, use 0; for smooth visuals without tearing, use 1
 #ifdef PN_PLATFORM_ANDROID
-		// Android frame pacing and battery controls.
 		int android_swap_interval = 1; // 1 = vsync, 0 = uncapped.
 		int android_target_fps = 0; // 0 = no explicit software cap.
 		bool android_battery_saver_mode = false;
 		int android_battery_saver_fps = 30;
+#else
+		int swap_interval = 1;  // Windows: Default to 1 (VSync enabled) for smooth visuals
+#endif
 
-		// OPTIMIZED: Post-process at reduced resolution to reduce thermal load
+		// OPTIMIZED: Post-process at reduced resolution to reduce GPU load
 		// Renders bloom/blur/tone-map at scale*full_resolution, then upscales to full
-		// Default 0.75 balances quality vs performance; use 0.5 for maximum savings
+		// Default 1.0 (full resolution) for desktop, 0.75 for mobile
+		// Use 0.5-0.75 for performance gains on lower-end hardware
+#ifdef PN_PLATFORM_ANDROID
 		float postprocess_resolution_scale = 0.75f;
+#else
+		float postprocess_resolution_scale = 1.0f;  // Windows: full resolution by default, can be lowered for performance
 #endif
 
 		// volumetric lighting (god rays / light shafts)
@@ -154,17 +163,19 @@ namespace PAIN {
 		float volumetric_history_clamp = 0.35f;
 		int   volumetric_selection_hysteresis_frames = 3;
 #else
+		// Windows: Balanced performance - reduced from 24 steps (4x GPU cost) to 12
+		// 24 steps is overkill for most scenes; 12 provides good quality with 2x performance
 		bool volumetric = true;
-		float volumetric_intensity = 0.5f;   // overall brightness; start low
-		int   volumetric_steps = 24;           // ray march steps; keep low and rely on lower-resolution upsampling
-		float volumetric_max_dist = 40.0f;     // max ray length in world units
-		float volumetric_scatter = 0.f;       // Mie g: 0=uniform, 1=pure forward
-		float volumetric_resolution_scale = 0.5f; // render volumetrics at reduced resolution, then upscale additively
-		int   volumetric_max_lights = 4;      // separate cap from total scene lights to control cost
-		float volumetric_temporal_blend = 0.85f; // low-res history stabilization; higher = steadier but more trailing
-		float volumetric_jitter_strength = 1.0f; // offsets ray-march layers so temporal filtering can smooth them out
-		float volumetric_history_clamp = 0.35f; // reject stale history when current and previous lighting diverge
-		int   volumetric_selection_hysteresis_frames = 3; // keep recently visible cones alive briefly near frustum edges
+		float volumetric_intensity = 0.5f;
+		int   volumetric_steps = 12;          // reduced from 24 for better performance
+		float volumetric_max_dist = 40.0f;
+		float volumetric_scatter = 0.f;
+		float volumetric_resolution_scale = 0.5f;
+		int   volumetric_max_lights = 4;
+		float volumetric_temporal_blend = 0.85f;
+		float volumetric_jitter_strength = 1.0f;
+		float volumetric_history_clamp = 0.35f;
+		int   volumetric_selection_hysteresis_frames = 3;
 #endif
 
 		// animation

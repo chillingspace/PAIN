@@ -4,6 +4,7 @@
 #include "GLFWWindow.h"
 
 #include "CoreSystems/Windows/OpenGL/OpenGLContext.h"
+#include "CoreSystems/Renderer/GraphicsSettings.h"
 
 #include "CoreSystems/Events/GLFW/WindowEvents.h"
 #include "CoreSystems/Events/GLFW/KeyEvents.h"
@@ -65,7 +66,12 @@ namespace PAIN {
 				throw std::exception();
 			}
 #else
-			// Create fullscreen window
+			// Create fullscreen window with explicit refresh rate (avoid driver guessing issues)
+			int refreshRate = (mode && monitor) ? mode->refreshRate : 60;
+			
+			// Set refresh rate hint before creating fullscreen window
+			glfwWindowHint(GLFW_REFRESH_RATE, refreshRate);
+			
 			ptr_window = glfwCreateWindow(
 				mode->width,
 				mode->height,
@@ -77,6 +83,7 @@ namespace PAIN {
 			int w, h;
 			glfwGetFramebufferSize(ptr_window, &w, &h);
 			frame_buffer = { w, h };
+			PN_CORE_INFO("[Window] Created fullscreen window {}x{} @ {}Hz", frame_buffer.x, frame_buffer.y, refreshRate);
 #endif
 
 			//Create rendering context
@@ -145,18 +152,20 @@ namespace PAIN {
 				glfwGetWindowPos(ptr_window, &wx, &wy);
 				glfwGetWindowSize(ptr_window, &ww, &wh);
 
-				// Get primary monitor resolution
-				int width = 1920, height = 1080;  // fallback
+				// Get primary monitor resolution and refresh rate
+				int width = 1920, height = 1080, refreshRate = 60;
 				if (monitor) {
 					const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 					if (mode) {
 						width = mode->width;
 						height = mode->height;
+						refreshRate = mode->refreshRate;
 					}
 				}
 
-				glfwSetWindowMonitor(ptr_window, monitor, 0, 0, width, height, GLFW_DONT_CARE);
-				PN_CORE_INFO("[Window] Switched to fullscreen {}x{}", width, height);
+				// Use explicit refresh rate instead of GLFW_DONT_CARE to avoid driver issues
+				glfwSetWindowMonitor(ptr_window, monitor, 0, 0, width, height, refreshRate);
+				PN_CORE_INFO("[Window] Switched to fullscreen {}x{} @ {}Hz", width, height, refreshRate);
 			}
 			else {
 				// Windowed: centered 1280x720
@@ -175,6 +184,12 @@ namespace PAIN {
 				glfwSetWindowMonitor(ptr_window, nullptr, posX, posY, winW, winH, GLFW_DONT_CARE);
 				PN_CORE_INFO("[Window] Switched to windowed {}x{} at ({},{})", winW, winH, posX, posY);
 			}
+
+			// CRITICAL: Reapply swap interval after monitor mode change
+			// glfwSetWindowMonitor can reset the swap interval to driver defaults
+			const int swapInterval = GraphicsSettings::get().swap_interval;
+			glfwSwapInterval(swapInterval);
+			PN_CORE_INFO("[Window] Swap interval reapplied: {} ({})", swapInterval, swapInterval == 0 ? "no VSync" : "VSync enabled");
 
 			// Update frame buffer after mode change
 			int w, h;

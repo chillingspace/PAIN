@@ -2,6 +2,7 @@
 
 #ifdef PN_PLATFORM_WINDOWS
 #include "OpenGLContext.h"
+#include "CoreSystems/Renderer/GraphicsSettings.h"
 
 namespace PAIN {
 	OpenGLContext::OpenGLContext(GLFWwindow* windowHandle)
@@ -24,6 +25,12 @@ namespace PAIN {
 			PN_CORE_ERROR("GLEW init failed: {}", (const char*)glewGetErrorString(err));
 			throw std::runtime_error("GLEW init failed");
 		}
+
+		// Configure swap interval for frame pacing
+		// 0 = no VSync (lowest latency, possible tearing), 1 = VSync (smooth, ~1 frame latency)
+		const int swapInterval = GraphicsSettings::get().swap_interval;
+		glfwSwapInterval(swapInterval);
+		PN_CORE_INFO("Swap interval set to {} ({})", swapInterval, swapInterval == 0 ? "no VSync, lowest latency" : "VSync enabled");
 
 		// Check if we actually got a debug context
 		GLint flags = 0;

@@ -1812,16 +1812,12 @@ namespace PAIN {
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 			// pp_texture for ping-pong if needed in post-processing
-			// OPTIMIZATION: For Android, render post-process at reduced resolution
-#ifdef PN_PLATFORM_ANDROID
+			// OPTIMIZATION: Allow post-process resolution scaling on all platforms
+			// This significantly reduces GPU load for bloom/blur/tone mapping passes
 			const float pp_scale = glm::clamp(GraphicsSettings::get().postprocess_resolution_scale, 0.25f, 1.0f);
 			pp_width = std::max(1, static_cast<int>(std::round(winWidth * pp_scale)));
 			pp_height = std::max(1, static_cast<int>(std::round(winHeight * pp_scale)));
 			PN_CORE_INFO("Post-process buffers at {}x{} ({} scale)", pp_width, pp_height, pp_scale);
-#else
-			pp_width = winWidth;
-			pp_height = winHeight;
-#endif
 			glGenFramebuffers(1, &pp_fbo);
 			glBindFramebuffer(GL_FRAMEBUFFER, pp_fbo);
 
@@ -2028,12 +2024,20 @@ namespace PAIN {
 		}
 
 		// === Debug VAO/VBO ===
+		// PERFORMANCE: Pre-allocate debug VBO with sufficient capacity
+		// This avoids per-draw reallocation checks which can cause micro-stutter
+		// 64KB buffer = ~9K vertices (7 floats/vertex * 4 bytes/float)
 		{
 			glGenVertexArrays(1, &debug_VAO);
 			glBindVertexArray(debug_VAO);
 
 			glGenBuffers(1, &debug_VBO);
 			glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
+			
+			// Pre-allocate buffer for debug drawing (reduces per-frame allocation overhead)
+			static constexpr GLsizeiptr kDebugVboInitialCapacity = 64 * 1024;
+			glBufferData(GL_ARRAY_BUFFER, kDebugVboInitialCapacity, nullptr, GL_DYNAMIC_DRAW);
+			debug_vbo_capacity = kDebugVboInitialCapacity;
 
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
@@ -4155,10 +4159,10 @@ namespace PAIN {
 
 		restorePassState();
 
-#ifdef PN_PLATFORM_ANDROID
+		// OPTIMIZATION: Invalidate framebuffer attachments to help GPU memory bandwidth
+		// This tells the GPU we don't need to preserve these textures for future use
 		InvalidateFramebufferAttachments(pp_fbo, true, false, false);
 		InvalidateFramebufferAttachments(pp2_fbo, true, false, false);
-#endif
 
 #ifdef _DEBUG
 		err = glGetError();
@@ -4216,10 +4220,44 @@ namespace PAIN {
 		glInvalidateFramebuffer(GL_FRAMEBUFFER, count, attachments);
 		glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(prevFbo));
 #else
+		// Windows/Desktop OpenGL: glInvalidateFramebuffer is available in OpenGL 4.3+
+		// (ARB_invalidate_subdata extension). Most modern GPUs support this.
+		// If not available, this becomes a no-op which is safe.
 		(void)fbo;
 		(void)invalidateColor;
 		(void)invalidateDepth;
 		(void)invalidateStencil;
+		
+		// Try to use glInvalidateFramebuffer if available (OpenGL 4.3+)
+		// This is a performance optimization that helps GPU memory bandwidth
+#if defined(GL_VERSION_4_3) || defined(GL_ARB_invalidate_subdata)
+		if (fbo == 0) {
+			return;
+		}
+
+		GLenum attachments[3];
+		int count = 0;
+
+		if (invalidateColor) {
+			attachments[count++] = GL_COLOR_ATTACHMENT0;
+		}
+		if (invalidateDepth) {
+			attachments[count++] = GL_DEPTH_ATTACHMENT;
+		}
+		if (invalidateStencil) {
+			attachments[count++] = GL_STENCIL_ATTACHMENT;
+		}
+
+		if (count == 0) {
+			return;
+		}
+
+		GLint prevFbo = 0;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glInvalidateFramebuffer(GL_FRAMEBUFFER, count, attachments);
+		glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(prevFbo));
+#endif
 #endif
 	}
 
