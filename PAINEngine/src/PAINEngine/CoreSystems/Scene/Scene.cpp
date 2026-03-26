@@ -1547,55 +1547,55 @@ namespace PAIN {
 				std::optional<std::shared_ptr<Assets::Model>> mdl_opt;
 				std::shared_ptr<Assets::Model> mdl;
 
-#ifdef PN_PLATFORM_WINDOWS
-				std::filesystem::path dm_path = "game/models/damagedhelmet/DamagedHelmet.mesh";
-#else	
-				std::filesystem::path dm_path = "game\\models\\damagedhelmet\\DamagedHelmet.mesh";
-#endif
-				//Get model
-				PN_CORE_INFO("Attempting to add {} to scene", dm_path.string());
-				mdl_opt = asset_manager->getAsset<Assets::Model>(dm_path);
-				if (mdl_opt.has_value()) {
-					mdl = mdl_opt.value();
-
-					auto e = AddObject(mdl, "damaged_helmet", { 0.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(1.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
-				}
-
-
-#ifdef PN_PLATFORM_WINDOWS
-				std::filesystem::path fox_path = "game/models/Fox.mesh";
-#else	
-				std::filesystem::path fox_path = "game\\models\\Fox.mesh";
-#endif
-				//Get model
-				PN_CORE_INFO("Attempting to add {} to scene", fox_path.string());
-				mdl_opt = asset_manager->getAsset<Assets::Model>(fox_path);
-				if (mdl_opt.has_value()) {
-					mdl = mdl_opt.value();
-
-					auto e = AddObject(mdl, "fox", { 5.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(1.0f, 0.0f, 0.0f)), glm::vec3{ 0.05f });
-				}
-
-
-#ifdef PN_PLATFORM_WINDOWS
-				std::filesystem::path bs_path = "game/models/brainstem/BrainStem.mesh";
-#else	
-				std::filesystem::path bs_path = "game\\models\\brainstem\\BrainStem.mesh";
-#endif
-				//Get model
-
-				PN_CORE_INFO("Attempting to add {} to scene", bs_path.string());
-				mdl_opt = asset_manager->getAsset<Assets::Model>(bs_path);
-				if (mdl_opt.has_value()) {
-					mdl = mdl_opt.value();
-					//mdl->materials[0].metallic = 0.f;
-					//mdl->materials[0].roughness = 1.f;
-					//mdl->materials[0].baseColor = { 0.3f, 0.3f, 0.3f };
-					auto e = AddObject(mdl, "brainstem_model", { 0.f, 0.f, -10.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(0.0f, 0.0f, 0.0f)), { 5.f, 5.f, 5.f });
-				}
-				else {
-					throw std::runtime_error("animation obj err");
-				}
+//#ifdef PN_PLATFORM_WINDOWS
+//				std::filesystem::path dm_path = "game/models/damagedhelmet/DamagedHelmet.mesh";
+//#else	
+//				std::filesystem::path dm_path = "game\\models\\damagedhelmet\\DamagedHelmet.mesh";
+//#endif
+//				//Get model
+//				PN_CORE_INFO("Attempting to add {} to scene", dm_path.string());
+//				mdl_opt = asset_manager->getAsset<Assets::Model>(dm_path);
+//				if (mdl_opt.has_value()) {
+//					mdl = mdl_opt.value();
+//
+//					auto e = AddObject(mdl, "damaged_helmet", { 0.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(1.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
+//				}
+//
+//
+//#ifdef PN_PLATFORM_WINDOWS
+//				std::filesystem::path fox_path = "game/models/Fox.mesh";
+//#else	
+//				std::filesystem::path fox_path = "game\\models\\Fox.mesh";
+//#endif
+//				//Get model
+//				PN_CORE_INFO("Attempting to add {} to scene", fox_path.string());
+//				mdl_opt = asset_manager->getAsset<Assets::Model>(fox_path);
+//				if (mdl_opt.has_value()) {
+//					mdl = mdl_opt.value();
+//
+//					auto e = AddObject(mdl, "fox", { 5.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(1.0f, 0.0f, 0.0f)), glm::vec3{ 0.05f });
+//				}
+//
+//
+//#ifdef PN_PLATFORM_WINDOWS
+//				std::filesystem::path bs_path = "game/models/brainstem/BrainStem.mesh";
+//#else	
+//				std::filesystem::path bs_path = "game\\models\\brainstem\\BrainStem.mesh";
+//#endif
+//				//Get model
+//
+//				PN_CORE_INFO("Attempting to add {} to scene", bs_path.string());
+//				mdl_opt = asset_manager->getAsset<Assets::Model>(bs_path);
+//				if (mdl_opt.has_value()) {
+//					mdl = mdl_opt.value();
+//					//mdl->materials[0].metallic = 0.f;
+//					//mdl->materials[0].roughness = 1.f;
+//					//mdl->materials[0].baseColor = { 0.3f, 0.3f, 0.3f };
+//					auto e = AddObject(mdl, "brainstem_model", { 0.f, 0.f, -10.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(0.0f, 0.0f, 0.0f)), { 5.f, 5.f, 5.f });
+//				}
+//				else {
+//					throw std::runtime_error("animation obj err");
+//				}
 
 #ifdef PN_PLATFORM_WINDOWS
 				std::filesystem::path fh_path = "game/models/Frog_Anim_Gear.mesh";
