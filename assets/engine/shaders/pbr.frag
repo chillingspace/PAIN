@@ -208,27 +208,47 @@ float shadowIntensity(int shadow_map_idx, vec3 fragPos, vec3 normal, Light light
         : normalize(light.position - fragPos);
     float ndotl = clamp(dot(normal, light_dir), 0.0, 1.0);
     float slope = 1.0 - ndotl;
-    float slopeScale = int(light.type) == 2 ? 0.008 : 0.012;
-    float minBias = int(light.type) == 2 ? 0.0008 : 0.0012;
+    // Use slightly higher bias for directional lights to reduce acne from large frustum
+    float slopeScale = int(light.type) == 1 ? 0.015 : (int(light.type) == 2 ? 0.008 : 0.012);
+    float minBias = int(light.type) == 1 ? 0.002 : (int(light.type) == 2 ? 0.0008 : 0.0012);
     float bias = max(slopeScale * slope, minBias);
 
-    // return frag_depth - bias > shadow_map_depth ? 1.0 : 0.0;
-
-    // PCF (Percentage Closer Filtering) for softer shadows
+    // PCF with Poisson disk sampling for smooth shadow edges
+    // 16 samples arranged in a Poisson disk pattern for better distribution
+    // Balanced for Windows desktop - good quality with acceptable performance
+    vec2 poissonDisk[16];
+    poissonDisk[0] = vec2(-0.94201624, -0.39906216);
+    poissonDisk[1] = vec2(0.94558609, -0.76890725);
+    poissonDisk[2] = vec2(-0.094184101, -0.92938870);
+    poissonDisk[3] = vec2(0.34495938, 0.29387760);
+    poissonDisk[4] = vec2(-0.91588581, 0.45771432);
+    poissonDisk[5] = vec2(-0.81544232, -0.87912464);
+    poissonDisk[6] = vec2(-0.38277543, 0.27676845);
+    poissonDisk[7] = vec2(0.97484398, 0.75648379);
+    poissonDisk[8] = vec2(0.44323325, -0.97511554);
+    poissonDisk[9] = vec2(0.53742981, -0.47373420);
+    poissonDisk[10] = vec2(-0.26496911, -0.41893023);
+    poissonDisk[11] = vec2(0.79197514, 0.19090188);
+    poissonDisk[12] = vec2(-0.24188840, 0.99706507);
+    poissonDisk[13] = vec2(-0.81409955, 0.91437590);
+    poissonDisk[14] = vec2(0.19984126, 0.78641367);
+    poissonDisk[15] = vec2(0.14383161, -0.14100790);
+    
     float shadow = 0.0;
     vec2 texelSize = ShadowTexelSize(shadow_map_idx);
-    for(int x = -1; x <= 1; ++x) {
-        for(int y = -1; y <= 1; ++y) {
-            float pcfDepth = SampleShadowMap(shadow_map_idx, projCoords.xy + vec2(x, y) * texelSize);
-            // If shadow map is empty (no depth written), don't cast shadows
-            if (pcfDepth >= 0.999) {
-                shadow += 0.0;  // No shadow from empty depth
-            } else {
-                shadow += frag_depth - bias > pcfDepth ? 1.0 : 0.0;
-            }
+    
+    // Use larger spread for directional lights (they cover more area)
+    float spread = int(light.type) == 1 ? 2.0 : 1.5;
+    
+    for(int i = 0; i < 16; ++i) {
+        vec2 sampleOffset = poissonDisk[i] * texelSize * spread;
+        float pcfDepth = SampleShadowMap(shadow_map_idx, projCoords.xy + sampleOffset);
+        
+        if (pcfDepth < 0.999) {
+            shadow += frag_depth - bias > pcfDepth ? 1.0 : 0.0;
         }
     }
-    shadow /= 9.0;
+    shadow /= 16.0;
     
     return shadow;
 }

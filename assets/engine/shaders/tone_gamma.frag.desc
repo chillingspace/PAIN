@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "tone_gamma.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 9248566985196528150
+  },
+  "descriptor_version": 1,
+  "guid": "9b37f4a2-3083-d745-ad3c-f77df411f681",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\tone_gamma.frag"
+  }
+}

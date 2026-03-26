@@ -1,0 +1,23 @@
+{
+  "asset_info": {
+    "name": "SkyboxTest_normal.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 9082175399909613044
+  },
+  "descriptor_version": 1,
+  "guid": "370df759-71e5-3e49-bf8b-55152b0ae22c",
+  "import_settings": {
+    "android_allow_astc_hdr": false,
+    "android_bake_cubemap": false,
+    "android_compression": "ASTC_4x4",
+    "android_skybox_source_format": "R16G16B16A16",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\SkyboxTest_normal.png"
+  }
+}

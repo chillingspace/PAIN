@@ -1,0 +1,216 @@
+#include "Systems/Render/MinimapStyle.h"
+
+#include <cmath>
+#include <cstdlib>
+#include <iostream>
+
+namespace {
+
+bool NearlyEqual(float lhs, float rhs, float epsilon = 0.0001f) {
+    return std::fabs(lhs - rhs) <= epsilon;
+}
+
+bool ExpectTrue(bool condition, const char* testName, const char* message) {
+    if (condition) {
+        return true;
+    }
+
+    std::cerr << testName << " failed: " << message << '\n';
+    return false;
+}
+
+bool TestCircleCoverageCounts() {
+    using PAIN::Render::BuildMinimapCircleCoverage;
+
+    const auto coverage = BuildMinimapCircleCoverage(glm::vec2(0.0f), 2.0f, 12);
+    const bool fillOk = ExpectTrue(
+        coverage.fillTriangles.size() == 36,
+        "TestCircleCoverageCounts",
+        "expected 12 triangles worth of fill vertices");
+    const bool lineOk = ExpectTrue(
+        coverage.outlineLines.size() == 24,
+        "TestCircleCoverageCounts",
+        "expected 12 line segments worth of outline vertices");
+    return fillOk && lineOk;
+}
+
+bool TestDangerCoverageUsesCircleGeometry() {
+    using PAIN::Render::BuildMinimapDangerCoverage;
+
+    const auto coverage = BuildMinimapDangerCoverage(glm::vec2(0.0f), 4.0f, 10);
+    const bool fillOk = ExpectTrue(
+        coverage.fillTriangles.size() == 30,
+        "TestDangerCoverageUsesCircleGeometry",
+        "expected 10 triangles worth of danger fill vertices");
+    const bool lineOk = ExpectTrue(
+        coverage.outlineLines.size() == 20,
+        "TestDangerCoverageUsesCircleGeometry",
+        "expected 10 line segments worth of danger outline vertices");
+    return fillOk && lineOk;
+}
+
+bool TestDangerStyleComesFromSingleHelper() {
+    using PAIN::Render::BuildMinimapDangerStyle;
+
+    const auto styleA = BuildMinimapDangerStyle(0.0f);
+    const auto styleB = BuildMinimapDangerStyle(1.0f);
+
+    const bool fillAlphaOk = ExpectTrue(
+        styleA.fillColor.a > 0.05f && styleA.fillColor.a < 0.25f,
+        "TestDangerStyleComesFromSingleHelper",
+        "expected restrained danger fill alpha");
+    const bool edgeAlphaOk = ExpectTrue(
+        styleA.edgeColor.a > styleA.fillColor.a,
+        "TestDangerStyleComesFromSingleHelper",
+        "expected danger edge alpha to exceed fill alpha");
+    const bool innerFillOk = ExpectTrue(
+        styleA.innerFillColor.a > styleA.fillColor.a &&
+        styleA.innerFillColor.a < styleA.edgeColor.a,
+        "TestDangerStyleComesFromSingleHelper",
+        "expected inner danger fill alpha to sit between fill and edge");
+    const bool innerRadiusOk = ExpectTrue(
+        styleA.innerRadiusScale > 0.5f && styleA.innerRadiusScale < 1.0f,
+        "TestDangerStyleComesFromSingleHelper",
+        "expected inner danger radius scale to stay inside the true radius");
+    const bool pulseOk = ExpectTrue(
+        !NearlyEqual(styleA.edgeColor.a, styleB.edgeColor.a, 0.0001f),
+        "TestDangerStyleComesFromSingleHelper",
+        "expected helper-driven pulse to change edge alpha over time");
+    return fillAlphaOk && edgeAlphaOk && innerFillOk && innerRadiusOk && pulseOk;
+}
+
+bool TestWallStyleProvidesFallbackOutline() {
+    using PAIN::Render::BuildMinimapWallStyle;
+
+    const auto style = BuildMinimapWallStyle(0.5f);
+    const bool baseOk = ExpectTrue(
+        style.fillColor.a > 0.5f,
+        "TestWallStyleProvidesFallbackOutline",
+        "expected solid structural wall fill");
+    const bool outlineOk = ExpectTrue(
+        style.fallbackOutlineColor.a > 0.0f,
+        "TestWallStyleProvidesFallbackOutline",
+        "expected fallback wall outline color");
+    const bool patternOk = ExpectTrue(
+        style.patternStrength > 0.0f && style.patternScale > 0.0f,
+        "TestWallStyleProvidesFallbackOutline",
+        "expected tactical wall pattern settings");
+    return baseOk && outlineOk && patternOk;
+}
+
+bool TestLightConeTopDownRadiusMatchesLegacyShape() {
+    using PAIN::Render::ComputeLightConeTopDownRadius;
+
+    const float radius = ComputeLightConeTopDownRadius(2.0f, 9.0f, glm::radians(32.0f));
+    const float expected = glm::max(
+        0.25f,
+        glm::min(std::tan(glm::radians(32.0f)) * 2.0f, std::sqrt(81.0f - 4.0f)));
+
+    return ExpectTrue(
+        NearlyEqual(radius, expected),
+        "TestLightConeTopDownRadiusMatchesLegacyShape",
+        "expected legacy light cone top-down radius");
+}
+
+bool TestWallCacheSignatureChangesWithTransformAndModel() {
+    using PAIN::Render::BuildMinimapWallCacheSignature;
+    using PAIN::Render::MinimapWallCacheFingerprintEntry;
+
+    std::vector<MinimapWallCacheFingerprintEntry> entriesA = {
+        {
+            1u,
+            100u,
+            glm::mat4(1.0f)
+        }
+    };
+
+    std::vector<MinimapWallCacheFingerprintEntry> entriesB = entriesA;
+    entriesB[0].worldMatrix[3][0] = 2.0f;
+
+    std::vector<MinimapWallCacheFingerprintEntry> entriesC = entriesA;
+    entriesC[0].modelKey = 200u;
+
+    const uint64_t sigA = BuildMinimapWallCacheSignature(entriesA);
+    const uint64_t sigB = BuildMinimapWallCacheSignature(entriesB);
+    const uint64_t sigC = BuildMinimapWallCacheSignature(entriesC);
+
+    const bool transformOk = ExpectTrue(
+        sigA != sigB,
+        "TestWallCacheSignatureChangesWithTransformAndModel",
+        "expected transform changes to invalidate the wall cache signature");
+    const bool modelOk = ExpectTrue(
+        sigA != sigC,
+        "TestWallCacheSignatureChangesWithTransformAndModel",
+        "expected model changes to invalidate the wall cache signature");
+    return transformOk && modelOk;
+}
+
+bool TestBackgroundTargetSpecUsesLowCostSettings() {
+    using PAIN::Render::BuildMinimapBackgroundTargetSpec;
+    using PAIN::Render::MinimapColorFormat;
+
+    const auto spec = BuildMinimapBackgroundTargetSpec();
+    const bool formatOk = ExpectTrue(
+        spec.colorFormat == MinimapColorFormat::RGBA8,
+        "TestBackgroundTargetSpecUsesLowCostSettings",
+        "expected minimap background target to use RGBA8");
+    const bool depthOk = ExpectTrue(
+        !spec.needsDepthStencil,
+        "TestBackgroundTargetSpecUsesLowCostSettings",
+        "expected minimap background target to avoid depth/stencil");
+    return formatOk && depthOk;
+}
+
+bool TestTacticalGridGeneratesMinorAndMajorLines() {
+    using PAIN::Render::AppendMinimapTacticalGridLines;
+
+    std::vector<glm::vec2> minorLines;
+    std::vector<glm::vec2> majorLines;
+    AppendMinimapTacticalGridLines(
+        minorLines,
+        majorLines,
+        glm::vec2(10.0f, 20.0f),
+        glm::vec2(110.0f, 120.0f),
+        4);
+
+    const bool minorOk = ExpectTrue(
+        minorLines.size() == 8,
+        "TestTacticalGridGeneratesMinorAndMajorLines",
+        "expected 4 minor line segments for a 4-division grid");
+    const bool majorOk = ExpectTrue(
+        majorLines.size() == 4,
+        "TestTacticalGridGeneratesMinorAndMajorLines",
+        "expected 2 major center line segments");
+    return minorOk && majorOk;
+}
+
+bool TestBorderLayerCountRoundsConfiguredThickness() {
+    using PAIN::Render::ComputeMinimapBorderLayerCount;
+
+    const bool zeroOk = ExpectTrue(
+        ComputeMinimapBorderLayerCount(0.0f) == 0,
+        "TestBorderLayerCountRoundsConfiguredThickness",
+        "expected zero border layers for zero thickness");
+    const bool roundedOk = ExpectTrue(
+        ComputeMinimapBorderLayerCount(2.6f) == 3,
+        "TestBorderLayerCountRoundsConfiguredThickness",
+        "expected border thickness to round to the nearest whole layer");
+    return zeroOk && roundedOk;
+}
+
+}
+
+int main() {
+    const bool ok =
+        TestCircleCoverageCounts() &&
+        TestDangerCoverageUsesCircleGeometry() &&
+        TestDangerStyleComesFromSingleHelper() &&
+        TestWallStyleProvidesFallbackOutline() &&
+        TestLightConeTopDownRadiusMatchesLegacyShape() &&
+        TestWallCacheSignatureChangesWithTransformAndModel() &&
+        TestBackgroundTargetSpecUsesLowCostSettings() &&
+        TestTacticalGridGeneratesMinorAndMajorLines() &&
+        TestBorderLayerCountRoundsConfiguredThickness();
+
+    return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+}

@@ -49,6 +49,8 @@ namespace PAIN {
 			//Get native window
 			virtual void* getNativeWindow() const = 0;
 
+			virtual std::string getWritablePath() const { return ""; }
+
 			//Pollevents
 			virtual void pollEvents() = 0;
 

@@ -6,6 +6,7 @@
 #include "ECS/Controller.h"
 #include "CoreSystems/Scene/Scene.h"
 #include <CoreSystems/Scripting/EngineAPIAdapter.h>
+#include "CoreSystems/Renderer/Light.h"
 
 #include "LayeredSystems/LevelEditor/Panels/ReflectionUI.h"
 #include "CoreSystems/Windows/Window.h"
@@ -639,6 +640,80 @@ namespace PAIN {
                 if (ImGui::Checkbox("Using World Light", &using_wlight))
                     gs.world_light = using_wlight;
 
+                // World Light Shadow Settings
+                if (gs.world_light && scn_service->getWorldLight()) {
+                    Light* worldLight = scn_service->getWorldLight();
+                    ImGui::Indent(10.0f);
+                    
+                    ImGui::Text("World Light Shadow Settings");
+                    ImGui::Separator();
+                    
+                    // Direction
+                    if (ImGui::DragFloat3("Direction", glm::value_ptr(worldLight->direction), 0.01f, -1.0f, 1.0f)) {
+                        worldLight->direction = glm::normalize(worldLight->direction);
+                    }
+                    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Direction the light is shining (normalized).");
+                    
+                    // Position (for shadow camera placement)
+                    if (ImGui::DragFloat3("Shadow Position", glm::value_ptr(worldLight->position), 0.5f)) {}
+                    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Position of the shadow camera. For directional lights, this follows the camera when 'Follow Camera' is enabled.");
+                    
+                    // Shadow follow distance
+                    if (ImGui::DragFloat("Shadow Follow Distance", &worldLight->shadow_source_follow_distance, 1.0f, 5.0f, 100.0f)) {}
+                    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Distance the shadow camera follows the player. Larger values = wider shadow coverage.");
+                    
+                    // Shadow resolution
+                    int shadowRes = worldLight->getShadowResolution();
+                    if (ImGui::SliderInt("Shadow Resolution", &shadowRes, 512, 4096)) {
+                        worldLight->setShadowResolution(shadowRes);
+                    }
+                    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Higher resolution = sharper shadows but more GPU memory.");
+                    
+                    // Far plane (shadow rendering distance)
+                    if (ImGui::DragFloat("Shadow Far Plane", &worldLight->far_plane, 1.0f, 10.0f, 100.0f)) {}
+                    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Maximum distance shadows are rendered from the shadow camera.");
+                    
+                    // Shadow type toggle
+                    bool hasMappedShadow = worldLight->getShadowType() == Light::SHADOW_TYPES::MAPPED;
+                    if (ImGui::Checkbox("Enable Shadows", &hasMappedShadow)) {
+                        if (hasMappedShadow) {
+                            // World light has priority - evict entity lights if budget is full
+                            // Try to enable shadows first
+                            bool result = worldLight->setShadowType(Light::SHADOW_TYPES::MAPPED);
+                            if (!result) {
+                                // Budget full - evict entity lights to make room
+                                int evicted = 0;
+                                auto& allLights = LightSources::get().getAllWithKeysMutable();
+                                for (auto& [key, lightRef] : allLights) {
+                                    if (key == "world" || key == "cam") continue;
+                                    Light& l = lightRef.get();
+                                    if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
+                                        l.setShadowType(Light::SHADOW_TYPES::NONE);
+                                        ++evicted;
+                                        PN_CORE_INFO("[ScenesPanel] Evicted entity light '{}' to make room for world light shadows", key);
+                                        break; // Only evict one
+                                    }
+                                }
+                                // Try again after eviction
+                                result = worldLight->setShadowType(Light::SHADOW_TYPES::MAPPED);
+                                if (!result) {
+                                    PN_CORE_WARN("[ScenesPanel] Failed to enable world light shadows even after eviction");
+                                }
+                            }
+                        } else {
+                            worldLight->setShadowType(Light::SHADOW_TYPES::NONE);
+                        }
+                    }
+                    if (!hasMappedShadow && worldLight->getShadowType() != Light::SHADOW_TYPES::MAPPED) {
+                        ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.0f, 1.0f), "Shadow budget full - reduce entity shadows");
+                    }
+                    
+                    // Debug info
+                    ImGui::Text("Shadow FBO: %d, Texture: %d", worldLight->getShadowFbo(), worldLight->getShadowTexture());
+                    
+                    ImGui::Unindent(10.0f);
+                }
+
                 bool using_ibl = gs.ibl;
                 if (ImGui::Checkbox("Using IBL", &using_ibl))
                     gs.ibl = using_ibl;
@@ -654,6 +729,42 @@ namespace PAIN {
                 ImGui::Separator();
                 if (ImGui::Checkbox("GPU Instancing", &gs.use_instanced_rendering)) {}
                 if (ImGui::IsItemHovered()) ImGui::SetTooltip("Batches identical non-animated objects into one draw call.");
+                ImGui::Separator();
+
+                // Post-process toggle
+                bool using_postprocess = gs.postprocess;
+                if (ImGui::Checkbox("Post Processing", &using_postprocess))
+                    gs.postprocess = using_postprocess;
+                if (ImGui::IsItemHovered()) ImGui::SetTooltip("Enable/disable all post-processing effects (bloom, tone mapping, gamma correction).");
+                
+                // Bloom settings (only show if post-process is enabled)
+                if (gs.postprocess) {
+                    bool using_bloom = gs.bloom;
+                    if (ImGui::Checkbox("Bloom", &using_bloom))
+                        gs.bloom = using_bloom;
+                    if (gs.bloom) {
+                        ImGui::SliderInt("Bloom Quality", &gs.bloom_quality, 1, 8);
+                        ImGui::SliderFloat("Bloom Threshold", &gs.bloom_threshold, 0.5f, 3.0f);
+                        ImGui::SliderFloat("Bloom Strength", &gs.bloom_strength, 0.0f, 2.0f);
+                        ImGui::SliderFloat("Bloom Blur Strength", &gs.bloom_blur_strength, 0.1f, 5.0f);
+                    }
+                    
+                    bool using_gamma = gs.gamma_correction;
+                    if (ImGui::Checkbox("Gamma Correction", &using_gamma))
+                        gs.gamma_correction = using_gamma;
+                    if (gs.gamma_correction) {
+                        ImGui::SliderFloat("Gamma Value", &gs.gamma_value, 1.0f, 3.0f);
+                    }
+                    
+                    bool using_blur = gs.blur_strength > 0.0f;
+                    if (ImGui::Checkbox("Screen Blur", &using_blur)) {
+                        gs.blur_strength = using_blur ? 1.0f : 0.0f;
+                    }
+                    if (gs.blur_strength > 0.0f) {
+                        ImGui::SliderInt("Blur Quality", &gs.blur_quality, 1, 10);
+                        ImGui::SliderFloat("Blur Strength", &gs.blur_strength, 0.1f, 10.0f);
+                    }
+                }
                 ImGui::Separator();
 
                 bool using_diffuse = gs.DEBUG_USE_DIFFUSE_MAP;

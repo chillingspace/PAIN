@@ -3,6 +3,7 @@
 
 #include "CoreSystems/Renderer/Light.h"
 #include "CoreSystems/Renderer/sRenderer.h"
+#include "CoreSystems/Renderer/ThermalProfiler.h"
 #include "CoreSystems/Renderer/text.h"
 #include "CoreSystems/Scene/Scene.h"	  
 #include "ECS/Controller.h"
@@ -12,6 +13,8 @@
 #include "Systems/Particle/sysParticleSystem.h"
 #include "CoreSystems/Assets/Types/Shader.h"
 #include "CoreSystems/Assets/Types/Texture.h"
+#include "Systems/Render/MinimapStyle.h"
+#include <glm/gtc/matrix_transform.hpp>
 
 #ifdef _DEBUG
 #include "LayeredSystems/LevelEditor/Editor.h"
@@ -31,13 +34,11 @@ namespace PAIN {
 
 			// Get asset manager
 			auto assetManager = services.lock()->get<Assets::Manager>();
+            auto rendererService = services.lock()->get<sRenderer>();
 
 			// Check for valid GUID
 			if (!component.modelGUID.IsValid())
 				return;
-
-			// Initiate scene VBO update
-			services.lock()->get<sRenderer>()->w_renderer->vboDirty = true;
 
 			// Set prev GUID
 			component.prevModelGUID = component.modelGUID;
@@ -57,6 +58,11 @@ namespace PAIN {
 				PN_CORE_ERROR("Failed to load model asset for entity {}", (uint32_t)entity);
 				return;
 			}
+
+            if (rendererService && rendererService->w_renderer &&
+                !rendererService->w_renderer->hasUploadedModel(component.cachedModelAsset->vpath)) {
+                rendererService->w_renderer->vboDirty = true;
+            }
 
 			// Cache model
 			const auto& modelAsset = component.cachedModelAsset;
@@ -81,6 +87,11 @@ namespace PAIN {
 					// Check valid material asset
 					if (materialAsset) {
 						matInstance.materialGUID = materialAsset->guid;
+						
+						// DEBUG: Log material GUID assignment
+						if (!materialAsset->guid.IsValid()) {
+							PN_CORE_TRACE("[Material Load] Material {} has invalid GUID!", materialPath.string());
+						}
 
 						// Init material overrides
 						matInstance.albedoTextureOverride =
@@ -117,10 +128,17 @@ namespace PAIN {
 			component.submeshCaches.clear();
 			component.submeshCaches.resize(modelAsset->submeshes.size());
 
+			// DEBUG: Log material/submesh counts
+			PN_CORE_TRACE("[Material Cache] Model {} has {} submeshes, {} materials",
+				modelAsset->vpath, modelAsset->submeshes.size(), component.materials.size());
+
 			for (size_t i = 0; i < modelAsset->submeshes.size(); ++i) {
 				const auto& submesh = modelAsset->submeshes[i];
 
+				// DEBUG: Log submesh material index
 				if (submesh.materialIndex >= component.materials.size()) {
+					PN_CORE_WARN("[Material Cache] Submesh {} has invalid materialIndex {} (only {} materials available)", 
+						i, submesh.materialIndex, component.materials.size());
 					continue;
 				}
 
@@ -133,6 +151,12 @@ namespace PAIN {
 				auto materialAsset =
 					materialAssetOpt.has_value() ? materialAssetOpt.value() : nullptr;
 
+				if (!materialAsset) {
+					// DEBUG: Log why material lookup failed
+					PN_CORE_WARN("[Material Cache] Submesh {} material lookup failed. GUID: {} (valid: {})", 
+						i, material->materialGUID.ToString(), material->materialGUID.IsValid());
+				}
+
 				if (materialAsset) {
 					// Cache base material properties
 					cache.baseColor = material->useOverrides ? material->baseColorOverride
@@ -142,53 +166,103 @@ namespace PAIN {
 					cache.roughness = material->useOverrides ? material->roughnessOverride
 															 : materialAsset->roughness;
 
-					// Helper lambda to get GL texture handle from GUID
-					auto getTextureHandle = [&](const Assets::GUID& guid) -> GLuint {
-						if (!guid.IsValid())
+					// Cache emission override state
+					cache.useEmissionOverride = material->useOverrides;
+					cache.emissionOverride = material->useOverrides ? material->emissiveOverride : glm::vec3(0.0f);
+
+					// Helper lambda to get GL texture handle from GUID with debug logging
+					// Only logs warnings for non-empty paths (empty paths are expected for solid-color materials)
+					auto getTextureHandle = [&](const Assets::GUID& guid, const char* textureType, const std::filesystem::path& texturePath) -> GLuint {
+						// Skip logging for empty paths - these are expected for solid-color materials
+						if (!guid.IsValid()) {
+							if (!texturePath.empty()) {
+								PN_CORE_TRACE("[Texture Cache] Invalid GUID for {} texture (path: {})", textureType, texturePath.string());
+							}
 							return 0;
+						}
 						auto texOpt = assetManager->getAsset<Assets::Texture>(guid);
-						return (texOpt.has_value() && texOpt.value())
-								   ? texOpt.value()->gl_texture
-								   : 0;
+						if (!texOpt.has_value() || !texOpt.value()) {
+							PN_CORE_WARN("[Texture Cache] Failed to load {} texture asset (GUID: {}, path: {})", textureType, guid.ToString(), texturePath.string());
+							return 0;
+						}
+						
+						auto tex = texOpt.value();
+						// Ensure texture is uploaded to GPU before caching the handle
+						if (tex->gl_texture == 0) {
+							services.lock()->get<sRenderer>()->uploadTexture(tex);
+							if (tex->gl_texture == 0) {
+								PN_CORE_WARN("[Texture Cache] Failed to upload {} texture to GPU (path: {})", textureType, texturePath.string());
+								return 0;
+							}
+						}
+						return tex->gl_texture;
 					};
 
 					// Cache all texture handles (look up ONCE during initialization)
 					cache.albedoTexture = getTextureHandle(
 						material->useOverrides
 							? material->albedoTextureOverride
-							: assetManager->findGUID(materialAsset->albedoTexturePath));
+							: assetManager->findGUID(materialAsset->albedoTexturePath),
+						"albedo", materialAsset->albedoTexturePath);
 
 					cache.normalTexture = getTextureHandle(
 						material->useOverrides
 							? material->normalTextureOverride
-							: assetManager->findGUID(materialAsset->normalTexturePath));
+							: assetManager->findGUID(materialAsset->normalTexturePath),
+						"normal", materialAsset->normalTexturePath);
 
 					cache.metallicTexture = getTextureHandle(
 						material->useOverrides
 							? material->metallicTextureOverride
-							: assetManager->findGUID(materialAsset->metallicTexturePath));
+							: assetManager->findGUID(materialAsset->metallicTexturePath),
+						"metallic", materialAsset->metallicTexturePath);
 
 					cache.roughnessTexture = getTextureHandle(
 						material->useOverrides
 							? material->roughnessTextureOverride
-							: assetManager->findGUID(materialAsset->roughnessTexturePath));
+							: assetManager->findGUID(materialAsset->roughnessTexturePath),
+						"roughness", materialAsset->roughnessTexturePath);
 
 					cache.aoTexture = getTextureHandle(
 						material->useOverrides
 							? material->aoTextureOverride
-							: assetManager->findGUID(materialAsset->aoTexturePath));
+							: assetManager->findGUID(materialAsset->aoTexturePath),
+						"ao", materialAsset->aoTexturePath);
 
 					cache.emissiveTexture = getTextureHandle(
 						material->useOverrides
 							? material->emissiveTextureOverride
-							: assetManager->findGUID(materialAsset->emissiveTexturePath));
+							: assetManager->findGUID(materialAsset->emissiveTexturePath),
+						"emissive", materialAsset->emissiveTexturePath);
 
 					cache.opacityTexture = getTextureHandle(
 						material->useOverrides
 							? material->opacityTextureOverride
-							: assetManager->findGUID(materialAsset->opacityTexturePath));
+							: assetManager->findGUID(materialAsset->opacityTexturePath),
+						"opacity", materialAsset->opacityTexturePath);
+
+					// ========================================
+					// ORM Channel Mask Detection
+					// Detect if roughness/metallic/ao textures are packed into a single ORM texture
+					// ========================================
+					const bool sameRoughMetalTexture = cache.roughnessTexture != 0 && 
+						cache.roughnessTexture == cache.metallicTexture;
+					const bool sameAoRoughTexture = cache.aoTexture != 0 && 
+						cache.aoTexture == cache.roughnessTexture;
+
+					// If textures are shared, likely packed ORM
+					if (sameRoughMetalTexture) {
+						cache.roughnessChannelMask = glm::vec3(0.0f, 1.0f, 0.0f);  // G = Roughness
+						cache.metallicChannelMask = glm::vec3(0.0f, 0.0f, 1.0f);   // B = Metallic
+					}
+					if (sameAoRoughTexture) {
+						cache.aoChannelMask = glm::vec3(1.0f, 0.0f, 0.0f);  // R = AO
+					}
 
 					cache.cacheValid = true;
+				} else {
+					PN_CORE_WARN("[Texture Cache] Material asset not found for submesh {} (GUID: {})", 
+						i, material->materialGUID.ToString());
 				}
 			}
 
@@ -208,6 +282,10 @@ namespace PAIN {
 		}
 
 		void System::onUpdate(AppTiming timing, entt::registry& registry) {
+            minimap_threat_time_ += glm::max(0.0f, timing.unscaled_dt);
+			if (g_ThermalProfiler) {
+				g_ThermalProfiler->BeginFrame();
+			}
 			{
 #ifdef _DEBUG
 				auto editor = services.lock()->get<Editor::Editor>();
@@ -243,6 +321,64 @@ namespace PAIN {
 					light.fov = activeCamera->fov;
 					light.direction = activeCamera->forward;
 					light.aspect_ratio = activeCamera->aspect_ratio;
+					light.enableStaticShadowCaching = false;  // Camera light moves every frame
+				};
+
+				auto syncWorldLightFromActiveCamera = [&]() {
+					auto sceneManager = services.lock()->get<Scene::SceneManager>();
+					if (!sceneManager) {
+						return;
+					}
+
+					auto activeCamera = sceneManager->GetActiveCamera();
+					auto worldLightOpt = LightSources::get().get("world");
+					if (!activeCamera || !worldLightOpt.has_value()) {
+						return;
+					}
+
+					Light& worldLight = worldLightOpt.value();
+					// Position the directional light's shadow camera to follow the player
+					// The position is offset opposite to the light direction so the shadow map
+					// covers the area around the player
+					glm::vec3 lightDir = glm::normalize(worldLight.direction);
+					glm::vec3 targetPos = activeCamera->pos - lightDir * worldLight.shadow_source_follow_distance;
+					
+					// Proper shadow stabilization for directional lights:
+					// Snap the target position to texel boundaries in light space,
+					// not world space. This prevents shadow "swimming" when camera moves.
+					float orthoSize = worldLight.shadow_source_follow_distance;
+					int shadowRes = worldLight.getShadowResolution();
+					float texelSize = (orthoSize * 2.0f) / static_cast<float>(shadowRes);
+					
+					// Create light's view matrix to transform world position to light space
+					glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+					if (std::abs(glm::dot(lightDir, up)) > 0.99f) {
+						up = glm::vec3(1.0f, 0.0f, 0.0f);
+					}
+					glm::mat4 lightView = glm::lookAt(
+						glm::vec3(0.0f),  // origin (we just want the rotation)
+						lightDir,
+						up
+					);
+					
+					// Transform target position to light space
+					glm::vec4 targetLightSpace = lightView * glm::vec4(targetPos, 1.0f);
+					
+					// Snap to texel boundaries in light space
+					targetLightSpace.x = std::round(targetLightSpace.x / texelSize) * texelSize;
+					targetLightSpace.y = std::round(targetLightSpace.y / texelSize) * texelSize;
+					// Z (depth) snapping helps with aliasing at distance
+					targetLightSpace.z = std::round(targetLightSpace.z / texelSize) * texelSize;
+					
+					// Transform back to world space
+					glm::mat4 invLightView = glm::inverse(lightView);
+					glm::vec4 snappedWorldPos = invLightView * targetLightSpace;
+					
+					worldLight.position = glm::vec3(snappedWorldPos);
+					
+					// Since the world light follows the camera, static shadow caching is not effective
+					// The light frustum changes as the camera moves
+					worldLight.enableStaticShadowCaching = false;
 				};
 
 				auto rendererService = services.lock()->get<sRenderer>();
@@ -251,6 +387,7 @@ namespace PAIN {
 				}
 
 				syncCameraLightFromActiveCamera();
+				syncWorldLightFromActiveCamera();
 				if (rendererService->w_renderer->resizeDirty) {
 					rendererService->w_renderer->resizeDirty = false;
 					rendererService->w_renderer->_initDeferredShadingBuffers();
@@ -294,57 +431,72 @@ namespace PAIN {
 				// -> volumetrics -> particles -> debug overlays -> post process -> UI
 				// Future refactors should keep ownership here and only move work between
 				// passes when both Windows and Android follow the same contract.
+				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("shadow");
 				shadowPass(registry);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("shadow");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after shadow pass: {}", err);
 				}
 #endif
+				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("geometry");
 				geometryPass(registry);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("geometry");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after geometry pass: {}", err);
 				}
 #endif
+				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("minimap");
 				minimapPass(registry);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("minimap");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after minimap pass: {}", err);
 				}
 #endif
+				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("lighting");
 				lightingPass(registry);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("lighting");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after lighting pass: {}", err);
 				}
 #endif
+				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("volumetric");
 				volumetricPass(registry);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("volumetric");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after volumetric pass: {}", err);
 				}
 #endif
+				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("particle");
 				particlePass(registry);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("particle");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after particle pass: {}", err);
 				}
 #endif
+				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("debug");
 				debugPass(registry, editor_debug_mode);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("debug");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
 					PN_CORE_ERROR("OpenGL err after debug pass: {}", err);
 				}
 #endif
-				
+				if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("postprocess");
 				services.lock()->get<sRenderer>()->postProcessPass(!editor_visible);
+				if (g_ThermalProfiler) g_ThermalProfiler->EndPass("postprocess");
 #ifdef _DEBUG
 				err = glGetError();
 				if (err != GL_NO_ERROR) {
@@ -359,25 +511,31 @@ namespace PAIN {
 					glBindFramebuffer(GL_FRAMEBUFFER, 0);
 				}
 
-				uiPass(registry);
+			if (g_ThermalProfiler) g_ThermalProfiler->BeginPass("ui");
+			uiPass(registry);
+			if (g_ThermalProfiler) g_ThermalProfiler->EndPass("ui");
 #ifdef _DEBUG
-				err = glGetError();
-				if (err != GL_NO_ERROR) {
-					PN_CORE_ERROR("OpenGL err after UI pass: {}", err);
-				}
-#endif
-
-				glBindFramebuffer(GL_FRAMEBUFFER, 0); // reset
-			}
-
-#ifdef _DEBUG
-			GLenum err = glGetError();
-			while (err != GL_NO_ERROR) {
-				PN_CORE_ERROR("OpenGL err on update loop end: {}", err);
-				err = glGetError();
+			err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after UI pass: {}", err);
 			}
 #endif
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
+
+		if (g_ThermalProfiler) {
+			g_ThermalProfiler->EndFrame();
+		}
+
+#ifdef _DEBUG
+		GLenum err = glGetError();
+		while (err != GL_NO_ERROR) {
+			PN_CORE_ERROR("OpenGL err on update loop end: {}", err);
+			err = glGetError();
+		}
+#endif
+	}
 
 		void System::onFixedUpdate(AppTiming timing, entt::registry& registry) {
 			// Rendering doesn't need fixed updates
@@ -393,53 +551,108 @@ namespace PAIN {
 				return;
 			static std::unordered_set<std::string> warnedNonShadowPipeAssets;
 
-			// Phase 1 keeps shadow rendering enabled, so the viewport must match the
-			// actual shadow target owned by each light rather than a stale global size.
+#ifdef _DEBUG
+			// DEBUG: Log world light shadow state
+			if (auto worldLightOpt = LightSources::get().get("world")) {
+				Light& wl = worldLightOpt.value();
+				static int logCounter = 0;
+				if (++logCounter >= 300) { // Log every 300 frames (~5 seconds at 60fps)
+					logCounter = 0;
+					PN_CORE_INFO("[ShadowPass] World light: shadowType={}, shadowFBO={}, shadowTex={}, staticShadowsDirty={}, enableStaticShadowCaching={}",
+						static_cast<int>(wl.getShadowType()),
+						wl.getShadowFbo(),
+						wl.getShadowTexture(),
+						wl.needsStaticShadowUpdate(),
+						wl.enableStaticShadowCaching);
+				}
+			}
+#endif
+
 			auto renderGroup =
 				registry.group<ModelRenderer>(entt::get<WorldTransform, Entity::Layer>);
 
-			for (const Light& l : LightSources::get().getAll()) {
+			// Get mutable access to lights for shadow caching
+			auto& lightSources = LightSources::get();
+
+			for (auto& [lightKey, lightRef] : lightSources.getAllWithKeysMutable()) {
+				Light& l = lightRef.get();
 				if (l.getShadowType() != Light::SHADOW_TYPES::MAPPED)
 					continue;
 
 				glViewport(0, 0, l.getShadowResolution(), l.getShadowResolution());
-				rendererService->w_renderer->BeginShadowPass(l);
-
 				Frustum lightFrustum = l.getFrustum();
 
-				for (auto [entity, model, transform, layer] : renderGroup.each()) {
-					glm::mat4 model_xform = transform.matrix;
+				// Check if we need to update static shadows
+				const bool needsStaticUpdate = l.needsStaticShadowUpdate();
+				
+				// Phase 1: Render static shadow casters (only if dirty)
+				if (needsStaticUpdate) {
+					rendererService->w_renderer->BeginShadowPass(l, true); // Clear depth buffer
 
-					if (model.visible && !model.castShadows && model.cachedModelAsset) {
-						std::string assetPath = model.cachedModelAsset->vpath;
-						std::string loweredPath = assetPath;
-						std::transform(
-							loweredPath.begin(),
-							loweredPath.end(),
-							loweredPath.begin(),
-							[](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+					for (auto [entity, model, transform, layer] : renderGroup.each()) {
+						if (!model.visible || !model.castShadows || !model.isStatic)
+							continue;
 
-						if (loweredPath.find("pipe") != std::string::npos &&
-							warnedNonShadowPipeAssets.insert(assetPath).second) {
-							PN_CORE_WARN(
-								"Pipe occluder '{}' has castShadows=false; spotlight + volumetric light can leak through it.",
-								assetPath);
-						}
-					}
+						glm::mat4 model_xform = transform.matrix;
 
-					if (model.visible && model.castShadows) {
 						// FRUSTUM CULLING FOR SHADOWS
 						auto* boundingVol = registry.try_get<BoundingVolume>(entity);
 						const bool allowFrustumCull = (l.type != Light::TYPES::SPOTLIGHT);
 						if (allowFrustumCull && boundingVol && boundingVol->worldAABB.isValid()) {
 							if (!isAABBInFrustum(boundingVol->worldAABB, lightFrustum)) {
 								GraphicsSettings::get().stats.shadow_objects_culled++;
-								continue; // skip shadow casting for this object, outside light frustum
+								continue;
 							}
+						}
+
+						// Handle double-sided shadows
+						if (model.doubleSidedShadows) {
+							glDisable(GL_CULL_FACE);
 						}
 
 						GraphicsSettings::get().stats.shadow_objects_rendered++;
 						rendererService->w_renderer->DrawShadows(model, model_xform, l);
+
+						if (model.doubleSidedShadows) {
+							glEnable(GL_CULL_FACE);
+							glCullFace(GL_FRONT);
+						}
+					}
+
+					l.markStaticShadowsRendered();
+				} else {
+					// Static shadows are cached, start without clearing
+					rendererService->w_renderer->BeginShadowPass(l, false); // Preserve depth buffer
+				}
+
+				// Phase 2: Render dynamic shadow casters (every frame)
+				for (auto [entity, model, transform, layer] : renderGroup.each()) {
+					if (!model.visible || !model.castShadows || model.isStatic)
+						continue; // Skip static (already rendered or cached)
+
+					glm::mat4 model_xform = transform.matrix;
+
+					// FRUSTUM CULLING FOR SHADOWS
+					auto* boundingVol = registry.try_get<BoundingVolume>(entity);
+					const bool allowFrustumCull = (l.type != Light::TYPES::SPOTLIGHT);
+					if (allowFrustumCull && boundingVol && boundingVol->worldAABB.isValid()) {
+						if (!isAABBInFrustum(boundingVol->worldAABB, lightFrustum)) {
+							GraphicsSettings::get().stats.shadow_objects_culled++;
+							continue;
+						}
+					}
+
+					// Handle double-sided shadows
+					if (model.doubleSidedShadows) {
+						glDisable(GL_CULL_FACE);
+					}
+
+					GraphicsSettings::get().stats.shadow_objects_rendered++;
+					rendererService->w_renderer->DrawShadows(model, model_xform, l);
+
+					if (model.doubleSidedShadows) {
+						glEnable(GL_CULL_FACE);
+						glCullFace(GL_FRONT);
 					}
 				}
 
@@ -492,6 +705,63 @@ namespace PAIN {
 				std::vector<glm::mat4> matrices;
 			};
 			std::unordered_map<std::string, InstanceGroup> instanceGroups;
+
+			// OPTIMIZATION: Material-sorted render items for non-instanced draws
+			// Reduces texture bindings and state changes between draws
+			struct RenderItem {
+				ModelRenderer* component;
+				glm::mat4 modelMatrix;
+				uint64_t sortKey;  // Material-based sort key for batching
+				
+				static uint64_t HashFNV1a(const void* data, size_t size, uint64_t seed) {
+					const auto* bytes = static_cast<const unsigned char*>(data);
+					uint64_t hash = seed;
+					for (size_t i = 0; i < size; ++i) {
+						hash ^= static_cast<uint64_t>(bytes[i]);
+						hash *= 1099511628211ull;
+					}
+					return hash;
+				}
+
+				static uint64_t HashString(const std::string& value, uint64_t seed) {
+					return HashFNV1a(value.data(), value.size(), seed);
+				}
+
+				// Compute sort key from model + full material set.
+				static uint64_t ComputeSortKey(const ModelRenderer& model) {
+					uint64_t key = 1469598103934665603ull;
+
+					if (model.cachedModelAsset) {
+						const std::string modelPath = model.cachedModelAsset->vpath;
+						key = HashString(modelPath, key);
+					} else {
+						const std::string modelGuid = model.modelGUID.ToString(false);
+						key = HashString(modelGuid, key);
+					}
+
+					for (const auto& mat : model.materials) {
+						const std::string materialGuid = mat.materialGUID.ToString(false);
+						key = HashString(materialGuid, key);
+
+						const unsigned char overrideFlag = mat.useOverrides ? 1u : 0u;
+						key = HashFNV1a(&overrideFlag, sizeof(overrideFlag), key);
+
+						if (mat.useOverrides) {
+							key = HashFNV1a(&mat.baseColorOverride, sizeof(mat.baseColorOverride), key);
+							key = HashFNV1a(&mat.metallicOverride, sizeof(mat.metallicOverride), key);
+							key = HashFNV1a(&mat.roughnessOverride, sizeof(mat.roughnessOverride), key);
+						}
+					}
+
+					key &= 0x7FFFFFFFFFFFFFFFull;
+					if (!model.boneTransforms.empty()) {
+						key |= (1ull << 63);
+					}
+					return key;
+				}
+			};
+			std::vector<RenderItem> renderItems;
+			renderItems.reserve(256);  // Pre-allocate for typical scene size
 
 			// Use structured bindings with .each() for proper group iteration
 			for (auto [entity, model, transform, layer] : renderGroup.each()) {
@@ -549,10 +819,24 @@ namespace PAIN {
 					}
 				}
 
-				// Non-instanced fallback
+				// Collect for material-sorted rendering (non-instanced path)
+				RenderItem item;
+				item.component = &const_cast<ModelRenderer&>(model);
+				item.modelMatrix = model_xform;
+				item.sortKey = RenderItem::ComputeSortKey(model);
+				renderItems.push_back(item);
+			}
+
+			// OPTIMIZATION: Sort render items by material key to reduce state changes
+			std::sort(renderItems.begin(), renderItems.end(),
+				[](const RenderItem& a, const RenderItem& b) {
+					return a.sortKey < b.sortKey;
+				});
+
+			// Render material-sorted items
+			for (const auto& item : renderItems) {
 				rendererService->w_renderer->DrawGeometry(
-					rendererService->m_Scene, const_cast<ModelRenderer&>(model),
-					model_xform);
+					rendererService->m_Scene, *item.component, item.modelMatrix);
 			}
 
 			// Flush instanced batches
@@ -823,34 +1107,6 @@ namespace PAIN {
 			constexpr int kShadowMappedLightBudget = 4;
 			const int maxVolumetricLights =
 				std::clamp(GraphicsSettings::get().volumetric_max_lights, 1, 4);
-			static int worldShadowRestoreCooldownFrames = 0;
-			if (worldShadowRestoreCooldownFrames > 0) {
-				--worldShadowRestoreCooldownFrames;
-			}
-
-			const int inViewVolumetricDemand = static_cast<int>(std::count_if(
-				pending.begin(),
-				pending.end(),
-				[](const PendingLightUpdate& update) {
-					return update.requireMappedForVolumetric && update.inCameraView;
-				}));
-
-			const bool requireFullDynamicShadowBudget =
-				inViewVolumetricDemand >= maxVolumetricLights;
-			if (auto worldLightOpt = LightSources::get().get("world")) {
-				Light& worldLight = worldLightOpt.value();
-				if (requireFullDynamicShadowBudget &&
-					worldLight.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
-					worldLight.setShadowType(Light::SHADOW_TYPES::NONE);
-					worldShadowRestoreCooldownFrames = 20;
-				}
-				else if (!requireFullDynamicShadowBudget &&
-					worldShadowRestoreCooldownFrames == 0 &&
-					GraphicsSettings::get().world_light &&
-					worldLight.getShadowType() != Light::SHADOW_TYPES::MAPPED) {
-					worldLight.setShadowType(Light::SHADOW_TYPES::MAPPED);
-				}
-			}
 
 			// Recover from stale mapped-light state (e.g. shadow buffer creation failure).
 			// Mapped lights with no shadow texture should not consume the global mapped budget.
@@ -865,16 +1121,18 @@ namespace PAIN {
 			}
 
 			int reservedShadowSlots = 0;
+			// Reserve slots for world and cam lights if they have MAPPED shadows enabled
 			for (const auto& [key, lightRef] : LightSources::get().getAllWithKeys()) {
 				if (key != "world" && key != "cam") {
 					continue;
 				}
 				const Light& l = lightRef.get();
-				if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED &&
-					l.getShadowTexture() != 0) {
+				// Reserve slot if the light wants MAPPED shadows (regardless of texture state)
+				if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
 					++reservedShadowSlots;
 				}
 			}
+			
 			const int entityShadowBudget =
 				std::max(0, kShadowMappedLightBudget - reservedShadowSlots);
 
@@ -972,6 +1230,54 @@ namespace PAIN {
 				}
 			}
 
+			// Phase 3: Ensure world light has priority over entity lights
+			// If world light wants shadows but couldn't get a slot, evict entity lights
+			{
+				auto worldLightOpt = LightSources::get().get("world");
+				if (worldLightOpt) {
+					Light& worldLight = worldLightOpt.value();
+					// Check if world light has MAPPED shadows but no texture (budget pressure prevented allocation)
+					if (worldLight.getShadowType() == Light::SHADOW_TYPES::MAPPED &&
+						worldLight.getShadowTexture() == 0) {
+						// Count how many entity lights have MAPPED shadows
+						int entityMappedCount = 0;
+						for (const auto& [key, lightRef] : LightSources::get().getAllWithKeys()) {
+							if (key == "world" || key == "cam") continue;
+							if (lightRef.get().getShadowType() == Light::SHADOW_TYPES::MAPPED) {
+								++entityMappedCount;
+							}
+						}
+						// If budget is full, evict the furthest entity light
+						if (entityMappedCount >= kShadowMappedLightBudget) {
+							// Find the entity light furthest from camera and demote it
+							float maxDist = -1.0f;
+							std::string toEvict;
+							for (const auto& [key, lightRef] : LightSources::get().getAllWithKeys()) {
+								if (key == "world" || key == "cam") continue;
+								const Light& l = lightRef.get();
+								if (l.getShadowType() == Light::SHADOW_TYPES::MAPPED) {
+									// Find matching update to get distance
+									for (const auto& update : pending) {
+										if (update.lightName == key && update.distanceToCamera > maxDist) {
+											maxDist = update.distanceToCamera;
+											toEvict = key;
+										}
+									}
+								}
+							}
+							if (!toEvict.empty()) {
+								if (auto evictLightOpt = LightSources::get().get(toEvict)) {
+									evictLightOpt.value().get().setShadowType(Light::SHADOW_TYPES::NONE);
+									PN_CORE_INFO("[LightingPass] Evicted entity light '{}' to make room for world light shadows", toEvict);
+								}
+							}
+						}
+						// Try to re-allocate shadow buffers for world light
+						worldLight.setShadowType(Light::SHADOW_TYPES::MAPPED);
+					}
+				}
+			}
+
 			for (const auto& update : pending) {
 				if (auto lightOpt = LightSources::get().get(update.lightName)) {
 					Light& light = lightOpt.value();
@@ -986,6 +1292,10 @@ namespace PAIN {
 					light.L_intensity = lighting.light_intensity;
 					light.type = static_cast<Light::TYPES>(lighting.light_type);
 					light.setShadowResolution(lighting.shadow_resolution);
+
+					// Disable static shadow caching for spotlights since they can move with entities
+					// Directional lights (world light) can benefit from caching if they don't move
+					light.enableStaticShadowCaching = (light.type != Light::TYPES::SPOTLIGHT);
 
 					const bool hasMappedShadow =
 						light.getShadowType() == Light::SHADOW_TYPES::MAPPED &&
@@ -1876,17 +2186,17 @@ namespace PAIN {
 							gs.minimap_border_color.b,
 							glm::max(0.2f, gs.minimap_border_color.a));
 
-						const int border_layers = static_cast<int>(glm::round(border_thickness));
-						if (border_layers > 0) {
-							// For circular minimap, adjust size to fit within the circle
+						const auto drawMinimapBorderOverlay = [&]() {
+							const int border_layers = ComputeMinimapBorderLayerCount(border_thickness);
+							if (border_layers <= 0) {
+								return;
+							}
+
 							float effective_w = map_w;
 							float effective_h = map_h;
-							float center_x = center_x_px;
-							float center_y = center_y_px;
 							float diameter = glm::min(effective_w, effective_h);
 
 							if (gs.minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
-								// Use the smaller dimension as diameter for the circle
 								effective_w = diameter;
 								effective_h = diameter;
 							}
@@ -1895,26 +2205,24 @@ namespace PAIN {
 								const float inset = static_cast<float>(i) + 0.5f;
 
 								if (gs.minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
-									// Draw circular border using line segments
-									float outer_radius = (diameter * 0.5f) - inset;
-									if (outer_radius <= 0.0f) break;
+									const float outer_radius = (diameter * 0.5f) - inset;
+									if (outer_radius <= 0.0f) {
+										break;
+									}
 
-									const int segments = 64;
-									const float two_pi = glm::two_pi<float>();
-
-									// Convert center pixel position to NDC
-									glm::vec2 center_ndc(
-										(center_x / fbw) * 2.0f - 1.0f,
-										1.0f - (center_y / fbh) * 2.0f);
-
-									// Calculate radius in NDC units (approximate, using width for uniform scaling)
-									float radius_x = (outer_radius / fbw) * 2.0f;
-									float radius_y = (outer_radius / fbh) * 2.0f;
-									glm::vec2 radius_ndc(radius_x, radius_y);
-
-									rendererService->w_renderer->DebugPass2DCircle(center_ndc, radius_ndc, border_color, segments);
-								} else {
-									// Square border (existing code)
+									const glm::vec2 center_ndc(
+										(center_x_px / fbw) * 2.0f - 1.0f,
+										1.0f - (center_y_px / fbh) * 2.0f);
+									const glm::vec2 radius_ndc(
+										(outer_radius / fbw) * 2.0f,
+										(outer_radius / fbh) * 2.0f);
+									rendererService->w_renderer->DebugPass2DCircle(
+										center_ndc,
+										radius_ndc,
+										border_color,
+										64);
+								}
+								else {
 									const float x0 = map_x + inset;
 									const float y0 = map_y + inset;
 									const float x1 = map_x + outer_w - inset;
@@ -1935,7 +2243,7 @@ namespace PAIN {
 									rendererService->w_renderer->DebugPass2DLine(bl, tl, border_color);
 								}
 							}
-						}
+						};
 
 						glm::vec3 player_pos(0.0f);
 						glm::vec3 player_forward = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -2038,7 +2346,7 @@ namespace PAIN {
 							return false;
 							};
 
-						auto worldToMinimapNdc = [&](const glm::vec3& worldPos, bool clampToEdge) {
+						auto worldToMinimapPx = [&](const glm::vec3& worldPos, bool clampToEdge) {
 							const glm::vec2 delta(worldPos.x - player_pos.x, worldPos.z - player_pos.z);
 							float local_x = delta.x;
 							float local_y = -delta.y;
@@ -2061,9 +2369,17 @@ namespace PAIN {
 							const float px = draw_x + u_draw * draw_w;
 							const float py = draw_y + (1.0f - v_draw) * draw_h;
 
+							return glm::vec2(px, py);
+							};
+
+						auto pixelsToNdc = [&](const glm::vec2& pxPos) {
 							return glm::vec2(
-								(px / fbw) * 2.0f - 1.0f,
-								1.0f - (py / fbh) * 2.0f);
+								(pxPos.x / fbw) * 2.0f - 1.0f,
+								1.0f - (pxPos.y / fbh) * 2.0f);
+							};
+
+						auto worldToMinimapNdc = [&](const glm::vec3& worldPos, bool clampToEdge) {
+							return pixelsToNdc(worldToMinimapPx(worldPos, clampToEdge));
 							};
 
 						auto drawDot = [&](const glm::vec3& pos, float radiusPx, const glm::vec4& color) {
@@ -2150,7 +2466,8 @@ namespace PAIN {
 
 						static WallMinimapCache wallCache;
 
-						auto rebuildWallCache = [&](const std::vector<entt::entity>& wallEntities) {
+						auto rebuildWallCache = [&](const std::vector<entt::entity>& wallEntities,
+							uint64_t wallSignature) {
 							wallCache.triangleVerticesXZ.clear();
 
 							for (const entt::entity entity : wallEntities) {
@@ -2200,12 +2517,7 @@ namespace PAIN {
 
 							wallCache.sourceRegistry = &registry;
 							wallCache.wallEntityCount = wallEntities.size();
-                            uint64_t signature = 1469598103934665603ull;
-							for (const entt::entity entity : wallEntities) {
-								signature ^= static_cast<uint64_t>(entity);
-								signature *= 1099511628211ull;
-							}
-							wallCache.wallEntitySignature = signature;
+							wallCache.wallEntitySignature = wallSignature;
 							wallCache.built = true;
 							wallCache.gpuDirty = true;
 							};
@@ -2217,27 +2529,53 @@ namespace PAIN {
 						float nearest_item_dist2 = std::numeric_limits<float>::max();
 						float nearest_objective_dist2 = std::numeric_limits<float>::max();
 
-						std::unordered_set<uint32_t> uniqueMarkerEntities;
-						std::vector<entt::entity> markerEntities;
 						const std::vector<entt::entity> wallEntities = metadata_service->getEntitiesByTag("wall");
-						auto appendTaggedEntities = [&](const char* tag) {
-							for (entt::entity entity : metadata_service->getEntitiesByTag(tag)) {
-								const uint32_t key = static_cast<uint32_t>(entity);
-								if (uniqueMarkerEntities.insert(key).second) {
-									markerEntities.push_back(entity);
+						const auto playerEntities = metadata_service->getEntitiesByTag("Player");
+						const auto enemyEntities = metadata_service->getEntitiesByTag("Enemy");
+						const auto itemEntities = metadata_service->getEntitiesByTag("item");
+						const auto objectiveEntities = metadata_service->getEntitiesByTag("objective");
+						const auto collectibleEntities = metadata_service->getEntitiesByTag("letter_collectible");
+						const auto carriedLetterEntities = metadata_service->getEntitiesByTag("letter_carried");
+						const auto collectionEntities = metadata_service->getEntitiesByTag("letter_collection");
+						const auto taggedDangerEntities = metadata_service->getEntitiesByTag("danger");
+
+						minimap_entity_dedupe_.clear();
+						minimap_marker_entities_.clear();
+						minimap_marker_entities_.reserve(
+							playerEntities.size() +
+							enemyEntities.size() +
+							itemEntities.size() +
+							objectiveEntities.size() +
+							collectibleEntities.size() +
+							carriedLetterEntities.size() +
+							collectionEntities.size());
+
+						auto appendUniqueEntities = [&](const std::vector<entt::entity>& entities,
+							std::vector<entt::entity>& out) {
+								for (const entt::entity entity : entities) {
+									const uint32_t key = static_cast<uint32_t>(entity);
+									if (minimap_entity_dedupe_.insert(key).second) {
+										out.push_back(entity);
+									}
 								}
-							}
 							};
 
-						appendTaggedEntities("Player");
-						appendTaggedEntities("Enemy");
-						appendTaggedEntities("item");
-						appendTaggedEntities("objective");
-						appendTaggedEntities("letter_collectible");
-						appendTaggedEntities("letter_carried");
-						appendTaggedEntities("letter_collection");
+						appendUniqueEntities(playerEntities, minimap_marker_entities_);
+						appendUniqueEntities(enemyEntities, minimap_marker_entities_);
+						appendUniqueEntities(itemEntities, minimap_marker_entities_);
+						appendUniqueEntities(objectiveEntities, minimap_marker_entities_);
+						appendUniqueEntities(collectibleEntities, minimap_marker_entities_);
+						appendUniqueEntities(carriedLetterEntities, minimap_marker_entities_);
+						appendUniqueEntities(collectionEntities, minimap_marker_entities_);
 
-						const bool has_carried_letter = !metadata_service->getEntitiesByTag("letter_carried").empty();
+						minimap_entity_dedupe_.clear();
+						minimap_danger_entities_.clear();
+						minimap_danger_entities_.reserve(
+							taggedDangerEntities.size() + enemyEntities.size());
+						appendUniqueEntities(taggedDangerEntities, minimap_danger_entities_);
+						appendUniqueEntities(enemyEntities, minimap_danger_entities_);
+
+						const bool has_carried_letter = !carriedLetterEntities.empty();
 
 						// Clip all minimap overlays (walls, markers, danger, route, legend, arrows)
 						glEnable(GL_SCISSOR_TEST);
@@ -2260,12 +2598,68 @@ namespace PAIN {
 							rendererService->w_renderer->BeginCircularStencilClip(center_ndc, radius_ndc);
 						}
 
-						if (gs.minimap_show_walls) {
-                            uint64_t currentWallSignature = 1469598103934665603ull;
-							for (const entt::entity entity : wallEntities) {
-								currentWallSignature ^= static_cast<uint64_t>(entity);
-								currentWallSignature *= 1099511628211ull;
+						{
+							const MinimapGridVisualStyle gridStyle = BuildMinimapGridStyle();
+							minimap_grid_minor_line_vertices_.clear();
+							minimap_grid_major_line_vertices_.clear();
+							AppendMinimapTacticalGridLines(
+								minimap_grid_minor_line_vertices_,
+								minimap_grid_major_line_vertices_,
+								glm::vec2(draw_x, draw_y),
+								glm::vec2(draw_x + draw_w, draw_y + draw_h),
+								gridStyle.divisions);
+
+							for (glm::vec2& vertexPx : minimap_grid_minor_line_vertices_) {
+								vertexPx = pixelsToNdc(vertexPx);
 							}
+							for (glm::vec2& vertexPx : minimap_grid_major_line_vertices_) {
+								vertexPx = pixelsToNdc(vertexPx);
+							}
+
+							if (!minimap_grid_minor_line_vertices_.empty()) {
+								rendererService->w_renderer->DebugPass2DLines(
+									minimap_grid_minor_line_vertices_,
+									gridStyle.minorLineColor);
+							}
+							if (!minimap_grid_major_line_vertices_.empty()) {
+								rendererService->w_renderer->DebugPass2DLines(
+									minimap_grid_major_line_vertices_,
+									gridStyle.majorLineColor);
+							}
+						}
+
+						if (gs.minimap_show_walls) {
+                            const MinimapWallVisualStyle wallStyle = BuildMinimapWallStyle(minimap_threat_time_);
+							minimap_wall_fingerprint_entries_.clear();
+							minimap_wall_fingerprint_entries_.reserve(wallEntities.size());
+							for (const entt::entity entity : wallEntities) {
+								if (!registry.valid(entity)) {
+									continue;
+								}
+
+								MinimapWallCacheFingerprintEntry entry;
+								entry.entityKey = static_cast<uint64_t>(static_cast<uint32_t>(entity));
+
+								if (auto* model = registry.try_get<ModelRenderer>(entity)) {
+									entry.modelKey = model->modelGUID.IsValid()
+										? static_cast<uint64_t>(std::hash<Assets::GUID>{}(model->modelGUID))
+										: 0ull;
+								}
+
+								if (auto* wt = registry.try_get<WorldTransform>(entity)) {
+									entry.worldMatrix = wt->matrix;
+								}
+								else if (auto* lt = registry.try_get<LocalTransform>(entity)) {
+									const glm::mat4 translate = glm::translate(glm::mat4(1.0f), lt->position);
+									const glm::mat4 rotate = glm::mat4_cast(lt->rotation);
+									const glm::mat4 scale = glm::scale(glm::mat4(1.0f), lt->scale);
+									entry.worldMatrix = translate * rotate * scale;
+								}
+
+								minimap_wall_fingerprint_entries_.push_back(entry);
+							}
+							const uint64_t currentWallSignature =
+								BuildMinimapWallCacheSignature(minimap_wall_fingerprint_entries_);
 
 							const bool needsRebuild =
 								!wallCache.built ||
@@ -2274,7 +2668,7 @@ namespace PAIN {
 								wallCache.wallEntitySignature != currentWallSignature;
 
 							if (needsRebuild) {
-								rebuildWallCache(wallEntities);
+								rebuildWallCache(wallEntities, currentWallSignature);
 							}
 
 							// Upload wall vertices to GPU when cache was rebuilt
@@ -2284,7 +2678,7 @@ namespace PAIN {
 							}
 
 							// GPU draw path: single draw call with scissor clipping
-							if (rendererService->w_renderer->hasMinimapWallData()) {
+							if (rendererService->w_renderer->canDrawMinimapWalls()) {
 								const float minimapRadius = glm::max(1.0f, gs.minimap_radius);
 								const glm::vec2 playerXZ(player_pos.x, player_pos.z);
 
@@ -2312,17 +2706,21 @@ namespace PAIN {
 								rendererService->w_renderer->DrawMinimapWalls(
 									playerXZ, transformCol0, transformCol1,
 									invDoubleRadius, ndcBase, ndcScale,
-									glm::vec4(0.75f, 0.75f, 0.75f, 0.35f));
+									wallStyle.fillColor,
+									wallStyle.accentColor,
+									wallStyle.patternStrength,
+									wallStyle.patternScale,
+									wallStyle.patternPhase);
 							}
 							else {
 								// Fallback to AABB outline when no triangle data available
 								for (const entt::entity wallEntity : wallEntities) {
-									drawWallFootprint(wallEntity, glm::vec4(0.75f, 0.75f, 0.75f, 1.0f));
+									drawWallFootprint(wallEntity, wallStyle.fallbackOutlineColor);
 								}
 							}
 						}
 
-						for (entt::entity entity : markerEntities) {
+						for (entt::entity entity : minimap_marker_entities_) {
 							glm::vec3 pos(0.0f);
 							if (!getEntityWorldPos(entity, pos)) {
 								continue;
@@ -2382,23 +2780,28 @@ namespace PAIN {
 						}
 
 						if (gs.minimap_show_danger) {
-							std::unordered_set<uint32_t> uniqueDangerEntities;
-							std::vector<entt::entity> dangerEntities;
-							auto appendDangerEntities = [&](const char* tag) {
-								for (entt::entity entity : metadata_service->getEntitiesByTag(tag)) {
-									const uint32_t key = static_cast<uint32_t>(entity);
-									if (uniqueDangerEntities.insert(key).second) {
-										dangerEntities.push_back(entity);
-									}
-								}
-								};
-							appendDangerEntities("danger");
-							appendDangerEntities("Enemy");
+							const MinimapDangerVisualStyle dangerStyle = BuildMinimapDangerStyle(minimap_threat_time_);
+							minimap_danger_fill_vertices_.clear();
+							minimap_danger_line_vertices_.clear();
+							minimap_danger_inner_fill_vertices_.clear();
+							minimap_danger_inner_line_vertices_.clear();
+							const size_t estimatedDangerCount = minimap_danger_entities_.size();
+							const size_t estimatedFillVertices = estimatedDangerCount * 24ull * 3ull;
+							const size_t estimatedLineVertices = estimatedDangerCount * 24ull * 2ull;
+							if (minimap_danger_fill_vertices_.capacity() < estimatedFillVertices) {
+								minimap_danger_fill_vertices_.reserve(estimatedFillVertices);
+							}
+							if (minimap_danger_line_vertices_.capacity() < estimatedLineVertices) {
+								minimap_danger_line_vertices_.reserve(estimatedLineVertices);
+							}
+							if (minimap_danger_inner_fill_vertices_.capacity() < estimatedFillVertices) {
+								minimap_danger_inner_fill_vertices_.reserve(estimatedFillVertices);
+							}
+							if (minimap_danger_inner_line_vertices_.capacity() < estimatedLineVertices) {
+								minimap_danger_inner_line_vertices_.reserve(estimatedLineVertices);
+							}
 
-							// Draw danger zones as red circles
-							std::vector<glm::vec2> dangerLineVertices;
-							dangerLineVertices.reserve(dangerEntities.size() * 24 * 2);
-							for (entt::entity entity : dangerEntities) {
+							for (entt::entity entity : minimap_danger_entities_) {
 								glm::vec3 pos(0.0f);
 								if (!getEntityWorldPos(entity, pos)) {
 									continue;
@@ -2409,12 +2812,10 @@ namespace PAIN {
 									const float maxDistance = 9.0f;
 									const float coneAngleDeg = 32.0f;
 									const float heightDelta = glm::abs(pos.y - player_pos.y);
-									const float coneRadius = glm::tan(glm::radians(coneAngleDeg)) * heightDelta;
-									const float sphereRadius =
-										heightDelta >= maxDistance
-										? 0.0f
-										: std::sqrt(maxDistance * maxDistance - heightDelta * heightDelta);
-									danger_radius = glm::max(0.25f, glm::min(coneRadius, sphereRadius));
+									danger_radius = ComputeLightConeTopDownRadius(
+										heightDelta,
+										maxDistance,
+										glm::radians(coneAngleDeg));
 								}
 								else if (metadata_service->hasTag(entity, "danger_collision")) {
 									danger_radius = 0.5f;
@@ -2429,30 +2830,57 @@ namespace PAIN {
 									continue;
 								}
 
-								const glm::vec2 centerNdc = worldToMinimapNdc(pos, false);
+								const glm::vec2 centerPx = worldToMinimapPx(pos, false);
 								const float radiusPx = (danger_radius / (2.0f * glm::max(1.0f, gs.minimap_radius))) * draw_min;
-								const glm::vec2 radiusNdc((radiusPx / fbw) * 2.0f, (radiusPx / fbh) * 2.0f);
-
-								for (int i = 0; i < 24; ++i) {
-									const float a0 = (static_cast<float>(i) / 24.0f) * glm::two_pi<float>();
-									const float a1 = (static_cast<float>(i + 1) / 24.0f) * glm::two_pi<float>();
-
-									const glm::vec2 p0(
-										centerNdc.x + std::cos(a0) * radiusNdc.x,
-										centerNdc.y + std::sin(a0) * radiusNdc.y);
-									const glm::vec2 p1(
-										centerNdc.x + std::cos(a1) * radiusNdc.x,
-										centerNdc.y + std::sin(a1) * radiusNdc.y);
-
-									dangerLineVertices.push_back(p0);
-									dangerLineVertices.push_back(p1);
+								const size_t fillStart = minimap_danger_fill_vertices_.size();
+								const size_t lineStart = minimap_danger_line_vertices_.size();
+								const size_t innerFillStart = minimap_danger_inner_fill_vertices_.size();
+								const size_t innerLineStart = minimap_danger_inner_line_vertices_.size();
+								AppendMinimapDangerCoverage(
+									minimap_danger_fill_vertices_,
+									minimap_danger_line_vertices_,
+									centerPx,
+									radiusPx,
+									24);
+								AppendMinimapDangerCoverage(
+									minimap_danger_inner_fill_vertices_,
+									minimap_danger_inner_line_vertices_,
+									centerPx,
+									radiusPx * dangerStyle.innerRadiusScale,
+									24);
+								for (size_t i = fillStart; i < minimap_danger_fill_vertices_.size(); ++i) {
+									minimap_danger_fill_vertices_[i] = pixelsToNdc(minimap_danger_fill_vertices_[i]);
+								}
+								for (size_t i = lineStart; i < minimap_danger_line_vertices_.size(); ++i) {
+									minimap_danger_line_vertices_[i] = pixelsToNdc(minimap_danger_line_vertices_[i]);
+								}
+								for (size_t i = innerFillStart; i < minimap_danger_inner_fill_vertices_.size(); ++i) {
+									minimap_danger_inner_fill_vertices_[i] = pixelsToNdc(minimap_danger_inner_fill_vertices_[i]);
+								}
+								for (size_t i = innerLineStart; i < minimap_danger_inner_line_vertices_.size(); ++i) {
+									minimap_danger_inner_line_vertices_[i] = pixelsToNdc(minimap_danger_inner_line_vertices_[i]);
 								}
 							}
 
-							if (!dangerLineVertices.empty()) {
+							if (!minimap_danger_fill_vertices_.empty()) {
+								rendererService->w_renderer->DebugPass2DTrianglesFilled(
+									minimap_danger_fill_vertices_,
+									dangerStyle.fillColor);
+							}
+							if (!minimap_danger_inner_fill_vertices_.empty()) {
+								rendererService->w_renderer->DebugPass2DTrianglesFilled(
+									minimap_danger_inner_fill_vertices_,
+									dangerStyle.innerFillColor);
+							}
+							if (!minimap_danger_inner_line_vertices_.empty()) {
 								rendererService->w_renderer->DebugPass2DLines(
-									dangerLineVertices,
-									glm::vec4(1.0f, 0.15f, 0.15f, 1.0f));
+									minimap_danger_inner_line_vertices_,
+									dangerStyle.innerEdgeColor);
+							}
+							if (!minimap_danger_line_vertices_.empty()) {
+								rendererService->w_renderer->DebugPass2DLines(
+									minimap_danger_line_vertices_,
+									dangerStyle.edgeColor);
 							}
 						}
 
@@ -2593,6 +3021,7 @@ namespace PAIN {
 						}
 
 						glDisable(GL_SCISSOR_TEST);
+						drawMinimapBorderOverlay();
 					}
 				}
 			}

@@ -110,12 +110,15 @@ namespace PAIN {
 		void Init(std::shared_ptr<Services> app_services);
 		void uploadTexture(std::shared_ptr<Assets::Texture> tex);
 		void initSceneVbo();
+		bool hasUploadedModel(const std::string& modelVPath) const {
+			return instanced_offsets.find(modelVPath) != instanced_offsets.end();
+		}
 		void _initDeferredShadingBuffers();
 		void _initGeometryBuffers();
 		void clearBuffers();
 
 		// PASSES
-		void BeginShadowPass(const Light& l);
+		void BeginShadowPass(const Light& l, bool clearDepth = true);
 		void DrawShadows(const ModelRenderer& component, const glm::mat4& M,
 						 const Light& l);
 		void EndShadowPass();
@@ -143,8 +146,13 @@ namespace PAIN {
 							 const glm::vec2& invDoubleRadius,
 							 const glm::vec2& ndcBase,
 							 const glm::vec2& ndcScale,
-							 const glm::vec4& color);
+							 const glm::vec4& color,
+							 const glm::vec4& accentColor,
+							 float patternStrength,
+							 float patternScale,
+							 float patternPhase);
 		bool hasMinimapWallData() const { return minimap_wall_vertex_count > 0; }
+		bool canDrawMinimapWalls() const { return minimap_wall_shader != nullptr && minimap_wall_vertex_count > 0; }
 
 		void ReflectionPass(const ModelRenderer& component);
 		void LightingPass(std::shared_ptr<Scene::SceneManager> scene,
@@ -171,6 +179,10 @@ namespace PAIN {
 		void VolumetricPass(std::shared_ptr<Scene::SceneManager> scene,
 						   const LightSources& lights);
 		void PostProcessPass(bool presentToSwapchain);
+		void BlitFinalToScreen();  // Simple blit without post-processing
+		void InvalidateFramebufferAttachments(GLuint fbo, bool invalidateColor = false,
+											 bool invalidateDepth = false,
+											 bool invalidateStencil = false);
 
 		void Render2DTexture(GLuint texture_id, const glm::vec2& pos,
 							 glm::vec2& scale,
@@ -222,6 +234,9 @@ namespace PAIN {
 		unsigned int pp2_fbo = 0; // post-processing framebuffer 2 (for ping-pong)
 								  // needed for stuff like bloom
 		unsigned int out_fbo = 0; // output framebuffer (for imgui/display)
+		GLint max_draw_buffers = 0;
+		GLint max_color_attachments = 0;
+		int active_gbuffer_count = 5;
 
 		// === Textures ===
 		unsigned int pos_texture = 0;
@@ -232,6 +247,8 @@ namespace PAIN {
 		unsigned int material_properties_texture =
 			0; // 2D to store roughness, metallic properties
 		unsigned int emission_texture = 0;
+		unsigned int fallback_material_texture = 0;
+		unsigned int fallback_emission_texture = 0;
 
 		// !TODO: jspoh cleanup memory
 		// === Geometry Buffers ===
@@ -239,6 +256,7 @@ namespace PAIN {
 		unsigned int geometry_vbo = 0;
 		unsigned int geometry_ebo = 0;
 		unsigned int geometry_ibo = 0;
+		GLsizeiptr geometry_ibo_capacity = 0;
 		unsigned int shadow_vao = 0;
 		unsigned int shadow_vbo = 0;
 		unsigned int shadow_ebo = 0;
@@ -248,6 +266,11 @@ namespace PAIN {
 		unsigned int pbr_light_ubo = 0;
 		unsigned int pbr_light_ubo_bound_program = 0;
 
+		// OPTIMIZATION: UBO for bone matrices (avoids 100+ SetUniform calls per animated mesh)
+		static constexpr int MAX_BONES = 100;
+		unsigned int bone_matrix_ubo = 0;
+		unsigned int bone_matrix_ubo_bound_program = 0;
+
 		unsigned int final_texture = 0; // for imgui/post-processing/display
 		unsigned int pp_texture = 0;	// for ping-pong for post-processing
 		unsigned int pp2_texture = 0;	// for ping-pong for post-processing (bloom etc)
@@ -255,6 +278,8 @@ namespace PAIN {
 		std::array<unsigned int, 2> volumetric_textures{0, 0};
 		int minimap_width = 0;
 		int minimap_height = 0;
+		int pp_width = 0;  // post-process render width (may be < winWidth on Android)
+		int pp_height = 0; // post-process render height (may be < winHeight on Android)
 		int volumetric_width = 0;
 		int volumetric_height = 0;
 		int volumetric_history_index = 0;
@@ -280,6 +305,8 @@ namespace PAIN {
 		// === Debug Buffers ===
 		unsigned int debug_VAO = 0;
 		unsigned int debug_VBO = 0;
+		GLsizeiptr debug_vbo_capacity = 0;
+		std::unordered_set<unsigned int> clamp_configured_textures;
 
 		// === Minimap Wall GPU Buffers ===
 		unsigned int minimap_wall_vao = 0;
@@ -298,6 +325,7 @@ namespace PAIN {
 		std::shared_ptr<Assets::Shader> blur_shader = nullptr;
 		std::shared_ptr<Assets::Shader> bloom_shader = nullptr;
 		std::shared_ptr<Assets::Shader> tone_shader = nullptr;
+		std::shared_ptr<Assets::Shader> tone_gamma_shader = nullptr;
 		std::shared_ptr<Assets::Shader> bloom_blend_shader = nullptr;
 		std::shared_ptr<Assets::Shader> minimap_wall_shader = nullptr;
 		std::shared_ptr<Assets::Shader> volumetric_shader = nullptr;
@@ -312,13 +340,15 @@ namespace PAIN {
 			&minimap_fbo,
 		};
 		std::array<unsigned int*, 2> rbos{&final_rbo, &minimap_rbo};
-		std::array<unsigned int*, 10> texs{
+		std::array<unsigned int*, 12> texs{
 			&ds_depth_texture,
 			&pos_texture,
 			&col_texture,
 			&norm_texture,
 			&material_properties_texture,
 			&emission_texture,
+			&fallback_material_texture,
+			&fallback_emission_texture,
 			//&shadow_texture,
 			&final_texture,
 			&pp_texture,

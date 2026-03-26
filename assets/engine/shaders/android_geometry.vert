@@ -22,12 +22,19 @@ out mat3 TBN;
 uniform mat4 u_M;
 uniform mat4 u_V;
 uniform mat4 u_P;
+uniform mat3 u_NormalMatrix;  // Pre-computed for non-instanced meshes
 
 uniform float u_InvertUvY;
 uniform float u_Instanced;
 
+// OPTIMIZATION: Use UBO for bone matrices instead of individual uniforms
+// This reduces CPU overhead from 100+ SetUniform calls to a single buffer update
+// Note: 'binding' qualifier requires ES 3.1+, so we use std140 only and bind via C++
 const int MAX_BONES = 100;
-uniform mat4 u_BoneMatrices[MAX_BONES];
+layout(std140) uniform BoneBlock {
+    mat4 u_BoneMatrices[MAX_BONES];
+};
+
 uniform float u_Animated;
 
 mat4 ResolveModelMatrix() {
@@ -67,7 +74,14 @@ void main() {
         localNormal = mat3(skin) * localNormal;
     }
 
-    vNormal = mat3(transpose(inverse(modelMatrix))) * localNormal;
+    // Use pre-computed normal matrix for non-instanced meshes (CPU optimization)
+    // For instanced meshes, compute in shader since model matrix varies per instance
+    if (u_Instanced > 0.5) {
+        vNormal = mat3(transpose(inverse(modelMatrix))) * localNormal;
+    } else {
+        vNormal = u_NormalMatrix * localNormal;
+    }
+    
     vFragPos = vec3(modelMatrix * localPos);
     vTexCoords = ResolveTexCoords();
     TBN = ResolveTBN(modelMatrix);

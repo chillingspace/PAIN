@@ -2,32 +2,6 @@
     "entities": [
         {
             "components": {
-                "BoundingVolume": {
-                    "localAABB": {
-                        "max": [
-                            0.09290358424186707,
-                            0.07747630774974823,
-                            0.09775418043136597
-                        ],
-                        "min": [
-                            -0.09290358424186707,
-                            -2.38418573772492e-09,
-                            -0.09775418043136597
-                        ]
-                    },
-                    "worldAABB": {
-                        "max": [
-                            21.853046417236328,
-                            1.5495262145996094,
-                            -4.602221488952637
-                        ],
-                        "min": [
-                            18.13690185546875,
-                            -4.768371297814156e-08,
-                            -8.512388229370117
-                        ]
-                    }
-                },
                 "Hierarchy": {
                     "childrenGUIDs": [],
                     "parentGUID": "00000000-0000-0000-0000-000000000000",
@@ -57,6 +31,8 @@
                 },
                 "ModelRenderer": {
                     "castShadows": true,
+                    "doubleSidedShadows": false,
+                    "isStatic": false,
                     "materials": [
                         {
                             "albedoTextureOverride": "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
@@ -98,19 +74,20 @@
                     ],
                     "collider_offset": [
                         0.0,
-                        0.0,
+                        0.05000000074505806,
                         0.0
                     ],
                     "collider_scale": [
-                        0.20000000298023224,
+                        0.15000000596046448,
                         -0.10000000149011612,
-                        0.20000000298023224
+                        0.15000000596046448
                     ],
-                    "mass": -107374176.0,
                     "motion_type": 0,
                     "physics_behavior": {
                         "behavior": 0
                     },
+                    "physics_enabled": true,
+                    "use_gravity": true,
                     "velocity": [
                         0.0,
                         0.0,

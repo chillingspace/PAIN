@@ -38,6 +38,7 @@ namespace PAIN {
             //Current scene id
             Assets::GUID curr_scene_id;
             Assets::GUID prev_scene_id;
+            std::unordered_set<Assets::GUID> preloaded_model_guids;
 
             // Change scene variables
             bool pending_scene_change = false;
@@ -158,6 +159,7 @@ namespace PAIN {
             void processPendingSceneChange();
 
             void updateSceneVBO();
+            const std::unordered_set<Assets::GUID>& getPreloadedModelGUIDs() const { return preloaded_model_guids; }
 
 #ifdef PN_PLATFORM_WINDOWS
 #ifdef _DEBUG

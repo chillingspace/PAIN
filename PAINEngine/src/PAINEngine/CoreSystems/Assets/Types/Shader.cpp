@@ -42,6 +42,26 @@ namespace PAIN {
             glUniformMatrix4fv(location, 1, GL_FALSE, &m[0][0]);
         }
 
+        void Shader::SetUniform(const std::string& name, const glm::mat3& m)
+        {
+            GLint location = -1;
+
+            if (loc_map.count(name)) {
+                location = loc_map[name];
+            }
+            else {
+                location = glGetUniformLocation(m_RendererID, name.c_str());
+                if (location == -1) {
+                    PN_CORE_WARN("Uniform '{}' does not exist in shader program {}", name, m_RendererID);
+                    return;
+                }
+                else {
+                    loc_map[name] = location;
+                }
+            }
+            glUniformMatrix3fv(location, 1, GL_FALSE, &m[0][0]);
+        }
+
         void Shader::SetUniform(const std::string& name, const glm::vec4& val)
         {
             //Location variable

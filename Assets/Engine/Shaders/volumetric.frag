@@ -67,10 +67,14 @@ float sampleShadow(int shadowIdx, vec3 worldPos, Light light) {
     vec3 projCoords = fragPosLight.xyz / max(fragPosLight.w, 0.0001);
     projCoords = projCoords * 0.5 + 0.5;
 
+    // For directional lights: samples outside shadow frustum should be treated as occluded
+    // to prevent light leaking through geometry that's not covered by the shadow map.
+    // For spotlights/point lights: outside frustum means light doesn't reach there, so no shadow needed.
+    bool isDirectional = int(light.type) == 1;
     if (projCoords.z > 1.0 ||
         projCoords.x < 0.0 || projCoords.x > 1.0 ||
         projCoords.y < 0.0 || projCoords.y > 1.0) {
-        return 0.0;
+        return isDirectional ? 1.0 : 0.0;
     }
 
     float shadowDepth = texture(u_ShadowMaps[shadowIdx], projCoords.xy).r;
@@ -78,7 +82,17 @@ float sampleShadow(int shadowIdx, vec3 worldPos, Light light) {
         return 0.0;
     }
 
-    float bias = int(light.type) == 2 ? 0.002 : 0.0035;
+    // IMPORTANT: Front-face culling renders BACK faces to shadow map.
+    // Shadow depth = back face (farther from light).
+    // 
+    // For samples BEHIND the object: projCoords.z > shadowDepth → in shadow (correct)
+    // For samples INSIDE geometry: projCoords.z < shadowDepth → not in shadow (LEAK!)
+    //
+    // To fix this, we use a NEGATIVE bias for directional lights. This makes samples
+    // that are slightly in front of the back face still count as "in shadow".
+    // Balance: enough to prevent leaks but not too aggressive to cause shadow acne.
+    // For spotlights, we use a small positive bias due to perspective projection.
+    float bias = int(light.type) == 1 ? -0.008 : 0.0005;
     return projCoords.z - bias > shadowDepth ? 1.0 : 0.0;
 }
 
@@ -91,7 +105,11 @@ void main() {
     bool hasSurface = depth < 0.99999;
     vec3 surfaceWorldPos = hasSurface ? reconstructWorldPosition(TexCoords, depth) : worldFar;
     float distToSurface = hasSurface ? length(surfaceWorldPos - u_CamPos) : u_VolumetricMaxDist;
-    float rayLen = min(distToSurface, u_VolumetricMaxDist);
+    
+    // Ray length reduction to prevent light leaking through enclosed spaces.
+    // Balance: reduce enough to prevent leaks but preserve volumetric visibility.
+    float rayLen = min(distToSurface, u_VolumetricMaxDist) * 0.9;
+    rayLen = max(rayLen, 0.0);
 
     int numSteps = clamp(u_VolumetricSteps, 1, MAX_VOLUMETRIC_STEPS);
     float stepSize = rayLen / float(numSteps);
@@ -104,6 +122,10 @@ void main() {
     }
 
     vec3 accumulated = vec3(0.0);
+    
+    // Depth-based fade: only fade very close to the surface
+    // This preserves volumetric visibility while preventing harsh boundaries
+    float fadeStartDist = rayLen * 0.85;
 
     for (int s = 0; s < MAX_VOLUMETRIC_STEPS; ++s) {
         if (s >= numSteps) {
@@ -112,6 +134,12 @@ void main() {
 
         float t = clamp((float(s) + 0.5) * stepSize + jitter, 0.0, rayLen);
         vec3 samplePos = u_CamPos + rayDir * t;
+        
+        // DEPTH-BASED FADE: Only reduce contribution very near the surface
+        float depthFade = 1.0;
+        if (t > fadeStartDist) {
+            depthFade = 1.0 - smoothstep(fadeStartDist, rayLen, t);
+        }
 
         for (int i = 0; i < MAX_LIGHTS; ++i) {
             if (i >= u_NumLights) {
@@ -132,7 +160,7 @@ void main() {
                 float cosTheta = dot(toLightNorm, -rayDir);
                 float phase = hgPhase(cosTheta, u_VolumetricScatter);
 
-                lightContrib = light.L * attenuation * phase * (1.0 - inShadow);
+                lightContrib = light.L * attenuation * phase * (1.0 - inShadow) * depthFade;
             } else if (int(light.type) == 1) {
                 vec3 lightDir = normalize(-light.direction);
                 if (!hasShadowMap) {
@@ -142,7 +170,7 @@ void main() {
                 float cosTheta = dot(lightDir, -rayDir);
                 float phase = hgPhase(cosTheta, u_VolumetricScatter);
 
-                lightContrib = light.L * phase * (1.0 - inShadow);
+                lightContrib = light.L * phase * (1.0 - inShadow) * depthFade;
             } else if (int(light.type) == 2) {
                 vec3 toLight = light.position - samplePos;
                 float dist = length(toLight);
@@ -155,7 +183,7 @@ void main() {
                 float cosTheta = dot(toLightNorm, -rayDir);
                 float phase = hgPhase(cosTheta, u_VolumetricScatter);
 
-                lightContrib = light.L * attenuation * spotIntensity * phase * (1.0 - inShadow);
+                lightContrib = light.L * attenuation * spotIntensity * phase * (1.0 - inShadow) * depthFade;
             }
 
             accumulated += lightContrib * stepSize;

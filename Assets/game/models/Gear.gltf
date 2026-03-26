@@ -84,13 +84,13 @@
   ],
   "images": [
     {
-      "uri": "Gear_baseColor.png"
+      "uri": "Gear_BaseColor.png"
     },
     {
       "uri": "Gear_occlusionRoughnessMetallic.png"
     },
     {
-      "uri": "Gear_normal.png"
+      "uri": "Gear_Normal.png"
     },
     {
       "uri": "Gear_emissive.png"

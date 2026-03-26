@@ -1,0 +1,23 @@
+{
+  "asset_info": {
+    "name": "Build4_occlusionRoughnessMetallic.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 15759080785804925444
+  },
+  "descriptor_version": 1,
+  "guid": "a8e232d8-24bd-f148-b8d8-848747b4d484",
+  "import_settings": {
+    "android_allow_astc_hdr": false,
+    "android_bake_cubemap": false,
+    "android_compression": "ASTC_4x4",
+    "android_skybox_source_format": "R16G16B16A16",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Build4_occlusionRoughnessMetallic.png"
+  }
+}

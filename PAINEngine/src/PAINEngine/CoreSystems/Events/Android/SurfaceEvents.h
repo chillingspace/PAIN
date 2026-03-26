@@ -23,6 +23,8 @@ namespace PAIN {
         private:
             int width, height;
         public:
+            bool contextWasLost = false;
+            
             SurfaceCreated(void* window, int w, int h) 
                 : SurfaceEvent(window), width(w), height(h) {}
 
@@ -32,6 +34,7 @@ namespace PAIN {
             std::string toString() override {
                 std::stringstream ss;
                 ss << "Android Surface Created: " << width << "x" << height;
+                if (contextWasLost) ss << " (context was lost)";
                 return ss.str();
             }
 

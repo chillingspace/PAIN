@@ -9,14 +9,17 @@
 #include "ECS/Components/cEntity.h"
 #include "ECS/Components/cMeshRenderer.h"
 #include "ECS/Components/cAudioSource.h"
+#include "ECS/Components/cScript.h"
 #include "CoreSystems/Renderer/GraphicsSettings.h"
 #include "CoreSystems/Serialization/sSerialization.h"
 #include "CoreSystems/Renderer/text.h"
 #include "CoreSystems/Renderer/skybox.h"
+#include "CoreSystems/Assets/Types/Prefab.h"
 #include "CoreSystems/Prefabs/sPrefab.h"
 #include "ECS/Components/cAnimation.h"
 #include "CoreSystems/Renderer/sRenderer.h"
 #include "Systems/Scripting/GameScriptingSystem.h"
+#include "ScriptModelPreloadScanner.h"
 
 #include "LayeredSystems/LevelEditor/Panels/ResourcePanel.h"
 #include "LoadingScreen.h"
@@ -31,6 +34,251 @@
 #endif
 namespace PAIN {
 	namespace Scene {
+        namespace {
+
+            void InsertPreloadAsset(std::unordered_set<Assets::GUID>& assetSet, const Assets::GUID& id) {
+                if (id.IsValid()) {
+                    assetSet.insert(id);
+                }
+            }
+
+            std::optional<std::string> ReadTextFile(const std::shared_ptr<Path::Path>& pathService,
+                                                    const std::string& virtualPath) {
+                if (!pathService) {
+                    return std::nullopt;
+                }
+
+                auto stream = pathService->createFileStream(virtualPath, Path::FileMode::Read, true);
+                if (!stream || !stream->good()) {
+                    return std::nullopt;
+                }
+
+                const size_t byteCount = stream->size();
+                std::string text(byteCount, '\0');
+                if (byteCount > 0) {
+                    const size_t readBytes = stream->read(text.data(), byteCount);
+                    text.resize(readBytes);
+                }
+
+                return text;
+            }
+
+            void InsertMaterialDependencies(const std::shared_ptr<Assets::Manager>& assetManager,
+                                            const std::shared_ptr<Assets::Material>& materialAsset,
+                                            std::unordered_set<Assets::GUID>& preloadAssets) {
+                if (!assetManager || !materialAsset) {
+                    return;
+                }
+
+                InsertPreloadAsset(preloadAssets, materialAsset->guid);
+
+                InsertPreloadAsset(preloadAssets, assetManager->findGUID(materialAsset->albedoTexturePath));
+                InsertPreloadAsset(preloadAssets, assetManager->findGUID(materialAsset->normalTexturePath));
+                InsertPreloadAsset(preloadAssets, assetManager->findGUID(materialAsset->metallicTexturePath));
+                InsertPreloadAsset(preloadAssets, assetManager->findGUID(materialAsset->roughnessTexturePath));
+                InsertPreloadAsset(preloadAssets, assetManager->findGUID(materialAsset->aoTexturePath));
+                InsertPreloadAsset(preloadAssets, assetManager->findGUID(materialAsset->emissiveTexturePath));
+                InsertPreloadAsset(preloadAssets, assetManager->findGUID(materialAsset->heightTexturePath));
+                InsertPreloadAsset(preloadAssets, assetManager->findGUID(materialAsset->opacityTexturePath));
+            }
+
+            void InsertModelDependencies(const std::shared_ptr<Assets::Manager>& assetManager,
+                                         const Assets::GUID& modelGuid,
+                                         std::unordered_set<Assets::GUID>& preloadAssets,
+                                         std::unordered_set<Assets::GUID>* preloadedModelGuids = nullptr) {
+                if (!assetManager || !modelGuid.IsValid()) {
+                    return;
+                }
+
+                InsertPreloadAsset(preloadAssets, modelGuid);
+                if (preloadedModelGuids) {
+                    preloadedModelGuids->insert(modelGuid);
+                }
+
+                auto modelAssetOpt = assetManager->getAsset<Assets::Model>(modelGuid);
+                if (!modelAssetOpt.has_value() || !modelAssetOpt.value()) {
+                    return;
+                }
+
+                const auto& modelAsset = modelAssetOpt.value();
+                for (const auto& materialPath : modelAsset->materials) {
+                    const Assets::GUID materialGuid = assetManager->findGUID(materialPath);
+                    if (!materialGuid.IsValid()) {
+                        continue;
+                    }
+
+                    auto materialAssetOpt = assetManager->getAsset<Assets::Material>(materialGuid);
+                    if (materialAssetOpt.has_value() && materialAssetOpt.value()) {
+                        InsertMaterialDependencies(assetManager, materialAssetOpt.value(), preloadAssets);
+                    } else {
+                        InsertPreloadAsset(preloadAssets, materialGuid);
+                    }
+                }
+            }
+
+            void InsertScriptReferencedModelDependencies(const std::shared_ptr<Assets::Manager>& assetManager,
+                                                         const std::shared_ptr<Path::Path>& pathService,
+                                                         const Assets::GUID& scriptGuid,
+                                                         std::unordered_set<Assets::GUID>& preloadAssets,
+                                                         std::unordered_set<Assets::GUID>& preloadedModelGuids) {
+                if (!assetManager || !pathService || !scriptGuid.IsValid()) {
+                    return;
+                }
+
+                std::shared_ptr<Assets::IAsset> scriptMeta;
+                try {
+                    scriptMeta = assetManager->getAssetData(scriptGuid);
+                }
+                catch (const std::exception&) {
+                    return;
+                }
+
+                if (!scriptMeta || scriptMeta->type != Assets::Type::Script) {
+                    return;
+                }
+
+                const std::string virtualPath =
+                    pathService->aliasCombineRelative(Path::assets_alias, scriptMeta->shipped_relative_path.string());
+                const auto source = ReadTextFile(pathService, virtualPath);
+                if (!source.has_value()) {
+                    PN_CORE_WARN("[SceneManager] Failed to read script for preload scan: {}", virtualPath);
+                    return;
+                }
+
+                for (const auto& modelName : ExtractSetModelAssetNames(*source)) {
+                    const Assets::GUID modelGuid = assetManager->findByName(modelName);
+                    if (!modelGuid.IsValid() || assetManager->getTypeByGUID(modelGuid) != Assets::Type::Model) {
+                        PN_CORE_WARN("[SceneManager] Script preload scan could not resolve model '{}'", modelName);
+                        continue;
+                    }
+
+                    InsertModelDependencies(assetManager, modelGuid, preloadAssets, &preloadedModelGuids);
+                }
+            }
+
+            void InsertScriptReferencesFromEntityJson(const nlohmann::json& entityJson,
+                                                      const std::shared_ptr<Assets::Manager>& assetManager,
+                                                      const std::shared_ptr<Path::Path>& pathService,
+                                                      std::unordered_set<Assets::GUID>& preloadAssets,
+                                                      std::unordered_set<Assets::GUID>& preloadedModelGuids,
+                                                      std::unordered_set<Assets::GUID>& visitedPrefabs);
+
+            void InsertScriptReferencesFromPrefab(const Assets::GUID& prefabGuid,
+                                                  const std::shared_ptr<Assets::Manager>& assetManager,
+                                                  const std::shared_ptr<Path::Path>& pathService,
+                                                  std::unordered_set<Assets::GUID>& preloadAssets,
+                                                  std::unordered_set<Assets::GUID>& preloadedModelGuids,
+                                                  std::unordered_set<Assets::GUID>& visitedPrefabs) {
+                if (!assetManager || !prefabGuid.IsValid() || visitedPrefabs.count(prefabGuid)) {
+                    return;
+                }
+
+                visitedPrefabs.insert(prefabGuid);
+
+                auto prefabOpt = assetManager->getAsset<Prefab::PrefabAsset>(prefabGuid);
+                if (!prefabOpt.has_value() || !prefabOpt.value()) {
+                    return;
+                }
+
+                InsertPreloadAsset(preloadAssets, prefabGuid);
+
+                for (const auto& prefabEntity : prefabOpt.value()->entities) {
+                    InsertScriptReferencesFromEntityJson(
+                        prefabEntity,
+                        assetManager,
+                        pathService,
+                        preloadAssets,
+                        preloadedModelGuids,
+                        visitedPrefabs);
+                }
+            }
+
+            void InsertScriptReferencesFromEntityJson(const nlohmann::json& entityJson,
+                                                      const std::shared_ptr<Assets::Manager>& assetManager,
+                                                      const std::shared_ptr<Path::Path>& pathService,
+                                                      std::unordered_set<Assets::GUID>& preloadAssets,
+                                                      std::unordered_set<Assets::GUID>& preloadedModelGuids,
+                                                      std::unordered_set<Assets::GUID>& visitedPrefabs) {
+                if (!entityJson.is_object()) {
+                    return;
+                }
+
+                const auto entityIt = entityJson.find("Entity");
+                if (entityIt == entityJson.end() || !entityIt->is_object()) {
+                    return;
+                }
+
+                const auto componentsIt = entityIt->find("Components");
+                if (componentsIt == entityIt->end() || !componentsIt->is_object()) {
+                    return;
+                }
+
+                if (const auto scriptsIt = componentsIt->find("Scripts");
+                    scriptsIt != componentsIt->end() && scriptsIt->is_object()) {
+                    const auto scriptArrayIt = scriptsIt->find("scripts");
+                    if (scriptArrayIt != scriptsIt->end() && scriptArrayIt->is_array()) {
+                        for (const auto& scriptJson : *scriptArrayIt) {
+                            if (!scriptJson.is_object()) {
+                                continue;
+                            }
+
+                            if (scriptJson.contains("enabled") && !scriptJson.value("enabled", true)) {
+                                continue;
+                            }
+
+                            if (scriptJson.contains("script_asset") && scriptJson["script_asset"].is_string()) {
+                                InsertScriptReferencedModelDependencies(
+                                    assetManager,
+                                    pathService,
+                                    Assets::GUID(scriptJson["script_asset"].get<std::string>()),
+                                    preloadAssets,
+                                    preloadedModelGuids);
+                            }
+                        }
+                    }
+                }
+
+                if (const auto prefabIt = componentsIt->find("PrefabInstance");
+                    prefabIt != componentsIt->end() && prefabIt->is_object() &&
+                    prefabIt->contains("sourcePrefabGUID") && (*prefabIt)["sourcePrefabGUID"].is_string()) {
+                    InsertScriptReferencesFromPrefab(
+                        Assets::GUID((*prefabIt)["sourcePrefabGUID"].get<std::string>()),
+                        assetManager,
+                        pathService,
+                        preloadAssets,
+                        preloadedModelGuids,
+                        visitedPrefabs);
+                }
+            }
+
+            void ExpandScenePreloadAssetsFromScriptReferences(const nlohmann::json& entityData,
+                                                              const std::shared_ptr<Assets::Manager>& assetManager,
+                                                              const std::shared_ptr<Path::Path>& pathService,
+                                                              std::unordered_set<Assets::GUID>& preloadAssets,
+                                                              std::unordered_set<Assets::GUID>& preloadedModelGuids) {
+                if (!entityData.is_object() || !assetManager || !pathService) {
+                    return;
+                }
+
+                const auto entitiesIt = entityData.find("Entities");
+                if (entitiesIt == entityData.end() || !entitiesIt->is_array()) {
+                    return;
+                }
+
+                std::unordered_set<Assets::GUID> visitedPrefabs;
+                for (const auto& entityJson : *entitiesIt) {
+                    InsertScriptReferencesFromEntityJson(
+                        entityJson,
+                        assetManager,
+                        pathService,
+                        preloadAssets,
+                        preloadedModelGuids,
+                        visitedPrefabs);
+                }
+            }
+
+        } // namespace
+
 
 		/* =========================================================================== */
 		/*                                CAMERAS                                      */
@@ -358,8 +606,16 @@ namespace PAIN {
 					LightSources::get().create(world_light_name);
 				}
 				getWorldLight()->L_intensity = env.worldLightIntensity;
-				getWorldLight()->direction = glm::normalize(glm::vec3{ -0.5f, -0.5f, -0.2f });
-				getWorldLight()->setShadowType(Light::SHADOW_TYPES::MAPPED);
+				getWorldLight()->direction = glm::normalize(env.worldLightDirection);
+				getWorldLight()->position = env.worldLightPosition;
+				getWorldLight()->shadow_source_follow_distance = env.worldLightShadowFollowDistance;
+				getWorldLight()->far_plane = env.worldLightFarPlane;
+				getWorldLight()->setShadowResolution(env.worldLightShadowResolution);
+				bool shadowResult = getWorldLight()->setShadowType(
+					env.worldLightShadowsEnabled ? Light::SHADOW_TYPES::MAPPED : Light::SHADOW_TYPES::NONE);
+				PN_CORE_INFO("[SceneManager] World light shadow setup: result={}, shadowType={}, shadowTex={}, pos=({:.1f},{:.1f},{:.1f})",
+					shadowResult, static_cast<int>(getWorldLight()->getShadowType()), getWorldLight()->getShadowTexture(),
+					env.worldLightPosition.x, env.worldLightPosition.y, env.worldLightPosition.z);
 				getWorldLight()->type = Light::TYPES::DIRECTIONAL;
 			}
 
@@ -654,12 +910,16 @@ namespace PAIN {
 
 			//Clear scene asset GUIDS
 			scene_asset.assets_to_cache.clear();
+            preloaded_model_guids.clear();
 
 			//Get all models in the current ecs registry
 			auto ecs = services->get<ECS::Controller>();
 			auto& registry = ecs->getRegistry();
-			auto view = registry.view<ModelRenderer>();
+			auto modelView = registry.view<ModelRenderer>();
+            auto audioView = registry.view<Audio::AudioSource>();
+            auto scriptView = registry.view<Scripts>();
 			auto assetManager = services->get<Assets::Manager>();
+            auto pathService = services->get<Path::Path>();
 
 			//Lambda to cache function
 			auto cacheAsset = [&](Assets::GUID const& id) {
@@ -668,7 +928,7 @@ namespace PAIN {
 				};
 
 			// Collect all unique models and build combined vertex/index buffers
-			for (auto e : view) {
+			for (auto e : modelView) {
 
 				//Get mdl asset
 				auto mdl = ecs->getEntityComponent<ModelRenderer>(e);
@@ -772,14 +1032,44 @@ namespace PAIN {
 					}
 				}
 
-				//Get audio asset
-				auto audio = ecs->getEntityComponent<Audio::AudioSource>(e);
-				if (audio.has_value()) {
-
-					//Cache the audio source
-					cacheAsset(audio.value().get().selected_audio);
-				}
 			}
+
+            for (auto e : audioView) {
+                auto audio = ecs->getEntityComponent<Audio::AudioSource>(e);
+                if (audio.has_value()) {
+                    cacheAsset(audio.value().get().selected_audio);
+                }
+            }
+
+            for (auto e : scriptView) {
+                auto scripts = ecs->getEntityComponent<Scripts>(e);
+                if (!scripts.has_value()) {
+                    continue;
+                }
+
+                for (const auto& script : scripts.value().get().scripts) {
+                    if (!script.enabled || !script.script_asset.IsValid()) {
+                        continue;
+                    }
+
+                    InsertScriptReferencedModelDependencies(
+                        assetManager,
+                        pathService,
+                        script.script_asset,
+                        scene_asset.assets_to_cache,
+                        preloaded_model_guids);
+                }
+            }
+
+            cacheAsset(curr_skybox_id);
+            if (loadingScreen) {
+                cacheAsset(loadingScreen->getBackgroundTexture());
+            }
+            cacheAsset(gs.minimap_icon_player_guid);
+            cacheAsset(gs.minimap_icon_danger_guid);
+            cacheAsset(gs.minimap_icon_item_guid);
+            cacheAsset(gs.minimap_icon_objective_guid);
+            cacheAsset(gs.minimap_icon_wall_guid);
 		}
 
 		void SceneManager::captureSceneVariables(SceneAsset& scene_asset) {
@@ -807,6 +1097,17 @@ namespace PAIN {
 			scene_asset.environment.cameraLightIntensity = getCameraLight() ? getCameraLight()->L_intensity : scene_asset.environment.cameraLightIntensity;
 			scene_asset.environment.worldLightIntensity = getWorldLight() ? getWorldLight()->L_intensity : scene_asset.environment.worldLightIntensity;
 			scene_asset.environment.skyboxGUID = curr_skybox_id;
+
+			// Capture world light shadow settings from live light
+			if (getWorldLight()) {
+				Light* wl = getWorldLight();
+				scene_asset.environment.worldLightDirection = wl->direction;
+				scene_asset.environment.worldLightPosition = wl->position;
+				scene_asset.environment.worldLightShadowFollowDistance = wl->shadow_source_follow_distance;
+				scene_asset.environment.worldLightShadowResolution = wl->getShadowResolution();
+				scene_asset.environment.worldLightFarPlane = wl->far_plane;
+				scene_asset.environment.worldLightShadowsEnabled = (wl->getShadowType() == Light::SHADOW_TYPES::MAPPED);
+			}
 
 			//Other graphic settings
 			scene_asset.environment.useWorldLight = gs.world_light;
@@ -924,6 +1225,12 @@ namespace PAIN {
 				{"cameraLightIntensity", {scn_asset.environment.cameraLightIntensity.x, scn_asset.environment.cameraLightIntensity.y, scn_asset.environment.cameraLightIntensity.z}},
 				{"worldLightIntensity", {scn_asset.environment.worldLightIntensity.x, scn_asset.environment.worldLightIntensity.y, scn_asset.environment.worldLightIntensity.z}},
 				{"useWorldLight", scn_asset.environment.useWorldLight},
+				{"worldLightDirection", {scn_asset.environment.worldLightDirection.x, scn_asset.environment.worldLightDirection.y, scn_asset.environment.worldLightDirection.z}},
+				{"worldLightPosition", {scn_asset.environment.worldLightPosition.x, scn_asset.environment.worldLightPosition.y, scn_asset.environment.worldLightPosition.z}},
+				{"worldLightShadowFollowDistance", scn_asset.environment.worldLightShadowFollowDistance},
+				{"worldLightShadowResolution", scn_asset.environment.worldLightShadowResolution},
+				{"worldLightFarPlane", scn_asset.environment.worldLightFarPlane},
+				{"worldLightShadowsEnabled", scn_asset.environment.worldLightShadowsEnabled},
 				{"useIBL", scn_asset.environment.useIBL},
 				{"useDiffuseMap", scn_asset.environment.useDiffuseMap},
 				{"useAOMap", scn_asset.environment.useAOMap},
@@ -1085,20 +1392,33 @@ namespace PAIN {
 			std::atomic<bool> loadingComplete{ false };
 			std::atomic<bool> loadingFailed{ false };
 			std::string errorMessage;
+            std::unordered_set<Assets::GUID> preloadAssetGuids = scn_asset.assets_to_cache;
+            std::unordered_set<Assets::GUID> preloadedModelGuids;
 			std::thread workerThread([&]() {
 				try {
 					PN_CORE_INFO("[AsyncLoader] Worker thread started");
 
+                    loadingScreen->setStatus("Analyzing scripted preload assets...");
+                    loadingScreen->setProgress(0.05f);
+                    ExpandScenePreloadAssetsFromScriptReferences(
+                        scn_asset.entityData,
+                        assetManager,
+                        services->get<Path::Path>(),
+                        preloadAssetGuids,
+                        preloadedModelGuids);
+
 					// Step 1: Load all assets (CPU-only, thread-safe)
 					loadingScreen->setStatus("Loading scene assets...");
 					loadingScreen->setProgress(0.1f);
-					const auto& assetGuids = scn_asset.assets_to_cache;
+					const auto& assetGuids = preloadAssetGuids;
 					size_t totalAssets = assetGuids.size();
 					size_t loadedAssets = 0;
 					PN_CORE_INFO("[AsyncLoader] Loading {} assets", totalAssets);
 					for (const auto& guid : assetGuids) {
 						if(assetManager->cacheAsset(guid)) loadedAssets++;
-						float progress = 0.1f + (loadedAssets / (float)totalAssets) * 0.6f;
+						float progress = totalAssets == 0
+                            ? 0.7f
+                            : 0.1f + (loadedAssets / static_cast<float>(totalAssets)) * 0.6f;
 						loadingScreen->setProgress(progress);
 						if (loadedAssets % 10 == 0) {
 							PN_CORE_INFO("[AsyncLoader] Loaded {}/{} assets", loadedAssets, totalAssets);
@@ -1138,6 +1458,8 @@ namespace PAIN {
 				return;
 			}
 
+            preloaded_model_guids = std::move(preloadedModelGuids);
+
 			// ========================================
 			// PHASE 5: Finalize on Main Thread (GPU)
 			// ========================================
@@ -1162,7 +1484,8 @@ namespace PAIN {
 			// Full rebuild of scene vbo
 			auto renderer = services->get<sRenderer>();
 			renderer->w_renderer->needsFullRebuild = true;
-			renderer->w_renderer->vboDirty = true;
+			renderer->w_renderer->vboDirty = false;
+            renderer->initSceneVbo();
 
 #ifdef _DEBUG
 #ifdef PN_PLATFORM_WINDOWS
@@ -1225,56 +1548,6 @@ namespace PAIN {
 				std::shared_ptr<Assets::Model> mdl;
 
 #ifdef PN_PLATFORM_WINDOWS
-				std::filesystem::path dm_path = "game/models/damagedhelmet/DamagedHelmet.mesh";
-#else	
-				std::filesystem::path dm_path = "game\\models\\damagedhelmet\\DamagedHelmet.mesh";
-#endif
-				//Get model
-				PN_CORE_INFO("Attempting to add {} to scene", dm_path.string());
-				mdl_opt = asset_manager->getAsset<Assets::Model>(dm_path);
-				if (mdl_opt.has_value()) {
-					mdl = mdl_opt.value();
-
-					auto e = AddObject(mdl, "damaged_helmet", { 0.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(1.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
-				}
-
-
-#ifdef PN_PLATFORM_WINDOWS
-				std::filesystem::path fox_path = "game/models/Fox.mesh";
-#else	
-				std::filesystem::path fox_path = "game\\models\\Fox.mesh";
-#endif
-				//Get model
-				PN_CORE_INFO("Attempting to add {} to scene", fox_path.string());
-				mdl_opt = asset_manager->getAsset<Assets::Model>(fox_path);
-				if (mdl_opt.has_value()) {
-					mdl = mdl_opt.value();
-
-					auto e = AddObject(mdl, "fox", { 5.f, 1.5f, 1.f }, glm::angleAxis(glm::radians(-90.f), glm::vec3(1.0f, 0.0f, 0.0f)), glm::vec3{ 0.05f });
-				}
-
-
-#ifdef PN_PLATFORM_WINDOWS
-				std::filesystem::path bs_path = "game/models/brainstem/BrainStem.mesh";
-#else	
-				std::filesystem::path bs_path = "game\\models\\brainstem\\BrainStem.mesh";
-#endif
-				//Get model
-
-				PN_CORE_INFO("Attempting to add {} to scene", bs_path.string());
-				mdl_opt = asset_manager->getAsset<Assets::Model>(bs_path);
-				if (mdl_opt.has_value()) {
-					mdl = mdl_opt.value();
-					//mdl->materials[0].metallic = 0.f;
-					//mdl->materials[0].roughness = 1.f;
-					//mdl->materials[0].baseColor = { 0.3f, 0.3f, 0.3f };
-					auto e = AddObject(mdl, "brainstem_model", { 0.f, 0.f, -10.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(0.0f, 0.0f, 0.0f)), { 5.f, 5.f, 5.f });
-				}
-				else {
-					throw std::runtime_error("animation obj err");
-				}
-
-#ifdef PN_PLATFORM_WINDOWS
 				std::filesystem::path fh_path = "game/models/Frog_Anim_Gear.mesh";
 #else	
 				std::filesystem::path fh_path = "game\\models\\Frog_Anim_Gear.mesh";
@@ -1287,7 +1560,7 @@ namespace PAIN {
 					//mdl->materials[0].metallic = 0.f;
 					//mdl->materials[0].roughness = 1.f;
 					//mdl->materials[0].baseColor = { 0.3f, 0.3f, 0.3f };
-					auto e = AddObject(mdl, "frog_hop", { -3.f, 2.f, 0.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(0.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
+					auto e = AddObject(mdl, "frog_hop", { 0.0f, 0.0f, 0.f }, glm::angleAxis(glm::radians(0.f), glm::vec3(0.0f, 0.0f, 0.0f)), { 1.f, 1.f, 1.f });
 				}
 				else {
 					throw std::runtime_error("animation obj err");
@@ -1788,6 +2061,7 @@ namespace PAIN {
 			
 			// Clear scene asset reference (but keep the object if we're reloading)
 			// currentSceneAsset.reset();
+            preloaded_model_guids.clear();
 
 			m_cameraBookmarks = {};
 		}
@@ -1837,6 +2111,7 @@ namespace PAIN {
 			buildEntitiesFromAsset(scene_snapshot);	
 			services->get<sRenderer>()->initSceneVbo();
 			services->get<Serialization::Service>()->markSceneChanged();
+            preloaded_model_guids.clear();
 
 			setPlaying(false);
 

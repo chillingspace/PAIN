@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "android_tone_gamma.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 3408755472521258745
+  },
+  "descriptor_version": 1,
+  "guid": "d1363c65-66e0-4a4a-ac5d-d47aee03b4fa",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_tone_gamma.vert"
+  }
+}

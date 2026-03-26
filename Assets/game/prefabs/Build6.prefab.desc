@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Build6.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 16937543221169628443
+  },
+  "descriptor_version": 1,
+  "guid": "6d7e2178-c440-4f40-aae4-785b17d1470f",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Build6.prefab"
+  }
+}

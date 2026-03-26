@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Build3.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 8497463083984816460
+  },
+  "descriptor_version": 1,
+  "guid": "6fbc11fd-42c2-6e4d-b6f1-78fa8f0431cd",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Build3.prefab"
+  }
+}

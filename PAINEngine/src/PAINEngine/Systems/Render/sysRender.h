@@ -5,6 +5,7 @@
 
 #include "ECS/System/ISystem.h"
 #include "CoreSystems/Renderer/sRenderer.h"
+#include "Systems/Render/MinimapStyle.h"
 
 namespace PAIN {
     namespace Render {
@@ -12,6 +13,17 @@ namespace PAIN {
         //Rendering system
         class System : public ECS::System::ISystem {
         private:
+            float minimap_threat_time_ = 0.0f;
+            std::vector<entt::entity> minimap_marker_entities_;
+            std::vector<entt::entity> minimap_danger_entities_;
+            std::vector<glm::vec2> minimap_danger_fill_vertices_;
+            std::vector<glm::vec2> minimap_danger_line_vertices_;
+            std::vector<glm::vec2> minimap_danger_inner_fill_vertices_;
+            std::vector<glm::vec2> minimap_danger_inner_line_vertices_;
+            std::vector<glm::vec2> minimap_grid_minor_line_vertices_;
+            std::vector<glm::vec2> minimap_grid_major_line_vertices_;
+            std::vector<MinimapWallCacheFingerprintEntry> minimap_wall_fingerprint_entries_;
+            std::unordered_set<uint32_t> minimap_entity_dedupe_;
 
             //Internal helpers
             void InitializeModelRenderer(entt::entity entity, ModelRenderer& component);
