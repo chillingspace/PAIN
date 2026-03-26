@@ -13,6 +13,8 @@
 #include "Systems/Particle/sysParticleSystem.h"
 #include "CoreSystems/Assets/Types/Shader.h"
 #include "CoreSystems/Assets/Types/Texture.h"
+#include "Systems/Render/MinimapStyle.h"
+#include <glm/gtc/matrix_transform.hpp>
 
 #ifdef _DEBUG
 #include "LayeredSystems/LevelEditor/Editor.h"
@@ -32,13 +34,11 @@ namespace PAIN {
 
 			// Get asset manager
 			auto assetManager = services.lock()->get<Assets::Manager>();
+            auto rendererService = services.lock()->get<sRenderer>();
 
 			// Check for valid GUID
 			if (!component.modelGUID.IsValid())
 				return;
-
-			// Initiate scene VBO update
-			services.lock()->get<sRenderer>()->w_renderer->vboDirty = true;
 
 			// Set prev GUID
 			component.prevModelGUID = component.modelGUID;
@@ -58,6 +58,11 @@ namespace PAIN {
 				PN_CORE_ERROR("Failed to load model asset for entity {}", (uint32_t)entity);
 				return;
 			}
+
+            if (rendererService && rendererService->w_renderer &&
+                !rendererService->w_renderer->hasUploadedModel(component.cachedModelAsset->vpath)) {
+                rendererService->w_renderer->vboDirty = true;
+            }
 
 			// Cache model
 			const auto& modelAsset = component.cachedModelAsset;
@@ -82,6 +87,11 @@ namespace PAIN {
 					// Check valid material asset
 					if (materialAsset) {
 						matInstance.materialGUID = materialAsset->guid;
+						
+						// DEBUG: Log material GUID assignment
+						if (!materialAsset->guid.IsValid()) {
+							PN_CORE_TRACE("[Material Load] Material {} has invalid GUID!", materialPath.string());
+						}
 
 						// Init material overrides
 						matInstance.albedoTextureOverride =
@@ -118,10 +128,17 @@ namespace PAIN {
 			component.submeshCaches.clear();
 			component.submeshCaches.resize(modelAsset->submeshes.size());
 
+			// DEBUG: Log material/submesh counts
+			PN_CORE_TRACE("[Material Cache] Model {} has {} submeshes, {} materials",
+				modelAsset->vpath, modelAsset->submeshes.size(), component.materials.size());
+
 			for (size_t i = 0; i < modelAsset->submeshes.size(); ++i) {
 				const auto& submesh = modelAsset->submeshes[i];
 
+				// DEBUG: Log submesh material index
 				if (submesh.materialIndex >= component.materials.size()) {
+					PN_CORE_WARN("[Material Cache] Submesh {} has invalid materialIndex {} (only {} materials available)", 
+						i, submesh.materialIndex, component.materials.size());
 					continue;
 				}
 
@@ -133,6 +150,12 @@ namespace PAIN {
 					assetManager->getAsset<Assets::Material>(material->materialGUID);
 				auto materialAsset =
 					materialAssetOpt.has_value() ? materialAssetOpt.value() : nullptr;
+
+				if (!materialAsset) {
+					// DEBUG: Log why material lookup failed
+					PN_CORE_WARN("[Material Cache] Submesh {} material lookup failed. GUID: {} (valid: {})", 
+						i, material->materialGUID.ToString(), material->materialGUID.IsValid());
+				}
 
 				if (materialAsset) {
 					// Cache base material properties
@@ -147,18 +170,30 @@ namespace PAIN {
 					cache.useEmissionOverride = material->useOverrides;
 					cache.emissionOverride = material->useOverrides ? material->emissiveOverride : glm::vec3(0.0f);
 
-					// Helper lambda to get GL texture handle from GUID
-					auto getTextureHandle = [&](const Assets::GUID& guid) -> GLuint {
-						if (!guid.IsValid())
+					// Helper lambda to get GL texture handle from GUID with debug logging
+					// Only logs warnings for non-empty paths (empty paths are expected for solid-color materials)
+					auto getTextureHandle = [&](const Assets::GUID& guid, const char* textureType, const std::filesystem::path& texturePath) -> GLuint {
+						// Skip logging for empty paths - these are expected for solid-color materials
+						if (!guid.IsValid()) {
+							if (!texturePath.empty()) {
+								PN_CORE_TRACE("[Texture Cache] Invalid GUID for {} texture (path: {})", textureType, texturePath.string());
+							}
 							return 0;
+						}
 						auto texOpt = assetManager->getAsset<Assets::Texture>(guid);
-						if (!texOpt.has_value() || !texOpt.value())
+						if (!texOpt.has_value() || !texOpt.value()) {
+							PN_CORE_WARN("[Texture Cache] Failed to load {} texture asset (GUID: {}, path: {})", textureType, guid.ToString(), texturePath.string());
 							return 0;
+						}
 						
 						auto tex = texOpt.value();
 						// Ensure texture is uploaded to GPU before caching the handle
 						if (tex->gl_texture == 0) {
 							services.lock()->get<sRenderer>()->uploadTexture(tex);
+							if (tex->gl_texture == 0) {
+								PN_CORE_WARN("[Texture Cache] Failed to upload {} texture to GPU (path: {})", textureType, texturePath.string());
+								return 0;
+							}
 						}
 						return tex->gl_texture;
 					};
@@ -167,37 +202,44 @@ namespace PAIN {
 					cache.albedoTexture = getTextureHandle(
 						material->useOverrides
 							? material->albedoTextureOverride
-							: assetManager->findGUID(materialAsset->albedoTexturePath));
+							: assetManager->findGUID(materialAsset->albedoTexturePath),
+						"albedo", materialAsset->albedoTexturePath);
 
 					cache.normalTexture = getTextureHandle(
 						material->useOverrides
 							? material->normalTextureOverride
-							: assetManager->findGUID(materialAsset->normalTexturePath));
+							: assetManager->findGUID(materialAsset->normalTexturePath),
+						"normal", materialAsset->normalTexturePath);
 
 					cache.metallicTexture = getTextureHandle(
 						material->useOverrides
 							? material->metallicTextureOverride
-							: assetManager->findGUID(materialAsset->metallicTexturePath));
+							: assetManager->findGUID(materialAsset->metallicTexturePath),
+						"metallic", materialAsset->metallicTexturePath);
 
 					cache.roughnessTexture = getTextureHandle(
 						material->useOverrides
 							? material->roughnessTextureOverride
-							: assetManager->findGUID(materialAsset->roughnessTexturePath));
+							: assetManager->findGUID(materialAsset->roughnessTexturePath),
+						"roughness", materialAsset->roughnessTexturePath);
 
 					cache.aoTexture = getTextureHandle(
 						material->useOverrides
 							? material->aoTextureOverride
-							: assetManager->findGUID(materialAsset->aoTexturePath));
+							: assetManager->findGUID(materialAsset->aoTexturePath),
+						"ao", materialAsset->aoTexturePath);
 
 					cache.emissiveTexture = getTextureHandle(
 						material->useOverrides
 							? material->emissiveTextureOverride
-							: assetManager->findGUID(materialAsset->emissiveTexturePath));
+							: assetManager->findGUID(materialAsset->emissiveTexturePath),
+						"emissive", materialAsset->emissiveTexturePath);
 
 					cache.opacityTexture = getTextureHandle(
 						material->useOverrides
 							? material->opacityTextureOverride
-							: assetManager->findGUID(materialAsset->opacityTexturePath));
+							: assetManager->findGUID(materialAsset->opacityTexturePath),
+						"opacity", materialAsset->opacityTexturePath);
 
 					// ========================================
 					// ORM Channel Mask Detection
@@ -218,6 +260,9 @@ namespace PAIN {
 					}
 
 					cache.cacheValid = true;
+				} else {
+					PN_CORE_WARN("[Texture Cache] Material asset not found for submesh {} (GUID: {})", 
+						i, material->materialGUID.ToString());
 				}
 			}
 
@@ -237,6 +282,7 @@ namespace PAIN {
 		}
 
 		void System::onUpdate(AppTiming timing, entt::registry& registry) {
+            minimap_threat_time_ += glm::max(0.0f, timing.unscaled_dt);
 			if (g_ThermalProfiler) {
 				g_ThermalProfiler->BeginFrame();
 			}
@@ -375,9 +421,6 @@ namespace PAIN {
 #endif
 
 				// Render all passes
-				if (g_ThermalProfiler) {
-					g_ThermalProfiler->BeginFrame();
-				}
 				GraphicsSettings::get().stats.objects_culled = 0;
 				GraphicsSettings::get().stats.objects_rendered = 0;
 				GraphicsSettings::get().stats.shadow_objects_culled = 0;
@@ -508,6 +551,7 @@ namespace PAIN {
 				return;
 			static std::unordered_set<std::string> warnedNonShadowPipeAssets;
 
+#ifdef _DEBUG
 			// DEBUG: Log world light shadow state
 			if (auto worldLightOpt = LightSources::get().get("world")) {
 				Light& wl = worldLightOpt.value();
@@ -522,6 +566,7 @@ namespace PAIN {
 						wl.enableStaticShadowCaching);
 				}
 			}
+#endif
 
 			auto renderGroup =
 				registry.group<ModelRenderer>(entt::get<WorldTransform, Entity::Layer>);
@@ -661,6 +706,63 @@ namespace PAIN {
 			};
 			std::unordered_map<std::string, InstanceGroup> instanceGroups;
 
+			// OPTIMIZATION: Material-sorted render items for non-instanced draws
+			// Reduces texture bindings and state changes between draws
+			struct RenderItem {
+				ModelRenderer* component;
+				glm::mat4 modelMatrix;
+				uint64_t sortKey;  // Material-based sort key for batching
+				
+				static uint64_t HashFNV1a(const void* data, size_t size, uint64_t seed) {
+					const auto* bytes = static_cast<const unsigned char*>(data);
+					uint64_t hash = seed;
+					for (size_t i = 0; i < size; ++i) {
+						hash ^= static_cast<uint64_t>(bytes[i]);
+						hash *= 1099511628211ull;
+					}
+					return hash;
+				}
+
+				static uint64_t HashString(const std::string& value, uint64_t seed) {
+					return HashFNV1a(value.data(), value.size(), seed);
+				}
+
+				// Compute sort key from model + full material set.
+				static uint64_t ComputeSortKey(const ModelRenderer& model) {
+					uint64_t key = 1469598103934665603ull;
+
+					if (model.cachedModelAsset) {
+						const std::string modelPath = model.cachedModelAsset->vpath;
+						key = HashString(modelPath, key);
+					} else {
+						const std::string modelGuid = model.modelGUID.ToString(false);
+						key = HashString(modelGuid, key);
+					}
+
+					for (const auto& mat : model.materials) {
+						const std::string materialGuid = mat.materialGUID.ToString(false);
+						key = HashString(materialGuid, key);
+
+						const unsigned char overrideFlag = mat.useOverrides ? 1u : 0u;
+						key = HashFNV1a(&overrideFlag, sizeof(overrideFlag), key);
+
+						if (mat.useOverrides) {
+							key = HashFNV1a(&mat.baseColorOverride, sizeof(mat.baseColorOverride), key);
+							key = HashFNV1a(&mat.metallicOverride, sizeof(mat.metallicOverride), key);
+							key = HashFNV1a(&mat.roughnessOverride, sizeof(mat.roughnessOverride), key);
+						}
+					}
+
+					key &= 0x7FFFFFFFFFFFFFFFull;
+					if (!model.boneTransforms.empty()) {
+						key |= (1ull << 63);
+					}
+					return key;
+				}
+			};
+			std::vector<RenderItem> renderItems;
+			renderItems.reserve(256);  // Pre-allocate for typical scene size
+
 			// Use structured bindings with .each() for proper group iteration
 			for (auto [entity, model, transform, layer] : renderGroup.each()) {
 				// Components guaranteed to exist by group - no try_get needed!
@@ -717,10 +819,24 @@ namespace PAIN {
 					}
 				}
 
-				// Non-instanced fallback
+				// Collect for material-sorted rendering (non-instanced path)
+				RenderItem item;
+				item.component = &const_cast<ModelRenderer&>(model);
+				item.modelMatrix = model_xform;
+				item.sortKey = RenderItem::ComputeSortKey(model);
+				renderItems.push_back(item);
+			}
+
+			// OPTIMIZATION: Sort render items by material key to reduce state changes
+			std::sort(renderItems.begin(), renderItems.end(),
+				[](const RenderItem& a, const RenderItem& b) {
+					return a.sortKey < b.sortKey;
+				});
+
+			// Render material-sorted items
+			for (const auto& item : renderItems) {
 				rendererService->w_renderer->DrawGeometry(
-					rendererService->m_Scene, const_cast<ModelRenderer&>(model),
-					model_xform);
+					rendererService->m_Scene, *item.component, item.modelMatrix);
 			}
 
 			// Flush instanced batches
@@ -2070,17 +2186,17 @@ namespace PAIN {
 							gs.minimap_border_color.b,
 							glm::max(0.2f, gs.minimap_border_color.a));
 
-						const int border_layers = static_cast<int>(glm::round(border_thickness));
-						if (border_layers > 0) {
-							// For circular minimap, adjust size to fit within the circle
+						const auto drawMinimapBorderOverlay = [&]() {
+							const int border_layers = ComputeMinimapBorderLayerCount(border_thickness);
+							if (border_layers <= 0) {
+								return;
+							}
+
 							float effective_w = map_w;
 							float effective_h = map_h;
-							float center_x = center_x_px;
-							float center_y = center_y_px;
 							float diameter = glm::min(effective_w, effective_h);
 
 							if (gs.minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
-								// Use the smaller dimension as diameter for the circle
 								effective_w = diameter;
 								effective_h = diameter;
 							}
@@ -2089,26 +2205,24 @@ namespace PAIN {
 								const float inset = static_cast<float>(i) + 0.5f;
 
 								if (gs.minimap_shape == GraphicsSettings::MINIMAP_SHAPE_CIRCLE) {
-									// Draw circular border using line segments
-									float outer_radius = (diameter * 0.5f) - inset;
-									if (outer_radius <= 0.0f) break;
+									const float outer_radius = (diameter * 0.5f) - inset;
+									if (outer_radius <= 0.0f) {
+										break;
+									}
 
-									const int segments = 64;
-									const float two_pi = glm::two_pi<float>();
-
-									// Convert center pixel position to NDC
-									glm::vec2 center_ndc(
-										(center_x / fbw) * 2.0f - 1.0f,
-										1.0f - (center_y / fbh) * 2.0f);
-
-									// Calculate radius in NDC units (approximate, using width for uniform scaling)
-									float radius_x = (outer_radius / fbw) * 2.0f;
-									float radius_y = (outer_radius / fbh) * 2.0f;
-									glm::vec2 radius_ndc(radius_x, radius_y);
-
-									rendererService->w_renderer->DebugPass2DCircle(center_ndc, radius_ndc, border_color, segments);
-								} else {
-									// Square border (existing code)
+									const glm::vec2 center_ndc(
+										(center_x_px / fbw) * 2.0f - 1.0f,
+										1.0f - (center_y_px / fbh) * 2.0f);
+									const glm::vec2 radius_ndc(
+										(outer_radius / fbw) * 2.0f,
+										(outer_radius / fbh) * 2.0f);
+									rendererService->w_renderer->DebugPass2DCircle(
+										center_ndc,
+										radius_ndc,
+										border_color,
+										64);
+								}
+								else {
 									const float x0 = map_x + inset;
 									const float y0 = map_y + inset;
 									const float x1 = map_x + outer_w - inset;
@@ -2129,7 +2243,7 @@ namespace PAIN {
 									rendererService->w_renderer->DebugPass2DLine(bl, tl, border_color);
 								}
 							}
-						}
+						};
 
 						glm::vec3 player_pos(0.0f);
 						glm::vec3 player_forward = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -2232,7 +2346,7 @@ namespace PAIN {
 							return false;
 							};
 
-						auto worldToMinimapNdc = [&](const glm::vec3& worldPos, bool clampToEdge) {
+						auto worldToMinimapPx = [&](const glm::vec3& worldPos, bool clampToEdge) {
 							const glm::vec2 delta(worldPos.x - player_pos.x, worldPos.z - player_pos.z);
 							float local_x = delta.x;
 							float local_y = -delta.y;
@@ -2255,9 +2369,17 @@ namespace PAIN {
 							const float px = draw_x + u_draw * draw_w;
 							const float py = draw_y + (1.0f - v_draw) * draw_h;
 
+							return glm::vec2(px, py);
+							};
+
+						auto pixelsToNdc = [&](const glm::vec2& pxPos) {
 							return glm::vec2(
-								(px / fbw) * 2.0f - 1.0f,
-								1.0f - (py / fbh) * 2.0f);
+								(pxPos.x / fbw) * 2.0f - 1.0f,
+								1.0f - (pxPos.y / fbh) * 2.0f);
+							};
+
+						auto worldToMinimapNdc = [&](const glm::vec3& worldPos, bool clampToEdge) {
+							return pixelsToNdc(worldToMinimapPx(worldPos, clampToEdge));
 							};
 
 						auto drawDot = [&](const glm::vec3& pos, float radiusPx, const glm::vec4& color) {
@@ -2344,7 +2466,8 @@ namespace PAIN {
 
 						static WallMinimapCache wallCache;
 
-						auto rebuildWallCache = [&](const std::vector<entt::entity>& wallEntities) {
+						auto rebuildWallCache = [&](const std::vector<entt::entity>& wallEntities,
+							uint64_t wallSignature) {
 							wallCache.triangleVerticesXZ.clear();
 
 							for (const entt::entity entity : wallEntities) {
@@ -2394,12 +2517,7 @@ namespace PAIN {
 
 							wallCache.sourceRegistry = &registry;
 							wallCache.wallEntityCount = wallEntities.size();
-                            uint64_t signature = 1469598103934665603ull;
-							for (const entt::entity entity : wallEntities) {
-								signature ^= static_cast<uint64_t>(entity);
-								signature *= 1099511628211ull;
-							}
-							wallCache.wallEntitySignature = signature;
+							wallCache.wallEntitySignature = wallSignature;
 							wallCache.built = true;
 							wallCache.gpuDirty = true;
 							};
@@ -2411,27 +2529,53 @@ namespace PAIN {
 						float nearest_item_dist2 = std::numeric_limits<float>::max();
 						float nearest_objective_dist2 = std::numeric_limits<float>::max();
 
-						std::unordered_set<uint32_t> uniqueMarkerEntities;
-						std::vector<entt::entity> markerEntities;
 						const std::vector<entt::entity> wallEntities = metadata_service->getEntitiesByTag("wall");
-						auto appendTaggedEntities = [&](const char* tag) {
-							for (entt::entity entity : metadata_service->getEntitiesByTag(tag)) {
-								const uint32_t key = static_cast<uint32_t>(entity);
-								if (uniqueMarkerEntities.insert(key).second) {
-									markerEntities.push_back(entity);
+						const auto playerEntities = metadata_service->getEntitiesByTag("Player");
+						const auto enemyEntities = metadata_service->getEntitiesByTag("Enemy");
+						const auto itemEntities = metadata_service->getEntitiesByTag("item");
+						const auto objectiveEntities = metadata_service->getEntitiesByTag("objective");
+						const auto collectibleEntities = metadata_service->getEntitiesByTag("letter_collectible");
+						const auto carriedLetterEntities = metadata_service->getEntitiesByTag("letter_carried");
+						const auto collectionEntities = metadata_service->getEntitiesByTag("letter_collection");
+						const auto taggedDangerEntities = metadata_service->getEntitiesByTag("danger");
+
+						minimap_entity_dedupe_.clear();
+						minimap_marker_entities_.clear();
+						minimap_marker_entities_.reserve(
+							playerEntities.size() +
+							enemyEntities.size() +
+							itemEntities.size() +
+							objectiveEntities.size() +
+							collectibleEntities.size() +
+							carriedLetterEntities.size() +
+							collectionEntities.size());
+
+						auto appendUniqueEntities = [&](const std::vector<entt::entity>& entities,
+							std::vector<entt::entity>& out) {
+								for (const entt::entity entity : entities) {
+									const uint32_t key = static_cast<uint32_t>(entity);
+									if (minimap_entity_dedupe_.insert(key).second) {
+										out.push_back(entity);
+									}
 								}
-							}
 							};
 
-						appendTaggedEntities("Player");
-						appendTaggedEntities("Enemy");
-						appendTaggedEntities("item");
-						appendTaggedEntities("objective");
-						appendTaggedEntities("letter_collectible");
-						appendTaggedEntities("letter_carried");
-						appendTaggedEntities("letter_collection");
+						appendUniqueEntities(playerEntities, minimap_marker_entities_);
+						appendUniqueEntities(enemyEntities, minimap_marker_entities_);
+						appendUniqueEntities(itemEntities, minimap_marker_entities_);
+						appendUniqueEntities(objectiveEntities, minimap_marker_entities_);
+						appendUniqueEntities(collectibleEntities, minimap_marker_entities_);
+						appendUniqueEntities(carriedLetterEntities, minimap_marker_entities_);
+						appendUniqueEntities(collectionEntities, minimap_marker_entities_);
 
-						const bool has_carried_letter = !metadata_service->getEntitiesByTag("letter_carried").empty();
+						minimap_entity_dedupe_.clear();
+						minimap_danger_entities_.clear();
+						minimap_danger_entities_.reserve(
+							taggedDangerEntities.size() + enemyEntities.size());
+						appendUniqueEntities(taggedDangerEntities, minimap_danger_entities_);
+						appendUniqueEntities(enemyEntities, minimap_danger_entities_);
+
+						const bool has_carried_letter = !carriedLetterEntities.empty();
 
 						// Clip all minimap overlays (walls, markers, danger, route, legend, arrows)
 						glEnable(GL_SCISSOR_TEST);
@@ -2454,12 +2598,68 @@ namespace PAIN {
 							rendererService->w_renderer->BeginCircularStencilClip(center_ndc, radius_ndc);
 						}
 
-						if (gs.minimap_show_walls) {
-                            uint64_t currentWallSignature = 1469598103934665603ull;
-							for (const entt::entity entity : wallEntities) {
-								currentWallSignature ^= static_cast<uint64_t>(entity);
-								currentWallSignature *= 1099511628211ull;
+						{
+							const MinimapGridVisualStyle gridStyle = BuildMinimapGridStyle();
+							minimap_grid_minor_line_vertices_.clear();
+							minimap_grid_major_line_vertices_.clear();
+							AppendMinimapTacticalGridLines(
+								minimap_grid_minor_line_vertices_,
+								minimap_grid_major_line_vertices_,
+								glm::vec2(draw_x, draw_y),
+								glm::vec2(draw_x + draw_w, draw_y + draw_h),
+								gridStyle.divisions);
+
+							for (glm::vec2& vertexPx : minimap_grid_minor_line_vertices_) {
+								vertexPx = pixelsToNdc(vertexPx);
 							}
+							for (glm::vec2& vertexPx : minimap_grid_major_line_vertices_) {
+								vertexPx = pixelsToNdc(vertexPx);
+							}
+
+							if (!minimap_grid_minor_line_vertices_.empty()) {
+								rendererService->w_renderer->DebugPass2DLines(
+									minimap_grid_minor_line_vertices_,
+									gridStyle.minorLineColor);
+							}
+							if (!minimap_grid_major_line_vertices_.empty()) {
+								rendererService->w_renderer->DebugPass2DLines(
+									minimap_grid_major_line_vertices_,
+									gridStyle.majorLineColor);
+							}
+						}
+
+						if (gs.minimap_show_walls) {
+                            const MinimapWallVisualStyle wallStyle = BuildMinimapWallStyle(minimap_threat_time_);
+							minimap_wall_fingerprint_entries_.clear();
+							minimap_wall_fingerprint_entries_.reserve(wallEntities.size());
+							for (const entt::entity entity : wallEntities) {
+								if (!registry.valid(entity)) {
+									continue;
+								}
+
+								MinimapWallCacheFingerprintEntry entry;
+								entry.entityKey = static_cast<uint64_t>(static_cast<uint32_t>(entity));
+
+								if (auto* model = registry.try_get<ModelRenderer>(entity)) {
+									entry.modelKey = model->modelGUID.IsValid()
+										? static_cast<uint64_t>(std::hash<Assets::GUID>{}(model->modelGUID))
+										: 0ull;
+								}
+
+								if (auto* wt = registry.try_get<WorldTransform>(entity)) {
+									entry.worldMatrix = wt->matrix;
+								}
+								else if (auto* lt = registry.try_get<LocalTransform>(entity)) {
+									const glm::mat4 translate = glm::translate(glm::mat4(1.0f), lt->position);
+									const glm::mat4 rotate = glm::mat4_cast(lt->rotation);
+									const glm::mat4 scale = glm::scale(glm::mat4(1.0f), lt->scale);
+									entry.worldMatrix = translate * rotate * scale;
+								}
+
+								minimap_wall_fingerprint_entries_.push_back(entry);
+							}
+							const uint64_t currentWallSignature =
+								BuildMinimapWallCacheSignature(minimap_wall_fingerprint_entries_);
 
 							const bool needsRebuild =
 								!wallCache.built ||
@@ -2468,7 +2668,7 @@ namespace PAIN {
 								wallCache.wallEntitySignature != currentWallSignature;
 
 							if (needsRebuild) {
-								rebuildWallCache(wallEntities);
+								rebuildWallCache(wallEntities, currentWallSignature);
 							}
 
 							// Upload wall vertices to GPU when cache was rebuilt
@@ -2478,7 +2678,7 @@ namespace PAIN {
 							}
 
 							// GPU draw path: single draw call with scissor clipping
-							if (rendererService->w_renderer->hasMinimapWallData()) {
+							if (rendererService->w_renderer->canDrawMinimapWalls()) {
 								const float minimapRadius = glm::max(1.0f, gs.minimap_radius);
 								const glm::vec2 playerXZ(player_pos.x, player_pos.z);
 
@@ -2506,17 +2706,21 @@ namespace PAIN {
 								rendererService->w_renderer->DrawMinimapWalls(
 									playerXZ, transformCol0, transformCol1,
 									invDoubleRadius, ndcBase, ndcScale,
-									glm::vec4(0.75f, 0.75f, 0.75f, 0.35f));
+									wallStyle.fillColor,
+									wallStyle.accentColor,
+									wallStyle.patternStrength,
+									wallStyle.patternScale,
+									wallStyle.patternPhase);
 							}
 							else {
 								// Fallback to AABB outline when no triangle data available
 								for (const entt::entity wallEntity : wallEntities) {
-									drawWallFootprint(wallEntity, glm::vec4(0.75f, 0.75f, 0.75f, 1.0f));
+									drawWallFootprint(wallEntity, wallStyle.fallbackOutlineColor);
 								}
 							}
 						}
 
-						for (entt::entity entity : markerEntities) {
+						for (entt::entity entity : minimap_marker_entities_) {
 							glm::vec3 pos(0.0f);
 							if (!getEntityWorldPos(entity, pos)) {
 								continue;
@@ -2576,23 +2780,28 @@ namespace PAIN {
 						}
 
 						if (gs.minimap_show_danger) {
-							std::unordered_set<uint32_t> uniqueDangerEntities;
-							std::vector<entt::entity> dangerEntities;
-							auto appendDangerEntities = [&](const char* tag) {
-								for (entt::entity entity : metadata_service->getEntitiesByTag(tag)) {
-									const uint32_t key = static_cast<uint32_t>(entity);
-									if (uniqueDangerEntities.insert(key).second) {
-										dangerEntities.push_back(entity);
-									}
-								}
-								};
-							appendDangerEntities("danger");
-							appendDangerEntities("Enemy");
+							const MinimapDangerVisualStyle dangerStyle = BuildMinimapDangerStyle(minimap_threat_time_);
+							minimap_danger_fill_vertices_.clear();
+							minimap_danger_line_vertices_.clear();
+							minimap_danger_inner_fill_vertices_.clear();
+							minimap_danger_inner_line_vertices_.clear();
+							const size_t estimatedDangerCount = minimap_danger_entities_.size();
+							const size_t estimatedFillVertices = estimatedDangerCount * 24ull * 3ull;
+							const size_t estimatedLineVertices = estimatedDangerCount * 24ull * 2ull;
+							if (minimap_danger_fill_vertices_.capacity() < estimatedFillVertices) {
+								minimap_danger_fill_vertices_.reserve(estimatedFillVertices);
+							}
+							if (minimap_danger_line_vertices_.capacity() < estimatedLineVertices) {
+								minimap_danger_line_vertices_.reserve(estimatedLineVertices);
+							}
+							if (minimap_danger_inner_fill_vertices_.capacity() < estimatedFillVertices) {
+								minimap_danger_inner_fill_vertices_.reserve(estimatedFillVertices);
+							}
+							if (minimap_danger_inner_line_vertices_.capacity() < estimatedLineVertices) {
+								minimap_danger_inner_line_vertices_.reserve(estimatedLineVertices);
+							}
 
-							// Draw danger zones as red circles
-							std::vector<glm::vec2> dangerLineVertices;
-							dangerLineVertices.reserve(dangerEntities.size() * 24 * 2);
-							for (entt::entity entity : dangerEntities) {
+							for (entt::entity entity : minimap_danger_entities_) {
 								glm::vec3 pos(0.0f);
 								if (!getEntityWorldPos(entity, pos)) {
 									continue;
@@ -2603,12 +2812,10 @@ namespace PAIN {
 									const float maxDistance = 9.0f;
 									const float coneAngleDeg = 32.0f;
 									const float heightDelta = glm::abs(pos.y - player_pos.y);
-									const float coneRadius = glm::tan(glm::radians(coneAngleDeg)) * heightDelta;
-									const float sphereRadius =
-										heightDelta >= maxDistance
-										? 0.0f
-										: std::sqrt(maxDistance * maxDistance - heightDelta * heightDelta);
-									danger_radius = glm::max(0.25f, glm::min(coneRadius, sphereRadius));
+									danger_radius = ComputeLightConeTopDownRadius(
+										heightDelta,
+										maxDistance,
+										glm::radians(coneAngleDeg));
 								}
 								else if (metadata_service->hasTag(entity, "danger_collision")) {
 									danger_radius = 0.5f;
@@ -2623,30 +2830,57 @@ namespace PAIN {
 									continue;
 								}
 
-								const glm::vec2 centerNdc = worldToMinimapNdc(pos, false);
+								const glm::vec2 centerPx = worldToMinimapPx(pos, false);
 								const float radiusPx = (danger_radius / (2.0f * glm::max(1.0f, gs.minimap_radius))) * draw_min;
-								const glm::vec2 radiusNdc((radiusPx / fbw) * 2.0f, (radiusPx / fbh) * 2.0f);
-
-								for (int i = 0; i < 24; ++i) {
-									const float a0 = (static_cast<float>(i) / 24.0f) * glm::two_pi<float>();
-									const float a1 = (static_cast<float>(i + 1) / 24.0f) * glm::two_pi<float>();
-
-									const glm::vec2 p0(
-										centerNdc.x + std::cos(a0) * radiusNdc.x,
-										centerNdc.y + std::sin(a0) * radiusNdc.y);
-									const glm::vec2 p1(
-										centerNdc.x + std::cos(a1) * radiusNdc.x,
-										centerNdc.y + std::sin(a1) * radiusNdc.y);
-
-									dangerLineVertices.push_back(p0);
-									dangerLineVertices.push_back(p1);
+								const size_t fillStart = minimap_danger_fill_vertices_.size();
+								const size_t lineStart = minimap_danger_line_vertices_.size();
+								const size_t innerFillStart = minimap_danger_inner_fill_vertices_.size();
+								const size_t innerLineStart = minimap_danger_inner_line_vertices_.size();
+								AppendMinimapDangerCoverage(
+									minimap_danger_fill_vertices_,
+									minimap_danger_line_vertices_,
+									centerPx,
+									radiusPx,
+									24);
+								AppendMinimapDangerCoverage(
+									minimap_danger_inner_fill_vertices_,
+									minimap_danger_inner_line_vertices_,
+									centerPx,
+									radiusPx * dangerStyle.innerRadiusScale,
+									24);
+								for (size_t i = fillStart; i < minimap_danger_fill_vertices_.size(); ++i) {
+									minimap_danger_fill_vertices_[i] = pixelsToNdc(minimap_danger_fill_vertices_[i]);
+								}
+								for (size_t i = lineStart; i < minimap_danger_line_vertices_.size(); ++i) {
+									minimap_danger_line_vertices_[i] = pixelsToNdc(minimap_danger_line_vertices_[i]);
+								}
+								for (size_t i = innerFillStart; i < minimap_danger_inner_fill_vertices_.size(); ++i) {
+									minimap_danger_inner_fill_vertices_[i] = pixelsToNdc(minimap_danger_inner_fill_vertices_[i]);
+								}
+								for (size_t i = innerLineStart; i < minimap_danger_inner_line_vertices_.size(); ++i) {
+									minimap_danger_inner_line_vertices_[i] = pixelsToNdc(minimap_danger_inner_line_vertices_[i]);
 								}
 							}
 
-							if (!dangerLineVertices.empty()) {
+							if (!minimap_danger_fill_vertices_.empty()) {
+								rendererService->w_renderer->DebugPass2DTrianglesFilled(
+									minimap_danger_fill_vertices_,
+									dangerStyle.fillColor);
+							}
+							if (!minimap_danger_inner_fill_vertices_.empty()) {
+								rendererService->w_renderer->DebugPass2DTrianglesFilled(
+									minimap_danger_inner_fill_vertices_,
+									dangerStyle.innerFillColor);
+							}
+							if (!minimap_danger_inner_line_vertices_.empty()) {
 								rendererService->w_renderer->DebugPass2DLines(
-									dangerLineVertices,
-									glm::vec4(1.0f, 0.15f, 0.15f, 1.0f));
+									minimap_danger_inner_line_vertices_,
+									dangerStyle.innerEdgeColor);
+							}
+							if (!minimap_danger_line_vertices_.empty()) {
+								rendererService->w_renderer->DebugPass2DLines(
+									minimap_danger_line_vertices_,
+									dangerStyle.edgeColor);
 							}
 						}
 
@@ -2787,6 +3021,7 @@ namespace PAIN {
 						}
 
 						glDisable(GL_SCISSOR_TEST);
+						drawMinimapBorderOverlay();
 					}
 				}
 			}

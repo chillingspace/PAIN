@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Build5.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 7047220380195159600
+  },
+  "descriptor_version": 1,
+  "guid": "e54de5ec-4eb9-9040-9f29-599cb8ec5160",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Build5.material"
+  }
+}

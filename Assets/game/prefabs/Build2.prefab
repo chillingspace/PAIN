@@ -31,6 +31,8 @@
                 },
                 "ModelRenderer": {
                     "castShadows": true,
+                    "doubleSidedShadows": false,
+                    "isStatic": false,
                     "materials": [
                         {
                             "albedoTextureOverride": "1c3470fa-7502-ed43-8d9e-123f089cc779",
@@ -47,7 +49,7 @@
                             ],
                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                            "materialGUID": "e4e877e9-e737-2d45-8217-3d7f5ab16384",
+                            "materialGUID": "d623b3f8-5caf-e649-a783-729e6026dfb2",
                             "metallicOverride": 1.0,
                             "metallicTextureOverride": "033d5b32-dede-f947-af8e-9cca54d7f135",
                             "normalTextureOverride": "0201b174-c121-9c4b-8920-c3ef05bb6ad5",
@@ -57,12 +59,40 @@
                             "useOverrides": false
                         }
                     ],
-                    "modelGUID": "26628b2d-06f2-9648-831e-7a2f4253d948",
+                    "modelGUID": "154c6c51-982f-d845-b493-e30d07a80100",
                     "receiveShadows": true,
                     "visible": true
                 },
                 "Name": {
                     "name": "Build2"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        3.5999999046325684,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        14.300000190734863,
+                        7.400000095367432,
+                        13.600000381469727
+                    ],
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 0
+                    },
+                    "physics_enabled": true,
+                    "use_gravity": true,
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
                 }
             },
             "entityGUID": "9deb9768-61b8-9846-bfdd-9bf720e4fdf3"

@@ -1,0 +1,29 @@
+{
+    "flags": {
+        "doubleSided": false,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "emissive": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "metallic": 1.0,
+        "roughness": 1.0
+    },
+    "textures": {
+        "albedo": "game\\textures\\Build5_baseColor.png",
+        "ao": "game\\textures\\Build5_occlusionRoughnessMetallic.png",
+        "emissive": "game\\textures\\Build5_emissive.png",
+        "lightmap": "game\\textures\\Build5_occlusionRoughnessMetallic.png",
+        "metallic": "game\\textures\\Build5_occlusionRoughnessMetallic.png",
+        "normal": "game\\textures\\Build5_normal.png",
+        "roughness": "game\\textures\\Build5_occlusionRoughnessMetallic.png"
+    }
+}

@@ -1,0 +1,103 @@
+{
+    "entities": [
+        {
+            "components": {
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        7.071907043457031,
+                        0.0,
+                        11.774810791015625
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "doubleSidedShadows": false,
+                    "isStatic": false,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "a7d20d82-edcf-9e43-a472-fcdf3d3d6a8c",
+                            "aoTextureOverride": "42a098c2-0b8b-c241-9ebe-8e44a9fe815b",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "c1a6b5fd-5b24-6545-9358-65dd293c1d5e",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "42a098c2-0b8b-c241-9ebe-8e44a9fe815b",
+                            "normalTextureOverride": "d087bd8e-0cb4-ee4c-85bc-8ad4cb2a25e1",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "42a098c2-0b8b-c241-9ebe-8e44a9fe815b",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "f89629ad-fef5-bf45-8454-eeb919b907ed",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "Oiltank"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        2.5,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        3.4000000953674316,
+                        4.900000095367432,
+                        3.4000000953674316
+                    ],
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 0
+                    },
+                    "physics_enabled": true,
+                    "use_gravity": true,
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "57da3616-98c8-b442-9c4e-d12d6be656c9"
+        }
+    ],
+    "prefabName": "Oiltank",
+    "rootEntityGUID": "57da3616-98c8-b442-9c4e-d12d6be656c9"
+}

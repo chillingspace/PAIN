@@ -1,0 +1,35 @@
+{
+  "asset_info": {
+    "name": "Build4.gltf",
+    "type": "Model"
+  },
+  "build_data": {
+    "hash": 9979238667811838739
+  },
+  "descriptor_version": 1,
+  "guid": "9d5ae13d-128d-b546-8965-94ed83d831ea",
+  "import_settings": {
+    "extension": ".mesh",
+    "generate_lods": false,
+    "generate_normals": false,
+    "generate_tangents": true,
+    "import_animations": false,
+    "import_skeleton": false,
+    "improve_cache_locality": true,
+    "join_identical_vertices": true,
+    "lod_levels": 3,
+    "lod_reduction": 0.5,
+    "max_bone_weights": 4,
+    "optimize_meshes": true,
+    "optimize_vertices": true,
+    "quantize_normals": false,
+    "quantize_positions": false,
+    "quantize_uvs": false,
+    "remove_redundant_materials": true,
+    "triangulate": true,
+    "weld_threshold": 0.0010000000474974513
+  },
+  "meta_data": {
+    "source_file": "game\\models\\Build4.gltf"
+  }
+}
