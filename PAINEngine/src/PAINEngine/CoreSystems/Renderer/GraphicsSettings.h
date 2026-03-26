@@ -96,7 +96,9 @@ namespace PAIN {
 		float bloom_strength = 0.8f;			// reduced from 1.0f, compensated by threshold
 		float bloom_threshold = 1.8f;			// slightly lower to catch more blooms with lower strength
 		#else
-		int bloom_quality = 4;					// number of blur passes for bloom
+		// Windows: bloom_quality=4 is 2x more expensive than Android's 2
+		// Reduce to 3 for balanced performance/quality
+		int bloom_quality = 3;					// number of blur passes for bloom (reduced from 4)
 		float bloom_blur_strength = 1.f;		// generally [0.5,10] - higher = bloomier, BUT SLOWER
 		float bloom_strength = 1.f;				// generally [0.0,5.0] - bloom strength is how visible the bloom is
 		float bloom_threshold = 2.f;			// generally [0.8,1.5] - min brightness to bloom
