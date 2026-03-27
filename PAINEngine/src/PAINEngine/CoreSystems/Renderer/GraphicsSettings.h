@@ -138,6 +138,27 @@ namespace PAIN {
 		int swap_interval = 1;  // Windows: Default to 1 (VSync enabled) for smooth visuals
 #endif
 
+		// ========================================
+		// FRAME PACING SYSTEM
+		// Helps smooth out frame time variance and prevents "spiral of death"
+		// when frames take longer than the target frame time
+		// ========================================
+		struct FramePacingSettings {
+			bool enabled = true;                     // Master toggle for frame pacing
+			float target_fps = 60.0f;                // Target frame rate
+			float max_accumulated_frames = 1.5f;     // Max frames to accumulate before skipping
+			bool enable_frame_skip = true;           // Skip rendering if too far behind
+			float spike_threshold_ms = 8.0f;         // Consider frame a "spike" if > this duration
+			
+			// Runtime state (don't modify in settings UI)
+			float accumulated_time = 0.0f;
+			int frames_skipped = 0;
+			int frames_rendered = 0;
+			float last_frame_time_ms = 0.0f;
+			float avg_frame_time_ms = 16.67f;        // Rolling average
+			int spike_count = 0;                     // Count of frames exceeding spike_threshold
+		} frame_pacing;
+
 		// OPTIMIZED: Post-process at reduced resolution to reduce GPU load
 		// Renders bloom/blur/tone-map at scale*full_resolution, then upscales to full
 		// Default 1.0 (full resolution) for desktop, 0.75 for mobile
@@ -320,5 +341,11 @@ namespace PAIN {
 		float minimap_border_thickness = 2.0f;
 		glm::vec4 minimap_border_color = glm::vec4(1.0f);
 		float minimap_camera_height = 30.0f;
+		
+		// OPTIMIZATION: Minimap update rate
+		// Update minimap every N frames to reduce CPU load
+		// 1 = every frame (default), 2 = every other frame, 3 = every 3rd frame
+		// Higher values = better performance but less responsive minimap
+		int minimap_update_interval = 1;
 	};
 }

@@ -48,6 +48,11 @@ namespace PAIN {
 		unsigned int currentVertexCount = 0;
 		unsigned int currentIndexCount = 0;
 
+		// OPTIMIZATION: CPU-side caches to avoid GPU read-back during buffer resizing
+		// These store all uploaded vertices/indices so we can re-upload without stalling the GPU
+		std::vector<Assets::Vertex> cpu_vertex_cache;
+		std::vector<unsigned int> cpu_index_cache;
+		bool cpu_cache_valid = false;
 
 		std::unordered_map<std::string, SceneVboOffset> instanced_offsets{};
 

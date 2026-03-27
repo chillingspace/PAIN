@@ -329,6 +329,26 @@ namespace {
 		return names;
 	}
 
+	// Pre-cached shadow map uniform names for volumetric pass (avoids per-frame string allocation)
+	struct VolumetricShadowUniformNames {
+		std::array<std::string, kMaxVolumetricLights> shadowSamplers;
+	};
+
+	const VolumetricShadowUniformNames& GetVolumetricShadowUniformNames() {
+		static const VolumetricShadowUniformNames names = [] {
+			VolumetricShadowUniformNames out{};
+			for (int i = 0; i < kMaxVolumetricLights; ++i) {
+#ifdef PN_PLATFORM_WINDOWS
+				out.shadowSamplers[i] = "u_ShadowMaps[" + std::to_string(i) + "]";
+#else
+				out.shadowSamplers[i] = "u_ShadowMap" + std::to_string(i);
+#endif
+			}
+			return out;
+		}();
+		return names;
+	}
+
 	struct PbrUniformNames {
 		std::array<std::string, kMaxPbrShadowMaps> shadowSamplers;
 	};
@@ -1170,30 +1190,32 @@ namespace PAIN {
 			newVertices.size(), newIndices.size());
 
 		// Resize GPU buffers first, then sub-upload the new slice
+		// OPTIMIZATION: Use CPU-side cache to avoid GPU read-back stalls
+		// Instead of reading from GPU (which causes sync points), we:
+		// 1. Keep all data in CPU cache
+		// 2. Orphan the buffer when resizing
+		// 3. Re-upload from CPU cache
 		auto appendToBuffer = [](GLuint buf, GLenum target,
 			unsigned int existingBytes,
-			const void* newData, unsigned int newBytes) {
+			const void* newData, unsigned int newBytes,
+			const void* cpuCacheData, unsigned int cpuCacheSize) {
 				glBindBuffer(target, buf);
 
-				// Get current size
 				GLint currentSize = 0;
 				glGetBufferParameteriv(target, GL_BUFFER_SIZE, &currentSize);
 
 				unsigned int totalBytes = existingBytes + newBytes;
 
 				if ((unsigned int)currentSize < totalBytes) {
-					// Orphan + resize: copy old data into a temp, re-upload everything
-					std::vector<uint8_t> temp(currentSize);
-					if (currentSize > 0) {
-						void* ptr = glMapBufferRange(target, 0, currentSize, GL_MAP_READ_BIT);
-						if (ptr) {
-							memcpy(temp.data(), ptr, currentSize);
-							glUnmapBuffer(target);
-						}
-					}
+					// OPTIMIZATION: Orphan the buffer and re-upload from CPU cache
+					// This avoids the GPU-CPU sync stall that would occur with glMapBufferRange(GL_MAP_READ_BIT)
+					// The CPU cache contains all previously uploaded data, so we can safely re-upload it
 					glBufferData(target, totalBytes, nullptr, GL_DYNAMIC_DRAW); // orphan
-					if (currentSize > 0)
-						glBufferSubData(target, 0, currentSize, temp.data());
+					
+					// Re-upload existing data from CPU cache
+					if (cpuCacheSize > 0 && cpuCacheData) {
+						glBufferSubData(target, 0, cpuCacheSize, cpuCacheData);
+					}
 				}
 
 				// Append new data at the end
@@ -1205,19 +1227,29 @@ namespace PAIN {
 		unsigned int existingIndexBytes = currentIndexCount * sizeof(unsigned int);
 		unsigned int newIndexBytes = (unsigned int)(newIndices.size() * sizeof(unsigned int));
 
-		// Append to geometry buffers
+		// OPTIMIZATION: Update CPU-side caches before GPU upload
+		// This allows us to re-upload without GPU read-back if buffer needs to grow
+		cpu_vertex_cache.insert(cpu_vertex_cache.end(), newVertices.begin(), newVertices.end());
+		cpu_index_cache.insert(cpu_index_cache.end(), newIndices.begin(), newIndices.end());
+		cpu_cache_valid = true;
+
+		// Append to geometry buffers using CPU cache for re-upload (avoids GPU stalls)
 		glBindVertexArray(geometry_vao);
 		appendToBuffer(geometry_vbo, GL_ARRAY_BUFFER,
-			existingVertexBytes, newVertices.data(), newVertexBytes);
+			existingVertexBytes, newVertices.data(), newVertexBytes,
+			cpu_vertex_cache.data(), existingVertexBytes);
 		appendToBuffer(geometry_ebo, GL_ELEMENT_ARRAY_BUFFER,
-			existingIndexBytes, newIndices.data(), newIndexBytes);
+			existingIndexBytes, newIndices.data(), newIndexBytes,
+			cpu_index_cache.data(), existingIndexBytes);
 
-		// Append to shadow buffers
+		// Append to shadow buffers using same CPU cache
 		glBindVertexArray(shadow_vao);
 		appendToBuffer(shadow_vbo, GL_ARRAY_BUFFER,
-			existingVertexBytes, newVertices.data(), newVertexBytes);
+			existingVertexBytes, newVertices.data(), newVertexBytes,
+			cpu_vertex_cache.data(), existingVertexBytes);
 		appendToBuffer(shadow_ebo, GL_ELEMENT_ARRAY_BUFFER,
-			existingIndexBytes, newIndices.data(), newIndexBytes);
+			existingIndexBytes, newIndices.data(), newIndexBytes,
+			cpu_index_cache.data(), existingIndexBytes);
 
 		// Pre-size the instance matrix buffer - filled per-frame in DrawGeometryInstanced.
 		// Reserve space for MAX_INSTANCES matrices upfront to avoid per-frame realloc.
@@ -1249,6 +1281,11 @@ namespace PAIN {
 
 		// Clear the offset tracking map
 		instanced_offsets.clear();
+
+		// OPTIMIZATION: Clear CPU-side caches
+		cpu_vertex_cache.clear();
+		cpu_index_cache.clear();
+		cpu_cache_valid = false;
 
 		// Reset buffers to empty state
 		glBindVertexArray(geometry_vao);
@@ -2026,7 +2063,8 @@ namespace PAIN {
 		// === Debug VAO/VBO ===
 		// PERFORMANCE: Pre-allocate debug VBO with sufficient capacity
 		// This avoids per-draw reallocation checks which can cause micro-stutter
-		// 64KB buffer = ~9K vertices (7 floats/vertex * 4 bytes/float)
+		// 256KB buffer = ~36K vertices (7 floats/vertex * 4 bytes/float)
+		// Increased from 64KB to handle complex debug scenes without reallocation
 		{
 			glGenVertexArrays(1, &debug_VAO);
 			glBindVertexArray(debug_VAO);
@@ -2035,7 +2073,7 @@ namespace PAIN {
 			glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
 			
 			// Pre-allocate buffer for debug drawing (reduces per-frame allocation overhead)
-			static constexpr GLsizeiptr kDebugVboInitialCapacity = 64 * 1024;
+			static constexpr GLsizeiptr kDebugVboInitialCapacity = 256 * 1024;
 			glBufferData(GL_ARRAY_BUFFER, kDebugVboInitialCapacity, nullptr, GL_DYNAMIC_DRAW);
 			debug_vbo_capacity = kDebugVboInitialCapacity;
 
@@ -2973,12 +3011,9 @@ namespace PAIN {
 			}
 #endif
 
-			for (int shadowSlot = 0; shadowSlot < kMaxPbrShadowMaps; ++shadowSlot) {
-				glActiveTexture(GL_TEXTURE0 + kFixedShadowTextureUnitStart + shadowSlot);
-				glBindTexture(GL_TEXTURE_2D, 0);
-				pbr_shader->SetUniform(GetPbrUniformNames().shadowSamplers[shadowSlot],
-									   kFixedShadowTextureUnitStart + shadowSlot);
-			}
+			// OPTIMIZATION: Don't pre-bind all shadow slots to 0.
+			// Instead, only bind shadow textures that are actually used.
+			// The shader will use the shadowMapIdx uniform to determine which slots have shadows.
 
 			struct ShadowMapCandidate {
 				int gpuLightIndex = -1;
@@ -3060,8 +3095,12 @@ namespace PAIN {
 					continue;
 				}
 
-				glActiveTexture(GL_TEXTURE0 + kFixedShadowTextureUnitStart + shadowMapCount);
+				const int textureUnit = kFixedShadowTextureUnitStart + shadowMapCount;
+				glActiveTexture(GL_TEXTURE0 + textureUnit);
 				glBindTexture(GL_TEXTURE_2D, candidate.shadowTexture);
+				// Set shadow sampler uniform only for slots we actually use
+				pbr_shader->SetUniform(GetPbrUniformNames().shadowSamplers[shadowMapCount],
+									   textureUnit);
 				gpuLights[candidate.gpuLightIndex].intensity_shadow.w =
 					static_cast<float>(shadowMapCount);
 				loggedShadowBudgetDrops.erase(candidate.key);
@@ -3781,21 +3820,19 @@ namespace PAIN {
 		glBindTexture(GL_TEXTURE_2D, volumetric_textures[previousHistoryIndex]);
 		volumetric_shader->SetUniform("u_HistoryTex", 1);
 
+		// Use pre-cached shadow uniform names to avoid per-frame string allocation
+		const auto& shadowUniformNames = GetVolumetricShadowUniformNames();
+
 		for (size_t lightIdx = 0; lightIdx < packedLights.size(); ++lightIdx) {
 			const PackedVolumetricLight& packed = packedLights[lightIdx];
 			const Light& l = *packed.light;
 			if (packed.shadowMapIdx >= 0) {
 				glActiveTexture(GL_TEXTURE0 + packed.shadowTextureUnit);
 				glBindTexture(GL_TEXTURE_2D, l.getShadowTexture());
-#ifdef PN_PLATFORM_WINDOWS
+				// Use pre-cached uniform name instead of string concatenation
 				volumetric_shader->SetUniform(
-					"u_ShadowMaps[" + std::to_string(packed.shadowMapIdx) + "]",
+					shadowUniformNames.shadowSamplers[packed.shadowMapIdx],
 					packed.shadowTextureUnit);
-#else
-				volumetric_shader->SetUniform(
-					"u_ShadowMap" + std::to_string(packed.shadowMapIdx),
-					packed.shadowTextureUnit);
-#endif
 				volumetric_shader->SetUniform(uniformNames.shadowMapIdx[lightIdx],
 											  static_cast<float>(packed.shadowMapIdx));
 			}
