@@ -1,5 +1,11 @@
 {
     "assets": [
+        "f59e4cbd-b183-3541-9531-bd14b87115de",
+        "39040d83-c6c4-d64f-9043-9f95bcec758f",
+        "6100a187-8732-804d-903d-32a5c3dc0576",
+        "4a319130-c746-0d4d-9463-ea992d847946",
+        "370df759-71e5-3e49-bf8b-55152b0ae22c",
+        "80f91347-fd0a-1c41-b7ca-79f38b83d77b",
         "3a976dda-9eeb-ae41-9050-0b7dcae71a10",
         "70fbb33a-74e7-a641-90d5-3a6255b9d413",
         "f02f0a71-8e9c-1843-9873-8e636f4ad324",
@@ -13,7 +19,6 @@
         "f6a92284-3591-ca4c-9cf5-1e0167b2d240",
         "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
         "38a421a9-1ffc-3c47-a8e2-f0af50f2e2c2",
-        "6100a187-8732-804d-903d-32a5c3dc0576",
         "630fadbb-2e36-ce45-9b42-33cb68aec2bd",
         "a67656ca-15a5-d441-b14d-dae036e5245e",
         "1fe8b9a9-f998-cc41-bbaf-d6268f17914b",
@@ -129,7 +134,7 @@
         "eb0d9fb3-a21c-4f49-87e8-c225bd47653e",
         "4ae3113a-4586-9045-a43d-17ed1c07d76f",
         "a5302a28-588d-fc4d-a39a-57873647e5c1",
-        "1fe7b95c-7093-7f44-8aac-322eae96b634",
+        "5ce8d5b8-cfe1-324e-9d35-a6f9345529bb",
         "a5dee0ac-d873-6648-bb32-5bea6e1322b6"
     ],
     "camera": {
@@ -230,16 +235,16 @@
         ],
         "farPlane": 100.0,
         "forward": [
-            -0.5967845320701599,
-            -0.7995098233222961,
-            0.06806248426437378
+            -0.32845214009284973,
+            -0.561847984790802,
+            0.7592405080795288
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            3.1296257972717285,
-            19.63207244873047,
-            -4.237420082092285
+            7.091859817504883,
+            20.966934204101563,
+            -32.41135025024414
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 20.0,
@@ -251,6 +256,187 @@
     },
     "ecs": {
         "Entities": [
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "11abc438-8283-104d-a8b1-c830bc555243"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.550000011920929,
+                                0.550000011920929,
+                                0.550000011920929
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "doubleSidedShadows": false,
+                            "isStatic": false,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "4a319130-c746-0d4d-9463-ea992d847946",
+                                    "aoTextureOverride": "80f91347-fd0a-1c41-b7ca-79f38b83d77b",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "39040d83-c6c4-d64f-9043-9f95bcec758f",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "80f91347-fd0a-1c41-b7ca-79f38b83d77b",
+                                    "normalTextureOverride": "370df759-71e5-3e49-bf8b-55152b0ae22c",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "80f91347-fd0a-1c41-b7ca-79f38b83d77b",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "f59e4cbd-b183-3541-9531-bd14b87115de",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "skybox"
+                        }
+                    },
+                    "Name": "skybox"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "03e16e0a-c5aa-5143-ab45-929fbb405ffe"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                2.428318500518799,
+                                -6.523167610168457
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "fog"
+                        },
+                        "ParticleSystem": {
+                            "angularVelocity": 0.0,
+                            "angularVelocityVariance": 0.0,
+                            "blendMode": 0,
+                            "colorOverLifetime": [],
+                            "directionMode": 0,
+                            "directionSpace": 0,
+                            "drag": 0.0,
+                            "emissionDirection": [
+                                1.0,
+                                0.0,
+                                1.0
+                            ],
+                            "emissionRate": 500.0,
+                            "emissionShape": 1,
+                            "emissionSpread": 1000.0,
+                            "gravityMultiplier": 0.0,
+                            "lifetime": 10.0,
+                            "lifetimeVariance": 0.0,
+                            "looping": true,
+                            "maxParticles": 1000,
+                            "particleTexture": "5cfacb04-7497-ac40-804a-68259bbb858b",
+                            "playDuration": 0.0,
+                            "playOnAwake": true,
+                            "renderShape": 2,
+                            "shapeParams": {
+                                "boxHalfExtents": [
+                                    0.5,
+                                    0.5,
+                                    0.5
+                                ],
+                                "circleArc": 360.0,
+                                "circleRadius": 0.5,
+                                "coneAngle": 25.0,
+                                "sphereRadius": 90.0,
+                                "volumeEmission": true
+                            },
+                            "simulationSpace": 0,
+                            "sizeOverLifetime": [],
+                            "sizeOverLifetimeMultiplier": 1.0,
+                            "softEdge": 50.0,
+                            "sortMode": 0,
+                            "speed": 1.0,
+                            "speedVariance": 0.0,
+                            "startColor": [
+                                0.2980392277240753,
+                                0.24705882370471954,
+                                0.11372549086809158,
+                                0.11764705926179886
+                            ],
+                            "startColorVariance": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "startRotation": 0.0,
+                            "startRotationVariance": 0.0,
+                            "startSize": 500.0,
+                            "startSizeVariance": 0.0,
+                            "velocityOverLifetime": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "velocityOverLifetimeEnabled": false
+                        }
+                    },
+                    "Name": "fog"
+                }
+            },
             {
                 "Entity": {
                     "Components": {
@@ -3677,7 +3863,7 @@
                         },
                         "LocalTransform": {
                             "position": [
-                                -11.707618713378906,
+                                -9.382043838500977,
                                 4.2210001945495605,
                                 -1.5240000486373901
                             ],
@@ -13014,40 +13200,6 @@
                                         20.0
                                     ]
                                 },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "doubleSidedShadows": false,
-                                    "isStatic": false,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
-                                            "aoTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "normalTextureOverride": "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "a67656ca-15a5-d441-b14d-dae036e5245e",
-                                    "receiveShadows": true,
-                                    "visible": true
-                                },
                                 "RigidBody3D": {
                                     "angular_velocity": [
                                         0.0,
@@ -14228,40 +14380,6 @@
                                         20.0
                                     ]
                                 },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "doubleSidedShadows": false,
-                                    "isStatic": false,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
-                                            "aoTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "normalTextureOverride": "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "a67656ca-15a5-d441-b14d-dae036e5245e",
-                                    "receiveShadows": true,
-                                    "visible": true
-                                },
                                 "RigidBody3D": {
                                     "angular_velocity": [
                                         0.0,
@@ -15217,40 +15335,6 @@
                                         20.0,
                                         20.0
                                     ]
-                                },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "doubleSidedShadows": false,
-                                    "isStatic": false,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
-                                            "aoTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "normalTextureOverride": "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "a67656ca-15a5-d441-b14d-dae036e5245e",
-                                    "receiveShadows": true,
-                                    "visible": true
                                 },
                                 "RigidBody3D": {
                                     "angular_velocity": [
@@ -17895,40 +17979,6 @@
                                         20.0
                                     ]
                                 },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "doubleSidedShadows": false,
-                                    "isStatic": false,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
-                                            "aoTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "normalTextureOverride": "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "a67656ca-15a5-d441-b14d-dae036e5245e",
-                                    "receiveShadows": true,
-                                    "visible": true
-                                },
                                 "RigidBody3D": {
                                     "angular_velocity": [
                                         0.0,
@@ -18118,40 +18168,6 @@
                                         20.0,
                                         20.0
                                     ]
-                                },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "doubleSidedShadows": false,
-                                    "isStatic": false,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
-                                            "aoTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "normalTextureOverride": "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "a67656ca-15a5-d441-b14d-dae036e5245e",
-                                    "receiveShadows": true,
-                                    "visible": true
                                 },
                                 "RigidBody3D": {
                                     "angular_velocity": [
@@ -23307,7 +23323,7 @@
             0.009999999776482582
         ],
         "pbr_map": 0,
-        "skyboxGUID": "1fe7b95c-7093-7f44-8aac-322eae96b634",
+        "skyboxGUID": "5ce8d5b8-cfe1-324e-9d35-a6f9345529bb",
         "useAOMap": true,
         "useDiffuseMap": true,
         "useEmissionMap": true,
@@ -23322,14 +23338,14 @@
         ],
         "worldLightFarPlane": 30.0,
         "worldLightIntensity": [
-            1.0,
-            1.0,
-            1.0
+            0.0,
+            0.4000000059604645,
+            0.800000011920929
         ],
         "worldLightPosition": [
-            14.795331954956055,
-            38.297203063964844,
-            0.4288625717163086
+            18.757566452026367,
+            39.63206481933594,
+            -27.745067596435547
         ],
         "worldLightShadowFollowDistance": 22.5,
         "worldLightShadowResolution": 1024,

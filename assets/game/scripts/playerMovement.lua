@@ -148,6 +148,8 @@ registerUpdate(function(dt)
         end
         joystickDirX = 0.0
         joystickDirY = 0.0
+        local _, curr_vy, _ = getVelocity(entityId)
+        setVelocity(entityId, 0.0, curr_vy, 0.0)
         return
     end
 

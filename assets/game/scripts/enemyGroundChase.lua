@@ -632,6 +632,11 @@ do
             if setLightOuterAngle then setLightOuterAngle(enemy, lightOuterAngle) end
             if setLightInnerAngle then setLightInnerAngle(enemy, lightInnerAngle) end
         end
+
+        -- ensure animation is stopped at startup
+        if Animation then
+            Animation.SetSpeed(enemy, 0.0)
+        end
     end
 
     -- =========================================================
