@@ -23,6 +23,7 @@ namespace PAIN {
 				std::function<void(std::any const&)> unsavedChangesPopUp(std::string const& popup_id);
 				std::function<void(std::any const&)> unsavedScenePopUp(std::string const& popup_id);
 				std::function<void(std::any const&)> addComponentPopUp(std::string const& popup_id);
+				std::function<void(std::any const&)> createEmptyPopUp(std::string const& popup_id);
 
 				std::weak_ptr<EntityPanel> entities_panel;
 				std::weak_ptr<ComponentsPanel> components_panel;

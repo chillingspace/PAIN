@@ -13,6 +13,7 @@
 #include "CoreSystems/Windows/Window.h"
 #include "CoreSystems/Scene/Scene.h"
 #include "ECS/Components/cEntity.h"
+#include "Systems/Transform/sysTransform.h"
 
 namespace PAIN {
 	namespace Editor {
@@ -42,8 +43,9 @@ namespace PAIN {
 				registerPopUp("Settings", settingsPopUp("Settings"));
 				registerPopUp("Unsaved Changes", unsavedChangesPopUp("Unsaved Changes"));
 				registerPopUp("Unsaved Scene", unsavedScenePopUp("Unsaved Scene"));
+				registerPopUp("Create Entity", createEmptyPopUp("Create Entity"));
 				registerPopUp("Add Component", addComponentPopUp("Add Component"));
-				registerPopUp("Info", defPopUp("Info")); // <-- ADDED
+				registerPopUp("Info", defPopUp("Info"));
 			}
 
 			void Tools::nextWindowSettings() {
@@ -443,6 +445,71 @@ namespace PAIN {
 			}
 
 			// ----------------------------------------------------------------
+			// Create Entity
+			// ----------------------------------------------------------------
+
+			std::function<void(std::any const&)> Tools::createEmptyPopUp(std::string const& popup_id)
+			{
+				return [this, popup_id](std::any const& data) {
+					static char entity_name[128] = "";
+
+					ImGui::Text("Enter a name for the new entity:");
+					ImGui::InputText("##Entity Name", entity_name, sizeof(entity_name));
+
+
+					if (strlen(entity_name) > 0 && (ImGui::Button("OK") || ImGui::IsKeyPressed(ImGuiKey_Enter))) {
+						std::string final_name = std::string(entity_name);
+
+						command_manager->executeAction(Action{
+							[this, final_name]() {
+								auto ecs = PN_ECS_SERVICE;
+								auto scene = services->get<Scene::SceneManager>();
+								ECS::RegistryID currentRegistryID = ECS::MAIN_REGISTRY_ID;
+
+								entt::entity entity = ecs->createEntity(currentRegistryID); // Auto-assigns GUID
+
+								// Add core components
+								ecs->addEntityComponent(entity, Entity::Name{ final_name }, currentRegistryID);
+								ecs->addEntityComponent(entity, LocalTransform{}, currentRegistryID);
+								ecs->addEntityComponent(entity, WorldTransform{}, currentRegistryID);
+
+								// Mark transform dirty
+								auto transformSystem = ecs->getSystem<Transform::System>();
+								if (transformSystem) {
+									transformSystem->markDirty(entity, ecs->getRegistry(currentRegistryID));
+								}
+							},
+							[this, final_name]() {
+								ECS::RegistryID currentRegistryID = ECS::MAIN_REGISTRY_ID;
+								// Undo: find and delete by name
+								auto ecs = PN_ECS_SERVICE;
+								auto& registry = ecs->getRegistry(currentRegistryID);
+								auto view = registry.view<Entity::Name>();
+
+								for (auto entity : view) {
+									if (view.get<Entity::Name>(entity).name == final_name) {
+										ecs->destroyEntity(entity, currentRegistryID);
+										break;
+									}
+								}
+							},
+							"Create Entity: " + final_name
+							});
+
+						entity_name[0] = '\0';
+						closePopUp(popup_id);
+					}
+
+					ImGui::SameLine();
+					if (ImGui::Button("Cancel")) {
+						entity_name[0] = '\0';
+						closePopUp(popup_id);
+					}
+					};
+			}
+
+
+			// ----------------------------------------------------------------
 			// onAttach
 			// ----------------------------------------------------------------
 			void Tools::onAttach() {}
@@ -547,32 +614,7 @@ namespace PAIN {
 					// ---- GameObject ----
 					if (ImGui::BeginMenu("GameObject")) {
 						if (ImGui::MenuItem("Create Empty")) {
-							Action create;
-							std::shared_ptr<std::string> shared_id = std::make_shared<std::string>("Empty");
-
-							create.do_action = [&, shared_id]() {
-								auto ecs = PN_ECS_SERVICE;
-								auto scene = PN_SCENE_SERVICE;
-
-								glm::vec3 pos = glm::vec3(0.f, 0.f, 0.f);
-								glm::quat rot = { 1.f, 0.f, 0.f, 0.f };
-								glm::vec3 scale = { 1.f, 1.f, 1.f };
-
-								entt::entity entity = ecs->createEntity();
-								ecs->addEntityComponent(entity, Entity::Name{ *shared_id });
-								ecs->addEntityComponent(entity, LocalTransform{ pos, rot, scale });
-								ecs->addEntityComponent(entity, WorldTransform{});
-								ecs->addEntityComponent(entity, Entity::Hierarchy{});
-								};
-
-							create.undo_action = [&, shared_id]() {
-								auto entity = PN_METADATA_SERVICE->getEntityByName(*shared_id);
-								if (entity.has_value()) {
-									PN_ECS_SERVICE->destroyEntity(entity.value());
-								}
-								};
-
-							command_manager->executeAction(std::move(create));
+							openPopUp("Create Entity");
 						}
 						ImGui::EndMenu();
 					}
