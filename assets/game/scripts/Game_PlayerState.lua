@@ -142,7 +142,7 @@ local function triggerGameOver()
     if _G.GlobalAudio and _G.GlobalAudio.setGameOver then
         _G.GlobalAudio.setGameOver(true)
     end
-    
+    SetGamePaused(S.gameEnded) 
     requestEndOverlay("lose")
 end
 
@@ -150,6 +150,7 @@ local function triggerGameWin()
     if S.gameEnded then return end
     S.gameEnded = true
     S.gameWon   = true
+    SetGamePaused(S.gameWon) 
     requestEndOverlay("win")
 end
 
