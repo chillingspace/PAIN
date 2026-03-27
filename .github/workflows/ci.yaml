@@ -176,7 +176,7 @@ jobs:
               taskkill /IM Friends-Frog-ever.exe 
           }
           
-          $proc.WaitForExit(5000)
+          $exited = $proc.WaitForExit(30000)
           
           if (!$proc.HasExited) {
               Write-Host "Process did not exit, forcing stop..."
