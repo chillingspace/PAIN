@@ -324,10 +324,10 @@
                             "visible": true
                         },
                         "Name": {
-                            "name": "Empty"
+                            "name": "skybox"
                         }
                     },
-                    "Name": "Empty"
+                    "Name": "skybox"
                 }
             },
             {

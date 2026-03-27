@@ -1,5 +1,11 @@
 {
     "assets": [
+        "f59e4cbd-b183-3541-9531-bd14b87115de",
+        "39040d83-c6c4-d64f-9043-9f95bcec758f",
+        "6100a187-8732-804d-903d-32a5c3dc0576",
+        "4a319130-c746-0d4d-9463-ea992d847946",
+        "370df759-71e5-3e49-bf8b-55152b0ae22c",
+        "80f91347-fd0a-1c41-b7ca-79f38b83d77b",
         "adb4c3f4-7a3b-734f-bfb7-398071f586b8",
         "91e02ba2-c6b8-184f-bd48-b59674946972",
         "f61ce6f4-f97e-a549-92f9-288fdf0c1314",
@@ -38,7 +44,6 @@
         "f6a92284-3591-ca4c-9cf5-1e0167b2d240",
         "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
         "38a421a9-1ffc-3c47-a8e2-f0af50f2e2c2",
-        "6100a187-8732-804d-903d-32a5c3dc0576",
         "630fadbb-2e36-ce45-9b42-33cb68aec2bd",
         "383081bd-046e-7d4c-a46d-98ddce4c4ac3",
         "a67656ca-15a5-d441-b14d-dae036e5245e",
@@ -150,7 +155,7 @@
         "06cab9b7-c91a-6948-bb59-426b8032ea12",
         "eb0d9fb3-a21c-4f49-87e8-c225bd47653e",
         "a5302a28-588d-fc4d-a39a-57873647e5c1",
-        "1fe7b95c-7093-7f44-8aac-322eae96b634",
+        "5ce8d5b8-cfe1-324e-9d35-a6f9345529bb",
         "a5dee0ac-d873-6648-bb32-5bea6e1322b6"
     ],
     "camera": {
@@ -251,16 +256,16 @@
         ],
         "farPlane": 100.0,
         "forward": [
-            -0.7689439058303833,
-            -0.6236876249313354,
-            -0.1404959261417389
+            -0.8474677205085754,
+            -0.5282304883003235,
+            -0.052641611546278
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            5.864988327026367,
-            14.759814262390137,
-            -4.37976598739624
+            20.569042205810547,
+            23.263343811035156,
+            -8.136104583740234
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 31.100000381469727,
@@ -272,6 +277,113 @@
     },
     "ecs": {
         "Entities": [
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "bf33c5df-934f-134b-9130-190f86c7f871"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                2.427999973297119,
+                                -6.5229997634887695
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "fog"
+                        },
+                        "ParticleSystem": {
+                            "angularVelocity": 0.0,
+                            "angularVelocityVariance": 0.0,
+                            "blendMode": 0,
+                            "colorOverLifetime": [],
+                            "directionMode": 0,
+                            "directionSpace": 0,
+                            "drag": 0.0,
+                            "emissionDirection": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissionRate": 500.0,
+                            "emissionShape": 1,
+                            "emissionSpread": 1000.0,
+                            "gravityMultiplier": 0.0,
+                            "lifetime": 10.0,
+                            "lifetimeVariance": 0.0,
+                            "looping": true,
+                            "maxParticles": 1000,
+                            "particleTexture": "7b9d0b37-2cc1-5741-b660-a72aca9d0d35",
+                            "playDuration": 0.0,
+                            "playOnAwake": true,
+                            "renderShape": 2,
+                            "shapeParams": {
+                                "boxHalfExtents": [
+                                    0.5,
+                                    0.5,
+                                    0.5
+                                ],
+                                "circleArc": 360.0,
+                                "circleRadius": 0.5,
+                                "coneAngle": 25.0,
+                                "sphereRadius": 100.0,
+                                "volumeEmission": true
+                            },
+                            "simulationSpace": 0,
+                            "sizeOverLifetime": [],
+                            "sizeOverLifetimeMultiplier": 1.0,
+                            "softEdge": 50.0,
+                            "sortMode": 0,
+                            "speed": 1.0,
+                            "speedVariance": 0.0,
+                            "startColor": [
+                                0.2980392277240753,
+                                0.24705882370471954,
+                                0.11372549086809158,
+                                0.11764705926179886
+                            ],
+                            "startColorVariance": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "startRotation": 0.0,
+                            "startRotationVariance": 0.0,
+                            "startSize": 600.0,
+                            "startSizeVariance": 0.0,
+                            "velocityOverLifetime": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "velocityOverLifetimeEnabled": false
+                        }
+                    },
+                    "Name": "fog"
+                }
+            },
             {
                 "Entity": {
                     "Components": {
@@ -459,6 +571,80 @@
                         }
                     },
                     "Name": "Crate"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "23b327ee-5285-fd43-a2c4-865103647206"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.4588000178337097,
+                                0.4588000178337097,
+                                0.4588000178337097
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "doubleSidedShadows": false,
+                            "isStatic": false,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "4a319130-c746-0d4d-9463-ea992d847946",
+                                    "aoTextureOverride": "80f91347-fd0a-1c41-b7ca-79f38b83d77b",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "39040d83-c6c4-d64f-9043-9f95bcec758f",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "80f91347-fd0a-1c41-b7ca-79f38b83d77b",
+                                    "normalTextureOverride": "370df759-71e5-3e49-bf8b-55152b0ae22c",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "80f91347-fd0a-1c41-b7ca-79f38b83d77b",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "f59e4cbd-b183-3541-9531-bd14b87115de",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "skybox"
+                        }
+                    },
+                    "Name": "skybox"
                 }
             },
             {
@@ -34386,7 +34572,7 @@
             0.009999999776482582
         ],
         "pbr_map": 0,
-        "skyboxGUID": "1fe7b95c-7093-7f44-8aac-322eae96b634",
+        "skyboxGUID": "5ce8d5b8-cfe1-324e-9d35-a6f9345529bb",
         "useAOMap": true,
         "useDiffuseMap": true,
         "useEmissionMap": true,
@@ -34401,14 +34587,14 @@
         ],
         "worldLightFarPlane": 30.0,
         "worldLightIntensity": [
-            1.0,
-            1.0,
-            1.0
+            0.0,
+            0.40784314274787903,
+            0.800000011920929
         ],
         "worldLightPosition": [
-            17.53069496154785,
-            33.42494583129883,
-            0.2865166664123535
+            32.23474884033203,
+            41.92847442626953,
+            -3.4698219299316406
         ],
         "worldLightShadowFollowDistance": 22.5,
         "worldLightShadowResolution": 1024,
