@@ -1,0 +1,23 @@
+{
+  "asset_info": {
+    "name": "moonless_golf_2k.hdr",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 1215688064836458964
+  },
+  "descriptor_version": 1,
+  "guid": "5ce8d5b8-cfe1-324e-9d35-a6f9345529bb",
+  "import_settings": {
+    "android_allow_astc_hdr": false,
+    "android_bake_cubemap": false,
+    "android_compression": "R16G16B16A16",
+    "android_skybox_source_format": "R16G16B16A16",
+    "generate_mipmaps": true,
+    "max_size": 2048,
+    "window_compression": "BC6H"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\moonless_golf_2k.hdr"
+  }
+}

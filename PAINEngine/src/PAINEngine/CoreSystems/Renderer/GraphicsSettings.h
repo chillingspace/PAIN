@@ -170,7 +170,6 @@ namespace PAIN {
 		// animation
 		bool interpolate_animation{ true };		// smoother animations at the expense of performance
 
-		
 		// debug settings
 		bool DEBUG_USE_DIFFUSE_MAP{ true };
 		bool DEBUG_USE_AO_MAP{ true };

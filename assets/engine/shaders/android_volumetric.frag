@@ -22,7 +22,9 @@ struct Light {
 
 #define MAX_LIGHTS 4
 #define MAX_SHADOWMAPPED_LIGHTS 4
-#define MAX_VOLUMETRIC_STEPS 64
+// OPTIMIZED: Reduced from 64 to 32 for mobile GPU efficiency
+// Default volumetric_steps is 6 on Android, 32 gives headroom for quality modes
+#define MAX_VOLUMETRIC_STEPS 32
 
 uniform Light u_Lights[MAX_LIGHTS];
 uniform int u_NumLights;
@@ -139,11 +141,9 @@ void main() {
     // This preserves volumetric visibility while preventing harsh boundaries
     float fadeStartDist = rayLen * 0.85;
 
-    for (int s = 0; s < MAX_VOLUMETRIC_STEPS; ++s) {
-        if (s >= numSteps) {
-            break;
-        }
-
+    // Keep iterations bounded by the quality setting (already clamped to MAX_VOLUMETRIC_STEPS).
+    // This avoids redundant work on low-step Android presets.
+    for (int s = 0; s < numSteps; ++s) {
         float t = clamp((float(s) + 0.5) * stepSize + jitter, 0.0, rayLen);
         vec3 samplePos = u_CamPos + rayDir * t;
         
@@ -153,10 +153,8 @@ void main() {
             depthFade = 1.0 - smoothstep(fadeStartDist, rayLen, t);
         }
 
-        for (int i = 0; i < MAX_LIGHTS; ++i) {
-            if (i >= u_NumLights) {
-                break;
-            }
+        // Iterate only active lights (u_NumLights <= MAX_LIGHTS).
+        for (int i = 0; i < u_NumLights; ++i) {
 
             Light light = u_Lights[i];
             bool hasShadowMap = light.shadowMapIdx > -0.5;

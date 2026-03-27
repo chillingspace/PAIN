@@ -1,0 +1,103 @@
+{
+    "entities": [
+        {
+            "components": {
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        10.921590805053711,
+                        0.0,
+                        25.628557205200195
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "doubleSidedShadows": false,
+                    "isStatic": false,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "4e94a305-8f71-4440-a978-1f584b2b04c7",
+                            "aoTextureOverride": "a8e232d8-24bd-f148-b8d8-848747b4d484",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "945433d9-fbd3-7e44-ad93-e7d2e13f863a",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "a8e232d8-24bd-f148-b8d8-848747b4d484",
+                            "normalTextureOverride": "c22d6814-e124-7a42-81c6-5f64fc3b7645",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "a8e232d8-24bd-f148-b8d8-848747b4d484",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "9d5ae13d-128d-b546-8965-94ed83d831ea",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "Build4"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        1.7999999523162842,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        6.900000095367432,
+                        3.700000047683716,
+                        6.800000190734863
+                    ],
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 0
+                    },
+                    "physics_enabled": true,
+                    "use_gravity": true,
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "8da6dfb8-8395-4945-b85b-1fb79976bcb7"
+        }
+    ],
+    "prefabName": "Build4",
+    "rootEntityGUID": "8da6dfb8-8395-4945-b85b-1fb79976bcb7"
+}

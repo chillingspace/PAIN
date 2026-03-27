@@ -22,6 +22,7 @@ out mat3 TBN;
 uniform mat4 u_M;
 uniform mat4 u_V;
 uniform mat4 u_P;
+uniform mat3 u_NormalMatrix;  // Pre-computed for non-instanced meshes
 
 uniform float u_InvertUvY;
 uniform float u_Instanced;
@@ -73,7 +74,14 @@ void main() {
         localNormal = mat3(skin) * localNormal;
     }
 
-    vNormal = mat3(transpose(inverse(modelMatrix))) * localNormal;
+    // Use pre-computed normal matrix for non-instanced meshes (CPU optimization)
+    // For instanced meshes, compute in shader since model matrix varies per instance
+    if (u_Instanced > 0.5) {
+        vNormal = mat3(transpose(inverse(modelMatrix))) * localNormal;
+    } else {
+        vNormal = u_NormalMatrix * localNormal;
+    }
+    
     vFragPos = vec3(modelMatrix * localPos);
     vTexCoords = ResolveTexCoords();
     TBN = ResolveTBN(modelMatrix);

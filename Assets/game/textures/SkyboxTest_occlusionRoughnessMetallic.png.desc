@@ -1,0 +1,23 @@
+{
+  "asset_info": {
+    "name": "SkyboxTest_occlusionRoughnessMetallic.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 6067803874275368201
+  },
+  "descriptor_version": 1,
+  "guid": "80f91347-fd0a-1c41-b7ca-79f38b83d77b",
+  "import_settings": {
+    "android_allow_astc_hdr": false,
+    "android_bake_cubemap": false,
+    "android_compression": "ASTC_4x4",
+    "android_skybox_source_format": "R16G16B16A16",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\SkyboxTest_occlusionRoughnessMetallic.png"
+  }
+}

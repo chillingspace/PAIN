@@ -110,6 +110,9 @@ namespace PAIN {
 		void Init(std::shared_ptr<Services> app_services);
 		void uploadTexture(std::shared_ptr<Assets::Texture> tex);
 		void initSceneVbo();
+		bool hasUploadedModel(const std::string& modelVPath) const {
+			return instanced_offsets.find(modelVPath) != instanced_offsets.end();
+		}
 		void _initDeferredShadingBuffers();
 		void _initGeometryBuffers();
 		void clearBuffers();
@@ -143,8 +146,13 @@ namespace PAIN {
 							 const glm::vec2& invDoubleRadius,
 							 const glm::vec2& ndcBase,
 							 const glm::vec2& ndcScale,
-							 const glm::vec4& color);
+							 const glm::vec4& color,
+							 const glm::vec4& accentColor,
+							 float patternStrength,
+							 float patternScale,
+							 float patternPhase);
 		bool hasMinimapWallData() const { return minimap_wall_vertex_count > 0; }
+		bool canDrawMinimapWalls() const { return minimap_wall_shader != nullptr && minimap_wall_vertex_count > 0; }
 
 		void ReflectionPass(const ModelRenderer& component);
 		void LightingPass(std::shared_ptr<Scene::SceneManager> scene,
@@ -239,6 +247,8 @@ namespace PAIN {
 		unsigned int material_properties_texture =
 			0; // 2D to store roughness, metallic properties
 		unsigned int emission_texture = 0;
+		unsigned int fallback_material_texture = 0;
+		unsigned int fallback_emission_texture = 0;
 
 		// !TODO: jspoh cleanup memory
 		// === Geometry Buffers ===
@@ -330,13 +340,15 @@ namespace PAIN {
 			&minimap_fbo,
 		};
 		std::array<unsigned int*, 2> rbos{&final_rbo, &minimap_rbo};
-		std::array<unsigned int*, 10> texs{
+		std::array<unsigned int*, 12> texs{
 			&ds_depth_texture,
 			&pos_texture,
 			&col_texture,
 			&norm_texture,
 			&material_properties_texture,
 			&emission_texture,
+			&fallback_material_texture,
+			&fallback_emission_texture,
 			//&shadow_texture,
 			&final_texture,
 			&pp_texture,

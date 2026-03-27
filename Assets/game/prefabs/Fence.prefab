@@ -31,6 +31,8 @@
                 },
                 "ModelRenderer": {
                     "castShadows": true,
+                    "doubleSidedShadows": false,
+                    "isStatic": false,
                     "materials": [
                         {
                             "albedoTextureOverride": "37c45efa-c7de-8241-9b1a-b26220fd197b",
@@ -57,7 +59,7 @@
                             "useOverrides": false
                         }
                     ],
-                    "modelGUID": "46536048-be77-5544-9fdc-0a11d0b7e60f",
+                    "modelGUID": "3b99f393-1f31-b847-933d-0f10509c199a",
                     "receiveShadows": true,
                     "visible": true
                 },

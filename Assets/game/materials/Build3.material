@@ -1,0 +1,29 @@
+{
+    "flags": {
+        "doubleSided": false,
+        "transparent": false
+    },
+    "properties": {
+        "baseColor": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "emissive": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "metallic": 1.0,
+        "roughness": 1.0
+    },
+    "textures": {
+        "albedo": "game\\textures\\Build3_baseColor.png",
+        "ao": "game\\textures\\Build3_occlusionRoughnessMetallic.png",
+        "emissive": "game\\textures\\Build3_emissive.png",
+        "lightmap": "game\\textures\\Build3_occlusionRoughnessMetallic.png",
+        "metallic": "game\\textures\\Build3_occlusionRoughnessMetallic.png",
+        "normal": "game\\textures\\Build3_normal.png",
+        "roughness": "game\\textures\\Build3_occlusionRoughnessMetallic.png"
+    }
+}

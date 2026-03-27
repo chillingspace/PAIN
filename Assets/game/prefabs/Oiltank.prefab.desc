@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Oiltank.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 16749948223043845665
+  },
+  "descriptor_version": 1,
+  "guid": "7919d93e-d76e-fb44-9d9a-3f1377c4fab5",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Oiltank.prefab"
+  }
+}

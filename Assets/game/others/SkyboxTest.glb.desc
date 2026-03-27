@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "SkyboxTest.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 2101079765363784520
+  },
+  "descriptor_version": 1,
+  "guid": "58f896e5-91f9-7446-8ae4-aedf6a09789c",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\SkyboxTest.glb"
+  }
+}

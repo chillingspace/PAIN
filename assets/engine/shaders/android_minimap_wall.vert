@@ -13,6 +13,7 @@ uniform vec2  u_TransformCol1;  // local-space transform column 1
 uniform vec2  u_InvDoubleRadius;// per-axis inverse radius scale
 uniform vec2  u_NdcBase;        // NDC base offset
 uniform vec2  u_NdcScale;       // NDC scale factor
+out vec2 vMapUv;
 
 void main() {
     // World-space delta from player
@@ -26,6 +27,7 @@ void main() {
     // Map to [0,1] UV (no clamp - glScissor handles clipping)
     float u = 0.5 + local.x * u_InvDoubleRadius.x;
     float v = 0.5 + local.y * u_InvDoubleRadius.y;
+    vMapUv = vec2(u, v);
 
     // Convert UV to screen NDC
     vec2 ndc = u_NdcBase + vec2(u, v) * u_NdcScale;

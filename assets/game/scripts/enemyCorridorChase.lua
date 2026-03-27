@@ -31,7 +31,7 @@ do
     local ALERT_PAUSE_TIME      = 0.5   -- freeze before charging (seconds)
 
     -- Movement
-    local CHASE_SPEED           = 2.0   -- units/sec while chasing
+    local CHASE_SPEED           = 3.0   -- units/sec while chasing
     local RETURN_SPEED          = 2.0   -- units/sec walking back to home
     local MAX_CHASE_DISTANCE    = 20.0  -- give up if this far from home (units)
     local ARRIVE_EPSILON        = 0.25  -- close enough to home to stop
