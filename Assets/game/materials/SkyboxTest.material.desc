@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "SkyboxTest.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 14711660240700465435
+  },
+  "descriptor_version": 1,
+  "guid": "39040d83-c6c4-d64f-9043-9f95bcec758f",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\SkyboxTest.material"
+  }
+}

@@ -6,6 +6,9 @@ end
 local maxFrames = 6
 local G = _G_root
 
+local frameDuration = 2.0
+local timer = 0.0
+
 G.Level2SceneName   = G.Level2SceneName  or "game/scenes/Level 2.scn"
 
 -- ==================== CUTSCENE SFX ====================
@@ -57,8 +60,13 @@ registerUpdate(function(dt)
     end
 
     
-    if wasMousePressed(0) then
-        print("1. Mouse Click Detected!")
+    timer = timer + dt
+
+    if timer >= frameDuration then
+    --if wasMousePressed(0) then
+
+        timer = 0
+        print("Next Panel")
         
         -- 2. Increment the frame
         currentFrame = currentFrame + 1

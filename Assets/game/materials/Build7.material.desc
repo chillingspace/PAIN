@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Build7.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 17306922633205598318
+  },
+  "descriptor_version": 1,
+  "guid": "bc3ef3ce-e400-1247-acaa-e9e34cd3b2cd",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Build7.material"
+  }
+}

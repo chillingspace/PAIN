@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Build7.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 7260247988905553333
+  },
+  "descriptor_version": 1,
+  "guid": "039bf494-9934-714a-8d53-5d72582a0c72",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Build7.prefab"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Build6.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 12140552876577944023
+  },
+  "descriptor_version": 1,
+  "guid": "cbc0efba-5a42-af42-8453-ce9966dc2b34",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Build6.material"
+  }
+}
