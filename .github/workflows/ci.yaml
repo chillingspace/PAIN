@@ -134,14 +134,17 @@ jobs:
               Write-Host "Synced: $($_.Name)"
           }
 
-          # Copy Mesa Software OpenGL (Specifically x64 llvmpipe)
-          # We search for the large opengl32.dll in the x64 folder of mesa_temp
-          $mesaDll = Get-ChildItem -Path "mesa_temp" -Filter "opengl32.dll" -Recurse | Where-Object { $_.FullName -match "x64" -and $_.Length -gt 10MB } | Select-Object -First 1
-          if ($mesaDll) {
-              Copy-Item $mesaDll.FullName $targetDir -Force
-              Write-Host "Synced x64 Mesa: $($mesaDll.FullName) ($([math]::round($mesaDll.Length/1MB, 2)) MB)"
+          # Copy Mesa Software OpenGL (x64)
+          # Newer Mesa releases distribute a small opengl32.dll wrapper alongside a larger libgallium driver
+          Write-Host "Copying all x64 Mesa DLLs..."
+          $mesaFolder = Get-ChildItem -Path "mesa_temp" -Directory -Filter "x64" -Recurse | Select-Object -First 1
+          if ($mesaFolder) {
+              Get-ChildItem -Path $mesaFolder.FullName -Filter "*.dll" | ForEach-Object {
+                  Copy-Item $_.FullName $targetDir -Force
+                  Write-Host "Synced x64 Mesa DLL: $($_.Name) ($([math]::round($_.Length/1MB, 2)) MB)"
+              }
           } else {
-              Write-Error "Could not find a valid x64 Mesa opengl32.dll (>10MB)!"
+              Write-Error "Could not find the x64 folder in Mesa extraction!"
           }
 
           # 3. VERIFY directory content
