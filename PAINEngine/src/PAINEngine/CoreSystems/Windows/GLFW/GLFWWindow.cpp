@@ -69,8 +69,11 @@ namespace PAIN {
 #else
 			// Create exclusive fullscreen window for lower latency and more stable pacing.
 			int refreshRate = (mode && monitor) ? mode->refreshRate : 60;
-			const int fsWidth = mode ? mode->width : static_cast<int>(frame_buffer.x);
-			const int fsHeight = mode ? mode->height : static_cast<int>(frame_buffer.y);
+			// Keep requested package resolution for smoother pacing vs forcing native monitor resolution.
+			const int fsWidth = mode ? std::min(mode->width, static_cast<int>(frame_buffer.x))
+									 : static_cast<int>(frame_buffer.x);
+			const int fsHeight = mode ? std::min(mode->height, static_cast<int>(frame_buffer.y))
+									  : static_cast<int>(frame_buffer.y);
 			ptr_window = glfwCreateWindow(
 				fsWidth,
 				fsHeight,
@@ -93,7 +96,7 @@ namespace PAIN {
 			int w, h;
 			glfwGetFramebufferSize(ptr_window, &w, &h);
 			frame_buffer = { w, h };
-			PN_CORE_INFO("[Window] Created exclusive fullscreen window {}x{} @ {}Hz (VSync disabled for low latency)", frame_buffer.x, frame_buffer.y, refreshRate);
+			PN_CORE_INFO("[Window] Created exclusive fullscreen window {}x{} @ {}Hz", frame_buffer.x, frame_buffer.y, refreshRate);
 #endif
 
 			// Persist current windowed reference size for future restore.
@@ -175,8 +178,12 @@ namespace PAIN {
 				glfwGetWindowPos(ptr_window, &windowed_x_, &windowed_y_);
 				glfwGetWindowSize(ptr_window, &windowed_w_, &windowed_h_);
 
-				const int width = mode ? mode->width : std::max(640, windowed_w_);
-				const int height = mode ? mode->height : std::max(480, windowed_h_);
+				// Preserve current windowed resolution target to keep fullscreen load comparable
+				// and avoid sudden frametime instability from forcing native monitor resolution.
+				const int width = mode ? std::min(mode->width, std::max(640, windowed_w_))
+									   : std::max(640, windowed_w_);
+				const int height = mode ? std::min(mode->height, std::max(480, windowed_h_))
+										: std::max(480, windowed_h_);
 				const int refreshRate = mode ? mode->refreshRate : GLFW_DONT_CARE;
 
 				// Exclusive fullscreen reduces compositor-induced latency and pacing jitter.
@@ -204,9 +211,9 @@ namespace PAIN {
 			}
 
 			// CRITICAL: Reapply swap interval after monitor mode change
-			// glfwSetWindowMonitor can reset the swap interval to driver defaults
-			// Force swap interval 0 in fullscreen to avoid VSync-induced half-rate stalls/input lag.
-			const int swapInterval = fullscreen ? 0 : GraphicsSettings::get().swap_interval;
+			// glfwSetWindowMonitor can reset the swap interval to driver defaults.
+			// Respect current graphics settings for consistent frame pacing behavior.
+			const int swapInterval = GraphicsSettings::get().swap_interval;
 			glfwSwapInterval(swapInterval);
 			PN_CORE_INFO("[Window] Swap interval reapplied: {} ({})", swapInterval, swapInterval == 0 ? "no VSync" : "VSync enabled");
 
