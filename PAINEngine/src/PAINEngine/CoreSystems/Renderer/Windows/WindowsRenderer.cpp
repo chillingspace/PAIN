@@ -2502,7 +2502,10 @@ namespace PAIN {
 			// submeshCaches are populated once in InitializeModelRenderer
 			// Avoids per-frame BuildGeometryMaterialState asset lookups
 			// ========================================
-			if (i < component.submeshCaches.size() && component.submeshCaches[i].cacheValid) {
+			const bool hasRuntimeOverrides = component.materials[submesh.materialIndex].useOverrides;
+			if (!hasRuntimeOverrides &&
+				i < component.submeshCaches.size() &&
+				component.submeshCaches[i].cacheValid) {
 				ApplyCachedGeometryMaterialState(geometry_shader, component.submeshCaches[i]);
 				checkGLError("DrawGeometry: After ApplyCachedGeometryMaterialState");
 			} else {
@@ -2691,7 +2694,10 @@ namespace PAIN {
 			// ========================================
 			// PERFORMANCE OPTIMIZATION: Use Cached Material State
 			// ========================================
-			if (i < component.submeshCaches.size() && component.submeshCaches[i].cacheValid) {
+			const bool hasRuntimeOverrides = component.materials[submesh.materialIndex].useOverrides;
+			if (!hasRuntimeOverrides &&
+				i < component.submeshCaches.size() &&
+				component.submeshCaches[i].cacheValid) {
 				ApplyCachedGeometryMaterialState(geometry_shader, component.submeshCaches[i]);
 			} else {
 				// Fallback: build material state per-frame
@@ -4065,17 +4071,20 @@ namespace PAIN {
 			
 			// Use combined tone+gamma shader if available (eliminates one full-screen pass)
 			if (tone_gamma_shader) {
+				const auto& gs = GraphicsSettings::get();
+				const float safeGamma = glm::max(0.001f, gs.gamma_value);
+				const float combinedGamma = gs.gamma_correction ? safeGamma : 1.0f;
 				tone_gamma_shader->Bind();
 				glCheck(glActiveTexture(GL_TEXTURE0));
 				glCheck(glBindTexture(GL_TEXTURE_2D, src_tex));
 				glCheck(tone_gamma_shader->SetUniform("tex", 0));
 				glCheck(tone_gamma_shader->SetUniform(
-					"exposure", GraphicsSettings::get().tone_mapping_exposure));
+					"exposure", gs.tone_mapping_exposure));
 				glCheck(tone_gamma_shader->SetUniform(
 					"toneMapMode",
-					static_cast<float>(GraphicsSettings::get().tone_mapping_mode)));
+					static_cast<float>(gs.tone_mapping_mode)));
 				glCheck(tone_gamma_shader->SetUniform(
-					"u_gamma", GraphicsSettings::get().gamma_value));
+					"u_gamma", combinedGamma));
 			}
 			else {
 				tone_shader->Bind();
@@ -4147,7 +4156,7 @@ namespace PAIN {
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, src_tex);
 			gamma_shader->SetUniform("tex", 0);
-			gamma_shader->SetUniform("u_gamma", GraphicsSettings::get().gamma_value);
+			gamma_shader->SetUniform("u_gamma", glm::max(0.001f, GraphicsSettings::get().gamma_value));
 			glBindVertexArray(empty_vao);
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 			++postprocess_passes;
@@ -4268,6 +4277,11 @@ namespace PAIN {
 		// Try to use glInvalidateFramebuffer if available (OpenGL 4.3+)
 		// This is a performance optimization that helps GPU memory bandwidth
 #if defined(GL_VERSION_4_3) || defined(GL_ARB_invalidate_subdata)
+#ifdef PN_PLATFORM_WINDOWS
+		if (!(GLEW_VERSION_4_3 || GLEW_ARB_invalidate_subdata)) {
+			return;
+		}
+#endif
 		if (fbo == 0) {
 			return;
 		}

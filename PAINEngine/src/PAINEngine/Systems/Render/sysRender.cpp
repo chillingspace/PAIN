@@ -2505,11 +2505,6 @@ namespace PAIN {
 
 						static WallMinimapCache wallCache;
 						
-						// OPTIMIZATION: Global dirty flag for minimap walls
-						// Set to true when any wall entity is added/removed/transformed
-						// This allows us to skip the expensive fingerprint check entirely
-						static uint32_t g_minimapWallsDirtyGeneration = 1;
-
 						auto rebuildWallCache = [&](const std::vector<entt::entity>& wallEntities,
 							uint64_t wallSignature) {
 							wallCache.triangleVerticesXZ.clear();
@@ -2565,10 +2560,10 @@ namespace PAIN {
 							wallCache.built = true;
 							wallCache.gpuDirty = true;
 							
-							// OPTIMIZATION: Update quick-check tracking
+							// Update quick-check tracking
 							wallCache.lastQuickCheckCount = wallEntities.size();
-							wallCache.dirtyGeneration = g_minimapWallsDirtyGeneration;
-							wallCache.lastRenderedGeneration = g_minimapWallsDirtyGeneration;
+							wallCache.dirtyGeneration++;
+							wallCache.lastRenderedGeneration = wallCache.dirtyGeneration;
 							};
 
 						glm::vec3 nearest_item_pos(0.0f);
@@ -2701,69 +2696,57 @@ namespace PAIN {
 						}
 
 						if (gs.minimap_show_walls) {
-                            const MinimapWallVisualStyle wallStyle = BuildMinimapWallStyle(minimap_threat_time_);
-							
-							// OPTIMIZATION: Quick check to skip expensive fingerprint building
-							// If wall count matches and no dirty flag is set, skip the rebuild
+							const MinimapWallVisualStyle wallStyle = BuildMinimapWallStyle(minimap_threat_time_);
+
+							// Always validate wall signature when overlays are updated.
+							// The previous quick-skip path could miss moved walls when count stayed constant.
 							const size_t currentWallCount = wallEntities.size();
-							const bool quickSkipPossible = 
-								wallCache.built &&
-								wallCache.sourceRegistry == &registry &&
-								wallCache.lastQuickCheckCount == currentWallCount &&
-								wallCache.dirtyGeneration == wallCache.lastRenderedGeneration;
-							
 							bool needsRebuild = false;
-							
-							if (quickSkipPossible) {
-								// Fast path: nothing changed, skip fingerprint entirely
-								needsRebuild = false;
-							} else {
-								// Slow path: build fingerprint to check for changes
-								minimap_wall_fingerprint_entries_.clear();
-								minimap_wall_fingerprint_entries_.reserve(wallEntities.size());
-								for (const entt::entity entity : wallEntities) {
-									if (!registry.valid(entity)) {
-										continue;
-									}
+							uint64_t currentWallSignature = 0;
 
-									MinimapWallCacheFingerprintEntry entry;
-									entry.entityKey = static_cast<uint64_t>(static_cast<uint32_t>(entity));
-
-									if (auto* model = registry.try_get<ModelRenderer>(entity)) {
-										entry.modelKey = model->modelGUID.IsValid()
-											? static_cast<uint64_t>(std::hash<Assets::GUID>{}(model->modelGUID))
-											: 0ull;
-									}
-
-									if (auto* wt = registry.try_get<WorldTransform>(entity)) {
-										entry.worldMatrix = wt->matrix;
-									}
-									else if (auto* lt = registry.try_get<LocalTransform>(entity)) {
-										const glm::mat4 translate = glm::translate(glm::mat4(1.0f), lt->position);
-										const glm::mat4 rotate = glm::mat4_cast(lt->rotation);
-										const glm::mat4 scale = glm::scale(glm::mat4(1.0f), lt->scale);
-										entry.worldMatrix = translate * rotate * scale;
-									}
-
-									minimap_wall_fingerprint_entries_.push_back(entry);
+							minimap_wall_fingerprint_entries_.clear();
+							minimap_wall_fingerprint_entries_.reserve(wallEntities.size());
+							for (const entt::entity entity : wallEntities) {
+								if (!registry.valid(entity)) {
+									continue;
 								}
-								const uint64_t currentWallSignature =
-									BuildMinimapWallCacheSignature(minimap_wall_fingerprint_entries_);
 
-								needsRebuild =
-									!wallCache.built ||
-									wallCache.sourceRegistry != &registry ||
-									wallCache.wallEntityCount != currentWallCount ||
-									wallCache.wallEntitySignature != currentWallSignature;
-								
-								// Update signature if not rebuilding (for next frame's quick check)
-								if (!needsRebuild) {
-									wallCache.wallEntitySignature = currentWallSignature;
+								MinimapWallCacheFingerprintEntry entry;
+								entry.entityKey = static_cast<uint64_t>(static_cast<uint32_t>(entity));
+
+								if (auto* model = registry.try_get<ModelRenderer>(entity)) {
+									entry.modelKey = model->modelGUID.IsValid()
+										? static_cast<uint64_t>(std::hash<Assets::GUID>{}(model->modelGUID))
+										: 0ull;
 								}
+
+								if (auto* wt = registry.try_get<WorldTransform>(entity)) {
+									entry.worldMatrix = wt->matrix;
+								}
+								else if (auto* lt = registry.try_get<LocalTransform>(entity)) {
+									const glm::mat4 translate = glm::translate(glm::mat4(1.0f), lt->position);
+									const glm::mat4 rotate = glm::mat4_cast(lt->rotation);
+									const glm::mat4 scale = glm::scale(glm::mat4(1.0f), lt->scale);
+									entry.worldMatrix = translate * rotate * scale;
+								}
+
+								minimap_wall_fingerprint_entries_.push_back(entry);
+							}
+							currentWallSignature =
+								BuildMinimapWallCacheSignature(minimap_wall_fingerprint_entries_);
+
+							needsRebuild =
+								!wallCache.built ||
+								wallCache.sourceRegistry != &registry ||
+								wallCache.wallEntityCount != currentWallCount ||
+								wallCache.wallEntitySignature != currentWallSignature;
+
+							if (!needsRebuild) {
+								wallCache.wallEntitySignature = currentWallSignature;
 							}
 
 							if (needsRebuild) {
-								rebuildWallCache(wallEntities, wallCache.wallEntitySignature);
+								rebuildWallCache(wallEntities, currentWallSignature);
 							}
 							
 							// Update quick-check tracking
