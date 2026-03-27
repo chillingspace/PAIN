@@ -119,7 +119,12 @@ jobs:
           # Copy Tools
           foreach ($tool in @("cuttlefish", "ffmpeg")) {
               $toolSource = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Directory -Filter $tool -Recurse | Select-Object -First 1
-              if ($toolSource) { Copy-Item -Path $toolSource.FullName -Destination $targetDir -Recurse -Force }
+              if ($toolSource) {
+                  $targetToolPath = Join-Path $targetDir $toolSource.Name
+                  if ($toolSource.FullName -ne $targetToolPath) {
+                      Copy-Item -Path $toolSource.FullName -Destination $targetDir -Recurse -Force
+                  }
+              }
           }
 
           # Copy ONLY x64 DLLs from vendor (strictly filter for x64 or neutral paths)
