@@ -23,7 +23,11 @@ local layers = {
     SETTINGS = 3,
     AUDIO = 4,
     GRAPHICS = 5,
-    CONTROLS = 6
+    CONTROLS = 6,
+    HOWTOPLAY_1 = 7,
+    HOWTOPLAY_2 = 8,
+    CREDITS_1 = 9,
+    CREDITS_2 = 10
 }
 
 -- ==================== GRAPHICS SETTINGS ====================
@@ -728,14 +732,26 @@ local handlers = {
     -- SETTINGS MENU
     ----------------------------------------------------------------------
     -- Goes from main menu to settings
-    mainmenu_Settings = function(buttonEntity, payload)
+    mainmenu_Next = function(buttonEntity, payload)
         playUIClick()
 
         -- Disable main menu layer
         setLayerEnabled(layers.MAINMENU, false)
 
-        -- Enable settings layer
-        setLayerEnabled(layers.SETTINGS, true)
+        -- Enable next layer
+        if payload then
+            local layer = layers[string.upper(payload)]
+
+            if layer then
+                setLayerEnabled(layer, true)
+            else
+                printLog("[UI] Invalid payload: " .. tostring(payload))
+            end
+        else
+            printLog("[UI] No payload provided")
+        end
+
+        -- setLayerEnabled(layers.SETTINGS, true)
     end,
 
     -- Goes back from settings to main menu
@@ -771,18 +787,32 @@ local handlers = {
         -- Disable settingsUI layer
         setLayerEnabled(layers.SETTINGS, false)
 
-        if payload == "audio" then
-            -- Enable audio layer   
-            setLayerEnabled(layers.AUDIO, true)
-        elseif payload == "graphics" then
-            -- Enable graphics layer
-            setLayerEnabled(layers.GRAPHICS, true)
-        elseif payload == "controls" then
-            -- Enable controls layer
-            setLayerEnabled(layers.CONTROLS, true)
+        -- if payload == "audio" then
+        --     -- Enable audio layer   
+        --     setLayerEnabled(layers.AUDIO, true)
+        -- elseif payload == "graphics" then
+        --     -- Enable graphics layer
+        --     setLayerEnabled(layers.GRAPHICS, true)
+        -- elseif payload == "controls" then
+        --     -- Enable controls layer
+        --     setLayerEnabled(layers.CONTROLS, true)
+        -- else
+        --     -- You forgot to set payload
+        --     printLog("[UI] No payload for next settings UI")
+        --     setLayerEnabled(layers.SETTINGS, true)
+        -- end
+
+        if payload then
+            local layer = layers[string.upper(payload)]
+
+            if layer then
+                setLayerEnabled(layer, true)
+            else
+                printLog("[UI] Invalid payload: " .. tostring(payload))
+                setLayerEnabled(layers.SETTINGS, true)
+            end
         else
-            -- You forgot to set payload
-            printLog("[UI] No payload for next settings UI")
+            printLog("[UI] No payload provided")
             setLayerEnabled(layers.SETTINGS, true)
         end
     end,

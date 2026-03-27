@@ -2,10 +2,10 @@
     "assets": [
         "efff96ab-9011-d248-a0e3-56bb0e76f8e6",
         "6466af7c-6447-2043-b9f5-6fd7dfada5d4",
-        "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
         "7b6d729f-2477-6e43-a93a-4a9f65732f3d",
         "cc4071a7-9223-6e4e-bab8-da7e8df1b667",
         "4e937e21-0623-ad45-ad95-e4c416c20b1b",
+        "31f050fc-b8fd-9f44-9f4c-c2b19a10e63e",
         "a77749e3-6c15-7446-a792-5609dd96b391",
         "a67656ca-15a5-d441-b14d-dae036e5245e",
         "14377587-a8fe-2b47-9f46-dad6bdad2753",
@@ -13,21 +13,29 @@
         "c49ebb97-d7ba-f148-9e46-16d6c5543147",
         "3e8dc653-3d17-ab42-bb53-da040f01f965",
         "c7685566-a3eb-4b4f-a630-7d08fedb36e5",
+        "a5302a28-588d-fc4d-a39a-57873647e5c1",
         "9aac41f9-737d-d540-a485-7155b0011394",
-        "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
-        "5936ba72-6cad-7a4a-8039-d1614e5a9719",
-        "70e060fa-e805-a24b-8f37-cce5a7a9fc73",
         "c3240e7d-4066-2444-a024-c1d31c71a299",
         "b4a81861-94f2-584b-9da1-dbb24a91f93c",
         "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
         "1708e4d2-69c9-ba43-9ef6-85d417b11f01",
-        "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
         "c79c529b-71e5-164c-854d-f8cf076f5318",
         "be682648-fcd7-2b47-b7bf-3faea372c733",
-        "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
+        "5936ba72-6cad-7a4a-8039-d1614e5a9719",
         "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
+        "25c6e2c3-b701-4c43-b049-8c9b21a29441",
         "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd",
-        "61f3c20b-d44c-544d-9a0d-d130e05c67a9"
+        "70e060fa-e805-a24b-8f37-cce5a7a9fc73",
+        "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+        "a8977689-ded0-fa41-9efb-33354e83dec7",
+        "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
+        "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
+        "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
+        "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
+        "6621d58f-1f66-bb4f-8c78-b77404b6296b",
+        "3da3f0aa-e9d3-634a-b1c9-f88763fb5bae",
+        "1fe7b95c-7093-7f44-8aac-322eae96b634",
+        "a5dee0ac-d873-6648-bb32-5bea6e1322b6"
     ],
     "camera": {
         "active_game_cam": "Cam",
@@ -6433,7 +6441,7 @@
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
-                                    "payload": "audio",
+                                    "payload": "AUDIO",
                                     "pressed_color": -5592406,
                                     "state": "Normal"
                                 }
@@ -6467,7 +6475,7 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "payload": "audio",
+                            "payload": "AUDIO",
                             "pressed_color": -5592406,
                             "state": "Normal"
                         },
@@ -6632,7 +6640,7 @@
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
-                                    "payload": "graphics",
+                                    "payload": "GRAPHICS",
                                     "pressed_color": -5592406,
                                     "state": "Normal"
                                 },
@@ -6674,7 +6682,7 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "payload": "graphics",
+                            "payload": "GRAPHICS",
                             "pressed_color": -5592406,
                             "state": "Normal"
                         },
@@ -6825,7 +6833,7 @@
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
-                                    "payload": "controls",
+                                    "payload": "CONTROLS",
                                     "pressed_color": -5592406,
                                     "state": "Normal"
                                 }
@@ -6859,7 +6867,7 @@
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "payload": "controls",
+                            "payload": "CONTROLS",
                             "pressed_color": -5592406,
                             "state": "Normal"
                         },
@@ -7454,11 +7462,11 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": "LoadScene",
+                            "action": "mainmenu_Next",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "payload": "game/scenes/howtoplay.scn",
+                            "payload": "HOWTOPLAY_1",
                             "pressed_color": -5592406,
                             "state": "Highlighted"
                         },
@@ -7596,11 +7604,11 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": "mainmenu_Settings",
+                            "action": "mainmenu_Next",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "payload": "",
+                            "payload": "SETTINGS",
                             "pressed_color": -5592406,
                             "state": "Normal"
                         },
@@ -7738,11 +7746,11 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": "LoadScene",
+                            "action": "mainmenu_Next",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "payload": "game/scenes/credits.scn",
+                            "payload": "CREDITS_1",
                             "pressed_color": -5592406,
                             "state": "Normal"
                         },
@@ -8253,6 +8261,8 @@
                         },
                         "ModelRenderer": {
                             "castShadows": true,
+                            "doubleSidedShadows": false,
+                            "isStatic": false,
                             "materials": [
                                 {
                                     "albedoTextureOverride": "7b6d729f-2477-6e43-a93a-4a9f65732f3d",
@@ -8343,6 +8353,8 @@
                                 },
                                 "ModelRenderer": {
                                     "castShadows": true,
+                                    "doubleSidedShadows": false,
+                                    "isStatic": false,
                                     "materials": [
                                         {
                                             "albedoTextureOverride": "7b6d729f-2477-6e43-a93a-4a9f65732f3d",
@@ -8476,6 +8488,8 @@
                         },
                         "ModelRenderer": {
                             "castShadows": true,
+                            "doubleSidedShadows": false,
+                            "isStatic": false,
                             "materials": [
                                 {
                                     "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
@@ -8599,6 +8613,8 @@
                         },
                         "ModelRenderer": {
                             "castShadows": true,
+                            "doubleSidedShadows": false,
+                            "isStatic": false,
                             "materials": [
                                 {
                                     "albedoTextureOverride": "c7685566-a3eb-4b4f-a630-7d08fedb36e5",
@@ -8723,6 +8739,8 @@
                         },
                         "ModelRenderer": {
                             "castShadows": true,
+                            "doubleSidedShadows": false,
+                            "isStatic": false,
                             "materials": [
                                 {
                                     "albedoTextureOverride": "1708e4d2-69c9-ba43-9ef6-85d417b11f01",
@@ -8806,6 +8824,40 @@
                                         0.10000000149011612,
                                         0.10000000149011612
                                     ]
+                                },
+                                "ModelRenderer": {
+                                    "castShadows": true,
+                                    "doubleSidedShadows": false,
+                                    "isStatic": false,
+                                    "materials": [
+                                        {
+                                            "albedoTextureOverride": "1708e4d2-69c9-ba43-9ef6-85d417b11f01",
+                                            "aoTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                                            "baseColorOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "materialGUID": "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
+                                            "metallicOverride": 1.0,
+                                            "metallicTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                                            "normalTextureOverride": "c79c529b-71e5-164c-854d-f8cf076f5318",
+                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "roughnessOverride": 1.0,
+                                            "roughnessTextureOverride": "b4a81861-94f2-584b-9da1-dbb24a91f93c",
+                                            "useOverrides": false
+                                        }
+                                    ],
+                                    "modelGUID": "c3240e7d-4066-2444-a024-c1d31c71a299",
+                                    "receiveShadows": true,
+                                    "visible": true
                                 },
                                 "Name": {
                                     "name": "ContainerRed"
@@ -8915,6 +8967,8 @@
                         },
                         "ModelRenderer": {
                             "castShadows": true,
+                            "doubleSidedShadows": false,
+                            "isStatic": false,
                             "materials": [
                                 {
                                     "albedoTextureOverride": "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
@@ -8998,6 +9052,40 @@
                                         0.10000000149011612,
                                         0.10000000149011612
                                     ]
+                                },
+                                "ModelRenderer": {
+                                    "castShadows": true,
+                                    "doubleSidedShadows": false,
+                                    "isStatic": false,
+                                    "materials": [
+                                        {
+                                            "albedoTextureOverride": "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
+                                            "aoTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                            "baseColorOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "materialGUID": "5936ba72-6cad-7a4a-8039-d1614e5a9719",
+                                            "metallicOverride": 1.0,
+                                            "metallicTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                            "normalTextureOverride": "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd",
+                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "roughnessOverride": 1.0,
+                                            "roughnessTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                            "useOverrides": false
+                                        }
+                                    ],
+                                    "modelGUID": "be682648-fcd7-2b47-b7bf-3faea372c733",
+                                    "receiveShadows": true,
+                                    "visible": true
                                 },
                                 "Name": {
                                     "name": "ContainerBlue"
@@ -9107,6 +9195,8 @@
                         },
                         "ModelRenderer": {
                             "castShadows": true,
+                            "doubleSidedShadows": false,
+                            "isStatic": false,
                             "materials": [
                                 {
                                     "albedoTextureOverride": "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
@@ -9190,6 +9280,40 @@
                                         0.10000000149011612,
                                         0.10000000149011612
                                     ]
+                                },
+                                "ModelRenderer": {
+                                    "castShadows": true,
+                                    "doubleSidedShadows": false,
+                                    "isStatic": false,
+                                    "materials": [
+                                        {
+                                            "albedoTextureOverride": "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
+                                            "aoTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                            "baseColorOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "materialGUID": "5936ba72-6cad-7a4a-8039-d1614e5a9719",
+                                            "metallicOverride": 1.0,
+                                            "metallicTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                            "normalTextureOverride": "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd",
+                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "roughnessOverride": 1.0,
+                                            "roughnessTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                            "useOverrides": false
+                                        }
+                                    ],
+                                    "modelGUID": "be682648-fcd7-2b47-b7bf-3faea372c733",
+                                    "receiveShadows": true,
+                                    "visible": true
                                 },
                                 "Name": {
                                     "name": "ContainerBlue"
@@ -9299,6 +9423,8 @@
                         },
                         "ModelRenderer": {
                             "castShadows": true,
+                            "doubleSidedShadows": false,
+                            "isStatic": false,
                             "materials": [
                                 {
                                     "albedoTextureOverride": "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
@@ -9382,6 +9508,40 @@
                                         0.10000000149011612,
                                         0.10000000149011612
                                     ]
+                                },
+                                "ModelRenderer": {
+                                    "castShadows": true,
+                                    "doubleSidedShadows": false,
+                                    "isStatic": false,
+                                    "materials": [
+                                        {
+                                            "albedoTextureOverride": "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
+                                            "aoTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                            "baseColorOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveOverride": [
+                                                1.0,
+                                                1.0,
+                                                1.0
+                                            ],
+                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "materialGUID": "5936ba72-6cad-7a4a-8039-d1614e5a9719",
+                                            "metallicOverride": 1.0,
+                                            "metallicTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                            "normalTextureOverride": "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd",
+                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                            "roughnessOverride": 1.0,
+                                            "roughnessTextureOverride": "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
+                                            "useOverrides": false
+                                        }
+                                    ],
+                                    "modelGUID": "be682648-fcd7-2b47-b7bf-3faea372c733",
+                                    "receiveShadows": true,
+                                    "visible": true
                                 },
                                 "Name": {
                                     "name": "ContainerBlue"
@@ -9491,6 +9651,8 @@
                         },
                         "ModelRenderer": {
                             "castShadows": true,
+                            "doubleSidedShadows": false,
+                            "isStatic": false,
                             "materials": [
                                 {
                                     "albedoTextureOverride": "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
@@ -9657,11 +9819,25 @@
         "useNormalMap": true,
         "useRoughnessMetallicMap": true,
         "useWorldLight": true,
+        "worldLightDirection": [
+            -0.5184758305549622,
+            -0.8295613527297974,
+            -0.20739033818244934
+        ],
+        "worldLightFarPlane": 30.0,
         "worldLightIntensity": [
             1.5,
             1.5,
             1.5
-        ]
+        ],
+        "worldLightPosition": [
+            12.979520797729492,
+            18.806503295898438,
+            5.742390155792236
+        ],
+        "worldLightShadowFollowDistance": 22.5,
+        "worldLightShadowResolution": 1024,
+        "worldLightShadowsEnabled": true
     },
     "layers": [
         {

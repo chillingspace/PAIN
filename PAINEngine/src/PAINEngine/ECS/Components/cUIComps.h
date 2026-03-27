@@ -138,7 +138,7 @@ namespace PAIN {
 		graphics_Left,
 		graphics_Right,
 
-		mainmenu_Settings,
+		mainmenu_Next,
 		settings_Back,
 		settings_Sub_Back,
 		settings_Next,
@@ -347,7 +347,7 @@ namespace PAIN {
 		{PAIN::UIAction::graphics_Left, "graphics_Left"},
 		{PAIN::UIAction::graphics_Right, "graphics_Right"},
 
-		{PAIN::UIAction::mainmenu_Settings, "mainmenu_Settings"},
+		{PAIN::UIAction::mainmenu_Next, "mainmenu_Next"},
 		{PAIN::UIAction::settings_Back, "settings_Back"},
 		{PAIN::UIAction::settings_Sub_Back, "settings_Sub_Back"},
 		{PAIN::UIAction::settings_Next, "settings_Next"},

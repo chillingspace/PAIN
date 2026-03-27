@@ -825,7 +825,7 @@ namespace PAIN {
 							"graphics_Left",
 							"graphics_Right",
 
-							"mainmenu_Settings",
+							"mainmenu_Next",
 							"settings_Back",
 							"settings_Sub_Back",
 							"settings_Next",

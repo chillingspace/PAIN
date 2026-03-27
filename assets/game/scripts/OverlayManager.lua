@@ -20,6 +20,14 @@ end)
 
 -- Make TogglePause globally accessible
 function TogglePause()
+    local scene = getCurrentSceneName()
+    -- printLog("Current scene: " .. tostring(scene))
+
+    if scene == "game/scenes/mainmenu.scn" then
+        hideCursor(false)
+        return
+    end
+
     isPaused = not isPaused
     
     log("[OverlayManager] Toggling pause: " .. tostring(isPaused))
