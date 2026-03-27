@@ -26,6 +26,12 @@ uniform Light u_Lights[MAX_LIGHTS];
 uniform int u_NumLights;
 uniform sampler2D u_ShadowMaps[MAX_SHADOWMAPPED_LIGHTS];
 
+#define SampleShadowMap(idx, coords) \
+    (idx == 0 ? texture(u_ShadowMaps[0], coords).r : \
+     idx == 1 ? texture(u_ShadowMaps[1], coords).r : \
+     idx == 2 ? texture(u_ShadowMaps[2], coords).r : \
+     texture(u_ShadowMaps[3], coords).r)
+
 uniform vec3 u_CamPos;
 uniform mat4 u_InvVP;
 uniform mat4 u_PrevVP;
@@ -77,7 +83,7 @@ float sampleShadow(int shadowIdx, vec3 worldPos, Light light) {
         return isDirectional ? 1.0 : 0.0;
     }
 
-    float shadowDepth = texture(u_ShadowMaps[shadowIdx], projCoords.xy).r;
+    float shadowDepth = SampleShadowMap(shadowIdx, projCoords.xy);
     if (shadowDepth >= 0.99) {
         return 0.0;
     }

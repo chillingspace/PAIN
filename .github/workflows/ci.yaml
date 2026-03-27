@@ -156,7 +156,7 @@ jobs:
           $proc = Start-Process .\Friends-Frog-ever.exe -PassThru -RedirectStandardOutput "app_stdout.log" -RedirectStandardError "app_stderr.log"
           Write-Host "Process started with PID: $($proc.Id)"
           
-          Start-Sleep -Seconds 15
+          Start-Sleep -Seconds 60
           
           if ($proc.HasExited) {
              Write-Host "--- APP STDOUT ---"
