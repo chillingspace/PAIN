@@ -135,25 +135,32 @@ namespace PAIN {
 		bool android_battery_saver_mode = false;
 		int android_battery_saver_fps = 30;
 #else
-		int swap_interval = 1;  // Windows: Default to 1 (VSync enabled) for smooth visuals
+		// Windows: Default to 0 (no VSync) in Release for lowest latency
+		// VSync enabled (1) in Debug for smooth editor experience
+		#ifdef _DEBUG
+		int swap_interval = 1;  // Debug: VSync enabled for smooth editor
+		#else
+		int swap_interval = 0;  // Release: No VSync for lowest latency, uncapped FPS
+		#endif
 #endif
 
 		// ========================================
-		// FRAME PACING SYSTEM
-		// Helps smooth out frame time variance and prevents "spiral of death"
-		// when frames take longer than the target frame time
+		// FRAME PACING SYSTEM (SIMPLIFIED)
+		// Only tracks frame time statistics for debugging - NO frame skipping
+		// Previous implementation caused input lag at high FPS due to
+		// accumulated time tracking creating disconnect between input and rendering
 		// ========================================
 		struct FramePacingSettings {
-			bool enabled = true;                     // Master toggle for frame pacing
-			float target_fps = 60.0f;                // Target frame rate
-			float max_accumulated_frames = 1.5f;     // Max frames to accumulate before skipping
-			bool enable_frame_skip = true;           // Skip rendering if too far behind
+			bool enabled = true;                     // Enable to track frame time stats
+			float target_fps = 60.0f;                // Target frame rate (for reference)
+			float max_accumulated_frames = 1.5f;     // DEPRECATED - not used
+			bool enable_frame_skip = false;          // DEPRECATED - not used
 			float spike_threshold_ms = 8.0f;         // Consider frame a "spike" if > this duration
 			
 			// Runtime state (don't modify in settings UI)
-			float accumulated_time = 0.0f;
-			int frames_skipped = 0;
-			int frames_rendered = 0;
+			float accumulated_time = 0.0f;            // DEPRECATED
+			int frames_skipped = 0;                   // DEPRECATED
+			int frames_rendered = 0;                  // DEPRECATED
 			float last_frame_time_ms = 0.0f;
 			float avg_frame_time_ms = 16.67f;        // Rolling average
 			int spike_count = 0;                     // Count of frames exceeding spike_threshold

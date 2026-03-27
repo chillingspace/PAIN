@@ -288,17 +288,16 @@ namespace PAIN {
 			}
 			
 			// ========================================
-			// FRAME PACING SYSTEM
-			// Helps smooth out frame time variance by tracking accumulated time
-			// and optionally skipping frames when too far behind
+			// FRAME PACING SYSTEM (SIMPLIFIED)
+			// Only tracks frame time statistics for debugging - NO frame skipping or accumulation
+			// These features were removed because they caused input lag at high FPS
 			// ========================================
 			auto& gs = GraphicsSettings::get();
 			if (gs.frame_pacing.enabled) {
 				auto& fp = gs.frame_pacing;
 				const float dt = glm::max(0.0f, timing.dt);
-				const float targetFrameTime = 1.0f / fp.target_fps;
 				
-				// Track frame time
+				// Track frame time statistics only (for debugging/performance monitoring)
 				fp.last_frame_time_ms = dt * 1000.0f;
 				
 				// Detect spikes (frames that took much longer than expected)
@@ -307,32 +306,12 @@ namespace PAIN {
 				}
 				
 				// Rolling average frame time (exponential moving average)
-				const float alpha = 0.1f;  // Weight for new sample
+				const float alpha = 0.1f;
 				fp.avg_frame_time_ms = fp.avg_frame_time_ms * (1.0f - alpha) + dt * 1000.0f * alpha;
 				
-				// Accumulate time
-				fp.accumulated_time += dt;
-				
-				// Check if we're too far behind
-				if (fp.accumulated_time > targetFrameTime * fp.max_accumulated_frames) {
-					// We're too far behind, potentially skip this frame to catch up
-					if (fp.enable_frame_skip) {
-						fp.accumulated_time -= targetFrameTime;
-						fp.frames_skipped++;
-						// Still need to update minimap time and end thermal frame
-						if (g_ThermalProfiler) {
-							g_ThermalProfiler->EndFrame();
-						}
-						return;  // Skip rendering this frame
-					}
-				}
-				
-				// Consume one frame's worth of accumulated time
-				if (fp.accumulated_time >= targetFrameTime) {
-					fp.accumulated_time -= targetFrameTime;
-				}
-				
-				fp.frames_rendered++;
+				// NOTE: Removed accumulated time tracking and frame skipping
+				// These were causing input lag at high FPS - the "smooth but low FPS"
+				// vs "laggy but high FPS" tradeoff was not acceptable
 			}
 			
 			{

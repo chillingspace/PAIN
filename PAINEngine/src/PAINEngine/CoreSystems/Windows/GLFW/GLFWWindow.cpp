@@ -66,24 +66,46 @@ namespace PAIN {
 				throw std::exception();
 			}
 #else
-			// Create fullscreen window with explicit refresh rate (avoid driver guessing issues)
+			// Create borderless fullscreen window for better performance and lower input lag
+			// Borderless windowed avoids exclusive fullscreen DWM issues while covering entire screen
 			int refreshRate = (mode && monitor) ? mode->refreshRate : 60;
 			
-			// Set refresh rate hint before creating fullscreen window
-			glfwWindowHint(GLFW_REFRESH_RATE, refreshRate);
+			// Remove window decorations for borderless look
+			glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+			// Don't specify refresh rate - let the driver handle it in windowed mode
+			glfwWindowHint(GLFW_REFRESH_RATE, GLFW_DONT_CARE);
+			
+			// Get monitor position to place window covering the entire monitor
+			int monitorX = 0, monitorY = 0;
+			if (monitor) {
+				glfwGetMonitorPos(monitor, &monitorX, &monitorY);
+			}
 			
 			ptr_window = glfwCreateWindow(
 				mode->width,
 				mode->height,
-				"My Fullscreen Window",
-				monitor,  // Pass monitor for fullscreen
+				package.title.c_str(),
+				nullptr,  // nullptr = windowed mode (borderless fullscreen), monitor = exclusive fullscreen
 				nullptr
 			);
+			
+			if (!ptr_window) {
+				PN_CORE_ERROR("Failed to create fullscreen window");
+				glfwTerminate();
+				throw std::exception();
+			}
+			
+			// Position window to cover the entire monitor (borderless fullscreen positioning)
+			glfwSetWindowPos(ptr_window, monitorX, monitorY);
+			
+			// Disable vsync by default in release mode for uncapped FPS and lowest input lag
+			// VSync in fullscreen can cause FPS halving and input lag issues
+			GraphicsSettings::get().swap_interval = 0;
 
 			int w, h;
 			glfwGetFramebufferSize(ptr_window, &w, &h);
 			frame_buffer = { w, h };
-			PN_CORE_INFO("[Window] Created fullscreen window {}x{} @ {}Hz", frame_buffer.x, frame_buffer.y, refreshRate);
+			PN_CORE_INFO("[Window] Created borderless fullscreen window {}x{} @ {}Hz (VSync disabled for low latency)", frame_buffer.x, frame_buffer.y, refreshRate);
 #endif
 
 			//Create rendering context
@@ -154,6 +176,7 @@ namespace PAIN {
 
 				// Get primary monitor resolution and refresh rate
 				int width = 1920, height = 1080, refreshRate = 60;
+				int monitorX = 0, monitorY = 0;
 				if (monitor) {
 					const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 					if (mode) {
@@ -161,11 +184,15 @@ namespace PAIN {
 						height = mode->height;
 						refreshRate = mode->refreshRate;
 					}
+					glfwGetMonitorPos(monitor, &monitorX, &monitorY);
 				}
 
-				// Use explicit refresh rate instead of GLFW_DONT_CARE to avoid driver issues
-				glfwSetWindowMonitor(ptr_window, monitor, 0, 0, width, height, refreshRate);
-				PN_CORE_INFO("[Window] Switched to fullscreen {}x{} @ {}Hz", width, height, refreshRate);
+				// Use BORDERLESS FULLSCREEN WINDOWED for best performance and lowest input lag
+				// This avoids exclusive fullscreen DWM issues while still covering the screen
+				// Set to nullptr monitor (windowed) but cover entire monitor
+				glfwSetWindowAttrib(ptr_window, GLFW_DECORATED, GLFW_FALSE);
+				glfwSetWindowMonitor(ptr_window, nullptr, monitorX, monitorY, width, height, GLFW_DONT_CARE);
+				PN_CORE_INFO("[Window] Switched to borderless fullscreen {}x{} @ {}Hz", width, height, refreshRate);
 			}
 			else {
 				// Windowed: centered 1280x720
@@ -181,6 +208,8 @@ namespace PAIN {
 					}
 				}
 
+				// Re-enable window decorations for windowed mode
+				glfwSetWindowAttrib(ptr_window, GLFW_DECORATED, GLFW_TRUE);
 				glfwSetWindowMonitor(ptr_window, nullptr, posX, posY, winW, winH, GLFW_DONT_CARE);
 				PN_CORE_INFO("[Window] Switched to windowed {}x{} at ({},{})", winW, winH, posX, posY);
 			}
