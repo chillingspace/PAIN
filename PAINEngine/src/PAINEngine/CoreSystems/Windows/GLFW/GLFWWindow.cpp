@@ -65,27 +65,17 @@ namespace PAIN {
 				glfwTerminate();
 				throw std::exception();
 			}
+			is_fullscreen_ = false;
 #else
-			// Create borderless fullscreen window for better performance and lower input lag
-			// Borderless windowed avoids exclusive fullscreen DWM issues while covering entire screen
+			// Create exclusive fullscreen window for lower latency and more stable pacing.
 			int refreshRate = (mode && monitor) ? mode->refreshRate : 60;
-			
-			// Remove window decorations for borderless look
-			glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
-			// Don't specify refresh rate - let the driver handle it in windowed mode
-			glfwWindowHint(GLFW_REFRESH_RATE, GLFW_DONT_CARE);
-			
-			// Get monitor position to place window covering the entire monitor
-			int monitorX = 0, monitorY = 0;
-			if (monitor) {
-				glfwGetMonitorPos(monitor, &monitorX, &monitorY);
-			}
-			
+			const int fsWidth = mode ? mode->width : static_cast<int>(frame_buffer.x);
+			const int fsHeight = mode ? mode->height : static_cast<int>(frame_buffer.y);
 			ptr_window = glfwCreateWindow(
-				mode->width,
-				mode->height,
+				fsWidth,
+				fsHeight,
 				package.title.c_str(),
-				nullptr,  // nullptr = windowed mode (borderless fullscreen), monitor = exclusive fullscreen
+				monitor,  // exclusive fullscreen for lower compositor latency (if monitor is available)
 				nullptr
 			);
 			
@@ -94,9 +84,7 @@ namespace PAIN {
 				glfwTerminate();
 				throw std::exception();
 			}
-			
-			// Position window to cover the entire monitor (borderless fullscreen positioning)
-			glfwSetWindowPos(ptr_window, monitorX, monitorY);
+			is_fullscreen_ = true;
 			
 			// Disable vsync by default in release mode for uncapped FPS and lowest input lag
 			// VSync in fullscreen can cause FPS halving and input lag issues
@@ -105,8 +93,14 @@ namespace PAIN {
 			int w, h;
 			glfwGetFramebufferSize(ptr_window, &w, &h);
 			frame_buffer = { w, h };
-			PN_CORE_INFO("[Window] Created borderless fullscreen window {}x{} @ {}Hz (VSync disabled for low latency)", frame_buffer.x, frame_buffer.y, refreshRate);
+			PN_CORE_INFO("[Window] Created exclusive fullscreen window {}x{} @ {}Hz (VSync disabled for low latency)", frame_buffer.x, frame_buffer.y, refreshRate);
 #endif
+
+			// Persist current windowed reference size for future restore.
+			// In release this becomes the preferred windowed fallback size.
+			windowed_w_ = static_cast<int>(package.width);
+			windowed_h_ = static_cast<int>(package.height);
+			glfwGetWindowPos(ptr_window, &windowed_x_, &windowed_y_);
 
 			//Create rendering context
 			m_Context = std::make_unique<OpenGLContext>(ptr_window);
@@ -166,57 +160,53 @@ namespace PAIN {
 
 		void GLFW_Window::setFullscreen(bool fullscreen)
 		{
+			if (!ptr_window) {
+				return;
+			}
+			if (fullscreen == is_fullscreen_) {
+				return;
+			}
+
 			GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+			const GLFWvidmode* mode = monitor ? glfwGetVideoMode(monitor) : nullptr;
 
 			if (fullscreen) {
-				// Save current windowed position and size for potential restore
-				int wx, wy, ww, wh;
-				glfwGetWindowPos(ptr_window, &wx, &wy);
-				glfwGetWindowSize(ptr_window, &ww, &wh);
+				// Save current windowed position and size before entering fullscreen.
+				glfwGetWindowPos(ptr_window, &windowed_x_, &windowed_y_);
+				glfwGetWindowSize(ptr_window, &windowed_w_, &windowed_h_);
 
-				// Get primary monitor resolution and refresh rate
-				int width = 1920, height = 1080, refreshRate = 60;
-				int monitorX = 0, monitorY = 0;
-				if (monitor) {
-					const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-					if (mode) {
-						width = mode->width;
-						height = mode->height;
-						refreshRate = mode->refreshRate;
-					}
-					glfwGetMonitorPos(monitor, &monitorX, &monitorY);
-				}
+				const int width = mode ? mode->width : std::max(640, windowed_w_);
+				const int height = mode ? mode->height : std::max(480, windowed_h_);
+				const int refreshRate = mode ? mode->refreshRate : GLFW_DONT_CARE;
 
-				// Use BORDERLESS FULLSCREEN WINDOWED for best performance and lowest input lag
-				// This avoids exclusive fullscreen DWM issues while still covering the screen
-				// Set to nullptr monitor (windowed) but cover entire monitor
+				// Exclusive fullscreen reduces compositor-induced latency and pacing jitter.
 				glfwSetWindowAttrib(ptr_window, GLFW_DECORATED, GLFW_FALSE);
-				glfwSetWindowMonitor(ptr_window, nullptr, monitorX, monitorY, width, height, GLFW_DONT_CARE);
-				PN_CORE_INFO("[Window] Switched to borderless fullscreen {}x{} @ {}Hz", width, height, refreshRate);
+				glfwSetWindowMonitor(ptr_window, monitor, 0, 0, width, height, refreshRate);
+				is_fullscreen_ = true;
+				PN_CORE_INFO("[Window] Switched to exclusive fullscreen {}x{} @ {}Hz", width, height, refreshRate);
 			}
 			else {
-				// Windowed: centered 1280x720
-				int winW = 1280, winH = 720;
-				int posX = 100, posY = 100;
-
-				// Try to center on monitor
-				if (monitor) {
-					const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-					if (mode) {
-						posX = (mode->width - winW) / 2;
-						posY = (mode->height - winH) / 2;
-					}
+				// Restore previous windowed bounds.
+				int winW = std::max(640, windowed_w_);
+				int winH = std::max(480, windowed_h_);
+				int posX = windowed_x_;
+				int posY = windowed_y_;
+				if (mode && (posX == 0 && posY == 0)) {
+					posX = (mode->width - winW) / 2;
+					posY = (mode->height - winH) / 2;
 				}
 
 				// Re-enable window decorations for windowed mode
 				glfwSetWindowAttrib(ptr_window, GLFW_DECORATED, GLFW_TRUE);
 				glfwSetWindowMonitor(ptr_window, nullptr, posX, posY, winW, winH, GLFW_DONT_CARE);
+				is_fullscreen_ = false;
 				PN_CORE_INFO("[Window] Switched to windowed {}x{} at ({},{})", winW, winH, posX, posY);
 			}
 
 			// CRITICAL: Reapply swap interval after monitor mode change
 			// glfwSetWindowMonitor can reset the swap interval to driver defaults
-			const int swapInterval = GraphicsSettings::get().swap_interval;
+			// Force swap interval 0 in fullscreen to avoid VSync-induced half-rate stalls/input lag.
+			const int swapInterval = fullscreen ? 0 : GraphicsSettings::get().swap_interval;
 			glfwSwapInterval(swapInterval);
 			PN_CORE_INFO("[Window] Swap interval reapplied: {} ({})", swapInterval, swapInterval == 0 ? "no VSync" : "VSync enabled");
 
