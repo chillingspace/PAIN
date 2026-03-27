@@ -4591,8 +4591,8 @@
 		},
 		{
 			"mimeType":"image/png",
-			"name":"Gear_baseColor",
-			"uri":"Gear_baseColor.png"
+			"name":"Gear_BaseColor",
+			"uri":"Gear_BaseColor.png"
 		}
 	],
 	"skins":[

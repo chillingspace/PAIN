@@ -3,41 +3,41 @@
     {
       "bufferView": 0,
       "componentType": 5125,
-      "count": 672,
+      "count": 2610,
       "type": "SCALAR"
     },
     {
       "bufferView": 1,
       "componentType": 5126,
-      "count": 310,
+      "count": 499,
       "max": [
-        11.6646766662598,
-        8.72545051574707,
-        11.3722190856934
+        12806.9306640625,
+        12806.9296875,
+        12736.775390625
       ],
       "min": [
-        -11.6646766662598,
+        -12806.9345703125,
         0.0,
-        -11.3722190856934
+        -12736.7822265625
       ],
       "type": "VEC3"
     },
     {
       "bufferView": 2,
       "componentType": 5126,
-      "count": 310,
+      "count": 499,
       "type": "VEC3"
     },
     {
       "bufferView": 3,
       "componentType": 5126,
-      "count": 310,
+      "count": 499,
       "type": "VEC4"
     },
     {
       "bufferView": 4,
       "componentType": 5126,
-      "count": 310,
+      "count": 499,
       "type": "VEC2"
     }
   ],
@@ -48,52 +48,52 @@
   "bufferViews": [
     {
       "buffer": 0,
-      "byteLength": 2688,
+      "byteLength": 10440,
       "target": 34963
     },
     {
       "buffer": 0,
-      "byteLength": 3720,
-      "byteOffset": 2688,
+      "byteLength": 5988,
+      "byteOffset": 10440,
       "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 3720,
-      "byteOffset": 6408,
+      "byteLength": 5988,
+      "byteOffset": 16428,
       "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 4960,
-      "byteOffset": 10128,
+      "byteLength": 7984,
+      "byteOffset": 22416,
       "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 2480,
-      "byteOffset": 15088,
+      "byteLength": 3992,
+      "byteOffset": 30400,
       "target": 34962
     }
   ],
   "buffers": [
     {
-      "byteLength": 17568,
-      "uri": "Gear.bin"
+      "byteLength": 34392,
+      "uri": "SkyboxTest.bin"
     }
   ],
   "images": [
     {
-      "uri": "Gear_BaseColor.png"
+      "uri": "SkyboxTest_baseColor.png"
     },
     {
-      "uri": "Gear_occlusionRoughnessMetallic.png"
+      "uri": "SkyboxTest_occlusionRoughnessMetallic.png"
     },
     {
-      "uri": "Gear_Normal.png"
+      "uri": "SkyboxTest_normal.png"
     },
     {
-      "uri": "Gear_emissive.png"
+      "uri": "SkyboxTest_emissive.png"
     }
   ],
   "materials": [
@@ -107,7 +107,7 @@
       "emissiveTexture": {
         "index": 3
       },
-      "name": "Gear",
+      "name": "SkyboxTest",
       "normalTexture": {
         "index": 2
       },
@@ -126,7 +126,7 @@
   ],
   "meshes": [
     {
-      "name": "Gear",
+      "name": "Skybox",
       "primitives": [
         {
           "attributes": {
@@ -147,7 +147,13 @@
       "children": [
         1
       ],
-      "name": "Gear.obj",
+      "name": "RootNode"
+    },
+    {
+      "children": [
+        2
+      ],
+      "name": "Skybox",
       "scale": [
         0.00999999977648258,
         0.00999999977648258,
@@ -155,14 +161,8 @@
       ]
     },
     {
-      "children": [
-        2
-      ],
-      "name": "Gear"
-    },
-    {
       "mesh": 0,
-      "name": "Gear"
+      "name": "Skybox"
     }
   ],
   "samplers": [

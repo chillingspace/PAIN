@@ -1,20 +1,20 @@
 {
   "asset_info": {
-    "name": "Frog_Anim_Gear.gltf",
+    "name": "Build6.gltf",
     "type": "Model"
   },
   "build_data": {
-    "hash": 12724609341675888851
+    "hash": 177959767464383007
   },
   "descriptor_version": 1,
-  "guid": "a5302a28-588d-fc4d-a39a-57873647e5c1",
+  "guid": "af46a3b7-61e8-474a-8f36-d22129bf4621",
   "import_settings": {
     "extension": ".mesh",
     "generate_lods": false,
     "generate_normals": false,
     "generate_tangents": true,
-    "import_animations": true,
-    "import_skeleton": true,
+    "import_animations": false,
+    "import_skeleton": false,
     "improve_cache_locality": true,
     "join_identical_vertices": true,
     "lod_levels": 3,
@@ -30,6 +30,6 @@
     "weld_threshold": 0.0010000000474974513
   },
   "meta_data": {
-    "source_file": "game\\models\\Frog_Anim_Gear.gltf"
+    "source_file": "game\\models\\Build6.gltf"
   }
 }

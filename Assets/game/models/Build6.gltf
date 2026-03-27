@@ -3,41 +3,41 @@
     {
       "bufferView": 0,
       "componentType": 5125,
-      "count": 672,
+      "count": 738,
       "type": "SCALAR"
     },
     {
       "bufferView": 1,
       "componentType": 5126,
-      "count": 310,
+      "count": 372,
       "max": [
-        11.6646766662598,
-        8.72545051574707,
-        11.3722190856934
+        731.915222167969,
+        778.72412109375,
+        693.872985839844
       ],
       "min": [
-        -11.6646766662598,
-        0.0,
-        -11.3722190856934
+        -731.915222167969,
+        3.0517578125e-05,
+        -693.872985839844
       ],
       "type": "VEC3"
     },
     {
       "bufferView": 2,
       "componentType": 5126,
-      "count": 310,
+      "count": 372,
       "type": "VEC3"
     },
     {
       "bufferView": 3,
       "componentType": 5126,
-      "count": 310,
+      "count": 372,
       "type": "VEC4"
     },
     {
       "bufferView": 4,
       "componentType": 5126,
-      "count": 310,
+      "count": 372,
       "type": "VEC2"
     }
   ],
@@ -48,52 +48,52 @@
   "bufferViews": [
     {
       "buffer": 0,
-      "byteLength": 2688,
+      "byteLength": 2952,
       "target": 34963
     },
     {
       "buffer": 0,
-      "byteLength": 3720,
-      "byteOffset": 2688,
+      "byteLength": 4464,
+      "byteOffset": 2952,
       "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 3720,
-      "byteOffset": 6408,
+      "byteLength": 4464,
+      "byteOffset": 7416,
       "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 4960,
-      "byteOffset": 10128,
+      "byteLength": 5952,
+      "byteOffset": 11880,
       "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 2480,
-      "byteOffset": 15088,
+      "byteLength": 2976,
+      "byteOffset": 17832,
       "target": 34962
     }
   ],
   "buffers": [
     {
-      "byteLength": 17568,
-      "uri": "Gear.bin"
+      "byteLength": 20808,
+      "uri": "Build6.bin"
     }
   ],
   "images": [
     {
-      "uri": "Gear_BaseColor.png"
+      "uri": "Build6_baseColor.png"
     },
     {
-      "uri": "Gear_occlusionRoughnessMetallic.png"
+      "uri": "Build6_occlusionRoughnessMetallic.png"
     },
     {
-      "uri": "Gear_Normal.png"
+      "uri": "Build6_normal.png"
     },
     {
-      "uri": "Gear_emissive.png"
+      "uri": "Build6_emissive.png"
     }
   ],
   "materials": [
@@ -107,7 +107,7 @@
       "emissiveTexture": {
         "index": 3
       },
-      "name": "Gear",
+      "name": "Build6",
       "normalTexture": {
         "index": 2
       },
@@ -126,7 +126,7 @@
   ],
   "meshes": [
     {
-      "name": "Gear",
+      "name": "Build2",
       "primitives": [
         {
           "attributes": {
@@ -147,7 +147,13 @@
       "children": [
         1
       ],
-      "name": "Gear.obj",
+      "name": "RootNode"
+    },
+    {
+      "children": [
+        2
+      ],
+      "name": "Build2",
       "scale": [
         0.00999999977648258,
         0.00999999977648258,
@@ -155,14 +161,8 @@
       ]
     },
     {
-      "children": [
-        2
-      ],
-      "name": "Gear"
-    },
-    {
       "mesh": 0,
-      "name": "Gear"
+      "name": "Build2"
     }
   ],
   "samplers": [

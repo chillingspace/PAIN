@@ -27,6 +27,9 @@ function TogglePause()
     -- Broadcast to all scripts
     SetGamePaused(isPaused) 
 
+    -- Quit Overlay
+    setLayerEnabled(3, isPaused)
+
     hideCursor(false)
     
     log("[OverlayManager] Layers toggled successfully")

@@ -3,8 +3,11 @@
         "efff96ab-9011-d248-a0e3-56bb0e76f8e6",
         "6466af7c-6447-2043-b9f5-6fd7dfada5d4",
         "7b6d729f-2477-6e43-a93a-4a9f65732f3d",
+        "1fe7b95c-7093-7f44-8aac-322eae96b634",
         "cc4071a7-9223-6e4e-bab8-da7e8df1b667",
-        "4e937e21-0623-ad45-ad95-e4c416c20b1b"
+        "4e937e21-0623-ad45-ad95-e4c416c20b1b",
+        "6621d58f-1f66-bb4f-8c78-b77404b6296b",
+        "a5dee0ac-d873-6648-bb32-5bea6e1322b6"
     ],
     "camera": {
         "active_game_cam": "Cam",
@@ -2004,8 +2007,8 @@
                             ],
                             "texture_guid": "2f0a68e9-67f0-8b48-8c2c-719009b70f24",
                             "texture_scale": [
-                                1.7999999523162842,
-                                1.0
+                                0.0,
+                                0.0
                             ]
                         },
                         "UIElement": {
@@ -2106,8 +2109,8 @@
                             ],
                             "texture_guid": "60624f27-8df0-e549-a091-95506decfa59",
                             "texture_scale": [
-                                1.7999999523162842,
-                                1.0
+                                0.0,
+                                0.0
                             ]
                         },
                         "UIElement": {
@@ -2208,8 +2211,8 @@
                             ],
                             "texture_guid": "19e22f49-24b4-a74e-aded-d24b27e4f185",
                             "texture_scale": [
-                                1.7999999523162842,
-                                1.0
+                                0.0,
+                                0.0
                             ]
                         },
                         "UIElement": {
@@ -2310,8 +2313,8 @@
                             ],
                             "texture_guid": "bb561657-f2fc-b948-9181-cde48c3f6ba4",
                             "texture_scale": [
-                                1.7999999523162842,
-                                1.0
+                                0.0,
+                                0.0
                             ]
                         },
                         "UIElement": {
@@ -2412,8 +2415,8 @@
                             ],
                             "texture_guid": "67536c87-41a5-4649-b4e4-73af2ca2116f",
                             "texture_scale": [
-                                1.7999999523162842,
-                                1.0
+                                0.0,
+                                0.0
                             ]
                         },
                         "UIElement": {
@@ -2514,8 +2517,8 @@
                             ],
                             "texture_guid": "2205057e-10be-5444-b655-0d4e294af700",
                             "texture_scale": [
-                                1.7999999523162842,
-                                1.0
+                                0.0,
+                                0.0
                             ]
                         },
                         "UIElement": {
@@ -2769,6 +2772,8 @@
                         },
                         "ModelRenderer": {
                             "castShadows": true,
+                            "doubleSidedShadows": false,
+                            "isStatic": false,
                             "materials": [
                                 {
                                     "albedoTextureOverride": "7b6d729f-2477-6e43-a93a-4a9f65732f3d",
@@ -2859,6 +2864,8 @@
                                 },
                                 "ModelRenderer": {
                                     "castShadows": true,
+                                    "doubleSidedShadows": false,
+                                    "isStatic": false,
                                     "materials": [
                                         {
                                             "albedoTextureOverride": "7b6d729f-2477-6e43-a93a-4a9f65732f3d",
@@ -2974,11 +2981,25 @@
         "useNormalMap": true,
         "useRoughnessMetallicMap": true,
         "useWorldLight": true,
+        "worldLightDirection": [
+            -0.5184758305549622,
+            -0.8295613527297974,
+            -0.20739033818244934
+        ],
+        "worldLightFarPlane": 30.0,
         "worldLightIntensity": [
             1.5,
             1.5,
             1.5
-        ]
+        ],
+        "worldLightPosition": [
+            12.044522285461426,
+            19.611106872558594,
+            6.289287567138672
+        ],
+        "worldLightShadowFollowDistance": 22.5,
+        "worldLightShadowResolution": 1024,
+        "worldLightShadowsEnabled": true
     },
     "layers": [
         {
@@ -3108,12 +3129,12 @@
         "border_thickness": 2.0,
         "camera_height": 30.0,
         "enabled": false,
-        "icon_danger_path": "",
-        "icon_item_path": "",
-        "icon_objective_path": "",
-        "icon_player_path": "",
+        "icon_danger_guid": "00000000-0000-0000-0000-000000000000",
+        "icon_item_guid": "00000000-0000-0000-0000-000000000000",
+        "icon_objective_guid": "00000000-0000-0000-0000-000000000000",
+        "icon_player_guid": "00000000-0000-0000-0000-000000000000",
         "icon_scale": 1.0,
-        "icon_wall_path": "",
+        "icon_wall_guid": "00000000-0000-0000-0000-000000000000",
         "override_position": false,
         "pos_px": [
             20.0,
@@ -3123,6 +3144,7 @@
         "recommended_position": 3,
         "rotate_with_player": true,
         "route_mode": 0,
+        "shape": 0,
         "show_danger": true,
         "show_items": true,
         "show_legend": false,
