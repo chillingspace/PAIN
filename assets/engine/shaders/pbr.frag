@@ -74,7 +74,7 @@ uniform vec3 u_CamPos;
 uniform sampler2D u_ShadowMaps[MAX_SHADOWMAPPED_LIGHTS];
 uniform float u_NumShadowMaps;
 
-Material material;
+Material material = Material(0.5, 0.0, vec3(1.0), 1.0);
 
 // debug
 uniform float DEBUG_TYPE;
@@ -108,11 +108,19 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
 } 
 
 float SampleShadowMap(int shadow_map_idx, vec2 uv) {
-    return texture(u_ShadowMaps[shadow_map_idx], uv).r;
+    if (shadow_map_idx == 0) return texture(u_ShadowMaps[0], uv).r;
+    if (shadow_map_idx == 1) return texture(u_ShadowMaps[1], uv).r;
+    if (shadow_map_idx == 2) return texture(u_ShadowMaps[2], uv).r;
+    if (shadow_map_idx == 3) return texture(u_ShadowMaps[3], uv).r;
+    return 1.0;
 }
 
 vec2 ShadowTexelSize(int shadow_map_idx) {
-    return 1.0 / vec2(textureSize(u_ShadowMaps[shadow_map_idx], 0));
+    if (shadow_map_idx == 0) return 1.0 / vec2(textureSize(u_ShadowMaps[0], 0));
+    if (shadow_map_idx == 1) return 1.0 / vec2(textureSize(u_ShadowMaps[1], 0));
+    if (shadow_map_idx == 2) return 1.0 / vec2(textureSize(u_ShadowMaps[2], 0));
+    if (shadow_map_idx == 3) return 1.0 / vec2(textureSize(u_ShadowMaps[3], 0));
+    return vec2(1.0);
 }
 
 Light FetchLight(int index) {

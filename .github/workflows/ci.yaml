@@ -180,6 +180,10 @@ jobs:
           
           if (!$proc.HasExited) {
               Write-Host "Process did not exit, forcing stop..."
+              Write-Host "--- APP STDOUT ---"
+              Get-Content "app_stdout.log" -ErrorAction SilentlyContinue | Out-Host
+              Write-Host "--- APP STDERR ---"
+              Get-Content "app_stderr.log" -ErrorAction SilentlyContinue | Out-Host
               Stop-Process -Id $proc.Id -Force
               exit 1
           }

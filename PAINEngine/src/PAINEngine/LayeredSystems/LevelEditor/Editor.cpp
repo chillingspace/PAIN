@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "Editor.h"
 #include <filesystem> 
 
@@ -273,7 +273,10 @@ namespace PAIN {
 #ifdef PN_PLATFORM_WINDOWS
             // If window closed event triggered set editor to visible
             if (event.getType() == Event::Type::WindowClosed) {
-                editor_visible = true;
+                auto scene = services->get<Scene::SceneManager>();
+                if (!scene || !scene->isPlaying()) {
+                    editor_visible = true;
+                }
             }
 #endif
             //Pass down events to platform for handling
