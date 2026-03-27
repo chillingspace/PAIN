@@ -829,6 +829,9 @@ namespace PAIN {
 							"settings_Back",
 							"settings_Sub_Back",
 							"settings_Next",
+							"to_MainMenu",
+							"credits_Next",
+							"howtoplay_Next"
 
 						};
 

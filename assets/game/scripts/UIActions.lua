@@ -781,26 +781,12 @@ local handlers = {
         setLayerEnabled(layers.SETTINGS, true)
     end,
 
+    -- Goes from settings to another layer. Payload: layer to show
     settings_Next = function(buttonEntity, payload)
         playUIClick()
 
         -- Disable settingsUI layer
         setLayerEnabled(layers.SETTINGS, false)
-
-        -- if payload == "audio" then
-        --     -- Enable audio layer   
-        --     setLayerEnabled(layers.AUDIO, true)
-        -- elseif payload == "graphics" then
-        --     -- Enable graphics layer
-        --     setLayerEnabled(layers.GRAPHICS, true)
-        -- elseif payload == "controls" then
-        --     -- Enable controls layer
-        --     setLayerEnabled(layers.CONTROLS, true)
-        -- else
-        --     -- You forgot to set payload
-        --     printLog("[UI] No payload for next settings UI")
-        --     setLayerEnabled(layers.SETTINGS, true)
-        -- end
 
         if payload then
             local layer = layers[string.upper(payload)]
@@ -814,6 +800,71 @@ local handlers = {
         else
             printLog("[UI] No payload provided")
             setLayerEnabled(layers.SETTINGS, true)
+        end
+    end,
+
+    -- Goes from a setting layer to main menu, Payload: Layer to hide
+    to_MainMenu = function(buttonEntity, payload)
+        playUIClick()
+
+        if payload then
+            local layer = layers[string.upper(payload)]
+
+            if layer then
+                -- Disable previous layer
+                setLayerEnabled(layer, false)
+            else
+                printLog("[UI] Invalid payload: " .. tostring(payload))
+                return
+            end
+        else
+            printLog("[UI] No payload provided")
+            return
+        end
+        
+        -- Enable main menu layer
+        setLayerEnabled(layers.MAINMENU, true)
+    end,
+
+    -- Toggles between credit layers
+    credits_Next = function(buttonEntity, payload)
+        playUIClick()
+
+        -- Disable previous layer
+        if payload then
+            local layer = layers[string.upper(payload)]
+
+            if layer == layers.CREDITS_1 then
+                setLayerEnabled(layers.CREDITS_1, true)
+                setLayerEnabled(layers.CREDITS_2, false)
+            elseif layer == layers.CREDITS_2 then
+                setLayerEnabled(layers.CREDITS_2, true)
+                setLayerEnabled(layers.CREDITS_1, false)
+            end
+        else
+            printLog("[UI] No payload provided")
+            return
+        end
+    end,
+
+    -- Toggles between how to play layers
+    howtoplay_Next = function(buttonEntity, payload)
+        playUIClick()
+
+        -- Disable previous layer
+        if payload then
+            local layer = layers[string.upper(payload)]
+
+            if layer == layers.HOWTOPLAY_1 then
+                setLayerEnabled(layers.HOWTOPLAY_1, true)
+                setLayerEnabled(layers.HOWTOPLAY_2, false)
+            elseif layer == layers.HOWTOPLAY_2 then
+                setLayerEnabled(layers.HOWTOPLAY_2, true)
+                setLayerEnabled(layers.HOWTOPLAY_1, false)
+            end
+        else
+            printLog("[UI] No payload provided")
+            return
         end
     end,
 }

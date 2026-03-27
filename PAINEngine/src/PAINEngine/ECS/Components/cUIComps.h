@@ -142,6 +142,9 @@ namespace PAIN {
 		settings_Back,
 		settings_Sub_Back,
 		settings_Next,
+		to_MainMenu,
+		credits_Next,
+		howtoplay_Next
 	};
 
 	struct UIButton {
@@ -351,6 +354,10 @@ namespace PAIN {
 		{PAIN::UIAction::settings_Back, "settings_Back"},
 		{PAIN::UIAction::settings_Sub_Back, "settings_Sub_Back"},
 		{PAIN::UIAction::settings_Next, "settings_Next"},
+		{PAIN::UIAction::to_MainMenu, "to_MainMenu"},
+		{PAIN::UIAction::credits_Next, "credits_Next"},
+		{PAIN::UIAction::howtoplay_Next, "howtoplay_Next"},
+
 
 	})
 

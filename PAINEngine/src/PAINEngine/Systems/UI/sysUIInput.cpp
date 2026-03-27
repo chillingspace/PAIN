@@ -67,7 +67,10 @@ namespace PAIN {
 		case UIAction::settings_Back:		   return "settings_Back";
 		case UIAction::settings_Sub_Back:	   return "settings_Sub_Back";
 		case UIAction::settings_Next:		   return "settings_Next";
-
+		case UIAction::to_MainMenu:			   return "to_MainMenu";
+		case UIAction::credits_Next:		   return "credits_Next";
+		case UIAction::howtoplay_Next:		   return "howtoplay_Next";
+		
 		case UIAction::None:
 		default:                               return "None";
 		}
