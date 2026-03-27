@@ -199,7 +199,7 @@ float shadowIntensity(int shadow_map_idx, vec3 fragPos, vec3 normal, Light light
 
     // check if proj coords within shadow map
     if (projCoords.z > 1.0 || projCoords.x < 0.0 || projCoords.x > 1.0 || projCoords.y < 0.0 || projCoords.y > 1.0) {
-        return 0;
+        return 0.0;
     }
 
     float shadow_map_depth = SampleShadowMap(shadow_map_idx, projCoords.xy);
