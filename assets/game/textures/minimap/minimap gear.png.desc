@@ -1,0 +1,23 @@
+{
+  "asset_info": {
+    "name": "minimap gear.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 11371179888090654641
+  },
+  "descriptor_version": 1,
+  "guid": "a617a97f-6461-954b-98a5-b2117cb26ea0",
+  "import_settings": {
+    "android_allow_astc_hdr": false,
+    "android_bake_cubemap": false,
+    "android_compression": "ASTC_4x4",
+    "android_skybox_source_format": "R16G16B16A16",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\minimap\\minimap gear.png"
+  }
+}

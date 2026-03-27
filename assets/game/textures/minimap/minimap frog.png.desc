@@ -1,0 +1,23 @@
+{
+  "asset_info": {
+    "name": "minimap frog.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 14063977750200406026
+  },
+  "descriptor_version": 1,
+  "guid": "583cbb29-cbde-054d-b797-df0382da0f9d",
+  "import_settings": {
+    "android_allow_astc_hdr": false,
+    "android_bake_cubemap": false,
+    "android_compression": "ASTC_4x4",
+    "android_skybox_source_format": "R16G16B16A16",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\minimap\\minimap frog.png"
+  }
+}
