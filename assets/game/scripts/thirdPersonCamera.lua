@@ -146,6 +146,13 @@ local frozenTx, frozenTy, frozenTz = nil, nil, nil
 local wasPaused = false
 local framesSinceUnpause = 0
 
+function _G.SetCameraYaw(newYaw)
+    yaw = newYaw
+    _G.CameraState.yaw = newYaw
+    lastMouseX = nil
+    lastMouseY = nil
+end
+
 function _G.ResetThirdPersonCamera()
     firstFrame = true
     yaw = DEFAULT_YAW
@@ -244,7 +251,14 @@ registerUpdate(function(dt)
             end
 
         elseif pan.phase == "return" then
-            -- Capture return source on first tick
+            -- Keep smooth position tracking live so the handoff to follow-cam is seamless
+            if not smoothX then smoothX, smoothY, smoothZ = px, py, pz end
+            smoothX = smoothX + (px - smoothX) * smoothFactor * dt
+            smoothY = smoothY + (py - smoothY) * smoothFactor * dt
+            smoothZ = smoothZ + (pz - smoothZ) * smoothFactor * dt
+
+            -- Capture return source AND destination once on first tick so the lerp
+            -- is a stable A→B and not chasing a moving target each frame
             if pan.retSrcX == nil then
                 pan.retSrcX = frozenCx
                 pan.retSrcY = frozenCy
@@ -252,32 +266,32 @@ registerUpdate(function(dt)
                 pan.retSrcLx = frozenTx
                 pan.retSrcLy = frozenTy
                 pan.retSrcLz = frozenTz
+
+                local cosY2, sinY2 = math.cos(yaw), math.sin(yaw)
+                local cosP2, sinP2 = math.cos(pitch), math.sin(pitch)
+                local pitchY2 = config.offY * cosP2 - config.offZ * sinP2
+                local pitchZ2 = config.offY * sinP2 + config.offZ * cosP2
+                local rx2 = config.offX * cosY2 + pitchZ2 * sinY2
+                local rz2 = -config.offX * sinY2 + pitchZ2 * cosY2
+                pan.retDstX  = smoothX + rx2
+                pan.retDstY  = smoothY + pitchY2
+                pan.retDstZ  = smoothZ + rz2
+                pan.retDstLx = smoothX
+                pan.retDstLy = smoothY + 0.1
+                pan.retDstLz = smoothZ
+
                 pan.retElapsed = 0.0
             end
 
             pan.retElapsed = pan.retElapsed + dt
 
-            -- Compute where the follow-cam would be right now
-            local cosY2, sinY2 = math.cos(yaw), math.sin(yaw)
-            local cosP2, sinP2 = math.cos(pitch), math.sin(pitch)
-            local pitchY2 = config.offY * cosP2 - config.offZ * sinP2
-            local pitchZ2 = config.offY * sinP2 + config.offZ * cosP2
-            local rx2 = config.offX * cosY2 + pitchZ2 * sinY2
-            local rz2 = -config.offX * sinY2 + pitchZ2 * cosY2
-            local targetCx = (smoothX or px) + rx2
-            local targetCy = (smoothY or py) + pitchY2
-            local targetCz = (smoothZ or pz) + rz2
-            local targetLx = smoothX or px
-            local targetLy = (smoothY or py) + 0.1
-            local targetLz = smoothZ or pz
-
             local t = math.min(pan.retElapsed / pan.returnDuration, 1.0)
             if pan.useSmooth then t = easeSmooth(t) end
 
             local cx, cy, cz = lerpV(pan.retSrcX, pan.retSrcY, pan.retSrcZ,
-                                     targetCx, targetCy, targetCz, t)
+                                     pan.retDstX,  pan.retDstY,  pan.retDstZ, t)
             local lx, ly, lz = lerpV(pan.retSrcLx, pan.retSrcLy, pan.retSrcLz,
-                                     targetLx, targetLy, targetLz, t)
+                                     pan.retDstLx,  pan.retDstLy,  pan.retDstLz, t)
 
             cameraSetTransform(cx, cy, cz, lx, ly, lz, 0.0, 1.0, 0.0)
             frozenCx, frozenCy, frozenCz = cx, cy, cz

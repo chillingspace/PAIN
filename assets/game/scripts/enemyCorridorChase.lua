@@ -107,7 +107,7 @@ do
         local dx = tx - ex
         local dz = tz - ez
         if dx*dx + dz*dz > 1e-6 then
-            setEnemyYaw(math.atan(dx, dz))
+            setEnemyYaw(math.atan(dx, dz) + math.pi)
         end
     end
 
@@ -193,6 +193,10 @@ do
         end
 
         triggered = false
+
+        if Animation then
+            Animation.SetSpeed(enemy, 0.0)
+        end
     end
 
     -- Teleport enemy back to home, return to IDLE, re-arm trigger
@@ -306,6 +310,13 @@ do
             local d = dist3(ex, ey, ez, px, py, pz)
             if d <= TRIGGER_RADIUS then
                 triggered = true
+
+                -- snap camera to face away from the enemy so w/forward immediately runs away
+                if _G.SetCameraYaw then
+                    local awayYaw = math.atan(px - ex, pz - ez)
+                    _G.SetCameraYaw(awayYaw)
+                end
+
                 enterState(STATE_CAM_PAN)
             end
 
@@ -378,8 +389,8 @@ do
             local dz = pz - ez
             local len = math.sqrt(dx*dx + dz*dz)
             if len > 1e-6 then
-                local fx = math.sin(currentYaw)
-                local fz = math.cos(currentYaw)
+                local fx = -math.sin(currentYaw)
+                local fz = -math.cos(currentYaw)
                 local dot = (dx/len)*fx + (dz/len)*fz
                 if dot <= 0.0 then return end  -- player is behind or beside the enemy
             end
