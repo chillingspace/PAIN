@@ -251,16 +251,16 @@
         ],
         "farPlane": 100.0,
         "forward": [
-            -0.5737726092338562,
-            -0.8190107941627502,
-            -0.002547865267843008
+            -0.7689439058303833,
+            -0.6236876249313354,
+            -0.1404959261417389
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            7.82649564743042,
-            20.152084350585938,
-            -11.751818656921387
+            5.864988327026367,
+            14.759814262390137,
+            -4.37976598739624
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 31.100000381469727,
@@ -15377,7 +15377,7 @@
                         "LocalTransform": {
                             "position": [
                                 -27.493690490722656,
-                                0.1300448775291443,
+                                0.0,
                                 -49.15290832519531
                             ],
                             "rotation": [
@@ -15465,7 +15465,7 @@
                                 "LocalTransform": {
                                     "position": [
                                         -27.493690490722656,
-                                        0.1300448775291443,
+                                        0.0,
                                         -49.15290832519531
                                     ],
                                     "rotation": [
@@ -15522,15 +15522,15 @@
                                     ],
                                     "collider_offset": [
                                         0.0,
-                                        0.0,
+                                        0.0430000014603138,
                                         0.0
                                     ],
                                     "collider_scale": [
-                                        0.5,
-                                        0.5,
-                                        0.5
+                                        0.23999999463558197,
+                                        0.08699999749660492,
+                                        0.23999999463558197
                                     ],
-                                    "motion_type": 0,
+                                    "motion_type": 1,
                                     "physics_behavior": {
                                         "behavior": 1
                                     },
@@ -15560,15 +15560,15 @@
                             ],
                             "collider_offset": [
                                 0.0,
-                                0.0,
+                                0.0430000014603138,
                                 0.0
                             ],
                             "collider_scale": [
-                                0.5,
-                                0.5,
-                                0.5
+                                0.23999999463558197,
+                                0.08699999749660492,
+                                0.23999999463558197
                             ],
-                            "motion_type": 0,
+                            "motion_type": 1,
                             "physics_behavior": {
                                 "behavior": 1
                             },
@@ -18200,40 +18200,6 @@
                                         20.0
                                     ]
                                 },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "doubleSidedShadows": false,
-                                    "isStatic": false,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
-                                            "aoTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "normalTextureOverride": "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "a67656ca-15a5-d441-b14d-dae036e5245e",
-                                    "receiveShadows": true,
-                                    "visible": true
-                                },
                                 "RigidBody3D": {
                                     "angular_velocity": [
                                         0.0,
@@ -19751,40 +19717,6 @@
                                         20.0,
                                         20.0
                                     ]
-                                },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "doubleSidedShadows": false,
-                                    "isStatic": false,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
-                                            "aoTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "normalTextureOverride": "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "a67656ca-15a5-d441-b14d-dae036e5245e",
-                                    "receiveShadows": true,
-                                    "visible": true
                                 },
                                 "RigidBody3D": {
                                     "angular_velocity": [
@@ -21495,40 +21427,6 @@
                                         20.0
                                     ]
                                 },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "doubleSidedShadows": false,
-                                    "isStatic": false,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
-                                            "aoTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "normalTextureOverride": "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "a67656ca-15a5-d441-b14d-dae036e5245e",
-                                    "receiveShadows": true,
-                                    "visible": true
-                                },
                                 "RigidBody3D": {
                                     "angular_velocity": [
                                         0.0,
@@ -22924,40 +22822,6 @@
                                         20.0
                                     ]
                                 },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "doubleSidedShadows": false,
-                                    "isStatic": false,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
-                                            "aoTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "normalTextureOverride": "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "a67656ca-15a5-d441-b14d-dae036e5245e",
-                                    "receiveShadows": true,
-                                    "visible": true
-                                },
                                 "RigidBody3D": {
                                     "angular_velocity": [
                                         0.0,
@@ -23893,40 +23757,6 @@
                                         20.0,
                                         20.0
                                     ]
-                                },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "doubleSidedShadows": false,
-                                    "isStatic": false,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
-                                            "aoTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "normalTextureOverride": "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "a67656ca-15a5-d441-b14d-dae036e5245e",
-                                    "receiveShadows": true,
-                                    "visible": true
                                 },
                                 "RigidBody3D": {
                                     "angular_velocity": [
@@ -25278,40 +25108,6 @@
                                         20.0
                                     ]
                                 },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "doubleSidedShadows": false,
-                                    "isStatic": false,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
-                                            "aoTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "normalTextureOverride": "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "a67656ca-15a5-d441-b14d-dae036e5245e",
-                                    "receiveShadows": true,
-                                    "visible": true
-                                },
                                 "RigidBody3D": {
                                     "angular_velocity": [
                                         0.0,
@@ -26247,40 +26043,6 @@
                                         20.0,
                                         20.0
                                     ]
-                                },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "doubleSidedShadows": false,
-                                    "isStatic": false,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
-                                            "aoTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "normalTextureOverride": "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "a67656ca-15a5-d441-b14d-dae036e5245e",
-                                    "receiveShadows": true,
-                                    "visible": true
                                 },
                                 "RigidBody3D": {
                                     "angular_velocity": [
@@ -28440,40 +28202,6 @@
                                         20.0
                                     ]
                                 },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "doubleSidedShadows": false,
-                                    "isStatic": false,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
-                                            "aoTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "normalTextureOverride": "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "a67656ca-15a5-d441-b14d-dae036e5245e",
-                                    "receiveShadows": true,
-                                    "visible": true
-                                },
                                 "RigidBody3D": {
                                     "angular_velocity": [
                                         0.0,
@@ -28659,40 +28387,6 @@
                                         20.0,
                                         20.0
                                     ]
-                                },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "doubleSidedShadows": false,
-                                    "isStatic": false,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
-                                            "aoTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "normalTextureOverride": "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "a67656ca-15a5-d441-b14d-dae036e5245e",
-                                    "receiveShadows": true,
-                                    "visible": true
                                 },
                                 "RigidBody3D": {
                                     "angular_velocity": [
@@ -34712,9 +34406,9 @@
             1.0
         ],
         "worldLightPosition": [
-            19.492202758789063,
-            38.81721496582031,
-            -7.085536003112793
+            17.53069496154785,
+            33.42494583129883,
+            0.2865166664123535
         ],
         "worldLightShadowFollowDistance": 22.5,
         "worldLightShadowResolution": 1024,
