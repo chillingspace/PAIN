@@ -25,7 +25,6 @@
         "be682648-fcd7-2b47-b7bf-3faea372c733",
         "5936ba72-6cad-7a4a-8039-d1614e5a9719",
         "8df5c9c9-cb3b-2d49-8b70-98584a4c7bf4",
-        "25c6e2c3-b701-4c43-b049-8c9b21a29441",
         "c7503d1d-f91e-7f44-aab4-adb8ff5d66dd",
         "70e060fa-e805-a24b-8f37-cce5a7a9fc73",
         "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
@@ -36,6 +35,7 @@
         "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
         "6621d58f-1f66-bb4f-8c78-b77404b6296b",
         "3da3f0aa-e9d3-634a-b1c9-f88763fb5bae",
+        "5b25ecd9-f723-f043-9333-6045100eaeeb",
         "1fe7b95c-7093-7f44-8aac-322eae96b634",
         "a5dee0ac-d873-6648-bb32-5bea6e1322b6"
     ],
@@ -2764,7 +2764,8 @@
                             "childrenGUIDs": [
                                 "bd5c1f39-93d4-1849-8bdb-59b9a3f63dd7",
                                 "68cd5abc-7357-6845-b37a-a8aec0eecba0",
-                                "331d130b-3b62-cb40-8a22-964b9f1b8814"
+                                "331d130b-3b62-cb40-8a22-964b9f1b8814",
+                                "9268bd36-a5a4-3f48-bb01-d11f3a59b97f"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 5
@@ -2800,7 +2801,8 @@
                                     "childrenGUIDs": [
                                         "bd5c1f39-93d4-1849-8bdb-59b9a3f63dd7",
                                         "68cd5abc-7357-6845-b37a-a8aec0eecba0",
-                                        "331d130b-3b62-cb40-8a22-964b9f1b8814"
+                                        "331d130b-3b62-cb40-8a22-964b9f1b8814",
+                                        "9268bd36-a5a4-3f48-bb01-d11f3a59b97f"
                                     ],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 5
@@ -3084,13 +3086,218 @@
             {
                 "Entity": {
                     "Components": {
+                        "AudioSource": {
+                            "audio_tracks": [],
+                            "group_name": "sfx",
+                            "is3D": true,
+                            "looping": true,
+                            "maxDistance": 50.0,
+                            "minDistance": 1.0,
+                            "pitchDb": 0.0,
+                            "playOnStart": false,
+                            "pos": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "selected_audio": "6621d58f-1f66-bb4f-8c78-b77404b6296b",
+                            "track_volumes": [],
+                            "volumeDb": 0.0
+                        },
+                        "CustomHitbox2D": {
+                            "max_point": [
+                                204.10000610351563,
+                                50.0
+                            ],
+                            "min_point": [
+                                -50.0,
+                                -50.0
+                            ],
+                            "position_offset": [
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        "GUID": {
+                            "guid": "9268bd36-a5a4-3f48-bb01-d11f3a59b97f"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "241d3746-82ce-6a49-b17c-41bdbd690c96",
+                            "siblingIndex": 1
+                        },
+                        "Layer": {
+                            "layer_id": 6,
+                            "layer_mask": 64
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                -0.04814612865447998,
+                                0.0,
+                                0.0461500883102417
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "graphics_reset_button"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "241d3746-82ce-6a49-b17c-41bdbd690c96",
+                                    "siblingIndex": 1
+                                },
+                                "Layer": {
+                                    "layer_id": 6,
+                                    "layer_mask": 64
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        -0.04814612865447998,
+                                        0.0,
+                                        0.0461500883102417
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "scale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ]
+                                },
+                                "Texture2D": {
+                                    "pos": [
+                                        -0.05000000074505806,
+                                        -0.6000000238418579
+                                    ],
+                                    "texture_guid": "9d11aa95-02aa-ba4f-8a52-d86a779e60f0",
+                                    "texture_scale": [
+                                        0.30000001192092896,
+                                        0.09000000357627869
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "704aa5a1-1837-064b-9a10-17218bcdc189",
+                            "instanceRootGUID": "9268bd36-a5a4-3f48-bb01-d11f3a59b97f",
+                            "sourcePrefabGUID": "7e850a62-ffd7-054c-96e0-30bb054b8f0f"
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                -0.05000000074505806,
+                                -0.6000000238418579
+                            ],
+                            "texture_guid": "9d11aa95-02aa-ba4f-8a52-d86a779e60f0",
+                            "texture_scale": [
+                                0.30000001192092896,
+                                0.09000000357627869
+                            ]
+                        },
+                        "UIAnimation": {
+                            "b_loop": true,
+                            "b_playing": false,
+                            "duration": 0.20000000298023224,
+                            "frame_duration": 0.10000000149011612,
+                            "spritesheet_columns": 2,
+                            "spritesheet_rows": 1,
+                            "total_frames": 2
+                        },
+                        "UIButton": {
+                            "action": "settings_Sub_Back",
+                            "disabled_color": -10066330,
+                            "highlighted_color": -3355444,
+                            "normal_color": -1,
+                            "payload": "",
+                            "pressed_color": -5592406,
+                            "state": "Normal"
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                1024.0,
+                                88.0
+                            ]
+                        },
+                        "UVCoordinates": {
+                            "uv": [
+                                0.001396648003719747,
+                                0.009615384973585606,
+                                0.49860334396362305,
+                                0.9903846383094788
+                            ]
+                        }
+                    },
+                    "Name": "graphics_reset_button"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
                         "GUID": {
                             "guid": "331d130b-3b62-cb40-8a22-964b9f1b8814"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "241d3746-82ce-6a49-b17c-41bdbd690c96",
-                            "siblingIndex": 1
+                            "siblingIndex": 2
                         },
                         "Layer": {
                             "layer_id": 6,
@@ -3122,7 +3329,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "241d3746-82ce-6a49-b17c-41bdbd690c96",
-                                    "siblingIndex": 1
+                                    "siblingIndex": 2
                                 },
                                 "Layer": {
                                     "layer_id": 6,
@@ -3134,7 +3341,7 @@
                                 "Texture2D": {
                                     "pos": [
                                         0.0,
-                                        -0.10000000149011612
+                                        -0.05000000074505806
                                     ],
                                     "texture_guid": "82047347-0357-7742-b2ce-b07fccee4065",
                                     "texture_scale": [
@@ -3150,7 +3357,7 @@
                         "Texture2D": {
                             "pos": [
                                 0.0,
-                                -0.10000000149011612
+                                -0.05000000074505806
                             ],
                             "texture_guid": "82047347-0357-7742-b2ce-b07fccee4065",
                             "texture_scale": [
@@ -3222,7 +3429,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "241d3746-82ce-6a49-b17c-41bdbd690c96",
-                            "siblingIndex": 2
+                            "siblingIndex": 3
                         },
                         "Layer": {
                             "layer_id": 6,
@@ -3254,7 +3461,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "241d3746-82ce-6a49-b17c-41bdbd690c96",
-                                    "siblingIndex": 2
+                                    "siblingIndex": 3
                                 },
                                 "Layer": {
                                     "layer_id": 6,
