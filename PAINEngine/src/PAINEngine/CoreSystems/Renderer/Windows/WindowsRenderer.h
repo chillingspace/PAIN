@@ -334,6 +334,7 @@ namespace PAIN {
 		std::shared_ptr<Assets::Shader> bloom_blend_shader = nullptr;
 		std::shared_ptr<Assets::Shader> minimap_wall_shader = nullptr;
 		std::shared_ptr<Assets::Shader> volumetric_shader = nullptr;
+		std::shared_ptr<Assets::Shader> fxaa_shader = nullptr;
 
 		// for easy access to clear memory
 		std::array<unsigned int*, 5> fbos{

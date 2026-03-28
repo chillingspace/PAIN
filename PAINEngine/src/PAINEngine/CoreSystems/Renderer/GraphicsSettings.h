@@ -85,6 +85,13 @@ namespace PAIN {
 		// Master post-process toggle - disables all post-processing effects when false
 		bool postprocess = true;
 
+		// Anti-aliasing
+#ifdef PN_PLATFORM_ANDROID
+		bool fxaa = false;
+#else
+		bool fxaa = true;
+#endif
+
 		bool bloom = true;
 		float global_light_intensity = 1.5f;
 

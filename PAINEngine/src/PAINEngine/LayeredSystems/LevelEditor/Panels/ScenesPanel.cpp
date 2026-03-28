@@ -764,6 +764,11 @@ namespace PAIN {
                         ImGui::SliderInt("Blur Quality", &gs.blur_quality, 1, 10);
                         ImGui::SliderFloat("Blur Strength", &gs.blur_strength, 0.1f, 10.0f);
                     }
+
+                    bool using_fxaa = gs.fxaa;
+                    if (ImGui::Checkbox("Anti-Aliasing (FXAA)", &using_fxaa))
+                        gs.fxaa = using_fxaa;
+                    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Fast approximate anti-aliasing. Smooths jagged edges as a post-process pass.");
                 }
                 ImGui::Separator();
 

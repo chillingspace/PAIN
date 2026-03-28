@@ -1330,6 +1330,7 @@ namespace PAIN {
 		std::filesystem::path bloom_blend_path = "engine/shaders/bloom_blend.vert";
 		std::filesystem::path tone_path = "engine/shaders/tone.vert";
 		std::filesystem::path volumetric_path = "engine/shaders/volumetric.vert";
+		std::filesystem::path fxaa_path = "engine/shaders/fxaa.vert";
 #else
 		std::filesystem::path pbr_path = "engine\\shaders\\android_pbr.vert";
 		std::filesystem::path geometry_path =
@@ -1557,6 +1558,17 @@ namespace PAIN {
 			PN_CORE_ERROR("Failed to create shader program for volumetric lighting - volumetric effects will be disabled");
 			volumetric_shader = nullptr;
 		}
+
+#ifdef PN_PLATFORM_WINDOWS
+		// FXAA shader (Windows only)
+		shader_opt = assets_loader->getAsset<Assets::Shader>(fxaa_path);
+		fxaa_shader = shader_opt.has_value() ? shader_opt.value() : fxaa_shader;
+
+		if (!fxaa_shader || fxaa_shader->GetRendererID() == 0) {
+			PN_CORE_WARN("Failed to create FXAA shader - anti-aliasing will be disabled");
+			fxaa_shader = nullptr;
+		}
+#endif
 
 	}
 
@@ -4186,6 +4198,38 @@ namespace PAIN {
 		err = glGetError();
 		if (err != GL_NO_ERROR) {
 			PN_CORE_ERROR("OpenGL err after finalizing post process pass: {}", err);
+		}
+#endif
+
+		// FXAA pass (runs at full resolution on LDR output, after tone mapping + gamma)
+		if (GraphicsSettings::get().fxaa && fxaa_shader) {
+			// Read final_texture → write to pp_fbo
+			glBindFramebuffer(GL_FRAMEBUFFER, pp_fbo);
+			glViewport(0, 0, pp_width, pp_height);
+			fxaa_shader->Bind();
+			fxaa_shader->SetUniform("tex", 0);
+			fxaa_shader->SetUniform("u_texel_size", glm::vec2(1.0f / pp_width, 1.0f / pp_height));
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, final_texture);
+			glBindVertexArray(empty_vao);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+			// Copy pp_texture back into final_fbo so final_texture holds the result
+			glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+			glViewport(0, 0, winWidth, winHeight);
+			passthrough_shader->Bind();
+			passthrough_shader->SetUniform("tex", 0);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, pp_texture);
+			glBindVertexArray(passthrough_vao);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+		}
+#ifdef _DEBUG
+		{
+			GLenum err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after FXAA pass: {}", err);
+			}
 		}
 #endif
 
