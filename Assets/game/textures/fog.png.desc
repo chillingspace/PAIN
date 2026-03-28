@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "Gear_BaseColor.png",
+    "name": "fog.png",
     "type": "Texture"
   },
   "build_data": {
-    "hash": 3448607518396702955
+    "hash": 11923689802910440067
   },
   "descriptor_version": 1,
-  "guid": "5b25ecd9-f723-f043-9333-6045100eaeeb",
+  "guid": "b6fdf19d-f8ab-0d4b-ae8e-22626c9fb75f",
   "import_settings": {
     "android_allow_astc_hdr": false,
     "android_bake_cubemap": false,
@@ -18,6 +18,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\Gear_BaseColor.png"
+    "source_file": "game\\textures\\fog.png"
   }
 }

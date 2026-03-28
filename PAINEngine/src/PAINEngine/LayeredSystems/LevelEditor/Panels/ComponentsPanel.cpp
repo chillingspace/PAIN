@@ -241,6 +241,9 @@ namespace PAIN {
 
 						ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
 
+						// Capture old GUID before asset selector can modify it
+						Assets::GUID oldGuid = renderer.modelGUID;
+
 						// Model Asset Selection
 						if (DrawAssetSelectorField("Select A Model", renderer.modelGUID,
 												   PAIN::Editor::Attributes::AssetSelector(
@@ -263,6 +266,59 @@ namespace PAIN {
 							ImGui::Unindent(10.0f);
 						}
 
+						if (renderer.modelGUID != oldGuid) {
+							// Remember previous model (existing field on ModelRenderer)
+							renderer.prevModelGUID = oldGuid;
+
+							// Clear any cached asset pointer so code will re-fetch the new model
+							renderer.cachedModelAsset.reset();
+
+							// Reset buffer offset tracking so DrawGeometry won't use stale offsets.
+							renderer.bufferOffset.vertexOffset = 0;
+							renderer.bufferOffset.indexOffset = 0;
+							renderer.bufferOffset.indexCount = 0;
+							renderer.bufferOffset.isUploaded = false;
+
+							// Clear per-submesh texture caches / flags
+							renderer.submeshCaches.clear();
+
+							auto assetManager = panel.services->get<Assets::Manager>();
+							if (assetManager && renderer.modelGUID.IsValid()) {
+								auto modelOpt = assetManager->getAsset<Assets::Model>(renderer.modelGUID);
+								if (modelOpt.has_value() && modelOpt.value()) {
+									// Cache the asset for immediate editor feedback
+									renderer.cachedModelAsset = modelOpt.value();
+
+									const size_t submeshCount = renderer.cachedModelAsset->submeshes.size();
+
+									// Resize materials to match submesh count while preserving existing overrides where possible.
+									std::vector<PAIN::MaterialInstance> newMaterials;
+									newMaterials.reserve(submeshCount);
+									for (size_t i = 0; i < submeshCount; ++i) {
+										if (i < renderer.materials.size()) {
+											newMaterials.push_back(renderer.materials[i]);
+										}
+										else {
+											newMaterials.emplace_back(); // default MaterialInstance
+										}
+									}
+									renderer.materials = std::move(newMaterials);
+
+									// Create per-submesh caches and mark invalid so they will be rebuilt on next draw
+									renderer.submeshCaches.resize(submeshCount);
+									for (auto& cache : renderer.submeshCaches) {
+										cache.albedoTexture = cache.normalTexture = cache.metallicTexture =
+											cache.roughnessTexture = cache.aoTexture = cache.emissiveTexture = 0;
+										cache.baseColor = glm::vec3(1.0f);
+										cache.metallic = 0.0f;
+										cache.roughness = 0.5f;
+										cache.useEmissionOverride = false;
+										cache.cacheValid = false;
+									}
+								}
+							}
+						}
+
 						ImGui::Spacing();
 						ImGui::Separator();
 						ImGui::Spacing();
@@ -270,6 +326,19 @@ namespace PAIN {
 						// MATERIALS SECTION - This is where the magic happens!
 						if (DrawField("Materials", renderer.materials, &panel)) {
 							changed = true;
+
+							if (renderer.cachedModelAsset) {
+								const size_t submeshCount = renderer.cachedModelAsset->submeshes.size();
+								renderer.submeshCaches.resize(submeshCount);
+								for (auto& cache : renderer.submeshCaches) {
+									cache.cacheValid = false;
+									// leave other fields as-is; ApplyCachedGeometryMaterialState will re-bind textures/uniforms
+								}
+							}
+							else {
+								// No model loaded yet: clear caches to avoid stale entries
+								renderer.submeshCaches.clear();
+							}
 						}
 
 						//if (ImGui::CollapsingHeader("Overrides")) {
