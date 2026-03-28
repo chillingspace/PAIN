@@ -53,6 +53,9 @@ namespace PAIN {
 
 				void renderEntityComponents(entt::entity entity, const char* filter = nullptr);
 
+				//Expose services
+				std::shared_ptr<Services> services;
+
 				void setRegistry(ECS::RegistryID registryID) {
 					currentRegistryID = registryID;
 				}

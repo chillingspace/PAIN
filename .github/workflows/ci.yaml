@@ -82,6 +82,7 @@ jobs:
           --suppress=duplicateCondition `
           -i vendor `
           -i PAINEngine/src/PAINEngine/CoreSystems/Renderer/stb_image.h `
+          "--suppress=*:*stb_image.h" `
           -i android/app/src/main/cpp/native_app_glue `
           -D PN_PLATFORM_WINDOWS `
           -D PN_PLATFORM_ANDROID `
