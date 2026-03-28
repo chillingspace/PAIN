@@ -125,7 +125,9 @@ jobs:
 
       - name: Build Windows
         run: |
-          .\build.bat ${{ matrix.configuration }}
+          cmake -B build -G "Visual Studio 17 2022" -A x64
+          cmake --build build --config ${{ matrix.configuration }} -j $env:CMAKE_BUILD_PARALLEL_LEVEL
+        shell: pwsh
         env:
           CMAKE_BUILD_PARALLEL_LEVEL: 8
 
