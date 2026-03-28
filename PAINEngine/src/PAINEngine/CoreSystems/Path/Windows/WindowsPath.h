@@ -50,7 +50,7 @@ namespace PAIN {
 			bool good() const override { return file.good(); }
 		};
 
-		class WindowsPath : public Path {
+		class WindowsPath final : public Path {
 		private:
 
 			//Path variables
@@ -72,7 +72,7 @@ namespace PAIN {
 		public:
 
 			WindowsPath() { init(); };
-			virtual ~WindowsPath() { destroy(); }
+			~WindowsPath() override { destroy(); }
 
 			std::string normalizePath(const std::string& path) const override;
 

@@ -69,9 +69,9 @@ namespace PAIN {
                 EGL_NONE
             };
 
-            m_Context = eglCreateContext(m_Display, config, EGL_NO_CONTEXT, context_attribs);
+            m_EGLContext = eglCreateContext(m_Display, config, EGL_NO_CONTEXT, context_attribs);
 
-            if (m_Context == EGL_NO_CONTEXT) {
+            if (m_EGLContext == EGL_NO_CONTEXT) {
                 PN_CORE_ERROR("eglCreateContext failed");
                 return false;
             }
@@ -136,7 +136,7 @@ namespace PAIN {
         }
 
         bool Android_Window::makeCurrent() {
-            if (!eglMakeCurrent(m_Display, m_Surface, m_Surface, m_Context)) {
+            if (!eglMakeCurrent(m_Display, m_Surface, m_Surface, m_EGLContext)) {
                 PN_CORE_ERROR("eglMakeCurrent failed");
                 return false;
             }
@@ -177,9 +177,9 @@ namespace PAIN {
         }
 
         void Android_Window::destroyContext() {
-            if (m_Context != EGL_NO_CONTEXT) {
-                eglDestroyContext(m_Display, m_Context);
-                m_Context = EGL_NO_CONTEXT;
+            if (m_EGLContext != EGL_NO_CONTEXT) {
+                eglDestroyContext(m_Display, m_EGLContext);
+                m_EGLContext = EGL_NO_CONTEXT;
                 b_contextready = false;
                 PN_CORE_INFO("EGL context destroyed");
             }

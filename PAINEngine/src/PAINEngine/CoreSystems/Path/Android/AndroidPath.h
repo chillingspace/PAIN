@@ -34,6 +34,8 @@ namespace PAIN {
                     file = fopen(path.c_str(), (mode == FileMode::Write) ? "wb" : "rb+");
                 }
             }
+            AndroidAssetStream(const AndroidAssetStream&) = delete;
+            AndroidAssetStream& operator=(const AndroidAssetStream&) = delete;
             ~AndroidAssetStream() override {
                 if (asset) AAsset_close(asset);
                 if (file) fclose(file);
@@ -70,7 +72,7 @@ namespace PAIN {
             bool good() const override { return (asset || file); }
         };
 
-        class AndroidPath : public Path {
+        class AndroidPath final : public Path {
         private:
             // Path variables
             std::string app_name;
@@ -94,7 +96,7 @@ namespace PAIN {
 
         public:
             AndroidPath(void* app) { initWithNativeApp(static_cast<android_app*>(app)); }
-            virtual ~AndroidPath() { destroy(); }
+            ~AndroidPath() override { destroy(); }
 
             // Native initialization - takes android_app* pointer
             void initWithNativeApp(android_app* app);

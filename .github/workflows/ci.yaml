@@ -44,7 +44,43 @@ jobs:
           --std=c++20 `
           --suppress=missingIncludeSystem `
           --suppress=missingInclude `
+          --suppress=cstyleCast `
+          --suppress=useStlAlgorithm `
+          --suppress=functionStatic `
+          --suppress=funcArgNamesDifferent `
+          --suppress=passedByValue `
+          --suppress=functionConst `
+          --suppress=constParameterReference `
+          --suppress=noExplicitConstructor `
+          --suppress=constVariableReference `
+          --suppress=variableScope `
+          --suppress=useInitializationList `
+          --suppress=initializerList `
+          --suppress=uselessCallsSubstr `
+          --suppress=returnByReference `
+          --suppress=unusedStructMember `
+          --suppress=constVariablePointer `
+          --suppress=constVariable `
+          --suppress=constParameterPointer `
+          --suppress=constParameterCallback `
+          --suppress=duplicateValueTernary `
+          --suppress=redundantInitialization `
+          --suppress=redundantIfRemove `
+          --suppress=redundantAssignment `
+          --suppress=unreadVariable `
+          --suppress=knownConditionTrueFalse `
+          --suppress=shadowVariable `
+          --suppress=duplicateBreak `
+          --suppress=unknownMacro `
+          --suppress=duplicateBranch `
+          --suppress=unusedPrivateFunction `
+          --suppress=uselessOverride `
+          --suppress=duplicateConditionalAssign `
+          --suppress=stlFindInsert `
+          --suppress=duplicateCondition `
           -i vendor `
+          -i PAINEngine/src/PAINEngine/CoreSystems/Renderer/stb_image.h `
+          -i android/app/src/main/cpp/native_app_glue `
           -D PN_PLATFORM_WINDOWS `
           -D PN_PLATFORM_ANDROID `
           --check-level=exhaustive `

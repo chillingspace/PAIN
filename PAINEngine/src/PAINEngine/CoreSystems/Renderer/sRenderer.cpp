@@ -164,7 +164,7 @@ namespace PAIN {
 		}
 
 		//Reset batch upload flag
-		if (batch_upload) batch_upload = false;
+		batch_upload = false;
 	}
 
 	void sRenderer::onEvent(Event::Event& e) {

@@ -716,7 +716,7 @@ namespace PAIN {
 							if(!ecs->isRegistryAutoSimulate(ECS::MAIN_REGISTRY_ID))ecs->setRegistryAutoSimulate(ECS::MAIN_REGISTRY_ID, true);
 
 							//Reset registry IDs
-							if(currentRegistryID != ECS::MAIN_REGISTRY_ID) currentRegistryID = ECS::MAIN_REGISTRY_ID;
+							currentRegistryID = ECS::MAIN_REGISTRY_ID;
 
 							//Reset registry IDs
 							if (m_comp_panel->getCurrentRegistry() != currentRegistryID) m_comp_panel->setRegistry(currentRegistryID);

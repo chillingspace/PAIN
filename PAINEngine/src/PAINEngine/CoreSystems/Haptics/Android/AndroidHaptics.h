@@ -13,7 +13,7 @@
 namespace PAIN {
     namespace Haptics {
 
-        class AndroidHaptics : public Haptics {
+        class AndroidHaptics final : public Haptics {
         private:
             android_app* m_App = nullptr;
             

@@ -329,11 +329,6 @@ namespace PAIN {
 				return std::ref(getRegistry(registryId).get<T>(entity));
 			}
 
-			// Get All Entity's Component
-			template <typename T>
-			std::optional<std::reference_wrapper<T>> getEntityAllComponent(entt::entity entity) {
-			}
-
 			// Get component (const version)
 			template <typename T>
 			std::optional<std::reference_wrapper<const T>> getEntityComponent(entt::entity entity, RegistryID registryId = MAIN_REGISTRY_ID) const {

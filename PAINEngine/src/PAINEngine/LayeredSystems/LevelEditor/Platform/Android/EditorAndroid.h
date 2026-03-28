@@ -12,7 +12,7 @@ namespace PAIN {
     namespace Editor {
 
         //GLFW Editor
-        class EditorAndroid : public EditorPlatform {
+        class EditorAndroid final : public EditorPlatform {
         private:
             ANativeWindow* a_window = nullptr;
             void init() override;

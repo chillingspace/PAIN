@@ -304,11 +304,12 @@ namespace PAIN {
 			ctx.name = name.empty() ? ("Registry_" + std::to_string(newId)) : name;
 			ctx.auto_simulate = autoSimulate;
 
+			std::string registryName = ctx.name;
 			registries[newId] = std::move(ctx);
 
 			PN_CORE_INFO(
 				"[ECS Controller] Created registry '{}' (ID: {}, AutoSimulate: {})",
-				ctx.name, newId, autoSimulate);
+				registryName, newId, autoSimulate);
 
 			return newId;
 		}

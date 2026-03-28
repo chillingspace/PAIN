@@ -1002,7 +1002,6 @@ namespace PAIN {
 
             // Import settings
             float quality = desc_file.import_settings.value("quality", 0.8f); // fallback to 0.8 if not specified
-            bool shouldLoop = desc_file.import_settings.value("loop", false);
 
             std::filesystem::create_directories(std::filesystem::path(outputPath).parent_path());
 
@@ -1049,7 +1048,6 @@ namespace PAIN {
 
             // Get import settings
             bool optimize_vertices = desc_file.import_settings.value("optimize_vertices", true);
-            float weld_threshold = desc_file.import_settings.value("weld_threshold", 0.001f);
             bool generate_tangents = desc_file.import_settings.value("generate_tangents", true);
             bool triangulate = desc_file.import_settings.value("triangulate", true);
             bool import_animations = desc_file.import_settings.value("import_animations", true);
@@ -2159,100 +2157,100 @@ namespace PAIN {
             std::ofstream out(out_path, std::ios::binary);
 
             // Write bounding box
-            out.write((char*)&asset.aabbMin, sizeof(asset.aabbMin));
-            out.write((char*)&asset.aabbMax, sizeof(asset.aabbMax));
+            out.write(reinterpret_cast<const char*>&asset.aabbMin, sizeof(asset.aabbMin));
+            out.write(reinterpret_cast<const char*>&asset.aabbMax, sizeof(asset.aabbMax));
 
             // Write LODs
             uint32_t lodCount = (uint32_t)asset.lods.size();
-            out.write((char*)&lodCount, sizeof(lodCount));
-            out.write((char*)asset.lods.data(), lodCount * sizeof(uint32_t));
+            out.write(reinterpret_cast<const char*>&lodCount, sizeof(lodCount));
+            out.write(reinterpret_cast<const char*>asset.lods.data(), lodCount * sizeof(uint32_t));
 
             // Write vertices/indices
             uint32_t vtxCount = (uint32_t)asset.vertices.size();
             uint32_t idxCount = (uint32_t)asset.indices.size();
-            out.write((char*)&vtxCount, sizeof(vtxCount));
-            out.write((char*)&idxCount, sizeof(idxCount));
-            out.write((char*)asset.vertices.data(), vtxCount * sizeof(Vertex));
-            out.write((char*)asset.indices.data(), idxCount * sizeof(uint32_t));
+            out.write(reinterpret_cast<const char*>&vtxCount, sizeof(vtxCount));
+            out.write(reinterpret_cast<const char*>&idxCount, sizeof(idxCount));
+            out.write(reinterpret_cast<const char*>asset.vertices.data(), vtxCount * sizeof(Vertex));
+            out.write(reinterpret_cast<const char*>asset.indices.data(), idxCount * sizeof(uint32_t));
 
             // Write submeshes
             uint32_t submeshCount = (uint32_t)asset.submeshes.size();
-            out.write((char*)&submeshCount, sizeof(submeshCount));
+            out.write(reinterpret_cast<const char*>&submeshCount, sizeof(submeshCount));
             for (const Submesh& sm : asset.submeshes) {
                 uint32_t nameLen = (uint32_t)sm.name.size();
-                out.write((char*)&nameLen, sizeof(nameLen));
+                out.write(reinterpret_cast<const char*>&nameLen, sizeof(nameLen));
                 out.write(sm.name.data(), nameLen);
-                out.write((char*)&sm.materialIndex, sizeof(sm.materialIndex));
-                out.write((char*)&sm.firstIndex, sizeof(sm.firstIndex));
-                out.write((char*)&sm.indexCount, sizeof(sm.indexCount));
-                out.write((char*)&sm.vertexOffset, sizeof(sm.vertexOffset));
+                out.write(reinterpret_cast<const char*>&sm.materialIndex, sizeof(sm.materialIndex));
+                out.write(reinterpret_cast<const char*>&sm.firstIndex, sizeof(sm.firstIndex));
+                out.write(reinterpret_cast<const char*>&sm.indexCount, sizeof(sm.indexCount));
+                out.write(reinterpret_cast<const char*>&sm.vertexOffset, sizeof(sm.vertexOffset));
             }
 
             // Write morph targets
             uint32_t morphCount = (uint32_t)asset.morphTargets.size();
-            out.write((char*)&morphCount, sizeof(morphCount));
+            out.write(reinterpret_cast<const char*>&morphCount, sizeof(morphCount));
             for (const MorphTarget& mt : asset.morphTargets) {
                 uint32_t nameLen = (uint32_t)mt.name.size();
-                out.write((char*)&nameLen, sizeof(nameLen));
+                out.write(reinterpret_cast<const char*>&nameLen, sizeof(nameLen));
                 out.write(mt.name.data(), nameLen);
 
                 uint32_t deltaCount = (uint32_t)mt.positionDeltas.size();
-                out.write((char*)&deltaCount, sizeof(deltaCount));
-                out.write((char*)mt.positionDeltas.data(), deltaCount * sizeof(glm::vec3));
-                out.write((char*)mt.normalDeltas.data(), deltaCount * sizeof(glm::vec3));
+                out.write(reinterpret_cast<const char*>&deltaCount, sizeof(deltaCount));
+                out.write(reinterpret_cast<const char*>mt.positionDeltas.data(), deltaCount * sizeof(glm::vec3));
+                out.write(reinterpret_cast<const char*>mt.normalDeltas.data(), deltaCount * sizeof(glm::vec3));
             }
 
             // Write skeleton bones
             uint32_t boneCount = (uint32_t)asset.skeleton.size();
-            out.write((char*)&boneCount, sizeof(boneCount));
+            out.write(reinterpret_cast<const char*>&boneCount, sizeof(boneCount));
             for (const Bone& b : asset.skeleton) {
                 uint32_t nameLen = (uint32_t)b.name.size();
-                out.write((char*)&nameLen, sizeof(nameLen));
+                out.write(reinterpret_cast<const char*>&nameLen, sizeof(nameLen));
                 out.write(b.name.data(), nameLen);
-                out.write((char*)&b.parent, sizeof(b.parent));
-                out.write((char*)&b.bindPose, sizeof(glm::mat4));
+                out.write(reinterpret_cast<const char*>&b.parent, sizeof(b.parent));
+                out.write(reinterpret_cast<const char*>&b.bindPose, sizeof(glm::mat4));
             }
 
             // Write animations
             uint32_t animCount = (uint32_t)asset.animations.size();
-            out.write((char*)&animCount, sizeof(animCount));
+            out.write(reinterpret_cast<const char*>&animCount, sizeof(animCount));
             for (const AnimationClip& anim : asset.animations) {
                 uint32_t nameLen = (uint32_t)anim.name.size();
-                out.write((char*)&nameLen, sizeof(nameLen));
+                out.write(reinterpret_cast<const char*>&nameLen, sizeof(nameLen));
                 out.write(anim.name.data(), nameLen);
-                out.write((char*)&anim.duration, sizeof(anim.duration));
-                out.write((char*)&anim.isAdditive, sizeof(anim.isAdditive));
+                out.write(reinterpret_cast<const char*>&anim.duration, sizeof(anim.duration));
+                out.write(reinterpret_cast<const char*>&anim.isAdditive, sizeof(anim.isAdditive));
 
                 uint32_t trackCount = (uint32_t)anim.track_map.size();
-                out.write((char*)&trackCount, sizeof(trackCount));
+                out.write(reinterpret_cast<const char*>&trackCount, sizeof(trackCount));
                 for (const auto& [bone_name, track] : anim.track_map) {
                     uint32_t boneLen = (uint32_t)bone_name.size();
-                    out.write((char*)&boneLen, sizeof(boneLen));
+                    out.write(reinterpret_cast<const char*>&boneLen, sizeof(boneLen));
                     out.write(bone_name.data(), boneLen);
 
                     uint32_t keyCount = (uint32_t)track.size();
-                    out.write((char*)&keyCount, sizeof(keyCount));
+                    out.write(reinterpret_cast<const char*>&keyCount, sizeof(keyCount));
                     for (const AnimationKey& key : track) {
-                        out.write((char*)&key.time, sizeof(key.time));
-                        out.write((char*)&key.translation, sizeof(key.translation));
-                        out.write((char*)&key.rotation, sizeof(key.rotation));
-                        out.write((char*)&key.scale, sizeof(key.scale));
+                        out.write(reinterpret_cast<const char*>&key.time, sizeof(key.time));
+                        out.write(reinterpret_cast<const char*>&key.translation, sizeof(key.translation));
+                        out.write(reinterpret_cast<const char*>&key.rotation, sizeof(key.rotation));
+                        out.write(reinterpret_cast<const char*>&key.scale, sizeof(key.scale));
                         // Write morph target weights if blend shapes exist
                         uint32_t morphWeightsCount = (uint32_t)key.morphTargetWeights.size();
-                        out.write((char*)&morphWeightsCount, sizeof(morphWeightsCount));
-                        out.write((char*)key.morphTargetWeights.data(), morphWeightsCount * sizeof(float));
+                        out.write(reinterpret_cast<const char*>&morphWeightsCount, sizeof(morphWeightsCount));
+                        out.write(reinterpret_cast<const char*>key.morphTargetWeights.data(), morphWeightsCount * sizeof(float));
                     }
                 }
             }
 
             // Write materials
             uint32_t matCount = (uint32_t)asset.materials.size();
-            out.write((char*)&matCount, sizeof(matCount));
+            out.write(reinterpret_cast<const char*>&matCount, sizeof(matCount));
             for (auto const& mat_path : asset.materials) {
 
                 auto writeStr = [&](const std::string& str) {
                     uint32_t len = (uint32_t)str.size();
-                    out.write((char*)&len, sizeof(len));
+                    out.write(reinterpret_cast<const char*>&len, sizeof(len));
                     out.write(str.data(), len);
                     };
 

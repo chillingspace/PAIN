@@ -72,7 +72,7 @@ namespace PAIN {
 		MOVE_MODES move_mode = FREE_FLY;
 
 	private:
-		Camera* camera;
+		Camera* camera = nullptr;
 		std::shared_ptr<Scene::SceneManager> m_Scene;
 		
 

@@ -533,7 +533,7 @@ namespace PAIN {
                         if (ImGui::InputInt("##LayerID", &layer.id, 1, 100, ImGuiInputTextFlags_ElideLeft)) {
                             if (layer.id < 0)  layer.id = 0;
                             if (layer.id > 31) layer.id = 31;
-                            layer.mask = 1 << layer.id;
+                            layer.mask = 1u << layer.id;
                         }
                         ImGui::SameLine(125);
                         ImGui::Text("Mask: 0x%08X", layer.mask);

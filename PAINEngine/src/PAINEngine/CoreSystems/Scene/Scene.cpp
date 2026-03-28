@@ -819,9 +819,10 @@ namespace PAIN {
 				recursiveCapture( root, ents);
 			}
 
+			size_t entityCount = ents.size();
 			ecs["Entities"] = std::move(ents);
 
-			PN_CORE_INFO("[SceneManager] Captured {} entities ", ents.size());
+			PN_CORE_INFO("[SceneManager] Captured {} entities ", entityCount);
 
 			return ecs;
 

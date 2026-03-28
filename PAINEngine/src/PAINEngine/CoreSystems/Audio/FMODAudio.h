@@ -9,7 +9,7 @@
 namespace PAIN {
     namespace Audio {
 
-        class FmodAudio : public Audio {
+        class FmodAudio final : public Audio {
         private:
             struct Impl;
             std::unique_ptr<Impl> impl_;

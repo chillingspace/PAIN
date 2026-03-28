@@ -549,8 +549,6 @@ namespace PAIN {
 			auto rendererService = services.lock()->get<sRenderer>();
 			if (!rendererService || !rendererService->w_renderer)
 				return;
-			static std::unordered_set<std::string> warnedNonShadowPipeAssets;
-
 #ifdef _DEBUG
 			// DEBUG: Log world light shadow state
 			if (auto worldLightOpt = LightSources::get().get("world")) {

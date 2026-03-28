@@ -26,7 +26,7 @@ namespace PAIN {
 			EGLDisplay m_Display = EGL_NO_DISPLAY;
 			EGLConfig  config = nullptr;
 			EGLSurface m_Surface = EGL_NO_SURFACE;
-			EGLContext m_Context = EGL_NO_CONTEXT;
+			EGLContext m_EGLContext = EGL_NO_CONTEXT;
 
 			//Android buffer size
 			glm::uvec2 frame_buffer;

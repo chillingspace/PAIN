@@ -104,7 +104,7 @@ void main()
         return;
     }
 
-    const uint SAMPLE_COUNT = 4096u;
+    const uint SAMPLE_COUNT = 64u;
     vec3 prefilteredColor = vec3(0.0);
     float totalWeight = 0.0;
     

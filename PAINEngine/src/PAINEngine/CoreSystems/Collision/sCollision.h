@@ -42,7 +42,7 @@ namespace PAIN {
 
 		private:
 			// To be changed to use MAX_ENTITY, to be put in collision manager, not wise for each entity to carry so much bytes
-			std::array<CollisionInfo, 100> current_collisions;
+			std::array<CollisionInfo, 100> current_collisions{};
 		};
 	}
 }
