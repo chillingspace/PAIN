@@ -80,6 +80,9 @@ namespace PAIN {
                 // Search helper
                 bool entityMatchesSearch(entt::entity entity, const std::string& search_filter);
 
+                void collapseAll();
+                void expandAll();
+
                 void setEntityParent(entt::entity child, entt::entity parent);
                 void removeParent(entt::entity child);
                 bool isAncestor(entt::entity potential_ancestor, entt::entity entity);
