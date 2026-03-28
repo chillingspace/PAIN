@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #ifdef _DEBUG
 
 #ifndef PAIN_EDITOR_COMPONENTS_PANEL_HPP
@@ -52,9 +52,6 @@ namespace PAIN {
 				}
 
 				void renderEntityComponents(entt::entity entity, const char* filter = nullptr);
-
-				//Expose services
-				std::shared_ptr<Services> services;
 
 				void setRegistry(ECS::RegistryID registryID) {
 					currentRegistryID = registryID;

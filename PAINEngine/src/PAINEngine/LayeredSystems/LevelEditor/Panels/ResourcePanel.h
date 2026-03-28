@@ -178,7 +178,7 @@ namespace PAIN {
 
                 // Script Saving
                 std::string current_script_file;
-                bool is_script_loaded;
+                bool is_script_loaded = false;
 
                 // ----------------------------
                 // File Render

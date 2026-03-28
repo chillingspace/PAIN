@@ -12,7 +12,7 @@ namespace PAIN {
     namespace Editor {
 
         //GLFW Editor
-        class EditorGLFW : public EditorPlatform {
+        class EditorGLFW final : public EditorPlatform {
         private:
             GLFWwindow* g_window = nullptr;
             void init() override;

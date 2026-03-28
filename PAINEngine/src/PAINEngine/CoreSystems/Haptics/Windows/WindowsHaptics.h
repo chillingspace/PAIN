@@ -11,7 +11,7 @@ namespace PAIN {
     namespace Haptics {
 
         // Windows stub implementation - no haptics support
-        class WindowsHaptics : public Haptics {
+        class WindowsHaptics final : public Haptics {
         public:
             WindowsHaptics(void* app) { init(); }
             ~WindowsHaptics() override = default;

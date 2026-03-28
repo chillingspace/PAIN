@@ -260,7 +260,6 @@ namespace PAIN {
 
             // Only assert for reads, not writes.
             if (mode == FileMode::Read) {
-                assert(std::filesystem::exists(path) && "Scene file does not exist or path is invalid!");
                 if (!std::filesystem::exists(path)) {
                     PN_CORE_WARN("File does not exist! Unable to create file stream for reading");
                     return std::unique_ptr<IFileStream>();

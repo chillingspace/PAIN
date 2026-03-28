@@ -309,7 +309,7 @@ namespace PAIN {
 				std::unique_lock<std::shared_mutex> cache_lock(cache_mutex);
 				auto cache_it = asset_cache.find(id);
 				if (cache_it != asset_cache.end()) {
-					cache_it = asset_cache.erase(cache_it);
+					asset_cache.erase(cache_it);
 				}
 			}
 
@@ -323,12 +323,12 @@ namespace PAIN {
 					//Remove paths to guid
 					auto shipped_it = shipped_path_to_guid.find(registry_it->second->shipped_relative_path);
 					if (shipped_it != shipped_path_to_guid.end()) {
-						shipped_it = shipped_path_to_guid.erase(shipped_it);
+						shipped_path_to_guid.erase(shipped_it);
 					}
 
 					auto main_it = main_path_to_guid.find(registry_it->second->main_relative_path);
 					if (main_it != main_path_to_guid.end()) {
-						main_it = main_path_to_guid.erase(main_it);
+						main_path_to_guid.erase(main_it);
 					}
 
 					registry_it = asset_registry.erase(registry_it);
@@ -498,7 +498,7 @@ namespace PAIN {
 			//Check asset cache
 			auto cache_it = asset_cache.find(id);
 			if (cache_it != asset_cache.end()) {
-				cache_it = asset_cache.erase(cache_it);
+				asset_cache.erase(cache_it);
 			}
 		}
 
@@ -684,10 +684,6 @@ namespace PAIN {
 		}
 
 		void Manager::duplicateFile(std::filesystem::path const& file_path) {
-
-			//Get root
-			auto path_service = services->get<Path::Path>();
-			std::filesystem::path root = path_service->resolvePath(Path::main_assets_alias + path_service->getVirtualSymbol());
 
 			//Build new file name
 			std::filesystem::path destination = file_path.parent_path() /

@@ -385,8 +385,8 @@ private:
 			std::vector<Light> out;
 			out.reserve(sources.size());
 
-			for (const auto [k, v] : sources) {
-				out.push_back(std::ref(v));
+			for (const auto& [k, v] : sources) {
+				out.push_back(v);
 			}
 
 			return out;

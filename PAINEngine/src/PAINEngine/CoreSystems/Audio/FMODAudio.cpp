@@ -30,7 +30,7 @@ namespace PAIN {
 			bool initialized = false;
 
 			// assets
-			struct FmodSound : public PAIN::Audio::Sound {
+			struct FmodSound final : public PAIN::Audio::Sound {
 			public:
 				FmodSound(const std::string& path, FMOD::Sound* fmodPtr)
 					: path(path), sound(fmodPtr) {

@@ -139,9 +139,6 @@ namespace PAIN {
 
             if (!skipKeyboard) {
                 luaManager_.Input_OnEvent(e); // forward keyboard events to luamanager only when not captured by editor
-            }
-
-            if (!skipKeyboard) {
                 d.Dispatch<KeyPressed>([&](KeyPressed& ev) {
                     //PN_CORE_INFO("[GSS] KeyPressed code={}", ev.getKeyCode());
                     if (auto name = getKeyName(ev.getKeyCode())) {

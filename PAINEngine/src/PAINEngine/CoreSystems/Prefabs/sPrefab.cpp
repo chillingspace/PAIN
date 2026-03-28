@@ -134,8 +134,6 @@ namespace PAIN {
 			prefabJson["rootEntityGUID"] = prefab_asset.rootEntityGUID.ToString();
 			prefabJson["entities"] = prefab_asset.entities;
 
-			std::string parsedJson = prefabJson["entities"].dump(4);
-
 			return prefabJson;
 		}
 

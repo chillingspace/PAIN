@@ -115,7 +115,7 @@ namespace PAIN {
 				if (event.getType() == T::getStaticType()) {
 
 					//Execute function
-					event.b_event_handled = func(*(T*)&event);
+					event.b_event_handled = func(static_cast<T&>(event));
 					return true;
 				}
 

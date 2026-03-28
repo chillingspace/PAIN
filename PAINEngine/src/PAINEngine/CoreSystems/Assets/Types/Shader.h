@@ -23,7 +23,7 @@ namespace PAIN {
             Shader(const Shader&) = delete;
             Shader& operator=(const Shader&) = delete;
 
-            Shader(Shader&& other) noexcept : m_RendererID(other.m_RendererID) {
+            Shader(Shader&& other) noexcept : m_RendererID(other.m_RendererID), loc_map(std::move(other.loc_map)) {
                 other.m_RendererID = 0;
             }
 

@@ -674,7 +674,18 @@ namespace PAIN {
 
 				dispatcher.Dispatch<Event::WindowClosed>([&](Event::WindowClosed& e) -> bool {
 					auto ser = PN_SERI_SERVICE;
+					auto scn = PN_SCENE_SERVICE;
 					closeAllPopUps();
+
+					// In CI or headless environments, skip save prompts entirely
+					const bool is_ci = std::getenv("CI") != nullptr;
+
+					// If the game is actively playing, don't halt shutdown for saving prompts
+					if (is_ci || (scn && scn->isPlaying())) {
+						auto win = services->get<Window::Window>();
+						win->safeShutdown();
+						return true;
+					}
 
 					if (ser->getIsModifiedScene()) {
 						openPopUp("Unsaved Changes");

@@ -550,8 +550,8 @@ namespace PAIN {
                 if (camera) {
                     camera->speed += 0.5f; // Increase speed by 0.5 (adjust as needed)
                     if (camera->speed > 20.f) camera->speed = 20.f; // Clamp max speed
+                    PN_CORE_INFO("CAMERA SPEED +0.5f, SPEED: {}", camera->speed);
                 }
-                PN_CORE_INFO("CAMERA SPEED +0.5f, SPEED: {}", camera->speed);
                 break;
 
             case PAIN_KEY_MINUS: // '-' key
@@ -559,8 +559,8 @@ namespace PAIN {
                 if (camera) {
                     camera->speed -= 0.5f; // Decrease speed by 0.5
                     if (camera->speed < 0.1f) camera->speed = 0.1f; // Clamp min speed
+                    PN_CORE_INFO("CAMERA SPEED -0.5f, SPEED: {}", camera->speed);
                 }
-                PN_CORE_INFO("CAMERA SPEED -0.5f, SPEED: {}", camera->speed);
                 break;
 
             case PAIN_KEY_I:

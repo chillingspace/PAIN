@@ -64,9 +64,6 @@ namespace PAIN {
 				//Actions manager
 				std::shared_ptr<CommandManager> command_manager;
 
-				//Services
-				std::shared_ptr<Services> services;
-
 				//Panel dock ID
 				unsigned int dock_id = 0;
 
@@ -84,7 +81,11 @@ namespace PAIN {
 
 				//Flag to signal that panel is hidden
 				bool panel_hidden = false;
+
 			public:
+
+				//Services
+				std::shared_ptr<Services> services;
 
 				//Constructor
 				IPanel() = default;

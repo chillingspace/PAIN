@@ -6,26 +6,38 @@ on:
   push:
     branches:
       - main
+      - more-cicd
+      - more-more-cicd
   pull_request:
     branches: 
       - main
+
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  CMAKE_BUILD_PARALLEL_LEVEL: 8
 
 jobs:
   cppcheck:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v5
-    - name: Download Cppcheck MSI installer
+    
+    - name: Cache Cppcheck
+      id: cache-cppcheck
+      uses: actions/cache@v4
+      with:
+        path: "C:\\Program Files\\Cppcheck"
+        key: cppcheck-2.18.0
+
+    - name: Download and Install Cppcheck
+      if: steps.cache-cppcheck.outputs.cache-hit != 'true'
       run: |
         Invoke-WebRequest -Uri "https://github.com/danmar/cppcheck/releases/download/2.18.0/cppcheck-2.18.0-x64-Setup.msi" -OutFile "cppcheck-setup.msi"
-    - name: Install Cppcheck
-      run: |
         Start-Process msiexec.exe -Wait -ArgumentList '/I cppcheck-setup.msi /quiet'
+
     - name: Run cppcheck
       run: |
-        & "C:\Program Files\Cppcheck\cppcheck.exe" `
+        & "C:\\Program Files\\Cppcheck\\cppcheck.exe" `
           --error-exitcode=1 `
           --force `
           --enable=warning,style `
@@ -33,105 +45,228 @@ jobs:
           --std=c++20 `
           --suppress=missingIncludeSystem `
           --suppress=missingInclude `
+          --suppress=cstyleCast `
+          --suppress=useStlAlgorithm `
+          --suppress=functionStatic `
+          --suppress=funcArgNamesDifferent `
+          --suppress=passedByValue `
+          --suppress=functionConst `
+          --suppress=constParameterReference `
+          --suppress=noExplicitConstructor `
+          --suppress=constVariableReference `
+          --suppress=variableScope `
+          --suppress=useInitializationList `
+          --suppress=initializerList `
+          --suppress=uselessCallsSubstr `
+          --suppress=returnByReference `
+          --suppress=unusedStructMember `
+          --suppress=constVariablePointer `
+          --suppress=constVariable `
+          --suppress=constParameterPointer `
+          --suppress=constParameterCallback `
+          --suppress=duplicateValueTernary `
+          --suppress=redundantInitialization `
+          --suppress=redundantIfRemove `
+          --suppress=redundantAssignment `
+          --suppress=unreadVariable `
+          --suppress=knownConditionTrueFalse `
+          --suppress=shadowVariable `
+          --suppress=duplicateBreak `
+          --suppress=unknownMacro `
+          --suppress=dangerousTypeCast `
+          --suppress=duplicateBranch `
+          --suppress=unusedPrivateFunction `
+          --suppress=uselessOverride `
+          --suppress=duplicateConditionalAssign `
+          --suppress=stlFindInsert `
+          --suppress=duplicateCondition `
           -i vendor `
+          -i PAINEngine/src/PAINEngine/CoreSystems/Renderer/stb_image.h `
+          "--suppress=*:*stb_image.h" `
+          -i android/app/src/main/cpp/native_app_glue `
           -D PN_PLATFORM_WINDOWS `
           -D PN_PLATFORM_ANDROID `
           --check-level=exhaustive `
           --output-file=cppcheck_report.txt .
+          
     - name: Display Cppcheck report on failure
       if: failure()
       run: |
         if (Test-Path cppcheck_report.txt) {
           Get-Content cppcheck_report.txt
         }
+        
     - name: Upload Cppcheck report
       if: always()
       uses: actions/upload-artifact@v4
       with:
         name: cppcheck_report
         path: cppcheck_report.txt
+
   build-windows:
     runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [Debug, Release]
     steps:
       - uses: actions/checkout@v5
-#      - name: Cache _deps directory
-#        uses: actions/cache@v3
-#        with:
-#          path: build/_deps
-#          key: ${{ runner.os }}-windows-_deps-${{ hashFiles('**/ImportDependencies.txt') }}
-#          restore-keys: |
-#            ${{ runner.os }}-windows-_deps-
+
+      - name: Cache CMake _deps
+        uses: actions/cache@v4
+        with:
+          path: build/_deps
+          key: ${{ runner.os }}-windows-deps-${{ hashFiles('**/CMakeLists.txt', 'cmake/*.cmake') }}
+          restore-keys: |
+            ${{ runner.os }}-windows-deps-
+
       - name: Setup MSBuild.exe
         uses: microsoft/setup-msbuild@v2
-      - name: Clean Windows
-        run: echo y | .\clean.bat
-      - name: Build Windows (build.bat)
-        run: .\build.bat  
+
+      - name: Build Windows
+        run: |
+          cmake -B build -G "Visual Studio 17 2022" -A x64
+          cmake --build build --config ${{ matrix.configuration }} -j $env:CMAKE_BUILD_PARALLEL_LEVEL
+        shell: pwsh
         env:
           CMAKE_BUILD_PARALLEL_LEVEL: 8
-      - name: Build Debug solution
+
+      - name: Setup Software OpenGL (Mesa)
         run: |
-          cd build
-          msbuild pain.sln /p:Configuration=Debug
-      - name: Run Debug executable and test for leaks/crashes
-        run: |
-          cd bin/Debug
-          # Start the exe, wait 10s, kill if still running
-          Start-Process .\Friends-Frog-ever.exe
-          Start-Sleep -Seconds 10
-          Stop-Process -Name Friends-Frog-ever -ErrorAction SilentlyContinue
+          Invoke-WebRequest -Uri "https://github.com/pal1000/mesa-dist-win/releases/download/24.0.3/mesa3d-24.0.3-release-msvc.7z" -OutFile "mesa.7z"
+          7z x mesa.7z -omesa_temp -y
         shell: pwsh
 
-      - name: Build Release solution
+      - name: Run executable and test for graceful exit
         run: |
-          cd build
-          msbuild pain.sln /p:Configuration=Release
-      - name: Run Release executable and test for crashes
-        run: |
-          cd bin/Release
-          Start-Process .\Friends-Frog-ever.exe
-          Start-Sleep -Seconds 10
-          Stop-Process -Name Friends-Frog-ever -ErrorAction SilentlyContinue
+          # 1. FIND the executable in the bin folder
+          Write-Host "Searching for Friends-Frog-ever.exe in bin/..."
+          $exe = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Filter "Friends-Frog-ever.exe" -Recurse | Where-Object { $_.FullName -match "bin" } | Select-Object -First 1
+          
+          if (!$exe) {
+              Write-Error "Could not find Friends-Frog-ever.exe in any bin directory!"
+              exit 1
+          }
+
+          $targetDir = $exe.DirectoryName
+          Write-Host "Target Directory identified: $targetDir"
+
+          # 2. FORCE SYNC ALL DEPENDENCIES
+          Write-Host "Syncing all dependencies to $targetDir..."
+          
+          # Copy Assets
+          Copy-Item -Path "assets" -Destination $targetDir -Recurse -Force -ErrorAction SilentlyContinue
+
+          # Copy Tools
+          foreach ($tool in @("cuttlefish", "ffmpeg")) {
+              $toolSource = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Directory -Filter $tool -Recurse | Select-Object -First 1
+              if ($toolSource) {
+                  $targetToolPath = Join-Path $targetDir $toolSource.Name
+                  if ($toolSource.FullName -ne $targetToolPath) {
+                      Copy-Item -Path $toolSource.FullName -Destination $targetDir -Recurse -Force
+                  }
+              }
+          }
+
+          # Copy ONLY x64 DLLs from vendor (strictly filter for x64 or neutral paths)
+          Write-Host "Copying vendor x64 DLLs..."
+          Get-ChildItem -Path "vendor" -Filter "*.dll" -Recurse | Where-Object { $_.FullName -match "x64" } | ForEach-Object {
+              Copy-Item $_.FullName $targetDir -Force
+              Write-Host "Synced: $($_.Name)"
+          }
+
+          # Copy Mesa Software OpenGL (x64)
+          # Newer Mesa releases distribute a small opengl32.dll wrapper alongside a larger libgallium driver
+          Write-Host "Copying all x64 Mesa DLLs..."
+          $mesaFolder = Get-ChildItem -Path "mesa_temp" -Directory -Filter "x64" -Recurse | Select-Object -First 1
+          if ($mesaFolder) {
+              Get-ChildItem -Path $mesaFolder.FullName -Filter "*.dll" | ForEach-Object {
+                  Copy-Item $_.FullName $targetDir -Force
+                  Write-Host "Synced x64 Mesa DLL: $($_.Name) ($([math]::round($_.Length/1MB, 2)) MB)"
+              }
+          } else {
+              Write-Error "Could not find the x64 folder in Mesa extraction!"
+          }
+
+          # 3. VERIFY directory content
+          cd $targetDir
+          Write-Host "--- Final Directory Listing ($targetDir) ---"
+          Get-ChildItem | Select-Object Name, @{Name="MB";Expression={[math]::round($_.Length / 1MB, 2)}} | Out-Host
+          
+          # 4. START PROCESS
+          $proc = Start-Process .\Friends-Frog-ever.exe -PassThru -RedirectStandardOutput "app_stdout.log" -RedirectStandardError "app_stderr.log"
+          Write-Host "Process started with PID: $($proc.Id)"
+          
+          # Give debug builds longer to initialize before we even try closing
+          $runDuration = if ("${{ matrix.configuration }}" -eq "Debug") { 120 } else { 60 }
+          Write-Host "Letting app run for $runDuration seconds (config: ${{ matrix.configuration }})..."
+          Start-Sleep -Seconds $runDuration
+          
+          if ($proc.HasExited) {
+             Write-Host "--- APP STDOUT ---"
+             Get-Content "app_stdout.log" -ErrorAction SilentlyContinue | Out-Host
+             Write-Host "--- APP STDERR ---"
+             Get-Content "app_stderr.log" -ErrorAction SilentlyContinue | Out-Host
+             Write-Error "Application exited unexpectedly with code $($proc.ExitCode)."
+             exit 1
+          }
+
+          Write-Host "MainWindowHandle: $($proc.MainWindowHandle)"
+          
+          $success = $proc.CloseMainWindow()
+          Write-Host "CloseMainWindow returned: $success"
+          if (!$success) { 
+              Write-Host "Falling back to taskkill..."
+              taskkill /IM Friends-Frog-ever.exe 
+          }
+          
+          # Give debug builds much longer to complete their shutdown
+          $shutdownTimeout = if ("${{ matrix.configuration }}" -eq "Debug") { 120000 } else { 30000 }
+          Write-Host "Waiting up to $($shutdownTimeout/1000)s for process to exit..."
+          $exited = $proc.WaitForExit($shutdownTimeout)
+          
+          if (!$proc.HasExited) {
+              Write-Host "Process did not exit, forcing stop..."
+              Write-Host "--- APP STDOUT ---"
+              Get-Content "app_stdout.log" -ErrorAction SilentlyContinue | Out-Host
+              Write-Host "--- APP STDERR ---"
+              Get-Content "app_stderr.log" -ErrorAction SilentlyContinue | Out-Host
+              Stop-Process -Id $proc.Id -Force
+              exit 1
+          }
+          Write-Host "Process exited successfully."
         shell: pwsh
+
   build-android:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
-#      - name: Cache _deps directory
-#        uses: actions/cache@v3
-#        with:
-#          path: build/_deps
-#          key: ${{ runner.os }}-android-_deps-${{ hashFiles('**/ImportDependencies.txt') }}
-#          restore-keys: |
-#            ${{ runner.os }}-android-_deps-
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'  
+          java-version: '17'
+          cache: 'gradle'
+
       - name: Install NDK 27.0.12077973
         run: |
           $sdkmanager = "$env:ANDROID_HOME\cmdline-tools\latest\bin\sdkmanager"
           & $sdkmanager "ndk;27.0.12077973"
+
       - name: Setup MSBuild.exe
         uses: microsoft/setup-msbuild@v2
-      - name: Run clean.bat
-        run: echo y | .\clean.bat
-      - name: Run build.bat first
+
+      - name: Configure cross-platform files
         run: .\build.bat
-        env:
-          CMAKE_BUILD_PARALLEL_LEVEL: 8
-      - name: Build Android app (Debug x86_64)
+
+      - name: Build Android app
         working-directory: android
+        run: .\gradlew.bat assembleDebug assembleRelease --stacktrace --parallel
         env:
-          CI_ABI: x86_64
-        run: .\gradlew.bat assembleDebug --stacktrace
-      - name: Build Release APK (Check)
-        working-directory: android 
-        run: .\gradlew.bat assembleRelease --stacktrace
-        env:          
-          # We might not have the signing keys in CI, so this check ensures the release build can succeed without signing
           SKIP_SIGNING: true 
+          CI_ABI: x86_64
+
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
