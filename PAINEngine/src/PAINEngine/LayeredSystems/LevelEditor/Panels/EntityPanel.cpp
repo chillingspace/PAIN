@@ -405,6 +405,17 @@ namespace PAIN {
                     PN_CORE_INFO("Sibling indices normalized!");
                     force_refresh = true;
                 }
+                // Collapse / Expand toolbar
+                float btn_w = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
+                if (ImGui::Button("Collapse All", ImVec2(btn_w, 0))) {
+                    collapseAll();
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Expand All", ImVec2(btn_w, 0))) {
+                    expandAll();
+                }
+                ImGui::Spacing();
+
                 ImGui::Spacing();
                 
                 // Search bar
@@ -725,6 +736,22 @@ namespace PAIN {
                         }
                     }
                 }
+            }
+
+            void EntityPanel::collapseAll() {
+                auto ecs = PN_ECS_SERVICE;
+                auto& registry = ecs->getRegistry(currentRegistryID);
+                auto view = registry.view<Entity::Hierarchy>();
+                for (auto entity : view) {
+                    auto h = ecs->getEntityComponent<Entity::Hierarchy>(entity, currentRegistryID);
+                    if (h && !h->get().childrenGUIDs.empty()) {
+                        collapsed_groups.insert(entity);
+                    }
+                }
+            }
+
+            void EntityPanel::expandAll() {
+                collapsed_groups.clear();
             }
 
             bool EntityPanel::entityMatchesSearch(entt::entity entity, const std::string& search_filter) {
