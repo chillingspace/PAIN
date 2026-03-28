@@ -144,7 +144,6 @@ namespace PAIN {
         }
 
         void Editor::onUpdate(AppTiming timing) {
-            PN_CORE_INFO("[ED-DIAG] onUpdate start");
             // Update shortcuts
             platform->updateShortCuts(command_manager);
 

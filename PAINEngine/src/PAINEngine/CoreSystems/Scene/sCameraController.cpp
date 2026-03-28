@@ -205,7 +205,7 @@ namespace PAIN {
             if (editor_visible) {
                 PN_CORE_INFO("EDITOR");
                 m_Scene->SetEditorCamera();
-                PN_CORE_INFO("[CC-DIAG] SetEditorCamera done, active={}", (void*)m_Scene->GetActiveCamera());
+                PN_CORE_INFO("[CC-DIAG] SetEditorCamera done, cam_null={}", m_Scene->GetActiveCamera() == nullptr);
             }
             else {
                 PN_CORE_INFO("GAME");

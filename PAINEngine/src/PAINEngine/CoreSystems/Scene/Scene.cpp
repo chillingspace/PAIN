@@ -1656,9 +1656,11 @@ namespace PAIN {
 					}
 					else {
 						cached_world_light_intensity = olc->L_intensity;
-						PN_CORE_INFO("[SM-DIAG] world light pos update, cam={}", (void*)GetActiveCamera());
-						if (!GetActiveCamera()) break;
-						olc->position = GetActiveCamera()->pos - glm::normalize(olc->direction) * olc->shadow_source_follow_distance;
+						if (GetActiveCamera()) {
+							olc->position = GetActiveCamera()->pos - glm::normalize(olc->direction) * olc->shadow_source_follow_distance;
+						} else {
+							PN_CORE_ERROR("[SM-DIAG] active_camera is NULL in world light update!");
+						}
 					}
 				}
 				else {
