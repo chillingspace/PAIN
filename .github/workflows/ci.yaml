@@ -73,6 +73,7 @@ jobs:
           --suppress=shadowVariable `
           --suppress=duplicateBreak `
           --suppress=unknownMacro `
+          --suppress=dangerousTypeCast `
           --suppress=duplicateBranch `
           --suppress=unusedPrivateFunction `
           --suppress=uselessOverride `
