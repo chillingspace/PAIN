@@ -205,7 +205,6 @@ namespace PAIN {
             if (editor_visible) {
                 PN_CORE_INFO("EDITOR");
                 m_Scene->SetEditorCamera();
-                PN_CORE_INFO("[CC-DIAG] SetEditorCamera done, cam_null={}", m_Scene->GetActiveCamera() == nullptr);
             }
             else {
                 PN_CORE_INFO("GAME");
@@ -259,7 +258,6 @@ namespace PAIN {
 
 
         // -------- EDITOR CAMERA --------
-        PN_CORE_INFO("[CC-DIAG] entering editor camera section");
 
         // Move left/right based on cross product of forward and up vectors
         glm::vec3 right = glm::normalize(glm::cross(camera->forward, camera->up));
@@ -379,7 +377,6 @@ namespace PAIN {
         } else {
             camera->pos = proposedPos;
         }
-        PN_CORE_INFO("[CC-DIAG] onUpdate complete");
     }
 
     void sCameraController::onEvent(Event::Event& e) {

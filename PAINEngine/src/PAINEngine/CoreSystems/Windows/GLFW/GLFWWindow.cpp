@@ -214,13 +214,10 @@ namespace PAIN {
 		void GLFW_Window::windowclose_cb([[maybe_unused]] GLFWwindow* window) {
 			//Fetch window class
 			auto* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
-		
-			#ifdef _DEBUG
-				app->pushEventQueue(std::make_shared<Event::WindowClosed>());
-			#else
-				//Stop application
-				app->terminate();
-			#endif // _DEBUG
+
+			//Notify all systems of window close, then terminate
+			app->pushEventQueue(std::make_shared<Event::WindowClosed>());
+			app->terminate();
 		}
 
 		void GLFW_Window::key_cb([[maybe_unused]] GLFWwindow* window, [[maybe_unused]] int key, [[maybe_unused]] int scancode, [[maybe_unused]] int action, [[maybe_unused]] int mods) {
