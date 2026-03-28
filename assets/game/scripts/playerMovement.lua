@@ -31,22 +31,6 @@ end
 local joystickDirX = 0.0
 local joystickDirY = 0.0
 
--- -- for UI button (on_click_callback_lua = "JumpButton_OnClick")
--- _G_root.JumpButton_OnClick = function()
---     printLog("[UI] Jump button pressed, setting jumpPressed")
---     if PlayerState and PlayerState.isHidden and PlayerState.isHidden() then
---         return
---     end
---     jumpPressed = true
--- end
-
--- _G_root.ActionButton_OnClick = function()
---     printLog("[UI] Action button pressed (hide / collect)")
---     if PlayerState and PlayerState.onActionButton then
---         PlayerState.onActionButton()
---     end
--- end
-
 -- shared input API for other UIActions.lua
 _G.PlayerInput = _G.PlayerInput or {}
 local PlayerInput = _G.PlayerInput
@@ -102,6 +86,7 @@ registerKeyUp("D", function() moveRight = false end)
 local speed = 3
 local jumpSpeed = 5
 local isGrounded = true
+local wasGrounded = true
 local groundY = nil
 
 local I = nil
@@ -109,6 +94,7 @@ local baseRx, baseRy, baseRz = getRotation(entityId)
 local currentYaw = baseRy or 0.0
 local playerStateInited = false
 
+local landingTimer = 0.0 
 local idleTimer = 0.0
 local hopTimer = 0.0
 local idleInterval = 5.0 + math.random() * 2.0  -- Random 5-8 seconds
@@ -162,6 +148,8 @@ registerUpdate(function(dt)
         end
         joystickDirX = 0.0
         joystickDirY = 0.0
+        local _, curr_vy, _ = getVelocity(entityId)
+        setVelocity(entityId, 0.0, curr_vy, 0.0)
         return
     end
 
@@ -341,26 +329,52 @@ registerUpdate(function(dt)
         -- STOPPED
         wasMoving = false
         lastAnimTime = 1000.0
-        
-        -- Make sure animation is not looping
-        if isGrounded then 
-            PlayAnim(id, ANIM_JUMP, 0.25, false) -- on the ground
-            Animation.SetSpeed(id, 2)
-            Animation.SetLoop(id, false)
-         end
+
+        if not isGrounded then
+            -- Airborne but not moving > show flight, not a looping jump
+            PlayAnim(id, ANIM_FLIGHT, 0.1, true)
+            Animation.SetSpeed(id, 1.0)
+            Animation.SetLoop(id, true)
+
+        elseif isGrounded then
+            if not wasGrounded then
+                -- Just landed: reset idle timer and play landing snap
+                landingTimer = 0.3
+                idleTimer = 0.0
+                idleInterval = 5.0 + math.random() * 2.0
+                PlayAnim(id, ANIM_JUMP, 0.1, false)
+                Animation.SetSpeed(id, 2)
+                Animation.SetLoop(id, false)
+            else
+                -- Count down landing snap, then do nothing — idleTimer takes over
+                if landingTimer > 0 then
+                    landingTimer = landingTimer - dt
+                elseif currentAnimState == ANIM_WALK then
+                    -- Stopped from walking: snap out of walk loop the same way
+                    landingTimer = 0.3
+                    idleTimer = 0.0
+                    idleInterval = 5.0 + math.random() * 2.0
+                    PlayAnim(id, ANIM_JUMP, 0.1, false)
+                    Animation.SetSpeed(id, 2)
+                    Animation.SetLoop(id, false)
+                end
+            end
+        end
     end
 
-    -- idle sfx: when not moving, play random idle vocal at random intervals
+    -- Always update at the END of the frame
+    wasGrounded = isGrounded
     if not isMoving then
-        idleTimer = idleTimer + dt
+        if landingTimer <= 0 then  -- don't count while landing snap is playing
+            idleTimer = idleTimer + dt
+        end
         if idleTimer >= idleInterval then
             idleTimer = 0.0
-            idleInterval = 5.0 + math.random() * 2.0  -- Randomize next interval
-            
-            -- Play random idle sound at player position
+            idleInterval = 2.0 + math.random() * 2
             audioPlayRandomSFXFromEntity(SFX_PLAYER_IDLES, id, VOL_PLAYER_IDLE)
+            PlayAnim(id, ANIM_IDLE, 0.2, true)  -- ✅ back here
+            Animation.SetSpeed(id, 1.0)
             Animation.SetLoop(id, true)
-            PlayAnim(id, ANIM_IDLE, 0.2, true)
         end
     else
         idleTimer = 0.0

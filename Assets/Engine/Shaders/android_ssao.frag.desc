@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "android_ssao.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 4469664017667271505
+  },
+  "descriptor_version": 1,
+  "guid": "6744c039-ae26-8642-a181-37d13595683e",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_ssao.frag"
+  }
+}

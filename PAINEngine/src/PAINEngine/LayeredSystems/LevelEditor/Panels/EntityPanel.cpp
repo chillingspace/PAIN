@@ -69,28 +69,28 @@ namespace PAIN {
                                 }
 
                                 // Optional: Add default model
-                                if (scene) {
-                                    auto models = services->get<Assets::Manager>()->getAllAssetDataOfType(Assets::Type::Model);
-                                    if (!models.empty()) {
-                                        auto asset_service = services->get<Assets::Manager>();
+                                //if (scene) {
+                                //    auto models = services->get<Assets::Manager>()->getAllAssetDataOfType(Assets::Type::Model);
+                                //    if (!models.empty()) {
+                                //        auto asset_service = services->get<Assets::Manager>();
 
-                                        //Default obj paths
-                                        std::filesystem::path quad_path = "engine\\models\\quad.obj";
-                                        std::filesystem::path sphere_path = "engine\\models\\sphere.obj";
+                                //        //Default obj paths
+                                //        std::filesystem::path quad_path = "engine\\models\\quad.obj";
+                                //        std::filesystem::path sphere_path = "engine\\models\\sphere.obj";
 
-                                        //3 Fallbacks incase
-                                        Assets::GUID base_model_id = asset_service->findGUID(quad_path);
-                                        if (!base_model_id.IsValid()) {
-                                            base_model_id = asset_service->findGUID(sphere_path);
-                                        }
-                                        if (!base_model_id.IsValid()) {
-                                            base_model_id = models.front()->guid;
-                                        }
+                                //        //3 Fallbacks incase
+                                //        Assets::GUID base_model_id = asset_service->findGUID(quad_path);
+                                //        if (!base_model_id.IsValid()) {
+                                //            base_model_id = asset_service->findGUID(sphere_path);
+                                //        }
+                                //        if (!base_model_id.IsValid()) {
+                                //            base_model_id = models.front()->guid;
+                                //        }
 
-                                        //Add default model renderer
-                                        ecs->addEntityComponent(entity, ModelRenderer{ base_model_id }, currentRegistryID);
-                                    }
-                                }
+                                //        //Add default model renderer
+                                //        ecs->addEntityComponent(entity, ModelRenderer{ base_model_id }, currentRegistryID);
+                                //    }
+                                //}
 
                                 // Mark transform dirty
                                 auto transformSystem = ecs->getSystem<Transform::System>();

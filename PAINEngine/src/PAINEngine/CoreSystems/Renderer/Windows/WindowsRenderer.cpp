@@ -17,6 +17,7 @@
 #include "CoreSystems/Windows/Window.h"
 #include "ECS/Controller.h"
 #include <cstring>
+#include <random>
 
 namespace {
 	// Import TextureUnits namespace for cleaner code
@@ -326,6 +327,26 @@ namespace {
 			return out;
 		}();
 
+		return names;
+	}
+
+	// Pre-cached shadow map uniform names for volumetric pass (avoids per-frame string allocation)
+	struct VolumetricShadowUniformNames {
+		std::array<std::string, kMaxVolumetricLights> shadowSamplers;
+	};
+
+	const VolumetricShadowUniformNames& GetVolumetricShadowUniformNames() {
+		static const VolumetricShadowUniformNames names = [] {
+			VolumetricShadowUniformNames out{};
+			for (int i = 0; i < kMaxVolumetricLights; ++i) {
+#ifdef PN_PLATFORM_WINDOWS
+				out.shadowSamplers[i] = "u_ShadowMaps[" + std::to_string(i) + "]";
+#else
+				out.shadowSamplers[i] = "u_ShadowMap" + std::to_string(i);
+#endif
+			}
+			return out;
+		}();
 		return names;
 	}
 
@@ -1170,30 +1191,32 @@ namespace PAIN {
 			newVertices.size(), newIndices.size());
 
 		// Resize GPU buffers first, then sub-upload the new slice
+		// OPTIMIZATION: Use CPU-side cache to avoid GPU read-back stalls
+		// Instead of reading from GPU (which causes sync points), we:
+		// 1. Keep all data in CPU cache
+		// 2. Orphan the buffer when resizing
+		// 3. Re-upload from CPU cache
 		auto appendToBuffer = [](GLuint buf, GLenum target,
 			unsigned int existingBytes,
-			const void* newData, unsigned int newBytes) {
+			const void* newData, unsigned int newBytes,
+			const void* cpuCacheData, unsigned int cpuCacheSize) {
 				glBindBuffer(target, buf);
 
-				// Get current size
 				GLint currentSize = 0;
 				glGetBufferParameteriv(target, GL_BUFFER_SIZE, &currentSize);
 
 				unsigned int totalBytes = existingBytes + newBytes;
 
 				if ((unsigned int)currentSize < totalBytes) {
-					// Orphan + resize: copy old data into a temp, re-upload everything
-					std::vector<uint8_t> temp(currentSize);
-					if (currentSize > 0) {
-						void* ptr = glMapBufferRange(target, 0, currentSize, GL_MAP_READ_BIT);
-						if (ptr) {
-							memcpy(temp.data(), ptr, currentSize);
-							glUnmapBuffer(target);
-						}
-					}
+					// OPTIMIZATION: Orphan the buffer and re-upload from CPU cache
+					// This avoids the GPU-CPU sync stall that would occur with glMapBufferRange(GL_MAP_READ_BIT)
+					// The CPU cache contains all previously uploaded data, so we can safely re-upload it
 					glBufferData(target, totalBytes, nullptr, GL_DYNAMIC_DRAW); // orphan
-					if (currentSize > 0)
-						glBufferSubData(target, 0, currentSize, temp.data());
+					
+					// Re-upload existing data from CPU cache
+					if (cpuCacheSize > 0 && cpuCacheData) {
+						glBufferSubData(target, 0, cpuCacheSize, cpuCacheData);
+					}
 				}
 
 				// Append new data at the end
@@ -1205,19 +1228,29 @@ namespace PAIN {
 		unsigned int existingIndexBytes = currentIndexCount * sizeof(unsigned int);
 		unsigned int newIndexBytes = (unsigned int)(newIndices.size() * sizeof(unsigned int));
 
-		// Append to geometry buffers
+		// OPTIMIZATION: Update CPU-side caches before GPU upload
+		// This allows us to re-upload without GPU read-back if buffer needs to grow
+		cpu_vertex_cache.insert(cpu_vertex_cache.end(), newVertices.begin(), newVertices.end());
+		cpu_index_cache.insert(cpu_index_cache.end(), newIndices.begin(), newIndices.end());
+		cpu_cache_valid = true;
+
+		// Append to geometry buffers using CPU cache for re-upload (avoids GPU stalls)
 		glBindVertexArray(geometry_vao);
 		appendToBuffer(geometry_vbo, GL_ARRAY_BUFFER,
-			existingVertexBytes, newVertices.data(), newVertexBytes);
+			existingVertexBytes, newVertices.data(), newVertexBytes,
+			cpu_vertex_cache.data(), existingVertexBytes);
 		appendToBuffer(geometry_ebo, GL_ELEMENT_ARRAY_BUFFER,
-			existingIndexBytes, newIndices.data(), newIndexBytes);
+			existingIndexBytes, newIndices.data(), newIndexBytes,
+			cpu_index_cache.data(), existingIndexBytes);
 
-		// Append to shadow buffers
+		// Append to shadow buffers using same CPU cache
 		glBindVertexArray(shadow_vao);
 		appendToBuffer(shadow_vbo, GL_ARRAY_BUFFER,
-			existingVertexBytes, newVertices.data(), newVertexBytes);
+			existingVertexBytes, newVertices.data(), newVertexBytes,
+			cpu_vertex_cache.data(), existingVertexBytes);
 		appendToBuffer(shadow_ebo, GL_ELEMENT_ARRAY_BUFFER,
-			existingIndexBytes, newIndices.data(), newIndexBytes);
+			existingIndexBytes, newIndices.data(), newIndexBytes,
+			cpu_index_cache.data(), existingIndexBytes);
 
 		// Pre-size the instance matrix buffer - filled per-frame in DrawGeometryInstanced.
 		// Reserve space for MAX_INSTANCES matrices upfront to avoid per-frame realloc.
@@ -1249,6 +1282,11 @@ namespace PAIN {
 
 		// Clear the offset tracking map
 		instanced_offsets.clear();
+
+		// OPTIMIZATION: Clear CPU-side caches
+		cpu_vertex_cache.clear();
+		cpu_index_cache.clear();
+		cpu_cache_valid = false;
 
 		// Reset buffers to empty state
 		glBindVertexArray(geometry_vao);
@@ -1293,6 +1331,9 @@ namespace PAIN {
 		std::filesystem::path bloom_blend_path = "engine/shaders/bloom_blend.vert";
 		std::filesystem::path tone_path = "engine/shaders/tone.vert";
 		std::filesystem::path volumetric_path = "engine/shaders/volumetric.vert";
+		std::filesystem::path fxaa_path = "engine/shaders/fxaa.vert";
+		std::filesystem::path ssao_path = "engine/shaders/ssao.vert";
+		std::filesystem::path ssao_blur_path = "engine/shaders/ssao_blur.vert";
 #else
 		std::filesystem::path pbr_path = "engine\\shaders\\android_pbr.vert";
 		std::filesystem::path geometry_path =
@@ -1312,6 +1353,9 @@ namespace PAIN {
 			"engine\\shaders\\android_bloom_blend.vert";
 		std::filesystem::path tone_path = "engine\\shaders\\android_tone.vert";
 		std::filesystem::path volumetric_path = "engine\\shaders\\android_volumetric.vert";
+		std::filesystem::path fxaa_path = "engine\\shaders\\android_fxaa.vert";
+		std::filesystem::path ssao_path = "engine\\shaders\\android_ssao.vert";
+		std::filesystem::path ssao_blur_path = "engine\\shaders\\android_ssao_blur.vert";
 #endif
 
 		// Get assets loader
@@ -1519,6 +1563,31 @@ namespace PAIN {
 		if (!volumetric_shader || volumetric_shader->GetRendererID() == 0) {
 			PN_CORE_ERROR("Failed to create shader program for volumetric lighting - volumetric effects will be disabled");
 			volumetric_shader = nullptr;
+		}
+
+		// FXAA shader
+		shader_opt = assets_loader->getAsset<Assets::Shader>(fxaa_path);
+		fxaa_shader = shader_opt.has_value() ? shader_opt.value() : fxaa_shader;
+
+		if (!fxaa_shader || fxaa_shader->GetRendererID() == 0) {
+			PN_CORE_WARN("Failed to create FXAA shader - anti-aliasing will be disabled");
+			fxaa_shader = nullptr;
+		}
+
+		// SSAO shader
+		shader_opt = assets_loader->getAsset<Assets::Shader>(ssao_path);
+		ssao_shader = shader_opt.has_value() ? shader_opt.value() : ssao_shader;
+		if (!ssao_shader || ssao_shader->GetRendererID() == 0) {
+			PN_CORE_WARN("Failed to create SSAO shader - SSAO will be disabled");
+			ssao_shader = nullptr;
+		}
+
+		// SSAO blur shader
+		shader_opt = assets_loader->getAsset<Assets::Shader>(ssao_blur_path);
+		ssao_blur_shader = shader_opt.has_value() ? shader_opt.value() : ssao_blur_shader;
+		if (!ssao_blur_shader || ssao_blur_shader->GetRendererID() == 0) {
+			PN_CORE_WARN("Failed to create SSAO blur shader - SSAO will be disabled");
+			ssao_blur_shader = nullptr;
 		}
 
 	}
@@ -1812,16 +1881,12 @@ namespace PAIN {
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 			// pp_texture for ping-pong if needed in post-processing
-			// OPTIMIZATION: For Android, render post-process at reduced resolution
-#ifdef PN_PLATFORM_ANDROID
+			// OPTIMIZATION: Allow post-process resolution scaling on all platforms
+			// This significantly reduces GPU load for bloom/blur/tone mapping passes
 			const float pp_scale = glm::clamp(GraphicsSettings::get().postprocess_resolution_scale, 0.25f, 1.0f);
 			pp_width = std::max(1, static_cast<int>(std::round(winWidth * pp_scale)));
 			pp_height = std::max(1, static_cast<int>(std::round(winHeight * pp_scale)));
 			PN_CORE_INFO("Post-process buffers at {}x{} ({} scale)", pp_width, pp_height, pp_scale);
-#else
-			pp_width = winWidth;
-			pp_height = winHeight;
-#endif
 			glGenFramebuffers(1, &pp_fbo);
 			glBindFramebuffer(GL_FRAMEBUFFER, pp_fbo);
 
@@ -1881,6 +1946,84 @@ namespace PAIN {
 			glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
 
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+			// === SSAO resources ===
+			// Generate hemisphere kernel (16 samples)
+			{
+				std::uniform_real_distribution<float> randomFloats(0.0f, 1.0f);
+				std::default_random_engine generator(42u); // fixed seed for determinism
+				ssao_kernel.clear();
+				ssao_kernel.reserve(16);
+				for (int i = 0; i < 16; ++i) {
+					glm::vec3 sample(
+						randomFloats(generator) * 2.0f - 1.0f,
+						randomFloats(generator) * 2.0f - 1.0f,
+						randomFloats(generator)
+					);
+					sample = glm::normalize(sample) * randomFloats(generator);
+					float scale = float(i) / 16.0f;
+					scale = glm::mix(0.1f, 1.0f, scale * scale);
+					ssao_kernel.push_back(sample * scale);
+				}
+
+				// 4×4 noise texture (random XY rotation vectors)
+				std::vector<glm::vec2> ssao_noise;
+				ssao_noise.reserve(16);
+				for (int i = 0; i < 16; ++i) {
+					ssao_noise.push_back(glm::vec2(
+						randomFloats(generator) * 2.0f - 1.0f,
+						randomFloats(generator) * 2.0f - 1.0f
+					));
+				}
+				glGenTextures(1, &ssao_noise_texture);
+				glBindTexture(GL_TEXTURE_2D, ssao_noise_texture);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, 4, 4, 0, GL_RG, GL_FLOAT, ssao_noise.data());
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+				glBindTexture(GL_TEXTURE_2D, 0);
+			}
+
+			// SSAO raw FBO (R8, full resolution)
+			glGenFramebuffers(1, &ssao_fbo);
+			glBindFramebuffer(GL_FRAMEBUFFER, ssao_fbo);
+			glGenTextures(1, &ssao_texture);
+			glBindTexture(GL_TEXTURE_2D, ssao_texture);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, winWidth, winHeight, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssao_texture, 0);
+			if (!checkFramebufferComplete("SSAO framebuffer")) {
+				PN_CORE_WARN("SSAO framebuffer incomplete - SSAO will be disabled");
+			}
+			// Clear to white (no occlusion) for safe first frame
+			glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT);
+			glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+			// SSAO blur FBO (R8, full resolution)
+			glGenFramebuffers(1, &ssao_blur_fbo);
+			glBindFramebuffer(GL_FRAMEBUFFER, ssao_blur_fbo);
+			glGenTextures(1, &ssao_blur_texture);
+			glBindTexture(GL_TEXTURE_2D, ssao_blur_texture);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, winWidth, winHeight, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssao_blur_texture, 0);
+			if (!checkFramebufferComplete("SSAO blur framebuffer")) {
+				PN_CORE_WARN("SSAO blur framebuffer incomplete - SSAO will be disabled");
+			}
+			// Clear to white (no occlusion) for safe first frame
+			glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT);
+			glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 			// minimap framebuffer
@@ -2028,12 +2171,21 @@ namespace PAIN {
 		}
 
 		// === Debug VAO/VBO ===
+		// PERFORMANCE: Pre-allocate debug VBO with sufficient capacity
+		// This avoids per-draw reallocation checks which can cause micro-stutter
+		// 256KB buffer = ~36K vertices (7 floats/vertex * 4 bytes/float)
+		// Increased from 64KB to handle complex debug scenes without reallocation
 		{
 			glGenVertexArrays(1, &debug_VAO);
 			glBindVertexArray(debug_VAO);
 
 			glGenBuffers(1, &debug_VBO);
 			glBindBuffer(GL_ARRAY_BUFFER, debug_VBO);
+			
+			// Pre-allocate buffer for debug drawing (reduces per-frame allocation overhead)
+			static constexpr GLsizeiptr kDebugVboInitialCapacity = 256 * 1024;
+			glBufferData(GL_ARRAY_BUFFER, kDebugVboInitialCapacity, nullptr, GL_DYNAMIC_DRAW);
+			debug_vbo_capacity = kDebugVboInitialCapacity;
 
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
@@ -2460,7 +2612,10 @@ namespace PAIN {
 			// submeshCaches are populated once in InitializeModelRenderer
 			// Avoids per-frame BuildGeometryMaterialState asset lookups
 			// ========================================
-			if (i < component.submeshCaches.size() && component.submeshCaches[i].cacheValid) {
+			const bool hasRuntimeOverrides = component.materials[submesh.materialIndex].useOverrides;
+			if (!hasRuntimeOverrides &&
+				i < component.submeshCaches.size() &&
+				component.submeshCaches[i].cacheValid) {
 				ApplyCachedGeometryMaterialState(geometry_shader, component.submeshCaches[i]);
 				checkGLError("DrawGeometry: After ApplyCachedGeometryMaterialState");
 			} else {
@@ -2649,7 +2804,10 @@ namespace PAIN {
 			// ========================================
 			// PERFORMANCE OPTIMIZATION: Use Cached Material State
 			// ========================================
-			if (i < component.submeshCaches.size() && component.submeshCaches[i].cacheValid) {
+			const bool hasRuntimeOverrides = component.materials[submesh.materialIndex].useOverrides;
+			if (!hasRuntimeOverrides &&
+				i < component.submeshCaches.size() &&
+				component.submeshCaches[i].cacheValid) {
 				ApplyCachedGeometryMaterialState(geometry_shader, component.submeshCaches[i]);
 			} else {
 				// Fallback: build material state per-frame
@@ -2969,12 +3127,9 @@ namespace PAIN {
 			}
 #endif
 
-			for (int shadowSlot = 0; shadowSlot < kMaxPbrShadowMaps; ++shadowSlot) {
-				glActiveTexture(GL_TEXTURE0 + kFixedShadowTextureUnitStart + shadowSlot);
-				glBindTexture(GL_TEXTURE_2D, 0);
-				pbr_shader->SetUniform(GetPbrUniformNames().shadowSamplers[shadowSlot],
-									   kFixedShadowTextureUnitStart + shadowSlot);
-			}
+			// OPTIMIZATION: Don't pre-bind all shadow slots to 0.
+			// Instead, only bind shadow textures that are actually used.
+			// The shader will use the shadowMapIdx uniform to determine which slots have shadows.
 
 			struct ShadowMapCandidate {
 				int gpuLightIndex = -1;
@@ -3056,8 +3211,12 @@ namespace PAIN {
 					continue;
 				}
 
-				glActiveTexture(GL_TEXTURE0 + kFixedShadowTextureUnitStart + shadowMapCount);
+				const int textureUnit = kFixedShadowTextureUnitStart + shadowMapCount;
+				glActiveTexture(GL_TEXTURE0 + textureUnit);
 				glBindTexture(GL_TEXTURE_2D, candidate.shadowTexture);
+				// Set shadow sampler uniform only for slots we actually use
+				pbr_shader->SetUniform(GetPbrUniformNames().shadowSamplers[shadowMapCount],
+									   textureUnit);
 				gpuLights[candidate.gpuLightIndex].intensity_shadow.w =
 					static_cast<float>(shadowMapCount);
 				loggedShadowBudgetDrops.erase(candidate.key);
@@ -3155,6 +3314,13 @@ namespace PAIN {
 			glActiveTexture(GL_TEXTURE0 + kBrdfLutTextureUnit);
 			glBindTexture(GL_TEXTURE_2D, Skybox::get().getBrdfLUT());
 			pbr_shader->SetUniform("brdfLut", kBrdfLutTextureUnit);
+
+			// SSAO
+			const bool useSsao = GraphicsSettings::get().ssao && ssao_blur_texture != 0;
+			glActiveTexture(GL_TEXTURE0 + LightingPass::kSsao);
+			glBindTexture(GL_TEXTURE_2D, useSsao ? ssao_blur_texture : 0);
+			pbr_shader->SetUniform("u_SsaoTex", LightingPass::kSsao);
+			pbr_shader->SetUniform("u_UseSsao", useSsao ? 1.0f : 0.0f);
 
 #ifdef _DEBUG
 			err = glGetError();
@@ -3777,21 +3943,19 @@ namespace PAIN {
 		glBindTexture(GL_TEXTURE_2D, volumetric_textures[previousHistoryIndex]);
 		volumetric_shader->SetUniform("u_HistoryTex", 1);
 
+		// Use pre-cached shadow uniform names to avoid per-frame string allocation
+		const auto& shadowUniformNames = GetVolumetricShadowUniformNames();
+
 		for (size_t lightIdx = 0; lightIdx < packedLights.size(); ++lightIdx) {
 			const PackedVolumetricLight& packed = packedLights[lightIdx];
 			const Light& l = *packed.light;
 			if (packed.shadowMapIdx >= 0) {
 				glActiveTexture(GL_TEXTURE0 + packed.shadowTextureUnit);
 				glBindTexture(GL_TEXTURE_2D, l.getShadowTexture());
-#ifdef PN_PLATFORM_WINDOWS
+				// Use pre-cached uniform name instead of string concatenation
 				volumetric_shader->SetUniform(
-					"u_ShadowMaps[" + std::to_string(packed.shadowMapIdx) + "]",
+					shadowUniformNames.shadowSamplers[packed.shadowMapIdx],
 					packed.shadowTextureUnit);
-#else
-				volumetric_shader->SetUniform(
-					"u_ShadowMap" + std::to_string(packed.shadowMapIdx),
-					packed.shadowTextureUnit);
-#endif
 				volumetric_shader->SetUniform(uniformNames.shadowMapIdx[lightIdx],
 											  static_cast<float>(packed.shadowMapIdx));
 			}
@@ -3855,6 +4019,69 @@ namespace PAIN {
 			PN_CORE_ERROR("OpenGL err after VolumetricPass: {}", err);
 		}
 #endif
+	}
+
+	void WindowsRenderer::SsaoPass(std::shared_ptr<Scene::SceneManager> scene) {
+		const auto& gs = GraphicsSettings::get();
+		if (!gs.ssao || !ssao_shader || !ssao_blur_shader || !scene) return;
+		if (ssao_fbo == 0 || ssao_blur_fbo == 0 || ssao_noise_texture == 0) return;
+
+		auto* cam = scene->GetActiveCamera();
+		if (!cam) return;
+
+		glDisable(GL_DEPTH_TEST);
+		glDepthMask(GL_FALSE);
+		glDisable(GL_BLEND);
+
+		// --- Raw SSAO pass ---
+		glBindFramebuffer(GL_FRAMEBUFFER, ssao_fbo);
+		glViewport(0, 0, winWidth, winHeight);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		ssao_shader->Bind();
+		ssao_shader->SetUniform("gPos",  0);
+		ssao_shader->SetUniform("gNorm", 1);
+		ssao_shader->SetUniform("u_Noise", 2);
+		ssao_shader->SetUniform("u_V", cam->view());
+		ssao_shader->SetUniform("u_P", cam->projection());
+		ssao_shader->SetUniform("u_ScreenSize", glm::vec2(float(winWidth), float(winHeight)));
+		ssao_shader->SetUniform("u_Radius", gs.ssao_radius);
+		ssao_shader->SetUniform("u_Bias",   gs.ssao_bias);
+
+		{
+			GLint kernelLoc = glGetUniformLocation(ssao_shader->GetRendererID(), "u_Kernel");
+			if (kernelLoc != -1) {
+				glUniform3fv(kernelLoc, static_cast<GLsizei>(ssao_kernel.size()), glm::value_ptr(ssao_kernel[0]));
+			}
+		}
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, pos_texture);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, norm_texture);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, ssao_noise_texture);
+
+		glBindVertexArray(empty_vao);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+		// --- SSAO blur pass ---
+		glBindFramebuffer(GL_FRAMEBUFFER, ssao_blur_fbo);
+		glViewport(0, 0, winWidth, winHeight);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		ssao_blur_shader->Bind();
+		ssao_blur_shader->SetUniform("u_Ssao", 0);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, ssao_texture);
+
+		glBindVertexArray(empty_vao);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glEnable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
 	}
 
 	// Post-process entry point: final_texture remains the renderer-owned scene output,
@@ -4024,17 +4251,20 @@ namespace PAIN {
 			
 			// Use combined tone+gamma shader if available (eliminates one full-screen pass)
 			if (tone_gamma_shader) {
+				const auto& gs = GraphicsSettings::get();
+				const float safeGamma = glm::max(0.001f, gs.gamma_value);
+				const float combinedGamma = gs.gamma_correction ? safeGamma : 1.0f;
 				tone_gamma_shader->Bind();
 				glCheck(glActiveTexture(GL_TEXTURE0));
 				glCheck(glBindTexture(GL_TEXTURE_2D, src_tex));
 				glCheck(tone_gamma_shader->SetUniform("tex", 0));
 				glCheck(tone_gamma_shader->SetUniform(
-					"exposure", GraphicsSettings::get().tone_mapping_exposure));
+					"exposure", gs.tone_mapping_exposure));
 				glCheck(tone_gamma_shader->SetUniform(
 					"toneMapMode",
-					static_cast<float>(GraphicsSettings::get().tone_mapping_mode)));
+					static_cast<float>(gs.tone_mapping_mode)));
 				glCheck(tone_gamma_shader->SetUniform(
-					"u_gamma", GraphicsSettings::get().gamma_value));
+					"u_gamma", combinedGamma));
 			}
 			else {
 				tone_shader->Bind();
@@ -4106,7 +4336,7 @@ namespace PAIN {
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, src_tex);
 			gamma_shader->SetUniform("tex", 0);
-			gamma_shader->SetUniform("u_gamma", GraphicsSettings::get().gamma_value);
+			gamma_shader->SetUniform("u_gamma", glm::max(0.001f, GraphicsSettings::get().gamma_value));
 			glBindVertexArray(empty_vao);
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 			++postprocess_passes;
@@ -4139,6 +4369,38 @@ namespace PAIN {
 		}
 #endif
 
+		// FXAA pass (runs at full resolution on LDR output, after tone mapping + gamma)
+		if (GraphicsSettings::get().fxaa && fxaa_shader) {
+			// Read final_texture → write to pp_fbo
+			glBindFramebuffer(GL_FRAMEBUFFER, pp_fbo);
+			glViewport(0, 0, pp_width, pp_height);
+			fxaa_shader->Bind();
+			fxaa_shader->SetUniform("tex", 0);
+			fxaa_shader->SetUniform("u_texel_size", glm::vec2(1.0f / pp_width, 1.0f / pp_height));
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, final_texture);
+			glBindVertexArray(empty_vao);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+			// Copy pp_texture back into final_fbo so final_texture holds the result
+			glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
+			glViewport(0, 0, winWidth, winHeight);
+			passthrough_shader->Bind();
+			passthrough_shader->SetUniform("tex", 0);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, pp_texture);
+			glBindVertexArray(passthrough_vao);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+		}
+#ifdef _DEBUG
+		{
+			GLenum err = glGetError();
+			if (err != GL_NO_ERROR) {
+				PN_CORE_ERROR("OpenGL err after FXAA pass: {}", err);
+			}
+		}
+#endif
+
 		// Keep final_fbo/final_texture as the renderer-owned postprocess output.
 		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo);
 
@@ -4155,10 +4417,10 @@ namespace PAIN {
 
 		restorePassState();
 
-#ifdef PN_PLATFORM_ANDROID
+		// OPTIMIZATION: Invalidate framebuffer attachments to help GPU memory bandwidth
+		// This tells the GPU we don't need to preserve these textures for future use
 		InvalidateFramebufferAttachments(pp_fbo, true, false, false);
 		InvalidateFramebufferAttachments(pp2_fbo, true, false, false);
-#endif
 
 #ifdef _DEBUG
 		err = glGetError();
@@ -4216,10 +4478,49 @@ namespace PAIN {
 		glInvalidateFramebuffer(GL_FRAMEBUFFER, count, attachments);
 		glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(prevFbo));
 #else
+		// Windows/Desktop OpenGL: glInvalidateFramebuffer is available in OpenGL 4.3+
+		// (ARB_invalidate_subdata extension). Most modern GPUs support this.
+		// If not available, this becomes a no-op which is safe.
 		(void)fbo;
 		(void)invalidateColor;
 		(void)invalidateDepth;
 		(void)invalidateStencil;
+		
+		// Try to use glInvalidateFramebuffer if available (OpenGL 4.3+)
+		// This is a performance optimization that helps GPU memory bandwidth
+#if defined(GL_VERSION_4_3) || defined(GL_ARB_invalidate_subdata)
+#ifdef PN_PLATFORM_WINDOWS
+		if (!(GLEW_VERSION_4_3 || GLEW_ARB_invalidate_subdata)) {
+			return;
+		}
+#endif
+		if (fbo == 0) {
+			return;
+		}
+
+		GLenum attachments[3];
+		int count = 0;
+
+		if (invalidateColor) {
+			attachments[count++] = GL_COLOR_ATTACHMENT0;
+		}
+		if (invalidateDepth) {
+			attachments[count++] = GL_DEPTH_ATTACHMENT;
+		}
+		if (invalidateStencil) {
+			attachments[count++] = GL_STENCIL_ATTACHMENT;
+		}
+
+		if (count == 0) {
+			return;
+		}
+
+		GLint prevFbo = 0;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glInvalidateFramebuffer(GL_FRAMEBUFFER, count, attachments);
+		glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(prevFbo));
+#endif
 #endif
 	}
 

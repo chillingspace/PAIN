@@ -1,15 +1,18 @@
 {
   "asset_info": {
-    "name": "Gear_baseColor.png",
+    "name": "Gear_BaseColor.png",
     "type": "Texture"
   },
   "build_data": {
     "hash": 3448607518396702955
   },
   "descriptor_version": 1,
-  "guid": "25c6e2c3-b701-4c43-b049-8c9b21a29441",
+  "guid": "5b25ecd9-f723-f043-9333-6045100eaeeb",
   "import_settings": {
+    "android_allow_astc_hdr": false,
+    "android_bake_cubemap": false,
     "android_compression": "ASTC_4x4",
+    "android_skybox_source_format": "R16G16B16A16",
     "generate_mipmaps": true,
     "max_size": 1024,
     "window_compression": "BC7"

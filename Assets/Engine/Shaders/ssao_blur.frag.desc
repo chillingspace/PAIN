@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "ssao_blur.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 1299483109402361710
+  },
+  "descriptor_version": 1,
+  "guid": "470d6c4a-ee34-c548-bce9-777227cba69d",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\ssao_blur.frag"
+  }
+}

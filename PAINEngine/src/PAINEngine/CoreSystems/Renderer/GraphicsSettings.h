@@ -85,6 +85,22 @@ namespace PAIN {
 		// Master post-process toggle - disables all post-processing effects when false
 		bool postprocess = true;
 
+		// Anti-aliasing
+#ifdef PN_PLATFORM_ANDROID
+		bool fxaa = false;
+#else
+		bool fxaa = true;
+#endif
+
+		// Screen-space ambient occlusion
+#ifdef PN_PLATFORM_ANDROID
+		bool ssao = false;
+#else
+		bool ssao = true;
+#endif
+		float ssao_radius = 1.5f;
+		float ssao_bias   = 0.025f;
+
 		bool bloom = true;
 		float global_light_intensity = 1.5f;
 
@@ -96,7 +112,9 @@ namespace PAIN {
 		float bloom_strength = 0.8f;			// reduced from 1.0f, compensated by threshold
 		float bloom_threshold = 1.8f;			// slightly lower to catch more blooms with lower strength
 		#else
-		int bloom_quality = 4;					// number of blur passes for bloom
+		// Windows: bloom_quality=4 is 2x more expensive than Android's 2
+		// Reduce to 3 for balanced performance/quality
+		int bloom_quality = 3;					// number of blur passes for bloom (reduced from 4)
 		float bloom_blur_strength = 1.f;		// generally [0.5,10] - higher = bloomier, BUT SLOWER
 		float bloom_strength = 1.f;				// generally [0.0,5.0] - bloom strength is how visible the bloom is
 		float bloom_threshold = 2.f;			// generally [0.8,1.5] - min brightness to bloom
@@ -124,17 +142,54 @@ namespace PAIN {
 		float ibl_specular_firefly_clamp = 32.0f;
 #endif
 
+		// Frame pacing and VSync settings
+		// swap_interval: 0 = no VSync (lowest latency, possible tearing), 1 = VSync (smooth, ~1 frame latency)
+		// For responsive controls, use 0; for smooth visuals without tearing, use 1
 #ifdef PN_PLATFORM_ANDROID
-		// Android frame pacing and battery controls.
 		int android_swap_interval = 1; // 1 = vsync, 0 = uncapped.
 		int android_target_fps = 0; // 0 = no explicit software cap.
 		bool android_battery_saver_mode = false;
 		int android_battery_saver_fps = 30;
+#else
+		// Windows: Default to 0 (no VSync) in Release for lowest latency
+		// VSync enabled (1) in Debug for smooth editor experience
+		#ifdef _DEBUG
+		int swap_interval = 1;  // Debug: VSync enabled for smooth editor
+		#else
+		int swap_interval = 0;  // Release: No VSync for lowest latency, uncapped FPS
+		#endif
+#endif
 
-		// OPTIMIZED: Post-process at reduced resolution to reduce thermal load
+		// ========================================
+		// FRAME PACING SYSTEM (SIMPLIFIED)
+		// Only tracks frame time statistics for debugging - NO frame skipping
+		// Previous implementation caused input lag at high FPS due to
+		// accumulated time tracking creating disconnect between input and rendering
+		// ========================================
+		struct FramePacingSettings {
+			bool enabled = true;                     // Enable to track frame time stats
+			float target_fps = 60.0f;                // Target frame rate (for reference)
+			float max_accumulated_frames = 1.5f;     // DEPRECATED - not used
+			bool enable_frame_skip = false;          // DEPRECATED - not used
+			float spike_threshold_ms = 8.0f;         // Consider frame a "spike" if > this duration
+			
+			// Runtime state (don't modify in settings UI)
+			float accumulated_time = 0.0f;            // DEPRECATED
+			int frames_skipped = 0;                   // DEPRECATED
+			int frames_rendered = 0;                  // DEPRECATED
+			float last_frame_time_ms = 0.0f;
+			float avg_frame_time_ms = 16.67f;        // Rolling average
+			int spike_count = 0;                     // Count of frames exceeding spike_threshold
+		} frame_pacing;
+
+		// OPTIMIZED: Post-process at reduced resolution to reduce GPU load
 		// Renders bloom/blur/tone-map at scale*full_resolution, then upscales to full
-		// Default 0.75 balances quality vs performance; use 0.5 for maximum savings
+		// Default 1.0 (full resolution) for desktop, 0.75 for mobile
+		// Use 0.5-0.75 for performance gains on lower-end hardware
+#ifdef PN_PLATFORM_ANDROID
 		float postprocess_resolution_scale = 0.75f;
+#else
+		float postprocess_resolution_scale = 1.0f;  // Windows: full resolution by default, can be lowered for performance
 #endif
 
 		// volumetric lighting (god rays / light shafts)
@@ -154,17 +209,19 @@ namespace PAIN {
 		float volumetric_history_clamp = 0.35f;
 		int   volumetric_selection_hysteresis_frames = 3;
 #else
+		// Windows: Balanced performance - reduced from 24 steps (4x GPU cost) to 12
+		// 24 steps is overkill for most scenes; 12 provides good quality with 2x performance
 		bool volumetric = true;
-		float volumetric_intensity = 0.5f;   // overall brightness; start low
-		int   volumetric_steps = 24;           // ray march steps; keep low and rely on lower-resolution upsampling
-		float volumetric_max_dist = 40.0f;     // max ray length in world units
-		float volumetric_scatter = 0.f;       // Mie g: 0=uniform, 1=pure forward
-		float volumetric_resolution_scale = 0.5f; // render volumetrics at reduced resolution, then upscale additively
-		int   volumetric_max_lights = 4;      // separate cap from total scene lights to control cost
-		float volumetric_temporal_blend = 0.85f; // low-res history stabilization; higher = steadier but more trailing
-		float volumetric_jitter_strength = 1.0f; // offsets ray-march layers so temporal filtering can smooth them out
-		float volumetric_history_clamp = 0.35f; // reject stale history when current and previous lighting diverge
-		int   volumetric_selection_hysteresis_frames = 3; // keep recently visible cones alive briefly near frustum edges
+		float volumetric_intensity = 0.5f;
+		int   volumetric_steps = 12;          // reduced from 24 for better performance
+		float volumetric_max_dist = 40.0f;
+		float volumetric_scatter = 0.f;
+		float volumetric_resolution_scale = 0.5f;
+		int   volumetric_max_lights = 4;
+		float volumetric_temporal_blend = 0.85f;
+		float volumetric_jitter_strength = 1.0f;
+		float volumetric_history_clamp = 0.35f;
+		int   volumetric_selection_hysteresis_frames = 3;
 #endif
 
 		// animation
@@ -307,5 +364,11 @@ namespace PAIN {
 		float minimap_border_thickness = 2.0f;
 		glm::vec4 minimap_border_color = glm::vec4(1.0f);
 		float minimap_camera_height = 30.0f;
+		
+		// OPTIMIZATION: Minimap update rate
+		// Update minimap every N frames to reduce CPU load
+		// 1 = every frame (default), 2 = every other frame, 3 = every 3rd frame
+		// Higher values = better performance but less responsive minimap
+		int minimap_update_interval = 1;
 	};
 }

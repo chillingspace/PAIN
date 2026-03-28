@@ -1,0 +1,23 @@
+{
+  "asset_info": {
+    "name": "fog.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 11923689802910440067
+  },
+  "descriptor_version": 1,
+  "guid": "b6fdf19d-f8ab-0d4b-ae8e-22626c9fb75f",
+  "import_settings": {
+    "android_allow_astc_hdr": false,
+    "android_bake_cubemap": false,
+    "android_compression": "ASTC_4x4",
+    "android_skybox_source_format": "R16G16B16A16",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\fog.png"
+  }
+}

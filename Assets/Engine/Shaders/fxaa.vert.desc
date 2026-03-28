@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "fxaa.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 14839468784090336780
+  },
+  "descriptor_version": 1,
+  "guid": "c30c8473-4039-3d44-bb83-dbfb8175a4ca",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\fxaa.vert"
+  }
+}

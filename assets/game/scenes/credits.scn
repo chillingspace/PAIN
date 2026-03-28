@@ -3,8 +3,11 @@
         "efff96ab-9011-d248-a0e3-56bb0e76f8e6",
         "6466af7c-6447-2043-b9f5-6fd7dfada5d4",
         "7b6d729f-2477-6e43-a93a-4a9f65732f3d",
+        "1fe7b95c-7093-7f44-8aac-322eae96b634",
         "cc4071a7-9223-6e4e-bab8-da7e8df1b667",
-        "4e937e21-0623-ad45-ad95-e4c416c20b1b"
+        "4e937e21-0623-ad45-ad95-e4c416c20b1b",
+        "6621d58f-1f66-bb4f-8c78-b77404b6296b",
+        "a5dee0ac-d873-6648-bb32-5bea6e1322b6"
     ],
     "camera": {
         "active_game_cam": "Cam",
@@ -643,10 +646,10 @@
                         },
                         "UVCoordinates": {
                             "uv": [
-                                0.0018248175038024783,
-                                0.011363636702299118,
-                                0.49817517399787903,
-                                0.9886363744735718
+                                0.0016556291375309229,
+                                0.009615384973585606,
+                                0.498344361782074,
+                                0.9903846383094788
                             ]
                         }
                     },
@@ -796,7 +799,7 @@
                                 0.0,
                                 0.0
                             ],
-                            "texture_guid": "7158b6f0-2b9a-a646-ae06-b0e132c7181b",
+                            "texture_guid": "74991f65-e605-2445-bc7b-6ff49623abf6",
                             "texture_scale": [
                                 2.0,
                                 1.0
@@ -1053,6 +1056,8 @@
                         },
                         "ModelRenderer": {
                             "castShadows": true,
+                            "doubleSidedShadows": false,
+                            "isStatic": false,
                             "materials": [
                                 {
                                     "albedoTextureOverride": "7b6d729f-2477-6e43-a93a-4a9f65732f3d",
@@ -1143,6 +1148,8 @@
                                 },
                                 "ModelRenderer": {
                                     "castShadows": true,
+                                    "doubleSidedShadows": false,
+                                    "isStatic": false,
                                     "materials": [
                                         {
                                             "albedoTextureOverride": "7b6d729f-2477-6e43-a93a-4a9f65732f3d",
@@ -1258,11 +1265,25 @@
         "useNormalMap": true,
         "useRoughnessMetallicMap": true,
         "useWorldLight": true,
+        "worldLightDirection": [
+            -0.5184758305549622,
+            -0.8295613527297974,
+            -0.20739033818244934
+        ],
+        "worldLightFarPlane": 30.0,
         "worldLightIntensity": [
             1.5,
             1.5,
             1.5
-        ]
+        ],
+        "worldLightPosition": [
+            11.781195640563965,
+            19.305204391479492,
+            5.8147759437561035
+        ],
+        "worldLightShadowFollowDistance": 22.5,
+        "worldLightShadowResolution": 1024,
+        "worldLightShadowsEnabled": true
     },
     "layers": [
         {
@@ -1371,12 +1392,12 @@
         "border_thickness": 2.0,
         "camera_height": 30.0,
         "enabled": false,
-        "icon_danger_path": "",
-        "icon_item_path": "",
-        "icon_objective_path": "",
-        "icon_player_path": "",
+        "icon_danger_guid": "00000000-0000-0000-0000-000000000000",
+        "icon_item_guid": "00000000-0000-0000-0000-000000000000",
+        "icon_objective_guid": "00000000-0000-0000-0000-000000000000",
+        "icon_player_guid": "00000000-0000-0000-0000-000000000000",
         "icon_scale": 1.0,
-        "icon_wall_path": "",
+        "icon_wall_guid": "00000000-0000-0000-0000-000000000000",
         "override_position": false,
         "pos_px": [
             20.0,
@@ -1386,6 +1407,7 @@
         "recommended_position": 3,
         "rotate_with_player": true,
         "route_mode": 0,
+        "shape": 0,
         "show_danger": true,
         "show_items": true,
         "show_legend": false,

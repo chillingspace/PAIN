@@ -4,6 +4,7 @@
 #include "GLFWWindow.h"
 
 #include "CoreSystems/Windows/OpenGL/OpenGLContext.h"
+#include "CoreSystems/Renderer/GraphicsSettings.h"
 
 #include "CoreSystems/Events/GLFW/WindowEvents.h"
 #include "CoreSystems/Events/GLFW/KeyEvents.h"
@@ -64,20 +65,45 @@ namespace PAIN {
 				glfwTerminate();
 				throw std::exception();
 			}
+			is_fullscreen_ = false;
 #else
-			// Create fullscreen window
+			// Create exclusive fullscreen window for lower latency and more stable pacing.
+			int refreshRate = (mode && monitor) ? mode->refreshRate : 60;
+			// Keep requested package resolution for smoother pacing vs forcing native monitor resolution.
+			const int fsWidth = mode ? std::min(mode->width, static_cast<int>(frame_buffer.x))
+									 : static_cast<int>(frame_buffer.x);
+			const int fsHeight = mode ? std::min(mode->height, static_cast<int>(frame_buffer.y))
+									  : static_cast<int>(frame_buffer.y);
 			ptr_window = glfwCreateWindow(
-				mode->width,
-				mode->height,
-				"My Fullscreen Window",
-				monitor,  // Pass monitor for fullscreen
+				fsWidth,
+				fsHeight,
+				package.title.c_str(),
+				monitor,  // exclusive fullscreen for lower compositor latency (if monitor is available)
 				nullptr
 			);
+			
+			if (!ptr_window) {
+				PN_CORE_ERROR("Failed to create fullscreen window");
+				glfwTerminate();
+				throw std::exception();
+			}
+			is_fullscreen_ = true;
+			
+			// Disable vsync by default in release mode for uncapped FPS and lowest input lag
+			// VSync in fullscreen can cause FPS halving and input lag issues
+			GraphicsSettings::get().swap_interval = 0;
 
 			int w, h;
 			glfwGetFramebufferSize(ptr_window, &w, &h);
 			frame_buffer = { w, h };
+			PN_CORE_INFO("[Window] Created exclusive fullscreen window {}x{} @ {}Hz", frame_buffer.x, frame_buffer.y, refreshRate);
 #endif
+
+			// Persist current windowed reference size for future restore.
+			// In release this becomes the preferred windowed fallback size.
+			windowed_w_ = static_cast<int>(package.width);
+			windowed_h_ = static_cast<int>(package.height);
+			glfwGetWindowPos(ptr_window, &windowed_x_, &windowed_y_);
 
 			//Create rendering context
 			m_Context = std::make_unique<OpenGLContext>(ptr_window);
@@ -137,44 +163,59 @@ namespace PAIN {
 
 		void GLFW_Window::setFullscreen(bool fullscreen)
 		{
+			if (!ptr_window) {
+				return;
+			}
+			if (fullscreen == is_fullscreen_) {
+				return;
+			}
+
 			GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+			const GLFWvidmode* mode = monitor ? glfwGetVideoMode(monitor) : nullptr;
 
 			if (fullscreen) {
-				// Save current windowed position and size for potential restore
-				int wx, wy, ww, wh;
-				glfwGetWindowPos(ptr_window, &wx, &wy);
-				glfwGetWindowSize(ptr_window, &ww, &wh);
+				// Save current windowed position and size before entering fullscreen.
+				glfwGetWindowPos(ptr_window, &windowed_x_, &windowed_y_);
+				glfwGetWindowSize(ptr_window, &windowed_w_, &windowed_h_);
 
-				// Get primary monitor resolution
-				int width = 1920, height = 1080;  // fallback
-				if (monitor) {
-					const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-					if (mode) {
-						width = mode->width;
-						height = mode->height;
-					}
-				}
+				// Preserve current windowed resolution target to keep fullscreen load comparable
+				// and avoid sudden frametime instability from forcing native monitor resolution.
+				const int width = mode ? std::min(mode->width, std::max(640, windowed_w_))
+									   : std::max(640, windowed_w_);
+				const int height = mode ? std::min(mode->height, std::max(480, windowed_h_))
+										: std::max(480, windowed_h_);
+				const int refreshRate = mode ? mode->refreshRate : GLFW_DONT_CARE;
 
-				glfwSetWindowMonitor(ptr_window, monitor, 0, 0, width, height, GLFW_DONT_CARE);
-				PN_CORE_INFO("[Window] Switched to fullscreen {}x{}", width, height);
+				// Exclusive fullscreen reduces compositor-induced latency and pacing jitter.
+				glfwSetWindowAttrib(ptr_window, GLFW_DECORATED, GLFW_FALSE);
+				glfwSetWindowMonitor(ptr_window, monitor, 0, 0, width, height, refreshRate);
+				is_fullscreen_ = true;
+				PN_CORE_INFO("[Window] Switched to exclusive fullscreen {}x{} @ {}Hz", width, height, refreshRate);
 			}
 			else {
-				// Windowed: centered 1280x720
-				int winW = 1280, winH = 720;
-				int posX = 100, posY = 100;
-
-				// Try to center on monitor
-				if (monitor) {
-					const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-					if (mode) {
-						posX = (mode->width - winW) / 2;
-						posY = (mode->height - winH) / 2;
-					}
+				// Restore previous windowed bounds.
+				int winW = std::max(640, windowed_w_);
+				int winH = std::max(480, windowed_h_);
+				int posX = windowed_x_;
+				int posY = windowed_y_;
+				if (mode && (posX == 0 && posY == 0)) {
+					posX = (mode->width - winW) / 2;
+					posY = (mode->height - winH) / 2;
 				}
 
+				// Re-enable window decorations for windowed mode
+				glfwSetWindowAttrib(ptr_window, GLFW_DECORATED, GLFW_TRUE);
 				glfwSetWindowMonitor(ptr_window, nullptr, posX, posY, winW, winH, GLFW_DONT_CARE);
+				is_fullscreen_ = false;
 				PN_CORE_INFO("[Window] Switched to windowed {}x{} at ({},{})", winW, winH, posX, posY);
 			}
+
+			// CRITICAL: Reapply swap interval after monitor mode change
+			// glfwSetWindowMonitor can reset the swap interval to driver defaults.
+			// Respect current graphics settings for consistent frame pacing behavior.
+			const int swapInterval = GraphicsSettings::get().swap_interval;
+			glfwSwapInterval(swapInterval);
+			PN_CORE_INFO("[Window] Swap interval reapplied: {} ({})", swapInterval, swapInterval == 0 ? "no VSync" : "VSync enabled");
 
 			// Update frame buffer after mode change
 			int w, h;

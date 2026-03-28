@@ -20,6 +20,13 @@ namespace PAIN {
 			//Window buffer size
 			glm::uvec2 frame_buffer;
 
+			// Window mode state used for stable fullscreen/windowed transitions.
+			bool is_fullscreen_ = false;
+			int windowed_x_ = 100;
+			int windowed_y_ = 100;
+			int windowed_w_ = 1280;
+			int windowed_h_ = 720;
+
 			//Private internal functions
 			void init(Package const& package);
 			void shutdown();

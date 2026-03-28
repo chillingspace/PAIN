@@ -286,6 +286,34 @@ namespace PAIN {
 			if (g_ThermalProfiler) {
 				g_ThermalProfiler->BeginFrame();
 			}
+			
+			// ========================================
+			// FRAME PACING SYSTEM (SIMPLIFIED)
+			// Only tracks frame time statistics for debugging - NO frame skipping or accumulation
+			// These features were removed because they caused input lag at high FPS
+			// ========================================
+			auto& gs = GraphicsSettings::get();
+			if (gs.frame_pacing.enabled) {
+				auto& fp = gs.frame_pacing;
+				const float dt = glm::max(0.0f, timing.dt);
+				
+				// Track frame time statistics only (for debugging/performance monitoring)
+				fp.last_frame_time_ms = dt * 1000.0f;
+				
+				// Detect spikes (frames that took much longer than expected)
+				if (dt * 1000.0f > fp.spike_threshold_ms) {
+					fp.spike_count++;
+				}
+				
+				// Rolling average frame time (exponential moving average)
+				const float alpha = 0.1f;
+				fp.avg_frame_time_ms = fp.avg_frame_time_ms * (1.0f - alpha) + dt * 1000.0f * alpha;
+				
+				// NOTE: Removed accumulated time tracking and frame skipping
+				// These were causing input lag at high FPS - the "smooth but low FPS"
+				// vs "laggy but high FPS" tradeoff was not acceptable
+			}
+			
 			{
 #ifdef _DEBUG
 				auto editor = services.lock()->get<Editor::Editor>();
@@ -1339,6 +1367,7 @@ namespace PAIN {
 				}
 			}
 
+			rendererService->w_renderer->SsaoPass(scene);
 			rendererService->w_renderer->LightingPass(scene, LightSources::get());
 		}
 
@@ -1495,7 +1524,10 @@ namespace PAIN {
 			static GLuint quadVBO = 0;
 			static GLuint quadEBO = 0;
 			static GLuint instanceVBO = 0;
-			static size_t instanceCapacity = 10000;
+			// OPTIMIZATION: Fixed maximum capacity to avoid runtime reallocation
+			// 20000 particles * 9 floats (pos3 + color4 + size1 + rot1) = ~720KB
+			static constexpr size_t kMaxParticleInstances = 20000;
+			static size_t instanceCapacity = kMaxParticleInstances;
 
 			// Android can recreate GL context while these statics remain non-zero.
 			// Reset stale handles if the driver says they are no longer valid.
@@ -1504,7 +1536,7 @@ namespace PAIN {
 				quadVBO = 0;
 				quadEBO = 0;
 				instanceVBO = 0;
-				instanceCapacity = 10000;
+				instanceCapacity = kMaxParticleInstances;
 			}
 
 			if (quadVAO == 0) {
@@ -1539,8 +1571,9 @@ namespace PAIN {
 				// Location 4: aInstanceSize (float)
 				// Location 5: aInstanceRotation (float radians)
 				glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-				// Allocate buffer (will be updated each frame)
-				glBufferData(GL_ARRAY_BUFFER, instanceCapacity * sizeof(float) * 9, nullptr, GL_STREAM_DRAW); // 9 floats per instance: pos(3) + color(4) + size(1) + rot(1)
+				// OPTIMIZATION: Pre-allocate maximum capacity to avoid runtime reallocation
+				// 9 floats per instance: pos(3) + color(4) + size(1) + rot(1)
+				glBufferData(GL_ARRAY_BUFFER, instanceCapacity * sizeof(float) * 9, nullptr, GL_STREAM_DRAW);
 
 				// Instance position (location 2)
 				glEnableVertexAttribArray(2);
@@ -1658,28 +1691,17 @@ namespace PAIN {
 				if (instanceCount == 0)
 					continue;
 
-				if (instanceCount > instanceCapacity) {
-					instanceCapacity = instanceCount;
-					glBindVertexArray(quadVAO);
-					glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-					glBufferData(GL_ARRAY_BUFFER, instanceCapacity * sizeof(float) * 9, nullptr, GL_STREAM_DRAW);
-
-					glEnableVertexAttribArray(2);
-					glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)0);
-					glVertexAttribDivisor(2, 1);
-
-					glEnableVertexAttribArray(3);
-					glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float)));
-					glVertexAttribDivisor(3, 1);
-
-					glEnableVertexAttribArray(4);
-					glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(7 * sizeof(float)));
-					glVertexAttribDivisor(4, 1);
-
-					glEnableVertexAttribArray(5);
-					glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(8 * sizeof(float)));
-					glVertexAttribDivisor(5, 1);
-					logParticleGLError("realloc instance buffer + rebind attribs");
+				// OPTIMIZATION: Clamp to maximum capacity to avoid runtime reallocation
+				// If we exceed the limit, we render only the first N particles
+				const size_t clampedInstanceCount = std::min(instanceCount, kMaxParticleInstances);
+				if (instanceCount > kMaxParticleInstances) {
+					// Log once if we're hitting the limit
+					static bool warnedOnce = false;
+					if (!warnedOnce) {
+						PN_CORE_WARN("Particle count ({}) exceeds maximum capacity ({}), some particles will not render",
+							instanceCount, kMaxParticleInstances);
+						warnedOnce = true;
+					}
 				}
 
 				GLuint particleTextureId = 0;
@@ -1718,9 +1740,10 @@ namespace PAIN {
 				logParticleGLError("set particle uniforms");
 
 				glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-				glBufferSubData(GL_ARRAY_BUFFER, 0, instanceData.size() * sizeof(float), instanceData.data());
+				// OPTIMIZATION: Only upload the data we're actually going to render
+				glBufferSubData(GL_ARRAY_BUFFER, 0, clampedInstanceCount * 9 * sizeof(float), instanceData.data());
 				logParticleGLError("upload instance data");
-				glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0, static_cast<GLsizei>(instanceCount));
+				glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0, static_cast<GLsizei>(clampedInstanceCount));
 				logParticleGLError("draw instanced particles");
 			}
 
@@ -2079,6 +2102,17 @@ namespace PAIN {
 			if (gs.minimap_enabled) {
 				GLuint minimapTexture = rendererService->w_renderer->getMinimapTexture();
 				if (minimapTexture != 0) {
+					// OPTIMIZATION: Update minimap overlays at reduced rate
+					// This skips the expensive CPU work for walls, danger zones, routes
+					// while still rendering the minimap texture every frame
+					static int minimap_frame_counter = 0;
+					const bool should_update_overlays = 
+						(++minimap_frame_counter >= gs.minimap_update_interval) ||
+						(gs.minimap_update_interval <= 1);
+					if (should_update_overlays) {
+						minimap_frame_counter = 0;
+					}
+					
 					auto assetManager = services.lock()->get<Assets::Manager>();
 					auto window = services.lock()->get<Window::Window>();
 					if (window) {
@@ -2462,10 +2496,16 @@ namespace PAIN {
 							bool built = false;
 							bool gpuDirty = false; // true when triangleVerticesXZ changed and needs GPU re-upload
 							std::vector<glm::vec2> triangleVerticesXZ;
+							
+							// OPTIMIZATION: Quick-skip counters to avoid per-frame fingerprint building
+							// when nothing has changed. These are updated incrementally.
+							size_t lastQuickCheckCount = 0;
+							uint32_t dirtyGeneration = 0;  // Incremented when walls change
+							uint32_t lastRenderedGeneration = 0;  // Tracked to skip unchanged renders
 						};
 
 						static WallMinimapCache wallCache;
-
+						
 						auto rebuildWallCache = [&](const std::vector<entt::entity>& wallEntities,
 							uint64_t wallSignature) {
 							wallCache.triangleVerticesXZ.clear();
@@ -2520,6 +2560,11 @@ namespace PAIN {
 							wallCache.wallEntitySignature = wallSignature;
 							wallCache.built = true;
 							wallCache.gpuDirty = true;
+							
+							// Update quick-check tracking
+							wallCache.lastQuickCheckCount = wallEntities.size();
+							wallCache.dirtyGeneration++;
+							wallCache.lastRenderedGeneration = wallCache.dirtyGeneration;
 							};
 
 						glm::vec3 nearest_item_pos(0.0f);
@@ -2577,6 +2622,18 @@ namespace PAIN {
 
 						const bool has_carried_letter = !carriedLetterEntities.empty();
 
+						// OPTIMIZATION: Cache overlay vertex data between frames
+						// These static vectors persist between frames and are only regenerated
+						// when should_update_overlays is true
+						static std::vector<glm::vec2> cached_danger_fill_vertices;
+						static std::vector<glm::vec2> cached_danger_line_vertices;
+						static std::vector<glm::vec2> cached_danger_inner_fill_vertices;
+						static std::vector<glm::vec2> cached_danger_inner_line_vertices;
+						static std::vector<glm::vec2> cached_grid_minor_vertices;
+						static std::vector<glm::vec2> cached_grid_major_vertices;
+						static MinimapDangerVisualStyle cached_danger_style;
+						static MinimapGridVisualStyle cached_grid_style;
+
 						// Clip all minimap overlays (walls, markers, danger, route, legend, arrows)
 						glEnable(GL_SCISSOR_TEST);
 						glScissor(
@@ -2598,7 +2655,9 @@ namespace PAIN {
 							rendererService->w_renderer->BeginCircularStencilClip(center_ndc, radius_ndc);
 						}
 
-						{
+						// OPTIMIZATION: Only regenerate grid lines when update interval is reached
+						// Grid lines are static (only depend on minimap size, not game state)
+						if (should_update_overlays || cached_grid_minor_vertices.empty()) {
 							const MinimapGridVisualStyle gridStyle = BuildMinimapGridStyle();
 							minimap_grid_minor_line_vertices_.clear();
 							minimap_grid_major_line_vertices_.clear();
@@ -2615,21 +2674,37 @@ namespace PAIN {
 							for (glm::vec2& vertexPx : minimap_grid_major_line_vertices_) {
 								vertexPx = pixelsToNdc(vertexPx);
 							}
+							
+							// Cache for future frames
+							cached_grid_minor_vertices = minimap_grid_minor_line_vertices_;
+							cached_grid_major_vertices = minimap_grid_major_line_vertices_;
+							cached_grid_style = gridStyle;
+						} else {
+							// Use cached grid vertices
+							minimap_grid_minor_line_vertices_ = cached_grid_minor_vertices;
+							minimap_grid_major_line_vertices_ = cached_grid_major_vertices;
+						}
 
-							if (!minimap_grid_minor_line_vertices_.empty()) {
-								rendererService->w_renderer->DebugPass2DLines(
-									minimap_grid_minor_line_vertices_,
-									gridStyle.minorLineColor);
-							}
-							if (!minimap_grid_major_line_vertices_.empty()) {
-								rendererService->w_renderer->DebugPass2DLines(
-									minimap_grid_major_line_vertices_,
-									gridStyle.majorLineColor);
-							}
+						if (!minimap_grid_minor_line_vertices_.empty()) {
+							rendererService->w_renderer->DebugPass2DLines(
+								minimap_grid_minor_line_vertices_,
+								cached_grid_style.minorLineColor);
+						}
+						if (!minimap_grid_major_line_vertices_.empty()) {
+							rendererService->w_renderer->DebugPass2DLines(
+								minimap_grid_major_line_vertices_,
+								cached_grid_style.majorLineColor);
 						}
 
 						if (gs.minimap_show_walls) {
-                            const MinimapWallVisualStyle wallStyle = BuildMinimapWallStyle(minimap_threat_time_);
+							const MinimapWallVisualStyle wallStyle = BuildMinimapWallStyle(minimap_threat_time_);
+
+							// Always validate wall signature when overlays are updated.
+							// The previous quick-skip path could miss moved walls when count stayed constant.
+							const size_t currentWallCount = wallEntities.size();
+							bool needsRebuild = false;
+							uint64_t currentWallSignature = 0;
+
 							minimap_wall_fingerprint_entries_.clear();
 							minimap_wall_fingerprint_entries_.reserve(wallEntities.size());
 							for (const entt::entity entity : wallEntities) {
@@ -2658,18 +2733,26 @@ namespace PAIN {
 
 								minimap_wall_fingerprint_entries_.push_back(entry);
 							}
-							const uint64_t currentWallSignature =
+							currentWallSignature =
 								BuildMinimapWallCacheSignature(minimap_wall_fingerprint_entries_);
 
-							const bool needsRebuild =
+							needsRebuild =
 								!wallCache.built ||
 								wallCache.sourceRegistry != &registry ||
-								wallCache.wallEntityCount != wallEntities.size() ||
+								wallCache.wallEntityCount != currentWallCount ||
 								wallCache.wallEntitySignature != currentWallSignature;
+
+							if (!needsRebuild) {
+								wallCache.wallEntitySignature = currentWallSignature;
+							}
 
 							if (needsRebuild) {
 								rebuildWallCache(wallEntities, currentWallSignature);
 							}
+							
+							// Update quick-check tracking
+							wallCache.lastQuickCheckCount = currentWallCount;
+							wallCache.lastRenderedGeneration = wallCache.dirtyGeneration;
 
 							// Upload wall vertices to GPU when cache was rebuilt
 							if (wallCache.gpuDirty) {

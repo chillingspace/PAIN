@@ -85,8 +85,14 @@ namespace PAIN {
 	{
 		// Skip post-processing if disabled
 		if (!GraphicsSettings::get().postprocess) {
-			// Just blit the final_fbo to screen without any post-processing
-			w_renderer->BlitFinalToScreen();
+			if (presentToSwapchain) {
+				// Runtime mode: present scene directly to swapchain.
+				w_renderer->BlitFinalToScreen();
+			}
+			else {
+				// Editor mode: keep rendering into renderer-owned final target.
+				glBindFramebuffer(GL_FRAMEBUFFER, getFinalFbo());
+			}
 			return;
 		}
 		w_renderer->PostProcessPass(presentToSwapchain);

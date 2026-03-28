@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "android_ssao_blur.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 12911148242270690494
+  },
+  "descriptor_version": 1,
+  "guid": "bd9e759e-d019-8349-9b4c-c6c9c706f9f1",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_ssao_blur.frag"
+  }
+}

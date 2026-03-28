@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "fxaa.frag",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 1310802789834395240
+  },
+  "descriptor_version": 1,
+  "guid": "12498c82-61d1-6640-bbe2-bbd807138689",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\fxaa.frag"
+  }
+}
