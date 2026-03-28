@@ -1367,6 +1367,7 @@ namespace PAIN {
 				}
 			}
 
+			rendererService->w_renderer->SsaoPass(scene);
 			rendererService->w_renderer->LightingPass(scene, LightSources::get());
 		}
 

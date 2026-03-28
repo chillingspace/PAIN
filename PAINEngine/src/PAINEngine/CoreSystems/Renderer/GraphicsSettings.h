@@ -92,6 +92,15 @@ namespace PAIN {
 		bool fxaa = true;
 #endif
 
+		// Screen-space ambient occlusion
+#ifdef PN_PLATFORM_ANDROID
+		bool ssao = false;
+#else
+		bool ssao = true;
+#endif
+		float ssao_radius = 1.5f;
+		float ssao_bias   = 0.025f;
+
 		bool bloom = true;
 		float global_light_intensity = 1.5f;
 

@@ -17,6 +17,7 @@
 #include "CoreSystems/Windows/Window.h"
 #include "ECS/Controller.h"
 #include <cstring>
+#include <random>
 
 namespace {
 	// Import TextureUnits namespace for cleaner code
@@ -1331,6 +1332,8 @@ namespace PAIN {
 		std::filesystem::path tone_path = "engine/shaders/tone.vert";
 		std::filesystem::path volumetric_path = "engine/shaders/volumetric.vert";
 		std::filesystem::path fxaa_path = "engine/shaders/fxaa.vert";
+		std::filesystem::path ssao_path = "engine/shaders/ssao.vert";
+		std::filesystem::path ssao_blur_path = "engine/shaders/ssao_blur.vert";
 #else
 		std::filesystem::path pbr_path = "engine\\shaders\\android_pbr.vert";
 		std::filesystem::path geometry_path =
@@ -1350,6 +1353,9 @@ namespace PAIN {
 			"engine\\shaders\\android_bloom_blend.vert";
 		std::filesystem::path tone_path = "engine\\shaders\\android_tone.vert";
 		std::filesystem::path volumetric_path = "engine\\shaders\\android_volumetric.vert";
+		std::filesystem::path fxaa_path = "engine\\shaders\\android_fxaa.vert";
+		std::filesystem::path ssao_path = "engine\\shaders\\android_ssao.vert";
+		std::filesystem::path ssao_blur_path = "engine\\shaders\\android_ssao_blur.vert";
 #endif
 
 		// Get assets loader
@@ -1559,8 +1565,7 @@ namespace PAIN {
 			volumetric_shader = nullptr;
 		}
 
-#ifdef PN_PLATFORM_WINDOWS
-		// FXAA shader (Windows only)
+		// FXAA shader
 		shader_opt = assets_loader->getAsset<Assets::Shader>(fxaa_path);
 		fxaa_shader = shader_opt.has_value() ? shader_opt.value() : fxaa_shader;
 
@@ -1568,7 +1573,22 @@ namespace PAIN {
 			PN_CORE_WARN("Failed to create FXAA shader - anti-aliasing will be disabled");
 			fxaa_shader = nullptr;
 		}
-#endif
+
+		// SSAO shader
+		shader_opt = assets_loader->getAsset<Assets::Shader>(ssao_path);
+		ssao_shader = shader_opt.has_value() ? shader_opt.value() : ssao_shader;
+		if (!ssao_shader || ssao_shader->GetRendererID() == 0) {
+			PN_CORE_WARN("Failed to create SSAO shader - SSAO will be disabled");
+			ssao_shader = nullptr;
+		}
+
+		// SSAO blur shader
+		shader_opt = assets_loader->getAsset<Assets::Shader>(ssao_blur_path);
+		ssao_blur_shader = shader_opt.has_value() ? shader_opt.value() : ssao_blur_shader;
+		if (!ssao_blur_shader || ssao_blur_shader->GetRendererID() == 0) {
+			PN_CORE_WARN("Failed to create SSAO blur shader - SSAO will be disabled");
+			ssao_blur_shader = nullptr;
+		}
 
 	}
 
@@ -1926,6 +1946,84 @@ namespace PAIN {
 			glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
 
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+			// === SSAO resources ===
+			// Generate hemisphere kernel (16 samples)
+			{
+				std::uniform_real_distribution<float> randomFloats(0.0f, 1.0f);
+				std::default_random_engine generator(42u); // fixed seed for determinism
+				ssao_kernel.clear();
+				ssao_kernel.reserve(16);
+				for (int i = 0; i < 16; ++i) {
+					glm::vec3 sample(
+						randomFloats(generator) * 2.0f - 1.0f,
+						randomFloats(generator) * 2.0f - 1.0f,
+						randomFloats(generator)
+					);
+					sample = glm::normalize(sample) * randomFloats(generator);
+					float scale = float(i) / 16.0f;
+					scale = glm::mix(0.1f, 1.0f, scale * scale);
+					ssao_kernel.push_back(sample * scale);
+				}
+
+				// 4×4 noise texture (random XY rotation vectors)
+				std::vector<glm::vec2> ssao_noise;
+				ssao_noise.reserve(16);
+				for (int i = 0; i < 16; ++i) {
+					ssao_noise.push_back(glm::vec2(
+						randomFloats(generator) * 2.0f - 1.0f,
+						randomFloats(generator) * 2.0f - 1.0f
+					));
+				}
+				glGenTextures(1, &ssao_noise_texture);
+				glBindTexture(GL_TEXTURE_2D, ssao_noise_texture);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, 4, 4, 0, GL_RG, GL_FLOAT, ssao_noise.data());
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+				glBindTexture(GL_TEXTURE_2D, 0);
+			}
+
+			// SSAO raw FBO (R8, full resolution)
+			glGenFramebuffers(1, &ssao_fbo);
+			glBindFramebuffer(GL_FRAMEBUFFER, ssao_fbo);
+			glGenTextures(1, &ssao_texture);
+			glBindTexture(GL_TEXTURE_2D, ssao_texture);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, winWidth, winHeight, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssao_texture, 0);
+			if (!checkFramebufferComplete("SSAO framebuffer")) {
+				PN_CORE_WARN("SSAO framebuffer incomplete - SSAO will be disabled");
+			}
+			// Clear to white (no occlusion) for safe first frame
+			glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT);
+			glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+			// SSAO blur FBO (R8, full resolution)
+			glGenFramebuffers(1, &ssao_blur_fbo);
+			glBindFramebuffer(GL_FRAMEBUFFER, ssao_blur_fbo);
+			glGenTextures(1, &ssao_blur_texture);
+			glBindTexture(GL_TEXTURE_2D, ssao_blur_texture);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, winWidth, winHeight, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssao_blur_texture, 0);
+			if (!checkFramebufferComplete("SSAO blur framebuffer")) {
+				PN_CORE_WARN("SSAO blur framebuffer incomplete - SSAO will be disabled");
+			}
+			// Clear to white (no occlusion) for safe first frame
+			glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT);
+			glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 			// minimap framebuffer
@@ -3217,6 +3315,13 @@ namespace PAIN {
 			glBindTexture(GL_TEXTURE_2D, Skybox::get().getBrdfLUT());
 			pbr_shader->SetUniform("brdfLut", kBrdfLutTextureUnit);
 
+			// SSAO
+			const bool useSsao = GraphicsSettings::get().ssao && ssao_blur_texture != 0;
+			glActiveTexture(GL_TEXTURE0 + LightingPass::kSsao);
+			glBindTexture(GL_TEXTURE_2D, useSsao ? ssao_blur_texture : 0);
+			pbr_shader->SetUniform("u_SsaoTex", LightingPass::kSsao);
+			pbr_shader->SetUniform("u_UseSsao", useSsao ? 1.0f : 0.0f);
+
 #ifdef _DEBUG
 			err = glGetError();
 			if (err != GL_NO_ERROR) {
@@ -3914,6 +4019,69 @@ namespace PAIN {
 			PN_CORE_ERROR("OpenGL err after VolumetricPass: {}", err);
 		}
 #endif
+	}
+
+	void WindowsRenderer::SsaoPass(std::shared_ptr<Scene::SceneManager> scene) {
+		const auto& gs = GraphicsSettings::get();
+		if (!gs.ssao || !ssao_shader || !ssao_blur_shader || !scene) return;
+		if (ssao_fbo == 0 || ssao_blur_fbo == 0 || ssao_noise_texture == 0) return;
+
+		auto* cam = scene->GetActiveCamera();
+		if (!cam) return;
+
+		glDisable(GL_DEPTH_TEST);
+		glDepthMask(GL_FALSE);
+		glDisable(GL_BLEND);
+
+		// --- Raw SSAO pass ---
+		glBindFramebuffer(GL_FRAMEBUFFER, ssao_fbo);
+		glViewport(0, 0, winWidth, winHeight);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		ssao_shader->Bind();
+		ssao_shader->SetUniform("gPos",  0);
+		ssao_shader->SetUniform("gNorm", 1);
+		ssao_shader->SetUniform("u_Noise", 2);
+		ssao_shader->SetUniform("u_V", cam->view());
+		ssao_shader->SetUniform("u_P", cam->projection());
+		ssao_shader->SetUniform("u_ScreenSize", glm::vec2(float(winWidth), float(winHeight)));
+		ssao_shader->SetUniform("u_Radius", gs.ssao_radius);
+		ssao_shader->SetUniform("u_Bias",   gs.ssao_bias);
+
+		{
+			GLint kernelLoc = glGetUniformLocation(ssao_shader->GetRendererID(), "u_Kernel");
+			if (kernelLoc != -1) {
+				glUniform3fv(kernelLoc, static_cast<GLsizei>(ssao_kernel.size()), glm::value_ptr(ssao_kernel[0]));
+			}
+		}
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, pos_texture);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, norm_texture);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, ssao_noise_texture);
+
+		glBindVertexArray(empty_vao);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+		// --- SSAO blur pass ---
+		glBindFramebuffer(GL_FRAMEBUFFER, ssao_blur_fbo);
+		glViewport(0, 0, winWidth, winHeight);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		ssao_blur_shader->Bind();
+		ssao_blur_shader->SetUniform("u_Ssao", 0);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, ssao_texture);
+
+		glBindVertexArray(empty_vao);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glEnable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
 	}
 
 	// Post-process entry point: final_texture remains the renderer-owned scene output,

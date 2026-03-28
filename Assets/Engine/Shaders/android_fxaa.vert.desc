@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "android_fxaa.vert",
+    "type": "Shader"
+  },
+  "build_data": {
+    "hash": 15602170372030146322
+  },
+  "descriptor_version": 1,
+  "guid": "d91bf046-ae14-524f-a1ef-4951d689ad46",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "engine\\shaders\\android_fxaa.vert"
+  }
+}

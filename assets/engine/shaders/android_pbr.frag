@@ -70,6 +70,10 @@ uniform samplerCube prefilterMap;
 uniform sampler2D brdfLut;
 uniform vec3 u_CamPos;
 
+// SSAO
+uniform sampler2D u_SsaoTex;
+uniform float u_UseSsao;
+
 #define MAX_SHADOWMAPPED_LIGHTS 4
 uniform sampler2D u_ShadowMap0;
 uniform sampler2D u_ShadowMap1;
@@ -462,7 +466,12 @@ void main() {
     } else {
         ambient = material.color * material.ao * u_AmbientLight;
     }
-    
+
+    // Apply SSAO to the full ambient term (diffuse + specular IBL)
+    if (u_UseSsao > 0.5) {
+        ambient *= texture(u_SsaoTex, TexCoords).r;
+    }
+
     color = directLighting + ambient;
 
     if (dbg == 1) {

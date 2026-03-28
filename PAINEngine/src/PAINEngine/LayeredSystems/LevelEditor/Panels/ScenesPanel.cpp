@@ -769,6 +769,15 @@ namespace PAIN {
                     if (ImGui::Checkbox("Anti-Aliasing (FXAA)", &using_fxaa))
                         gs.fxaa = using_fxaa;
                     if (ImGui::IsItemHovered()) ImGui::SetTooltip("Fast approximate anti-aliasing. Smooths jagged edges as a post-process pass.");
+
+                    bool using_ssao = gs.ssao;
+                    if (ImGui::Checkbox("Ambient Occlusion (SSAO)", &using_ssao))
+                        gs.ssao = using_ssao;
+                    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Screen-space ambient occlusion. Darkens crevices and contact shadows.");
+                    if (gs.ssao) {
+                        ImGui::SliderFloat("SSAO Radius", &gs.ssao_radius, 0.05f, 2.0f);
+                        ImGui::SliderFloat("SSAO Bias",   &gs.ssao_bias,   0.001f, 0.1f);
+                    }
                 }
                 ImGui::Separator();
 

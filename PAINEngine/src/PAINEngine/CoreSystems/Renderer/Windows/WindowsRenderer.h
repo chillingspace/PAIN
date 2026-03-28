@@ -183,6 +183,7 @@ namespace PAIN {
 							  const glm::vec4& color, int segments = 32);
 		void VolumetricPass(std::shared_ptr<Scene::SceneManager> scene,
 						   const LightSources& lights);
+		void SsaoPass(std::shared_ptr<Scene::SceneManager> scene);
 		void PostProcessPass(bool presentToSwapchain);
 		void BlitFinalToScreen();  // Simple blit without post-processing
 		void InvalidateFramebufferAttachments(GLuint fbo, bool invalidateColor = false,
@@ -237,6 +238,8 @@ namespace PAIN {
 
 		unsigned int pp_fbo = 0;  // post-processing framebuffer (for ping-pong)
 		unsigned int pp2_fbo = 0; // post-processing framebuffer 2 (for ping-pong)
+		unsigned int ssao_fbo = 0;
+		unsigned int ssao_blur_fbo = 0;
 								  // needed for stuff like bloom
 		unsigned int out_fbo = 0; // output framebuffer (for imgui/display)
 		GLint max_draw_buffers = 0;
@@ -279,6 +282,10 @@ namespace PAIN {
 		unsigned int final_texture = 0; // for imgui/post-processing/display
 		unsigned int pp_texture = 0;	// for ping-pong for post-processing
 		unsigned int pp2_texture = 0;	// for ping-pong for post-processing (bloom etc)
+		unsigned int ssao_texture = 0;
+		unsigned int ssao_blur_texture = 0;
+		unsigned int ssao_noise_texture = 0;
+		std::vector<glm::vec3> ssao_kernel;
 		unsigned int minimap_texture = 0;
 		std::array<unsigned int, 2> volumetric_textures{0, 0};
 		int minimap_width = 0;
@@ -335,18 +342,22 @@ namespace PAIN {
 		std::shared_ptr<Assets::Shader> minimap_wall_shader = nullptr;
 		std::shared_ptr<Assets::Shader> volumetric_shader = nullptr;
 		std::shared_ptr<Assets::Shader> fxaa_shader = nullptr;
+		std::shared_ptr<Assets::Shader> ssao_shader = nullptr;
+		std::shared_ptr<Assets::Shader> ssao_blur_shader = nullptr;
 
 		// for easy access to clear memory
-		std::array<unsigned int*, 5> fbos{
+		std::array<unsigned int*, 7> fbos{
 			&ds_fbo,
 			//&shadow_fbo,
 			&final_fbo,
 			&pp_fbo,
 			&pp2_fbo,
 			&minimap_fbo,
+			&ssao_fbo,
+			&ssao_blur_fbo,
 		};
 		std::array<unsigned int*, 2> rbos{&final_rbo, &minimap_rbo};
-		std::array<unsigned int*, 12> texs{
+		std::array<unsigned int*, 15> texs{
 			&ds_depth_texture,
 			&pos_texture,
 			&col_texture,
@@ -360,6 +371,9 @@ namespace PAIN {
 			&pp_texture,
 			&pp2_texture,
 			&minimap_texture,
+			&ssao_texture,
+			&ssao_blur_texture,
+			&ssao_noise_texture,
 		};
 
 		std::shared_ptr<Services> services;

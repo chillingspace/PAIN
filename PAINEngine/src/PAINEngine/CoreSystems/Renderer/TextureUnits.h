@@ -58,8 +58,11 @@ namespace LightingPass {
     constexpr int kIrradiance = kShadowStart + kMaxShadowMaps;  // 9
     constexpr int kPrefilter  = kIrradiance + 1;  // 10
     constexpr int kBrdfLUT    = kPrefilter + 1;   // 11
-    
-    constexpr int kTotalUnits = kBrdfLUT + 1;  // 12 total units used in lighting pass
+
+    // SSAO occlusion texture
+    constexpr int kSsao       = kBrdfLUT + 1;    // 12
+
+    constexpr int kTotalUnits = kSsao + 1;  // 13 total units used in lighting pass
 }
 
 // ============================================================================
