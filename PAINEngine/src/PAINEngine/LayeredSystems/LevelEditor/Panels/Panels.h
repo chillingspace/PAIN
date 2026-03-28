@@ -59,13 +59,15 @@ namespace PAIN {
 				//Map of popups
 				std::unordered_map<std::string, InternalPopUp> popups;
 
+			public:
+
+				//Services
+				std::shared_ptr<Services> services;
+
 			protected:
 
 				//Actions manager
 				std::shared_ptr<CommandManager> command_manager;
-
-				//Services
-				std::shared_ptr<Services> services;
 
 				//Panel dock ID
 				unsigned int dock_id = 0;
