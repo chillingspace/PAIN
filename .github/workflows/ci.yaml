@@ -173,17 +173,37 @@ jobs:
         shell: pwsh
       - name: Run Tests (Release)
         run: |
-          $exe = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Filter "Friends-Frog-ever.exe" -Recurse | Where-Object { $_.FullName -match "bin/Release" } | Select-Object -First 1
-          if (!$exe) { Write-Error "Could not find Friends-Frog-ever.exe in Release bin!"; exit 1 }
-          $targetDir = $exe.DirectoryName
-          Copy-Item -Path "assets" -Destination $targetDir -Recurse -Force -ErrorAction SilentlyContinue
+          $targetDir = "bin/Release"
+          if (!(Test-Path $targetDir/Friends-Frog-ever.exe)) { Write-Error "Could not find Friends-Frog-ever.exe in Release bin!"; exit 1 }
+          
+          # Sync all dependencies exactly as the local GAMEDIRECTORY expects
+          Write-Host "Syncing all dependencies to $targetDir..."
+          
+          # Copy Assets (Ensure they are present)
+          if (!(Test-Path "$targetDir/assets")) {
+              Copy-Item -Path "assets" -Destination $targetDir -Recurse -Force -ErrorAction SilentlyContinue
+          }
+
+          # Copy Tools
           foreach ($tool in @("cuttlefish", "ffmpeg")) {
               $toolSource = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Directory -Filter $tool -Recurse | Select-Object -First 1
-              if ($toolSource) { Copy-Item -Path $toolSource.FullName -Destination $targetDir -Recurse -Force }
+              if ($toolSource) {
+                  $targetToolPath = Join-Path $targetDir $toolSource.Name
+                  if (!(Test-Path $targetToolPath)) {
+                      Copy-Item -Path $toolSource.FullName -Destination $targetDir -Recurse -Force
+                  }
+              }
           }
-          Get-ChildItem -Path "vendor" -Filter "*.dll" -Recurse | Where-Object { $_.FullName -match "x64" } | ForEach-Object { Copy-Item $_.FullName $targetDir -Force }
+
+          # Copy Vendor x64 DLLs
+          Get-ChildItem -Path "vendor" -Filter "*.dll" -Recurse | Where-Object { $_.FullName -match "x64" } | ForEach-Object {
+              Copy-Item $_.FullName $targetDir -Force -ErrorAction SilentlyContinue
+          }
+
+          # Setup Mesa for testing
           $mesaFolder = Get-ChildItem -Path "mesa_temp" -Directory -Filter "x64" -Recurse | Select-Object -First 1
           if ($mesaFolder) { Get-ChildItem -Path $mesaFolder.FullName -Filter "*.dll" | ForEach-Object { Copy-Item $_.FullName $targetDir -Force } }
+          
           cd $targetDir
           $proc = Start-Process .\Friends-Frog-ever.exe -PassThru -RedirectStandardOutput "app_stdout.log" -RedirectStandardError "app_stderr.log"
           Start-Sleep -Seconds 60
@@ -201,31 +221,7 @@ jobs:
   cd-windows:
     needs: build-windows-release
     if: github.ref == 'refs/heads/main'
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v5
-      
-      - name: Download Build Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: windows-release-bin
-          path: bin/Release/
-
-      - name: Prepare Installer Directory
-        run: |
-          $gameDir = "installer/GAMEDIRECTORY"
-          if (Test-Path $gameDir) { Remove-Item -Path "$gameDir/*" -Recurse -Force -ErrorAction SilentlyContinue }
-          else { New-Item -ItemType Directory -Path $gameDir }
-          Copy-Item -Path "bin/Release/*" -Destination $gameDir -Recurse -Force
-        shell: pwsh
-
-      - name: Compile Installer with Inno Setup
-        run: |
-          & "iscc" installer/InstallScript.iss
-        shell: pwsh
-
-      - name: Upload Installer Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Friends-Frog-ever-Installer
-          path: installer/INSTALLER/Friends-Frog-ever.exe
+    uses: ./.github/workflows/cd.yaml
+    with:
+      platform: 'windows'
+      run_id: ${{ github.run_id }}

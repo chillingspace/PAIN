@@ -1,0 +1,63 @@
+name: Pain Engine CD
+
+on:
+  workflow_call:
+    inputs:
+      platform:
+        required: true
+        type: string
+      run_id:
+        required: true
+        type: string
+
+jobs:
+  cd-windows:
+    if: inputs.platform == 'windows'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-release-bin
+          path: bin/Release/
+          run-id: ${{ inputs.run_id }}
+
+      - name: Prepare Installer Directory
+        run: |
+          $gameDir = "installer/GAMEDIRECTORY"
+          if (Test-Path $gameDir) { Remove-Item -Path "$gameDir/*" -Recurse -Force -ErrorAction SilentlyContinue }
+          else { New-Item -ItemType Directory -Path $gameDir }
+          Copy-Item -Path "bin/Release/*" -Destination $gameDir -Recurse -Force
+        shell: pwsh
+
+      - name: Compile Installer with Inno Setup
+        run: |
+          & "iscc" installer/InstallScript.iss
+        shell: pwsh
+
+      - name: Upload Installer Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Friends-Frog-ever-Installer
+          path: installer/INSTALLER/Friends-Frog-ever.exe
+
+  cd-android:
+    if: inputs.platform == 'android'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Download Android APK
+        uses: actions/download-artifact@v4
+        with:
+          name: android-release-apk-raw
+          path: release-apk/
+          run-id: ${{ inputs.run_id }}
+
+      - name: Upload Final Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: release-apk/*.apk
