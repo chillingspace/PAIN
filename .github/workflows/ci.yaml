@@ -1,4 +1,4 @@
-name: Pain Engine CI
+name: Pain Engine Windows CI
 permissions:
   contents: read
 
@@ -11,6 +11,7 @@ on:
   pull_request:
     branches: 
       - main
+  workflow_dispatch:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -103,15 +104,10 @@ jobs:
         name: cppcheck_report
         path: cppcheck_report.txt
 
-  build-windows:
+  build-windows-debug:
     runs-on: windows-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        configuration: [Debug, Release]
     steps:
       - uses: actions/checkout@v5
-
       - name: Cache CMake _deps
         uses: actions/cache@v4
         with:
@@ -119,156 +115,117 @@ jobs:
           key: ${{ runner.os }}-windows-deps-${{ hashFiles('**/CMakeLists.txt', 'cmake/*.cmake') }}
           restore-keys: |
             ${{ runner.os }}-windows-deps-
-
       - name: Setup MSBuild.exe
         uses: microsoft/setup-msbuild@v2
-
-      - name: Build Windows
+      - name: Build Windows (Debug)
         run: |
           cmake -B build -G "Visual Studio 17 2022" -A x64
-          cmake --build build --config ${{ matrix.configuration }} -j $env:CMAKE_BUILD_PARALLEL_LEVEL
+          cmake --build build --config Debug -j $env:CMAKE_BUILD_PARALLEL_LEVEL
         shell: pwsh
-        env:
-          CMAKE_BUILD_PARALLEL_LEVEL: 8
-
       - name: Setup Software OpenGL (Mesa)
         run: |
           Invoke-WebRequest -Uri "https://github.com/pal1000/mesa-dist-win/releases/download/24.0.3/mesa3d-24.0.3-release-msvc.7z" -OutFile "mesa.7z"
           7z x mesa.7z -omesa_temp -y
         shell: pwsh
-
-      - name: Run executable and test for graceful exit
+      - name: Run Tests (Debug)
         run: |
-          # 1. FIND the executable in the bin folder
-          Write-Host "Searching for Friends-Frog-ever.exe in bin/..."
-          $exe = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Filter "Friends-Frog-ever.exe" -Recurse | Where-Object { $_.FullName -match "bin" } | Select-Object -First 1
-          
-          if (!$exe) {
-              Write-Error "Could not find Friends-Frog-ever.exe in any bin directory!"
-              exit 1
-          }
-
+          $exe = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Filter "Friends-Frog-ever.exe" -Recurse | Where-Object { $_.FullName -match "bin/Debug" } | Select-Object -First 1
+          if (!$exe) { Write-Error "Could not find Friends-Frog-ever.exe in Debug bin!"; exit 1 }
           $targetDir = $exe.DirectoryName
-          Write-Host "Target Directory identified: $targetDir"
-
-          # 2. FORCE SYNC ALL DEPENDENCIES
-          Write-Host "Syncing all dependencies to $targetDir..."
-          
-          # Copy Assets
           Copy-Item -Path "assets" -Destination $targetDir -Recurse -Force -ErrorAction SilentlyContinue
-
-          # Copy Tools
           foreach ($tool in @("cuttlefish", "ffmpeg")) {
               $toolSource = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Directory -Filter $tool -Recurse | Select-Object -First 1
-              if ($toolSource) {
-                  $targetToolPath = Join-Path $targetDir $toolSource.Name
-                  if ($toolSource.FullName -ne $targetToolPath) {
-                      Copy-Item -Path $toolSource.FullName -Destination $targetDir -Recurse -Force
-                  }
-              }
+              if ($toolSource) { Copy-Item -Path $toolSource.FullName -Destination $targetDir -Recurse -Force }
           }
-
-          # Copy ONLY x64 DLLs from vendor (strictly filter for x64 or neutral paths)
-          Write-Host "Copying vendor x64 DLLs..."
-          Get-ChildItem -Path "vendor" -Filter "*.dll" -Recurse | Where-Object { $_.FullName -match "x64" } | ForEach-Object {
-              Copy-Item $_.FullName $targetDir -Force
-              Write-Host "Synced: $($_.Name)"
-          }
-
-          # Copy Mesa Software OpenGL (x64)
-          # Newer Mesa releases distribute a small opengl32.dll wrapper alongside a larger libgallium driver
-          Write-Host "Copying all x64 Mesa DLLs..."
+          Get-ChildItem -Path "vendor" -Filter "*.dll" -Recurse | Where-Object { $_.FullName -match "x64" } | ForEach-Object { Copy-Item $_.FullName $targetDir -Force }
           $mesaFolder = Get-ChildItem -Path "mesa_temp" -Directory -Filter "x64" -Recurse | Select-Object -First 1
-          if ($mesaFolder) {
-              Get-ChildItem -Path $mesaFolder.FullName -Filter "*.dll" | ForEach-Object {
-                  Copy-Item $_.FullName $targetDir -Force
-                  Write-Host "Synced x64 Mesa DLL: $($_.Name) ($([math]::round($_.Length/1MB, 2)) MB)"
-              }
-          } else {
-              Write-Error "Could not find the x64 folder in Mesa extraction!"
-          }
-
-          # 3. VERIFY directory content
+          if ($mesaFolder) { Get-ChildItem -Path $mesaFolder.FullName -Filter "*.dll" | ForEach-Object { Copy-Item $_.FullName $targetDir -Force } }
           cd $targetDir
-          Write-Host "--- Final Directory Listing ($targetDir) ---"
-          Get-ChildItem | Select-Object Name, @{Name="MB";Expression={[math]::round($_.Length / 1MB, 2)}} | Out-Host
-          
-          # 4. START PROCESS
           $proc = Start-Process .\Friends-Frog-ever.exe -PassThru -RedirectStandardOutput "app_stdout.log" -RedirectStandardError "app_stderr.log"
-          Write-Host "Process started with PID: $($proc.Id)"
-          
-          # Give debug builds longer to initialize before we even try closing
-          $runDuration = if ("${{ matrix.configuration }}" -eq "Debug") { 120 } else { 60 }
-          Write-Host "Letting app run for $runDuration seconds (config: ${{ matrix.configuration }})..."
-          Start-Sleep -Seconds $runDuration
-          
-          if ($proc.HasExited) {
-             Write-Host "--- APP STDOUT ---"
-             Get-Content "app_stdout.log" -ErrorAction SilentlyContinue | Out-Host
-             Write-Host "--- APP STDERR ---"
-             Get-Content "app_stderr.log" -ErrorAction SilentlyContinue | Out-Host
-             Write-Error "Application exited unexpectedly with code $($proc.ExitCode)."
-             exit 1
-          }
-
-          Write-Host "MainWindowHandle: $($proc.MainWindowHandle)"
-          
-          $success = $proc.CloseMainWindow()
-          Write-Host "CloseMainWindow returned: $success"
-          if (!$success) { 
-              Write-Host "Falling back to taskkill..."
-              taskkill /IM Friends-Frog-ever.exe 
-          }
-          
-          # Give debug builds much longer to complete their shutdown
-          $shutdownTimeout = if ("${{ matrix.configuration }}" -eq "Debug") { 120000 } else { 30000 }
-          Write-Host "Waiting up to $($shutdownTimeout/1000)s for process to exit..."
-          $exited = $proc.WaitForExit($shutdownTimeout)
-          
-          if (!$proc.HasExited) {
-              Write-Host "Process did not exit, forcing stop..."
-              Write-Host "--- APP STDOUT ---"
-              Get-Content "app_stdout.log" -ErrorAction SilentlyContinue | Out-Host
-              Write-Host "--- APP STDERR ---"
-              Get-Content "app_stderr.log" -ErrorAction SilentlyContinue | Out-Host
-              Stop-Process -Id $proc.Id -Force
-              exit 1
-          }
-          Write-Host "Process exited successfully."
+          Start-Sleep -Seconds 120
+          if ($proc.HasExited) { exit 1 }
+          if (!$proc.CloseMainWindow()) { taskkill /IM Friends-Frog-ever.exe }
+          $proc.WaitForExit(120000)
         shell: pwsh
 
-  build-android:
+  build-windows-release:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - name: Cache CMake _deps
+        uses: actions/cache@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: 'gradle'
-
-      - name: Install NDK 27.0.12077973
-        run: |
-          $sdkmanager = "$env:ANDROID_HOME\cmdline-tools\latest\bin\sdkmanager"
-          & $sdkmanager "ndk;27.0.12077973"
-
+          path: build/_deps
+          key: ${{ runner.os }}-windows-deps-${{ hashFiles('**/CMakeLists.txt', 'cmake/*.cmake') }}
+          restore-keys: |
+            ${{ runner.os }}-windows-deps-
       - name: Setup MSBuild.exe
         uses: microsoft/setup-msbuild@v2
-
-      - name: Configure cross-platform files
-        run: .\build.bat
-
-      - name: Build Android app
-        working-directory: android
-        run: .\gradlew.bat assembleDebug assembleRelease --stacktrace --parallel
-        env:
-          SKIP_SIGNING: true 
-          CI_ABI: x86_64
-
-      - name: Upload Release APK
+      - name: Build Windows (Release)
+        run: |
+          cmake -B build -G "Visual Studio 17 2022" -A x64
+          cmake --build build --config Release -j $env:CMAKE_BUILD_PARALLEL_LEVEL
+        shell: pwsh
+      - name: Setup Software OpenGL (Mesa)
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/pal1000/mesa-dist-win/releases/download/24.0.3/mesa3d-24.0.3-release-msvc.7z" -OutFile "mesa.7z"
+          7z x mesa.7z -omesa_temp -y
+        shell: pwsh
+      - name: Run Tests (Release)
+        run: |
+          $exe = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Filter "Friends-Frog-ever.exe" -Recurse | Where-Object { $_.FullName -match "bin/Release" } | Select-Object -First 1
+          if (!$exe) { Write-Error "Could not find Friends-Frog-ever.exe in Release bin!"; exit 1 }
+          $targetDir = $exe.DirectoryName
+          Copy-Item -Path "assets" -Destination $targetDir -Recurse -Force -ErrorAction SilentlyContinue
+          foreach ($tool in @("cuttlefish", "ffmpeg")) {
+              $toolSource = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Directory -Filter $tool -Recurse | Select-Object -First 1
+              if ($toolSource) { Copy-Item -Path $toolSource.FullName -Destination $targetDir -Recurse -Force }
+          }
+          Get-ChildItem -Path "vendor" -Filter "*.dll" -Recurse | Where-Object { $_.FullName -match "x64" } | ForEach-Object { Copy-Item $_.FullName $targetDir -Force }
+          $mesaFolder = Get-ChildItem -Path "mesa_temp" -Directory -Filter "x64" -Recurse | Select-Object -First 1
+          if ($mesaFolder) { Get-ChildItem -Path $mesaFolder.FullName -Filter "*.dll" | ForEach-Object { Copy-Item $_.FullName $targetDir -Force } }
+          cd $targetDir
+          $proc = Start-Process .\Friends-Frog-ever.exe -PassThru -RedirectStandardOutput "app_stdout.log" -RedirectStandardError "app_stderr.log"
+          Start-Sleep -Seconds 60
+          if ($proc.HasExited) { exit 1 }
+          if (!$proc.CloseMainWindow()) { taskkill /IM Friends-Frog-ever.exe }
+          $proc.WaitForExit(30000)
+        shell: pwsh
+      - name: Upload Build Artifacts
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v4
         with:
-          name: release-apk
-          path: android/app/build/outputs/apk/release/*.apk  
+          name: windows-release-bin
+          path: bin/Release/
+
+  cd-windows:
+    needs: build-windows-release
+    if: github.ref == 'refs/heads/main'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-release-bin
+          path: bin/Release/
+
+      - name: Prepare Installer Directory
+        run: |
+          $gameDir = "installer/GAMEDIRECTORY"
+          if (Test-Path $gameDir) { Remove-Item -Path "$gameDir/*" -Recurse -Force -ErrorAction SilentlyContinue }
+          else { New-Item -ItemType Directory -Path $gameDir }
+          Copy-Item -Path "bin/Release/*" -Destination $gameDir -Recurse -Force
+        shell: pwsh
+
+      - name: Compile Installer with Inno Setup
+        run: |
+          & "iscc" installer/InstallScript.iss
+        shell: pwsh
+
+      - name: Upload Installer Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Friends-Frog-ever-Installer
+          path: installer/INSTALLER/Friends-Frog-ever.exe
