@@ -129,17 +129,37 @@ jobs:
         shell: pwsh
       - name: Run Tests (Debug)
         run: |
-          $exe = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Filter "Friends-Frog-ever.exe" -Recurse | Where-Object { $_.FullName -match "bin/Debug" } | Select-Object -First 1
-          if (!$exe) { Write-Error "Could not find Friends-Frog-ever.exe in Debug bin!"; exit 1 }
-          $targetDir = $exe.DirectoryName
-          Copy-Item -Path "assets" -Destination $targetDir -Recurse -Force -ErrorAction SilentlyContinue
+          $targetDir = "bin/Debug"
+          if (!(Test-Path $targetDir/Friends-Frog-ever.exe)) { Write-Error "Could not find Friends-Frog-ever.exe in Debug bin!"; exit 1 }
+          
+          # Sync all dependencies
+          Write-Host "Syncing all dependencies to $targetDir..."
+          
+          # Copy Assets (Ensure they are present)
+          if (!(Test-Path "$targetDir/assets")) {
+              Copy-Item -Path "assets" -Destination $targetDir -Recurse -Force -ErrorAction SilentlyContinue
+          }
+
+          # Copy Tools
           foreach ($tool in @("cuttlefish", "ffmpeg")) {
               $toolSource = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Directory -Filter $tool -Recurse | Select-Object -First 1
-              if ($toolSource) { Copy-Item -Path $toolSource.FullName -Destination $targetDir -Recurse -Force }
+              if ($toolSource) {
+                  $targetToolPath = Join-Path $targetDir $toolSource.Name
+                  if (!(Test-Path $targetToolPath)) {
+                      Copy-Item -Path $toolSource.FullName -Destination $targetDir -Recurse -Force
+                  }
+              }
           }
-          Get-ChildItem -Path "vendor" -Filter "*.dll" -Recurse | Where-Object { $_.FullName -match "x64" } | ForEach-Object { Copy-Item $_.FullName $targetDir -Force }
+
+          # Copy Vendor x64 DLLs
+          Get-ChildItem -Path "vendor" -Filter "*.dll" -Recurse | Where-Object { $_.FullName -match "x64" } | ForEach-Object {
+              Copy-Item $_.FullName $targetDir -Force -ErrorAction SilentlyContinue
+          }
+
+          # Setup Mesa for testing
           $mesaFolder = Get-ChildItem -Path "mesa_temp" -Directory -Filter "x64" -Recurse | Select-Object -First 1
           if ($mesaFolder) { Get-ChildItem -Path $mesaFolder.FullName -Filter "*.dll" | ForEach-Object { Copy-Item $_.FullName $targetDir -Force } }
+          
           cd $targetDir
           $proc = Start-Process .\Friends-Frog-ever.exe -PassThru -RedirectStandardOutput "app_stdout.log" -RedirectStandardError "app_stderr.log"
           Start-Sleep -Seconds 120
