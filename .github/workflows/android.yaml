@@ -80,13 +80,32 @@ jobs:
         working-directory: android
         shell: pwsh
         run: |
+          # Use secrets for passwords if they exist, otherwise fallback to placeholder
           $storePassword = "${{ secrets.ANDROID_STORE_PASSWORD }}"
           $keyPassword = "${{ secrets.ANDROID_KEY_PASSWORD }}"
           $keyAlias = "${{ secrets.ANDROID_KEY_ALIAS }}"
           
-          if ([string]::IsNullOrWhiteSpace($storePassword)) { $storePassword = "password" }
-          if ([string]::IsNullOrWhiteSpace($keyPassword)) { $keyPassword = "password" }
-          if ([string]::IsNullOrWhiteSpace($keyAlias)) { $keyAlias = "key0" }
+          if ([string]::IsNullOrWhiteSpace($storePassword)) { $storePassword = "pain2024secure" }
+          if ([string]::IsNullOrWhiteSpace($keyPassword)) { $keyPassword = "pain2024secure" }
+          if ([string]::IsNullOrWhiteSpace($keyAlias)) { $keyAlias = "pain_release" }
+
+          # Ensure keystore directory exists
+          if (!(Test-Path "keystore")) {
+              New-Item -ItemType Directory -Path "keystore"
+          }
+
+          # Generate a new keystore on the fly for CI
+          # This ensures the build always has a valid keystore to sign with
+          Write-Host "Generating CI keystore..."
+          keytool -genkeypair -v `
+            -keystore "keystore/release.keystore" `
+            -alias "$keyAlias" `
+            -keyalg RSA `
+            -keysize 2048 `
+            -validity 10000 `
+            -storepass "$storePassword" `
+            -keypass "$keyPassword" `
+            -dname "CN=PAIN CI, OU=Development, O=PAIN, L=Singapore, S=Singapore, C=SG"
 
           $content = @"
           storeFile=keystore/release.keystore
