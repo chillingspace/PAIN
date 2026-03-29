@@ -729,6 +729,67 @@ local handlers = {
     end,
 
     ----------------------------------------------------------------------
+    -- RESET GRAPHICS SETTINGS
+    ----------------------------------------------------------------------
+    reset_Graphics_Settings = function(buttonEntity, payload)
+        playUIClick()
+
+        -- Slider positioning constants (must match UISlider.lua)
+        local sliderMinX = -0.32
+        local sliderMaxX = 0.32
+
+        -- Default slider values (0.0-1.0 range)
+        local DEFAULT_BRIGHTNESS = 0.333   -- maps to exposure 1.0 (range 0.5-2.0)
+        local DEFAULT_GAMMA      = 0.467   -- maps to gamma 2.2 (range 1.5-3.0)
+
+        -- 1. Reset display mode to windowed
+        _G.GraphicsSettings.displayMode = "windowed"
+        if setFullscreen then
+            setFullscreen(false)
+        end
+        updateGraphicsModeDisplay()
+
+        -- 2. Reset brightness (exposure = 0.5 + 0.333 * 1.5 = 1.0)
+        local defaultExposure = 0.5 + DEFAULT_BRIGHTNESS * 1.5
+        if setBrightness then
+            setBrightness(defaultExposure)
+        end
+        _G.SliderUI = _G.SliderUI or {}
+        _G.SliderUI["brightness_handle"] = DEFAULT_BRIGHTNESS
+
+        local bHandle = findEntity("brightness_handle")
+        if bHandle then
+            local _, knobY = get2DPosition(bHandle)
+            local newX = sliderMinX + DEFAULT_BRIGHTNESS * (sliderMaxX - sliderMinX)
+            set2DPosition(bHandle, newX, knobY)
+        end
+
+        if settingsSave then
+            settingsSave("gfx_brightness", string.format("%.4f", DEFAULT_BRIGHTNESS))
+        end
+
+        -- 3. Reset gamma (gamma = 1.5 + 0.467 * 1.5 = 2.2)
+        local defaultGamma = 1.5 + DEFAULT_GAMMA * 1.5
+        if setGamma then
+            setGamma(defaultGamma)
+        end
+        _G.SliderUI["gamma_handle"] = DEFAULT_GAMMA
+
+        local gHandle = findEntity("gamma_handle")
+        if gHandle then
+            local _, knobY = get2DPosition(gHandle)
+            local newX = sliderMinX + DEFAULT_GAMMA * (sliderMaxX - sliderMinX)
+            set2DPosition(gHandle, newX, knobY)
+        end
+
+        if settingsSave then
+            settingsSave("gfx_gamma", string.format("%.4f", DEFAULT_GAMMA))
+        end
+
+        printLog("[UI] reset_Graphics_Settings -> windowed, brightness=" .. defaultExposure .. ", gamma=" .. defaultGamma)
+    end,
+
+    ----------------------------------------------------------------------
     -- SETTINGS MENU
     ----------------------------------------------------------------------
     -- Goes from main menu to settings

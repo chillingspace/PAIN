@@ -1,4 +1,4 @@
-﻿/*****************************************************************//**
+/*****************************************************************//**
  * \file   cUIComps.h
  * \brief  All UI comps
  *
@@ -144,7 +144,8 @@ namespace PAIN {
 		settings_Next,
 		to_MainMenu,
 		credits_Next,
-		howtoplay_Next
+		howtoplay_Next,
+		reset_Graphics_Settings
 	};
 
 	struct UIButton {
@@ -357,6 +358,7 @@ namespace PAIN {
 		{PAIN::UIAction::to_MainMenu, "to_MainMenu"},
 		{PAIN::UIAction::credits_Next, "credits_Next"},
 		{PAIN::UIAction::howtoplay_Next, "howtoplay_Next"},
+		{PAIN::UIAction::reset_Graphics_Settings, "reset_Graphics_Settings"},
 
 
 	})

@@ -70,6 +70,7 @@ namespace PAIN {
 		case UIAction::to_MainMenu:			   return "to_MainMenu";
 		case UIAction::credits_Next:		   return "credits_Next";
 		case UIAction::howtoplay_Next:		   return "howtoplay_Next";
+		case UIAction::reset_Graphics_Settings: return "reset_Graphics_Settings";
 		
 		case UIAction::None:
 		default:                               return "None";

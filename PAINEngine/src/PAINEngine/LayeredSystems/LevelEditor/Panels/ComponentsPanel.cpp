@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "ComponentsPanel.h"
 
 #ifdef _DEBUG
@@ -908,7 +908,8 @@ namespace PAIN {
 							"settings_Next",
 							"to_MainMenu",
 							"credits_Next",
-							"howtoplay_Next"
+							"howtoplay_Next",
+						"reset_Graphics_Settings"
 
 						};
 

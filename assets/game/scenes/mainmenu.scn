@@ -3190,6 +3190,15 @@
                                         0.30000001192092896,
                                         0.09000000357627869
                                     ]
+                                },
+                                "UIButton": {
+                                    "action": "reset_Graphics_Settings",
+                                    "disabled_color": -10066330,
+                                    "highlighted_color": -3355444,
+                                    "normal_color": -1,
+                                    "payload": "",
+                                    "pressed_color": -5592406,
+                                    "state": "Normal"
                                 }
                             },
                             "correspondingPrefabEntityGUID": "704aa5a1-1837-064b-9a10-17218bcdc189",
@@ -3217,7 +3226,7 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": "settings_Sub_Back",
+                            "action": "reset_Graphics_Settings",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
@@ -3962,7 +3971,7 @@
                                     "layer_mask": 32
                                 },
                                 "UIButton": {
-                                    "action": "settings_Sub_Back",
+                                    "action": "reset_Graphics_Settings",
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
@@ -3996,7 +4005,7 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": "settings_Sub_Back",
+                            "action": "reset_Graphics_Settings",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
