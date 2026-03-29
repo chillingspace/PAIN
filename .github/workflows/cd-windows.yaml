@@ -1,18 +1,14 @@
-name: Pain Engine CD
+name: Pain Engine CD Windows
 
 on:
   workflow_call:
     inputs:
-      platform:
-        required: true
-        type: string
       run_id:
         required: true
         type: string
 
 jobs:
   cd-windows:
-    if: inputs.platform == 'windows'
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
@@ -42,22 +38,3 @@ jobs:
         with:
           name: Friends-Frog-ever-Installer
           path: installer/INSTALLER/Friends-Frog-ever.exe
-
-  cd-android:
-    if: inputs.platform == 'android'
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Download Android APK
-        uses: actions/download-artifact@v4
-        with:
-          name: android-release-apk-raw
-          path: release-apk/
-          run-id: ${{ inputs.run_id }}
-
-      - name: Upload Final Release APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-apk
-          path: release-apk/*.apk

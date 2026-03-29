@@ -221,7 +221,6 @@ jobs:
   cd-windows:
     needs: build-windows-release
     if: github.ref == 'refs/heads/main'
-    uses: ./.github/workflows/cd.yaml
+    uses: ./.github/workflows/cd-windows.yaml
     with:
-      platform: 'windows'
       run_id: ${{ github.run_id }}

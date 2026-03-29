@@ -112,7 +112,6 @@ jobs:
   cd-android:
     needs: build-android-release
     if: github.ref == 'refs/heads/main'
-    uses: ./.github/workflows/cd.yaml
+    uses: ./.github/workflows/cd-android.yaml
     with:
-      platform: 'android'
       run_id: ${{ github.run_id }}
