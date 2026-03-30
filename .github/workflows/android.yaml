@@ -122,7 +122,6 @@ jobs:
           CI_ABI: arm64-v8a
 
       - name: Upload Intermediate Release APK
-        if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v4
         with:
           name: android-release-apk-raw
@@ -130,7 +129,4 @@ jobs:
 
   cd-android:
     needs: build-android-release
-    if: github.ref == 'refs/heads/main'
     uses: ./.github/workflows/cd-android.yaml
-    with:
-      run_id: ${{ github.run_id }}

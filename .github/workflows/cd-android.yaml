@@ -2,10 +2,6 @@ name: Pain Engine CD Android
 
 on:
   workflow_call:
-    inputs:
-      run_id:
-        required: true
-        type: string
 
 jobs:
   cd-android:
@@ -18,7 +14,6 @@ jobs:
         with:
           name: android-release-apk-raw
           path: release-apk/
-          run-id: ${{ inputs.run_id }}
 
       - name: Upload Final Release APK
         uses: actions/upload-artifact@v4
