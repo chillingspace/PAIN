@@ -1,0 +1,23 @@
+{
+  "asset_info": {
+    "name": "heart_grey.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 13491949711885617589
+  },
+  "descriptor_version": 1,
+  "guid": "ad8857e2-e9ed-6048-97ab-8643dfd26c31",
+  "import_settings": {
+    "android_allow_astc_hdr": false,
+    "android_bake_cubemap": false,
+    "android_compression": "ASTC_4x4",
+    "android_skybox_source_format": "R16G16B16A16",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\heart_grey.png"
+  }
+}

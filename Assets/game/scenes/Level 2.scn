@@ -340,9 +340,9 @@
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            -10.188065528869629,
-            25.26446533203125,
-            -9.919817924499512
+            -10.936158180236816,
+            21.551027297973633,
+            -4.986350059509277
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 31.100000381469727,
@@ -46850,7 +46850,9 @@
                             "childrenGUIDs": [
                                 "c9bc93bb-fca8-4341-952c-6f550e3190ac",
                                 "83b6ccea-04e0-a54a-93c0-c94fbdccd8de",
-                                "919b7422-5e7c-c140-b2c0-91ef65fa8262"
+                                "919b7422-5e7c-c140-b2c0-91ef65fa8262",
+                                "ed6a6e74-7994-c248-a26d-f26266100543",
+                                "0bc01f26-6cfb-764e-be79-5687771ff08a"
                             ],
                             "parentGUID": "08f7b37b-512b-8046-aa8f-df4df3c659da",
                             "siblingIndex": 1
@@ -46930,13 +46932,13 @@
                         },
                         "Texture2D": {
                             "pos": [
-                                -0.10000000149011612,
+                                -0.20000000298023224,
                                 -0.6000000238418579
                             ],
-                            "texture_guid": "d673873b-8700-6f45-80a4-4b8c06d76caa",
+                            "texture_guid": "4bd7df99-9e11-7647-ac44-d5560bf92dfc",
                             "texture_scale": [
-                                0.05000000074505806,
-                                0.05000000074505806
+                                0.6000000238418579,
+                                0.10000000149011612
                             ]
                         },
                         "UIElement": {
@@ -47043,10 +47045,10 @@
                                 0.0,
                                 -0.6000000238418579
                             ],
-                            "texture_guid": "d673873b-8700-6f45-80a4-4b8c06d76caa",
+                            "texture_guid": "4bd7df99-9e11-7647-ac44-d5560bf92dfc",
                             "texture_scale": [
-                                0.05000000074505806,
-                                0.05000000074505806
+                                0.6000000238418579,
+                                0.10000000149011612
                             ]
                         },
                         "UIElement": {
@@ -47113,7 +47115,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "7f20ef65-a9d5-4541-859b-ff911ea58a59",
-                            "siblingIndex": 2
+                            "siblingIndex": 3
                         },
                         "Layer": {
                             "layer_id": 1,
@@ -47150,13 +47152,13 @@
                         },
                         "Texture2D": {
                             "pos": [
-                                0.10000000149011612,
+                                0.20000000298023224,
                                 -0.6000000238418579
                             ],
-                            "texture_guid": "d673873b-8700-6f45-80a4-4b8c06d76caa",
+                            "texture_guid": "4bd7df99-9e11-7647-ac44-d5560bf92dfc",
                             "texture_scale": [
-                                0.05000000074505806,
-                                0.05000000074505806
+                                0.6000000238418579,
+                                0.10000000149011612
                             ]
                         },
                         "UIElement": {
@@ -47212,6 +47214,108 @@
                         }
                     },
                     "Name": "heart_3"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "0bc01f26-6cfb-764e-be79-5687771ff08a"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "7f20ef65-a9d5-4541-859b-ff911ea58a59",
+                            "siblingIndex": 3
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "heart border"
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                0.0,
+                                -0.6000000238418579
+                            ],
+                            "texture_guid": "fda9fdc4-a022-6744-ba11-f2e14ce229b6",
+                            "texture_scale": [
+                                0.6000000238418579,
+                                0.10000000149011612
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": false,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "heart border"
                 }
             },
             {
@@ -58452,9 +58556,9 @@
             0.7990195751190186
         ],
         "worldLightPosition": [
-            1.4776411056518555,
-            43.929595947265625,
-            -5.253535270690918
+            0.729548454284668,
+            40.216156005859375,
+            -0.3200674057006836
         ],
         "worldLightShadowFollowDistance": 22.5,
         "worldLightShadowResolution": 1024,

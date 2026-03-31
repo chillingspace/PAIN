@@ -1,0 +1,23 @@
+{
+  "asset_info": {
+    "name": "heart_red.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 11472649222881659948
+  },
+  "descriptor_version": 1,
+  "guid": "4bd7df99-9e11-7647-ac44-d5560bf92dfc",
+  "import_settings": {
+    "android_allow_astc_hdr": false,
+    "android_bake_cubemap": false,
+    "android_compression": "ASTC_4x4",
+    "android_skybox_source_format": "R16G16B16A16",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\heart_red.png"
+  }
+}

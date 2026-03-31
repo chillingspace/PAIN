@@ -109,8 +109,8 @@ log("[PlayerState] Next Scene Path:", _G.NextLevelName)
 local restartPressed = false
 
 -- Heart UI textures
-local normalHeartTexture = "game/textures/heart normal.png"
-local greyHeartTexture   = "game/textures/heart grey.png"
+local normalHeartTexture = "game/textures/heart_red.png"
+local greyHeartTexture   = "game/textures/heart_grey.png"
 
 -- result = either win or lose
 local function requestEndOverlay(result) 
