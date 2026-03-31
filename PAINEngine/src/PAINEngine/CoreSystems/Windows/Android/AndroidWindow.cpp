@@ -94,8 +94,29 @@ namespace PAIN {
             eglGetConfigAttrib(m_Display, config, EGL_NATIVE_VISUAL_ID, &format);
             ANativeWindow_setBuffersGeometry(m_Window, 0, 0, format);
 
+            // Request linear (non-sRGB) color space to avoid double gamma conversion.
+            // The tone_gamma shader already applies gamma correction; on ARM devices the
+            // EGL window surface may default to sRGB, causing pow(pow(x,1/2.2),1/2.2).
+            // EGL_GL_COLORSPACE_LINEAR_KHR overrides this to a linear swap-chain surface.
+#ifndef EGL_KHR_gl_colorspace
+#define EGL_KHR_gl_colorspace 1
+#endif
+#ifndef EGL_GL_COLORSPACE_KHR
+#define EGL_GL_COLORSPACE_KHR 0x309D
+#endif
+#ifndef EGL_GL_COLORSPACE_SRGB_KHR
+#define EGL_GL_COLORSPACE_SRGB_KHR 0x3089
+#endif
+#ifndef EGL_GL_COLORSPACE_LINEAR_KHR
+#define EGL_GL_COLORSPACE_LINEAR_KHR 0x308A
+#endif
+            EGLint surfaceAttribs[] = {
+                EGL_GL_COLORSPACE_KHR, EGL_GL_COLORSPACE_LINEAR_KHR,
+                EGL_NONE
+            };
+
             // Create window surface
-            m_Surface = eglCreateWindowSurface(m_Display, config, m_Window, nullptr);
+            m_Surface = eglCreateWindowSurface(m_Display, config, m_Window, surfaceAttribs);
 
             if (m_Surface == EGL_NO_SURFACE) {
                 PN_CORE_ERROR("eglCreateWindowSurface failed");
