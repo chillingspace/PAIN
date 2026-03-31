@@ -3,6 +3,9 @@ name: Pain Engine CD Windows
 on:
   workflow_call:
 
+permissions:
+  contents: read
+
 jobs:
   cd-windows:
     runs-on: windows-latest
