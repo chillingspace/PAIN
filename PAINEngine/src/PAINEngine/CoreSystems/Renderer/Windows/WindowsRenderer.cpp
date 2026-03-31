@@ -3302,6 +3302,7 @@ namespace PAIN {
 				GraphicsSettings::get().ibl_max_reflection_lod,
 				Skybox::get().getPrefilterMaxReflectionLod());
 			pbr_shader->SetUniform("u_IblMaxReflectionLod", maxReflectionLod);
+			pbr_shader->SetUniform("u_ViewportWidth", static_cast<float>(winWidth));
 
 			glActiveTexture(GL_TEXTURE0 + kIrradianceTextureUnit);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, Skybox::get().getIrradianceMap());
