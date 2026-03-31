@@ -1905,7 +1905,7 @@
                             ],
                             "texture_guid": "8d3faccf-ec71-d944-9920-b81c054ed8fe",
                             "texture_scale": [
-                                1.7999999523162842,
+                                2.0,
                                 1.0
                             ]
                         },
@@ -2007,8 +2007,8 @@
                             ],
                             "texture_guid": "8d3faccf-ec71-d944-9920-b81c054ed8fe",
                             "texture_scale": [
-                                0.0,
-                                0.0
+                                2.0,
+                                1.0
                             ]
                         },
                         "UIElement": {
@@ -2109,8 +2109,8 @@
                             ],
                             "texture_guid": "eab5a204-444f-ac42-8b3a-e123060c248b",
                             "texture_scale": [
-                                0.0,
-                                0.0
+                                2.0,
+                                1.0
                             ]
                         },
                         "UIElement": {
@@ -2211,8 +2211,8 @@
                             ],
                             "texture_guid": "4bc44323-fe1b-9749-b7c1-6b2f667bf968",
                             "texture_scale": [
-                                0.0,
-                                0.0
+                                2.0,
+                                1.0
                             ]
                         },
                         "UIElement": {
@@ -2313,8 +2313,8 @@
                             ],
                             "texture_guid": "a6e3d418-5698-2a45-95cc-f54a572c34d6",
                             "texture_scale": [
-                                0.0,
-                                0.0
+                                2.0,
+                                1.0
                             ]
                         },
                         "UIElement": {
@@ -2415,8 +2415,8 @@
                             ],
                             "texture_guid": "880bf6bb-2e25-a34c-b327-2e14ae101c4f",
                             "texture_scale": [
-                                0.0,
-                                0.0
+                                2.0,
+                                1.0
                             ]
                         },
                         "UIElement": {
@@ -2517,8 +2517,8 @@
                             ],
                             "texture_guid": "48916524-2225-944b-a468-4e6ec1713e1b",
                             "texture_scale": [
-                                0.0,
-                                0.0
+                                2.0,
+                                1.0
                             ]
                         },
                         "UIElement": {
@@ -2619,8 +2619,8 @@
                             ],
                             "texture_guid": "d33ebfc5-94ed-ce40-ba04-ea73539b01f6",
                             "texture_scale": [
-                                0.0,
-                                0.0
+                                2.0,
+                                1.0
                             ]
                         },
                         "UIElement": {
