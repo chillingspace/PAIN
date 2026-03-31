@@ -81,7 +81,7 @@ uniform sampler2D u_ShadowMap2;
 uniform sampler2D u_ShadowMap3;
 uniform float u_NumShadowMaps;
 
-Material material;
+Material material = Material(0.5, 0.0, vec3(1.0), 1.0);
 
 // debug
 uniform float DEBUG_TYPE;

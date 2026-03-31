@@ -244,18 +244,42 @@ namespace PAIN {
 					// ========================================
 					// ORM Channel Mask Detection
 					// Detect if roughness/metallic/ao textures are packed into a single ORM texture
+					// Uses both texture handle matching AND path-based heuristics for reliability
 					// ========================================
 					const bool sameRoughMetalTexture = cache.roughnessTexture != 0 && 
 						cache.roughnessTexture == cache.metallicTexture;
 					const bool sameAoRoughTexture = cache.aoTexture != 0 && 
 						cache.aoTexture == cache.roughnessTexture;
 
-					// If textures are shared, likely packed ORM
-					if (sameRoughMetalTexture) {
+					// Path-based heuristics for packed ORM detection
+					auto toLower = [](std::string v) {
+						std::transform(v.begin(), v.end(), v.begin(),
+							[](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+						return v;
+					};
+					const std::string roughPath = toLower(materialAsset->roughnessTexturePath.lexically_normal().generic_string());
+					const std::string metalPath = toLower(materialAsset->metallicTexturePath.lexically_normal().generic_string());
+					const std::string aoPath = toLower(materialAsset->aoTexturePath.lexically_normal().generic_string());
+					
+					const auto containsAny = [](const std::string& value, std::initializer_list<const char*> needles) {
+						for (const char* needle : needles) {
+							if (value.find(needle) != std::string::npos) return true;
+						}
+						return false;
+					};
+					
+					const bool sameRoughMetalPath = !roughPath.empty() && roughPath == metalPath;
+					const bool sameAoRoughPath = !aoPath.empty() && aoPath == roughPath;
+					const bool packedHint = containsAny(roughPath, {"_orm", "_mrao", "_rma", "_arm", "_mra"}) ||
+						containsAny(metalPath, {"_orm", "_mrao", "_rma", "_arm", "_mra"}) ||
+						containsAny(aoPath, {"_orm", "_mrao", "_rma", "_arm", "_mra"});
+
+					// Use handle match OR path match to detect packed ORM
+					if (sameRoughMetalTexture || sameRoughMetalPath || packedHint) {
 						cache.roughnessChannelMask = glm::vec3(0.0f, 1.0f, 0.0f);  // G = Roughness
 						cache.metallicChannelMask = glm::vec3(0.0f, 0.0f, 1.0f);   // B = Metallic
 					}
-					if (sameAoRoughTexture) {
+					if (sameAoRoughTexture || sameAoRoughPath || packedHint) {
 						cache.aoChannelMask = glm::vec3(1.0f, 0.0f, 0.0f);  // R = AO
 					}
 

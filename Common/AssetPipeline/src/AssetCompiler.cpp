@@ -124,6 +124,186 @@ namespace {
         return false;
     }
 
+    // Detect if a texture contains linear data (roughness, metallic, ao, normal, ORM)
+    // These should use linear color space compression, not sRGB
+    bool IsLinearDataTexture(const std::string& filename) {
+        std::string lower = PAIN::Assets::toLowerCase(filename);
+        return lower.find("roughness") != std::string::npos ||
+               lower.find("rough") != std::string::npos ||
+               lower.find("metallic") != std::string::npos ||
+               lower.find("metalness") != std::string::npos ||
+               lower.find("ao") != std::string::npos ||
+               lower.find("occlusion") != std::string::npos ||
+               lower.find("normal") != std::string::npos ||
+               lower.find("_nrm") != std::string::npos ||
+               lower.find("_orm") != std::string::npos ||
+               lower.find("_rma") != std::string::npos ||
+               lower.find("_arm") != std::string::npos ||
+               lower.find("_mra") != std::string::npos ||
+               lower.find("_mrao") != std::string::npos ||
+               lower.find("height") != std::string::npos ||
+               lower.find("displacement") != std::string::npos;
+    }
+
+    // Detect if a texture is an IBL/skybox environment map.
+    // IBL textures must use linear color space: sRGB decoding during sampling
+    // corrupts prefilter/irradiance calculations, making Android specular too bright.
+    bool IsIblSkyboxTexture(const std::string& filename) {
+        std::string lower = PAIN::Assets::toLowerCase(filename);
+        // All .hdr files are treated as IBL/skybox environment maps
+        if (lower.find(".hdr") != std::string::npos) {
+            return true;
+        }
+        return lower.find("skybox") != std::string::npos ||
+               lower.find("sky") != std::string::npos ||
+               lower.find("cubemap") != std::string::npos ||
+               lower.find("ibl") != std::string::npos ||
+               lower.find("irradiance") != std::string::npos ||
+               lower.find("prefilter") != std::string::npos ||
+               lower.find("env") != std::string::npos ||
+               lower.find("brdf") != std::string::npos;
+    }
+
+    // KTX1 format constants for patching sRGB to linear
+    constexpr uint32_t KTX_ENDIANNESS = 0x04030201;
+    constexpr uint32_t KTX_OPPOSITE_ENDIANNESS = 0x01020304;
+    
+    // OpenGL format constants (using AC_ prefix to avoid conflicts with GLEW)
+    constexpr uint32_t AC_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR = 0x93D0u;
+    constexpr uint32_t AC_COMPRESSED_RGBA_ASTC_4x4_KHR = 0x93B0u;
+    constexpr uint32_t AC_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR = 0x93D1u;
+    constexpr uint32_t AC_COMPRESSED_RGBA_ASTC_5x4_KHR = 0x93B1u;
+    constexpr uint32_t AC_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR = 0x93D2u;
+    constexpr uint32_t AC_COMPRESSED_RGBA_ASTC_5x5_KHR = 0x93B2u;
+    constexpr uint32_t AC_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR = 0x93D3u;
+    constexpr uint32_t AC_COMPRESSED_RGBA_ASTC_6x5_KHR = 0x93B3u;
+    constexpr uint32_t AC_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR = 0x93D4u;
+    constexpr uint32_t AC_COMPRESSED_RGBA_ASTC_6x6_KHR = 0x93B4u;
+    constexpr uint32_t AC_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR = 0x93D5u;
+    constexpr uint32_t AC_COMPRESSED_RGBA_ASTC_8x5_KHR = 0x93B5u;
+    constexpr uint32_t AC_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR = 0x93D6u;
+    constexpr uint32_t AC_COMPRESSED_RGBA_ASTC_8x6_KHR = 0x93B6u;
+    constexpr uint32_t AC_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR = 0x93D7u;
+    constexpr uint32_t AC_COMPRESSED_RGBA_ASTC_8x8_KHR = 0x93B7u;
+    constexpr uint32_t AC_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR = 0x93D8u;
+    constexpr uint32_t AC_COMPRESSED_RGBA_ASTC_10x5_KHR = 0x93B8u;
+    constexpr uint32_t AC_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR = 0x93D9u;
+    constexpr uint32_t AC_COMPRESSED_RGBA_ASTC_10x6_KHR = 0x93B9u;
+    constexpr uint32_t AC_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR = 0x93DAu;
+    constexpr uint32_t AC_COMPRESSED_RGBA_ASTC_10x8_KHR = 0x93BAu;
+    constexpr uint32_t AC_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR = 0x93DBu;
+    constexpr uint32_t AC_COMPRESSED_RGBA_ASTC_10x10_KHR = 0x93BBu;
+    constexpr uint32_t AC_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR = 0x93DCu;
+    constexpr uint32_t AC_COMPRESSED_RGBA_ASTC_12x10_KHR = 0x93BCu;
+    constexpr uint32_t AC_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR = 0x93DDu;
+    constexpr uint32_t AC_COMPRESSED_RGBA_ASTC_12x12_KHR = 0x93BDu;
+
+    uint32_t GetLinearAstcFormat(uint32_t srgbFormat) {
+        switch (srgbFormat) {
+        case AC_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR: return AC_COMPRESSED_RGBA_ASTC_4x4_KHR;
+        case AC_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR: return AC_COMPRESSED_RGBA_ASTC_5x4_KHR;
+        case AC_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR: return AC_COMPRESSED_RGBA_ASTC_5x5_KHR;
+        case AC_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR: return AC_COMPRESSED_RGBA_ASTC_6x5_KHR;
+        case AC_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR: return AC_COMPRESSED_RGBA_ASTC_6x6_KHR;
+        case AC_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR: return AC_COMPRESSED_RGBA_ASTC_8x5_KHR;
+        case AC_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR: return AC_COMPRESSED_RGBA_ASTC_8x6_KHR;
+        case AC_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR: return AC_COMPRESSED_RGBA_ASTC_8x8_KHR;
+        case AC_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR: return AC_COMPRESSED_RGBA_ASTC_10x5_KHR;
+        case AC_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR: return AC_COMPRESSED_RGBA_ASTC_10x6_KHR;
+        case AC_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR: return AC_COMPRESSED_RGBA_ASTC_10x8_KHR;
+        case AC_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR: return AC_COMPRESSED_RGBA_ASTC_10x10_KHR;
+        case AC_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR: return AC_COMPRESSED_RGBA_ASTC_12x10_KHR;
+        case AC_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR: return AC_COMPRESSED_RGBA_ASTC_12x12_KHR;
+        default: return 0;
+        }
+    }
+
+    // Patch a KTX1 file to use linear ASTC format instead of sRGB ASTC
+    bool PatchKtxToLinearAstc(const std::string& ktx_path) {
+        try {
+            // Read the entire file
+            std::ifstream file(ktx_path, std::ios::binary);
+            if (!file.is_open()) {
+                std::cout << "Failed to open KTX file for patching: " << ktx_path << std::endl;
+                return false;
+            }
+
+            std::vector<uint8_t> data((std::istreambuf_iterator<char>(file)),
+                                       std::istreambuf_iterator<char>());
+            file.close();
+
+            if (data.size() < 64) {
+                std::cout << "KTX file too small: " << ktx_path << std::endl;
+                return false;
+            }
+
+            // Check magic
+            if (memcmp(data.data(), "\xABKTX 11\xBB\x0D\x0A\x1A\x0A", 12) != 0) {
+                std::cout << "Not a valid KTX1 file: " << ktx_path << std::endl;
+                return false;
+            }
+
+            // Read endianness
+            uint32_t endianness;
+            memcpy(&endianness, data.data() + 12, sizeof(endianness));
+            
+            bool needs_swap = false;
+            if (endianness == KTX_OPPOSITE_ENDIANNESS) {
+                needs_swap = true;
+            } else if (endianness != KTX_ENDIANNESS) {
+                std::cout << "Invalid KTX endianness: " << ktx_path << std::endl;
+                return false;
+            }
+
+            // glInternalformat is at offset 28 (after: endianness, glType, glTypeSize, glFormat)
+            uint32_t glInternalformat;
+            memcpy(&glInternalformat, data.data() + 28, sizeof(glInternalformat));
+            
+            if (needs_swap) {
+                // Simple byte swap
+                glInternalformat = ((glInternalformat >> 24) & 0xFF) |
+                                   ((glInternalformat >> 8) & 0xFF00) |
+                                   ((glInternalformat << 8) & 0xFF0000) |
+                                   ((glInternalformat << 24) & 0xFF000000);
+            }
+
+            uint32_t linearFormat = GetLinearAstcFormat(glInternalformat);
+            if (linearFormat == 0) {
+                // Not an sRGB ASTC format, nothing to patch
+                return true;
+            }
+
+            std::cout << "Patching KTX sRGB ASTC format 0x" << std::hex << glInternalformat 
+                      << " to linear 0x" << linearFormat << std::dec << " for: " << ktx_path << std::endl;
+
+            // Convert back if needed
+            if (needs_swap) {
+                linearFormat = ((linearFormat >> 24) & 0xFF) |
+                               ((linearFormat >> 8) & 0xFF00) |
+                               ((linearFormat << 8) & 0xFF0000) |
+                               ((linearFormat << 24) & 0xFF000000);
+            }
+
+            // Write the new format
+            memcpy(data.data() + 28, &linearFormat, sizeof(linearFormat));
+
+            // Write the file back
+            std::ofstream outFile(ktx_path, std::ios::binary);
+            if (!outFile.is_open()) {
+                std::cout << "Failed to write patched KTX file: " << ktx_path << std::endl;
+                return false;
+            }
+            outFile.write(reinterpret_cast<const char*>(data.data()), data.size());
+            outFile.close();
+
+            return true;
+        }
+        catch (const std::exception& e) {
+            std::cout << "Error patching KTX file: " << e.what() << std::endl;
+            return false;
+        }
+    }
+
     const char* GetCuttlefishHdrTypeForFormat(const std::string& format) {
         // KTX doesn't accept ufloat for plain R16G16B16A16-style formats.
         // BC6H/ASTC HDR paths should remain ufloat to preserve non-negative radiance.
@@ -857,7 +1037,8 @@ namespace PAIN {
                     compression_success = CuttlefishCompressor(
                         raw_pixels, width, height, channels,
                         asset_info.shipped_path.string(),
-                        compression_format, desc_file.import_settings
+                        compression_format, desc_file.import_settings,
+                        asset_info.raw_path.string()
                     );
                 }
 
@@ -960,7 +1141,8 @@ namespace PAIN {
                 compression_success = CuttlefishCompressor(
                     raw_pixels, width, height, 4,  // Always 4 channels (RGBA)
                     asset_info.shipped_path.string(),
-                    compression_format, desc_file.import_settings
+                    compression_format, desc_file.import_settings,
+                    asset_info.raw_path.string()
                 );
 
                 //Free loaded image
@@ -970,6 +1152,16 @@ namespace PAIN {
             //Verify output
             if (compression_success && std::filesystem::exists(asset_info.shipped_path)) {
                 std::cout << "Texture compiled successfully: " << asset_info.shipped_path.filename() << std::endl;
+
+                // For Android data textures and IBL/skybox textures, patch KTX to use linear ASTC format
+                // IBL textures compressed as sRGB ASTC cause specular to appear brighter due to
+                // GPU automatic sRGB-to-linear decode during textureLod sampling in the prefilter shader.
+                if (platform == Platform::Android && 
+                    compression_format.find("ASTC") != std::string::npos &&
+                    (IsLinearDataTexture(asset_info.raw_path.string()) ||
+                     IsIblSkyboxTexture(asset_info.raw_path.string()))) {
+                    PatchKtxToLinearAstc(asset_info.shipped_path.string());
+                }
 
                 //Update desc file with hashing
                 desc_file.hash = fileHashing(asset_info.raw_path);
@@ -1871,7 +2063,7 @@ namespace PAIN {
 
         bool Compiler::CuttlefishCompressor(unsigned char* pixels, int width, int height, int channels,
             const std::string& output_path, const std::string& format,
-            const nlohmann::json& settings) const {
+            const nlohmann::json& settings, const std::string& source_path) const {
             try {
                 // Output temp file in float format (png)
                 std::string temp_input = "temp_" + std::to_string(getCurrentTimeStamp()) + ".png";
@@ -1930,7 +2122,7 @@ namespace PAIN {
 
         bool Compiler::CuttlefishCompressor(float* pixels, int width, int height, int channels,
             const std::string& output_path, const std::string& format,
-            const nlohmann::json& settings) const {
+            const nlohmann::json& settings, const std::string& source_path) const {
             try {
                 // Output temp file in float format (hdr)
                 std::string temp_input = "temp_" + std::to_string(getCurrentTimeStamp()) + ".hdr";
