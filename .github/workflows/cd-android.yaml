@@ -3,6 +3,9 @@ name: Pain Engine CD Android
 on:
   workflow_call:
 
+permissions:
+  contents: read
+
 jobs:
   cd-android:
     runs-on: windows-latest
