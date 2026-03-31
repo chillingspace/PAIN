@@ -1,0 +1,48 @@
+name: Pain Engine CD Windows
+
+on:
+  workflow_call:
+
+jobs:
+  cd-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-release-bin
+          path: bin/Release/
+
+      - name: Prepare Installer Directory
+        run: |
+          $gameDir = "installer/GAMEDIRECTORY"
+          $sourceDir = "bin/Release"
+          
+          Write-Host "Preparing $gameDir..."
+          if (Test-Path $gameDir) { Remove-Item -Path "$gameDir/*" -Recurse -Force -ErrorAction SilentlyContinue }
+          else { New-Item -ItemType Directory -Path $gameDir }
+          
+          Write-Host "Copying strictly required files to $gameDir..."
+          
+          # Copy only the 4 items requested by the user
+          Copy-Item -Path "$sourceDir/assets" -Destination $gameDir -Recurse -Force
+          Copy-Item -Path "$sourceDir/fmod.dll" -Destination $gameDir -Force
+          Copy-Item -Path "$sourceDir/Friends-Frog-ever.exe" -Destination $gameDir -Force
+          Copy-Item -Path "$sourceDir/lua.lib" -Destination $gameDir -Force
+          
+          Write-Host "GAMEDIRECTORY content summary:"
+          Get-ChildItem $gameDir | Select-Object Name
+        shell: pwsh
+
+      - name: Compile Installer with Inno Setup
+        run: |
+          & "iscc" installer/InstallScript.iss
+        shell: pwsh
+
+      - name: Upload Installer Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Friends-Frog-ever-Installer
+          path: installer/INSTALLER/Friends-Frog-ever.exe

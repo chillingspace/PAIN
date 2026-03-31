@@ -1,0 +1,132 @@
+name: Pain Engine Android CI
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+      - more-cicd
+      - more-more-cicd
+  pull_request:
+    branches: 
+      - main
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build-android-debug:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Install NDK 27.0.12077973
+        run: |
+          $sdkmanager = "$env:ANDROID_HOME\cmdline-tools\latest\bin\sdkmanager"
+          & $sdkmanager "ndk;27.0.12077973"
+
+      - name: Setup MSBuild.exe
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Configure cross-platform files
+        run: .\build.bat
+
+      - name: Build Android Debug
+        working-directory: android
+        run: .\gradlew.bat assembleDebug --stacktrace --parallel
+        env:
+          SKIP_SIGNING: true 
+          CI_ABI: x86_64
+
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+
+  build-android-release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Install NDK 27.0.12077973
+        run: |
+          $sdkmanager = "$env:ANDROID_HOME\cmdline-tools\latest\bin\sdkmanager"
+          & $sdkmanager "ndk;27.0.12077973"
+
+      - name: Setup MSBuild.exe
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Configure cross-platform files
+        run: .\build.bat
+
+      - name: Prepare Signing Properties
+        working-directory: android
+        shell: pwsh
+        run: |
+          # Use secrets for passwords if they exist, otherwise fallback to placeholder
+          $storePassword = "${{ secrets.ANDROID_STORE_PASSWORD }}"
+          $keyPassword = "${{ secrets.ANDROID_KEY_PASSWORD }}"
+          $keyAlias = "${{ secrets.ANDROID_KEY_ALIAS }}"
+          
+          if ([string]::IsNullOrWhiteSpace($storePassword)) { $storePassword = "pain2024secure" }
+          if ([string]::IsNullOrWhiteSpace($keyPassword)) { $keyPassword = "pain2024secure" }
+          if ([string]::IsNullOrWhiteSpace($keyAlias)) { $keyAlias = "pain_release" }
+
+          # Ensure keystore directory exists
+          if (!(Test-Path "keystore")) {
+              New-Item -ItemType Directory -Path "keystore"
+          }
+
+          # Generate a new keystore on the fly for CI
+          # This ensures the build always has a valid keystore to sign with
+          Write-Host "Generating CI keystore..."
+          keytool -genkeypair -v `
+            -keystore "keystore/release.keystore" `
+            -alias "$keyAlias" `
+            -keyalg RSA `
+            -keysize 2048 `
+            -validity 10000 `
+            -storepass "$storePassword" `
+            -keypass "$keyPassword" `
+            -dname "CN=PAIN CI, OU=Development, O=PAIN, L=Singapore, S=Singapore, C=SG"
+
+          $content = @"
+          storeFile=keystore/release.keystore
+          storePassword=$storePassword
+          keyAlias=$keyAlias
+          keyPassword=$keyPassword
+          "@
+          $content | Out-File -FilePath key.properties -Encoding ascii
+
+      - name: Build Android Release
+        working-directory: android
+        run: .\gradlew.bat assembleRelease --stacktrace --parallel
+        env:
+          CI_ABI: arm64-v8a
+
+      - name: Upload Intermediate Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release-apk-raw
+          path: android/app/build/outputs/apk/release/*.apk
+
+  cd-android:
+    needs: build-android-release
+    uses: ./.github/workflows/cd-android.yaml

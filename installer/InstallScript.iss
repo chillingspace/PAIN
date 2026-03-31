@@ -29,7 +29,7 @@ DefaultGroupName=DigiPen\Friends-Frog-ever
 OutputDir=.\INSTALLER
 
 ; Setup executable installer
-OutputBaseFilename=Friends-Frog-ever_Setup
+OutputBaseFilename=Friends-Frog-ever
 
 ; Path to the DigiPen EULA (Needed to pass TCRs)
 LicenseFile=INSTALLERFILES\DigiPen_EULA.txt
