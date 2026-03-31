@@ -185,6 +185,10 @@ namespace PAIN {
         glm::vec2 GetUITextureScale(entt::entity e) override;
         void SetVisibility(entt::entity entityId, bool visible) override;
 
+        void SetUIFollowEnabled(entt::entity uiEntityId, bool enabled) override;
+        void SetUIFollowsEntity(entt::entity uiEntityId, entt::entity targetEntityId, float offsetX, float offsetY, float offsetZ) override;
+        std::optional<int> GetUIFollowTarget(entt::entity uiEntityId) override;
+
         /* =========================================================================== */
         /*                                  Lighting                                   */
         /* =========================================================================== */

@@ -10,6 +10,7 @@
 #include "ECS/Components/cMetadata.h"
 #include "ECS/Components/cEntity.h"
 #include "ECS/Components/cMeshRenderer.h"
+#include "ECS/Components/cUIComps.h"
 #include "Systems/Transform/sysTransform.h"
 #include "Common/AssetTypes/src/AssetData.h"
 #include "Systems/Physics/sysPhysics.h"
@@ -995,6 +996,34 @@ namespace PAIN {
         if (!reg.all_of<PAIN::ModelRenderer>(entityId)) return;
 
 		reg.get<PAIN::ModelRenderer>(entityId).visible = visible;
+    }
+
+    void EngineAPIAdapter::SetUIFollowEnabled(entt::entity uiEntityId, bool enabled)
+    {
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<UIFollowsWorldEntity>(uiEntityId)) return;
+        reg.get<UIFollowsWorldEntity>(uiEntityId).b_hidden = !enabled;
+    }
+
+    void EngineAPIAdapter::SetUIFollowsEntity(entt::entity uiEntityId, entt::entity targetEntityId,
+        float offsetX, float offsetY, float offsetZ)
+    {
+        auto& reg = ecs_.getRegistry();
+        if (!reg.valid(uiEntityId) || !reg.valid(targetEntityId)) return;
+        Assets::GUID targetGuid = ecs_.getOrCreateEntityGUID(targetEntityId);
+        auto& follows = ensure<UIFollowsWorldEntity>(uiEntityId);
+        follows.entity_target_guid = targetGuid;
+        follows.world_offset = glm::vec3(offsetX, offsetY, offsetZ);
+    }
+
+    std::optional<int> EngineAPIAdapter::GetUIFollowTarget(entt::entity uiEntityId)
+    {
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<UIFollowsWorldEntity>(uiEntityId)) return std::nullopt;
+        const auto& follows = reg.get<UIFollowsWorldEntity>(uiEntityId);
+        entt::entity target = ecs_.resolveGUID(follows.entity_target_guid);
+        if (target == entt::null) return std::nullopt;
+        return static_cast<int>(entt::to_integral(target));
     }
 
     /* =========================================================================== */

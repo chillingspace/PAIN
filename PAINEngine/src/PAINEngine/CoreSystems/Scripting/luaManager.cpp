@@ -1447,6 +1447,19 @@ namespace PAIN {
             });
         lua_.set_function("setVisibility", [this](entt::entity entityId, bool visible) { if (api_) api_->SetVisibility(entityId, visible); });
 
+        // UIFollowsWorldEntity helpers — world-space prompt billboards
+        lua_.set_function("setUIFollowEnabled", [this](entt::entity uiId, bool enabled) {
+            if (api_) api_->SetUIFollowEnabled(uiId, enabled);
+        });
+        lua_.set_function("setUIFollowsEntity", [this](entt::entity uiId, entt::entity targetId, float ox, float oy, float oz) {
+            if (api_) api_->SetUIFollowsEntity(uiId, targetId, ox, oy, oz);
+        });
+        lua_.set_function("getUIFollowTarget", [this](entt::entity uiId) -> sol::object {
+            if (!api_) return sol::make_object(lua_, sol::nil);
+            auto t = api_->GetUIFollowTarget(uiId);
+            return t ? sol::make_object(lua_, *t) : sol::make_object(lua_, sol::nil);
+        });
+
         /* =========================================================================== */
         /*                                  Lighting                                   */
         /* =========================================================================== */
