@@ -150,6 +150,10 @@ namespace {
     // corrupts prefilter/irradiance calculations, making Android specular too bright.
     bool IsIblSkyboxTexture(const std::string& filename) {
         std::string lower = PAIN::Assets::toLowerCase(filename);
+        // All .hdr files are treated as IBL/skybox environment maps
+        if (lower.find(".hdr") != std::string::npos) {
+            return true;
+        }
         return lower.find("skybox") != std::string::npos ||
                lower.find("sky") != std::string::npos ||
                lower.find("cubemap") != std::string::npos ||

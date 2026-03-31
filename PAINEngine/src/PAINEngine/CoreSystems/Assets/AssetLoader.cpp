@@ -94,6 +94,11 @@ namespace PAIN {
             bool IsLikelyLinearDataTexturePath(std::string const& virtual_path) {
                 const std::string lower = ToLowerAscii(virtual_path);
 
+                // All .hdr/.hdr.ktx textures are IBL/skybox environment maps
+                if (lower.find(".hdr") != std::string::npos) {
+                    return true;
+                }
+
                 // IBL/skybox cubemaps need linear sampling to avoid sRGB decode corruption
                 if (ContainsAny(lower, { "skybox", "cubemap", "ibl", "irradiance", "prefilter", "brdf" })) {
                     return true;
@@ -270,7 +275,9 @@ namespace PAIN {
 
                 // Force linear ASTC for IBL/skybox cubemaps if they were compressed as sRGB ASTC
                 if (tex->is_cube_map) {
-                    const bool isIbl = ContainsAny(ToLowerAscii(virtual_path), { "skybox", "cubemap", "ibl", "irradiance", "prefilter", "brdf" });
+                    const std::string lower = ToLowerAscii(virtual_path);
+                    const bool isIbl = lower.find(".hdr") != std::string::npos ||
+                        ContainsAny(lower, { "skybox", "cubemap", "ibl", "irradiance", "prefilter", "brdf" });
                     if (isIbl) {
                         const bool isSrgbAstc = (tex->glTexFormat >= 0x93D0 && tex->glTexFormat <= 0x93DD);
                         if (isSrgbAstc) {
