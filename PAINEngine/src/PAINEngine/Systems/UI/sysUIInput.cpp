@@ -1,5 +1,5 @@
 /*****************************************************************//**
- * \file   sysUILayout.h
+ * \file   sysUIInput.cpp
  * \brief  Declaration of UI layout system
  *
  * \author Bryan Lim, 2301214, bryanlicheng.l@digipen.edu (100%)
