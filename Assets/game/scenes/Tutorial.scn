@@ -335,117 +335,6 @@
             {
                 "Entity": {
                     "Components": {
-                        "EditorVisible": {
-                            "locked": false,
-                            "visible": true
-                        },
-                        "GUID": {
-                            "guid": "03e16e0a-c5aa-5143-ab45-929fbb405ffe"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 0
-                        },
-                        "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                2.428318500518799,
-                                -6.523167610168457
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "fog"
-                        },
-                        "ParticleSystem": {
-                            "angularVelocity": 0.0,
-                            "angularVelocityVariance": 0.0,
-                            "blendMode": 0,
-                            "colorOverLifetime": [],
-                            "directionMode": 0,
-                            "directionSpace": 0,
-                            "drag": 0.0,
-                            "emissionDirection": [
-                                1.0,
-                                0.0,
-                                1.0
-                            ],
-                            "emissionRate": 50.0,
-                            "emissionShape": 1,
-                            "emissionSpread": 1000.0,
-                            "gravityMultiplier": 0.0,
-                            "lifetime": 10.0,
-                            "lifetimeVariance": 0.0,
-                            "looping": true,
-                            "maxParticles": 100,
-                            "particleTexture": "5cfacb04-7497-ac40-804a-68259bbb858b",
-                            "playDuration": 0.0,
-                            "playOnAwake": true,
-                            "renderShape": 2,
-                            "shapeParams": {
-                                "boxHalfExtents": [
-                                    0.5,
-                                    0.5,
-                                    0.5
-                                ],
-                                "circleArc": 360.0,
-                                "circleRadius": 0.5,
-                                "coneAngle": 25.0,
-                                "sphereRadius": 90.0,
-                                "volumeEmission": true
-                            },
-                            "simulationSpace": 0,
-                            "sizeOverLifetime": [],
-                            "sizeOverLifetimeMultiplier": 1.0,
-                            "softEdge": 50.0,
-                            "sortMode": 0,
-                            "speed": 1.0,
-                            "speedVariance": 0.0,
-                            "startColor": [
-                                0.2980392277240753,
-                                0.24705882370471954,
-                                0.11372549086809158,
-                                0.11764705926179886
-                            ],
-                            "startColorVariance": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "startRotation": 0.0,
-                            "startRotationVariance": 0.0,
-                            "startSize": 900.0,
-                            "startSizeVariance": 0.0,
-                            "velocityOverLifetime": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "velocityOverLifetimeEnabled": false
-                        }
-                    },
-                    "Name": "fog"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
                         "GUID": {
                             "guid": "298bdf47-4935-4249-8458-79ec7945219d"
                         },
@@ -873,6 +762,117 @@
                         }
                     },
                     "Name": "yes_button"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "EditorVisible": {
+                            "locked": false,
+                            "visible": true
+                        },
+                        "GUID": {
+                            "guid": "03e16e0a-c5aa-5143-ab45-929fbb405ffe"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                2.428318500518799,
+                                -6.523167610168457
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "fog"
+                        },
+                        "ParticleSystem": {
+                            "angularVelocity": 0.0,
+                            "angularVelocityVariance": 0.0,
+                            "blendMode": 0,
+                            "colorOverLifetime": [],
+                            "directionMode": 0,
+                            "directionSpace": 0,
+                            "drag": 0.0,
+                            "emissionDirection": [
+                                1.0,
+                                0.0,
+                                1.0
+                            ],
+                            "emissionRate": 50.0,
+                            "emissionShape": 1,
+                            "emissionSpread": 1000.0,
+                            "gravityMultiplier": 0.0,
+                            "lifetime": 10.0,
+                            "lifetimeVariance": 0.0,
+                            "looping": true,
+                            "maxParticles": 100,
+                            "particleTexture": "5cfacb04-7497-ac40-804a-68259bbb858b",
+                            "playDuration": 0.0,
+                            "playOnAwake": true,
+                            "renderShape": 2,
+                            "shapeParams": {
+                                "boxHalfExtents": [
+                                    0.5,
+                                    0.5,
+                                    0.5
+                                ],
+                                "circleArc": 360.0,
+                                "circleRadius": 0.5,
+                                "coneAngle": 25.0,
+                                "sphereRadius": 90.0,
+                                "volumeEmission": true
+                            },
+                            "simulationSpace": 0,
+                            "sizeOverLifetime": [],
+                            "sizeOverLifetimeMultiplier": 1.0,
+                            "softEdge": 50.0,
+                            "sortMode": 0,
+                            "speed": 1.0,
+                            "speedVariance": 0.0,
+                            "startColor": [
+                                0.2980392277240753,
+                                0.24705882370471954,
+                                0.11372549086809158,
+                                0.11764705926179886
+                            ],
+                            "startColorVariance": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "startRotation": 0.0,
+                            "startRotationVariance": 0.0,
+                            "startSize": 900.0,
+                            "startSizeVariance": 0.0,
+                            "velocityOverLifetime": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "velocityOverLifetimeEnabled": false
+                        }
+                    },
+                    "Name": "fog"
                 }
             },
             {
@@ -10116,7 +10116,8 @@
                             "childrenGUIDs": [
                                 "c9bc93bb-fca8-4341-952c-6f550e3190ac",
                                 "83b6ccea-04e0-a54a-93c0-c94fbdccd8de",
-                                "919b7422-5e7c-c140-b2c0-91ef65fa8262"
+                                "919b7422-5e7c-c140-b2c0-91ef65fa8262",
+                                "ec57d320-b00e-8a4a-a2c7-dceddbe7cadd"
                             ],
                             "parentGUID": "08f7b37b-512b-8046-aa8f-df4df3c659da",
                             "siblingIndex": 1
@@ -10196,13 +10197,13 @@
                         },
                         "Texture2D": {
                             "pos": [
-                                -0.8500000238418579,
-                                0.800000011920929
+                                -0.20000000298023224,
+                                -0.6000000238418579
                             ],
-                            "texture_guid": "d673873b-8700-6f45-80a4-4b8c06d76caa",
+                            "texture_guid": "4bd7df99-9e11-7647-ac44-d5560bf92dfc",
                             "texture_scale": [
-                                0.05000000074505806,
-                                0.05000000074505806
+                                0.5899999737739563,
+                                0.10000000149011612
                             ]
                         },
                         "UIElement": {
@@ -10306,13 +10307,13 @@
                         },
                         "Texture2D": {
                             "pos": [
-                                -0.7200000286102295,
-                                0.800000011920929
+                                0.0,
+                                -0.6000000238418579
                             ],
-                            "texture_guid": "d673873b-8700-6f45-80a4-4b8c06d76caa",
+                            "texture_guid": "4bd7df99-9e11-7647-ac44-d5560bf92dfc",
                             "texture_scale": [
-                                0.05000000074505806,
-                                0.05000000074505806
+                                0.5899999737739563,
+                                0.10000000149011612
                             ]
                         },
                         "UIElement": {
@@ -10416,13 +10417,13 @@
                         },
                         "Texture2D": {
                             "pos": [
-                                -0.5899999737739563,
-                                0.800000011920929
+                                0.20000000298023224,
+                                -0.6000000238418579
                             ],
-                            "texture_guid": "d673873b-8700-6f45-80a4-4b8c06d76caa",
+                            "texture_guid": "4bd7df99-9e11-7647-ac44-d5560bf92dfc",
                             "texture_scale": [
-                                0.05000000074505806,
-                                0.05000000074505806
+                                0.5899999737739563,
+                                0.10000000149011612
                             ]
                         },
                         "UIElement": {
@@ -10478,6 +10479,108 @@
                         }
                     },
                     "Name": "heart_3"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "ec57d320-b00e-8a4a-a2c7-dceddbe7cadd"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "7f20ef65-a9d5-4541-859b-ff911ea58a59",
+                            "siblingIndex": 3
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "heart border"
+                        },
+                        "Texture2D": {
+                            "pos": [
+                                0.0,
+                                -0.6000000238418579
+                            ],
+                            "texture_guid": "fda9fdc4-a022-6744-ba11-f2e14ce229b6",
+                            "texture_scale": [
+                                0.6000000238418579,
+                                0.10000000149011612
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": false,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "heart border"
                 }
             },
             {
@@ -10766,6 +10869,17 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "01217e52-b00d-084d-bea0-6c5346f3d94f",
                                     "siblingIndex": 1
+                                },
+                                "Texture2D": {
+                                    "pos": [
+                                        -0.699999988079071,
+                                        -0.550000011920929
+                                    ],
+                                    "texture_guid": "931913db-35c2-f044-b648-e07fd4f1b456",
+                                    "texture_scale": [
+                                        0.15000000596046448,
+                                        0.15000000596046448
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "0dc7d509-a2c9-b640-ae82-df7adde1fa4b",
@@ -10784,8 +10898,8 @@
                             ],
                             "texture_guid": "931913db-35c2-f044-b648-e07fd4f1b456",
                             "texture_scale": [
-                                0.20000000298023224,
-                                0.20000000298023224
+                                0.15000000596046448,
+                                0.15000000596046448
                             ]
                         },
                         "UIButton": {
@@ -10919,13 +11033,13 @@
                                 },
                                 "Texture2D": {
                                     "pos": [
-                                        0.5,
-                                        -0.550000011920929
+                                        0.6499999761581421,
+                                        -0.6000000238418579
                                     ],
                                     "texture_guid": "ae3a0a6b-31b6-784c-a377-b551352c4e18",
                                     "texture_scale": [
-                                        0.20000000298023224,
-                                        0.20000000298023224
+                                        0.15000000596046448,
+                                        0.15000000596046448
                                     ]
                                 }
                             },
@@ -10940,13 +11054,13 @@
                         },
                         "Texture2D": {
                             "pos": [
-                                0.5,
-                                -0.550000011920929
+                                0.6499999761581421,
+                                -0.6000000238418579
                             ],
                             "texture_guid": "ae3a0a6b-31b6-784c-a377-b551352c4e18",
                             "texture_scale": [
-                                0.20000000298023224,
-                                0.20000000298023224
+                                0.15000000596046448,
+                                0.15000000596046448
                             ]
                         },
                         "UIButton": {
@@ -11072,13 +11186,13 @@
                                 },
                                 "Texture2D": {
                                     "pos": [
-                                        0.75,
-                                        -0.550000011920929
+                                        0.800000011920929,
+                                        -0.3499999940395355
                                     ],
                                     "texture_guid": "5196e609-0b34-0742-87ec-b0260a14c392",
                                     "texture_scale": [
-                                        0.20000000298023224,
-                                        0.20000000298023224
+                                        0.15000000596046448,
+                                        0.15000000596046448
                                     ]
                                 }
                             },
@@ -11093,13 +11207,13 @@
                         },
                         "Texture2D": {
                             "pos": [
-                                0.75,
-                                -0.550000011920929
+                                0.800000011920929,
+                                -0.3499999940395355
                             ],
                             "texture_guid": "5196e609-0b34-0742-87ec-b0260a14c392",
                             "texture_scale": [
-                                0.20000000298023224,
-                                0.20000000298023224
+                                0.15000000596046448,
+                                0.15000000596046448
                             ]
                         },
                         "UIButton": {
@@ -23595,13 +23709,13 @@
         "icon_player_guid": "583cbb29-cbde-054d-b797-df0382da0f9d",
         "icon_scale": 2.0,
         "icon_wall_guid": "00000000-0000-0000-0000-000000000000",
-        "override_position": false,
+        "override_position": true,
         "pos_px": [
-            20.0,
-            20.0
+            100.0,
+            50.0
         ],
         "radius": 15.0,
-        "recommended_position": 5,
+        "recommended_position": 0,
         "rotate_with_player": true,
         "route_mode": 1,
         "shape": 1,
