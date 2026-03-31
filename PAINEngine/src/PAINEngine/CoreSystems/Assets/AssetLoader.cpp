@@ -94,9 +94,9 @@ namespace PAIN {
             bool IsLikelyLinearDataTexturePath(std::string const& virtual_path) {
                 const std::string lower = ToLowerAscii(virtual_path);
 
-                // Keep color/HDR cubemap paths untouched.
+                // IBL/skybox cubemaps need linear sampling to avoid sRGB decode corruption
                 if (ContainsAny(lower, { "skybox", "cubemap", "ibl", "irradiance", "prefilter", "brdf" })) {
-                    return false;
+                    return true;
                 }
 
                 return ContainsAny(lower, {
@@ -268,20 +268,29 @@ namespace PAIN {
                 tex->glBaseFormat = ktx1->glFormat;
                 tex->glDataType = ktx1->glType;
 
-                // Validate IBL texture format to catch sRGB contamination
-                if (tex->is_cube_map && !IsLikelyLinearDataTexturePath(virtual_path)) {
+                // Force linear ASTC for IBL/skybox cubemaps if they were compressed as sRGB ASTC
+                if (tex->is_cube_map) {
                     const bool isIbl = ContainsAny(ToLowerAscii(virtual_path), { "skybox", "cubemap", "ibl", "irradiance", "prefilter", "brdf" });
                     if (isIbl) {
-                        const bool isSrgb = (tex->glTexFormat >= 0x93D0 && tex->glTexFormat <= 0x93DD);
-                        const bool isFloat = (tex->glTexFormat == GL_RGB16F || tex->glTexFormat == GL_RGBA16F ||
-                                              tex->glTexFormat == GL_RGB32F || tex->glTexFormat == GL_RGBA32F ||
-                                              tex->glTexFormat == GL_R11F_G11F_B10F);
-                        if (!isSrgb) {
-                            PN_CORE_INFO("IBL texture '{}' format 0x{:X} is {} (ok)",
-                                virtual_path, tex->glTexFormat, isFloat ? "linear HDR" : "compressed");
+                        const bool isSrgbAstc = (tex->glTexFormat >= 0x93D0 && tex->glTexFormat <= 0x93DD);
+                        if (isSrgbAstc) {
+                            const GLenum linearAstc = ToLinearAstcFormat(static_cast<GLenum>(tex->glTexFormat));
+                            if (linearAstc != 0) {
+                                PN_CORE_WARN("Forcing linear ASTC for IBL cubemap '{}' (0x{:X} -> 0x{:X})",
+                                    virtual_path, tex->glTexFormat, linearAstc);
+                                tex->glTexFormat = static_cast<int>(linearAstc);
+                            }
                         } else {
-                            PN_CORE_WARN("IBL texture '{}' uses sRGB format 0x{:X} - this will corrupt specular IBL!",
-                                virtual_path, tex->glTexFormat);
+                            const bool isFloat = (tex->glTexFormat == GL_RGB16F || tex->glTexFormat == GL_RGBA16F ||
+                                                  tex->glTexFormat == GL_RGB32F || tex->glTexFormat == GL_RGBA32F ||
+                                                  tex->glTexFormat == GL_R11F_G11F_B10F);
+                            const bool isLinearAstc = (tex->glTexFormat >= 0x93B0 && tex->glTexFormat <= 0x93BD);
+                            if (isFloat || isLinearAstc) {
+                                PN_CORE_INFO("IBL cubemap '{}' format 0x{:X} is {} (ok)",
+                                    virtual_path, tex->glTexFormat, isFloat ? "linear HDR" : "linear ASTC");
+                            } else {
+                                PN_CORE_WARN("IBL cubemap '{}' unexpected format 0x{:X}", virtual_path, tex->glTexFormat);
+                            }
                         }
                     }
                 }
@@ -293,7 +302,7 @@ namespace PAIN {
                             "Forcing linear ASTC decode for data texture '{}' (internal 0x{:X} -> 0x{:X})",
                             virtual_path, tex->glTexFormat, linearAstc
                         );
-                        tex->glTexFormat = linearAstc;
+                        tex->glTexFormat = static_cast<int>(linearAstc);
                     }
                 }
             }

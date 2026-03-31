@@ -145,6 +145,21 @@ namespace {
                lower.find("displacement") != std::string::npos;
     }
 
+    // Detect if a texture is an IBL/skybox environment map.
+    // IBL textures must use linear color space: sRGB decoding during sampling
+    // corrupts prefilter/irradiance calculations, making Android specular too bright.
+    bool IsIblSkyboxTexture(const std::string& filename) {
+        std::string lower = PAIN::Assets::toLowerCase(filename);
+        return lower.find("skybox") != std::string::npos ||
+               lower.find("sky") != std::string::npos ||
+               lower.find("cubemap") != std::string::npos ||
+               lower.find("ibl") != std::string::npos ||
+               lower.find("irradiance") != std::string::npos ||
+               lower.find("prefilter") != std::string::npos ||
+               lower.find("env") != std::string::npos ||
+               lower.find("brdf") != std::string::npos;
+    }
+
     // KTX1 format constants for patching sRGB to linear
     constexpr uint32_t KTX_ENDIANNESS = 0x04030201;
     constexpr uint32_t KTX_OPPOSITE_ENDIANNESS = 0x01020304;
@@ -1134,10 +1149,13 @@ namespace PAIN {
             if (compression_success && std::filesystem::exists(asset_info.shipped_path)) {
                 std::cout << "Texture compiled successfully: " << asset_info.shipped_path.filename() << std::endl;
 
-                // For Android data textures, patch KTX to use linear ASTC format
+                // For Android data textures and IBL/skybox textures, patch KTX to use linear ASTC format
+                // IBL textures compressed as sRGB ASTC cause specular to appear brighter due to
+                // GPU automatic sRGB-to-linear decode during textureLod sampling in the prefilter shader.
                 if (platform == Platform::Android && 
                     compression_format.find("ASTC") != std::string::npos &&
-                    IsLinearDataTexture(asset_info.raw_path.string())) {
+                    (IsLinearDataTexture(asset_info.raw_path.string()) ||
+                     IsIblSkyboxTexture(asset_info.raw_path.string()))) {
                     PatchKtxToLinearAstc(asset_info.shipped_path.string());
                 }
 
