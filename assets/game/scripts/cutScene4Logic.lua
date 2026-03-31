@@ -105,10 +105,10 @@ registerUpdate(function(dt)
         local fileName = ""
         if isMobile then
             -- Android: use KTX format (compressed texture format)
-            fileName = "game/textures/cs4-" .. currentFrame .. " WIP.ktx"
+            fileName = "game/textures/cs4-" .. currentFrame .. " .ktx"
         else
             -- Windows: use PNG format
-            fileName = "game/textures/cs4-" .. currentFrame .. " WIP.png"
+            fileName = "game/textures/cs4-" .. currentFrame .. " .png"
         end
         
         local guid = getImageID(fileName)

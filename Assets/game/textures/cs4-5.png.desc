@@ -1,0 +1,23 @@
+{
+  "asset_info": {
+    "name": "cs4-5.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 1502704727514709414
+  },
+  "descriptor_version": 1,
+  "guid": "b80405a9-e9bf-9c42-a1c9-c17b040dbbb1",
+  "import_settings": {
+    "android_allow_astc_hdr": false,
+    "android_bake_cubemap": false,
+    "android_compression": "ASTC_4x4",
+    "android_skybox_source_format": "R16G16B16A16",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\cs4-5.png"
+  }
+}

@@ -114,9 +114,9 @@
         "fov": 90.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            0.3762663006782532,
-            0.985648512840271,
-            1.692427635192871
+            0.3756290078163147,
+            0.9955667853355408,
+            1.7097833156585693
         ],
         "sensitivity": 0.11999999731779099,
         "speed": 0.10000000149011612,
@@ -2005,10 +2005,10 @@
                                 0.0,
                                 0.0
                             ],
-                            "texture_guid": "2843f15d-7774-474e-a140-204578dc6cbb",
+                            "texture_guid": "21938da9-2a81-5548-9ff2-1a92c37c54e6",
                             "texture_scale": [
-                                0.0,
-                                0.0
+                                2.0,
+                                1.0
                             ]
                         },
                         "UIElement": {
@@ -2107,10 +2107,10 @@
                                 0.0,
                                 0.0
                             ],
-                            "texture_guid": "442363af-cd3a-5844-a1f8-aa7b2d61fd8c",
+                            "texture_guid": "0b52ac7e-58ab-8146-bcb4-63974550d1d9",
                             "texture_scale": [
-                                0.0,
-                                0.0
+                                2.0,
+                                1.0
                             ]
                         },
                         "UIElement": {
@@ -2209,10 +2209,10 @@
                                 0.0,
                                 0.0
                             ],
-                            "texture_guid": "383ea86a-d04a-714a-ae1b-69efc374d038",
+                            "texture_guid": "5475c59f-37ec-a546-9465-5eefa5349bd7",
                             "texture_scale": [
-                                0.0,
-                                0.0
+                                2.0,
+                                1.0
                             ]
                         },
                         "UIElement": {
@@ -2311,10 +2311,10 @@
                                 0.0,
                                 0.0
                             ],
-                            "texture_guid": "4b5265dd-bff1-154b-aee2-0f2977e767fe",
+                            "texture_guid": "c0f133d4-acc1-6a4a-835b-065b5a3faaa5",
                             "texture_scale": [
-                                0.0,
-                                0.0
+                                2.0,
+                                1.0
                             ]
                         },
                         "UIElement": {
@@ -2413,10 +2413,10 @@
                                 0.0,
                                 0.0
                             ],
-                            "texture_guid": "d7a1f532-004d-9548-adee-5dd888331b15",
+                            "texture_guid": "b80405a9-e9bf-9c42-a1c9-c17b040dbbb1",
                             "texture_scale": [
-                                0.0,
-                                0.0
+                                2.0,
+                                1.0
                             ]
                         },
                         "UIElement": {
@@ -2515,10 +2515,10 @@
                                 0.0,
                                 0.0
                             ],
-                            "texture_guid": "3deb7825-b35e-0048-9837-32d9bc25aa9e",
+                            "texture_guid": "4d186907-e73c-6a4c-809a-1c0d6540498f",
                             "texture_scale": [
-                                0.0,
-                                0.0
+                                2.0,
+                                1.0
                             ]
                         },
                         "UIElement": {
@@ -2617,10 +2617,10 @@
                                 0.0,
                                 0.0
                             ],
-                            "texture_guid": "64417822-46a0-da4f-a3cb-66f7689f6384",
+                            "texture_guid": "9ec61ff1-d507-604c-a7c7-8ab090ab8e9a",
                             "texture_scale": [
-                                0.0,
-                                0.0
+                                2.0,
+                                1.0
                             ]
                         },
                         "UIElement": {
@@ -2719,10 +2719,10 @@
                                 0.0,
                                 0.0
                             ],
-                            "texture_guid": "9e0f613c-605e-2c44-8962-5b9ac6e5bff4",
+                            "texture_guid": "a7f14880-bf05-5a4f-97c2-61c12f6a92b4",
                             "texture_scale": [
-                                0.0,
-                                0.0
+                                2.0,
+                                1.0
                             ]
                         },
                         "UIElement": {
@@ -2821,10 +2821,10 @@
                                 0.0,
                                 0.0
                             ],
-                            "texture_guid": "9621df35-6195-2d4a-a622-6eecdde7331f",
+                            "texture_guid": "80f1b6b3-b72f-9743-8d7c-7673c16c40ea",
                             "texture_scale": [
-                                0.0,
-                                0.0
+                                2.0,
+                                1.0
                             ]
                         },
                         "UIElement": {
@@ -3299,9 +3299,9 @@
             1.5
         ],
         "worldLightPosition": [
-            12.041973114013672,
-            19.650779724121094,
-            6.358710289001465
+            12.041336059570313,
+            19.66069793701172,
+            6.376066207885742
         ],
         "worldLightShadowFollowDistance": 22.5,
         "worldLightShadowResolution": 1024,
