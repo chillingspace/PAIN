@@ -238,6 +238,7 @@ namespace PAIN {
 	struct UIFollowsWorldEntity {
 		Assets::GUID entity_target_guid;     // The 3D entity to follow
 		glm::vec3 world_offset{ 0, 2, 0 };   // Offset in world space (e.g., 2 units above entity)
+		bool b_hidden = false;               // Set from Lua to suppress rendering regardless of camera state
 	};
 
 	// ═══════════════════════════════════════════════════════════════════════

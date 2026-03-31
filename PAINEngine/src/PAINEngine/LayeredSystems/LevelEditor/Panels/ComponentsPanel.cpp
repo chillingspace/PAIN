@@ -1088,23 +1088,27 @@ namespace PAIN {
 							return;
 						}
 
-						std::string currentTag = "Untagged";
-						if (!tagComp.tags.empty())
-							currentTag = *tagComp.tags.begin();
-
-						ImGui::Text("Current Tag: %s", currentTag.c_str());
+						// Show all current tags with remove buttons
+						ImGui::TextUnformatted("Tags:");
+						std::string tagToRemove;
+						for (auto const& tag : tagComp.tags) {
+							ImGui::BulletText("%s", tag.c_str());
+							ImGui::SameLine();
+							std::string removeLabel = "x##" + tag;
+							if (ImGui::SmallButton(removeLabel.c_str()))
+								tagToRemove = tag;
+						}
+						if (!tagToRemove.empty())
+							metaSvc->removeTag(e, tagToRemove);
 
 						const auto& allTags = metaSvc->getRegisteredTags();
 
-						if (ImGui::BeginCombo("Tag", currentTag.c_str())) {
+						// Add a tag from the registered list
+						if (ImGui::BeginCombo("Add Tag##Combo", "-- select --")) {
 							for (auto const& t : allTags) {
-								bool selected = (t == currentTag);
-								if (ImGui::Selectable(t.c_str(), selected)) {
-									// Clears old tags & sets this one
-									metaSvc->setEntityTag(e, t);
-								}
-								if (selected)
-									ImGui::SetItemDefaultFocus();
+								if (tagComp.tags.count(t)) continue; // skip tags already on entity
+								if (ImGui::Selectable(t.c_str(), false))
+									metaSvc->addTag(e, t);
 							}
 							ImGui::EndCombo();
 						}
@@ -1114,7 +1118,7 @@ namespace PAIN {
 						ImGui::InputText("New Tag", newTagBuf, sizeof(newTagBuf));
 						ImGui::SameLine();
 						if (ImGui::Button("Add##Tag") && newTagBuf[0] != '\0') {
-							metaSvc->setEntityTag(e, newTagBuf); // also registers it
+							metaSvc->addTag(e, newTagBuf);
 							newTagBuf[0] = '\0';
 						}
 					});
@@ -2515,6 +2519,50 @@ namespace PAIN {
 				// consume flags after render
 				collapse_all_requested = false;
 				expand_all_requested = false;
+
+				// ── UI Followers ──
+				// Show any UI entities that follow this entity, so their world_offset
+				// can be edited without switching selection.
+				{
+					auto& registry = ecs->getRegistry(currentRegistryID);
+					auto* selectedGUID = registry.try_get<Entity::GUID>(selected);
+					if (selectedGUID) {
+						std::vector<entt::entity> followers;
+						for (auto [entity, follow] :
+							 registry.view<UIFollowsWorldEntity>().each()) {
+							if (follow.entity_target_guid == selectedGUID->guid)
+								followers.push_back(entity);
+						}
+
+						if (!followers.empty()) {
+							ImGui::Spacing();
+							ImGui::Separator();
+							ImGui::Spacing();
+
+							ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.9f, 1.0f, 1.0f));
+							bool open = ImGui::CollapsingHeader(
+								"UI Followers", ImGuiTreeNodeFlags_DefaultOpen);
+							ImGui::PopStyleColor();
+
+							if (open) {
+								for (auto follower : followers) {
+									auto* nameComp = registry.try_get<Entity::Name>(follower);
+									std::string follower_name =
+										nameComp ? nameComp->name : "[unnamed]";
+
+									ImGui::PushID(static_cast<int>(follower));
+									ImGui::TextUnformatted(follower_name.c_str());
+									auto* follow = registry.try_get<UIFollowsWorldEntity>(follower);
+									if (follow) {
+										ImGui::DragFloat3("World Offset", &follow->world_offset.x,
+														  0.1f, -100.0f, 100.0f, "%.2f");
+									}
+									ImGui::PopID();
+								}
+							}
+						}
+					}
+				}
 
 				ImGui::Spacing();
 				ImGui::Separator();

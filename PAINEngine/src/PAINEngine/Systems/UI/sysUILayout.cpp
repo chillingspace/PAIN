@@ -148,6 +148,12 @@ namespace PAIN {
             );
 
             for (auto&& [entity, follows, rect, elem] : view_floating.each()) {
+                // Script-driven hide takes priority over all camera/frustum logic
+                if (follows.b_hidden) {
+                    elem.b_is_enabled = false;
+                    continue;
+                }
+
                 entt::entity target = ecs->resolveGUID(follows.entity_target_guid);
 
                 if (target == entt::null || !registry.valid(target) ||

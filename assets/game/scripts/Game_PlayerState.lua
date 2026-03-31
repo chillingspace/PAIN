@@ -86,6 +86,9 @@ _G.PlayerState = _G.PlayerState or {
     uiEndScreen = nil,
     spawnGraceTime = 0.0, --5.0
 
+    -- interaction prompt billboard entities
+    promptEntities = {},   -- list of { entity=<id>, ptype="pipe"|"hide"|"collect" }
+
     _keysRegistered = false
 }
 
@@ -283,6 +286,7 @@ function S.init(player)
         S.letterBaseScale = nil
         S.startPos = nil -- force re-cache
         S.checkpointPos = nil
+        S.promptEntities = {}   -- force re-discovery of prompt billboard entities
 
         -- Clear input state
         restartPressed = false
@@ -324,6 +328,27 @@ function S.init(player)
     if S.uiEndScreen and setUITexture then
         setUITexture(S.uiEndScreen, "")
     end
+
+    -- Discover all interaction prompt billboard entities and hide them
+    S.promptEntities = {}
+    local allPrompts = getEntitiesByTag and getEntitiesByTag("interaction_prompt") or {}
+    for _, e in ipairs(allPrompts) do
+        local ptype
+        if hasTag(e, "prompt_pipe") then
+            ptype = "pipe"
+        elseif hasTag(e, "prompt_hide") then
+            ptype = "hide"
+        elseif hasTag(e, "prompt_collect") then
+            ptype = "collect"
+        end
+        -- Resolve the interactable entity this prompt follows (for distance checks)
+        local targetId = getUIFollowTarget and getUIFollowTarget(e) or nil
+        if ptype and targetId then
+            table.insert(S.promptEntities, { entity = e, ptype = ptype, target = targetId })
+        end
+        setUIFollowEnabled(e, false)
+    end
+    log("[PlayerState] Interaction prompts found:", #S.promptEntities)
 
     -- queue heart binding
     S.pendingHeartBind = true
@@ -752,6 +777,48 @@ end
 
 
 
+-------------------------------------------------
+-- Helper: Show/hide interaction prompt billboards (UIFollowsWorldEntity)
+-- Facing is automatic — the layout system projects the target's world
+-- position to screen space each frame, so no rotation needed.
+-------------------------------------------------
+local function updateInteractionPrompts(px, py, pz)
+    if not S.promptEntities or #S.promptEntities == 0 then return end
+
+    -- While hiding or inside a pipe, suppress all prompts
+    local forceHide = S.hidden or S.inPipe
+
+    for _, prompt in ipairs(S.promptEntities) do
+        local e      = prompt.entity
+        local ptype  = prompt.ptype
+        local target = prompt.target  -- the interactable entity this prompt follows
+
+        if forceHide then
+            setUIFollowEnabled(e, false)
+        else
+            local tx, ty, tz = getPosition(target)
+            if tx and ty and tz then
+                -- Determine radius for this prompt type
+                local radius
+                if ptype == "pipe" then
+                    radius = S.pipeEnterRadius
+                elseif ptype == "hide" then
+                    radius = S.hideRadius
+                else -- "collect"
+                    radius = S.pickupRadius
+                end
+
+                local dx     = px - tx
+                local dy     = py - ty
+                local dz     = pz - tz
+                local distSq = dx*dx + dy*dy + dz*dz
+
+                setUIFollowEnabled(e, distSq <= radius * radius)
+            end
+        end
+    end
+end
+
 function S.update(dt)
     CURRENT_SCENE_PATH = currentScene()
     NEXT_SCENE_PATH = nextScene()
@@ -846,7 +913,12 @@ function S.update(dt)
     ensureMinimapGameplayTags()
 
     -------------------------------------------------
-    -- 8. Hide/Unhide logic (H key)
+    -- 8. Interaction prompt billboards
+    -------------------------------------------------
+    updateInteractionPrompts(px, py, pz)
+
+    -------------------------------------------------
+    -- 9. Hide/Unhide logic (H key)
     -------------------------------------------------
     if hidePressed then
         hidePressed = false
@@ -854,7 +926,7 @@ function S.update(dt)
     end
 
     -------------------------------------------------
-    -- 9. Letter carry/deliver/pickup logic (C key)
+    -- 10. Letter carry/deliver/pickup logic (C key)
     -------------------------------------------------
     handleLetterLogic(px, py, pz)
 end
