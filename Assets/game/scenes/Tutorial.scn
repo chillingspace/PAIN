@@ -237,16 +237,16 @@
         ],
         "farPlane": 100.0,
         "forward": [
-            -0.32845214009284973,
-            -0.561847984790802,
-            0.7592405080795288
+            0.7498763799667358,
+            -0.6168121695518494,
+            0.23922424018383026
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            7.091859817504883,
-            20.966934204101563,
-            -32.41135025024414
+            -4.125285625457764,
+            14.828756332397461,
+            -12.48643970489502
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 20.0,
@@ -330,6 +330,117 @@
                         }
                     },
                     "Name": "skybox"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "EditorVisible": {
+                            "locked": false,
+                            "visible": true
+                        },
+                        "GUID": {
+                            "guid": "03e16e0a-c5aa-5143-ab45-929fbb405ffe"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                2.428318500518799,
+                                -6.523167610168457
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "fog"
+                        },
+                        "ParticleSystem": {
+                            "angularVelocity": 0.0,
+                            "angularVelocityVariance": 0.0,
+                            "blendMode": 0,
+                            "colorOverLifetime": [],
+                            "directionMode": 0,
+                            "directionSpace": 0,
+                            "drag": 0.0,
+                            "emissionDirection": [
+                                1.0,
+                                0.0,
+                                1.0
+                            ],
+                            "emissionRate": 50.0,
+                            "emissionShape": 1,
+                            "emissionSpread": 1000.0,
+                            "gravityMultiplier": 0.0,
+                            "lifetime": 10.0,
+                            "lifetimeVariance": 0.0,
+                            "looping": true,
+                            "maxParticles": 100,
+                            "particleTexture": "5cfacb04-7497-ac40-804a-68259bbb858b",
+                            "playDuration": 0.0,
+                            "playOnAwake": true,
+                            "renderShape": 2,
+                            "shapeParams": {
+                                "boxHalfExtents": [
+                                    0.5,
+                                    0.5,
+                                    0.5
+                                ],
+                                "circleArc": 360.0,
+                                "circleRadius": 0.5,
+                                "coneAngle": 25.0,
+                                "sphereRadius": 90.0,
+                                "volumeEmission": true
+                            },
+                            "simulationSpace": 0,
+                            "sizeOverLifetime": [],
+                            "sizeOverLifetimeMultiplier": 1.0,
+                            "softEdge": 50.0,
+                            "sortMode": 0,
+                            "speed": 1.0,
+                            "speedVariance": 0.0,
+                            "startColor": [
+                                0.2980392277240753,
+                                0.24705882370471954,
+                                0.11372549086809158,
+                                0.11764705926179886
+                            ],
+                            "startColorVariance": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "startRotation": 0.0,
+                            "startRotationVariance": 0.0,
+                            "startSize": 900.0,
+                            "startSizeVariance": 0.0,
+                            "velocityOverLifetime": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "velocityOverLifetimeEnabled": false
+                        }
+                    },
+                    "Name": "fog"
                 }
             },
             {
@@ -762,113 +873,6 @@
                         }
                     },
                     "Name": "yes_button"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "GUID": {
-                            "guid": "03e16e0a-c5aa-5143-ab45-929fbb405ffe"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 0
-                        },
-                        "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                2.428318500518799,
-                                -6.523167610168457
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "fog"
-                        },
-                        "ParticleSystem": {
-                            "angularVelocity": 0.0,
-                            "angularVelocityVariance": 0.0,
-                            "blendMode": 0,
-                            "colorOverLifetime": [],
-                            "directionMode": 0,
-                            "directionSpace": 0,
-                            "drag": 0.0,
-                            "emissionDirection": [
-                                1.0,
-                                0.0,
-                                1.0
-                            ],
-                            "emissionRate": 500.0,
-                            "emissionShape": 1,
-                            "emissionSpread": 1000.0,
-                            "gravityMultiplier": 0.0,
-                            "lifetime": 10.0,
-                            "lifetimeVariance": 0.0,
-                            "looping": true,
-                            "maxParticles": 1000,
-                            "particleTexture": "5cfacb04-7497-ac40-804a-68259bbb858b",
-                            "playDuration": 0.0,
-                            "playOnAwake": true,
-                            "renderShape": 2,
-                            "shapeParams": {
-                                "boxHalfExtents": [
-                                    0.5,
-                                    0.5,
-                                    0.5
-                                ],
-                                "circleArc": 360.0,
-                                "circleRadius": 0.5,
-                                "coneAngle": 25.0,
-                                "sphereRadius": 90.0,
-                                "volumeEmission": true
-                            },
-                            "simulationSpace": 0,
-                            "sizeOverLifetime": [],
-                            "sizeOverLifetimeMultiplier": 1.0,
-                            "softEdge": 50.0,
-                            "sortMode": 0,
-                            "speed": 1.0,
-                            "speedVariance": 0.0,
-                            "startColor": [
-                                0.2980392277240753,
-                                0.24705882370471954,
-                                0.11372549086809158,
-                                0.11764705926179886
-                            ],
-                            "startColorVariance": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "startRotation": 0.0,
-                            "startRotationVariance": 0.0,
-                            "startSize": 500.0,
-                            "startSizeVariance": 0.0,
-                            "velocityOverLifetime": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "velocityOverLifetimeEnabled": false
-                        }
-                    },
-                    "Name": "fog"
                 }
             },
             {
@@ -23345,9 +23349,9 @@
             0.800000011920929
         ],
         "worldLightPosition": [
-            18.757566452026367,
-            39.63206481933594,
-            -27.745067596435547
+            7.540421009063721,
+            33.49388885498047,
+            -7.820157051086426
         ],
         "worldLightShadowFollowDistance": 22.5,
         "worldLightShadowResolution": 1024,

@@ -222,6 +222,7 @@ namespace PAIN {
 		int max_length = 0;                   // 0 = unlimited, >0 = truncate text
 
 		// ─── Internal (do not set manually) ───
+		glm::vec2 layout_position{ 0, 0 };  // Set by layout system - do not touch
 		glm::vec2 text_pos{ 0, 0 };          // Calculated by renderer
 		float scale_factor = 1.0f;            // Calculated by layout system
 	};
@@ -430,6 +431,7 @@ REFL_FIELD(shadow_offset)
 REFL_FIELD(shadow_color)
 REFL_FIELD(max_length)
 REFL_FIELD(wrap_width)
+REFL_FIELD(text_pos)
 REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::UIText>);

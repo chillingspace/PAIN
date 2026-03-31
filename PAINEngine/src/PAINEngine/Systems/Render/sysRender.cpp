@@ -3239,7 +3239,7 @@ namespace PAIN {
 					text_comp.scale_factor = rect_comp.scale.z;
 				}
 				else if (rect_comp.layout_dirty) {
-					text_comp.text_pos = rect_comp.calculated_world_position;
+					text_comp.layout_position = rect_comp.calculated_world_position;
 					text_comp.scale_factor = rect_comp.scale.x;
 					rect_comp.layout_dirty = false;
 				}
