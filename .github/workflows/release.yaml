@@ -11,28 +11,40 @@ on:
         description: 'Name of the release'
         required: true
         default: 'Release v1.0.0'
+      windows_run_id:
+        description: 'The Run ID of the successful Windows CI/CD'
+        required: true
+      android_run_id:
+        description: 'The Run ID of the successful Android CI/CD'
+        required: true
 
 jobs:
   create-release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: read
     steps:
       - uses: actions/checkout@v4
 
+      - name: Create Artifact Directory
+        run: mkdir release-artifacts
+
       - name: Download Windows Installer
-        uses: actions/download-artifact@v4
-        with:
-          name: Friends-Frog-ever-Installer
-          path: release-artifacts/
-          # This will download the artifact from the most recent successful run of any workflow that produced it
-          # You might need to specify a run-id if you want a specific build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh run download ${{ github.event.inputs.windows_run_id }} \
+            --name Friends-Frog-ever-Installer \
+            --dir release-artifacts/
 
       - name: Download Android APK
-        uses: actions/download-artifact@v4
-        with:
-          name: release-apk
-          path: release-artifacts/
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh run download ${{ github.event.inputs.android_run_id }} \
+            --name release-apk \
+            --dir release-artifacts/
 
       - name: Create GitHub Release
         env:
@@ -41,4 +53,5 @@ jobs:
           gh release create ${{ github.event.inputs.tag_name }} \
             --title "${{ github.event.inputs.release_name }}" \
             --notes "Automated release of Friends-Frog-ever." \
-            release-artifacts/*
+            release-artifacts/*.exe \
+            release-artifacts/*.apk
