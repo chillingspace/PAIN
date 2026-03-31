@@ -1,0 +1,22 @@
+name: Pain Engine CD Android
+
+on:
+  workflow_call:
+
+jobs:
+  cd-android:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Download Android APK
+        uses: actions/download-artifact@v4
+        with:
+          name: android-release-apk-raw
+          path: release-apk/
+
+      - name: Upload Final Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: release-apk/*.apk

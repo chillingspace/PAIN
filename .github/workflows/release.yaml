@@ -1,0 +1,89 @@
+name: Create GitHub Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag name for the release (e.g., v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+      release_name:
+        description: 'Name of the release'
+        required: true
+        default: 'Release v1.0.0'
+      windows_run_id:
+        description: 'Optional: Specific Windows Run ID (Leave blank for latest successful)'
+        required: false
+      android_run_id:
+        description: 'Optional: Specific Android Run ID (Leave blank for latest successful)'
+        required: false
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create Artifact Directory
+        run: mkdir release-artifacts
+
+      - name: Resolve and Download Windows Installer
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          WIN_ID="${{ github.event.inputs.windows_run_id }}"
+          
+          if [ -z "$WIN_ID" ]; then
+            echo "Searching for latest successful Windows build..."
+            WIN_ID=$(gh run list --workflow "Pain Engine Windows CI" --branch ${{ github.ref_name }} --status success --limit 1 --json databaseId --jq '.[0].databaseId')
+            
+            if [ "$WIN_ID" == "null" ] || [ -z "$WIN_ID" ]; then
+              echo "No success on ${{ github.ref_name }}, checking main..."
+              WIN_ID=$(gh run list --workflow "Pain Engine Windows CI" --branch main --status success --limit 1 --json databaseId --jq '.[0].databaseId')
+            fi
+          fi
+
+          if [ -z "$WIN_ID" ] || [ "$WIN_ID" == "null" ]; then
+            echo "::error::Could not find a successful Windows run!"
+            exit 1
+          fi
+
+          echo "Using Windows Run ID: $WIN_ID"
+          gh run download $WIN_ID --name Friends-Frog-ever-Installer --dir release-artifacts/
+
+      - name: Resolve and Download Android APK
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          AND_ID="${{ github.event.inputs.android_run_id }}"
+          
+          if [ -z "$AND_ID" ]; then
+            echo "Searching for latest successful Android build..."
+            AND_ID=$(gh run list --workflow "Pain Engine Android CI" --branch ${{ github.ref_name }} --status success --limit 1 --json databaseId --jq '.[0].databaseId')
+            
+            if [ "$AND_ID" == "null" ] || [ -z "$AND_ID" ]; then
+              echo "No success on ${{ github.ref_name }}, checking main..."
+              AND_ID=$(gh run list --workflow "Pain Engine Android CI" --branch main --status success --limit 1 --json databaseId --jq '.[0].databaseId')
+            fi
+          fi
+
+          if [ -z "$AND_ID" ] || [ "$AND_ID" == "null" ]; then
+            echo "::error::Could not find a successful Android run!"
+            exit 1
+          fi
+
+          echo "Using Android Run ID: $AND_ID"
+          gh run download $AND_ID --name release-apk --dir release-artifacts/
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${{ github.event.inputs.tag_name }} \
+            --title "${{ github.event.inputs.release_name }}" \
+            --notes "Automated release of Friends-Frog-ever." \
+            release-artifacts/*.exe \
+            release-artifacts/*.apk
