@@ -268,6 +268,24 @@ namespace PAIN {
                 tex->glBaseFormat = ktx1->glFormat;
                 tex->glDataType = ktx1->glType;
 
+                // Validate IBL texture format to catch sRGB contamination
+                if (tex->is_cube_map && !IsLikelyLinearDataTexturePath(virtual_path)) {
+                    const bool isIbl = ContainsAny(ToLowerAscii(virtual_path), { "skybox", "cubemap", "ibl", "irradiance", "prefilter", "brdf" });
+                    if (isIbl) {
+                        const bool isSrgb = (tex->glTexFormat >= 0x93D0 && tex->glTexFormat <= 0x93DD);
+                        const bool isFloat = (tex->glTexFormat == GL_RGB16F || tex->glTexFormat == GL_RGBA16F ||
+                                              tex->glTexFormat == GL_RGB32F || tex->glTexFormat == GL_RGBA32F ||
+                                              tex->glTexFormat == GL_R11F_G11F_B10F);
+                        if (!isSrgb) {
+                            PN_CORE_INFO("IBL texture '{}' format 0x{:X} is {} (ok)",
+                                virtual_path, tex->glTexFormat, isFloat ? "linear HDR" : "compressed");
+                        } else {
+                            PN_CORE_WARN("IBL texture '{}' uses sRGB format 0x{:X} - this will corrupt specular IBL!",
+                                virtual_path, tex->glTexFormat);
+                        }
+                    }
+                }
+
                 if (!tex->is_cube_map && IsLikelyLinearDataTexturePath(virtual_path)) {
                     const GLenum linearAstc = ToLinearAstcFormat(static_cast<GLenum>(tex->glTexFormat));
                     if (linearAstc != 0 && linearAstc != tex->glTexFormat) {
@@ -445,9 +463,24 @@ namespace PAIN {
             // ========================================
             //  USE KTX API TO GET ACTUAL MIP SIZES
             // ========================================
+            // CRITICAL: For uncompressed HDR cubemaps, ktxTexture_GetImageSize() returns
+            // the size of ALL faces combined at that mip level, not per-face.
+            // For compressed textures, it also returns the total size for the mip level.
+            // We must divide by numFaces to get per-face size for uncompressed textures
+            // when iterating face-by-face, OR use the total size when uploading.
+            //
+            // The KTX format stores faces sequentially within each mip level.
+            //
+            // NOTE: ktxTexture_GetImageOffset returns the offset from the start of the 
+            // texture data to the specified mip level and face.
+            // ktxTexture_GetImageSize returns the size of that mip level (all faces combined).
+            
+            // Get total data size for bounds checking
+            ktx_size_t totalKtxDataSize = ktxTexture_GetDataSize(kTexture);
+            
             for (uint32_t face = 0; face < numFaces; ++face) {
                 for (uint32_t mip = 0; mip < static_cast<uint32_t>(tex->mips); ++mip) {
-                    // Get offset
+                    // Get offset to this mip/face
                     ktx_size_t imageOffset = 0;
                     KTX_error_code ofsResult = ktxTexture_GetImageOffset(
                         kTexture, mip, 0, face, &imageOffset);
@@ -458,24 +491,75 @@ namespace PAIN {
                             std::to_string(mip) + ", face " + std::to_string(face));
                     }
 
-                    // GET ACTUAL SIZE FROM KTX
-                    ktx_size_t mipSize = ktxTexture_GetImageSize(kTexture, mip);
-                    if (mipSize == 0) {
+                    // Calculate actual per-face size from dimensions.
+                    // For compressed textures, ktxTexture_GetImageSize() already returns per-face size.
+                    // For uncompressed cubemaps, it returns total across all faces,
+                    // so we derive size directly from pixel dimensions.
+                    ktx_size_t faceMipSize;
+                    if (tex->is_compressed) {
+                        faceMipSize = ktxTexture_GetImageSize(kTexture, mip);
+                    } else {
+                        // Uncompressed: calculate from mip dimensions
+                        int32_t faceW = std::max(1, static_cast<int32_t>(kTexture->baseWidth >> mip));
+                        int32_t faceH = std::max(1, static_cast<int32_t>(kTexture->baseHeight >> mip));
+                        
+                        // Determine bytes-per-pixel from format
+                        uint32_t bpp = 0;
+                        switch (tex->glTexFormat) {
+                        case GL_RGB16F:      bpp = 6;  break;  // 3 × 2 bytes
+                        case GL_RGBA16F:     bpp = 8;  break;  // 4 × 2 bytes
+                        case GL_RGBA8:       bpp = 4;  break;  // 4 × 1 byte
+                        case GL_RGB8:        bpp = 3;  break;  // 3 × 1 byte
+                        case GL_R11F_G11F_B10F: bpp = 4; break;  // packed 32-bit
+                        default:
+                            // Fallback: use KTX info and derive from total
+                            bpp = (kTexture->dataSize / (kTexture->baseWidth * kTexture->baseHeight)) / numFaces;
+                            if (bpp == 0) bpp = 8; // default to RGBA16F
+                            break;
+                        }
+                        faceMipSize = static_cast<ktx_size_t>(faceW) * static_cast<ktx_size_t>(faceH) * bpp;
+                        
+                        // For KTX1 uncompressed cubemaps, GetImageSize returns total for all faces.
+                        // Verify our calculation matches and use it instead.
+                        ktx_size_t reportedSize = ktxTexture_GetImageSize(kTexture, mip);
+                        ktx_size_t totalFaceSize = faceMipSize * static_cast<ktx_size_t>(numFaces);
+                        if (reportedSize > 0 && totalFaceSize > 0 && std::abs(static_cast<int64_t>(reportedSize - totalFaceSize)) < 100) {
+                            // KTX reports total for all faces; our per-face calc is correct
+                        } else if (reportedSize > faceMipSize) {
+                            // KTX reports per-face already, use it
+                            faceMipSize = reportedSize;
+                        }
+                    }
+
+                    // Verify we have valid data
+                    if (faceMipSize == 0) {
                         ktxTexture_Destroy(kTexture);
-                        throw std::runtime_error("No data for KTX mip level " +
+                        throw std::runtime_error("Zero-size data for KTX mip level " +
+                            std::to_string(mip) + " face " + std::to_string(face));
+                    }
+
+                    // Bounds check: make sure we don't read past the end of texture data
+                    // imageOffset is from the start of texture data
+                    // faceMipSize is the size for this specific face
+                    if (imageOffset + faceMipSize > totalKtxDataSize) {
+                        PN_CORE_ERROR("KTX face {} mip {} would exceed texture data (offset={}, faceSize={}, total={})",
+                            face, mip, imageOffset, faceMipSize, totalKtxDataSize);
+                        ktxTexture_Destroy(kTexture);
+                        throw std::runtime_error("KTX mip data out of bounds for mip " +
                             std::to_string(mip) + " face " + std::to_string(face));
                     }
 
                     // Store offset and size
                     tex->mipOffsets.push_back(tex->data.size());
-                    tex->mipSizes.push_back(static_cast<size_t>(mipSize));
+                    tex->mipSizes.push_back(static_cast<size_t>(faceMipSize));
 
-                    // Copy mip data
-                    const uint8_t* mipData = reinterpret_cast<const uint8_t*>(ktxTexture_GetData(kTexture)) + imageOffset;
-                    tex->data.insert(tex->data.end(), mipData, mipData + mipSize);
+                    // Copy mip data - imageOffset is relative to the start of the texture data
+                    const uint8_t* ktxData = reinterpret_cast<const uint8_t*>(ktxTexture_GetData(kTexture));
+                    const uint8_t* mipData = ktxData + imageOffset;
+                    tex->data.insert(tex->data.end(), mipData, mipData + faceMipSize);
 
-                    PN_CORE_TRACE("  Mip {} face {}: offset {}, size {} bytes",
-                        mip, face, tex->mipOffsets.back(), mipSize);
+                    PN_CORE_TRACE("  Mip {} face {}: ktxOffset={}, storedOffset={}, size={} bytes",
+                        mip, face, imageOffset, tex->mipOffsets.back(), faceMipSize);
                 }
             }
 

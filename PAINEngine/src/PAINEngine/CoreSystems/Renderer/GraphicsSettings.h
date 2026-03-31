@@ -129,11 +129,11 @@ namespace PAIN {
 		float ibl_specular_strength = 1.0f;
 		float ibl_max_reflection_lod = 4.0f;
 #ifdef PN_PLATFORM_ANDROID
-		float ibl_roughness_bias = 0.10f;       // compensates for ASTC vs BC7 roughness compression artifacts
-		float ibl_specular_mip_bias = 0.80f;    // reduced - was over-compensating for quantization artifacts
-		float ibl_specular_strength_scale = 0.80f;  // slight reduction for GPU sampling differences
-		float ibl_specular_prefilter_luma_clamp = 12.0f;
-		float ibl_specular_firefly_clamp = 7.5f;
+		float ibl_roughness_bias = 0.0f;        // FIX: Removed bias - was compensating for incorrect ORM texture values
+		float ibl_specular_mip_bias = 0.0f;     // FIX: Removed bias - KTX patching now fixes texture data correctly
+		float ibl_specular_strength_scale = 1.0f; // Match Windows for consistent rendering
+		float ibl_specular_prefilter_luma_clamp = 0.0f;
+		float ibl_specular_firefly_clamp = 32.0f;
 #else
 		float ibl_roughness_bias = 0.0f;
 		float ibl_specular_mip_bias = 0.0f;
