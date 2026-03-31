@@ -57,7 +57,7 @@ _G.PlayerState = _G.PlayerState or {
 
     hidden = false, -- is player hiding
     hiddenIn = nil, -- which spot
-    hideRadius = 1,  -- how close to hide
+    hideRadius = 2,  -- how close to hide
     playerBaseScale = nil,   -- original scale of player
     letterBaseScale = nil,
     hideScaleFactor = 0.1,   -- how small when hiding
