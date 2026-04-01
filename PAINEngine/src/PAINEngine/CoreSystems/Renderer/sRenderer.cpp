@@ -132,30 +132,6 @@ namespace PAIN {
 				PN_CORE_INFO("Android thermal guard disabled (smoothed {:.2f} ms)", smoothedFrameMs);
 			}
 		}
-#else
-		if (timing.dt > 0.0f) {
-			static float smoothedFrameMs = 16.67f;
-			static bool perfReduced = false;
-			const float frameMs = timing.dt * 1000.0f;
-			smoothedFrameMs = smoothedFrameMs * 0.92f + frameMs * 0.08f;
-
-			auto& gs = GraphicsSettings::get();
-			if (!perfReduced && smoothedFrameMs > 33.0f) {
-				perfReduced = true;
-				gs.bloom_quality = std::max(1, gs.bloom_quality - 1);
-				gs.volumetric_steps = std::max(4, gs.volumetric_steps - 2);
-				gs.volumetric_resolution_scale = std::max(0.3f, gs.volumetric_resolution_scale - 0.1f);
-				gs.postprocess_resolution_scale = std::max(0.5f, gs.postprocess_resolution_scale - 0.1f);
-				PN_CORE_WARN("Windows performance guard enabled (smoothed {:.2f} ms)", smoothedFrameMs);
-			} else if (perfReduced && smoothedFrameMs < 20.0f) {
-				perfReduced = false;
-				gs.bloom_quality = std::max(gs.bloom_quality, 2);
-				gs.volumetric_steps = std::max(gs.volumetric_steps, 8);
-				gs.volumetric_resolution_scale = std::max(gs.volumetric_resolution_scale, 0.5f);
-				gs.postprocess_resolution_scale = std::max(gs.postprocess_resolution_scale, 0.75f);
-				PN_CORE_INFO("Windows performance guard disabled (smoothed {:.2f} ms)", smoothedFrameMs);
-			}
-		}
 #endif
 	}
 

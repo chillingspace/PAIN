@@ -1768,7 +1768,7 @@ namespace PAIN {
 				_createDeferredShadingBuffer(material_properties_texture, 3, GL_COLOR_ATTACHMENT3);
 			}
 			if (active_gbuffer_count >= 5) {
-				_createDeferredShadingBuffer(emission_texture, 3, GL_COLOR_ATTACHMENT4, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+				_createDeferredShadingBuffer(emission_texture, 3, GL_COLOR_ATTACHMENT4);
 			}
 #endif
 

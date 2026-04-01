@@ -89,14 +89,14 @@ namespace PAIN {
 #ifdef PN_PLATFORM_ANDROID
 		bool fxaa = false;
 #else
-		bool fxaa = false;  // Disabled for performance - matches Android
+		bool fxaa = true;
 #endif
 
 		// Screen-space ambient occlusion
 #ifdef PN_PLATFORM_ANDROID
 		bool ssao = false;
 #else
-		bool ssao = false;  // Disabled for performance - matches Android
+		bool ssao = true;
 #endif
 		float ssao_radius = 1.5f;
 		float ssao_bias   = 0.025f;
@@ -158,7 +158,6 @@ namespace PAIN {
 		#else
 		int swap_interval = 0;  // Release: No VSync for lowest latency, uncapped FPS
 		#endif
-		int windows_target_fps = 0; // 0 = no explicit software cap (uncapped)
 #endif
 
 		// ========================================
@@ -190,8 +189,7 @@ namespace PAIN {
 #ifdef PN_PLATFORM_ANDROID
 		float postprocess_resolution_scale = 0.75f;
 #else
-		// Windows: match Android post-process scale for consistent performance
-		float postprocess_resolution_scale = 0.75f;
+		float postprocess_resolution_scale = 1.0f;  // Windows: full resolution by default, can be lowered for performance
 #endif
 
 		// volumetric lighting (god rays / light shafts)
@@ -212,10 +210,10 @@ namespace PAIN {
 		int   volumetric_selection_hysteresis_frames = 3;
 #else
 		// Windows: Balanced performance - reduced from 24 steps (4x GPU cost) to 12
-		// Further reduced to 8 to match Android thermal performance profile
+		// 24 steps is overkill for most scenes; 12 provides good quality with 2x performance
 		bool volumetric = true;
 		float volumetric_intensity = 0.5f;
-		int   volumetric_steps = 8;          // reduced from 12 for better performance
+		int   volumetric_steps = 12;          // reduced from 24 for better performance
 		float volumetric_max_dist = 40.0f;
 		float volumetric_scatter = 0.f;
 		float volumetric_resolution_scale = 0.5f;
