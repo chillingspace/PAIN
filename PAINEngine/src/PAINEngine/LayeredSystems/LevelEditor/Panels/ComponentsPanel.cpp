@@ -1115,7 +1115,7 @@ namespace PAIN {
 								tagToRemove = tag;
 						}
 						if (!tagToRemove.empty())
-							metaSvc->removeTag(e, tagToRemove);
+							metaSvc->removeTag(e, tagToRemove, panel.getCurrentRegistry());
 
 						const auto& allTags = metaSvc->getRegisteredTags();
 
@@ -1124,7 +1124,7 @@ namespace PAIN {
 							for (auto const& t : allTags) {
 								if (tagComp.tags.count(t)) continue; // skip tags already on entity
 								if (ImGui::Selectable(t.c_str(), false))
-									metaSvc->addTag(e, t);
+									metaSvc->addTag(e, t, panel.getCurrentRegistry());
 							}
 							ImGui::EndCombo();
 						}
@@ -1134,7 +1134,7 @@ namespace PAIN {
 						ImGui::InputText("New Tag", newTagBuf, sizeof(newTagBuf));
 						ImGui::SameLine();
 						if (ImGui::Button("Add##Tag") && newTagBuf[0] != '\0') {
-							metaSvc->addTag(e, newTagBuf);
+							metaSvc->addTag(e, newTagBuf, panel.getCurrentRegistry());
 							newTagBuf[0] = '\0';
 						}
 					});
@@ -2361,13 +2361,13 @@ namespace PAIN {
 
 				// Checkbox
 				auto metadata = services->get<MetaData::Service>();
-				bool isChecked = metadata->isVisible(selected);
+				bool isChecked = metadata->isVisible(selected, currentRegistryID);
 
 				ImGui::PushID("Chkbox");
 
 				if (ImGui::Checkbox("", &isChecked)) {
 					// 3. Write the new state back to the metadata
-					metadata->setVisible(selected, isChecked);
+					metadata->setVisible(selected, isChecked, currentRegistryID);
 				}
 				ImGui::PopID();
 				ImGui::SameLine(0, 8);

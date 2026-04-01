@@ -14,6 +14,10 @@
 #include "Applications/AppSystem.h"
 
 namespace PAIN {
+    namespace ECS {
+        using RegistryID = uint32_t;
+    }
+
     namespace MetaData {
 
         // Group data structure (not a component)
@@ -40,10 +44,10 @@ namespace PAIN {
             std::set<std::string> registered_tags;
             std::unordered_map<std::string, GroupData> groups;
 
-            // Name uniqueness tracking
-            std::unordered_map<std::string, entt::entity> name_lookup;
+            // Name uniqueness tracking: per registry
+            std::unordered_map<ECS::RegistryID, std::unordered_map<std::string, entt::entity>> name_lookup;
 
-            std::string generateUniqueName(std::string const& base_name) const;
+            std::string generateUniqueName(std::string const& base_name, ECS::RegistryID registryId) const;
 
             bool b_entity_changed = false;
 
@@ -60,10 +64,10 @@ namespace PAIN {
             void onEvent(Event::Event& e) override;
 
             // === Name Management ===
-            void setEntityName(entt::entity entity, std::string const& name);
-            std::string getEntityName(entt::entity entity) const;
-            std::optional<entt::entity> getEntityByName(std::string const& name) const;        
-            bool isNameValid(std::string const& name) const;
+            void setEntityName(entt::entity entity, std::string const& name, ECS::RegistryID registryId = 0); // 0 is MAIN_REGISTRY_ID
+            std::string getEntityName(entt::entity entity, ECS::RegistryID registryId = 0) const;
+            std::optional<entt::entity> getEntityByName(std::string const& name, ECS::RegistryID registryId = 0) const;        
+            bool isNameValid(std::string const& name, ECS::RegistryID registryId = 0) const;
             bool entityNameChanged();
 
             // === Tag System ===
@@ -72,11 +76,11 @@ namespace PAIN {
             bool isTagValid(std::string const& tag) const;
             std::set<std::string> const& getRegisteredTags() const;
 
-            void addTag(entt::entity entity, std::string const& tag);
-            void removeTag(entt::entity entity, std::string const& tag);
-            std::vector<entt::entity> getEntitiesByTag(std::string const& tag) const;
-            bool hasTag(entt::entity entity, std::string const& tag) const;
-            void setEntityTag(entt::entity entity, const std::string& new_tag);
+            void addTag(entt::entity entity, std::string const& tag, ECS::RegistryID registryId = 0);
+            void removeTag(entt::entity entity, std::string const& tag, ECS::RegistryID registryId = 0);
+            std::vector<entt::entity> getEntitiesByTag(std::string const& tag, ECS::RegistryID registryId = 0) const;
+            bool hasTag(entt::entity entity, std::string const& tag, ECS::RegistryID registryId = 0) const;
+            void setEntityTag(entt::entity entity, const std::string& new_tag, ECS::RegistryID registryId = 0);
 
             // === Hierarchy System ===
             //void setParent(entt::entity child, entt::entity parent);
@@ -89,10 +93,10 @@ namespace PAIN {
             //std::vector<entt::entity> getChildren(entt::entity entity) const;
 
             // === Editor Visibility ===
-            void setVisible(entt::entity entity, bool visible);
-            bool isVisible(entt::entity entity) const;
-            void setLocked(entt::entity entity, bool locked);
-            bool isLocked(entt::entity entity) const;
+            void setVisible(entt::entity entity, bool visible, ECS::RegistryID registryId = 0);
+            bool isVisible(entt::entity entity, ECS::RegistryID registryId = 0) const;
+            void setLocked(entt::entity entity, bool locked, ECS::RegistryID registryId = 0);
+            bool isLocked(entt::entity entity, ECS::RegistryID registryId = 0) const;
 
             // === Group System ===
             //bool createGroup(std::string const& group_name,

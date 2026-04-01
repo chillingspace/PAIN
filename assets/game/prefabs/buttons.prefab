@@ -479,7 +479,8 @@
                 },
                 "Tag": {
                     "tags": [
-                        "android_ui"
+                        "android_ui",
+                        "hide_button"
                     ]
                 },
                 "Texture2D": {
