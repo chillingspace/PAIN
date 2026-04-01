@@ -926,8 +926,8 @@
                                 0.0
                             ],
                             "text_pos": [
-                                0.0,
-                                0.0
+                                1210.0,
+                                600.0
                             ],
                             "word_wrap": false,
                             "wrap_width": 0.0
@@ -1062,8 +1062,8 @@
                                 0.0
                             ],
                             "text_pos": [
-                                0.0,
-                                0.0
+                                1210.0,
+                                525.0
                             ],
                             "word_wrap": false,
                             "wrap_width": 0.0
@@ -1198,8 +1198,8 @@
                                 0.0
                             ],
                             "text_pos": [
-                                0.0,
-                                0.0
+                                1210.0,
+                                445.0
                             ],
                             "word_wrap": false,
                             "wrap_width": 0.0
@@ -1334,8 +1334,8 @@
                                 0.0
                             ],
                             "text_pos": [
-                                0.0,
-                                0.0
+                                1210.0,
+                                370.0
                             ],
                             "word_wrap": false,
                             "wrap_width": 0.0
@@ -1470,8 +1470,8 @@
                                 0.0
                             ],
                             "text_pos": [
-                                0.0,
-                                0.0
+                                1160.0,
+                                294.0
                             ],
                             "word_wrap": false,
                             "wrap_width": 0.0
@@ -1606,8 +1606,8 @@
                                 0.0
                             ],
                             "text_pos": [
-                                0.0,
-                                0.0
+                                1210.0,
+                                215.0
                             ],
                             "word_wrap": false,
                             "wrap_width": 0.0
@@ -10901,7 +10901,7 @@
                             "normal_color": -1,
                             "payload": "game/scenes/cutscene.scn",
                             "pressed_color": -5592406,
-                            "state": "Highlighted"
+                            "state": "Normal"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -10956,9 +10956,9 @@
                         },
                         "UVCoordinates": {
                             "uv": [
-                                0.5014792680740356,
+                                0.001479289960116148,
                                 0.009615384973585606,
-                                0.9985207319259644,
+                                0.49852070212364197,
                                 0.9903846383094788
                             ]
                         }
