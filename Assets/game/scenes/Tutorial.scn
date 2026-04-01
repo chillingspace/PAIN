@@ -400,6 +400,7 @@
                                     "siblingIndex": 0
                                 },
                                 "Texture2D": {
+                                    "opacity": 1.0,
                                     "pos": [
                                         0.25,
                                         -0.15000000596046448
@@ -425,6 +426,7 @@
                             "sourcePrefabGUID": "ba6b7137-3a6f-d74e-ae1b-16d6c16fe571"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.25,
                                 -0.15000000596046448
@@ -574,6 +576,7 @@
                                     "siblingIndex": 1
                                 },
                                 "Texture2D": {
+                                    "opacity": 1.0,
                                     "pos": [
                                         -0.3499999940395355,
                                         -0.15000000596046448
@@ -599,6 +602,7 @@
                             "sourcePrefabGUID": "ba6b7137-3a6f-d74e-ae1b-16d6c16fe571"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 -0.3499999940395355,
                                 -0.15000000596046448
@@ -1017,6 +1021,7 @@
                                     "siblingIndex": 0
                                 },
                                 "Texture2D": {
+                                    "opacity": 1.0,
                                     "pos": [
                                         -0.4000000059604645,
                                         -0.699999988079071
@@ -1042,6 +1047,7 @@
                             "sourcePrefabGUID": "114dfe50-ef4f-9d4d-b239-ce0e8fb1bd48"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 -0.4000000059604645,
                                 -0.699999988079071
@@ -1191,6 +1197,7 @@
                                     "siblingIndex": 1
                                 },
                                 "Texture2D": {
+                                    "opacity": 1.0,
                                     "pos": [
                                         0.30000001192092896,
                                         -0.699999988079071
@@ -1216,6 +1223,7 @@
                             "sourcePrefabGUID": "114dfe50-ef4f-9d4d-b239-ce0e8fb1bd48"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.30000001192092896,
                                 -0.699999988079071
@@ -1426,6 +1434,7 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "Texture2D": {
+                                    "opacity": 1.0,
                                     "pos": [
                                         -0.4000000059604645,
                                         -0.699999988079071
@@ -1451,6 +1460,7 @@
                             "sourcePrefabGUID": "faa3cea9-93de-124e-af09-6799b6cf63d1"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 -0.4000000059604645,
                                 -0.699999988079071
@@ -1595,6 +1605,7 @@
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "Texture2D": {
+                                    "opacity": 1.0,
                                     "pos": [
                                         0.30000001192092896,
                                         -0.699999988079071
@@ -1620,6 +1631,7 @@
                             "sourcePrefabGUID": "faa3cea9-93de-124e-af09-6799b6cf63d1"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.30000001192092896,
                                 -0.699999988079071
@@ -3073,6 +3085,18 @@
                                 "Layer": {
                                     "layer_id": 7,
                                     "layer_mask": 128
+                                },
+                                "Texture2D": {
+                                    "opacity": 1.0,
+                                    "pos": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "texture_guid": "eb3094f7-a1f7-8440-8b40-8b56d3f6deed",
+                                    "texture_scale": [
+                                        2.0,
+                                        1.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "b7582502-e810-ce4c-97f3-72a7cf98ca1a",
@@ -3080,6 +3104,7 @@
                             "sourcePrefabGUID": "9518f1e9-570e-124c-a9fc-a3974432dce0"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 0.0
@@ -3467,6 +3492,18 @@
                                 "Layer": {
                                     "layer_id": 6,
                                     "layer_mask": 64
+                                },
+                                "Texture2D": {
+                                    "opacity": 1.0,
+                                    "pos": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "texture_guid": "b7128467-93ed-f44f-b83b-c497ae4cc715",
+                                    "texture_scale": [
+                                        2.0,
+                                        1.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "c782207c-7090-924e-8e10-b0c4872abf24",
@@ -3474,6 +3511,7 @@
                             "sourcePrefabGUID": "1ebf1807-e398-e14d-b22c-73d493a1b851"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 0.0
@@ -8246,6 +8284,7 @@
                                     ]
                                 },
                                 "Texture2D": {
+                                    "opacity": 1.0,
                                     "pos": [
                                         0.25,
                                         -0.15000000596046448
@@ -8279,6 +8318,7 @@
                             ]
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.25,
                                 -0.15000000596046448
@@ -8431,6 +8471,7 @@
                                     ]
                                 },
                                 "Texture2D": {
+                                    "opacity": 1.0,
                                     "pos": [
                                         -0.3499999940395355,
                                         -0.15000000596046448
@@ -8464,6 +8505,7 @@
                             ]
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 -0.3499999940395355,
                                 -0.15000000596046448
@@ -8599,6 +8641,7 @@
                                     "siblingIndex": 25
                                 },
                                 "Texture2D": {
+                                    "opacity": 1.0,
                                     "pos": [
                                         0.0,
                                         0.0
@@ -8615,6 +8658,7 @@
                             "sourcePrefabGUID": "3ae755df-b075-fc42-88ae-408c55e41704"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 0.0
@@ -8809,6 +8853,7 @@
                                     ]
                                 },
                                 "Texture2D": {
+                                    "opacity": 1.0,
                                     "pos": [
                                         -0.05000000074505806,
                                         0.20000000298023224
@@ -8842,6 +8887,7 @@
                             ]
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 -0.05000000074505806,
                                 0.20000000298023224
@@ -8994,6 +9040,7 @@
                                     ]
                                 },
                                 "Texture2D": {
+                                    "opacity": 1.0,
                                     "pos": [
                                         -0.054999999701976776,
                                         -0.10000000149011612
@@ -9027,6 +9074,7 @@
                             ]
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 -0.054999999701976776,
                                 -0.10000000149011612
@@ -9179,6 +9227,7 @@
                                     ]
                                 },
                                 "Texture2D": {
+                                    "opacity": 1.0,
                                     "pos": [
                                         -0.07999999821186066,
                                         -0.4000000059604645
@@ -9212,6 +9261,7 @@
                             ]
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 -0.07999999821186066,
                                 -0.4000000059604645
@@ -9345,6 +9395,18 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 27
+                                },
+                                "Texture2D": {
+                                    "opacity": 1.0,
+                                    "pos": [
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "texture_guid": "e3ef88a4-bc32-2d49-b6dc-b4cdd0c69531",
+                                    "texture_scale": [
+                                        2.0,
+                                        1.0
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "e16cf30f-27e6-644c-b42a-8b14d51908d5",
@@ -9352,6 +9414,7 @@
                             "sourcePrefabGUID": "77bbf572-2783-5b4d-8190-da668cc8da75"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 0.0
@@ -9479,6 +9542,7 @@
                                     ]
                                 },
                                 "Texture2D": {
+                                    "opacity": 1.0,
                                     "pos": [
                                         0.0,
                                         0.0
@@ -9495,6 +9559,7 @@
                             "sourcePrefabGUID": "743a3c5d-e45e-c948-ba6c-b8d0b9534e25"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 0.0
@@ -9735,6 +9800,7 @@
                             "name": "UI_DetectBar_Fill_L"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 0.699999988079071
@@ -9837,6 +9903,7 @@
                             "name": "UI_DetectBar_Fill_R"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 0.699999988079071
@@ -9939,6 +10006,7 @@
                             "name": "UI_DetectBar_BG"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 0.699999988079071
@@ -10041,6 +10109,7 @@
                             "name": "UI_DetectOverlay"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 0.0
@@ -10196,14 +10265,15 @@
                             ]
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
-                                -0.20000000298023224,
+                                -0.1899999976158142,
                                 -0.6000000238418579
                             ],
-                            "texture_guid": "4bd7df99-9e11-7647-ac44-d5560bf92dfc",
+                            "texture_guid": "c20e7ad2-648a-5740-8abd-717a03ef4a82",
                             "texture_scale": [
-                                0.5899999737739563,
-                                0.10000000149011612
+                                0.6600000262260437,
+                                0.09000000357627869
                             ]
                         },
                         "UIElement": {
@@ -10306,14 +10376,15 @@
                             ]
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 -0.6000000238418579
                             ],
-                            "texture_guid": "4bd7df99-9e11-7647-ac44-d5560bf92dfc",
+                            "texture_guid": "c20e7ad2-648a-5740-8abd-717a03ef4a82",
                             "texture_scale": [
-                                0.5899999737739563,
-                                0.10000000149011612
+                                0.6600000262260437,
+                                0.09000000357627869
                             ]
                         },
                         "UIElement": {
@@ -10416,14 +10487,15 @@
                             ]
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
-                                0.20000000298023224,
+                                0.1899999976158142,
                                 -0.6000000238418579
                             ],
-                            "texture_guid": "4bd7df99-9e11-7647-ac44-d5560bf92dfc",
+                            "texture_guid": "c20e7ad2-648a-5740-8abd-717a03ef4a82",
                             "texture_scale": [
-                                0.5899999737739563,
-                                0.10000000149011612
+                                0.6600000262260437,
+                                0.09000000357627869
                             ]
                         },
                         "UIElement": {
@@ -10518,14 +10590,15 @@
                             "name": "heart border"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 -0.6000000238418579
                             ],
-                            "texture_guid": "fda9fdc4-a022-6744-ba11-f2e14ce229b6",
+                            "texture_guid": "21c8c800-9042-1547-b52b-4fee191116f7",
                             "texture_scale": [
-                                0.6000000238418579,
-                                0.10000000149011612
+                                0.6499999761581421,
+                                0.09000000357627869
                             ]
                         },
                         "UIElement": {
@@ -10719,6 +10792,18 @@
                                     "childrenGUIDs": [],
                                     "parentGUID": "01217e52-b00d-084d-bea0-6c5346f3d94f",
                                     "siblingIndex": 0
+                                },
+                                "Texture2D": {
+                                    "opacity": 1.0,
+                                    "pos": [
+                                        0.800000011920929,
+                                        0.699999988079071
+                                    ],
+                                    "texture_guid": "7ccefaa4-196c-9a44-8f03-bd9d4f7328d0",
+                                    "texture_scale": [
+                                        0.10000000149011612,
+                                        0.10000000149011612
+                                    ]
                                 }
                             },
                             "correspondingPrefabEntityGUID": "234f63d2-9ce2-de4a-b2e9-b51df68fadf4",
@@ -10739,6 +10824,7 @@
                             ]
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.800000011920929,
                                 0.699999988079071
@@ -10871,6 +10957,7 @@
                                     "siblingIndex": 1
                                 },
                                 "Texture2D": {
+                                    "opacity": 1.0,
                                     "pos": [
                                         -0.699999988079071,
                                         -0.550000011920929
@@ -10892,6 +10979,7 @@
                             ]
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 -0.699999988079071,
                                 -0.550000011920929
@@ -11032,6 +11120,7 @@
                                     "siblingIndex": 2
                                 },
                                 "Texture2D": {
+                                    "opacity": 1.0,
                                     "pos": [
                                         0.6499999761581421,
                                         -0.6000000238418579
@@ -11049,10 +11138,12 @@
                         },
                         "Tag": {
                             "tags": [
-                                "android_ui"
+                                "android_ui",
+                                "hide_button"
                             ]
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.6499999761581421,
                                 -0.6000000238418579
@@ -11185,6 +11276,7 @@
                                     "siblingIndex": 3
                                 },
                                 "Texture2D": {
+                                    "opacity": 1.0,
                                     "pos": [
                                         0.800000011920929,
                                         -0.3499999940395355
@@ -11206,6 +11298,7 @@
                             ]
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.800000011920929,
                                 -0.3499999940395355
@@ -11601,6 +11694,7 @@
                             ]
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.2028525471687317,
                                 0.9691160917282104
