@@ -244,9 +244,9 @@
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            6.806421279907227,
-            8.834074020385742,
-            -1.2112581729888916
+            2.971919059753418,
+            7.7259063720703125,
+            -0.9494199752807617
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 20.0,
@@ -11387,7 +11387,9 @@
                                 "5863a16e-dac2-d147-af44-d4b2c947e3ab",
                                 "df084946-7200-3b4b-ae50-84f462365d51",
                                 "f6bf96c3-da1d-c24d-9cde-a658757a021a",
-                                "c5c61d9d-5743-b642-ac69-d3efb08bff0b"
+                                "c5c61d9d-5743-b642-ac69-d3efb08bff0b",
+                                "3b4e9f7a-9fa1-c646-99a0-f40a859a13e6",
+                                "c842c73c-e519-ea47-8c54-b995ff2e3843"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 30
@@ -11699,10 +11701,127 @@
                                 0.2028525471687317,
                                 0.9691160917282104
                             ],
-                            "texture_guid": "fce62157-0364-fb42-b719-bddd2cfa488b",
+                            "texture_guid": "06de2ec5-fd70-3742-9f79-6b3a3bb9740b",
                             "texture_scale": [
-                                0.03401033207774162,
-                                0.06589286774396896
+                                0.023807231336832047,
+                                0.01976786181330681
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": false,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIFollowsWorldEntity": {
+                            "entity_target_guid": "df084946-7200-3b4b-ae50-84f462365d51",
+                            "world_offset": [
+                                0.0,
+                                1.5,
+                                0.0
+                            ]
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.023807231336832047,
+                                0.01976786181330681,
+                                0.6529983282089233
+                            ],
+                            "size_delta": [
+                                70.0,
+                                30.0
+                            ]
+                        }
+                    },
+                    "Name": "tire1 ui"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "3b4e9f7a-9fa1-c646-99a0-f40a859a13e6"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "75d1f30b-c786-784b-baba-f6f13f5e7436",
+                            "siblingIndex": 2
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "tire2 ui"
+                        },
+                        "Tag": {
+                            "tags": [
+                                "interaction_prompt",
+                                "prompt_hide"
+                            ]
+                        },
+                        "Texture2D": {
+                            "opacity": 1.0,
+                            "pos": [
+                                0.5506807565689087,
+                                0.9514042139053345
+                            ],
+                            "texture_guid": "06de2ec5-fd70-3742-9f79-6b3a3bb9740b",
+                            "texture_scale": [
+                                0.010520439594984055,
+                                0.00873543694615364
                             ]
                         },
                         "UIElement": {
@@ -11711,7 +11830,124 @@
                             "layer": 0
                         },
                         "UIFollowsWorldEntity": {
-                            "entity_target_guid": "df084946-7200-3b4b-ae50-84f462365d51",
+                            "entity_target_guid": "5863a16e-dac2-d147-af44-d4b2c947e3ab",
+                            "world_offset": [
+                                0.0,
+                                1.5,
+                                0.0
+                            ]
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.010520439594984055,
+                                0.00873543694615364,
+                                0.2885606288909912
+                            ],
+                            "size_delta": [
+                                70.0,
+                                30.0
+                            ]
+                        }
+                    },
+                    "Name": "tire2 ui"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "c842c73c-e519-ea47-8c54-b995ff2e3843"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "75d1f30b-c786-784b-baba-f6f13f5e7436",
+                            "siblingIndex": 3
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "box ui"
+                        },
+                        "Tag": {
+                            "tags": [
+                                "interaction_prompt",
+                                "prompt_hide"
+                            ]
+                        },
+                        "Texture2D": {
+                            "opacity": 1.0,
+                            "pos": [
+                                0.6163318157196045,
+                                0.9690762162208557
+                            ],
+                            "texture_guid": "06de2ec5-fd70-3742-9f79-6b3a3bb9740b",
+                            "texture_scale": [
+                                0.02117529697716236,
+                                0.01758248545229435
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIFollowsWorldEntity": {
+                            "entity_target_guid": "f6bf96c3-da1d-c24d-9cde-a658757a021a",
                             "world_offset": [
                                 0.0,
                                 1.0,
@@ -11755,17 +11991,17 @@
                                 1.0
                             ],
                             "scale": [
-                                0.03401033207774162,
-                                0.06589286774396896,
-                                0.6529983282089233
+                                0.02117529697716236,
+                                0.01758248545229435,
+                                0.580808162689209
                             ],
                             "size_delta": [
-                                100.0,
-                                100.0
+                                70.0,
+                                30.0
                             ]
                         }
                     },
-                    "Name": "tire1 ui"
+                    "Name": "box ui"
                 }
             },
             {
@@ -11777,7 +12013,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "75d1f30b-c786-784b-baba-f6f13f5e7436",
-                            "siblingIndex": 2
+                            "siblingIndex": 4
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -11843,7 +12079,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "75d1f30b-c786-784b-baba-f6f13f5e7436",
-                                    "siblingIndex": 2
+                                    "siblingIndex": 4
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -11976,7 +12212,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "75d1f30b-c786-784b-baba-f6f13f5e7436",
-                            "siblingIndex": 3
+                            "siblingIndex": 5
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -12042,7 +12278,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "75d1f30b-c786-784b-baba-f6f13f5e7436",
-                                    "siblingIndex": 3
+                                    "siblingIndex": 5
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -12178,7 +12414,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "75d1f30b-c786-784b-baba-f6f13f5e7436",
-                            "siblingIndex": 4
+                            "siblingIndex": 6
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -12244,7 +12480,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "75d1f30b-c786-784b-baba-f6f13f5e7436",
-                                    "siblingIndex": 4
+                                    "siblingIndex": 6
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -23680,9 +23916,9 @@
             0.800000011920929
         ],
         "worldLightPosition": [
-            18.47212791442871,
-            27.499204635620117,
-            3.455024480819702
+            14.637625694274902,
+            26.391036987304688,
+            3.716862678527832
         ],
         "worldLightShadowFollowDistance": 22.5,
         "worldLightShadowResolution": 1024,
