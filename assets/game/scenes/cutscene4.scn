@@ -319,6 +319,7 @@
                             "name": "confirm_button"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 -0.30000001192092896,
                                 -0.20000000298023224
@@ -479,6 +480,7 @@
                             "name": "cancel_button"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.17000000178813934,
                                 -0.20000000298023224
@@ -607,6 +609,7 @@
                             "name": "quit_to_start_bg"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 0.0
@@ -794,6 +797,7 @@
                             "name": "quit_button"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.800000011920929,
                                 0.44999998807907104
@@ -954,6 +958,7 @@
                             "name": "menu_button"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.800000011920929,
                                 0.8299999833106995
@@ -1114,6 +1119,7 @@
                             "name": "skip_button"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.800000011920929,
                                 0.6200000047683716
@@ -1242,6 +1248,7 @@
                             "name": "extended_bg"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.800000011920929,
                                 0.5400000214576721
@@ -1344,6 +1351,7 @@
                             "name": "menu_overlay"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 0.0
@@ -1441,6 +1449,7 @@
                             "name": "quit_overlay"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 0.0
@@ -1661,14 +1670,15 @@
                             "name": "menu_button"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
-                                0.800000011920929,
+                                0.8500000238418579,
                                 0.8299999833106995
                             ],
-                            "texture_guid": "160bdf18-e114-7f4b-a579-c7c726750734",
+                            "texture_guid": "11329a72-a977-4c48-bec3-22d41e01eb6b",
                             "texture_scale": [
-                                0.18000000715255737,
-                                0.07000000029802322
+                                0.20000000298023224,
+                                0.07999999821186066
                             ]
                         },
                         "UIAnimation": {
@@ -1756,114 +1766,12 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
-                            "guid": "83ea44b0-7d8d-6147-8ddf-2a84895ddaa6"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 6
-                        },
-                        "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.6797102689743042,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "menu_button_bg"
-                        },
-                        "Texture2D": {
-                            "pos": [
-                                0.800000011920929,
-                                0.8299999833106995
-                            ],
-                            "texture_guid": "f5b92c94-1cc5-1140-8ebd-0da38fa97fb3",
-                            "texture_scale": [
-                                0.27000001072883606,
-                                0.09000000357627869
-                            ]
-                        },
-                        "UIElement": {
-                            "b_is_enabled": true,
-                            "b_is_interactable": true,
-                            "layer": 0
-                        },
-                        "UIRectTransform": {
-                            "anchor_max": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchor_min": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchored_position": [
-                                0.0,
-                                0.0
-                            ],
-                            "local_position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "offset_max": [
-                                0.0,
-                                0.0
-                            ],
-                            "offset_min": [
-                                0.0,
-                                0.0
-                            ],
-                            "pivot": [
-                                0.5,
-                                0.5
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "size_delta": [
-                                1024.0,
-                                88.0
-                            ]
-                        }
-                    },
-                    "Name": "menu_button_bg"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "GUID": {
                             "guid": "5ebbec7a-a181-584c-921d-e90f35a3ed82"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 7
+                            "siblingIndex": 6
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1899,6 +1807,7 @@
                             ]
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 0.0
@@ -1973,7 +1882,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 8
+                            "siblingIndex": 7
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -2001,6 +1910,7 @@
                             "name": "c1"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 0.0
@@ -2075,7 +1985,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 9
+                            "siblingIndex": 8
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -2103,6 +2013,7 @@
                             "name": "c2"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 0.0
@@ -2177,7 +2088,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 10
+                            "siblingIndex": 9
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -2205,6 +2116,7 @@
                             "name": "c3"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 0.0
@@ -2279,7 +2191,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 11
+                            "siblingIndex": 10
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -2307,6 +2219,7 @@
                             "name": "c4"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 0.0
@@ -2381,7 +2294,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 12
+                            "siblingIndex": 11
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -2409,6 +2322,7 @@
                             "name": "c5"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 0.0
@@ -2483,7 +2397,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 13
+                            "siblingIndex": 12
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -2511,6 +2425,7 @@
                             "name": "c6"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 0.0
@@ -2585,7 +2500,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 14
+                            "siblingIndex": 13
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -2613,6 +2528,7 @@
                             "name": "c7"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 0.0
@@ -2687,7 +2603,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 15
+                            "siblingIndex": 14
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -2715,6 +2631,7 @@
                             "name": "c8"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 0.0
@@ -2789,7 +2706,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 16
+                            "siblingIndex": 15
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -2817,6 +2734,7 @@
                             "name": "c9"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 0.0
@@ -2918,7 +2836,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 17
+                            "siblingIndex": 16
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -2966,7 +2884,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 18
+                            "siblingIndex": 17
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -3012,7 +2930,7 @@
                                 "ce700d51-a84c-e24e-970b-f0cc7c63c275"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 19
+                            "siblingIndex": 18
                         },
                         "Layer": {
                             "layer_id": 0,
