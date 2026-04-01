@@ -1467,8 +1467,30 @@ namespace PAIN {
    *******************************************/
 				registerCompUIFunc<PAIN::UIRectTransform>(
 					"UIRectTransform",
-					[this](ComponentsPanel&, PAIN::UIRectTransform& transform_ui) {
-						DrawWithReflection(transform_ui, static_cast<ComponentsPanel*>(this));
+					[this](ComponentsPanel&, PAIN::UIRectTransform& rt) {
+						bool changed = false;
+
+						ImGui::SeparatorText("Size & Position");
+						changed |= ImGui::DragFloat2("Size (px)",            &rt.size_delta.x,        1.0f);
+						changed |= ImGui::DragFloat2("Position",             &rt.anchored_position.x, 1.0f);
+
+						ImGui::SeparatorText("Anchors & Pivot");
+						changed |= ImGui::DragFloat2("Anchor Min",           &rt.anchor_min.x,        0.01f, 0.0f, 1.0f);
+						changed |= ImGui::DragFloat2("Anchor Max",           &rt.anchor_max.x,        0.01f, 0.0f, 1.0f);
+						changed |= ImGui::DragFloat2("Pivot",                &rt.pivot.x,             0.01f, 0.0f, 1.0f);
+
+						ImGui::SeparatorText("Stretch Offsets");
+						changed |= ImGui::DragFloat2("Offset Min",           &rt.offset_min.x,        1.0f);
+						changed |= ImGui::DragFloat2("Offset Max",           &rt.offset_max.x,        1.0f);
+
+						ImGui::SeparatorText("Transform");
+						changed |= ImGui::DragFloat3("Local Position",       &rt.local_position.x,    0.1f);
+
+						ImGui::BeginDisabled();
+						ImGui::DragFloat3("Scale (computed)",                &rt.scale.x,             0.001f);
+						ImGui::EndDisabled();
+
+						if (changed) rt.layout_dirty = true;
 					});
 
 				// registerCompUIFunc<PAIN::UIButton>("UIButton",

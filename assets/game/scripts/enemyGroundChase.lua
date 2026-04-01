@@ -8,7 +8,7 @@
 --   chases, searches, then returns to patrol
 --   damages player on collision
 --   reuses DetectionUI overlay/audio (hides the bar)
---   shows a 3D exclamation icon above itself
+--   shows a 2D UI alert billboard above itself (UIFollowsWorldEntity)
 
 do
     local enemy = entityId
@@ -72,8 +72,8 @@ do
     -- Animation
     local ANIM_MOVE              = "ArmatureAction"
 
-    -- Exclamation icon
-    local ALERT_ICON_NAME        = "exclamation_alert"
+    -- Alert UI billboard (UIFollowsWorldEntity, tagged interaction_prompt + enemy_alert_X)
+    local ALERT_UI_TAG           = "enemy_alert"   -- base tag; script appends "_A", "_B", etc.
     local ALERT_ICON_HEIGHT      = 2.0
     local SHOW_ICON_IN_ALERT     = true
     local SHOW_ICON_IN_CHASE     = true
@@ -141,7 +141,8 @@ do
     local searchArrived = false
     local chaseOrigin = nil  -- position where the enemy first spotted the player
 
-    local alertIcon = nil
+    local alertIcon = nil       -- the UI entity (UIFollowsWorldEntity billboard)
+    local alertGroupTag = nil   -- resolved tag e.g. "enemy_alert_A"
     local audioChannel = -1
 
     -- Light values cached from editor on init
@@ -326,11 +327,14 @@ do
     -- alert icon helpers
     local function updateAlertIcon(visible)
         if not alertIcon then return end
-        if not setVisibility then return end
-        setVisibility(alertIcon, visible)
         if visible then
-            local ex, ey, ez = getEnemyPos()
-            setPosition(alertIcon, ex, ey + ALERT_ICON_HEIGHT, ez)
+            -- anchor the billboard to the enemy with the height offset, then enable it
+            if setUIFollowsEntity then
+                setUIFollowsEntity(alertIcon, enemy, 0, ALERT_ICON_HEIGHT, 0)
+            end
+            if setUIFollowEnabled then setUIFollowEnabled(alertIcon, true) end
+        else
+            if setUIFollowEnabled then setUIFollowEnabled(alertIcon, false) end
         end
     end
 
@@ -399,10 +403,14 @@ do
     end
 
     local function tryCacheAlertIcon()
-        if alertIcon or ALERT_ICON_NAME == "" then return end
-        alertIcon = findEntity(ALERT_ICON_NAME)
-        if alertIcon and setVisibility then
-            setVisibility(alertIcon, false)
+        if alertIcon or not alertGroupTag then return end
+        local candidates = getEntitiesByTag and getEntitiesByTag("interaction_prompt") or {}
+        for _, e in ipairs(candidates) do
+            if hasTag(e, alertGroupTag) then
+                alertIcon = e
+                if setUIFollowEnabled then setUIFollowEnabled(alertIcon, false) end
+                break
+            end
         end
     end
 
@@ -602,13 +610,11 @@ do
         baseRotX, baseYaw, baseRotZ = rx, ry, rz
         currentYaw = baseYaw
 
-        -- Derive icon name from patrol group tag so each enemy finds its own icon.
-        if ALERT_ICON_NAME ~= "" then
-            for _, group in ipairs(PATROL_GROUPS) do
-                if hasTag(enemy, "patrol_group_" .. group) then
-                    ALERT_ICON_NAME = "exclamation_alert_" .. group
-                    break
-                end
+        -- Derive alert UI tag from patrol group so each enemy finds its own billboard.
+        for _, group in ipairs(PATROL_GROUPS) do
+            if hasTag(enemy, "patrol_group_" .. group) then
+                alertGroupTag = ALERT_UI_TAG .. "_" .. group  -- e.g. "enemy_alert_A"
+                break
             end
         end
 
