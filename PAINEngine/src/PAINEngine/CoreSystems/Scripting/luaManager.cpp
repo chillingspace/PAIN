@@ -526,6 +526,14 @@ namespace PAIN {
                 api_->SetEntityTexture(entityId, guidStr);
             }
             });
+        lua_.set_function("getTextureOpacity", [this](entt::entity entityId) {
+            return api_ ? api_->GetEntityTextureOpacity(entityId) : 1.0f;
+            });
+        lua_.set_function("setTextureOpacity", [this](entt::entity entityId, float opacity) {
+            if (api_) {
+                api_->SetEntityTextureOpacity(entityId, opacity);
+            }
+            });
 
 
         /* =========================================================================== */

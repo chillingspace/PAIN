@@ -3199,7 +3199,7 @@ namespace PAIN {
 
 			rendererService->w_renderer->Render2DTexture(
 				texture_opt.value()->gl_texture, render_pos,
-				render_scale, uv_transform);
+				render_scale, uv_transform, texture_comp.opacity);
 		}
 
 			// ========================================

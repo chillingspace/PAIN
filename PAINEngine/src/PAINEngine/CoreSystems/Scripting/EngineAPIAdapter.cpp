@@ -231,6 +231,21 @@ namespace PAIN {
         texComp.texture_guid = PAIN::Assets::GUID(guidStr);
     }
 
+    float EngineAPIAdapter::GetEntityTextureOpacity(entt::entity entityId) {
+        auto& reg = ecs_.getRegistry();
+        if (reg.valid(entityId) && reg.all_of<PAIN::Texture2D>(entityId)) {
+            return reg.get<PAIN::Texture2D>(entityId).opacity;
+        }
+        return 1.0f;
+    }
+
+    void EngineAPIAdapter::SetEntityTextureOpacity(entt::entity entityId, float opacity) {
+        auto& reg = ecs_.getRegistry();
+        if (reg.valid(entityId) && reg.all_of<PAIN::Texture2D>(entityId)) {
+            reg.get<PAIN::Texture2D>(entityId).opacity = opacity;
+        }
+    }
+
     glm::uvec2 EngineAPIAdapter::GetFrameBufferSize() const {
         return window_->getFrameBuffer();
     }

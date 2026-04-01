@@ -7,6 +7,7 @@ out vec4 FragColor;
 
 uniform sampler2D tex;
 uniform int u_ClipCircle;      // 0 = no clip, 1 = circular clip
+uniform float u_Opacity;
 
 void main() {
     vec2 uvCenter = vec2(0.5, 0.5);
@@ -16,5 +17,5 @@ void main() {
         discard;
     }
     
-    FragColor = texture(tex, TexCoords);
+    FragColor = texture(tex, TexCoords) * vec4(1.0, 1.0, 1.0, u_Opacity);
 }

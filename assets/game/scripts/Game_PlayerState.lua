@@ -819,6 +819,34 @@ local function updateInteractionPrompts(px, py, pz)
     end
 end
 
+-------------------------------------------------
+-- Helper: Dynamically adjust the opacity of the hide_button UI element
+-- based on player's proximity to hiding spots/pipes
+-------------------------------------------------
+local function updateHideButtonOpacity(px, py, pz)
+    local hideButtons = getEntitiesByTag("hide_button")
+    if not hideButtons or #hideButtons == 0 then return end
+
+    -- Check if within range of any hide obj
+    local canHide = false
+    if not S.hidden and not S.inPipe then
+        local pipeData = findNearestPipeEntrance(px, py, pz)
+        local bestSpot = findNearestByTag("hiding_spot", px, py, pz, S.hideRadius)
+        if pipeData or bestSpot then
+            canHide = true
+        end
+    end
+
+    local targetOpacity = 0.3
+    if canHide or S.hidden or S.inPipe then
+        targetOpacity = 1.0
+    end
+
+    for _, btn in ipairs(hideButtons) do
+        setTextureOpacity(btn, targetOpacity)
+    end
+end
+
 function S.update(dt)
     CURRENT_SCENE_PATH = currentScene()
     NEXT_SCENE_PATH = nextScene()
@@ -916,6 +944,7 @@ function S.update(dt)
     -- 8. Interaction prompt billboards
     -------------------------------------------------
     updateInteractionPrompts(px, py, pz)
+    updateHideButtonOpacity(px, py, pz)
 
     -------------------------------------------------
     -- 9. Hide/Unhide logic (H key)

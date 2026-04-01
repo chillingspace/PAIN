@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "pch.h"
 
@@ -39,6 +39,7 @@ namespace PAIN {
         Assets::GUID texture_guid;
         glm::vec2 pos;
         glm::vec2 texture_scale{ 1 };
+        float opacity = 1.0f;
     };
 
     struct ModelRenderer {
@@ -165,6 +166,7 @@ REFL_TYPE(PAIN::Texture2D)
 REFL_FIELD(texture_guid, PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture))
 REFL_FIELD(pos)
 REFL_FIELD(texture_scale)
+REFL_FIELD(opacity, PAIN::Editor::Attributes::Range(0.0f, 1.0f))
 REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::Texture2D>);

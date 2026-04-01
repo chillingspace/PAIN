@@ -2252,7 +2252,7 @@ namespace PAIN {
 
 	void WindowsRenderer::Render2DTexture(GLuint texture_id, const glm::vec2& pos,
 										  glm::vec2& scale,
-										  const glm::vec4& uv_transform) {
+										  const glm::vec4& uv_transform, float opacity) {
 		if (texture_id == 0) {
 			PN_CORE_ERROR("Invalid texture_id in Render2DTexture");
 			return;
@@ -2290,6 +2290,7 @@ namespace PAIN {
 		texture2d_shader->SetUniform("ndc_scale", corrected_scale);
 		texture2d_shader->SetUniform("uv_transform",
 									 uv_transform); // Pass UV transform
+		texture2d_shader->SetUniform("u_Opacity", opacity);
 
 		glActiveTexture(GL_TEXTURE6);
 		glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -2314,7 +2315,7 @@ namespace PAIN {
 
 	void WindowsRenderer::Render2DTextureCircular(GLuint texture_id, const glm::vec2& pos,
 										  glm::vec2& scale,
-										  const glm::vec4& uv_transform) {
+										  const glm::vec4& uv_transform, float opacity) {
 		if (texture_id == 0) {
 			PN_CORE_ERROR("Invalid texture_id in Render2DTextureCircular");
 			return;
@@ -2352,6 +2353,7 @@ namespace PAIN {
 		texture2d_shader->SetUniform("pos", pos);
 		texture2d_shader->SetUniform("ndc_scale", corrected_scale);
 		texture2d_shader->SetUniform("uv_transform", uv_transform);
+		texture2d_shader->SetUniform("u_Opacity", opacity);
 		
 		// Enable circular clipping in shader (shader clips based on UV coords, center=0.5, radius=0.5)
 		texture2d_shader->SetUniform("u_ClipCircle", 1);

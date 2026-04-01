@@ -4,6 +4,7 @@ out vec4 FragColor;
 
 uniform sampler2D tex;
 uniform int u_ClipCircle;      // 0 = no clip, 1 = circular clip
+uniform float u_Opacity;
 
 void main() {
     // Always test the clipping logic for debugging
@@ -14,5 +15,5 @@ void main() {
         discard;
     }
     
-    FragColor = texture(tex, TexCoords);
+    FragColor = texture(tex, TexCoords) * vec4(1.0, 1.0, 1.0, u_Opacity);
 }
