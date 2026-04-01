@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "credits1.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 2226071197125094477
+  },
+  "descriptor_version": 1,
+  "guid": "3771872f-976b-2148-8203-e500b71b42a5",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\credits1.prefab"
+  }
+}

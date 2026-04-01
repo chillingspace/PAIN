@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "graphics_reset_button.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 2328710439496086945
+  },
+  "descriptor_version": 1,
+  "guid": "7e850a62-ffd7-054c-96e0-30bb054b8f0f",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\graphics_reset_button.prefab"
+  }
+}

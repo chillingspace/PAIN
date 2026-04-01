@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "howtoplay_text2.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 7360239490548934976
+  },
+  "descriptor_version": 1,
+  "guid": "43d16f9b-a990-f449-9937-7fcb143b7806",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\howtoplay_text2.prefab"
+  }
+}

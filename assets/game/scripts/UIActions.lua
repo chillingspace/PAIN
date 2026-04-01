@@ -16,6 +16,20 @@ G.TutorialSceneName   = G.TutorialSceneName  or "game/scenes/Tutorial.scn"
 -- -- Placeholder for next level
 G.NextLevelName       = G.NextLevelName      or "game/scenes/Tutorial.scn"
 
+local layers = {
+    DEFAULT = 0,
+    MAINMENU = 1,
+    QUIT = 2,
+    SETTINGS = 3,
+    AUDIO = 4,
+    GRAPHICS = 5,
+    CONTROLS = 6,
+    HOWTOPLAY_1 = 7,
+    HOWTOPLAY_2 = 8,
+    CREDITS_1 = 9,
+    CREDITS_2 = 10
+}
+
 -- ==================== GRAPHICS SETTINGS ====================
 G.GraphicsSettings = G.GraphicsSettings or {
     displayMode = "windowed"
@@ -712,6 +726,207 @@ local handlers = {
 
         updateGraphicsModeDisplay()
         printLog("[UI] graphics_Right -> " .. tostring(_G.GraphicsSettings.displayMode))
+    end,
+
+    ----------------------------------------------------------------------
+    -- RESET GRAPHICS SETTINGS
+    ----------------------------------------------------------------------
+    reset_Graphics_Settings = function(buttonEntity, payload)
+        playUIClick()
+
+        -- Slider positioning constants (must match UISlider.lua)
+        local sliderMinX = -0.32
+        local sliderMaxX = 0.32
+
+        -- Default slider values (0.0-1.0 range)
+        local DEFAULT_BRIGHTNESS = 0.333   -- maps to exposure 1.0 (range 0.5-2.0)
+        local DEFAULT_GAMMA      = 0.467   -- maps to gamma 2.2 (range 1.5-3.0)
+
+        -- 1. Reset display mode to windowed
+        _G.GraphicsSettings.displayMode = "windowed"
+        if setFullscreen then
+            setFullscreen(false)
+        end
+        updateGraphicsModeDisplay()
+
+        -- 2. Reset brightness (exposure = 0.5 + 0.333 * 1.5 = 1.0)
+        local defaultExposure = 0.5 + DEFAULT_BRIGHTNESS * 1.5
+        if setBrightness then
+            setBrightness(defaultExposure)
+        end
+        _G.SliderUI = _G.SliderUI or {}
+        _G.SliderUI["brightness_handle"] = DEFAULT_BRIGHTNESS
+
+        local bHandle = findEntity("brightness_handle")
+        if bHandle then
+            local _, knobY = get2DPosition(bHandle)
+            local newX = sliderMinX + DEFAULT_BRIGHTNESS * (sliderMaxX - sliderMinX)
+            set2DPosition(bHandle, newX, knobY)
+        end
+
+        if settingsSave then
+            settingsSave("gfx_brightness", string.format("%.4f", DEFAULT_BRIGHTNESS))
+        end
+
+        -- 3. Reset gamma (gamma = 1.5 + 0.467 * 1.5 = 2.2)
+        local defaultGamma = 1.5 + DEFAULT_GAMMA * 1.5
+        if setGamma then
+            setGamma(defaultGamma)
+        end
+        _G.SliderUI["gamma_handle"] = DEFAULT_GAMMA
+
+        local gHandle = findEntity("gamma_handle")
+        if gHandle then
+            local _, knobY = get2DPosition(gHandle)
+            local newX = sliderMinX + DEFAULT_GAMMA * (sliderMaxX - sliderMinX)
+            set2DPosition(gHandle, newX, knobY)
+        end
+
+        if settingsSave then
+            settingsSave("gfx_gamma", string.format("%.4f", DEFAULT_GAMMA))
+        end
+
+        printLog("[UI] reset_Graphics_Settings -> windowed, brightness=" .. defaultExposure .. ", gamma=" .. defaultGamma)
+    end,
+
+    ----------------------------------------------------------------------
+    -- SETTINGS MENU
+    ----------------------------------------------------------------------
+    -- Goes from main menu to settings
+    mainmenu_Next = function(buttonEntity, payload)
+        playUIClick()
+
+        -- Disable main menu layer
+        setLayerEnabled(layers.MAINMENU, false)
+
+        -- Enable next layer
+        if payload then
+            local layer = layers[string.upper(payload)]
+
+            if layer then
+                setLayerEnabled(layer, true)
+            else
+                printLog("[UI] Invalid payload: " .. tostring(payload))
+            end
+        else
+            printLog("[UI] No payload provided")
+        end
+
+        -- setLayerEnabled(layers.SETTINGS, true)
+    end,
+
+    -- Goes back from settings to main menu
+    settings_Back = function(buttonEntity, payload)
+        playUIClick()
+
+        -- Disable settings layers
+        setLayerEnabled(layers.AUDIO, false)
+        setLayerEnabled(layers.GRAPHICS, false)
+        setLayerEnabled(layers.CONTROLS, false)
+        setLayerEnabled(layers.SETTINGS, false)
+        
+        -- Enable main menu layers
+        setLayerEnabled(layers.MAINMENU, true)
+    end,
+
+    -- Goes back from audio/graphics/controls to settings
+    settings_Sub_Back = function(buttonEntity, payload)
+        playUIClick()
+
+        -- Disable other settings ui layers
+        setLayerEnabled(layers.AUDIO, false)
+        setLayerEnabled(layers.GRAPHICS, false)
+        setLayerEnabled(layers.CONTROLS, false)
+        
+        -- Enable settingsUI layer
+        setLayerEnabled(layers.SETTINGS, true)
+    end,
+
+    -- Goes from settings to another layer. Payload: layer to show
+    settings_Next = function(buttonEntity, payload)
+        playUIClick()
+
+        -- Disable settingsUI layer
+        setLayerEnabled(layers.SETTINGS, false)
+
+        if payload then
+            local layer = layers[string.upper(payload)]
+
+            if layer then
+                setLayerEnabled(layer, true)
+            else
+                printLog("[UI] Invalid payload: " .. tostring(payload))
+                setLayerEnabled(layers.SETTINGS, true)
+            end
+        else
+            printLog("[UI] No payload provided")
+            setLayerEnabled(layers.SETTINGS, true)
+        end
+    end,
+
+    -- Goes from a setting layer to main menu, Payload: Layer to hide
+    to_MainMenu = function(buttonEntity, payload)
+        playUIClick()
+
+        if payload then
+            local layer = layers[string.upper(payload)]
+
+            if layer then
+                -- Disable previous layer
+                setLayerEnabled(layer, false)
+            else
+                printLog("[UI] Invalid payload: " .. tostring(payload))
+                return
+            end
+        else
+            printLog("[UI] No payload provided")
+            return
+        end
+        
+        -- Enable main menu layer
+        setLayerEnabled(layers.MAINMENU, true)
+    end,
+
+    -- Toggles between credit layers
+    credits_Next = function(buttonEntity, payload)
+        playUIClick()
+
+        -- Disable previous layer
+        if payload then
+            local layer = layers[string.upper(payload)]
+
+            if layer == layers.CREDITS_1 then
+                setLayerEnabled(layers.CREDITS_1, true)
+                setLayerEnabled(layers.CREDITS_2, false)
+            elseif layer == layers.CREDITS_2 then
+                setLayerEnabled(layers.CREDITS_2, true)
+                setLayerEnabled(layers.CREDITS_1, false)
+            end
+        else
+            printLog("[UI] No payload provided")
+            return
+        end
+    end,
+
+    -- Toggles between how to play layers
+    howtoplay_Next = function(buttonEntity, payload)
+        playUIClick()
+
+        -- Disable previous layer
+        if payload then
+            local layer = layers[string.upper(payload)]
+
+            if layer == layers.HOWTOPLAY_1 then
+                setLayerEnabled(layers.HOWTOPLAY_1, true)
+                setLayerEnabled(layers.HOWTOPLAY_2, false)
+            elseif layer == layers.HOWTOPLAY_2 then
+                setLayerEnabled(layers.HOWTOPLAY_2, true)
+                setLayerEnabled(layers.HOWTOPLAY_1, false)
+            end
+        else
+            printLog("[UI] No payload provided")
+            return
+        end
     end,
 }
 

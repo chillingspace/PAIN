@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "back_button.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 16902894610154546373
+  },
+  "descriptor_version": 1,
+  "guid": "f699978f-4d62-dc40-8719-a3392c3837fa",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\back_button.prefab"
+  }
+}

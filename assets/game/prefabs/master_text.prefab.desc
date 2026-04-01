@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "master_text.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 129785808055474638
+  },
+  "descriptor_version": 1,
+  "guid": "486a04ef-9605-a747-aebf-2bd7ebfd1f1a",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\master_text.prefab"
+  }
+}

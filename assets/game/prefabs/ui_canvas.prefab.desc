@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "ui_canvas.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 2016446215825170653
+  },
+  "descriptor_version": 1,
+  "guid": "00065270-4a18-d74c-b7b2-1874f6357610",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\ui_canvas.prefab"
+  }
+}

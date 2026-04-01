@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "display_text.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 14418958143610577369
+  },
+  "descriptor_version": 1,
+  "guid": "f734ab6a-61b5-8541-9d3a-6d3b6d2c8cd2",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\display_text.prefab"
+  }
+}

@@ -63,6 +63,15 @@ namespace PAIN {
 		case UIAction::graphics_Left:		   return "graphics_Left";
 		case UIAction::graphics_Right:		   return "graphics_Right";
 
+		case UIAction::mainmenu_Next:		   return "mainmenu_Next";
+		case UIAction::settings_Back:		   return "settings_Back";
+		case UIAction::settings_Sub_Back:	   return "settings_Sub_Back";
+		case UIAction::settings_Next:		   return "settings_Next";
+		case UIAction::to_MainMenu:			   return "to_MainMenu";
+		case UIAction::credits_Next:		   return "credits_Next";
+		case UIAction::howtoplay_Next:		   return "howtoplay_Next";
+		case UIAction::reset_Graphics_Settings: return "reset_Graphics_Settings";
+		
 		case UIAction::None:
 		default:                               return "None";
 		}

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "audio_canvas.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 1590541652802885529
+  },
+  "descriptor_version": 1,
+  "guid": "38e9c738-9265-d846-8857-21a84a819520",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\audio_canvas.prefab"
+  }
+}

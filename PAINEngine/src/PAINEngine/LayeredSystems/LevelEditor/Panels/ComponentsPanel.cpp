@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "ComponentsPanel.h"
 
 #ifdef _DEBUG
@@ -762,7 +762,14 @@ namespace PAIN {
 					}
 
 					// Font position
-					changed |= ImGui::DragFloat2("Text Position", &text.text_pos.x, 0.5f, 0.0f, 0.0f, "%.2f");
+					changed |= ImGui::DragFloat2(
+						"Text Position",
+						&text.text_pos.x,
+						1.0f,
+						-10000.0f,
+						10000.0f,
+						"%.2f"
+					);
 
 					// Font size
 					changed |= ImGui::DragFloat("Font Size", &text.font_size, 0.2f, 6.0f,
@@ -891,7 +898,17 @@ namespace PAIN {
 							"howtoplay_Left",
 
 							"graphics_Left",
-							"graphics_Right"
+							"graphics_Right",
+
+							"mainmenu_Next",
+							"settings_Back",
+							"settings_Sub_Back",
+							"settings_Next",
+							"to_MainMenu",
+							"credits_Next",
+							"howtoplay_Next",
+						"reset_Graphics_Settings"
+
 						};
 
 						int action_idx = static_cast<int>(button.action);

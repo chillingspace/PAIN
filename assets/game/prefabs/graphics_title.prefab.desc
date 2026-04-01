@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "graphics_title.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 11959414697732888228
+  },
+  "descriptor_version": 1,
+  "guid": "f3635596-ca2c-7242-ba02-80e9f0a184fa",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\graphics_title.prefab"
+  }
+}

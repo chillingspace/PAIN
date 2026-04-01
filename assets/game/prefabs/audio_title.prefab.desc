@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "audio_title.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 17161985734243740162
+  },
+  "descriptor_version": 1,
+  "guid": "a9367b32-ea28-d44c-b37f-fd1a7dbc2ffd",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\audio_title.prefab"
+  }
+}
