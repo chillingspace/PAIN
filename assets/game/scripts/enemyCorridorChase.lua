@@ -19,7 +19,7 @@ do
     -- =========================================================
 
     -- Trigger
-    local TRIGGER_RADIUS        = 5.0   -- proximity to fire camera pan (units)
+    local TRIGGER_RADIUS        = 7.0   -- proximity to fire camera pan (units)
 
     -- Camera pan (uses _G.StartCameraPan from thirdPersonCamera.lua)
     local CAM_WAYPOINTS         = { "corridor_cam_waypoint_1" }
