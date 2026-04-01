@@ -19,7 +19,7 @@ do
     -- =========================================================
 
     -- Trigger
-    local TRIGGER_RADIUS        = 10.0   -- proximity to fire camera pan (units)
+    local TRIGGER_RADIUS        = 5.0   -- proximity to fire camera pan (units)
 
     -- Camera pan (uses _G.StartCameraPan from thirdPersonCamera.lua)
     local CAM_WAYPOINTS         = { "corridor_cam_waypoint_1" }
@@ -31,7 +31,7 @@ do
     local ALERT_PAUSE_TIME      = 0.5   -- freeze before charging (seconds)
 
     -- Movement
-    local CHASE_SPEED           = 3.0   -- units/sec while chasing
+    local CHASE_SPEED           = 2.5   -- units/sec while chasing
     local RETURN_SPEED          = 2.0   -- units/sec walking back to home
     local MAX_CHASE_DISTANCE    = 35.0  -- give up if this far from home (units)
     local ARRIVE_EPSILON        = 0.25  -- close enough to home to stop

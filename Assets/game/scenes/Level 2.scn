@@ -64,18 +64,21 @@
         "bc3ef3ce-e400-1247-acaa-e9e34cd3b2cd",
         "89e040b6-c439-7c45-a630-000c72698fcf",
         "9299e062-af2a-cb4c-8ae2-fbd228835828",
+        "630fadbb-2e36-ce45-9b42-33cb68aec2bd",
+        "1fe8b9a9-f998-cc41-bbaf-d6268f17914b",
+        "383081bd-046e-7d4c-a46d-98ddce4c4ac3",
+        "a67656ca-15a5-d441-b14d-dae036e5245e",
+        "8fb18e50-fe3a-dd4c-889f-62f426ff9d18",
+        "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
+        "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
+        "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
+        "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
         "79269c4e-addb-ea41-85c6-57e984c24ff3",
         "45a24c40-8fa2-c747-9653-4d55350bf379",
         "4ae3113a-4586-9045-a43d-17ed1c07d76f",
         "8500da5f-b5ff-4d4f-be3b-cbda036f39d2",
         "ca65c8fb-c79d-9c4e-b32c-2ce453f01543",
-        "630fadbb-2e36-ce45-9b42-33cb68aec2bd",
-        "1fe8b9a9-f998-cc41-bbaf-d6268f17914b",
-        "a67656ca-15a5-d441-b14d-dae036e5245e",
-        "383081bd-046e-7d4c-a46d-98ddce4c4ac3",
         "b8a2c974-f619-014b-9cb4-6143cbdf7c4b",
-        "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
-        "8fb18e50-fe3a-dd4c-889f-62f426ff9d18",
         "8ec89d31-ef7e-9247-834a-8782dd0c614d",
         "2d87afdc-663f-ed4a-bdce-4ac73c3b6db0",
         "f57adda3-64e1-a544-86a2-842c8976e7e0",
@@ -88,9 +91,6 @@
         "164de26f-1403-e146-8a76-735d5dc42155",
         "dadd8247-bfe7-7e42-8874-2bccc9ed2210",
         "c49ebb97-d7ba-f148-9e46-16d6c5543147",
-        "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
-        "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
-        "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
         "9dc666a4-a004-0346-803d-0530eb3a2f70",
         "8e26f21e-f0ca-5448-a80f-70f21e165ec6",
         "c3240e7d-4066-2444-a024-c1d31c71a299",
@@ -329,16 +329,16 @@
         ],
         "farPlane": 100.0,
         "forward": [
-            0.01013556681573391,
-            -0.9643279910087585,
-            0.26451635360717773
+            0.35463765263557434,
+            -0.839148223400116,
+            0.4123862087726593
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            16.174922943115234,
-            26.461585998535156,
-            -6.302441120147705
+            35.96826934814453,
+            14.014725685119629,
+            -8.138319969177246
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 31.100000381469727,
@@ -359,7 +359,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 23
+                            "siblingIndex": 0
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -471,7 +471,7 @@
                                 "9234730d-16d6-c044-a306-66a4f628f65a"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 24
+                            "siblingIndex": 1
                         },
                         "Layer": {
                             "layer_id": 8,
@@ -741,7 +741,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 25
+                            "siblingIndex": 2
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -864,7 +864,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 26
+                            "siblingIndex": 3
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -932,7 +932,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 27
+                            "siblingIndex": 4
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -968,13 +968,13 @@
                         "Texture2D": {
                             "opacity": 1.0,
                             "pos": [
-                                0.0,
-                                0.0
+                                -0.24356238543987274,
+                                -0.1206989735364914
                             ],
                             "texture_guid": "1e639b81-b5bd-6e47-96f8-9451bf492db5",
                             "texture_scale": [
-                                1.0,
-                                1.0
+                                0.011028801091015339,
+                                0.026683544740080833
                             ]
                         },
                         "UIElement": {
@@ -1027,9 +1027,9 @@
                                 1.0
                             ],
                             "scale": [
-                                1.0,
-                                1.0,
-                                1.0
+                                0.011028801091015339,
+                                0.026683544740080833,
+                                0.423505961894989
                             ],
                             "size_delta": [
                                 50.0,
@@ -1049,7 +1049,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 28
+                            "siblingIndex": 5
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1166,7 +1166,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 29
+                            "siblingIndex": 6
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1283,7 +1283,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 30
+                            "siblingIndex": 7
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1400,7 +1400,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 31
+                            "siblingIndex": 8
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1517,7 +1517,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 32
+                            "siblingIndex": 9
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1603,7 +1603,7 @@
                                 "d4036560-5638-c24c-afad-34e80b3b813c"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 33
+                            "siblingIndex": 10
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -3275,7 +3275,7 @@
                                 "5dcd8df7-64c1-c648-986c-3941c7c66454"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 34
+                            "siblingIndex": 11
                         },
                         "Layer": {
                             "layer_id": 8,
@@ -4769,10 +4769,20 @@
                                 "ba6b5a22-9dd4-de41-8a37-5895115d426d",
                                 "c56841ac-f9ea-b546-8553-df0b25b85cdd",
                                 "34ad3be1-e33d-b848-b345-2946ee55cf64",
-                                "4c933a58-e1fe-9f40-87bc-d59179163dae"
+                                "4c933a58-e1fe-9f40-87bc-d59179163dae",
+                                "50cbe3b8-66cf-6e41-8404-0409d79dadef",
+                                "902752f9-e1d5-3c4b-a13f-9b509f1226cc",
+                                "fe22ad2c-17a6-0242-b3aa-f7c4619a8ffb",
+                                "2a015918-c4c0-a046-bd8c-916a905efa8d",
+                                "8bc8a786-c303-f546-9c19-4e9f797ecd66",
+                                "016a873f-81f5-b04f-a8ac-100d9ff12c7c",
+                                "817e76d2-c5c6-e440-abca-08f2c5fb196c",
+                                "06dc55ba-7a39-c44a-bc64-f0b73dc53569",
+                                "609a5cb3-2ce0-7243-bd5d-58c0adf9d471",
+                                "e2af4028-21fe-9c4b-8fcf-56fae98df8da"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 35
+                            "siblingIndex": 12
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -5635,7 +5645,7 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
-                            "guid": "4c933a58-e1fe-9f40-87bc-d59179163dae"
+                            "guid": "817e76d2-c5c6-e440-abca-08f2c5fb196c"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
@@ -5665,7 +5675,7 @@
                             ]
                         },
                         "Name": {
-                            "name": "pAe ui"
+                            "name": "pCs ui"
                         },
                         "Tag": {
                             "tags": [
@@ -5691,7 +5701,7 @@
                             "layer": 0
                         },
                         "UIFollowsWorldEntity": {
-                            "entity_target_guid": "3d6b3b6f-0e82-1649-90ff-a19acc80c2cd",
+                            "entity_target_guid": "d4ee0be3-7143-854e-aa8a-60c26fa5cc4d",
                             "world_offset": [
                                 0.0,
                                 1.0,
@@ -5745,6 +5755,1176 @@
                             ]
                         }
                     },
+                    "Name": "pCs ui"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "06dc55ba-7a39-c44a-bc64-f0b73dc53569"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
+                            "siblingIndex": 11
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "pCe ui"
+                        },
+                        "Tag": {
+                            "tags": [
+                                "interaction_prompt",
+                                "prompt_pipe"
+                            ]
+                        },
+                        "Texture2D": {
+                            "opacity": 1.0,
+                            "pos": [
+                                -0.9214488863945007,
+                                0.9024047255516052
+                            ],
+                            "texture_guid": "bd0a7c29-ace7-3748-9bb0-beba7ab453fd",
+                            "texture_scale": [
+                                0.0072916666977107525,
+                                0.006054490339010954
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": false,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIFollowsWorldEntity": {
+                            "entity_target_guid": "8931e4e9-86fc-2448-bc1e-7a896e70724f",
+                            "world_offset": [
+                                0.0,
+                                1.0,
+                                0.0
+                            ]
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0072916666977107525,
+                                0.005400539841502905,
+                                0.20000000298023224
+                            ],
+                            "size_delta": [
+                                70.0,
+                                30.0
+                            ]
+                        }
+                    },
+                    "Name": "pCe ui"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "609a5cb3-2ce0-7243-bd5d-58c0adf9d471"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
+                            "siblingIndex": 12
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "pDs ui"
+                        },
+                        "Tag": {
+                            "tags": [
+                                "interaction_prompt",
+                                "prompt_pipe"
+                            ]
+                        },
+                        "Texture2D": {
+                            "opacity": 1.0,
+                            "pos": [
+                                -0.9214488863945007,
+                                0.9024047255516052
+                            ],
+                            "texture_guid": "bd0a7c29-ace7-3748-9bb0-beba7ab453fd",
+                            "texture_scale": [
+                                0.0072916666977107525,
+                                0.006054490339010954
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": false,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIFollowsWorldEntity": {
+                            "entity_target_guid": "0a53cc2f-dc8a-eb49-9edb-7f85042f59b1",
+                            "world_offset": [
+                                0.0,
+                                1.0,
+                                0.0
+                            ]
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0072916666977107525,
+                                0.005400539841502905,
+                                0.20000000298023224
+                            ],
+                            "size_delta": [
+                                70.0,
+                                30.0
+                            ]
+                        }
+                    },
+                    "Name": "pDs ui"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "e2af4028-21fe-9c4b-8fcf-56fae98df8da"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
+                            "siblingIndex": 13
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "pDe ui"
+                        },
+                        "Tag": {
+                            "tags": [
+                                "interaction_prompt",
+                                "prompt_pipe"
+                            ]
+                        },
+                        "Texture2D": {
+                            "opacity": 1.0,
+                            "pos": [
+                                -0.9214488863945007,
+                                0.9024047255516052
+                            ],
+                            "texture_guid": "bd0a7c29-ace7-3748-9bb0-beba7ab453fd",
+                            "texture_scale": [
+                                0.0072916666977107525,
+                                0.006054490339010954
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": false,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIFollowsWorldEntity": {
+                            "entity_target_guid": "8c8fdab5-a188-da40-a309-ff210e0650cb",
+                            "world_offset": [
+                                0.0,
+                                1.0,
+                                0.0
+                            ]
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0072916666977107525,
+                                0.005400539841502905,
+                                0.20000000298023224
+                            ],
+                            "size_delta": [
+                                70.0,
+                                30.0
+                            ]
+                        }
+                    },
+                    "Name": "pDe ui"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "8bc8a786-c303-f546-9c19-4e9f797ecd66"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
+                            "siblingIndex": 14
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "pFs ui"
+                        },
+                        "Tag": {
+                            "tags": [
+                                "interaction_prompt",
+                                "prompt_pipe"
+                            ]
+                        },
+                        "Texture2D": {
+                            "opacity": 1.0,
+                            "pos": [
+                                -0.9214488863945007,
+                                0.9024047255516052
+                            ],
+                            "texture_guid": "bd0a7c29-ace7-3748-9bb0-beba7ab453fd",
+                            "texture_scale": [
+                                0.0072916666977107525,
+                                0.006054490339010954
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": false,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIFollowsWorldEntity": {
+                            "entity_target_guid": "ba6b5a22-9dd4-de41-8a37-5895115d426d",
+                            "world_offset": [
+                                0.0,
+                                1.0,
+                                0.0
+                            ]
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0072916666977107525,
+                                0.005400539841502905,
+                                0.20000000298023224
+                            ],
+                            "size_delta": [
+                                70.0,
+                                30.0
+                            ]
+                        }
+                    },
+                    "Name": "pFs ui"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "016a873f-81f5-b04f-a8ac-100d9ff12c7c"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
+                            "siblingIndex": 15
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "pFe ui"
+                        },
+                        "Tag": {
+                            "tags": [
+                                "interaction_prompt",
+                                "prompt_pipe"
+                            ]
+                        },
+                        "Texture2D": {
+                            "opacity": 1.0,
+                            "pos": [
+                                -0.9214488863945007,
+                                0.9024047255516052
+                            ],
+                            "texture_guid": "bd0a7c29-ace7-3748-9bb0-beba7ab453fd",
+                            "texture_scale": [
+                                0.0072916666977107525,
+                                0.006054490339010954
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": false,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIFollowsWorldEntity": {
+                            "entity_target_guid": "c56841ac-f9ea-b546-8553-df0b25b85cdd",
+                            "world_offset": [
+                                0.0,
+                                1.0,
+                                0.0
+                            ]
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0072916666977107525,
+                                0.005400539841502905,
+                                0.20000000298023224
+                            ],
+                            "size_delta": [
+                                70.0,
+                                30.0
+                            ]
+                        }
+                    },
+                    "Name": "pFe ui"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "50cbe3b8-66cf-6e41-8404-0409d79dadef"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
+                            "siblingIndex": 16
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "pBs ui"
+                        },
+                        "Tag": {
+                            "tags": [
+                                "interaction_prompt",
+                                "prompt_pipe"
+                            ]
+                        },
+                        "Texture2D": {
+                            "opacity": 1.0,
+                            "pos": [
+                                -0.9214488863945007,
+                                0.9024047255516052
+                            ],
+                            "texture_guid": "bd0a7c29-ace7-3748-9bb0-beba7ab453fd",
+                            "texture_scale": [
+                                0.0072916666977107525,
+                                0.006054490339010954
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": false,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIFollowsWorldEntity": {
+                            "entity_target_guid": "b98e03a0-94e6-3c4b-94f3-e8e03fa538be",
+                            "world_offset": [
+                                0.0,
+                                1.0,
+                                0.0
+                            ]
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0072916666977107525,
+                                0.005400539841502905,
+                                0.20000000298023224
+                            ],
+                            "size_delta": [
+                                70.0,
+                                30.0
+                            ]
+                        }
+                    },
+                    "Name": "pBs ui"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "902752f9-e1d5-3c4b-a13f-9b509f1226cc"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
+                            "siblingIndex": 17
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "pBe ui"
+                        },
+                        "Tag": {
+                            "tags": [
+                                "interaction_prompt",
+                                "prompt_pipe"
+                            ]
+                        },
+                        "Texture2D": {
+                            "opacity": 1.0,
+                            "pos": [
+                                -0.9214488863945007,
+                                0.9024047255516052
+                            ],
+                            "texture_guid": "bd0a7c29-ace7-3748-9bb0-beba7ab453fd",
+                            "texture_scale": [
+                                0.0072916666977107525,
+                                0.006054490339010954
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": false,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIFollowsWorldEntity": {
+                            "entity_target_guid": "f643195c-c2d0-ea4f-870f-cd60b1542e63",
+                            "world_offset": [
+                                0.0,
+                                1.0,
+                                0.0
+                            ]
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0072916666977107525,
+                                0.005400539841502905,
+                                0.20000000298023224
+                            ],
+                            "size_delta": [
+                                70.0,
+                                30.0
+                            ]
+                        }
+                    },
+                    "Name": "pBe ui"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "fe22ad2c-17a6-0242-b3aa-f7c4619a8ffb"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
+                            "siblingIndex": 18
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "pEe ui"
+                        },
+                        "Tag": {
+                            "tags": [
+                                "interaction_prompt",
+                                "prompt_pipe"
+                            ]
+                        },
+                        "Texture2D": {
+                            "opacity": 1.0,
+                            "pos": [
+                                -0.9214488863945007,
+                                0.9024047255516052
+                            ],
+                            "texture_guid": "bd0a7c29-ace7-3748-9bb0-beba7ab453fd",
+                            "texture_scale": [
+                                0.0072916666977107525,
+                                0.006054490339010954
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": false,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIFollowsWorldEntity": {
+                            "entity_target_guid": "29cf6faf-38d8-b848-992d-bdbba80fb50a",
+                            "world_offset": [
+                                0.0,
+                                1.0,
+                                0.0
+                            ]
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0072916666977107525,
+                                0.005400539841502905,
+                                0.20000000298023224
+                            ],
+                            "size_delta": [
+                                70.0,
+                                30.0
+                            ]
+                        }
+                    },
+                    "Name": "pEe ui"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "2a015918-c4c0-a046-bd8c-916a905efa8d"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
+                            "siblingIndex": 19
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "pEs ui"
+                        },
+                        "Tag": {
+                            "tags": [
+                                "interaction_prompt",
+                                "prompt_pipe"
+                            ]
+                        },
+                        "Texture2D": {
+                            "opacity": 1.0,
+                            "pos": [
+                                -0.9214488863945007,
+                                0.9024047255516052
+                            ],
+                            "texture_guid": "bd0a7c29-ace7-3748-9bb0-beba7ab453fd",
+                            "texture_scale": [
+                                0.0072916666977107525,
+                                0.006054490339010954
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": false,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIFollowsWorldEntity": {
+                            "entity_target_guid": "d5e43bd3-1f7c-374f-9b27-2417bdca7830",
+                            "world_offset": [
+                                0.0,
+                                1.0,
+                                0.0
+                            ]
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.0072916666977107525,
+                                0.005400539841502905,
+                                0.20000000298023224
+                            ],
+                            "size_delta": [
+                                70.0,
+                                30.0
+                            ]
+                        }
+                    },
+                    "Name": "pEs ui"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "4c933a58-e1fe-9f40-87bc-d59179163dae"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
+                            "siblingIndex": 20
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "pAe ui"
+                        },
+                        "Tag": {
+                            "tags": [
+                                "interaction_prompt",
+                                "prompt_pipe"
+                            ]
+                        },
+                        "Texture2D": {
+                            "opacity": 1.0,
+                            "pos": [
+                                -0.9873453378677368,
+                                0.35675859451293945
+                            ],
+                            "texture_guid": "bd0a7c29-ace7-3748-9bb0-beba7ab453fd",
+                            "texture_scale": [
+                                0.010292117483913898,
+                                0.007622810546308756
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": false,
+                            "b_is_interactable": true,
+                            "layer": 0
+                        },
+                        "UIFollowsWorldEntity": {
+                            "entity_target_guid": "3d6b3b6f-0e82-1649-90ff-a19acc80c2cd",
+                            "world_offset": [
+                                0.0,
+                                1.0,
+                                0.0
+                            ]
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.010292117483913898,
+                                0.007622810546308756,
+                                0.28229808807373047
+                            ],
+                            "size_delta": [
+                                70.0,
+                                30.0
+                            ]
+                        }
+                    },
                     "Name": "pAe ui"
                 }
             },
@@ -5757,7 +6937,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
-                            "siblingIndex": 11
+                            "siblingIndex": 21
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -5836,7 +7016,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
-                            "siblingIndex": 12
+                            "siblingIndex": 22
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -5915,7 +7095,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
-                            "siblingIndex": 13
+                            "siblingIndex": 23
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -5994,7 +7174,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
-                            "siblingIndex": 14
+                            "siblingIndex": 24
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -6060,7 +7240,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
-                                    "siblingIndex": 14
+                                    "siblingIndex": 24
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -6160,7 +7340,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
-                            "siblingIndex": 15
+                            "siblingIndex": 25
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -6226,7 +7406,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
-                                    "siblingIndex": 15
+                                    "siblingIndex": 25
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -6329,7 +7509,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
-                            "siblingIndex": 16
+                            "siblingIndex": 26
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -6395,7 +7575,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
-                                    "siblingIndex": 16
+                                    "siblingIndex": 26
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -6498,7 +7678,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
-                            "siblingIndex": 17
+                            "siblingIndex": 27
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -6564,7 +7744,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
-                                    "siblingIndex": 17
+                                    "siblingIndex": 27
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -6667,7 +7847,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
-                            "siblingIndex": 18
+                            "siblingIndex": 28
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -6733,7 +7913,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
-                                    "siblingIndex": 18
+                                    "siblingIndex": 28
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -6836,7 +8016,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
-                            "siblingIndex": 19
+                            "siblingIndex": 29
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -6902,7 +8082,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
-                                    "siblingIndex": 19
+                                    "siblingIndex": 29
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -7005,7 +8185,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
-                            "siblingIndex": 20
+                            "siblingIndex": 30
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -7071,7 +8251,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
-                                    "siblingIndex": 20
+                                    "siblingIndex": 30
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -7174,7 +8354,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
-                            "siblingIndex": 21
+                            "siblingIndex": 31
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -7240,7 +8420,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "f994893e-3df8-7640-bcb8-b7a43807770d",
-                                    "siblingIndex": 21
+                                    "siblingIndex": 31
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -7572,10 +8752,11 @@
                                 "49b128c9-1942-e24e-91e5-f8cede7e1837",
                                 "76db345e-913d-f041-beca-b37484d737c4",
                                 "feff8a8d-b842-0c44-8b75-36fa9b979e92",
-                                "afac0b17-643b-b740-843e-77a7ab600069"
+                                "afac0b17-643b-b740-843e-77a7ab600069",
+                                "9486be85-8a92-1f4b-867e-048ab5448715"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 36
+                            "siblingIndex": 13
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -7742,12 +8923,144 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
-                            "guid": "afac0b17-643b-b740-843e-77a7ab600069"
+                            "guid": "9486be85-8a92-1f4b-867e-048ab5448715"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
                             "siblingIndex": 1
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                42.18233108520508,
+                                -0.42728614807128906,
+                                -5.829216957092285
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                36.19999694824219,
+                                36.19999694824219,
+                                36.19999694824219
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "doubleSidedShadows": false,
+                            "isStatic": false,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "48ae6798-0194-ae4c-89c1-c9d8ba1c016d",
+                                    "aoTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "f3df4752-cdaf-d943-aa2e-1a7ca9f13ec5",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
+                                    "normalTextureOverride": "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "a67656ca-15a5-d441-b14d-dae036e5245e",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "Pile1"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
+                                    "siblingIndex": 1
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        42.18233108520508,
+                                        -0.42728614807128906,
+                                        -5.829216957092285
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "scale": [
+                                        36.19999694824219,
+                                        36.19999694824219,
+                                        36.19999694824219
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "45b1df7c-23c7-d541-97ef-cfc2793bc466",
+                            "instanceRootGUID": "9486be85-8a92-1f4b-867e-048ab5448715",
+                            "sourcePrefabGUID": "06414c40-ae12-174c-96ea-52ea187c80c4"
+                        },
+                        "RigidBody3D": {
+                            "angular_velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "collider_offset": [
+                                0.0,
+                                0.05000000074505806,
+                                0.0
+                            ],
+                            "collider_scale": [
+                                0.15000000596046448,
+                                -0.10000000149011612,
+                                0.15000000596046448
+                            ],
+                            "motion_type": 0,
+                            "physics_behavior": {
+                                "behavior": 0
+                            },
+                            "physics_enabled": true,
+                            "use_gravity": true,
+                            "velocity": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    },
+                    "Name": "Pile1"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "afac0b17-643b-b740-843e-77a7ab600069"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
+                            "siblingIndex": 2
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -7813,7 +9126,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 1
+                                    "siblingIndex": 2
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -7941,7 +9254,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 2
+                            "siblingIndex": 3
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -8007,7 +9320,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 2
+                                    "siblingIndex": 3
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -8135,7 +9448,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 3
+                            "siblingIndex": 4
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -8201,7 +9514,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 3
+                                    "siblingIndex": 4
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -8329,7 +9642,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 4
+                            "siblingIndex": 5
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -8403,7 +9716,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 5
+                            "siblingIndex": 6
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -8477,7 +9790,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 6
+                            "siblingIndex": 7
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -8543,7 +9856,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 6
+                                    "siblingIndex": 7
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -8609,7 +9922,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 7
+                            "siblingIndex": 8
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -8675,7 +9988,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 7
+                                    "siblingIndex": 8
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -8775,7 +10088,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 8
+                            "siblingIndex": 9
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -8841,7 +10154,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 8
+                                    "siblingIndex": 9
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -8946,7 +10259,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 9
+                            "siblingIndex": 10
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -9012,7 +10325,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 9
+                                    "siblingIndex": 10
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -9140,7 +10453,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 10
+                            "siblingIndex": 11
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -9206,7 +10519,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 10
+                                    "siblingIndex": 11
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -9306,7 +10619,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 11
+                            "siblingIndex": 12
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -9372,7 +10685,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 11
+                                    "siblingIndex": 12
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -9438,7 +10751,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 12
+                            "siblingIndex": 13
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -9504,7 +10817,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 12
+                                    "siblingIndex": 13
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -9570,7 +10883,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 13
+                            "siblingIndex": 14
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -9636,7 +10949,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 13
+                                    "siblingIndex": 14
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -9736,7 +11049,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 14
+                            "siblingIndex": 15
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -9802,7 +11115,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 14
+                                    "siblingIndex": 15
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -9902,7 +11215,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 15
+                            "siblingIndex": 16
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -9968,7 +11281,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 15
+                                    "siblingIndex": 16
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -10034,7 +11347,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 16
+                            "siblingIndex": 17
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -10100,7 +11413,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 16
+                                    "siblingIndex": 17
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -10166,7 +11479,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 17
+                            "siblingIndex": 18
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -10232,7 +11545,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 17
+                                    "siblingIndex": 18
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -10298,7 +11611,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 18
+                            "siblingIndex": 19
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -10364,7 +11677,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 18
+                                    "siblingIndex": 19
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -10464,7 +11777,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 19
+                            "siblingIndex": 20
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -10530,7 +11843,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 19
+                                    "siblingIndex": 20
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -10658,7 +11971,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 20
+                            "siblingIndex": 21
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -10724,7 +12037,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 20
+                                    "siblingIndex": 21
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -10790,7 +12103,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 21
+                            "siblingIndex": 22
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -10856,7 +12169,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 21
+                                    "siblingIndex": 22
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -10922,7 +12235,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 22
+                            "siblingIndex": 23
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -10988,7 +12301,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 22
+                                    "siblingIndex": 23
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -11116,7 +12429,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 23
+                            "siblingIndex": 24
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -11182,7 +12495,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 23
+                                    "siblingIndex": 24
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -11248,7 +12561,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 24
+                            "siblingIndex": 25
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -11314,7 +12627,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 24
+                                    "siblingIndex": 25
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -11380,7 +12693,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 25
+                            "siblingIndex": 26
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -11446,7 +12759,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 25
+                                    "siblingIndex": 26
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -11512,7 +12825,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 26
+                            "siblingIndex": 27
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -11578,7 +12891,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 26
+                                    "siblingIndex": 27
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -11678,7 +12991,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 27
+                            "siblingIndex": 28
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -11744,7 +13057,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 27
+                                    "siblingIndex": 28
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -11872,7 +13185,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 28
+                            "siblingIndex": 29
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -11938,7 +13251,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 28
+                                    "siblingIndex": 29
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -12055,200 +13368,6 @@
                         }
                     },
                     "Name": "Pallet"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "GUID": {
-                            "guid": "802ee699-d2ce-8246-b215-dcb16d229726"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                            "siblingIndex": 29
-                        },
-                        "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                60.37364959716797,
-                                4.76837158203125e-07,
-                                -22.753822326660156
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "ModelRenderer": {
-                            "castShadows": true,
-                            "doubleSidedShadows": false,
-                            "isStatic": false,
-                            "materials": [
-                                {
-                                    "albedoTextureOverride": "8e95fbff-6409-534d-9514-5cd28ca3299b",
-                                    "aoTextureOverride": "82b54b78-a8d8-864d-b876-e2ac4637529a",
-                                    "baseColorOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "8500da5f-b5ff-4d4f-be3b-cbda036f39d2",
-                                    "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "82b54b78-a8d8-864d-b876-e2ac4637529a",
-                                    "normalTextureOverride": "32c78f38-e359-b04f-8588-85117e067bfb",
-                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "82b54b78-a8d8-864d-b876-e2ac4637529a",
-                                    "useOverrides": false
-                                }
-                            ],
-                            "modelGUID": "45a24c40-8fa2-c747-9653-4d55350bf379",
-                            "receiveShadows": true,
-                            "visible": true
-                        },
-                        "Name": {
-                            "name": "Pipe10"
-                        },
-                        "PrefabInstance": {
-                            "componentOverrides": {
-                                "Hierarchy": {
-                                    "childrenGUIDs": [],
-                                    "parentGUID": "d76099ce-0208-b94e-aec3-913a95c77990",
-                                    "siblingIndex": 29
-                                },
-                                "LocalTransform": {
-                                    "position": [
-                                        60.37364959716797,
-                                        4.76837158203125e-07,
-                                        -22.753822326660156
-                                    ],
-                                    "rotation": [
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        1.0
-                                    ],
-                                    "scale": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ]
-                                },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "doubleSidedShadows": false,
-                                    "isStatic": false,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "8e95fbff-6409-534d-9514-5cd28ca3299b",
-                                            "aoTextureOverride": "82b54b78-a8d8-864d-b876-e2ac4637529a",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "8500da5f-b5ff-4d4f-be3b-cbda036f39d2",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "82b54b78-a8d8-864d-b876-e2ac4637529a",
-                                            "normalTextureOverride": "32c78f38-e359-b04f-8588-85117e067bfb",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "82b54b78-a8d8-864d-b876-e2ac4637529a",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "45a24c40-8fa2-c747-9653-4d55350bf379",
-                                    "receiveShadows": true,
-                                    "visible": true
-                                },
-                                "RigidBody3D": {
-                                    "angular_velocity": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "collider_offset": [
-                                        -1.0,
-                                        5.199999809265137,
-                                        1.399999976158142
-                                    ],
-                                    "collider_scale": [
-                                        1.0,
-                                        10.5,
-                                        1.0
-                                    ],
-                                    "motion_type": 0,
-                                    "physics_behavior": {
-                                        "behavior": 0
-                                    },
-                                    "physics_enabled": true,
-                                    "use_gravity": true,
-                                    "velocity": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ]
-                                }
-                            },
-                            "correspondingPrefabEntityGUID": "b1a6c3e1-df6d-f948-bece-8c5f267e13d7",
-                            "instanceRootGUID": "802ee699-d2ce-8246-b215-dcb16d229726",
-                            "sourcePrefabGUID": "219f6d90-0114-8e44-b3b8-c09214f12f05"
-                        },
-                        "RigidBody3D": {
-                            "angular_velocity": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "collider_offset": [
-                                -1.0,
-                                5.199999809265137,
-                                1.399999976158142
-                            ],
-                            "collider_scale": [
-                                1.0,
-                                10.5,
-                                1.0
-                            ],
-                            "motion_type": 0,
-                            "physics_behavior": {
-                                "behavior": 0
-                            },
-                            "physics_enabled": true,
-                            "use_gravity": true,
-                            "velocity": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ]
-                        }
-                    },
-                    "Name": "Pipe10"
                 }
             },
             {
@@ -41801,7 +42920,7 @@
                                 "dd464bb8-d9f7-a245-9822-3d2644e4bbe2"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 37
+                            "siblingIndex": 14
                         },
                         "Layer": {
                             "layer_id": 5,
@@ -41836,7 +42955,7 @@
                                         "dd464bb8-d9f7-a245-9822-3d2644e4bbe2"
                                     ],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 37
+                                    "siblingIndex": 14
                                 }
                             },
                             "correspondingPrefabEntityGUID": "5b06bcce-31b8-8340-baaa-ac9c654e80d8",
@@ -42209,7 +43328,7 @@
                                 "324a94f3-0c7b-664a-9619-95b48f8c0d09"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 38
+                            "siblingIndex": 15
                         },
                         "Layer": {
                             "layer_id": 6,
@@ -42244,7 +43363,7 @@
                                         "324a94f3-0c7b-664a-9619-95b48f8c0d09"
                                     ],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 38
+                                    "siblingIndex": 15
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -42645,7 +43764,7 @@
                                 "d4d60ee0-4ec7-9d41-b7a3-b856d41d3471"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 39
+                            "siblingIndex": 16
                         },
                         "Layer": {
                             "layer_id": 7,
@@ -42680,7 +43799,7 @@
                                         "d4d60ee0-4ec7-9d41-b7a3-b856d41d3471"
                                     ],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 39
+                                    "siblingIndex": 16
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -43093,7 +44212,7 @@
                                 "ab5e1d78-c736-0649-97f6-30e44102c0cf"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 40
+                            "siblingIndex": 17
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -43271,7 +44390,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 41
+                            "siblingIndex": 18
                         },
                         "Layer": {
                             "layer_id": 6,
@@ -43303,7 +44422,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 41
+                                    "siblingIndex": 18
                                 },
                                 "Layer": {
                                     "layer_id": 6,
@@ -43420,7 +44539,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 42
+                            "siblingIndex": 19
                         },
                         "Layer": {
                             "layer_id": 7,
@@ -43452,7 +44571,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 42
+                                    "siblingIndex": 19
                                 },
                                 "Layer": {
                                     "layer_id": 7,
@@ -43572,7 +44691,7 @@
                                 "675345f8-21f4-d84c-a928-f9bcdd48cb9f"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 43
+                            "siblingIndex": 20
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -44233,7 +45352,7 @@
                                 "7952d2c0-1274-7342-b71f-eeaf56f5824a"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 44
+                            "siblingIndex": 21
                         },
                         "Layer": {
                             "layer_id": 3,
@@ -44658,7 +45777,7 @@
                                 "97ea948c-5ee7-ef4b-9172-9aa9ecadc576"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 45
+                            "siblingIndex": 22
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -45638,7 +46757,7 @@
                                 "8c5cd650-8149-b84e-8886-1cd25c307250"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 46
+                            "siblingIndex": 23
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -46219,7 +47338,7 @@
                                 "a7a16103-310b-e04f-b079-8217f74a16b9"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 47
+                            "siblingIndex": 24
                         },
                         "Layer": {
                             "layer_id": 4,
@@ -46254,7 +47373,7 @@
                                         "a7a16103-310b-e04f-b079-8217f74a16b9"
                                     ],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 47
+                                    "siblingIndex": 24
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -46652,7 +47771,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 48
+                            "siblingIndex": 25
                         },
                         "Layer": {
                             "layer_id": 4,
@@ -46684,7 +47803,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 48
+                                    "siblingIndex": 25
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -46797,7 +47916,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 49
+                            "siblingIndex": 26
                         },
                         "Layer": {
                             "layer_id": 5,
@@ -46829,7 +47948,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 49
+                                    "siblingIndex": 26
                                 },
                                 "Texture2D": {
                                     "opacity": 1.0,
@@ -46928,7 +48047,7 @@
                                 "830683d6-d837-f040-87c2-dc1c24baeb72"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 50
+                            "siblingIndex": 27
                         },
                         "Layer": {
                             "layer_id": 2,
@@ -46964,7 +48083,7 @@
                                         "830683d6-d837-f040-87c2-dc1c24baeb72"
                                     ],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 50
+                                    "siblingIndex": 27
                                 }
                             },
                             "correspondingPrefabEntityGUID": "cbc53e43-5867-7042-86ff-da57ea2d741f",
@@ -47618,7 +48737,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 51
+                            "siblingIndex": 28
                         },
                         "Layer": {
                             "layer_id": 2,
@@ -47650,7 +48769,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 51
+                                    "siblingIndex": 28
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -47767,7 +48886,7 @@
                                 "a1063123-23b1-454b-b06c-05b48726d559"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 52
+                            "siblingIndex": 29
                         },
                         "Layer": {
                             "layer_id": 1,
@@ -49528,7 +50647,7 @@
                                 "7c25af6d-dcff-7d49-8762-8a4d59f1c630"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 53
+                            "siblingIndex": 30
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -50815,13 +51934,13 @@
                         "Texture2D": {
                             "opacity": 1.0,
                             "pos": [
-                                0.22991754114627838,
-                                0.9183506369590759
+                                0.664341390132904,
+                                0.9436889290809631
                             ],
                             "texture_guid": "bd0a7c29-ace7-3748-9bb0-beba7ab453fd",
                             "texture_scale": [
-                                0.0072916666977107525,
-                                0.006054490339010954
+                                0.00917983241379261,
+                                0.006799001712352037
                             ]
                         },
                         "UIElement": {
@@ -50874,9 +51993,9 @@
                                 1.0
                             ],
                             "scale": [
-                                0.04054027050733566,
-                                0.030025970190763474,
-                                1.1119617223739624
+                                0.00917983241379261,
+                                0.006799001712352037,
+                                0.2517896890640259
                             ],
                             "size_delta": [
                                 70.0,
@@ -50942,7 +52061,7 @@
                             ]
                         },
                         "UIElement": {
-                            "b_is_enabled": true,
+                            "b_is_enabled": false,
                             "b_is_interactable": true,
                             "layer": 0
                         },
@@ -51049,13 +52168,13 @@
                         "Texture2D": {
                             "opacity": 1.0,
                             "pos": [
-                                0.5941806435585022,
-                                0.9259834289550781
+                                -0.1475285142660141,
+                                0.9124485850334167
                             ],
                             "texture_guid": "bd0a7c29-ace7-3748-9bb0-beba7ab453fd",
                             "texture_scale": [
-                                0.012524795718491077,
-                                0.0103997141122818
+                                0.010948802344501019,
+                                0.008109180256724358
                             ]
                         },
                         "UIElement": {
@@ -51108,9 +52227,9 @@
                                 1.0
                             ],
                             "scale": [
-                                0.012524795718491077,
-                                0.0103997141122818,
-                                0.34353724122047424
+                                0.010948802344501019,
+                                0.008109180256724358,
+                                0.3003099858760834
                             ],
                             "size_delta": [
                                 70.0,
@@ -51166,13 +52285,13 @@
                         "Texture2D": {
                             "opacity": 1.0,
                             "pos": [
-                                0.11309801787137985,
-                                0.9213882684707642
+                                -0.033608730882406235,
+                                0.9009813070297241
                             ],
                             "texture_guid": "bd0a7c29-ace7-3748-9bb0-beba7ab453fd",
                             "texture_scale": [
-                                0.013077412731945515,
-                                0.010858570225536823
+                                0.008336660452187061,
+                                0.006174509879201651
                             ]
                         },
                         "UIElement": {
@@ -51225,9 +52344,9 @@
                                 1.0
                             ],
                             "scale": [
-                                0.013077412731945515,
-                                0.010858570225536823,
-                                0.35869476199150085
+                                0.008336660452187061,
+                                0.006174509879201651,
+                                0.22866268455982208
                             ],
                             "size_delta": [
                                 70.0,
@@ -51283,13 +52402,13 @@
                         "Texture2D": {
                             "opacity": 1.0,
                             "pos": [
-                                0.33399879932403564,
-                                0.9059053063392639
+                                0.2736598253250122,
+                                0.9111084938049316
                             ],
                             "texture_guid": "bd0a7c29-ace7-3748-9bb0-beba7ab453fd",
                             "texture_scale": [
-                                0.009094173088669777,
-                                0.007551165297627449
+                                0.010414202697575092,
+                                0.007713232189416885
                             ]
                         },
                         "UIElement": {
@@ -51342,9 +52461,9 @@
                                 1.0
                             ],
                             "scale": [
-                                0.02672235667705536,
-                                0.020359890535473824,
-                                0.6107967495918274
+                                0.010414202697575092,
+                                0.007713232189416885,
+                                0.2856467068195343
                             ],
                             "size_delta": [
                                 70.0,
@@ -51364,7 +52483,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 55
+                            "siblingIndex": 31
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -51470,7 +52589,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 56
+                            "siblingIndex": 32
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -51589,7 +52708,7 @@
                                 "b5692014-216a-9146-a903-c3f8d6826a7a"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 57
+                            "siblingIndex": 33
                         },
                         "Layer": {
                             "layer_id": 3,
@@ -51965,9 +53084,9 @@
             0.7990195751190186
         ],
         "worldLightPosition": [
-            27.84062957763672,
-            45.12671661376953,
-            -1.6361584663391113
+            47.633975982666016,
+            32.67985534667969,
+            -3.4720373153686523
         ],
         "worldLightShadowFollowDistance": 22.5,
         "worldLightShadowResolution": 1024,
