@@ -12,6 +12,94 @@
 #include "CoreSystems/Events/GLFW/AssetEvents.h"
 #include "Applications/Application.h"
 
+namespace {
+	GLFWmonitor* SelectBestMonitorForWindow(GLFWwindow* window) {
+		int monitorCount = 0;
+		GLFWmonitor** monitors = glfwGetMonitors(&monitorCount);
+		if (!monitors || monitorCount <= 0) {
+			return glfwGetPrimaryMonitor();
+		}
+
+		if (!window) {
+			POINT cursorPos{};
+			if (GetCursorPos(&cursorPos)) {
+				GLFWmonitor* cursorMonitor = monitors[0];
+				for (int i = 0; i < monitorCount; ++i) {
+					int mx = 0, my = 0, mw = 0, mh = 0;
+					glfwGetMonitorWorkarea(monitors[i], &mx, &my, &mw, &mh);
+					if (cursorPos.x >= mx && cursorPos.x < (mx + mw) &&
+						cursorPos.y >= my && cursorPos.y < (my + mh)) {
+						cursorMonitor = monitors[i];
+						break;
+					}
+				}
+				return cursorMonitor;
+			}
+			return glfwGetPrimaryMonitor();
+		}
+
+		int wx = 0, wy = 0, ww = 0, wh = 0;
+		glfwGetWindowPos(window, &wx, &wy);
+		glfwGetWindowSize(window, &ww, &wh);
+
+		GLFWmonitor* bestMonitor = monitors[0];
+		int bestOverlap = -1;
+
+		for (int i = 0; i < monitorCount; ++i) {
+			int mx = 0, my = 0, mw = 0, mh = 0;
+			glfwGetMonitorWorkarea(monitors[i], &mx, &my, &mw, &mh);
+
+			const int overlapW = std::max(0, std::min(wx + ww, mx + mw) - std::max(wx, mx));
+			const int overlapH = std::max(0, std::min(wy + wh, my + mh) - std::max(wy, my));
+			const int overlapArea = overlapW * overlapH;
+			if (overlapArea > bestOverlap) {
+				bestOverlap = overlapArea;
+				bestMonitor = monitors[i];
+			}
+		}
+
+		return bestMonitor ? bestMonitor : glfwGetPrimaryMonitor();
+	}
+
+	void LogWindowDisplayDiagnostics(GLFWwindow* window, const char* phaseTag) {
+		if (!window) {
+			return;
+		}
+
+		int winW = 0, winH = 0, fbW = 0, fbH = 0, posX = 0, posY = 0;
+		glfwGetWindowSize(window, &winW, &winH);
+		glfwGetFramebufferSize(window, &fbW, &fbH);
+		glfwGetWindowPos(window, &posX, &posY);
+
+		GLFWmonitor* monitor = glfwGetWindowMonitor(window);
+		if (!monitor) {
+			monitor = SelectBestMonitorForWindow(window);
+		}
+
+		const char* monitorName = monitor ? glfwGetMonitorName(monitor) : "unknown";
+		const GLFWvidmode* mode = monitor ? glfwGetVideoMode(monitor) : nullptr;
+		const int refreshHz = mode ? mode->refreshRate : -1;
+		const int modeW = mode ? mode->width : -1;
+		const int modeH = mode ? mode->height : -1;
+
+		const int swapInterval = PAIN::GraphicsSettings::get().swap_interval;
+		PN_CORE_INFO(
+			"[Window][{}] monitor='{}' mode={}x{}@{}Hz win={}x{} fb={}x{} pos=({}, {}) swap_interval={}",
+			phaseTag,
+			monitorName ? monitorName : "unknown",
+			modeW,
+			modeH,
+			refreshHz,
+			winW,
+			winH,
+			fbW,
+			fbH,
+			posX,
+			posY,
+			swapInterval);
+	}
+}
+
 namespace PAIN {
 	namespace Window {
 
@@ -51,11 +139,11 @@ namespace PAIN {
 			glfwWindowHint(GLFW_BLUE_BITS, 8); glfwWindowHint(GLFW_ALPHA_BITS, 8);
 			glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-			// Get the primary monitor
-			GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+			// Pick the best monitor for this window path.
+			GLFWmonitor* monitor = SelectBestMonitorForWindow(nullptr);
 
-			// Get the video mode of the monitor
-			const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+			// Get the video mode of the selected monitor
+			const GLFWvidmode* mode = monitor ? glfwGetVideoMode(monitor) : nullptr;
 
 #ifdef _DEBUG
 			//Create window
@@ -66,6 +154,7 @@ namespace PAIN {
 				throw std::exception();
 			}
 			is_fullscreen_ = false;
+			LogWindowDisplayDiagnostics(ptr_window, "init_windowed");
 #else
 			// Create exclusive fullscreen window for lower latency and more stable pacing.
 			int refreshRate = (mode && monitor) ? mode->refreshRate : 60;
@@ -97,6 +186,7 @@ namespace PAIN {
 			glfwGetFramebufferSize(ptr_window, &w, &h);
 			frame_buffer = { w, h };
 			PN_CORE_INFO("[Window] Created exclusive fullscreen window {}x{} @ {}Hz", frame_buffer.x, frame_buffer.y, refreshRate);
+			LogWindowDisplayDiagnostics(ptr_window, "init_fullscreen");
 #endif
 
 			// Persist current windowed reference size for future restore.
@@ -170,7 +260,7 @@ namespace PAIN {
 				return;
 			}
 
-			GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+			GLFWmonitor* monitor = SelectBestMonitorForWindow(ptr_window);
 			const GLFWvidmode* mode = monitor ? glfwGetVideoMode(monitor) : nullptr;
 
 			if (fullscreen) {
@@ -191,6 +281,7 @@ namespace PAIN {
 				glfwSetWindowMonitor(ptr_window, monitor, 0, 0, width, height, refreshRate);
 				is_fullscreen_ = true;
 				PN_CORE_INFO("[Window] Switched to exclusive fullscreen {}x{} @ {}Hz", width, height, refreshRate);
+				LogWindowDisplayDiagnostics(ptr_window, "set_fullscreen_on");
 			}
 			else {
 				// Restore previous windowed bounds.
@@ -208,6 +299,7 @@ namespace PAIN {
 				glfwSetWindowMonitor(ptr_window, nullptr, posX, posY, winW, winH, GLFW_DONT_CARE);
 				is_fullscreen_ = false;
 				PN_CORE_INFO("[Window] Switched to windowed {}x{} at ({},{})", winW, winH, posX, posY);
+				LogWindowDisplayDiagnostics(ptr_window, "set_fullscreen_off");
 			}
 
 			// CRITICAL: Reapply swap interval after monitor mode change
