@@ -12073,7 +12073,7 @@
                         "LocalTransform": {
                             "position": [
                                 -27.135353088378906,
-                                0.1300448775291443,
+                                0.0,
                                 -1.8544782400131226
                             ],
                             "rotation": [
@@ -12125,6 +12125,73 @@
                         "Name": {
                             "name": "Gear"
                         },
+                        "ParticleSystem": {
+                            "angularVelocity": 0.0,
+                            "angularVelocityVariance": 0.0,
+                            "blendMode": 0,
+                            "colorOverLifetime": [],
+                            "directionMode": 0,
+                            "directionSpace": 0,
+                            "drag": 0.0,
+                            "emissionDirection": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "emissionRate": 3.0,
+                            "emissionShape": 1,
+                            "emissionSpread": 2.0,
+                            "gravityMultiplier": 0.0,
+                            "lifetime": 2.0,
+                            "lifetimeVariance": 0.0,
+                            "looping": true,
+                            "maxParticles": 10,
+                            "particleTexture": "b6fdf19d-f8ab-0d4b-ae8e-22626c9fb75f",
+                            "playDuration": 0.0,
+                            "playOnAwake": true,
+                            "renderShape": 2,
+                            "shapeParams": {
+                                "boxHalfExtents": [
+                                    0.5,
+                                    0.5,
+                                    0.5
+                                ],
+                                "circleArc": 360.0,
+                                "circleRadius": 0.5,
+                                "coneAngle": 25.0,
+                                "sphereRadius": 0.15000000596046448,
+                                "volumeEmission": true
+                            },
+                            "simulationSpace": 0,
+                            "sizeOverLifetime": [],
+                            "sizeOverLifetimeMultiplier": 1.0,
+                            "softEdge": 0.20000000298023224,
+                            "sortMode": 0,
+                            "speed": 0.699999988079071,
+                            "speedVariance": 0.0,
+                            "startColor": [
+                                0.9882352948188782,
+                                1.0,
+                                0.8392156958580017,
+                                1.0
+                            ],
+                            "startColorVariance": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "startRotation": 0.0,
+                            "startRotationVariance": 0.0,
+                            "startSize": 0.029999999329447746,
+                            "startSizeVariance": 0.0,
+                            "velocityOverLifetime": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "velocityOverLifetimeEnabled": false
+                        },
                         "PrefabInstance": {
                             "componentOverrides": {
                                 "BoundingVolume": {
@@ -12161,7 +12228,7 @@
                                 "LocalTransform": {
                                     "position": [
                                         -27.135353088378906,
-                                        0.1300448775291443,
+                                        0.0,
                                         -1.8544782400131226
                                     ],
                                     "rotation": [
@@ -12174,68 +12241,6 @@
                                         1.0,
                                         1.0,
                                         1.0
-                                    ]
-                                },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "doubleSidedShadows": false,
-                                    "isStatic": false,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "aoTextureOverride": "a8977689-ded0-fa41-9efb-33354e83dec7",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "3da3f0aa-e9d3-634a-b1c9-f88763fb5bae",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "a8977689-ded0-fa41-9efb-33354e83dec7",
-                                            "normalTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "a8977689-ded0-fa41-9efb-33354e83dec7",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "d9977322-f31e-bc4c-b298-fbcd6690c4ba",
-                                    "receiveShadows": true,
-                                    "visible": true
-                                },
-                                "RigidBody3D": {
-                                    "angular_velocity": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "collider_offset": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "collider_scale": [
-                                        0.5,
-                                        0.5,
-                                        0.5
-                                    ],
-                                    "motion_type": 0,
-                                    "physics_behavior": {
-                                        "behavior": 1
-                                    },
-                                    "physics_enabled": true,
-                                    "use_gravity": true,
-                                    "velocity": [
-                                        0.0,
-                                        0.0,
-                                        0.0
                                     ]
                                 },
                                 "Tag": {
