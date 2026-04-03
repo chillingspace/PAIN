@@ -702,22 +702,13 @@ namespace PAIN {
 
 			// Query all UI elements with UIText
 			auto textView = registry.view<UIText, UIElement, UIRectTransform>();
-			PN_CORE_INFO("[UIInput] UIText raycast: mouse NDC = ({:.3f}, {:.3f}), fb = ({:.0f}, {:.0f})", normalized_mouse.x, normalized_mouse.y, fb.x, fb.y);
-			int text_entity_count = 0;
 			for (auto [entity, text_comp, element, rect] : textView.each()) {
-				text_entity_count++;
-				PN_CORE_INFO("[UIInput] UIText entity {:08X}: enabled={}, interactable={}, text='{}', text_pos=({:.1f}, {:.1f})",
-					static_cast<uint32_t>(entity), element.b_is_enabled, element.b_is_interactable, text_comp.display_text, text_comp.text_pos.x, text_comp.text_pos.y);
-				if (!element.b_is_enabled || !element.b_is_interactable) {
-					PN_CORE_INFO("[UIInput]   -> skipped (not enabled or not interactable)");
-					continue;
-				}
+				if (!element.b_is_enabled || !element.b_is_interactable) continue;
 
 				// Skip if layer is disabled
 				if (registry.all_of<Entity::Layer>(entity)) {
 					const auto& layer = registry.get<Entity::Layer>(entity);
 					if (scene && !scene->isLayerEnabled(layer.layer_id)) {
-						PN_CORE_INFO("[UIInput]   -> skipped (layer {} disabled)", layer.layer_id);
 						continue;
 					}
 				}
@@ -727,25 +718,15 @@ namespace PAIN {
 				// to match the text renderer's glm::ortho projection
 				glm::vec2 text_pos = text_comp.position;
 				text_pos.y = fb.y - text_pos.y;
-				PN_CORE_INFO("[UIInput]   text position (flipped)=({:.1f},{:.1f}), font_size={:.1f}, scale_factor={:.2f}",
-					text_pos.x, text_pos.y, text_comp.font_size, text_comp.scale_factor);
 				float text_width = 0.0f;
 				float text_height = 0.0f;
 
 				// Measure text width using font metrics
 				auto font_opt = svc->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(text_comp.font_guid);
-				if (!font_opt.has_value()) {
-					PN_CORE_INFO("[UIInput]   -> skipped (font not found)");
-					continue;
-				}
+				if (!font_opt.has_value()) continue;
 				auto font = font_opt.value().get()->getFont();
-				if (!font) {
-					PN_CORE_INFO("[UIInput]   -> skipped (font null)");
-					continue;
-				}
+				if (!font) continue;
 				float final_scale = text_comp.font_size * text_comp.scale_factor;
-				PN_CORE_INFO("[UIInput]   font_size={:.1f}, scale_factor={:.3f}, final_scale={:.3f}, line_height={:.2f}",
-					text_comp.font_size, text_comp.scale_factor, final_scale, text_comp.line_height);
 
 				// Measure widest line
 				std::vector<std::string> lines;
@@ -855,23 +836,16 @@ namespace PAIN {
 				float min_y = text_pos.y;
 				float max_y = text_pos.y + text_height;
 
-				PN_CORE_INFO("[UIInput]   text bounds (pixels): min=({:.1f},{:.1f}) max=({:.1f},{:.1f}), size=({:.1f},{:.1f}), alignment={}",
-					min_x, min_y, max_x, max_y, text_width, text_height, (int)text_comp.alignment);
-
 				// Convert screen pixel coords to NDC
 				// Both text_pos and mouse NDC now use bottom-left origin
-				// ortho(0, w, 0, h): x=0→-1, x=w→+1, y=0→-1, y=h→+1
+				// ortho(0, w, 0, h): x=0 -> -1, x=w -> +1, y=0 -> -1, y=h -> +1
 				glm::vec2 rect_min_ndc, rect_max_ndc;
 				rect_min_ndc.x = (min_x / fb.x) * 2.0f - 1.0f;
 				rect_min_ndc.y = (min_y / fb.y) * 2.0f - 1.0f;
 				rect_max_ndc.x = (max_x / fb.x) * 2.0f - 1.0f;
 				rect_max_ndc.y = (max_y / fb.y) * 2.0f - 1.0f;
 
-				PN_CORE_INFO("[UIInput]   text bounds (NDC): min=({:.3f},{:.3f}) max=({:.3f},{:.3f})",
-					rect_min_ndc.x, rect_min_ndc.y, rect_max_ndc.x, rect_max_ndc.y);
-
 				if (isPointInRect(normalized_mouse, rect_min_ndc, rect_max_ndc)) {
-					PN_CORE_INFO("[UIInput]   -> HIT!");
 					// Get canvas sort order
 					int canvas_sort = 0;
 					entt::entity parent = entity;
@@ -906,11 +880,7 @@ namespace PAIN {
 
 					candidates.push_back({ entity, canvas_sort, sibling_index });
 				}
-				else {
-					PN_CORE_INFO("[UIInput]   -> MISS");
-				}
 			}
-			PN_CORE_INFO("[UIInput] UIText raycast: checked {} entities, {} candidates", text_entity_count, candidates.size());
 
 			// Sort by canvas_sort DESC, then sibling_index DESC (front-to-back)
 			if (!candidates.empty()) {
