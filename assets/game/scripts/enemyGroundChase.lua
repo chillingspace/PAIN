@@ -141,8 +141,9 @@ do
     local searchArrived = false
     local chaseOrigin = nil  -- position where the enemy first spotted the player
 
-    local alertIcon = nil       -- the UI entity (UIFollowsWorldEntity billboard)
-    local alertGroupTag = nil   -- resolved tag e.g. "enemy_alert_A"
+    local alertIcon = nil           -- the UI entity (UIFollowsWorldEntity billboard)
+    local alertGroupTag = nil       -- resolved tag e.g. "enemy_alert_A"
+    local alertIconOffset = nil     -- {x,y,z} world_offset read from the component; falls back to ALERT_ICON_HEIGHT on Y
     local audioChannel = -1
 
     -- Light values cached from editor on init
@@ -328,9 +329,12 @@ do
     local function updateAlertIcon(visible)
         if not alertIcon then return end
         if visible then
-            -- anchor the billboard to the enemy with the height offset, then enable it
+            -- anchor the billboard to the enemy; use editor-set offset or fallback
+            local ox = alertIconOffset and alertIconOffset.x or 0
+            local oy = alertIconOffset and alertIconOffset.y or ALERT_ICON_HEIGHT
+            local oz = alertIconOffset and alertIconOffset.z or 0
             if setUIFollowsEntity then
-                setUIFollowsEntity(alertIcon, enemy, 0, ALERT_ICON_HEIGHT, 0)
+                setUIFollowsEntity(alertIcon, enemy, ox, oy, oz)
             end
             if setUIFollowEnabled then setUIFollowEnabled(alertIcon, true) end
         else
@@ -408,6 +412,11 @@ do
         for _, e in ipairs(candidates) do
             if hasTag(e, alertGroupTag) then
                 alertIcon = e
+                -- Read the world_offset set in the editor so we don't override it at runtime
+                if getUIFollowOffset then
+                    local ox, oy, oz = getUIFollowOffset(alertIcon)
+                    alertIconOffset = { x = ox, y = oy, z = oz }
+                end
                 if setUIFollowEnabled then setUIFollowEnabled(alertIcon, false) end
                 break
             end

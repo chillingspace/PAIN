@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "heart_red.png",
+    "name": "loading screen sp.png",
     "type": "Texture"
   },
   "build_data": {
-    "hash": 18103454635823559130
+    "hash": 16135774189579542214
   },
   "descriptor_version": 1,
-  "guid": "c20e7ad2-648a-5740-8abd-717a03ef4a82",
+  "guid": "107c6ad7-55a8-c945-8451-4500acd8f1a9",
   "import_settings": {
     "android_allow_astc_hdr": false,
     "android_bake_cubemap": false,
@@ -18,6 +18,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\heart_red.png"
+    "source_file": "game\\textures\\loading screen sp.png"
   }
 }

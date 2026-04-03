@@ -1470,6 +1470,11 @@ namespace PAIN {
             auto t = api_->GetUIFollowTarget(uiId);
             return t ? sol::make_object(lua_, *t) : sol::make_object(lua_, sol::nil);
         });
+        lua_.set_function("getUIFollowOffset", [this](entt::entity uiId) -> std::tuple<float, float, float> {
+            if (!api_) return { 0.f, 0.f, 0.f };
+            auto off = api_->GetUIFollowOffset(uiId);
+            return off ? *off : std::make_tuple(0.f, 0.f, 0.f);
+        });
 
         /* =========================================================================== */
         /*                                  Lighting                                   */

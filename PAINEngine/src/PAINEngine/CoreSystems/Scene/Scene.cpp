@@ -748,6 +748,8 @@ namespace PAIN {
 			loadingScreen->setShowStatusText(ls.showStatusText);
 
 			// Spritesheet animation settings
+			loadingScreen->setSpritesheetTexture(ls.spritesheetTextureGUID);
+			loadingScreen->setSpritesheetScale(ls.ssScale);
 			loadingScreen->setSpritesheetAnimation(ls.frameCount, ls.framesPerRow, ls.frameTime);
 			loadingScreen->setAnimationEnabled(ls.animationEnabled);
 
@@ -1153,6 +1155,9 @@ namespace PAIN {
 				scene_asset.loadingScreen.statusTextScale = loadingScreen->getStatusTextScale();
 				scene_asset.loadingScreen.showStatusText = loadingScreen->getShowStatusText();
 			
+				scene_asset.loadingScreen.spritesheetTextureGUID = loadingScreen->getSpritesheetTexture();
+				scene_asset.loadingScreen.ssScale = loadingScreen->getSpritesheetScale();
+
 				auto [frameCount, framesPerRow, frameTime, animEnabled] = loadingScreen->getSpritesheetSettings();
 				scene_asset.loadingScreen.frameCount = frameCount;
 				scene_asset.loadingScreen.framesPerRow = framesPerRow;
@@ -1260,6 +1265,8 @@ namespace PAIN {
 				{"statusTextScale", scn_asset.loadingScreen.statusTextScale},
 				{"showStatusText", scn_asset.loadingScreen.showStatusText},
 
+				{"spritesheetTextureGUID", scn_asset.loadingScreen.spritesheetTextureGUID.ToString()},
+				{"ssScale", scn_asset.loadingScreen.ssScale},
 				{"frameCount", scn_asset.loadingScreen.frameCount},
 				{"framesPerRow", scn_asset.loadingScreen.framesPerRow},
 				{"frameTime", scn_asset.loadingScreen.frameTime},

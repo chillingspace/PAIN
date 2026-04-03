@@ -674,15 +674,25 @@ namespace PAIN {
 				PN_CORE_WARN("[PrefabService] Entity is not a prefab instance");
 				return;
 			}
-			auto& prefabInst = registry.get<PrefabInstance>(instanceRoot);
-			auto savedOverrides = prefabInst.componentOverrides; // Backup overrides
+
+			// Capture prefab instance data BEFORE any modifications to avoid dangling references
+			Assets::GUID sourcePrefabGUID;
+			Assets::GUID correspondingPrefabEntityGUID;
+			std::unordered_map<std::string, nlohmann::json> savedOverrides;
+			{
+				const auto& prefabInst = registry.get<PrefabInstance>(instanceRoot);
+				sourcePrefabGUID = prefabInst.sourcePrefabGUID;
+				correspondingPrefabEntityGUID = prefabInst.correspondingPrefabEntityGUID;
+				savedOverrides = prefabInst.componentOverrides;
+			}
+
 			// Get fresh prefab data
 			auto asset_service = services.lock()->get<Assets::Manager>();
 			auto prefabAssetOpt =
-				asset_service->getAsset<PrefabAsset>(prefabInst.sourcePrefabGUID);
+				asset_service->getAsset<PrefabAsset>(sourcePrefabGUID);
 			if (!prefabAssetOpt.has_value()) {
 				PN_CORE_ERROR("[PrefabService] Source prefab not found: {}",
-					prefabInst.sourcePrefabGUID.ToString());
+					sourcePrefabGUID.ToString());
 				return;
 			}
 			auto prefabAsset = prefabAssetOpt.value();
@@ -690,7 +700,7 @@ namespace PAIN {
 			nlohmann::json* entityData = nullptr;
 			for (auto& entJson : prefabAsset->entities) {
 				Assets::GUID entGUID(entJson["entityGUID"].get<std::string>());
-				if (entGUID == prefabInst.correspondingPrefabEntityGUID) {
+				if (entGUID == correspondingPrefabEntityGUID) {
 					entityData = &entJson;
 					break;
 				}
@@ -700,12 +710,14 @@ namespace PAIN {
 				return;
 			}
 			auto ecs_controller = services.lock()->get<ECS::Controller>();
-			// Apply fresh prefab component data, but skip Entity::Hierarchy and Entity::GUID.
-			// Hierarchy GUIDs are remapped per-instance during instantiation and must not be
-			// overwritten with stale prefab GUIDs (which would reset child entity references).
+			// Apply fresh prefab component data, but skip components that are instance-specific.
+			// - Entity::Hierarchy: GUIDs are remapped per-instance and must not be overwritten
+			// - Entity::GUID: Each instance has its own unique GUID
+			// - LocalTransform: Each instance has its own position/rotation/scale in the scene
 			auto componentsJson = (*entityData)["components"];
 			componentsJson.erase(getComponentName<Entity::Hierarchy>());
 			componentsJson.erase(getComponentName<Entity::GUID>());
+			componentsJson.erase(getComponentName<LocalTransform>());
 			ecs_controller->loadAllComponentsFromJson(
 				instanceRoot, componentsJson, registry_id);
 			// Re-apply overrides if requested
@@ -720,6 +732,7 @@ namespace PAIN {
 				}
 
 				// Restore overrides map
+				auto& prefabInst = registry.get<PrefabInstance>(instanceRoot);
 				prefabInst.componentOverrides = savedOverrides;
 			}
 			PN_CORE_INFO("[PrefabService] Updated instance: {}",
