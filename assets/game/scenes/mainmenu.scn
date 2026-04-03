@@ -8881,9 +8881,9 @@
                             "childrenGUIDs": [
                                 "864ca393-1dc5-9043-8f7d-83e252a0f8af",
                                 "c23bc44d-baf0-6642-85be-0b1979a31924",
-                                "977370c1-e476-744d-91c9-32e337b817a1",
                                 "fac00d16-ba01-da45-9bce-b3860d290914",
-                                "5fa27f73-d24a-0847-8276-afc44ee0e4da"
+                                "5fa27f73-d24a-0847-8276-afc44ee0e4da",
+                                "977370c1-e476-744d-91c9-32e337b817a1"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 15
@@ -8919,9 +8919,9 @@
                                     "childrenGUIDs": [
                                         "864ca393-1dc5-9043-8f7d-83e252a0f8af",
                                         "c23bc44d-baf0-6642-85be-0b1979a31924",
-                                        "977370c1-e476-744d-91c9-32e337b817a1",
                                         "fac00d16-ba01-da45-9bce-b3860d290914",
-                                        "5fa27f73-d24a-0847-8276-afc44ee0e4da"
+                                        "5fa27f73-d24a-0847-8276-afc44ee0e4da",
+                                        "977370c1-e476-744d-91c9-32e337b817a1"
                                     ],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
                                     "siblingIndex": 15
@@ -9663,14 +9663,14 @@
                             "siblingIndex": 3
                         },
                         "Layer": {
-                            "layer_id": 3,
-                            "layer_mask": 8
+                            "layer_id": 11,
+                            "layer_mask": 2048
                         },
                         "LocalTransform": {
                             "position": [
-                                0.6797102689743042,
+                                -0.8523032665252686,
                                 0.0,
-                                0.0
+                                -0.8062763214111328
                             ],
                             "rotation": [
                                 0.0,
@@ -9695,8 +9695,26 @@
                                     "siblingIndex": 3
                                 },
                                 "Layer": {
-                                    "layer_id": 3,
-                                    "layer_mask": 8
+                                    "layer_id": 11,
+                                    "layer_mask": 2048
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        -0.8523032665252686,
+                                        0.0,
+                                        -0.8062763214111328
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "scale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ]
                                 },
                                 "Texture2D": {
                                     "opacity": 1.0,
@@ -10162,6 +10180,10 @@
                                 6.099999904632568,
                                 19.799999237060547
                             ]
+                        },
+                        "EditorVisible": {
+                            "locked": false,
+                            "visible": true
                         },
                         "GUID": {
                             "guid": "7beaa535-462c-7f45-9d6d-4090ca227034"
@@ -13018,6 +13040,18 @@
             "mask": 1024,
             "name": "CreditsUI_2",
             "pickable": true
+        },
+        {
+            "color": [
+                0.30000001192092896,
+                0.8999999761581421,
+                0.8999999761581421
+            ],
+            "enabled": false,
+            "id": 11,
+            "mask": 2048,
+            "name": "Settings_Controls",
+            "pickable": true
         }
     ],
     "loadingScreen": {
@@ -13075,35 +13109,11 @@
             false,
             false,
             false,
-            false
-        ],
-        [
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
             false,
             false
         ],
         [
             false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false
-        ],
-        [
             false,
             false,
             false,
@@ -13127,35 +13137,11 @@
             false,
             false,
             false,
-            false
-        ],
-        [
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
             false,
             false
         ],
         [
             false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false
-        ],
-        [
             false,
             false,
             false,
@@ -13179,6 +13165,21 @@
             false,
             false,
             false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
             false
         ],
         [
@@ -13192,9 +13193,67 @@
             false,
             false,
             false,
+            false,
             false
         ],
         [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        [
+            false,
             false,
             false,
             false,

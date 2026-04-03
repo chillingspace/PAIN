@@ -56,8 +56,6 @@ namespace PAIN {
 
         virtual glm::uvec2 GetFrameBufferSize() const = 0;
 
-        virtual bool IsWindows() const = 0;
-
         /* =========================================================================== */
         /*                     Metadata (name / tags / groups)                         */
         /* =========================================================================== */
