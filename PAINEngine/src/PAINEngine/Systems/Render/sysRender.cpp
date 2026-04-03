@@ -3238,10 +3238,14 @@ namespace PAIN {
 					// scale factor for floating UI is stored in z
 					text_comp.scale_factor = rect_comp.scale.z;
 				}
-				else if (rect_comp.layout_dirty) {
-					text_comp.layout_position = rect_comp.calculated_world_position;
-					text_comp.scale_factor = rect_comp.scale.x;
-					rect_comp.layout_dirty = false;
+				else {
+					// For standalone UI text, convert designer position (top-left origin)
+					// to text renderer coords (bottom-left origin for glm::ortho)
+					auto window_service = services.lock()->get<Window::Window>();
+					glm::vec2 viewport = window_service->getFrameBuffer();
+					text_comp.text_pos.x = text_comp.position.x;
+					text_comp.text_pos.y = viewport.y - text_comp.position.y;
+					text_comp.scale_factor = 1.0f;
 				}
 
 				TextRenderer::get().renderText(text_comp);
