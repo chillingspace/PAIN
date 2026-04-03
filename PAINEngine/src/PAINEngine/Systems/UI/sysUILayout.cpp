@@ -158,7 +158,9 @@ namespace PAIN {
 
                 if (target == entt::null || !registry.valid(target) ||
                     !registry.all_of<WorldTransform>(target)) {
-                    PN_CORE_WARN("[UIFollowsWorldEntity] Invalid or missing target entity for UIFollowsWorldEntity - disabling");
+                    if (follows.entity_target_guid.IsValid()) {
+                        PN_CORE_WARN("[UIFollowsWorldEntity] Invalid or missing target entity for UIFollowsWorldEntity - disabling");
+                    }
                     elem.b_is_enabled = false;
                     continue;
                 }

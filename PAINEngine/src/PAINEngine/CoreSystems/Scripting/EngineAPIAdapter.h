@@ -190,6 +190,7 @@ namespace PAIN {
         void SetUIFollowEnabled(entt::entity uiEntityId, bool enabled) override;
         void SetUIFollowsEntity(entt::entity uiEntityId, entt::entity targetEntityId, float offsetX, float offsetY, float offsetZ) override;
         std::optional<int> GetUIFollowTarget(entt::entity uiEntityId) override;
+        std::optional<std::tuple<float, float, float>> GetUIFollowOffset(entt::entity uiEntityId) override;
 
         /* =========================================================================== */
         /*                                  Lighting                                   */
