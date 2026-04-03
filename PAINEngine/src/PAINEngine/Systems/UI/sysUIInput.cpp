@@ -593,6 +593,9 @@ namespace PAIN {
 		std::optional<entt::entity> InputSystem::raycastUI(const glm::vec2& mouse_pos, entt::registry& registry) {
 			auto ecs = services.lock()->get<ECS::Controller>();
 			glm::vec2 normalized_mouse = normalizeScreenPosition(mouse_pos);
+			auto svc = services.lock();
+			auto window = svc->get<Window::Window>();
+			glm::vec2 fb = window ? glm::vec2(window->getFrameBuffer()) : glm::vec2(1.0f);
 
 			// Query all UI elements with Texture2D (the actual rendered texture holds position)
 			auto view = registry.view<Texture2D, UIElement, UIRectTransform>();
@@ -661,6 +664,188 @@ namespace PAIN {
 
 				if (isPointInRect(normalized_mouse, rect_min, rect_max)) {
 
+					// Get canvas sort order
+					int canvas_sort = 0;
+					entt::entity parent = entity;
+					while (parent != entt::null && registry.all_of<Entity::Hierarchy>(parent)) {
+						const auto& parentHierarchy = registry.get<Entity::Hierarchy>(parent);
+						if (registry.all_of<UICanvas>(parent)) {
+							canvas_sort = registry.get<UICanvas>(parent).sort_order;
+							break;
+						}
+						if (!parentHierarchy.parentGUID.IsValid()) break;
+						parent = ecs->resolveGUID(parentHierarchy.parentGUID);
+					}
+
+					// Get sibling index
+					int sibling_index = 0;
+					if (registry.all_of<Entity::Hierarchy>(entity)) {
+						const auto& hierarchy = registry.get<Entity::Hierarchy>(entity);
+						const auto& entity_guid = registry.get<Entity::GUID>(entity);
+
+						if (hierarchy.parentGUID.IsValid()) {
+							entt::entity parent_entity = ecs->resolveGUID(hierarchy.parentGUID);
+							if (parent_entity != entt::null && registry.all_of<Entity::Hierarchy>(parent_entity)) {
+								const auto& parentHierarchy = registry.get<Entity::Hierarchy>(parent_entity);
+								auto it = std::find(parentHierarchy.childrenGUIDs.begin(),
+									parentHierarchy.childrenGUIDs.end(), entity_guid.guid);
+								if (it != parentHierarchy.childrenGUIDs.end()) {
+									sibling_index = static_cast<int>(std::distance(parentHierarchy.childrenGUIDs.begin(), it));
+								}
+							}
+						}
+					}
+
+					candidates.push_back({ entity, canvas_sort, sibling_index });
+				}
+			}
+
+			// Query all UI elements with UIText
+			auto textView = registry.view<UIText, UIElement, UIRectTransform>();
+			for (auto [entity, text_comp, element, rect] : textView.each()) {
+				if (!element.b_is_enabled || !element.b_is_interactable) continue;
+
+				// Skip if layer is disabled
+				if (registry.all_of<Entity::Layer>(entity)) {
+					const auto& layer = registry.get<Entity::Layer>(entity);
+					if (scene && !scene->isLayerEnabled(layer.layer_id)) {
+						continue;
+					}
+				}
+
+				// Get text bounds in screen pixel coordinates
+				// Position is top-left origin (designer coords), convert to bottom-left origin
+				// to match the text renderer's glm::ortho projection
+				glm::vec2 text_pos = text_comp.position;
+				text_pos.y = fb.y - text_pos.y;
+				float text_width = 0.0f;
+				float text_height = 0.0f;
+
+				// Measure text width using font metrics
+				auto font_opt = svc->get<Assets::Manager>()->getAsset<Assets::Fonts::FontFace>(text_comp.font_guid);
+				if (!font_opt.has_value()) continue;
+				auto font = font_opt.value().get()->getFont();
+				if (!font) continue;
+				float final_scale = text_comp.font_size * text_comp.scale_factor;
+
+				// Measure widest line
+				std::vector<std::string> lines;
+				std::string curr_line, curr_word;
+				float curr_width = 0.f, word_width = 0.f;
+				float wrap_limit = text_comp.word_wrap ? text_comp.wrap_width : FLT_MAX;
+				int length = (text_comp.max_length > 0) ?
+					std::min<int>(text_comp.max_length, text_comp.display_text.length()) :
+					text_comp.display_text.length();
+
+				for (int i = 0; i < length; ++i) {
+					char ch = text_comp.display_text[i];
+					if (ch == ' ' || ch == '\n' || i == length - 1) {
+						if (i == length - 1 && ch != '\n' && ch != ' ') curr_word.push_back(ch);
+
+						word_width = 0.f;
+						for (char c : curr_word) {
+							if (font->glyphs.count(c)) {
+								word_width += (font->glyphs[c].advance >> 6) * final_scale;
+							}
+						}
+
+						if (curr_width + word_width > wrap_limit && !curr_line.empty()) {
+							lines.push_back(curr_line);
+							if (curr_width > text_width) text_width = curr_width;
+							curr_line.clear();
+							curr_width = 0.f;
+						}
+						curr_line += curr_word;
+						curr_width += word_width;
+
+						if (ch == ' ' || ch == '\n') {
+							curr_line.push_back(ch);
+							float space_width = 0.f;
+							if (font->glyphs.count(' ')) {
+								space_width = (font->glyphs[' '].advance >> 6) * final_scale;
+							}
+							curr_width += space_width;
+						}
+						if (ch == '\n') {
+							lines.push_back(curr_line);
+							if (curr_width > text_width) text_width = curr_width;
+							curr_line.clear();
+							curr_width = 0.f;
+						}
+						curr_word.clear();
+					}
+					else {
+						curr_word.push_back(ch);
+					}
+				}
+				if (!curr_line.empty()) {
+					lines.push_back(curr_line);
+					if (curr_width > text_width) text_width = curr_width;
+				}
+				if (lines.empty() && !text_comp.display_text.empty()) {
+					text_width = 0.f;
+					for (char c : text_comp.display_text) {
+						if (font->glyphs.count(c)) {
+							text_width += (font->glyphs[c].advance >> 6) * final_scale;
+						}
+					}
+					lines.push_back(text_comp.display_text);
+				}
+
+				// Calculate text height using actual glyph dimensions (same as renderer)
+				size_t num_lines = lines.empty() ? 1 : lines.size();
+				
+				// Find max glyph height across all characters (same as renderer uses)
+				float max_glyph_height = 0.0f;
+				for (const auto& line : lines) {
+					for (char c : line) {
+						if (font->glyphs.count(c)) {
+							float gh = font->glyphs[c].size.y * final_scale;
+							if (gh > max_glyph_height) max_glyph_height = gh;
+						}
+					}
+				}
+				if (max_glyph_height == 0.0f) {
+					// Fallback: use first character or default
+					for (char c : text_comp.display_text) {
+						if (font->glyphs.count(c)) {
+							max_glyph_height = font->glyphs[c].size.y * final_scale;
+							break;
+						}
+					}
+				}
+				text_height = num_lines * max_glyph_height * text_comp.line_height;
+
+				// Adjust width based on alignment
+				float min_x = text_pos.x;
+				float max_x = text_pos.x;
+
+				if (text_comp.alignment == TextAlignment::Left) {
+					min_x = text_pos.x - text_width;
+					max_x = text_pos.x;
+				}
+				else if (text_comp.alignment == TextAlignment::Center) {
+					min_x = text_pos.x - text_width * 0.5f;
+					max_x = text_pos.x + text_width * 0.5f;
+				}
+				else {
+					min_x = text_pos.x;
+					max_x = text_pos.x + text_width;
+				}
+
+				float min_y = text_pos.y;
+				float max_y = text_pos.y + text_height;
+
+				// Convert screen pixel coords to NDC
+				// Both text_pos and mouse NDC now use bottom-left origin
+				// ortho(0, w, 0, h): x=0 -> -1, x=w -> +1, y=0 -> -1, y=h -> +1
+				glm::vec2 rect_min_ndc, rect_max_ndc;
+				rect_min_ndc.x = (min_x / fb.x) * 2.0f - 1.0f;
+				rect_min_ndc.y = (min_y / fb.y) * 2.0f - 1.0f;
+				rect_max_ndc.x = (max_x / fb.x) * 2.0f - 1.0f;
+				rect_max_ndc.y = (max_y / fb.y) * 2.0f - 1.0f;
+
+				if (isPointInRect(normalized_mouse, rect_min_ndc, rect_max_ndc)) {
 					// Get canvas sort order
 					int canvas_sort = 0;
 					entt::entity parent = entity;

@@ -237,10 +237,10 @@ namespace PAIN {
 		// ─── Advanced ───
 		int max_length = 0;                   // 0 = unlimited, >0 = truncate text
 
-		// ─── Internal (do not set manually) ───
-		glm::vec2 layout_position{ 0, 0 };  // Set by layout system - do not touch
-		glm::vec2 text_pos{ 0, 0 };          // Calculated by renderer
-		float scale_factor = 1.0f;            // Calculated by layout system
+		// ─── Positioning ───
+		glm::vec2 position{ 0, 0 };           // Screen position in pixels (top-left origin). Set by designers.
+		glm::vec2 text_pos{ 0, 0 };          // Calculated by renderer (bottom-left origin)
+		float scale_factor = 1.0f;            // Calculated by renderer
 	};
 
 	// ═══════════════════════════════════════════════════════════════════════

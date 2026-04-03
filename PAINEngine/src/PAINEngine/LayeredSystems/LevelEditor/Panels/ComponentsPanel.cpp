@@ -761,10 +761,10 @@ namespace PAIN {
 						changed = true;
 					}
 
-					// Font position
+					// Font position (screen pixels, bottom-left origin)
 					changed |= ImGui::DragFloat2(
 						"Text Position",
-						&text.text_pos.x,
+						&text.position.x,
 						1.0f,
 						-10000.0f,
 						10000.0f,
