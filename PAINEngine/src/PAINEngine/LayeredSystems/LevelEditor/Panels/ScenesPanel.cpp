@@ -1264,13 +1264,39 @@ namespace PAIN {
                     float bgScale = loadingScreen->getBGScale();
                     ImGui::Text("Background Texture Scale");
                     ImGui::SetNextItemWidth(200);
-                    if (ImGui::SliderFloat("##BGScale", &bgScale, 0.1f, 10.0f, "%.2f"))
+                    if (ImGui::InputFloat("##BGScale", &bgScale, 0.1f, 1.0f, "%.2f"))
                         loadingScreen->setBGScale(bgScale);
 
                     ImGui::Spacing();
                     ImGui::Separator();
                     ImGui::Spacing();
 
+                    ImGui::TextColored(ImVec4(0.9f, 0.9f, 0.5f, 1.0f), "Spritesheet Overlay (optional)");
+                    ImGui::TextWrapped("Choose a separate spritesheet texture to render over the background. Configure position and scale in pixels.");
+                    ImGui::Spacing();
+
+                    // Spritesheet texture selector
+                    Assets::GUID currentSheet = loadingScreen->getSpritesheetTexture();
+                    if (DrawAssetSelectorField("Spritesheet Texture",
+                        currentSheet,
+                        PAIN::Editor::Attributes::AssetSelector(PAIN::Assets::Type::Texture),
+                        services, false)) {
+                        loadingScreen->setSpritesheetTexture(currentSheet);
+                    }
+                    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Select a texture that contains the spritesheet frames.");
+
+                    // Spritesheet scale (multiplier applied to native frame size)
+                    float ssScale = loadingScreen->getSpritesheetScale();
+                    ImGui::Text("Spritesheet Scale");
+                    ImGui::SetNextItemWidth(200);
+                    if (ImGui::InputFloat("##SheetScale", &ssScale, 0.1f, 1.0f, "%.2f")) {
+                        loadingScreen->setSpritesheetScale(ssScale);
+                    }
+                    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Scale multiplier for the spritesheet frame (1.0 = native frame size).");
+
+                    ImGui::Spacing();
+                    ImGui::Separator();
+                    ImGui::Spacing();
                     ImGui::TextColored(ImVec4(0.9f, 0.9f, 0.5f, 1.0f), "Spritesheet Animation");
                     ImGui::TextWrapped("Configure spritesheet-based animation for the background texture.");
                     ImGui::Spacing();

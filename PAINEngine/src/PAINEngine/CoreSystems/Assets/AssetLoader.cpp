@@ -1567,6 +1567,12 @@ namespace PAIN {
                 if (ls.contains("showStatusText")) {
                     sceneAsset->loadingScreen.showStatusText = ls["showStatusText"].get<bool>();
                 }
+                if (ls.contains("spritesheetTextureGUID")) {
+                    sceneAsset->loadingScreen.spritesheetTextureGUID = Assets::GUID(ls["spritesheetTextureGUID"].get<std::string>());
+				}
+                if (ls.contains("ssScale")) {
+                    sceneAsset->loadingScreen.ssScale = ls["ssScale"].get<float>();
+				}
                 if (ls.contains("frameCount")) {
                     sceneAsset->loadingScreen.frameCount = ls["frameCount"].get<int>();
                 }

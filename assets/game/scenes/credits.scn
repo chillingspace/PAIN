@@ -245,6 +245,7 @@
                             "name": "right_arrow_button"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.8799999952316284,
                                 0.0
@@ -405,6 +406,7 @@
                             "name": "left_arrow_button"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 -0.8799999952316284,
                                 0.0
@@ -565,6 +567,7 @@
                             "name": "back_button"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 -0.05000000074505806,
                                 -0.800000011920929
@@ -693,6 +696,7 @@
                             "name": "credits1"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 0.0
@@ -795,6 +799,7 @@
                             "name": "credits2"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 0.0
@@ -1324,7 +1329,7 @@
         }
     ],
     "loadingScreen": {
-        "animationEnabled": false,
+        "animationEnabled": true,
         "backgroundColor": [
             0.10000000149011612,
             0.10000000149011612,
@@ -1337,9 +1342,9 @@
             0.800000011920929,
             0.8999999761581421
         ],
-        "frameCount": 1,
+        "frameCount": 4,
         "frameTime": 0.10000000149011612,
-        "framesPerRow": 1,
+        "framesPerRow": 4,
         "glowColor": [
             0.4000000059604645,
             0.8999999761581421,
@@ -1358,11 +1363,13 @@
         "showOverlay": false,
         "showProgressBar": false,
         "showStatusText": true,
+        "spritesheetTextureGUID": "107c6ad7-55a8-c945-8451-4500acd8f1a9",
+        "ssScale": 1.2000000476837158,
         "statusTextPosition": [
-            800.0,
+            1450.0,
             65.0
         ],
-        "statusTextScale": 0.029999999329447746
+        "statusTextScale": 0.05000000074505806
     },
     "mask_matrix": [
         [

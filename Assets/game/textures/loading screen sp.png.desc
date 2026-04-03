@@ -1,0 +1,23 @@
+{
+  "asset_info": {
+    "name": "loading screen sp.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 16135774189579542214
+  },
+  "descriptor_version": 1,
+  "guid": "107c6ad7-55a8-c945-8451-4500acd8f1a9",
+  "import_settings": {
+    "android_allow_astc_hdr": false,
+    "android_bake_cubemap": false,
+    "android_compression": "ASTC_4x4",
+    "android_skybox_source_format": "R16G16B16A16",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\loading screen sp.png"
+  }
+}

@@ -112,6 +112,9 @@ namespace PAIN {
                 bool showStatusText = false;
                 
                 // Spritesheet Animation
+                Assets::GUID spritesheetTextureGUID;
+                float ssScale = 1.0f;
+
                 int frameCount = 1;
                 int framesPerRow = 1;
                 float frameTime = 0.1f;

@@ -144,6 +144,10 @@ namespace PAIN {
             // Spritesheet Animation Support
             // ============================================================
             
+            void setSpritesheetTexture(const Assets::GUID& textureGUID);
+            Assets::GUID getSpritesheetTexture() const;
+            void setSpritesheetScale(float scale);
+            float getSpritesheetScale() const;
             /**
              * @brief Configure spritesheet animation for background texture
              * @param frameCount Number of frames in the spritesheet
@@ -320,6 +324,10 @@ void main() {
             glm::vec3 m_backGroundColor{ 0.1f, 0.1f, 0.1f };
             float bgScale = 1.0f;
 
+            // Spritesheet overlay (use existing animation settings)
+            Assets::GUID m_spritesheetTextureGUID;
+            float spritesheetScale = 1.0f;
+
             // Progress Bar - Screen Space Configuration (in pixels)
             glm::vec2 m_progressBarPosition{ 0.0f, 0.0f };  // Position (x, y) in screen space
             glm::vec2 m_progressBarSize{ 600.0f, 40.0f };    // Size (width, height) in pixels
@@ -358,6 +366,7 @@ void main() {
 
             // Helper methods
             void renderBackgroundTexture();
+            void renderSpritesheetLayer();
             void renderBackgroundOverlay();
             void renderProgressBar();
             void renderStatusText();

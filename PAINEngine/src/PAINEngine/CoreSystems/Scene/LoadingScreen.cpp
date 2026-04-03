@@ -125,6 +125,9 @@ namespace PAIN {
             // Layer 1: Background texture (if set)
             if (showBg) renderBackgroundTexture();
 
+            // Layer 2: Spritesheet overlay
+            renderSpritesheetLayer();
+
             // Layer 2: Animated gradient overlay
             if (showOverlay) renderBackgroundOverlay();
 
@@ -309,13 +312,13 @@ namespace PAIN {
             float screenHeight = framebuffer.y;
             
             // Lock mutex to safely read status text
-            std::string currentStatus = "Progress ( ";
+            std::string currentStatus = "";
             float progress = m_progress.load();
             int percentage = static_cast<int>(progress * 100.0f);
-            currentStatus += std::to_string(percentage) + "% ): ";
+            currentStatus += std::to_string(percentage) + "%";
             {
                 std::lock_guard<std::mutex> lock(m_statusMutex);
-                currentStatus += m_statusText;
+                //currentStatus += m_statusText;
             }
             
             if (currentStatus.empty()) return;
@@ -337,9 +340,9 @@ namespace PAIN {
             // Set word wrap and font
             statusTextComp.word_wrap = false;
 #ifdef PN_PLATFORM_WINDOWS
-            std::filesystem::path font_path = "engine/fonts/OpenSans-Regular.ttf";
+            std::filesystem::path font_path = "engine/fonts/Playfulist.ttf";
 #else
-            std::filesystem::path font_path = "engine\\fonts\\OpenSans-Regular.ttf";
+            std::filesystem::path font_path = "engine\\fonts\\Playfulist.ttf";
 #endif
             statusTextComp.font_guid = services.lock()->get<Assets::Manager>()->findGUID(font_path);
             
@@ -494,6 +497,50 @@ namespace PAIN {
             float frameWidth = 1.0f;  // Default to full texture
             float frameHeight = 1.0f;
 
+        
+            uvTransform = glm::vec4(1.0f, 1.0f, 0.0f, 0.0f);
+            
+
+            // Calculate FRAME dimensions, not texture dimensions
+            float actualFrameWidth = texOpt.value()->width * frameWidth;
+            float actualFrameHeight = texOpt.value()->height * frameHeight;
+
+            glm::vec2 pos(0.0f, 0.0f);
+            glm::vec2 scale(actualFrameWidth, actualFrameHeight);
+            glm::vec2 normscale = glm::normalize(scale) * bgScale;
+
+            renderer->w_renderer->Render2DTexture(texID, pos, normscale, uvTransform);
+        }
+
+        void LoadingScreen::renderSpritesheetLayer()
+        {
+            if (!m_spritesheetTextureGUID.IsValid()) return;
+
+            auto serv = services.lock();
+            if (!serv) return;
+
+            auto renderer = serv->get<sRenderer>();
+            if (!renderer || !renderer->w_renderer) return;
+
+            auto win = serv->get<Window::Window>();
+            if (!win) return;
+
+            auto framebuffer = win->getFrameBuffer();
+            float screenWidth = framebuffer.x;
+            float screenHeight = framebuffer.y;
+
+            auto assetMgr = serv->get<Assets::Manager>();
+            auto texOpt = assetMgr->getAsset<Assets::Texture>(m_spritesheetTextureGUID);
+            if (!texOpt.has_value()) return;
+            if (!texOpt.value()->gl_texture) services.lock()->get<sRenderer>()->uploadTexture(texOpt.value());
+
+            GLuint texID = texOpt.value()->gl_texture;
+
+            // Calculate UV coordinates for spritesheet animation
+            glm::vec4 uvTransform;
+            float frameWidth = 1.0f;  // Default to full texture
+            float frameHeight = 1.0f;
+
             if (m_animationEnabled && m_frameCount > 1) {
                 frameWidth = 1.0f / static_cast<float>(m_framesPerRow);
                 int framesPerColumn = (m_frameCount + m_framesPerRow - 1) / m_framesPerRow;
@@ -521,7 +568,7 @@ namespace PAIN {
 
             glm::vec2 pos(0.0f, 0.0f);
             glm::vec2 scale(actualFrameWidth, actualFrameHeight);
-            glm::vec2 normscale = glm::normalize(scale) * bgScale;
+            glm::vec2 normscale = glm::normalize(scale) * spritesheetScale;
 
             renderer->w_renderer->Render2DTexture(texID, pos, normscale, uvTransform);
         }
@@ -594,6 +641,16 @@ namespace PAIN {
         float LoadingScreen::getStatusTextScale() const {
             return m_statusTextScale;
         }
+
+        void LoadingScreen::setSpritesheetTexture(const Assets::GUID& textureGUID) {
+            m_spritesheetTextureGUID = textureGUID;
+        }
+        
+        Assets::GUID LoadingScreen::getSpritesheetTexture() const { return m_spritesheetTextureGUID; }
+        
+        void LoadingScreen::setSpritesheetScale(float scale) { spritesheetScale = scale; }
+        
+        float LoadingScreen::getSpritesheetScale() const { return spritesheetScale; }
 
         void LoadingScreen::defaultSetup() {
             //Set default digipen screen for texture rendering
@@ -846,6 +903,8 @@ namespace PAIN {
             // Render in Z-order (back to front):
             // Layer 1: Background texture (if set)
             if (showBg) renderBackgroundTexture();
+
+			renderSpritesheetLayer();
 
             // Layer 2: Animated gradient overlay
             if (showOverlay) renderBackgroundOverlay();
