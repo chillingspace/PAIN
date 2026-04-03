@@ -2,32 +2,6 @@
     "entities": [
         {
             "components": {
-                "BoundingVolume": {
-                    "localAABB": {
-                        "max": [
-                            11.664676666259766,
-                            8.72545051574707,
-                            11.37221908569336
-                        ],
-                        "min": [
-                            -11.664676666259766,
-                            0.0,
-                            -11.37221908569336
-                        ]
-                    },
-                    "worldAABB": {
-                        "max": [
-                            14.05306625366211,
-                            8.714418411254883,
-                            11.35693359375
-                        ],
-                        "min": [
-                            -9.276287078857422,
-                            -0.01103212870657444,
-                            -11.387504577636719
-                        ]
-                    }
-                },
                 "Hierarchy": {
                     "childrenGUIDs": [],
                     "parentGUID": "00000000-0000-0000-0000-000000000000",
@@ -57,6 +31,8 @@
                 },
                 "ModelRenderer": {
                     "castShadows": true,
+                    "doubleSidedShadows": false,
+                    "isStatic": false,
                     "materials": [
                         {
                             "albedoTextureOverride": "00000000-0000-0000-0000-000000000000",
@@ -90,6 +66,73 @@
                 "Name": {
                     "name": "Gear"
                 },
+                "ParticleSystem": {
+                    "angularVelocity": 0.0,
+                    "angularVelocityVariance": 0.0,
+                    "blendMode": 0,
+                    "colorOverLifetime": [],
+                    "directionMode": 0,
+                    "directionSpace": 0,
+                    "drag": 0.0,
+                    "emissionDirection": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "emissionRate": 3.0,
+                    "emissionShape": 1,
+                    "emissionSpread": 2.0,
+                    "gravityMultiplier": 0.0,
+                    "lifetime": 2.0,
+                    "lifetimeVariance": 0.0,
+                    "looping": true,
+                    "maxParticles": 10,
+                    "particleTexture": "b6fdf19d-f8ab-0d4b-ae8e-22626c9fb75f",
+                    "playDuration": 0.0,
+                    "playOnAwake": true,
+                    "renderShape": 2,
+                    "shapeParams": {
+                        "boxHalfExtents": [
+                            0.5,
+                            0.5,
+                            0.5
+                        ],
+                        "circleArc": 360.0,
+                        "circleRadius": 0.5,
+                        "coneAngle": 25.0,
+                        "sphereRadius": 0.15000000596046448,
+                        "volumeEmission": true
+                    },
+                    "simulationSpace": 0,
+                    "sizeOverLifetime": [],
+                    "sizeOverLifetimeMultiplier": 1.0,
+                    "softEdge": 0.20000000298023224,
+                    "sortMode": 0,
+                    "speed": 0.699999988079071,
+                    "speedVariance": 0.0,
+                    "startColor": [
+                        0.9882352948188782,
+                        1.0,
+                        0.8392156958580017,
+                        1.0
+                    ],
+                    "startColorVariance": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "startRotation": 0.0,
+                    "startRotationVariance": 0.0,
+                    "startSize": 0.029999999329447746,
+                    "startSizeVariance": 0.0,
+                    "velocityOverLifetime": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "velocityOverLifetimeEnabled": false
+                },
                 "RigidBody3D": {
                     "angular_velocity": [
                         0.0,
@@ -106,11 +149,12 @@
                         0.5,
                         0.5
                     ],
-                    "mass": -107374176.0,
                     "motion_type": 0,
                     "physics_behavior": {
                         "behavior": 1
                     },
+                    "physics_enabled": true,
+                    "use_gravity": true,
                     "velocity": [
                         0.0,
                         0.0,
