@@ -1454,6 +1454,9 @@ namespace PAIN {
             api_->SetUITextureScale(e, { x, y });
             });
         lua_.set_function("setVisibility", [this](entt::entity entityId, bool visible) { if (api_) api_->SetVisibility(entityId, visible); });
+        lua_.set_function("setUIText", [this](entt::entity entityId, std::string text) {
+            if (api_) api_->SetUIText(entityId, text);
+        });
 
         // UIFollowsWorldEntity helpers — world-space prompt billboards
         lua_.set_function("setUIFollowEnabled", [this](entt::entity uiId, bool enabled) {

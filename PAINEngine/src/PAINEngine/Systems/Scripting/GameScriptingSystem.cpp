@@ -218,24 +218,63 @@ namespace PAIN {
 
             switch (keyCode) {
 #ifdef PN_PLATFORM_WINDOWS
+            // Special keys
             case GLFW_KEY_SPACE: return "SPACE";
             case GLFW_KEY_ENTER: return "ENTER";
+            case GLFW_KEY_TAB:   return "TAB";
+            case GLFW_KEY_ESCAPE: return "ESCAPE";
 
+            // All alpha keys A-Z
             case GLFW_KEY_A: return "A";
+            case GLFW_KEY_B: return "B";
+            case GLFW_KEY_C: return "C";
             case GLFW_KEY_D: return "D";
+            case GLFW_KEY_E: return "E";
+            case GLFW_KEY_F: return "F";
+            case GLFW_KEY_G: return "G";
+            case GLFW_KEY_H: return "H";
+            case GLFW_KEY_I: return "I";
+            case GLFW_KEY_J: return "J";
+            case GLFW_KEY_K: return "K";
+            case GLFW_KEY_L: return "L";
+            case GLFW_KEY_M: return "M";
+            case GLFW_KEY_N: return "N";
+            case GLFW_KEY_O: return "O";
+            case GLFW_KEY_P: return "P";
+            case GLFW_KEY_Q: return "Q";
+            case GLFW_KEY_R: return "R";
             case GLFW_KEY_S: return "S";
+            case GLFW_KEY_T: return "T";
+            case GLFW_KEY_U: return "U";
+            case GLFW_KEY_V: return "V";
             case GLFW_KEY_W: return "W";
+            case GLFW_KEY_X: return "X";
+            case GLFW_KEY_Y: return "Y";
+            case GLFW_KEY_Z: return "Z";
+
+            // Number keys
+            case GLFW_KEY_0: return "0";
+            case GLFW_KEY_1: return "1";
+            case GLFW_KEY_2: return "2";
+            case GLFW_KEY_3: return "3";
+            case GLFW_KEY_4: return "4";
+            case GLFW_KEY_5: return "5";
+            case GLFW_KEY_6: return "6";
+            case GLFW_KEY_7: return "7";
+            case GLFW_KEY_8: return "8";
+            case GLFW_KEY_9: return "9";
+
+            // Arrow keys
             case GLFW_KEY_RIGHT: return "KEY_R";
             case GLFW_KEY_LEFT: return "KEY_L";
             case GLFW_KEY_DOWN: return "KEY_D";
             case GLFW_KEY_UP: return "KEY_U";
 
-
-            case GLFW_KEY_C: return "C";
-            case GLFW_KEY_E: return "E";
-            case GLFW_KEY_H: return "H";
-            case GLFW_KEY_R: return "R";
-            case GLFW_KEY_P: return "P";
+            // Shift keys
+            case GLFW_KEY_LEFT_SHIFT: return "LSHIFT";
+            case GLFW_KEY_RIGHT_SHIFT: return "RSHIFT";
+            case GLFW_KEY_LEFT_CONTROL: return "LCTRL";
+            case GLFW_KEY_RIGHT_CONTROL: return "RCTRL";
 #endif
 
 #ifdef PN_PLATFORM_ANDROID
@@ -244,19 +283,47 @@ namespace PAIN {
             case 257: return "ENTER";
 
             case 65: return "A";
+            case 66: return "B";
+            case 67: return "C";
             case 68: return "D";
+            case 69: return "E";
+            case 70: return "F";
+            case 71: return "G";
+            case 72: return "H";
+            case 73: return "I";
+            case 74: return "J";
+            case 75: return "K";
+            case 76: return "L";
+            case 77: return "M";
+            case 78: return "N";
+            case 79: return "O";
+            case 80: return "P";
+            case 81: return "Q";
+            case 82: return "R";
             case 83: return "S";
+            case 84: return "T";
+            case 85: return "U";
+            case 86: return "V";
             case 87: return "W";
+            case 88: return "X";
+            case 89: return "Y";
+            case 90: return "Z";
+
+            case 48: return "0";
+            case 49: return "1";
+            case 50: return "2";
+            case 51: return "3";
+            case 52: return "4";
+            case 53: return "5";
+            case 54: return "6";
+            case 55: return "7";
+            case 56: return "8";
+            case 57: return "9";
 
             case 262: return "KEY_R";
             case 263: return "KEY_L";
             case 264: return "KEY_D";
             case 265: return "KEY_U";
-
-            case 67: return "C";
-            case 72: return "H";
-            case 80: return "P";
-            //case 83: return "R";
 
 #endif
 

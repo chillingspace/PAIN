@@ -71,6 +71,13 @@ namespace PAIN {
 		case UIAction::credits_Next:		   return "credits_Next";
 		case UIAction::howtoplay_Next:		   return "howtoplay_Next";
 		case UIAction::reset_Graphics_Settings: return "reset_Graphics_Settings";
+		case UIAction::rebind_Forward:          return "rebind_Forward";
+		case UIAction::rebind_Left:             return "rebind_Left";
+		case UIAction::rebind_Right:            return "rebind_Right";
+		case UIAction::rebind_Backward:         return "rebind_Backward";
+		case UIAction::rebind_Jump:             return "rebind_Jump";
+		case UIAction::rebind_Hide:             return "rebind_Hide";
+		case UIAction::reset_Controls:          return "reset_Controls";
 		
 		case UIAction::None:
 		default:                               return "None";

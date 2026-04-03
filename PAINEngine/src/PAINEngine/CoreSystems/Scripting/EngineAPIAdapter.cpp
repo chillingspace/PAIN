@@ -1013,6 +1013,17 @@ namespace PAIN {
 		reg.get<PAIN::ModelRenderer>(entityId).visible = visible;
     }
 
+    void EngineAPIAdapter::SetUIText(entt::entity entityId, const std::string& text)
+    {
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<PAIN::UIText>(entityId)) {
+            PN_CORE_WARN("[EngineAPIAdapter] SetUIText: entity has no UIText component");
+            return;
+        }
+
+        reg.get<PAIN::UIText>(entityId).display_text = text;
+    }
+
     void EngineAPIAdapter::SetUIFollowEnabled(entt::entity uiEntityId, bool enabled)
     {
         auto& reg = ecs_.getRegistry();

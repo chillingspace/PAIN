@@ -185,6 +185,7 @@ namespace PAIN {
         void SetUITexture(entt::entity entityId, const std::string& textureGuidStr) override;
         void SetUITextureScale(entt::entity e, glm::vec2 s) override;
         glm::vec2 GetUITextureScale(entt::entity e) override;
+        void SetUIText(entt::entity entityId, const std::string& text) override;
         void SetVisibility(entt::entity entityId, bool visible) override;
 
         void SetUIFollowEnabled(entt::entity uiEntityId, bool enabled) override;

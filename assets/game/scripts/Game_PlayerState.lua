@@ -179,12 +179,35 @@ if not S._keysRegistered then
     registerKeyDown("C", function() collectPressed = true end)
     registerKeyUp("C", function() collectPressed = false end)
 
-    registerKeyDown("E", function() 
-        --log("[PlayerState] E keydown fired")
-        hidePressed = true 
-    end)
-    registerKeyUp("E",   function() hidePressed = false end)
     registerKeyDown("R", function() restartPressed = true end)
+
+    -- Dynamic dispatch for the rebindable "hide" key
+    local KB_PS = _G.KeyBindings
+    if KB_PS then
+        -- All keys that could possibly be bound to hide
+        local ALL_KEYS_PS = {
+            "A","B","C","D","E","F","G","H","I","J","K","L","M",
+            "N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
+            "0","1","2","3","4","5","6","7","8","9",
+            "SPACE","TAB","LSHIFT","RSHIFT"
+        }
+        for _, kn in ipairs(ALL_KEYS_PS) do
+            registerKeyDown(kn, function()
+                if KB_PS.hide == kn then
+                    hidePressed = true
+                end
+            end)
+            registerKeyUp(kn, function()
+                if KB_PS.hide == kn then
+                    hidePressed = false
+                end
+            end)
+        end
+    else
+        -- Fallback: hardcoded E key if KeyBindings not available
+        registerKeyDown("E", function() hidePressed = true end)
+        registerKeyUp("E", function() hidePressed = false end)
+    end
 
     -- mouse click and press (android) treated as a generic action
     if registerOnClick then

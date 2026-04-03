@@ -50,6 +50,169 @@ local function updateGraphicsModeDisplay()
 end
 
 
+-- ==================== CONTROLS / KEY BINDINGS ====================
+local KB_DEFAULTS = {
+    forward  = "W",
+    left     = "A",
+    right    = "D",
+    backward = "S",
+    jump     = "SPACE",
+    hide     = "E",
+}
+
+local KB_ACTION_NAMES = { "forward", "left", "right", "backward", "jump", "hide" }
+
+-- Valid keys that can be used for rebinding (excludes F-keys, system keys, arrows)
+local KB_VALID_KEYS = {}
+for c = string.byte("A"), string.byte("Z") do
+    KB_VALID_KEYS[string.char(c)] = true
+end
+for i = 0, 9 do
+    KB_VALID_KEYS[tostring(i)] = true
+end
+KB_VALID_KEYS["SPACE"]  = true
+KB_VALID_KEYS["TAB"]    = true
+KB_VALID_KEYS["LSHIFT"] = true
+KB_VALID_KEYS["RSHIFT"] = true
+
+-- Init global table
+_G.KeyBindings = _G.KeyBindings or {}
+local KB = _G.KeyBindings
+
+for _, action in ipairs(KB_ACTION_NAMES) do
+    if KB[action] == nil then
+        KB[action] = KB_DEFAULTS[action]
+    end
+end
+
+KB._defaults    = KB_DEFAULTS
+KB._actionNames = KB_ACTION_NAMES
+KB._validKeys   = KB_VALID_KEYS
+
+-- Load saved bindings from settings.cfg
+local function loadBindings()
+    for _, action in ipairs(KB_ACTION_NAMES) do
+        local key = "controls_" .. action
+        if settingsLoad then
+            local saved = settingsLoad(key)
+            if saved and saved ~= "" then
+                KB[action] = saved
+                printLog("[KeyBindings] Loaded " .. action .. " = " .. saved)
+            end
+        end
+    end
+end
+
+-- Save all bindings to settings.cfg
+function KB.saveAll()
+    for _, action in ipairs(KB_ACTION_NAMES) do
+        local key = "controls_" .. action
+        local val = KB[action] or KB_DEFAULTS[action]
+        if settingsSave then
+            settingsSave(key, val)
+        end
+    end
+    printLog("[KeyBindings] All bindings saved")
+end
+
+-- Reset all bindings to defaults
+function KB.resetAll()
+    for _, action in ipairs(KB_ACTION_NAMES) do
+        KB[action] = KB_DEFAULTS[action]
+    end
+    KB.saveAll()
+    printLog("[KeyBindings] All bindings reset to defaults")
+end
+
+-- Rebinding state
+KB._pendingRebind = nil
+KB._pendingEntity = nil
+
+function KB.isValidKey(keyName)
+    return KB_VALID_KEYS[keyName] == true
+end
+
+function KB.getDisplayName(keyName)
+    if     keyName == "SPACE"  then return "SPACE"
+    elseif keyName == "LSHIFT" then return "L-SHIFT"
+    elseif keyName == "RSHIFT" then return "R-SHIFT"
+    elseif keyName == "TAB"    then return "TAB"
+    elseif keyName == ""       then return "---"
+    else   return keyName
+    end
+end
+
+function KB.findActionByKey(keyName)
+    for _, action in ipairs(KB_ACTION_NAMES) do
+        if KB[action] == keyName then
+            return action
+        end
+    end
+    return nil
+end
+
+function KB.startRebind(action, uiEntity)
+    KB._pendingRebind = action
+    KB._pendingEntity = uiEntity
+    printLog("[KeyBindings] Waiting for key input to rebind: " .. action)
+end
+
+function KB.tryApplyRebind(keyName)
+    if not KB._pendingRebind then return false end
+
+    local action = KB._pendingRebind
+
+    if not KB.isValidKey(keyName) then
+        printLog("[KeyBindings] Invalid key for rebind: " .. tostring(keyName))
+        return true
+    end
+
+    -- Orphan method: unbind any other action using this key
+    local existingAction = KB.findActionByKey(keyName)
+    if existingAction and existingAction ~= action then
+        KB[existingAction] = ""
+        printLog("[KeyBindings] Unbound " .. existingAction .. " (was " .. keyName .. ")")
+
+        local orphanEntity = findEntity("bind_" .. existingAction)
+        if orphanEntity and setUIText then
+            setUIText(orphanEntity, KB.getDisplayName(""))
+        end
+    end
+
+    -- Apply new binding
+    KB[action] = keyName
+    printLog("[KeyBindings] Rebound " .. action .. " to " .. keyName)
+
+    -- Update UI text on the button entity
+    if KB._pendingEntity and setUIText then
+        setUIText(KB._pendingEntity, KB.getDisplayName(keyName))
+    end
+
+    KB.saveAll()
+    KB._pendingRebind = nil
+    KB._pendingEntity = nil
+    return true
+end
+
+function KB.cancelRebind()
+    if KB._pendingRebind then
+        printLog("[KeyBindings] Rebind cancelled for: " .. KB._pendingRebind)
+        KB._pendingRebind = nil
+        KB._pendingEntity = nil
+    end
+end
+
+-- Load saved bindings on init
+loadBindings()
+
+printLog("[KeyBindings] Init: forward=" .. KB.forward ..
+    " left=" .. KB.left ..
+    " right=" .. KB.right ..
+    " backward=" .. KB.backward ..
+    " jump=" .. KB.jump ..
+    " hide=" .. KB.hide)
+
+
 -- ==================== AUDIO-AWARE SCENE CHANGE ====================
 -- Helper to do scene transitions with audio fade-out
 local function changeSceneWithAudioFade(scenePath)
@@ -846,6 +1009,15 @@ local handlers = {
     settings_Next = function(buttonEntity, payload)
         playUIClick()
 
+        -- Block controls rebinding menu on Android
+        if payload and string.upper(payload) == "CONTROLS" then
+            local isMobile = (isAndroid ~= nil and isAndroid())
+            if isMobile then
+                printLog("[UI] Controls rebinding not available on Android")
+                return
+            end
+        end
+
         -- Disable settingsUI layer
         setLayerEnabled(layers.SETTINGS, false)
 
@@ -928,6 +1100,87 @@ local handlers = {
             return
         end
     end,
+
+    ----------------------------------------------------------------------
+    -- CONTROLS REBINDING
+    ----------------------------------------------------------------------
+    rebind_Forward = function(buttonEntity, payload)
+        playUIClick()
+        local KB = _G.KeyBindings
+        if KB then
+            KB.startRebind("forward", buttonEntity)
+            printLog("[UI] Rebinding forward... press a key")
+        end
+    end,
+
+    rebind_Left = function(buttonEntity, payload)
+        playUIClick()
+        local KB = _G.KeyBindings
+        if KB then
+            KB.startRebind("left", buttonEntity)
+            printLog("[UI] Rebinding left... press a key")
+        end
+    end,
+
+    rebind_Right = function(buttonEntity, payload)
+        playUIClick()
+        local KB = _G.KeyBindings
+        if KB then
+            KB.startRebind("right", buttonEntity)
+            printLog("[UI] Rebinding right... press a key")
+        end
+    end,
+
+    rebind_Backward = function(buttonEntity, payload)
+        playUIClick()
+        local KB = _G.KeyBindings
+        if KB then
+            KB.startRebind("backward", buttonEntity)
+            printLog("[UI] Rebinding backward... press a key")
+        end
+    end,
+
+    rebind_Jump = function(buttonEntity, payload)
+        playUIClick()
+        local KB = _G.KeyBindings
+        if KB then
+            KB.startRebind("jump", buttonEntity)
+            printLog("[UI] Rebinding jump... press a key")
+        end
+    end,
+
+    rebind_Hide = function(buttonEntity, payload)
+        playUIClick()
+        local KB = _G.KeyBindings
+        if KB then
+            KB.startRebind("hide", buttonEntity)
+            printLog("[UI] Rebinding hide... press a key")
+        end
+    end,
+
+    reset_Controls = function(buttonEntity, payload)
+        playUIClick()
+        local KB = _G.KeyBindings
+        if KB then
+            KB.cancelRebind()
+            KB.resetAll()
+            printLog("[UI] Controls reset to defaults")
+
+            -- Update all UI text entities for the 6 controls
+            -- The UI entities should be named: "bind_forward", "bind_left", etc.
+            local actionNames = { "forward", "left", "right", "backward", "jump", "hide" }
+            for _, action in ipairs(actionNames) do
+                local entityName = "bind_" .. action
+                local e = findEntity(entityName)
+                if e and setUIText then
+                    local keyName = KB[action] or ""
+                    local displayName = KB.getDisplayName and KB.getDisplayName(keyName) or keyName
+                    setUIText(e, displayName)
+                    printLog("[UI] Reset " .. action .. " display to " .. displayName)
+                end
+            end
+        end
+    end,
 }
 
 function G.UI_OnAction(actionName, buttonEntity, payload)
@@ -938,6 +1191,25 @@ function G.UI_OnAction(actionName, buttonEntity, payload)
     else
         printLog("[UI] No handler for action "..tostring(actionName))
     end
+end
+
+-- ==================== KEY CAPTURE FOR CONTROLS REBINDING ====================
+-- Register key handlers for all rebindable keys to capture rebind input.
+-- These only do work when _G.KeyBindings._pendingRebind is set (event-driven, not per-frame).
+local REBIND_LISTEN_KEYS = {
+    "A","B","C","D","E","F","G","H","I","J","K","L","M",
+    "N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
+    "0","1","2","3","4","5","6","7","8","9",
+    "SPACE","TAB","LSHIFT","RSHIFT"
+}
+
+for _, keyName in ipairs(REBIND_LISTEN_KEYS) do
+    registerKeyDown(keyName, function()
+        local KB = _G.KeyBindings
+        if KB and KB._pendingRebind then
+            KB.tryApplyRebind(keyName)
+        end
+    end)
 end
 
 -- ==================== INIT: Sync display text on scene load ====================
@@ -952,6 +1224,20 @@ registerUpdate(function(dt)
     if uiactions_frameCount >= UIACTIONS_FRAMES_TO_WAIT then
         uiactions_initDone = true
         updateGraphicsModeDisplay()
-        --printLog("[UIActions] Init: synced display mode text to " .. tostring(_G.GraphicsSettings.displayMode))
+
+        -- Sync controls keybinding display text
+        local KB = _G.KeyBindings
+        if KB then
+            local actionNames = { "forward", "left", "right", "backward", "jump", "hide" }
+            for _, action in ipairs(actionNames) do
+                local entityName = "bind_" .. action
+                local e = findEntity(entityName)
+                if e and setUIText then
+                    local keyName = KB[action] or ""
+                    local displayName = KB.getDisplayName and KB.getDisplayName(keyName) or keyName
+                    setUIText(e, displayName)
+                end
+            end
+        end
     end
 end)

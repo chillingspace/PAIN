@@ -907,7 +907,14 @@ namespace PAIN {
 							"to_MainMenu",
 							"credits_Next",
 							"howtoplay_Next",
-						"reset_Graphics_Settings"
+							"reset_Graphics_Settings",
+							"rebind_Forward",
+							"rebind_Left",
+							"rebind_Right",
+							"rebind_Backward",
+							"rebind_Jump",
+							"rebind_Hide",
+							"reset_Controls"
 
 						};
 

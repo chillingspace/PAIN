@@ -62,26 +62,45 @@ _G_root.Joystick_OnDrag = function(dirX, dirY)
     end
 end
 
-registerKeyDown("W", function() 
-    if not IsGamePaused() then moveUp = true end 
-end)
-registerKeyDown("S", function() 
-    if not IsGamePaused() then moveDown = true end 
-end)
-registerKeyDown("A", function() 
-    if not IsGamePaused() then moveLeft = true end 
-end)
-registerKeyDown("D", function() 
-    if not IsGamePaused() then moveRight = true end 
-end)
-registerKeyDown("SPACE", function() 
-    if not IsGamePaused() then jumpPressed = true end 
-end)
+-- ==================== DYNAMIC KEY DISPATCH ====================
+-- Instead of hardcoding keys, we register handlers for ALL rebindable keys
+-- and check _G.KeyBindings at input time to determine which action to trigger.
 
-registerKeyUp("W", function() moveUp = false end)
-registerKeyUp("S", function() moveDown = false end)
-registerKeyUp("A", function() moveLeft = false end)
-registerKeyUp("D", function() moveRight = false end)
+local KB = _G.KeyBindings
+if not KB then
+    -- Fallback if KeyBindings.lua hasn't loaded yet
+    _G.KeyBindings = {
+        forward = "W", left = "A", right = "D", backward = "S",
+        jump = "SPACE", hide = "E",
+    }
+    KB = _G.KeyBindings
+end
+
+-- List of all keys we need to listen to (the valid rebindable set)
+local ALL_LISTEN_KEYS = {
+    "A","B","C","D","E","F","G","H","I","J","K","L","M",
+    "N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
+    "0","1","2","3","4","5","6","7","8","9",
+    "SPACE","TAB","LSHIFT","RSHIFT"
+}
+
+for _, keyName in ipairs(ALL_LISTEN_KEYS) do
+    registerKeyDown(keyName, function()
+        if IsGamePaused() then return end
+        if KB.forward  == keyName then moveUp    = true end
+        if KB.backward == keyName then moveDown  = true end
+        if KB.left     == keyName then moveLeft  = true end
+        if KB.right    == keyName then moveRight = true end
+        if KB.jump     == keyName then jumpPressed = true end
+    end)
+
+    registerKeyUp(keyName, function()
+        if KB.forward  == keyName then moveUp    = false end
+        if KB.backward == keyName then moveDown  = false end
+        if KB.left     == keyName then moveLeft  = false end
+        if KB.right    == keyName then moveRight = false end
+    end)
+end
 
 local speed = 3
 local jumpSpeed = 5

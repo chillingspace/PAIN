@@ -168,6 +168,7 @@ namespace PAIN {
         virtual void SetUITexture(entt::entity entityId, const std::string& textureGuidStr) = 0;
         virtual void SetUITextureScale(entt::entity e, glm::vec2 s) = 0;
         virtual glm::vec2 GetUITextureScale(entt::entity e) = 0;
+        virtual void SetUIText(entt::entity entityId, const std::string& text) = 0;
 
         // UIFollowsWorldEntity helpers (world-space prompt billboards)
         virtual void SetUIFollowEnabled(entt::entity uiEntityId, bool enabled) = 0;

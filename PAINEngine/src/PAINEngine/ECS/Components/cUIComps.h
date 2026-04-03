@@ -145,7 +145,14 @@ namespace PAIN {
 		to_MainMenu,
 		credits_Next,
 		howtoplay_Next,
-		reset_Graphics_Settings
+		reset_Graphics_Settings,
+		rebind_Forward,
+		rebind_Left,
+		rebind_Right,
+		rebind_Backward,
+		rebind_Jump,
+		rebind_Hide,
+		reset_Controls
 	};
 
 	struct UIButton {
@@ -361,6 +368,13 @@ namespace PAIN {
 		{PAIN::UIAction::credits_Next, "credits_Next"},
 		{PAIN::UIAction::howtoplay_Next, "howtoplay_Next"},
 		{PAIN::UIAction::reset_Graphics_Settings, "reset_Graphics_Settings"},
+		{PAIN::UIAction::rebind_Forward, "rebind_Forward"},
+		{PAIN::UIAction::rebind_Left, "rebind_Left"},
+		{PAIN::UIAction::rebind_Right, "rebind_Right"},
+		{PAIN::UIAction::rebind_Backward, "rebind_Backward"},
+		{PAIN::UIAction::rebind_Jump, "rebind_Jump"},
+		{PAIN::UIAction::rebind_Hide, "rebind_Hide"},
+		{PAIN::UIAction::reset_Controls, "reset_Controls"},
 
 
 	})
