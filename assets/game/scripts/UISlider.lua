@@ -105,6 +105,17 @@ local volumeFunctions = {
 
 _G.SliderUI = _G.SliderUI or {}
 
+-- Layer IDs for each slider (must match scene layer setup in UIActions.lua)
+local SLIDER_LAYERS = {
+    master_handle     = 4,  -- AUDIO layer
+    bgm_handle        = 4,
+    sfx_handle        = 4,
+    brightness_handle = 5,  -- GRAPHICS layer
+    gamma_handle      = 5,
+}
+
+local myLayerId = SLIDER_LAYERS[settingKey]
+
 -- ==================== Utility ====================
 
 -- Prevents the slider from going out of bounds
@@ -142,6 +153,11 @@ local function positionToValue(x)
 end
 
 registerUpdate(function(dt)
+    -- Skip all input processing if this slider's layer is disabled
+    if myLayerId and getLayerEnabled and not getLayerEnabled(myLayerId) then
+        return
+    end
+
     local x, y = get2DPosition(entityId)
 
     if not knobY then
