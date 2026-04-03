@@ -8,10 +8,8 @@
         "38a421a9-1ffc-3c47-a8e2-f0af50f2e2c2",
         "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
         "d54d96e7-2dc0-c947-8f1a-bab6892ff688",
-        "466ca22c-0eb2-0d49-ac1a-b9d822cc1ce4",
         "4727438d-9c1f-ea47-91e0-8911d3412588",
         "08527159-b243-d742-a313-9001198b2097",
-        "5d46bba2-ab81-064e-bab5-2517c42f6aca",
         "ffd57a3d-b8b4-2b40-94a5-52ecd82a5a5f",
         "f59e4cbd-b183-3541-9531-bd14b87115de",
         "f0c75d25-c006-194c-b132-37309323a11c",
@@ -46,6 +44,8 @@
         "4b1f318e-49f7-1545-bb84-b9c6608f3471",
         "6a6e7d67-82c1-f846-96c5-4c5338a9a7ec",
         "3da3f0aa-e9d3-634a-b1c9-f88763fb5bae",
+        "5b25ecd9-f723-f043-9333-6045100eaeeb",
+        "31f050fc-b8fd-9f44-9f4c-c2b19a10e63e",
         "146f4e3b-5c24-624f-80c8-d74159ed9f41",
         "a8977689-ded0-fa41-9efb-33354e83dec7",
         "41022c20-5591-324d-80ff-f14090e5e9d3",
@@ -74,7 +74,6 @@
         "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
         "c3be7e4a-501e-0744-ac10-55d1b5a38d86",
         "510e3ede-f637-c448-99e8-7dc200d60c8f",
-        "164de26f-1403-e146-8a76-735d5dc42155",
         "b3ec7aee-c5ff-af48-9aa1-f912f843a888",
         "9dc666a4-a004-0346-803d-0530eb3a2f70",
         "c3240e7d-4066-2444-a024-c1d31c71a299",
@@ -173,7 +172,6 @@
         "cbc0efba-5a42-af42-8453-ce9966dc2b34",
         "2675eeff-5329-9d40-b56f-6f613855b441",
         "ee65299b-47d9-4648-ae3d-7a9e1ae75012",
-        "6fc0ccbc-ae9d-a948-9557-6140470621c4",
         "259d9f3b-aa62-7148-8f9b-2377b7ba1ddd",
         "e76d8d48-ff6e-aa46-b2f0-54b889f0f9bb",
         "afdab715-37bc-5b43-80d3-5acf798bb7b4",
@@ -45787,7 +45785,7 @@
                                     ]
                                 },
                                 "UIButton": {
-                                    "action": "LoadScene",
+                                    "action": "pause_Quit",
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
@@ -45822,7 +45820,7 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": "LoadScene",
+                            "action": "pause_Quit",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
@@ -46223,7 +46221,7 @@
                                     ]
                                 },
                                 "UIButton": {
-                                    "action": "LoadScene",
+                                    "action": "pause_Quit",
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
@@ -46258,7 +46256,7 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": "LoadScene",
+                            "action": "pause_Quit",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
@@ -54230,8 +54228,8 @@
                             ],
                             "texture_guid": "bd0a7c29-ace7-3748-9bb0-beba7ab453fd",
                             "texture_scale": [
-                                0.0072916666977107525,
-                                0.005400539841502905
+                                0.008750000037252903,
+                                0.006666666828095913
                             ]
                         },
                         "UIElement": {
@@ -54284,8 +54282,8 @@
                                 1.0
                             ],
                             "scale": [
-                                0.0072916666977107525,
-                                0.005400539841502905,
+                                0.008750000037252903,
+                                0.006666666828095913,
                                 0.20000000298023224
                             ],
                             "size_delta": [

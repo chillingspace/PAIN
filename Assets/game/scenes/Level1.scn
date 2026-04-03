@@ -25,6 +25,8 @@
         "4b1f318e-49f7-1545-bb84-b9c6608f3471",
         "6a6e7d67-82c1-f846-96c5-4c5338a9a7ec",
         "3da3f0aa-e9d3-634a-b1c9-f88763fb5bae",
+        "5b25ecd9-f723-f043-9333-6045100eaeeb",
+        "31f050fc-b8fd-9f44-9f4c-c2b19a10e63e",
         "146f4e3b-5c24-624f-80c8-d74159ed9f41",
         "a8977689-ded0-fa41-9efb-33354e83dec7",
         "f59e4cbd-b183-3541-9531-bd14b87115de",
@@ -99,10 +101,6 @@
         "feb46661-0d8d-d947-ac9f-881f436feda7",
         "a77749e3-6c15-7446-a792-5609dd96b391",
         "14377587-a8fe-2b47-9f46-dad6bdad2753",
-        "c3be7e4a-501e-0744-ac10-55d1b5a38d86",
-        "510e3ede-f637-c448-99e8-7dc200d60c8f",
-        "164de26f-1403-e146-8a76-735d5dc42155",
-        "466ca22c-0eb2-0d49-ac1a-b9d822cc1ce4",
         "dadd8247-bfe7-7e42-8874-2bccc9ed2210",
         "c49ebb97-d7ba-f148-9e46-16d6c5543147",
         "4ab9b8a8-4bdc-e046-83a2-24863013c030",
@@ -132,9 +130,9 @@
         "ca65c8fb-c79d-9c4e-b32c-2ce453f01543",
         "b8a2c974-f619-014b-9cb4-6143cbdf7c4b",
         "79269c4e-addb-ea41-85c6-57e984c24ff3",
+        "c3be7e4a-501e-0744-ac10-55d1b5a38d86",
+        "510e3ede-f637-c448-99e8-7dc200d60c8f",
         "ee65299b-47d9-4648-ae3d-7a9e1ae75012",
-        "5d46bba2-ab81-064e-bab5-2517c42f6aca",
-        "6fc0ccbc-ae9d-a948-9557-6140470621c4",
         "e60f5690-3ae8-a142-b726-5ea017a209e9",
         "0b9ad008-e8ad-144b-855d-115dd4683035",
         "b6f7c506-7c21-1847-a0b9-597479e83e13",
@@ -15393,7 +15391,7 @@
                                     ]
                                 },
                                 "UIButton": {
-                                    "action": "LoadScene",
+                                    "action": "pause_Quit",
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
@@ -15428,7 +15426,7 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": "LoadScene",
+                            "action": "pause_Quit",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
@@ -15829,7 +15827,7 @@
                                     ]
                                 },
                                 "UIButton": {
-                                    "action": "LoadScene",
+                                    "action": "pause_Quit",
                                     "disabled_color": -10066330,
                                     "highlighted_color": -3355444,
                                     "normal_color": -1,
@@ -15864,7 +15862,7 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": "LoadScene",
+                            "action": "pause_Quit",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
