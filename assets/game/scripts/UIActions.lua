@@ -1012,6 +1012,11 @@ local handlers = {
         
         -- Enable settingsUI layer
         setLayerEnabled(layers.SETTINGS, true)
+
+        -- Enable Controls button layer if on windows
+        if not (isAndroid and isAndroid()) then
+            setLayerEnabled(layers.SETTINGS_CONTROLS, true)
+        end
     end,
 
     -- Goes from settings to another layer. Payload: layer to show
@@ -1029,6 +1034,7 @@ local handlers = {
 
         -- Disable settingsUI layer
         setLayerEnabled(layers.SETTINGS, false)
+        setLayerEnabled(layers.SETTINGS_CONTROLS, false)
 
         if payload then
             local layer = layers[string.upper(payload)]
