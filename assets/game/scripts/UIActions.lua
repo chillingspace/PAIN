@@ -27,7 +27,8 @@ local layers = {
     HOWTOPLAY_1 = 7,
     HOWTOPLAY_2 = 8,
     CREDITS_1 = 9,
-    CREDITS_2 = 10
+    CREDITS_2 = 10,
+    SETTINGS_CONTROLS = 11,
 }
 
 -- ==================== GRAPHICS SETTINGS ====================
@@ -968,6 +969,13 @@ local handlers = {
 
             if layer then
                 setLayerEnabled(layer, true)
+
+                -- Opening Settings should also show the controls section on Windows
+                if layer == layers.SETTINGS then
+                    if not (isAndroid and isAndroid()) then
+                        setLayerEnabled(layers.SETTINGS_CONTROLS, true)
+                    end
+                end
             else
                 printLog("[UI] Invalid payload: " .. tostring(payload))
             end
@@ -987,6 +995,7 @@ local handlers = {
         setLayerEnabled(layers.GRAPHICS, false)
         setLayerEnabled(layers.CONTROLS, false)
         setLayerEnabled(layers.SETTINGS, false)
+        setLayerEnabled(layers.SETTINGS_CONTROLS, false)
         
         -- Enable main menu layers
         setLayerEnabled(layers.MAINMENU, true)

@@ -250,14 +250,6 @@ namespace PAIN {
         return window_->getFrameBuffer();
     }
 
-    bool EngineAPIAdapter::IsWindows() const {
-        #ifdef PN_PLATFORM_WINDOWS
-                return true;
-        #else
-                return false;
-        #endif
-    }
-
     //int EngineAPIAdapter::guidToInt(const PAIN::Assets::GUID& id) {
     //    uint32_t v = 0; std::memcpy(&v, id.bytes, sizeof(uint32_t));
     //    return static_cast<int>(v);

@@ -70,8 +70,6 @@ namespace PAIN {
 
         glm::uvec2 GetFrameBufferSize() const override;
 
-        bool IsWindows() const;
-
         /* =========================================================================== */
         /*                     Metadata (name / tags / groups)                         */
         /* =========================================================================== */
