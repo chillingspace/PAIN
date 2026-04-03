@@ -1052,6 +1052,14 @@ namespace PAIN {
         return static_cast<int>(entt::to_integral(target));
     }
 
+    std::optional<std::tuple<float, float, float>> EngineAPIAdapter::GetUIFollowOffset(entt::entity uiEntityId)
+    {
+        auto& reg = ecs_.getRegistry();
+        if (!reg.all_of<UIFollowsWorldEntity>(uiEntityId)) return std::nullopt;
+        const auto& follows = reg.get<UIFollowsWorldEntity>(uiEntityId);
+        return std::make_tuple(follows.world_offset.x, follows.world_offset.y, follows.world_offset.z);
+    }
+
     /* =========================================================================== */
     /*                                  Lighting                                   */
     /* =========================================================================== */

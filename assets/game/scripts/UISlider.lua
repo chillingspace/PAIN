@@ -3,8 +3,8 @@
 
 -- local sliderName = getEntityName(entityId)
 local settingKey = getEntityName(entityId)
-local minX = -0.32
-local maxX = 0.32
+local minX = -0.25
+local maxX = 0.5
 local hitHalfWidth = 0.05
 local hitHalfHeight = 0.05
 

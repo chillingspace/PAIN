@@ -4,10 +4,10 @@
     "type": "Texture"
   },
   "build_data": {
-    "hash": 4772098082838300202
+    "hash": 8296674654876954880
   },
   "descriptor_version": 1,
-  "guid": "fda9fdc4-a022-6744-ba11-f2e14ce229b6",
+  "guid": "21c8c800-9042-1547-b52b-4fee191116f7",
   "import_settings": {
     "android_allow_astc_hdr": false,
     "android_bake_cubemap": false,
