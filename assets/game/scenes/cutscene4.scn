@@ -1691,11 +1691,11 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": "cutscene_Open_Menu",
+                            "action": "LoadScene",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "payload": "",
+                            "payload": "game/scenes/mainmenu.scn",
                             "pressed_color": -5592406,
                             "state": "Normal"
                         },
@@ -1752,10 +1752,10 @@
                         },
                         "UVCoordinates": {
                             "uv": [
-                                0.0017241379246115685,
-                                0.009999999776482582,
-                                0.49827587604522705,
-                                0.9900000095367432
+                                0.00147058826405555,
+                                0.008064515888690948,
+                                0.4985294044017792,
+                                0.9919354915618896
                             ]
                         }
                     },

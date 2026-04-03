@@ -1691,11 +1691,11 @@
                             "total_frames": 2
                         },
                         "UIButton": {
-                            "action": "cutscene_Open_Menu",
+                            "action": "LoadScene",
                             "disabled_color": -10066330,
                             "highlighted_color": -3355444,
                             "normal_color": -1,
-                            "payload": "",
+                            "payload": "game/scenes/Level 2.scn",
                             "pressed_color": -5592406,
                             "state": "Normal"
                         },
