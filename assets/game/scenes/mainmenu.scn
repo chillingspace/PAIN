@@ -739,7 +739,7 @@
                                         0.0,
                                         0.0
                                     ],
-                                    "texture_guid": "cffcaacf-e530-054e-8840-547d4272f0a4",
+                                    "texture_guid": "e6cd3d7b-441b-6942-9f03-765486ba28dc",
                                     "texture_scale": [
                                         2.0,
                                         1.0
@@ -764,7 +764,7 @@
                                 0.0,
                                 0.0
                             ],
-                            "texture_guid": "cffcaacf-e530-054e-8840-547d4272f0a4",
+                            "texture_guid": "e6cd3d7b-441b-6942-9f03-765486ba28dc",
                             "texture_scale": [
                                 2.0,
                                 1.0
@@ -2236,7 +2236,7 @@
                                         0.0,
                                         0.0
                                     ],
-                                    "texture_guid": "7de36637-5be8-964c-9b0a-26b3d0c3bd47",
+                                    "texture_guid": "ca47a573-6e59-574e-bad3-773698e6524f",
                                     "texture_scale": [
                                         2.0,
                                         1.0
@@ -2253,7 +2253,7 @@
                                 0.0,
                                 0.0
                             ],
-                            "texture_guid": "7de36637-5be8-964c-9b0a-26b3d0c3bd47",
+                            "texture_guid": "ca47a573-6e59-574e-bad3-773698e6524f",
                             "texture_scale": [
                                 2.0,
                                 1.0
@@ -10389,7 +10389,7 @@
                             "normal_color": -1,
                             "payload": "HOWTOPLAY_1",
                             "pressed_color": -5592406,
-                            "state": "Normal"
+                            "state": "Highlighted"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -10444,9 +10444,9 @@
                         },
                         "UVCoordinates": {
                             "uv": [
-                                0.0009765625,
+                                0.5009765625,
                                 0.009615384973585606,
-                                0.4990234375,
+                                0.9990234375,
                                 0.9903846383094788
                             ]
                         }

@@ -4,12 +4,15 @@
     "type": "Texture"
   },
   "build_data": {
-    "hash": 749455730076950
+    "hash": 6328564420547768846
   },
   "descriptor_version": 1,
-  "guid": "d0c240cc-c1d0-734a-9227-95124d0de8d1",
+  "guid": "061938e5-29ba-9f48-9efc-c037d2f48843",
   "import_settings": {
+    "android_allow_astc_hdr": false,
+    "android_bake_cubemap": false,
     "android_compression": "ASTC_4x4",
+    "android_skybox_source_format": "R16G16B16A16",
     "generate_mipmaps": true,
     "max_size": 1024,
     "window_compression": "BC7"
