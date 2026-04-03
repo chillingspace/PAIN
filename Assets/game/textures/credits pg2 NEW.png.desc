@@ -1,0 +1,23 @@
+{
+  "asset_info": {
+    "name": "credits pg2 NEW.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 10854252621880602453
+  },
+  "descriptor_version": 1,
+  "guid": "42c0a592-6043-a842-bc01-a62b387613ec",
+  "import_settings": {
+    "android_allow_astc_hdr": false,
+    "android_bake_cubemap": false,
+    "android_compression": "ASTC_4x4",
+    "android_skybox_source_format": "R16G16B16A16",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\credits pg2 NEW.png"
+  }
+}

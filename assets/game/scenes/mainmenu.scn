@@ -3104,10 +3104,10 @@
                                 "Texture2D": {
                                     "opacity": 1.0,
                                     "pos": [
-                                        0.004385964944958687,
+                                        0.0,
                                         0.0
                                     ],
-                                    "texture_guid": "52e61897-7f8c-a44b-95ce-496cef35a289",
+                                    "texture_guid": "b04a897d-7fb8-3142-914c-9fd583d244f3",
                                     "texture_scale": [
                                         2.0,
                                         1.0
@@ -3121,10 +3121,10 @@
                         "Texture2D": {
                             "opacity": 1.0,
                             "pos": [
-                                0.004385964944958687,
+                                0.0,
                                 0.0
                             ],
-                            "texture_guid": "52e61897-7f8c-a44b-95ce-496cef35a289",
+                            "texture_guid": "b04a897d-7fb8-3142-914c-9fd583d244f3",
                             "texture_scale": [
                                 2.0,
                                 1.0
@@ -3774,10 +3774,10 @@
                                 "Texture2D": {
                                     "opacity": 1.0,
                                     "pos": [
-                                        0.0021929824724793434,
+                                        0.0,
                                         0.0
                                     ],
-                                    "texture_guid": "b36499f1-5b52-ea47-a926-4991e10f0a0e",
+                                    "texture_guid": "42c0a592-6043-a842-bc01-a62b387613ec",
                                     "texture_scale": [
                                         2.0,
                                         1.0
@@ -3791,10 +3791,10 @@
                         "Texture2D": {
                             "opacity": 1.0,
                             "pos": [
-                                0.0021929824724793434,
+                                0.0,
                                 0.0
                             ],
-                            "texture_guid": "b36499f1-5b52-ea47-a926-4991e10f0a0e",
+                            "texture_guid": "42c0a592-6043-a842-bc01-a62b387613ec",
                             "texture_scale": [
                                 2.0,
                                 1.0
