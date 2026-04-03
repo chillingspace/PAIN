@@ -1,0 +1,103 @@
+{
+    "entities": [
+        {
+            "components": {
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        -0.9603743553161621,
+                        0.0,
+                        -8.25582504272461
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "ModelRenderer": {
+                    "castShadows": true,
+                    "doubleSidedShadows": false,
+                    "isStatic": false,
+                    "materials": [
+                        {
+                            "albedoTextureOverride": "73084c4b-377c-5f4f-bc9b-680e92e2961a",
+                            "aoTextureOverride": "f2f27596-9772-124f-83fb-be2a9b36e157",
+                            "baseColorOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveOverride": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "materialGUID": "c78ed2e6-4499-3d4a-a6bc-50525a939d91",
+                            "metallicOverride": 1.0,
+                            "metallicTextureOverride": "f2f27596-9772-124f-83fb-be2a9b36e157",
+                            "normalTextureOverride": "29198db1-80ae-d843-925e-77a8d9dcc9ff",
+                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                            "roughnessOverride": 1.0,
+                            "roughnessTextureOverride": "f2f27596-9772-124f-83fb-be2a9b36e157",
+                            "useOverrides": false
+                        }
+                    ],
+                    "modelGUID": "e2b6fe52-91b6-7843-98e3-0203a71ebcf5",
+                    "receiveShadows": true,
+                    "visible": true
+                },
+                "Name": {
+                    "name": "Signboard"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_scale": [
+                        1.0,
+                        2.0,
+                        0.10000000149011612
+                    ],
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 0
+                    },
+                    "physics_enabled": true,
+                    "use_gravity": true,
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "7e8e475e-1d9e-004f-bee1-c0db73789924"
+        }
+    ],
+    "prefabName": "Signboard",
+    "rootEntityGUID": "7e8e475e-1d9e-004f-bee1-c0db73789924"
+}
