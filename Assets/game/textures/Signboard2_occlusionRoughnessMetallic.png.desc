@@ -1,0 +1,23 @@
+{
+  "asset_info": {
+    "name": "Signboard2_occlusionRoughnessMetallic.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 6289465271140768848
+  },
+  "descriptor_version": 1,
+  "guid": "684dfb1a-1c8c-d645-87fb-699ee4ebcece",
+  "import_settings": {
+    "android_allow_astc_hdr": false,
+    "android_bake_cubemap": false,
+    "android_compression": "ASTC_4x4",
+    "android_skybox_source_format": "R16G16B16A16",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Signboard2_occlusionRoughnessMetallic.png"
+  }
+}

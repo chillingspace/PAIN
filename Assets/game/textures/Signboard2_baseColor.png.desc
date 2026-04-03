@@ -1,0 +1,23 @@
+{
+  "asset_info": {
+    "name": "Signboard2_baseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 15277703481034643300
+  },
+  "descriptor_version": 1,
+  "guid": "f0c75d25-c006-194c-b132-37309323a11c",
+  "import_settings": {
+    "android_allow_astc_hdr": false,
+    "android_bake_cubemap": false,
+    "android_compression": "ASTC_4x4",
+    "android_skybox_source_format": "R16G16B16A16",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Signboard2_baseColor.png"
+  }
+}

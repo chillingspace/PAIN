@@ -1,0 +1,23 @@
+{
+  "asset_info": {
+    "name": "Signboard_normal.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 4360295072264273415
+  },
+  "descriptor_version": 1,
+  "guid": "11277c06-c3f0-664a-b008-01ed6ab9e28b",
+  "import_settings": {
+    "android_allow_astc_hdr": false,
+    "android_bake_cubemap": false,
+    "android_compression": "ASTC_4x4",
+    "android_skybox_source_format": "R16G16B16A16",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Signboard_normal.png"
+  }
+}
