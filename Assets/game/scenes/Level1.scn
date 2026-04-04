@@ -14595,14 +14595,14 @@
                                 1.0,
                                 1.0
                             ],
-                            "emissionRate": 50.0,
+                            "emissionRate": 75.0,
                             "emissionShape": 1,
-                            "emissionSpread": 120.0,
+                            "emissionSpread": 95.0,
                             "gravityMultiplier": 0.0,
-                            "lifetime": 10.0,
+                            "lifetime": 8.0,
                             "lifetimeVariance": 0.0,
                             "looping": true,
-                            "maxParticles": 420,
+                            "maxParticles": 680,
                             "particleTexture": "b6fdf19d-f8ab-0d4b-ae8e-22626c9fb75f",
                             "playDuration": 0.0,
                             "playOnAwake": true,
@@ -14622,15 +14622,15 @@
                             "simulationSpace": 0,
                             "sizeOverLifetime": [],
                             "sizeOverLifetimeMultiplier": 1.0,
-                            "softEdge": 0.75,
+                            "softEdge": 0.8299999833106995,
                             "sortMode": 1,
-                            "speed": 0.20000000298023224,
-                            "speedVariance": 0.10000000149011612,
+                            "speed": 0.14000000059604645,
+                            "speedVariance": 0.12000000476837158,
                             "startColor": [
                                 0.2980392277240753,
                                 0.24705882370471954,
                                 0.11372549086809158,
-                                0.13333334028720856
+                                0.18039216101169586
                             ],
                             "startColorVariance": [
                                 0.0,
@@ -14640,7 +14640,7 @@
                             ],
                             "startRotation": 0.0,
                             "startRotationVariance": 0.0,
-                            "startSize": 185.0,
+                            "startSize": 145.0,
                             "startSizeVariance": 0.0,
                             "velocityOverLifetime": [
                                 0.0,
