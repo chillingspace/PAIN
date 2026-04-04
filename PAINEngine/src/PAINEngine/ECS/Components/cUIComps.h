@@ -465,7 +465,7 @@ REFL_FIELD(shadow_offset)
 REFL_FIELD(shadow_color)
 REFL_FIELD(max_length)
 REFL_FIELD(wrap_width)
-REFL_FIELD(text_pos)
+REFL_FIELD(position)
 REFL_END
 
 static_assert(refl::trait::is_reflectable_v<PAIN::UIText>);
