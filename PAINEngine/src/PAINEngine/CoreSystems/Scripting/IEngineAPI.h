@@ -140,6 +140,7 @@ namespace PAIN {
         /*                                Particles                                    */
         /* =========================================================================== */
         virtual void SpawnParticles(int entityId, int count, bool ignoreRotation = false) = 0;
+        virtual void SpawnParticlesWithOffset(int entityId, int count, float offsetX, float offsetY, float offsetZ, bool ignoreRotation = false) = 0;
         virtual void ParticleSystem_Play(int entityId) = 0;
         virtual void ParticleSystem_Stop(int entityId) = 0;
         virtual void ParticleSystem_Restart(int entityId) = 0;

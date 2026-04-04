@@ -121,6 +121,41 @@ local S = nil
 
 local maxGroundCheckDist = 0.1
 local jumpCooldown = 0.0
+local FOOT_PARTICLE_OFFSET_Y = 0.03
+local FOOT_PARTICLE_OFFSET_Z = -0.18
+local FOOT_PARTICLE_JITTER_X = 0.14
+local FOOT_PARTICLE_JITTER_Y = 0.05
+local FOOT_PARTICLE_JITTER_Z = 0.1
+local FOOT_PARTICLE_BURSTS = 3
+local WALK_PARTICLE_COUNT = 6
+local WALK_LOOP_PARTICLE_COUNT = 4
+local JUMP_PARTICLE_COUNT = 8
+
+local function randomRange(minVal, maxVal)
+    return minVal + (maxVal - minVal) * math.random()
+end
+
+local function emitFootPebbles(id, totalCount)
+    local burstCount = math.min(FOOT_PARTICLE_BURSTS, totalCount)
+    if burstCount <= 0 then return end
+
+    local baseCount = math.floor(totalCount / burstCount)
+    local remainder = totalCount % burstCount
+
+    for i = 1, burstCount do
+        local burstParticles = baseCount
+        if i <= remainder then
+            burstParticles = burstParticles + 1
+        end
+
+        if burstParticles > 0 then
+            local offsetX = randomRange(-FOOT_PARTICLE_JITTER_X, FOOT_PARTICLE_JITTER_X)
+            local offsetY = FOOT_PARTICLE_OFFSET_Y + randomRange(0.0, FOOT_PARTICLE_JITTER_Y)
+            local offsetZ = FOOT_PARTICLE_OFFSET_Z + randomRange(-FOOT_PARTICLE_JITTER_Z, FOOT_PARTICLE_JITTER_Z)
+            spawnParticlesAtOffset(id, burstParticles, offsetX, offsetY, offsetZ)
+        end
+    end
+end
 
 -- Player SFX file paths
 local SFX_PLAYER_HOPS = {
@@ -327,17 +362,17 @@ registerUpdate(function(dt)
         if not wasMoving then
             
             audioPlayRandomSFXFromEntity(SFX_PLAYER_HOPS, id, VOL_PLAYER_HOP)
-            particleSystemPlay(id)
+            emitFootPebbles(id, WALK_PARTICLE_COUNT)
             lastAnimTime = 0.0
         
-        -- LOOP: play hop sound at animation loop point
+        -- LOOP: play hop sound at animation cycle loop point
         elseif Animation and Animation.GetTime then
             local t = Animation.GetTime(id)
             
-            -- Play audio at the start of the walk cycle (skip if airborne or during jump cooldown)
+            -- Play audio + burst debris at the start of each walk cycle
             if t < lastAnimTime and t < 0.2 and isGrounded and jumpCooldown <= 0 then
                 audioPlayRandomSFXFromEntity(SFX_PLAYER_HOPS, id, VOL_PLAYER_HOP)
-                particleSystemPlay(id)
+                emitFootPebbles(id, WALK_LOOP_PARTICLE_COUNT)
             end
             
             lastAnimTime = t
@@ -366,7 +401,7 @@ registerUpdate(function(dt)
                 PlayAnim(id, ANIM_JUMP, 0.1, false)
                 Animation.SetSpeed(id, 2)
                 Animation.SetLoop(id, false)
-                particleSystemPlay(id)
+                emitFootPebbles(id, JUMP_PARTICLE_COUNT)
             else
                 -- Count down landing snap, then do nothing — idleTimer takes over
                 if landingTimer > 0 then
@@ -459,7 +494,7 @@ registerUpdate(function(dt)
 
         -- Play random hop sound for jump
         audioPlayRandomSFXFromEntity(SFX_PLAYER_HOPS, id, VOL_PLAYER_HOP)
-        particleSystemPlay(id)
+        emitFootPebbles(id, JUMP_PARTICLE_COUNT)
 
         -- Prevent walk-cycle hop from double-playing on landing
         jumpCooldown = 0.35

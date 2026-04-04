@@ -207,10 +207,6 @@ namespace PAIN {
         
         // Update the particle system
         void Update(float deltaTime, const glm::vec3& emitterPosition, const glm::quat& emitterRotation) {
-            if (m_Config.state != ParticleSystemState::Playing) {
-                return;
-            }
-
             if (!m_HasPreviousEmitterPosition) {
                 m_PreviousEmitterPosition = emitterPosition;
                 m_PreviousEmitterRotation = emitterRotation;
@@ -236,25 +232,28 @@ namespace PAIN {
             }
             m_PreviousEmitterPosition = emitterPosition;
             m_PreviousEmitterRotation = emitterRotation;
-            
-            // Check play duration
-            m_Config.currentPlayTime += deltaTime;
-            if (m_Config.playDuration > 0.0f && 
-                m_Config.currentPlayTime >= m_Config.playDuration) {
-                if (m_Config.looping) {
-                    Restart();
-                } else {
-                    Stop();
-                    return;
+
+            if (m_Config.state == ParticleSystemState::Playing) {
+                // Check play duration
+                m_Config.currentPlayTime += deltaTime;
+                if (m_Config.playDuration > 0.0f &&
+                    m_Config.currentPlayTime >= m_Config.playDuration) {
+                    if (m_Config.looping) {
+                        Restart();
+                    } else {
+                        m_Config.state = ParticleSystemState::Stopped;
+                        m_Config.currentPlayTime = 0.0f;
+                        m_EmissionAccumulator = 0.0f;
+                    }
+                }
+
+                if (m_Config.state == ParticleSystemState::Playing) {
+                    Emit(deltaTime, emitterPosition, emitterRotation);
                 }
             }
-            
-            // Emit new particles
-            Emit(deltaTime, emitterPosition, emitterRotation);
-            
-            // Update existing particles
+
+            // Burst-emitted particles must continue aging and simulating even while the system is stopped.
             UpdateParticles(deltaTime);
-            
             m_Config.activeParticleCount = m_Pool.GetAliveCount();
         }
         

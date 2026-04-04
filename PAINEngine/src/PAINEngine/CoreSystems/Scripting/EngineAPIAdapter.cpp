@@ -785,16 +785,48 @@ namespace PAIN {
         auto particleSystem = ecs_.getSystem<PAIN::ParticleSystem::System>();
         if (!particleSystem) return;
 
+        auto& registry = ecs_.getRegistry();
+        auto view = registry.view<ParticleSystemComponent, LocalTransform>();
+        if (!view.contains(enttEntity)) return;
+
         auto* psInstance = particleSystem->GetParticleSystem(enttEntity);
-        if (!psInstance) return;
+        if (!psInstance) {
+            auto& comp = view.get<ParticleSystemComponent>(enttEntity);
+            particleSystem->InitializeParticleSystem(enttEntity, comp);
+            psInstance = particleSystem->GetParticleSystem(enttEntity);
+            if (!psInstance) return;
+        }
+
+        auto& transform = view.get<LocalTransform>(enttEntity);
+        glm::vec3 emitterPosition = transform.position;
+        glm::quat emitterRotation = ignoreRotation ? glm::quat(1.0f, 0.0f, 0.0f, 0.0f) : transform.rotation;
+
+        psInstance->EmitBurst(count, emitterPosition, emitterRotation);
+    }
+
+    void EngineAPIAdapter::SpawnParticlesWithOffset(int entityId, int count, float offsetX, float offsetY, float offsetZ, bool ignoreRotation) {
+        auto enttEntity = static_cast<entt::entity>(entityId);
+        if (!ecs_.getEntityComponent<LocalTransform>(enttEntity)) return;
+
+        auto particleSystem = ecs_.getSystem<PAIN::ParticleSystem::System>();
+        if (!particleSystem) return;
 
         auto& registry = ecs_.getRegistry();
         auto view = registry.view<ParticleSystemComponent, LocalTransform>();
         if (!view.contains(enttEntity)) return;
 
+        auto* psInstance = particleSystem->GetParticleSystem(enttEntity);
+        if (!psInstance) {
+            auto& comp = view.get<ParticleSystemComponent>(enttEntity);
+            particleSystem->InitializeParticleSystem(enttEntity, comp);
+            psInstance = particleSystem->GetParticleSystem(enttEntity);
+            if (!psInstance) return;
+        }
+
         auto& transform = view.get<LocalTransform>(enttEntity);
-        glm::vec3 emitterPosition = transform.position;
         glm::quat emitterRotation = ignoreRotation ? glm::quat(1.0f, 0.0f, 0.0f, 0.0f) : transform.rotation;
+        glm::vec3 localOffset(offsetX, offsetY, offsetZ);
+        glm::vec3 emitterPosition = transform.position + (ignoreRotation ? localOffset : (emitterRotation * localOffset));
 
         psInstance->EmitBurst(count, emitterPosition, emitterRotation);
     }
