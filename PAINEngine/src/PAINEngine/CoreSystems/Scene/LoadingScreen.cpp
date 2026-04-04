@@ -21,6 +21,7 @@ namespace PAIN {
             m_shader = compileShader();
             m_progressBarShader = compileProgressBarShader();
             m_overlayShader = compileOverlayShader();
+            m_proceduralShader = compileProceduralShader();
 
             // Initialize animation timing
             m_animationTime = 0.0f;
@@ -88,6 +89,11 @@ namespace PAIN {
                 glDeleteProgram(m_overlayShader);
                 m_overlayShader = 0;
             }
+
+            if (m_proceduralShader) {
+                glDeleteProgram(m_proceduralShader);
+                m_proceduralShader = 0;
+            }
         }
 
         void LoadingScreen::render() {
@@ -122,8 +128,10 @@ namespace PAIN {
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             
             // Render in Z-order (back to front):
-            // Layer 1: Background texture (if set)
-            if (showBg) renderBackgroundTexture();
+            // Layer 1: Background
+            static bool useProceduralBG = true;
+            if (useProceduralBG) renderProceduralBackground();
+            else if (showBg) renderBackgroundTexture();
 
             // Layer 2: Spritesheet overlay
             renderSpritesheetLayer();
@@ -451,6 +459,78 @@ namespace PAIN {
             }
             
             return shader->GetRendererID();
+        }
+
+        unsigned int LoadingScreen::compileProceduralShader() {
+            unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+            glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
+            glCompileShader(vertexShader);
+
+            int success;
+            char infoLog[512];
+            glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+            if (!success) {
+                glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
+                PN_CORE_ERROR("[LoadingScreen] Procedural vertex shader compilation failed: {}", infoLog);
+            }
+
+            unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+            glShaderSource(fragmentShader, 1, &proceduralFragmentShaderSource, nullptr);
+            glCompileShader(fragmentShader);
+
+            glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+            if (!success) {
+                glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
+                PN_CORE_ERROR("[LoadingScreen] Procedural fragment shader compilation failed: {}", infoLog);
+            }
+
+            unsigned int shaderProgram = glCreateProgram();
+            glAttachShader(shaderProgram, vertexShader);
+            glAttachShader(shaderProgram, fragmentShader);
+            glLinkProgram(shaderProgram);
+
+            glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+            if (!success) {
+                glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
+                PN_CORE_ERROR("[LoadingScreen] Procedural shader program linking failed: {}", infoLog);
+            }
+
+            glDeleteShader(vertexShader);
+            glDeleteShader(fragmentShader);
+
+            return shaderProgram;
+        }
+
+        void LoadingScreen::renderProceduralBackground() {
+            if (!m_proceduralShader || !m_vao) return;
+
+            auto serv = services.lock();
+            if (!serv) return;
+            auto win = serv->get<Window::Window>();
+            if (!win) return;
+            auto fb = win->getFrameBuffer();
+
+            // Reset VBO to fullscreen quad in case progress bar overwrote it
+            float quadVertices[] = {
+                -1.0f,  1.0f,  0.0f, 1.0f,
+                -1.0f, -1.0f,  0.0f, 0.0f,
+                 1.0f, -1.0f,  1.0f, 0.0f,
+                -1.0f,  1.0f,  0.0f, 1.0f,
+                 1.0f, -1.0f,  1.0f, 0.0f,
+                 1.0f,  1.0f,  1.0f, 1.0f
+            };
+            glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(quadVertices), quadVertices);
+
+            glUseProgram(m_proceduralShader);
+            glUniform1f(glGetUniformLocation(m_proceduralShader, "iTime"), m_animationTime);
+            glUniform2f(glGetUniformLocation(m_proceduralShader, "iResolution"),
+                        static_cast<float>(fb.x), static_cast<float>(fb.y));
+
+            glBindVertexArray(m_vao);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            glBindVertexArray(0);
+            glUseProgram(0);
         }
 
         void LoadingScreen::setBackgroundTexture(const Assets::GUID& textureGUID) {
