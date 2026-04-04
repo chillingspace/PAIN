@@ -1163,6 +1163,10 @@
                                 1.0
                             ],
                             "outline_thickness": 0.0,
+                            "position": [
+                                1230.0,
+                                300.0
+                            ],
                             "shadow_color": [
                                 0.0,
                                 0.0,
@@ -1172,10 +1176,6 @@
                             "shadow_offset": [
                                 0.0,
                                 0.0
-                            ],
-                            "text_pos": [
-                                1232.0,
-                                600.0
                             ],
                             "word_wrap": false,
                             "wrap_width": 0.0
@@ -1299,6 +1299,10 @@
                                 1.0
                             ],
                             "outline_thickness": 0.0,
+                            "position": [
+                                1230.0,
+                                375.0
+                            ],
                             "shadow_color": [
                                 0.0,
                                 0.0,
@@ -1308,10 +1312,6 @@
                             "shadow_offset": [
                                 0.0,
                                 0.0
-                            ],
-                            "text_pos": [
-                                1232.0,
-                                525.0
                             ],
                             "word_wrap": false,
                             "wrap_width": 0.0
@@ -1435,6 +1435,10 @@
                                 1.0
                             ],
                             "outline_thickness": 0.0,
+                            "position": [
+                                1230.0,
+                                455.0
+                            ],
                             "shadow_color": [
                                 0.0,
                                 0.0,
@@ -1444,10 +1448,6 @@
                             "shadow_offset": [
                                 0.0,
                                 0.0
-                            ],
-                            "text_pos": [
-                                1232.0,
-                                445.0
                             ],
                             "word_wrap": false,
                             "wrap_width": 0.0
@@ -1571,6 +1571,10 @@
                                 1.0
                             ],
                             "outline_thickness": 0.0,
+                            "position": [
+                                1230.0,
+                                530.0
+                            ],
                             "shadow_color": [
                                 0.0,
                                 0.0,
@@ -1580,10 +1584,6 @@
                             "shadow_offset": [
                                 0.0,
                                 0.0
-                            ],
-                            "text_pos": [
-                                1232.0,
-                                370.0
                             ],
                             "word_wrap": false,
                             "wrap_width": 0.0
@@ -1707,6 +1707,10 @@
                                 1.0
                             ],
                             "outline_thickness": 0.0,
+                            "position": [
+                                1230.0,
+                                605.0
+                            ],
                             "shadow_color": [
                                 0.0,
                                 0.0,
@@ -1716,10 +1720,6 @@
                             "shadow_offset": [
                                 0.0,
                                 0.0
-                            ],
-                            "text_pos": [
-                                1232.0,
-                                294.0
                             ],
                             "word_wrap": false,
                             "wrap_width": 0.0
@@ -1831,7 +1831,7 @@
                                 1.0,
                                 1.0
                             ],
-                            "display_text": "H",
+                            "display_text": "E",
                             "font_guid": "de491929-bcab-6949-9a77-a1d03ba57e1c",
                             "font_size": 1.0,
                             "line_height": 1.2000000476837158,
@@ -1843,6 +1843,10 @@
                                 1.0
                             ],
                             "outline_thickness": 0.0,
+                            "position": [
+                                1230.0,
+                                685.0
+                            ],
                             "shadow_color": [
                                 0.0,
                                 0.0,
@@ -1852,10 +1856,6 @@
                             "shadow_offset": [
                                 0.0,
                                 0.0
-                            ],
-                            "text_pos": [
-                                1232.0,
-                                215.0
                             ],
                             "word_wrap": false,
                             "wrap_width": 0.0
@@ -11569,6 +11569,10 @@
                                         1.0
                                     ],
                                     "outline_thickness": 0.0,
+                                    "position": [
+                                        0.0,
+                                        0.0
+                                    ],
                                     "shadow_color": [
                                         0.0,
                                         0.0,
@@ -11576,10 +11580,6 @@
                                         0.5
                                     ],
                                     "shadow_offset": [
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "text_pos": [
                                         0.0,
                                         0.0
                                     ],
@@ -11638,6 +11638,10 @@
                                 1.0
                             ],
                             "outline_thickness": 0.0,
+                            "position": [
+                                0.0,
+                                0.0
+                            ],
                             "shadow_color": [
                                 0.0,
                                 0.0,
@@ -11645,10 +11649,6 @@
                                 0.5
                             ],
                             "shadow_offset": [
-                                0.0,
-                                0.0
-                            ],
-                            "text_pos": [
                                 0.0,
                                 0.0
                             ],
@@ -12115,6 +12115,10 @@
                                         1.0
                                     ],
                                     "outline_thickness": 0.0,
+                                    "position": [
+                                        0.0,
+                                        0.0
+                                    ],
                                     "shadow_color": [
                                         0.0,
                                         0.0,
@@ -12122,10 +12126,6 @@
                                         0.5
                                     ],
                                     "shadow_offset": [
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "text_pos": [
                                         0.0,
                                         0.0
                                     ],
@@ -12189,6 +12189,10 @@
                                 1.0
                             ],
                             "outline_thickness": 0.0,
+                            "position": [
+                                0.0,
+                                0.0
+                            ],
                             "shadow_color": [
                                 0.0,
                                 0.0,
@@ -12196,10 +12200,6 @@
                                 0.5
                             ],
                             "shadow_offset": [
-                                0.0,
-                                0.0
-                            ],
-                            "text_pos": [
                                 0.0,
                                 0.0
                             ],

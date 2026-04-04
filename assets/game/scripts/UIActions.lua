@@ -610,8 +610,9 @@ local handlers = {
         if isMobile then
            hideCursor(true)
         end
+
         --SetGamePaused(not IsGamePaused()) 
-        _G_root.TogglePause()
+        -- _G_root.TogglePause()
         
         setLayerEnabled(1, false)
         setLayerEnabled(2, true)
