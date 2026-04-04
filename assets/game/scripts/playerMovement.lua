@@ -123,13 +123,13 @@ local maxGroundCheckDist = 0.1
 local jumpCooldown = 0.0
 local FOOT_PARTICLE_OFFSET_Y = 0.03
 local FOOT_PARTICLE_OFFSET_Z = -0.18
-local FOOT_PARTICLE_JITTER_X = 0.14
-local FOOT_PARTICLE_JITTER_Y = 0.05
-local FOOT_PARTICLE_JITTER_Z = 0.1
-local FOOT_PARTICLE_BURSTS = 3
-local WALK_PARTICLE_COUNT = 6
-local WALK_LOOP_PARTICLE_COUNT = 4
-local JUMP_PARTICLE_COUNT = 8
+local FOOT_PARTICLE_JITTER_X = 0.11
+local FOOT_PARTICLE_JITTER_Y = 0.04
+local FOOT_PARTICLE_JITTER_Z = 0.08
+local FOOT_PARTICLE_BURSTS = 2
+local WALK_PARTICLE_COUNT = 5
+local WALK_LOOP_PARTICLE_COUNT = 3
+local JUMP_PARTICLE_COUNT = 6
 
 local function randomRange(minVal, maxVal)
     return minVal + (maxVal - minVal) * math.random()

@@ -608,6 +608,7 @@ local function pickupLetter(letter)
     if audioPlaySFX then audioPlaySFX(SFX_COLLECT, VOL_COLLECT) end
 
     disablePhysics(letter)
+    if particleSystemStop then particleSystemStop(letter) end
     setVisibility(letter, false) 
     SetModel(S.player, "Frog_Anim_Gear.mesh")
     
@@ -1075,6 +1076,7 @@ function S.onCaught(player)
         setPosition(S.carriedLetter, deathPos.x, deathPos.y, deathPos.z)
         setVisibility(S.carriedLetter, true)
         enablePhysics(S.carriedLetter)
+        if particleSystemPlay then particleSystemPlay(S.carriedLetter) end
         if removeTag then removeTag(S.carriedLetter, "letter_carried") end
         if addTag then addTag(S.carriedLetter, "letter_collectible") end
         SetModel(S.player, "Frog_Anim.mesh")

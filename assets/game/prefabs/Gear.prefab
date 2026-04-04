@@ -67,26 +67,54 @@
                     "name": "Gear"
                 },
                 "ParticleSystem": {
-                    "angularVelocity": 0.0,
-                    "angularVelocityVariance": 0.0,
-                    "blendMode": 0,
-                    "colorOverLifetime": [],
+                    "angularVelocity": 65.0,
+                    "angularVelocityVariance": 110.0,
+                    "blendMode": 1,
+                    "colorOverLifetime": [
+                        {
+                            "color": [
+                                1.0,
+                                0.9700000286102295,
+                                0.7699999809265137,
+                                1.0
+                            ],
+                            "time": 0.0
+                        },
+                        {
+                            "color": [
+                                1.0,
+                                0.8600000143051147,
+                                0.4699999988079071,
+                                0.6499999761581421
+                            ],
+                            "time": 0.550000011920929
+                        },
+                        {
+                            "color": [
+                                1.0,
+                                0.7400000095367432,
+                                0.3400000035762787,
+                                0.0
+                            ],
+                            "time": 1.0
+                        }
+                    ],
                     "directionMode": 0,
                     "directionSpace": 0,
-                    "drag": 0.0,
+                    "drag": 0.44999998807907104,
                     "emissionDirection": [
                         0.0,
-                        0.0,
+                        1.0,
                         0.0
                     ],
-                    "emissionRate": 3.0,
-                    "emissionShape": 1,
-                    "emissionSpread": 2.0,
-                    "gravityMultiplier": 0.0,
-                    "lifetime": 2.0,
-                    "lifetimeVariance": 0.0,
+                    "emissionRate": 14.0,
+                    "emissionShape": 3,
+                    "emissionSpread": 24.0,
+                    "gravityMultiplier": -0.18000000715255737,
+                    "lifetime": 1.25,
+                    "lifetimeVariance": 0.30000001192092896,
                     "looping": true,
-                    "maxParticles": 10,
+                    "maxParticles": 32,
                     "particleTexture": "b6fdf19d-f8ab-0d4b-ae8e-22626c9fb75f",
                     "playDuration": 0.0,
                     "playOnAwake": true,
@@ -98,40 +126,53 @@
                             0.5
                         ],
                         "circleArc": 360.0,
-                        "circleRadius": 0.5,
+                        "circleRadius": 0.2199999988079071,
                         "coneAngle": 25.0,
                         "sphereRadius": 0.15000000596046448,
                         "volumeEmission": true
                     },
                     "simulationSpace": 0,
-                    "sizeOverLifetime": [],
+                    "sizeOverLifetime": [
+                        {
+                            "time": 0.0,
+                            "value": 0.75
+                        },
+                        {
+                            "time": 0.25,
+                            "value": 1.149999976158142
+                        },
+                        {
+                            "time": 1.0,
+                            "value": 0.0
+                        }
+                    ],
                     "sizeOverLifetimeMultiplier": 1.0,
-                    "softEdge": 0.20000000298023224,
-                    "sortMode": 0,
-                    "speed": 0.699999988079071,
-                    "speedVariance": 0.0,
+                    "softEdge": 0.4000000059604645,
+                    "sortMode": 1,
+                    "speed": 0.6499999761581421,
+                    "speedVariance": 0.25,
                     "startColor": [
-                        0.9882352948188782,
                         1.0,
-                        0.8392156958580017,
+                        0.949999988079071,
+                        0.6700000166893005,
                         1.0
                     ],
                     "startColorVariance": [
-                        0.0,
-                        0.0,
-                        0.0,
-                        0.0
+                        0.05999999865889549,
+                        0.05000000074505806,
+                        0.10000000149011612,
+                        0.03999999910593033
                     ],
                     "startRotation": 0.0,
-                    "startRotationVariance": 0.0,
-                    "startSize": 0.029999999329447746,
-                    "startSizeVariance": 0.0,
+                    "startRotationVariance": 60.0,
+                    "startSize": 0.06499999761581421,
+                    "startSizeVariance": 0.02500000037252903,
                     "velocityOverLifetime": [
                         0.0,
-                        0.0,
+                        0.07000000029802322,
                         0.0
                     ],
-                    "velocityOverLifetimeEnabled": false
+                    "velocityOverLifetimeEnabled": true
                 },
                 "RigidBody3D": {
                     "angular_velocity": [
