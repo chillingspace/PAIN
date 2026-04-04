@@ -1414,6 +1414,9 @@ namespace PAIN {
         lua_.set_function("spawnParticlesAtOffset", [this](int id, int count, float ox, float oy, float oz) {
             if (api_) api_->SpawnParticlesWithOffset(id, count, ox, oy, oz, false);
         });
+        lua_.set_function("spawnParticlesTowardPoint", [this](int id, int count, float ox, float oy, float oz, float tx, float ty, float tz) {
+            if (api_) api_->SpawnParticlesTowardPoint(id, count, ox, oy, oz, tx, ty, tz);
+        });
         lua_.set_function("spawnParticlesAtFeet", [this](int id, int count, float footOffsetY) {
             if (api_) api_->SpawnParticlesWithOffset(id, count, 0.0f, footOffsetY, 0.0f, false);
         });

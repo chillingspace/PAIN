@@ -59,8 +59,13 @@ _G.StartCameraPan = function(waypointNames, options)
 
     local opts = options or {}
     local waypoints = {}
-    for _, name in ipairs(waypointNames) do
-        local wp = resolveWaypoint(name)
+    for _, input in ipairs(waypointNames) do
+        local wp = nil
+        if type(input) == "string" then
+            wp = resolveWaypoint(input)
+        elseif type(input) == "table" and input.px and input.py and input.pz and input.lx and input.ly and input.lz then
+            wp = input
+        end
         if wp then table.insert(waypoints, wp) end
     end
 

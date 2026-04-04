@@ -831,6 +831,31 @@ namespace PAIN {
         psInstance->EmitBurst(count, emitterPosition, emitterRotation);
     }
 
+    void EngineAPIAdapter::SpawnParticlesTowardPoint(int entityId, int count, float offsetX, float offsetY, float offsetZ, float targetX, float targetY, float targetZ) {
+        auto enttEntity = static_cast<entt::entity>(entityId);
+        if (!ecs_.getEntityComponent<LocalTransform>(enttEntity)) return;
+
+        auto particleSystem = ecs_.getSystem<PAIN::ParticleSystem::System>();
+        if (!particleSystem) return;
+
+        auto& registry = ecs_.getRegistry();
+        auto view = registry.view<ParticleSystemComponent, LocalTransform>();
+        if (!view.contains(enttEntity)) return;
+
+        auto* psInstance = particleSystem->GetParticleSystem(enttEntity);
+        if (!psInstance) {
+            auto& comp = view.get<ParticleSystemComponent>(enttEntity);
+            particleSystem->InitializeParticleSystem(enttEntity, comp);
+            psInstance = particleSystem->GetParticleSystem(enttEntity);
+            if (!psInstance) return;
+        }
+
+        auto& transform = view.get<LocalTransform>(enttEntity);
+        glm::vec3 emitterPosition = transform.position + (transform.rotation * glm::vec3(offsetX, offsetY, offsetZ));
+        glm::vec3 targetPosition(targetX, targetY, targetZ);
+        psInstance->EmitBurstTowardPoint(count, emitterPosition, targetPosition);
+    }
+
     void EngineAPIAdapter::ParticleSystem_Play(int entityId) {
         auto enttEntity = static_cast<entt::entity>(entityId);
         auto& registry = ecs_.getRegistry();

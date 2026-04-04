@@ -1586,6 +1586,73 @@
                         "Name": {
                             "name": "robot5"
                         },
+                        "ParticleSystem": {
+                            "angularVelocity": 320.0,
+                            "angularVelocityVariance": 280.0,
+                            "blendMode": 1,
+                            "colorOverLifetime": [
+                                {
+                                    "color": [1.0, 1.0, 0.949999988079071, 1.0],
+                                    "time": 0.0
+                                },
+                                {
+                                    "color": [1.0, 0.8600000143051147, 0.4399999976158142, 0.75],
+                                    "time": 0.3499999940395355
+                                },
+                                {
+                                    "color": [1.0, 0.5, 0.14000000059604645, 0.0],
+                                    "time": 1.0
+                                }
+                            ],
+                            "directionMode": 0,
+                            "directionSpace": 0,
+                            "drag": 0.6000000238418579,
+                            "emissionDirection": [0.0, 0.0, 1.0],
+                            "emissionRate": 110.0,
+                            "emissionShape": 0,
+                            "emissionSpread": 30.0,
+                            "gravityMultiplier": 3.0999999046325684,
+                            "lifetime": 0.949999988079071,
+                            "lifetimeVariance": 0.18000000715255737,
+                            "looping": true,
+                            "maxParticles": 140,
+                            "particleTexture": "b6fdf19d-f8ab-0d4b-ae8e-22626c9fb75f",
+                            "playDuration": 0.0,
+                            "playOnAwake": false,
+                            "renderShape": 1,
+                            "shapeParams": {
+                                "boxHalfExtents": [0.5, 0.5, 0.5],
+                                "circleArc": 360.0,
+                                "circleRadius": 0.5,
+                                "coneAngle": 25.0,
+                                "sphereRadius": 0.0,
+                                "volumeEmission": false
+                            },
+                            "simulationSpace": 0,
+                            "sizeOverLifetime": [
+                                {
+                                    "time": 0.0,
+                                    "value": 1.0
+                                },
+                                {
+                                    "time": 1.0,
+                                    "value": 0.0
+                                }
+                            ],
+                            "sizeOverLifetimeMultiplier": 1.0,
+                            "softEdge": 0.0,
+                            "sortMode": 1,
+                            "speed": 7.800000190734863,
+                            "speedVariance": 3.0,
+                            "startColor": [1.0, 0.9800000190734863, 0.8600000143051147, 1.0],
+                            "startColorVariance": [0.07999999821186066, 0.18000000715255737, 0.30000001192092896, 0.0],
+                            "startRotation": 0.0,
+                            "startRotationVariance": 100.0,
+                            "startSize": 0.09000000357627869,
+                            "startSizeVariance": 0.03500000014901161,
+                            "velocityOverLifetime": [0.0, 0.0, 0.0],
+                            "velocityOverLifetimeEnabled": false
+                        },
                         "Tag": {
                             "tags": [
                                 "letter_collection"

@@ -54,6 +54,12 @@ _G.PlayerState = _G.PlayerState or {
         y = 0,
         z = 0
     },
+    deliverySequenceActive = false,
+    deliveryObjective = nil,
+    deliverySparkTimer = 0.0,
+    deliverySparkElapsed = 0.0,
+    deliverySparkConfig = nil,
+    deliveryCameraTarget = nil,
 
     hidden = false, -- is player hiding
     hiddenIn = nil, -- which spot
@@ -304,6 +310,12 @@ function S.init(player)
         S.pendingRespawn = nil
         S.gameEnded = false
         S.gameWon = false
+        S.deliverySequenceActive = false
+        S.deliveryObjective = nil
+        S.deliverySparkTimer = 0.0
+        S.deliverySparkElapsed = 0.0
+        S.deliverySparkConfig = nil
+        S.deliveryCameraTarget = nil
         S.spawnGraceTime = 5.0
         S.playerBaseScale = nil -- force re-cache
         S.letterBaseScale = nil
@@ -570,19 +582,96 @@ end
 
 
 -------------------------------------------------
--- Helper: Deliver carried letter
+-- Helper: Delivery sequence + completion
 -------------------------------------------------
-local function deliverLetter()
-    if deleteEntity then
-        deleteEntity(S.carriedLetter)
-    end
-    if removeTag then
-        removeTag(S.carriedLetter, "letter_carried")
+local function getDeliverySequenceConfig()
+    local scenePath = currentScene() or CURRENT_SCENE_PATH or ""
+    if string.find(scenePath, "Level 2.scn", 1, true) then
+        return {
+            panDuration = 0.65,
+            holdDuration = 1.7,
+            returnDuration = 0.75,
+            camDistance = 3.9,
+            camHeight = 2.0,
+            lookHeight = 1.2,
+            sparkInterval = 0.07,
+            sparkBurstCount = 16,
+            sparkOffsetY = 0.95,
+        }
+    elseif string.find(scenePath, "Level1.scn", 1, true) then
+        return {
+            panDuration = 0.55,
+            holdDuration = 1.45,
+            returnDuration = 0.65,
+            camDistance = 3.7,
+            camHeight = 1.85,
+            lookHeight = 1.1,
+            sparkInterval = 0.09,
+            sparkBurstCount = 11,
+            sparkOffsetY = 0.85,
+        }
     end
 
-    SetModel(S.player, "Frog_Anim.mesh")  
+    return {
+        panDuration = 0.45,
+        holdDuration = 1.2,
+        returnDuration = 0.55,
+        camDistance = 3.4,
+        camHeight = 1.65,
+        lookHeight = 1.0,
+        sparkInterval = 0.11,
+        sparkBurstCount = 8,
+        sparkOffsetY = 0.75,
+    }
+end
+
+local function emitDeliverySparks()
+    local deliveryObjective = S.deliveryObjective
+    local sparkCfg = S.deliverySparkConfig
+    local cameraTarget = S.deliveryCameraTarget
+    if not deliveryObjective or not sparkCfg or not cameraTarget or not spawnParticlesTowardPoint then
+        return
+    end
+
+    spawnParticlesTowardPoint(
+        deliveryObjective,
+        sparkCfg.sparkBurstCount,
+        0.0,
+        sparkCfg.sparkOffsetY,
+        0.0,
+        cameraTarget.x,
+        cameraTarget.y,
+        cameraTarget.z
+    )
+end
+
+local function completeDeliverySequence()
+    local deliveredLetter = S.carriedLetter
+    local deliveryObjective = S.deliveryObjective
+
+    if deliveryObjective and particleSystemStop then
+        particleSystemStop(deliveryObjective)
+    end
+
+    S.deliverySparkTimer = 0.0
+    S.deliverySparkElapsed = 0.0
+    S.deliverySparkConfig = nil
+    S.deliveryCameraTarget = nil
+
+    if deliveredLetter then
+        if deleteEntity then
+            deleteEntity(deliveredLetter)
+        end
+        if removeTag then
+            removeTag(deliveredLetter, "letter_carried")
+        end
+    end
+
+    SetModel(S.player, "Frog_Anim.mesh")
 
     S.carriedLetter = nil
+    S.deliveryObjective = nil
+    S.deliverySequenceActive = false
     S.lettersDelivered = (S.lettersDelivered or 0) + 1
 
     if audioPlaySFX then audioPlaySFX(SFX_DELIVER, VOL_DELIVER) end
@@ -592,6 +681,64 @@ local function deliverLetter()
     if S.lettersDelivered >= (S.lettersToWin or 3) then
         log("[PlayerState] All letters delivered! YOU WIN")
         triggerGameWin()
+    end
+end
+
+local function beginDeliverySequence(deliveryPoint, px, py, pz)
+    if S.deliverySequenceActive or not S.carriedLetter then
+        return
+    end
+
+    S.deliverySequenceActive = true
+    S.deliveryObjective = deliveryPoint
+    collectPressed = false
+    hidePressed = false
+    resetInputState()
+
+    local rx, ry, rz = getPosition(deliveryPoint)
+    local dx = px - rx
+    local dz = pz - rz
+    local len = math.sqrt(dx * dx + dz * dz)
+    if len < 0.0001 then
+        dx, dz, len = 0.0, 1.0, 1.0
+    end
+    dx = dx / len
+    dz = dz / len
+
+    local cfg = getDeliverySequenceConfig()
+    local camX = rx + dx * cfg.camDistance
+    local camY = ry + cfg.camHeight
+    local camZ = rz + dz * cfg.camDistance
+    local lookX = rx
+    local lookY = ry + cfg.lookHeight
+    local lookZ = rz
+
+    S.deliverySparkTimer = 0.0
+    S.deliverySparkElapsed = 0.0
+    S.deliverySparkConfig = cfg
+    S.deliveryCameraTarget = { x = camX, y = camY, z = camZ }
+
+    emitDeliverySparks()
+
+    if _G.StartCameraPan then
+        _G.StartCameraPan({
+            {
+                px = camX,
+                py = camY,
+                pz = camZ,
+                lx = lookX,
+                ly = lookY,
+                lz = lookZ,
+            }
+        }, {
+            duration = cfg.panDuration,
+            holdDuration = cfg.holdDuration,
+            returnDuration = cfg.returnDuration,
+            easing = "smoothstep",
+            onComplete = completeDeliverySequence,
+        })
+    else
+        completeDeliverySequence()
     end
 end
 
@@ -769,6 +916,10 @@ local function handleLetterLogic(px, py, pz)
     -- No letter interaction while inside a pipe
     if S.inPipe then return end
 
+    if S.deliverySequenceActive then
+        return
+    end
+
     -- If carrying a letter
     if S.carriedLetter then
         -- Keep letter on player's back
@@ -783,7 +934,7 @@ local function handleLetterLogic(px, py, pz)
         local deliveryPoint = findNearestByTag("letter_collection", px, py, pz, S.deliveryRadius)
         if deliveryPoint then
             collectPressed = false
-            deliverLetter()
+            beginDeliverySequence(deliveryPoint, px, py, pz)
         end
         return  -- Don't pick up new letters while carrying
     end
@@ -922,6 +1073,15 @@ function S.update(dt)
         return
     end
 
+    if S.deliverySequenceActive and S.deliverySparkConfig and S.deliveryObjective and spawnParticlesTowardPoint then
+        S.deliverySparkTimer = (S.deliverySparkTimer or 0.0) - dt
+        S.deliverySparkElapsed = (S.deliverySparkElapsed or 0.0) + dt
+        while S.deliverySparkTimer <= 0.0 and S.deliverySparkElapsed <= ((S.deliverySparkConfig.holdDuration or 0.0) + (S.deliverySparkConfig.panDuration or 0.0)) do
+            emitDeliverySparks()
+            S.deliverySparkTimer = S.deliverySparkTimer + (S.deliverySparkConfig.sparkInterval or 0.1)
+        end
+    end
+
     -------------------------------------------------
     -- 5. Game ended - wait for restart only
     -------------------------------------------------
@@ -1003,6 +1163,10 @@ end
 function S.canBeCaught()
     -- cannot be caught while hiding or inside a pipe
     if S.hidden or S.inPipe then
+        return false
+    end
+
+    if S.deliverySequenceActive or (_G.CameraPan and _G.CameraPan.active) then
         return false
     end
 

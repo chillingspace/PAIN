@@ -156,6 +156,7 @@ namespace PAIN {
         /* =========================================================================== */
         void SpawnParticles(int entityId, int count, bool ignoreRotation) override;
         void SpawnParticlesWithOffset(int entityId, int count, float offsetX, float offsetY, float offsetZ, bool ignoreRotation) override;
+        void SpawnParticlesTowardPoint(int entityId, int count, float offsetX, float offsetY, float offsetZ, float targetX, float targetY, float targetZ) override;
         void ParticleSystem_Play(int entityId) override;
         void ParticleSystem_Stop(int entityId) override;
         void ParticleSystem_Restart(int entityId) override;
