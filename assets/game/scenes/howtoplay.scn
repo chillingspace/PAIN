@@ -3,8 +3,11 @@
         "efff96ab-9011-d248-a0e3-56bb0e76f8e6",
         "6466af7c-6447-2043-b9f5-6fd7dfada5d4",
         "7b6d729f-2477-6e43-a93a-4a9f65732f3d",
+        "1fe7b95c-7093-7f44-8aac-322eae96b634",
         "cc4071a7-9223-6e4e-bab8-da7e8df1b667",
-        "4e937e21-0623-ad45-ad95-e4c416c20b1b"
+        "4e937e21-0623-ad45-ad95-e4c416c20b1b",
+        "6621d58f-1f66-bb4f-8c78-b77404b6296b",
+        "a5dee0ac-d873-6648-bb32-5bea6e1322b6"
     ],
     "camera": {
         "active_game_cam": "Cam",
@@ -264,6 +267,7 @@
                             "name": "right_arrow_button"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.8799999952316284,
                                 0.0
@@ -424,6 +428,7 @@
                             "name": "left_arrow_button"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 -0.8799999952316284,
                                 0.0
@@ -584,6 +589,7 @@
                             "name": "back_button"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 -0.05000000074505806,
                                 -0.800000011920929
@@ -720,11 +726,12 @@
                             ]
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 0.0
                             ],
-                            "texture_guid": "cffcaacf-e530-054e-8840-547d4272f0a4",
+                            "texture_guid": "e6cd3d7b-441b-6942-9f03-765486ba28dc",
                             "texture_scale": [
                                 2.0,
                                 1.0
@@ -822,11 +829,12 @@
                             "name": "instructions2"
                         },
                         "Texture2D": {
+                            "opacity": 1.0,
                             "pos": [
                                 0.0,
                                 0.0
                             ],
-                            "texture_guid": "7de36637-5be8-964c-9b0a-26b3d0c3bd47",
+                            "texture_guid": "ca47a573-6e59-574e-bad3-773698e6524f",
                             "texture_scale": [
                                 2.0,
                                 1.0
@@ -1083,6 +1091,8 @@
                         },
                         "ModelRenderer": {
                             "castShadows": true,
+                            "doubleSidedShadows": false,
+                            "isStatic": false,
                             "materials": [
                                 {
                                     "albedoTextureOverride": "7b6d729f-2477-6e43-a93a-4a9f65732f3d",
@@ -1173,6 +1183,8 @@
                                 },
                                 "ModelRenderer": {
                                     "castShadows": true,
+                                    "doubleSidedShadows": false,
+                                    "isStatic": false,
                                     "materials": [
                                         {
                                             "albedoTextureOverride": "7b6d729f-2477-6e43-a93a-4a9f65732f3d",
@@ -1288,11 +1300,25 @@
         "useNormalMap": true,
         "useRoughnessMetallicMap": true,
         "useWorldLight": true,
+        "worldLightDirection": [
+            -0.5184758305549622,
+            -0.8295613527297974,
+            -0.20739033818244934
+        ],
+        "worldLightFarPlane": 30.0,
         "worldLightIntensity": [
             1.5,
             1.5,
             1.5
-        ]
+        ],
+        "worldLightPosition": [
+            11.781195640563965,
+            19.305204391479492,
+            5.8147759437561035
+        ],
+        "worldLightShadowFollowDistance": 22.5,
+        "worldLightShadowResolution": 1024,
+        "worldLightShadowsEnabled": true
     },
     "layers": [
         {
@@ -1367,6 +1393,8 @@
         "showOverlay": false,
         "showProgressBar": false,
         "showStatusText": true,
+        "spritesheetTextureGUID": "00000000-0000-0000-0000-000000000000",
+        "ssScale": 1.0,
         "statusTextPosition": [
             800.0,
             65.0
@@ -1401,12 +1429,12 @@
         "border_thickness": 2.0,
         "camera_height": 30.0,
         "enabled": false,
-        "icon_danger_path": "",
-        "icon_item_path": "",
-        "icon_objective_path": "",
-        "icon_player_path": "",
+        "icon_danger_guid": "00000000-0000-0000-0000-000000000000",
+        "icon_item_guid": "00000000-0000-0000-0000-000000000000",
+        "icon_objective_guid": "00000000-0000-0000-0000-000000000000",
+        "icon_player_guid": "00000000-0000-0000-0000-000000000000",
         "icon_scale": 1.0,
-        "icon_wall_path": "",
+        "icon_wall_guid": "00000000-0000-0000-0000-000000000000",
         "override_position": false,
         "pos_px": [
             20.0,
@@ -1416,6 +1444,7 @@
         "recommended_position": 3,
         "rotate_with_player": true,
         "route_mode": 0,
+        "shape": 0,
         "show_danger": true,
         "show_items": true,
         "show_legend": false,

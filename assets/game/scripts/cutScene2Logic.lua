@@ -11,7 +11,24 @@ local timer = 0.0
 
 G.Level1SceneName   = G.Level1SceneName  or "game/scenes/Level1.scn"
 
--- ==================== CUTSCENE SFX ====================
+-- ==================== CUTSCENE MASTER AUDIO ====================
+-- Single master audio file plays for the entire cutscene duration (no loop)
+local CS2_MASTER_AUDIO = "game/audio/sfx/cutscenes/cs2 master audio.wav"
+
+if not _G.cs2_sfx_init then
+    _G.cs2_sfx_init = true
+    if audioPlaySFX then
+        local chId = audioPlaySFX(CS2_MASTER_AUDIO, 0.0)
+        if chId and chId >= 0 then
+            _G.SFXChannels = _G.SFXChannels or {}
+            _G.SFXChannels[chId] = true
+        end
+        print("[Cutscene2] Playing master audio: " .. CS2_MASTER_AUDIO)
+    end
+end
+
+-- ==================== OLD PER-FRAME SFX (commented out) ====================
+--[[ OLD PER-FRAME SFX SYSTEM - kept for potential revert
 local SFX_PATH = "game/audio/sfx/cutscenes/"
 local FRAME_SFX = {
     [1] = { SFX_PATH .. "fixing robot.wav" },
@@ -47,12 +64,11 @@ local function playCutsceneSFX(frame)
     end
 end
 
--- Play SFX for the initial frame (frame 1 is already displayed when scene loads)
--- Guard to prevent double-play if script is loaded more than once
 if not _G.cs2_sfx_init then
     _G.cs2_sfx_init = true
     playCutsceneSFX(1)
 end
+--]]
 
 registerUpdate(function(dt)
     -- Check for mouse click
@@ -95,8 +111,8 @@ registerUpdate(function(dt)
             return
         end
         
-        -- Play SFX for the new frame
-        playCutsceneSFX(currentFrame)
+        -- Play SFX for the new frame (OLD per-frame system, commented out)
+        -- playCutsceneSFX(currentFrame)
         
         -- Determine file path based on platform
         local fileName = ""

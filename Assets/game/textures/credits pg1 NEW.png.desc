@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "how to play pg1- pc ver NEW.png",
+    "name": "credits pg1 NEW.png",
     "type": "Texture"
   },
   "build_data": {
-    "hash": 10260355670878545929
+    "hash": 5524743996268333321
   },
   "descriptor_version": 1,
-  "guid": "e6cd3d7b-441b-6942-9f03-765486ba28dc",
+  "guid": "b04a897d-7fb8-3142-914c-9fd583d244f3",
   "import_settings": {
     "android_allow_astc_hdr": false,
     "android_bake_cubemap": false,
@@ -18,6 +18,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\how to play pg1- pc ver NEW.png"
+    "source_file": "game\\textures\\credits pg1 NEW.png"
   }
 }

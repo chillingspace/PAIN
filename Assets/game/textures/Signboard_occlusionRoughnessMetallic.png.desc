@@ -1,13 +1,13 @@
 {
   "asset_info": {
-    "name": "how to play pg1- pc ver NEW.png",
+    "name": "Signboard_occlusionRoughnessMetallic.png",
     "type": "Texture"
   },
   "build_data": {
-    "hash": 10260355670878545929
+    "hash": 6289465271140768848
   },
   "descriptor_version": 1,
-  "guid": "e6cd3d7b-441b-6942-9f03-765486ba28dc",
+  "guid": "21cf24bc-1b86-394e-8c2d-76c4e1da2d45",
   "import_settings": {
     "android_allow_astc_hdr": false,
     "android_bake_cubemap": false,
@@ -18,6 +18,6 @@
     "window_compression": "BC7"
   },
   "meta_data": {
-    "source_file": "game\\textures\\how to play pg1- pc ver NEW.png"
+    "source_file": "game\\textures\\Signboard_occlusionRoughnessMetallic.png"
   }
 }

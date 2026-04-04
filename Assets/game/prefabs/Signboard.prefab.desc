@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Signboard.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 7550679286506985041
+  },
+  "descriptor_version": 1,
+  "guid": "2680415d-43a8-4343-bc64-781cc95e4db4",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Signboard.prefab"
+  }
+}
