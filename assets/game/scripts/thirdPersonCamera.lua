@@ -140,7 +140,7 @@ local CAM_FORGET_SPEED   =  1.0  -- how fast minSafeDist recovers after clearing
 
 -- Pipe traversal camera
 local pipeCamX, pipeCamY, pipeCamZ = nil, nil, nil
-local PIPE_CAM_BACK   = 2.0   -- units behind the player along the pipe axis
+local PIPE_CAM_BACK   = -1.0  -- units behind the player along the pipe axis 
 local PIPE_CAM_UP     = 0.35  -- camera raised above pipe axis
 local PIPE_CAM_SMOOTH = 10.0  -- how fast the camera slides to the pipe view
 

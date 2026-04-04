@@ -38,6 +38,13 @@ do
     -- Respawn
     local RESPAWN_ENTITY_NAME   = "corridor_enemy_respawn"
 
+    -- Detection UI (red overlay — bar entities are hidden, overlay stays visible)
+    local UI_DETECT_BAR_BG       = "UI_DetectBar_BG"
+    local UI_DETECT_BAR_FILL_L   = "UI_DetectBar_Fill_L"
+    local UI_DETECT_BAR_FILL_R   = "UI_DetectBar_Fill_R"
+    local HIDE_UI_X              = -2000
+    local HIDE_UI_Y              = -2000
+
     -- Animation
     local ANIM_MOVE             = "ArmatureAction"
 
@@ -156,6 +163,27 @@ do
         end
     end
 
+    local function setDetectionUIActive(active)
+        if not DetectionUI then return end
+        if active then
+            if DetectionUI.begin then DetectionUI.begin(enemy, false) end
+            -- Suppress the DetectionUI audio — corridor chase manages its own audio
+            if DetectionUI.stopAudio then DetectionUI.stopAudio() end
+        else
+            if DetectionUI.cancel then DetectionUI.cancel(enemy) end
+        end
+    end
+
+    local function hideDetectionBarOnly()
+        if DetectionUI and DetectionUI.active and DetectionUI.autoConfirmHit then return end
+        local barBG    = findEntity(UI_DETECT_BAR_BG)
+        local barFillL = findEntity(UI_DETECT_BAR_FILL_L)
+        local barFillR = findEntity(UI_DETECT_BAR_FILL_R)
+        if barBG    then set2DPosition(barBG,    HIDE_UI_X, HIDE_UI_Y) end
+        if barFillL then set2DPosition(barFillL, HIDE_UI_X, HIDE_UI_Y) end
+        if barFillR then set2DPosition(barFillR, HIDE_UI_X, HIDE_UI_Y) end
+    end
+
     local function setCombatBGM(active)
         if _G.GlobalAudio and _G.GlobalAudio.setCombat then
             _G.GlobalAudio.setCombat(active)
@@ -205,6 +233,7 @@ do
         setEnemyYaw(baseYaw)
         setMoveAnim(false)
         setCombatBGM(false)
+        setDetectionUIActive(false)
         state = STATE_IDLE
         stateTimer = 0.0
         triggered = false   -- re-arm the proximity trigger
@@ -259,6 +288,8 @@ do
 
         elseif newState == STATE_ALERT_PAUSE then
             setMoveAnim(false)
+            setDetectionUIActive(true)
+            hideDetectionBarOnly()
             -- Face toward player before charging
             if player then
                 local px, py, pz = getPlayerPos()
@@ -268,10 +299,13 @@ do
         elseif newState == STATE_CHASE then
             setMoveAnim(true)
             setCombatBGM(true)
+            setDetectionUIActive(true)
+            hideDetectionBarOnly()
 
         elseif newState == STATE_RETURN then
             setMoveAnim(true)
             setCombatBGM(false)
+            setDetectionUIActive(false)
         end
     end
 
@@ -330,6 +364,11 @@ do
         -- ALERT_PAUSE: brief freeze before charging
         -- ==================================================
         elseif state == STATE_ALERT_PAUSE then
+            if DetectionUI and DetectionUI.active
+                and DetectionUI.sourceEnemy == enemy
+                and DetectionUI.autoConfirmHit == false then
+                hideDetectionBarOnly()
+            end
             if stateTimer >= ALERT_PAUSE_TIME then
                 enterState(STATE_CHASE)
             end
@@ -338,6 +377,11 @@ do
         -- CHASE: charge straight at the player
         -- ==================================================
         elseif state == STATE_CHASE then
+            if DetectionUI and DetectionUI.active
+                and DetectionUI.sourceEnemy == enemy
+                and DetectionUI.autoConfirmHit == false then
+                hideDetectionBarOnly()
+            end
             local px, py, pz = getPlayerPos()
             if not px then return end
 

@@ -104,6 +104,8 @@ end
 
 local speed = 3
 local pipeSpeedFactor = 0.65  -- multiplier applied to speed while inside a pipe
+local pipeHopTimer = 0.0
+local PIPE_HOP_INTERVAL = 0.45  -- seconds between hop sounds inside a pipe
 local jumpSpeed = 5
 local isGrounded = true
 local wasGrounded = true
@@ -289,6 +291,17 @@ registerUpdate(function(dt)
             ep.y + S.pipeDirY * newT,
             ep.z + S.pipeDirZ * newT)
         setVelocity(id, 0.0, 0.0, 0.0)
+
+        -- Hop sounds while moving in pipe
+        if fwd ~= 0.0 then
+            pipeHopTimer = pipeHopTimer - dt
+            if pipeHopTimer <= 0.0 then
+                audioPlayRandomSFXFromEntity(SFX_PLAYER_HOPS, id, VOL_PLAYER_HOP)
+                pipeHopTimer = PIPE_HOP_INTERVAL
+            end
+        else
+            pipeHopTimer = 0.0  -- reset so next movement starts a sound immediately
+        end
 
         -- face direction of travel
         if fwd ~= 0.0 then

@@ -109,6 +109,12 @@ end
 
 -- public API called from enemy scripts --------------------------
 
+-- Stops the detection audio without cancelling the overlay.
+-- Call this after ui.begin() when the caller manages its own audio.
+function ui.stopAudio()
+    stopAudio()
+end
+
 -- autoConfirmHit:
 --   true/nil  -> old behavior (fill bar, confirm hit after duration)
 --   false     -> feedback only (overlay/audio, no auto damage)
