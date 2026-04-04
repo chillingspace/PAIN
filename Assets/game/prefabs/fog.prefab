@@ -1,0 +1,108 @@
+{
+    "entities": [
+        {
+            "components": {
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        0.0,
+                        2.427999973297119,
+                        -6.5229997634887695
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "Name": {
+                    "name": "fog"
+                },
+                "ParticleSystem": {
+                    "angularVelocity": 0.0,
+                    "angularVelocityVariance": 0.0,
+                    "blendMode": 0,
+                    "colorOverLifetime": [],
+                    "directionMode": 0,
+                    "directionSpace": 0,
+                    "drag": 0.0,
+                    "emissionDirection": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "emissionRate": 85.0,
+                    "emissionShape": 1,
+                    "emissionSpread": 90.0,
+                    "gravityMultiplier": 0.0,
+                    "lifetime": 8.0,
+                    "lifetimeVariance": 0.0,
+                    "looping": true,
+                    "maxParticles": 760,
+                    "particleTexture": "2d69738e-73a7-144a-a4ee-64a5c0bca3f2",
+                    "playDuration": 0.0,
+                    "playOnAwake": true,
+                    "renderShape": 2,
+                    "shapeParams": {
+                        "boxHalfExtents": [
+                            0.5,
+                            0.5,
+                            0.5
+                        ],
+                        "circleArc": 360.0,
+                        "circleRadius": 0.5,
+                        "coneAngle": 25.0,
+                        "sphereRadius": 100.0,
+                        "volumeEmission": true
+                    },
+                    "simulationSpace": 0,
+                    "sizeOverLifetime": [],
+                    "sizeOverLifetimeMultiplier": 1.0,
+                    "softEdge": 0.8999999761581421,
+                    "sortMode": 1,
+                    "speed": 0.11999999731779099,
+                    "speedVariance": 0.18000000715255737,
+                    "startColor": [
+                        0.2980392277240753,
+                        0.24705882370471954,
+                        0.11372549086809158,
+                        0.29411765933036804
+                    ],
+                    "startColorVariance": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "startRotation": 0.0,
+                    "startRotationVariance": 0.0,
+                    "startSize": 120.0,
+                    "startSizeVariance": 0.0,
+                    "velocityOverLifetime": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "velocityOverLifetimeEnabled": false
+                }
+            },
+            "entityGUID": "1cd37017-0e82-4448-8d55-3d0a6c0897e5"
+        }
+    ],
+    "prefabName": "fog",
+    "rootEntityGUID": "1cd37017-0e82-4448-8d55-3d0a6c0897e5"
+}
