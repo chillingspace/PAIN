@@ -13409,17 +13409,17 @@
                         "Texture2D": {
                             "opacity": 1.0,
                             "pos": [
-                                0.5506807565689087,
-                                0.9514042139053345
+                                0.7323529720306396,
+                                0.9778212904930115
                             ],
                             "texture_guid": "bd0a7c29-ace7-3748-9bb0-beba7ab453fd",
                             "texture_scale": [
-                                0.01262452732771635,
-                                0.009618687443435192
+                                0.015335396863520145,
+                                0.011684111319482327
                             ]
                         },
                         "UIElement": {
-                            "b_is_enabled": true,
+                            "b_is_enabled": false,
                             "b_is_interactable": true,
                             "layer": 0
                         },
@@ -13468,9 +13468,9 @@
                                 1.0
                             ],
                             "scale": [
-                                0.01262452732771635,
-                                0.009618687443435192,
-                                0.2885606288909912
+                                0.015335396863520145,
+                                0.011684111319482327,
+                                0.35052335262298584
                             ],
                             "size_delta": [
                                 70.0,
@@ -13536,7 +13536,7 @@
                             ]
                         },
                         "UIElement": {
-                            "b_is_enabled": true,
+                            "b_is_enabled": false,
                             "b_is_interactable": true,
                             "layer": 0
                         },
@@ -21024,6 +21024,101 @@
                         },
                         "Name": {
                             "name": "Player"
+                        },
+                        "ParticleSystem": {
+                            "angularVelocity": 0.0,
+                            "angularVelocityVariance": 0.0,
+                            "blendMode": 0,
+                            "colorOverLifetime": [
+                                {
+                                    "color": [
+                                        1.0,
+                                        1.0,
+                                        1.0,
+                                        0.800000011920929
+                                    ],
+                                    "time": 0.0
+                                },
+                                {
+                                    "color": [
+                                        1.0,
+                                        1.0,
+                                        1.0,
+                                        0.0
+                                    ],
+                                    "time": 1.0
+                                }
+                            ],
+                            "directionMode": 1,
+                            "directionSpace": 0,
+                            "drag": 2.0,
+                            "emissionDirection": [
+                                0.0,
+                                1.0,
+                                0.0
+                            ],
+                            "emissionRate": 30.0,
+                            "emissionShape": 0,
+                            "emissionSpread": 180.0,
+                            "gravityMultiplier": 0.0,
+                            "lifetime": 0.5,
+                            "lifetimeVariance": 0.20000000298023224,
+                            "looping": false,
+                            "maxParticles": 20,
+                            "particleTexture": "b6fdf19d-f8ab-0d4b-ae8e-22626c9fb75f",
+                            "playDuration": 0.0,
+                            "playOnAwake": false,
+                            "renderShape": 2,
+                            "shapeParams": {
+                                "boxHalfExtents": [
+                                    0.5,
+                                    0.5,
+                                    0.5
+                                ],
+                                "circleArc": 360.0,
+                                "circleRadius": 0.5,
+                                "coneAngle": 25.0,
+                                "sphereRadius": 0.5,
+                                "volumeEmission": false
+                            },
+                            "simulationSpace": 1,
+                            "sizeOverLifetime": [
+                                {
+                                    "time": 0.0,
+                                    "value": 0.30000001192092896
+                                },
+                                {
+                                    "time": 1.0,
+                                    "value": 1.5
+                                }
+                            ],
+                            "sizeOverLifetimeMultiplier": 0.07999999821186066,
+                            "softEdge": 0.5,
+                            "sortMode": 0,
+                            "speed": 0.5,
+                            "speedVariance": 0.30000001192092896,
+                            "startColor": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "startColorVariance": [
+                                0.10000000149011612,
+                                0.10000000149011612,
+                                0.10000000149011612,
+                                0.20000000298023224
+                            ],
+                            "startRotation": 0.0,
+                            "startRotationVariance": 0.0,
+                            "startSize": 0.699999988079071,
+                            "startSizeVariance": 0.05000000074505806,
+                            "velocityOverLifetime": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "velocityOverLifetimeEnabled": false
                         },
                         "RigidBody3D": {
                             "angular_velocity": [

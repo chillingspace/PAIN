@@ -12,6 +12,7 @@
 #include "ECS/Components/cMeshRenderer.h"
 #include "ECS/Components/cUIComps.h"
 #include "Systems/Transform/sysTransform.h"
+#include "Systems/Particle/sysParticleSystem.h"
 #include "Common/AssetTypes/src/AssetData.h"
 #include "Systems/Physics/sysPhysics.h"
 #include <glm/gtx/quaternion.hpp>   // for glm::eulerAngles, glm::quat(vec3)
@@ -777,7 +778,68 @@ namespace PAIN {
     /* =========================================================================== */
     /*                                Particles                                    */
     /* =========================================================================== */
-    void EngineAPIAdapter::SpawnParticles(int /*entityId*/, int /*count*/, bool /*ignoreRotation*/) {}
+    void EngineAPIAdapter::SpawnParticles(int entityId, int count, bool ignoreRotation) {
+        auto enttEntity = static_cast<entt::entity>(entityId);
+        if (!ecs_.getEntityComponent<LocalTransform>(enttEntity)) return;
+
+        auto particleSystem = ecs_.getSystem<PAIN::ParticleSystem::System>();
+        if (!particleSystem) return;
+
+        auto* psInstance = particleSystem->GetParticleSystem(enttEntity);
+        if (!psInstance) return;
+
+        auto& registry = ecs_.getRegistry();
+        auto view = registry.view<ParticleSystemComponent, LocalTransform>();
+        if (!view.contains(enttEntity)) return;
+
+        auto& transform = view.get<LocalTransform>(enttEntity);
+        glm::vec3 emitterPosition = transform.position;
+        glm::quat emitterRotation = ignoreRotation ? glm::quat(1.0f, 0.0f, 0.0f, 0.0f) : transform.rotation;
+
+        psInstance->EmitBurst(count, emitterPosition, emitterRotation);
+    }
+
+    void EngineAPIAdapter::ParticleSystem_Play(int entityId) {
+        auto enttEntity = static_cast<entt::entity>(entityId);
+        auto& registry = ecs_.getRegistry();
+        auto view = registry.view<ParticleSystemComponent, LocalTransform>();
+        if (!view.contains(enttEntity)) return;
+
+        auto particleSystem = ecs_.getSystem<PAIN::ParticleSystem::System>();
+        if (!particleSystem) return;
+
+        auto* psInstance = particleSystem->GetParticleSystem(enttEntity);
+        if (!psInstance) {
+            auto& comp = view.get<ParticleSystemComponent>(enttEntity);
+            particleSystem->InitializeParticleSystem(enttEntity, comp);
+            psInstance = particleSystem->GetParticleSystem(enttEntity);
+            if (!psInstance) return;
+        }
+
+        psInstance->Play();
+    }
+
+    void EngineAPIAdapter::ParticleSystem_Stop(int entityId) {
+        auto enttEntity = static_cast<entt::entity>(entityId);
+        if (!ecs_.getEntityComponent<LocalTransform>(enttEntity)) return;
+
+        auto particleSystem = ecs_.getSystem<PAIN::ParticleSystem::System>();
+        if (!particleSystem) return;
+
+        auto* psInstance = particleSystem->GetParticleSystem(enttEntity);
+        if (psInstance) psInstance->Stop();
+    }
+
+    void EngineAPIAdapter::ParticleSystem_Restart(int entityId) {
+        auto enttEntity = static_cast<entt::entity>(entityId);
+        if (!ecs_.getEntityComponent<LocalTransform>(enttEntity)) return;
+
+        auto particleSystem = ecs_.getSystem<PAIN::ParticleSystem::System>();
+        if (!particleSystem) return;
+
+        auto* psInstance = particleSystem->GetParticleSystem(enttEntity);
+        if (psInstance) psInstance->Restart();
+    }
 
     /* =========================================================================== */
     /*                              Input Helpers                                  */

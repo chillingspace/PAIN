@@ -169,21 +169,19 @@ registerUpdate(function(dt)
         joystickDirY = 0.0
         local _, curr_vy, _ = getVelocity(entityId)
         setVelocity(entityId, 0.0, curr_vy, 0.0)
+        particleSystemStop(entityId)
         return
     end
 
     -- EARLY EXIT: If game is paused, freeze player completely
     if IsGamePaused() then
-        -- Stop walking audio
         if walkingSoundPlaying and audioStop then
             audioStop(entityId)
             walkingSoundPlaying = false
         end
-        
-        -- Clear all movement inputs
         joystickDirX = 0.0
         joystickDirY = 0.0
-        
+        particleSystemStop(entityId)
         return
     end
     
@@ -222,6 +220,7 @@ registerUpdate(function(dt)
         if audioStop then
             audioStop(id)
         end
+        particleSystemStop(id)
         return
     end
 
@@ -328,6 +327,7 @@ registerUpdate(function(dt)
         if not wasMoving then
             
             audioPlayRandomSFXFromEntity(SFX_PLAYER_HOPS, id, VOL_PLAYER_HOP)
+            particleSystemPlay(id)
             lastAnimTime = 0.0
         
         -- LOOP: play hop sound at animation loop point
@@ -337,6 +337,7 @@ registerUpdate(function(dt)
             -- Play audio at the start of the walk cycle (skip if airborne or during jump cooldown)
             if t < lastAnimTime and t < 0.2 and isGrounded and jumpCooldown <= 0 then
                 audioPlayRandomSFXFromEntity(SFX_PLAYER_HOPS, id, VOL_PLAYER_HOP)
+                particleSystemPlay(id)
             end
             
             lastAnimTime = t
@@ -348,6 +349,7 @@ registerUpdate(function(dt)
         -- STOPPED
         wasMoving = false
         lastAnimTime = 1000.0
+        particleSystemStop(id)
 
         if not isGrounded then
             -- Airborne but not moving > show flight, not a looping jump
@@ -364,6 +366,7 @@ registerUpdate(function(dt)
                 PlayAnim(id, ANIM_JUMP, 0.1, false)
                 Animation.SetSpeed(id, 2)
                 Animation.SetLoop(id, false)
+                particleSystemPlay(id)
             else
                 -- Count down landing snap, then do nothing — idleTimer takes over
                 if landingTimer > 0 then
@@ -456,6 +459,7 @@ registerUpdate(function(dt)
 
         -- Play random hop sound for jump
         audioPlayRandomSFXFromEntity(SFX_PLAYER_HOPS, id, VOL_PLAYER_HOP)
+        particleSystemPlay(id)
 
         -- Prevent walk-cycle hop from double-playing on landing
         jumpCooldown = 0.35

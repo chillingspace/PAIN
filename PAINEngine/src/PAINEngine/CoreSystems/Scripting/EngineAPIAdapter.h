@@ -155,6 +155,9 @@ namespace PAIN {
         /*                                Particles                                    */
         /* =========================================================================== */
         void SpawnParticles(int entityId, int count, bool ignoreRotation) override;
+        void ParticleSystem_Play(int entityId) override;
+        void ParticleSystem_Stop(int entityId) override;
+        void ParticleSystem_Restart(int entityId) override;
 
         /* =========================================================================== */
         /*                              Input Helpers                                  */

@@ -264,6 +264,49 @@ namespace PAIN {
         // Get particle pool for rendering
         ParticlePool& GetPool() { return m_Pool; }
         
+        // Emit a burst of particles immediately (bypasses emission rate)
+        void EmitBurst(int count, const glm::vec3& emitterPosition, const glm::quat& emitterRotation, const glm::vec3& positionOffset = glm::vec3(0.0f)) {
+            glm::vec3 adjustedPosition = emitterPosition + positionOffset;
+            for (int i = 0; i < count; ++i) {
+                if (m_Pool.IsFull()) break;
+                
+                int idx = m_Pool.Spawn();
+                if (idx < 0) break;
+                
+                Particle& p = m_Pool.GetParticle(idx);
+                
+                p.lifetime = m_Config.lifetime + m_Config.lifetimeVariance * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
+                p.age = 0.0f;
+                p.alive = true;
+                
+                p.position = GetEmissionPosition(adjustedPosition);
+                
+                float speedVariance = m_Config.speedVariance * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
+                float actualSpeed = m_Config.speed + speedVariance;
+                
+                glm::vec3 direction = GetEmissionDirection(p.position, adjustedPosition, emitterRotation);
+                p.velocity = direction * actualSpeed;
+                
+                float sizeVariance = m_Config.startSizeVariance * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
+                p.initialSize = glm::max(0.0f, m_Config.startSize + sizeVariance);
+                p.size = p.initialSize;
+                
+                float startRotVariance = m_Config.startRotationVariance * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
+                p.rotation = glm::radians(m_Config.startRotation + startRotVariance);
+                
+                float angularVelVariance = m_Config.angularVelocityVariance * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
+                p.angularVelocity = glm::radians(m_Config.angularVelocity + angularVelVariance);
+                
+                p.initialColor = m_Config.startColor;
+                p.initialColor.r += m_Config.startColorVariance.r * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
+                p.initialColor.g += m_Config.startColorVariance.g * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
+                p.initialColor.b += m_Config.startColorVariance.b * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
+                p.initialColor.a += m_Config.startColorVariance.a * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
+                p.initialColor = glm::clamp(p.initialColor, glm::vec4(0.0f), glm::vec4(1.0f));
+                p.color = p.initialColor;
+            }
+        }
+        
     private:
         ParticleSystemComponent m_Config;
         ParticlePool m_Pool;

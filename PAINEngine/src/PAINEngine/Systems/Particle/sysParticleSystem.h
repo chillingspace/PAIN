@@ -24,12 +24,12 @@ namespace PAIN {
             // Get particle system instance for an entity (for rendering)
             ParticleSystemInstance* GetParticleSystem(entt::entity entity);
             
+            // Initialize particle system for an entity (public for scripting API)
+            void InitializeParticleSystem(entt::entity entity, const ParticleSystemComponent& config);
+            
         private:
             // Map entity to particle system instance
             std::unordered_map<entt::entity, std::unique_ptr<PAIN::ParticleSystemInstance>> m_ParticleSystems;
-            
-            // Initialize particle system for an entity
-            void InitializeParticleSystem(entt::entity entity, const ParticleSystemComponent& config);
             
             // Clean up particle system for removed entities
             void CleanupRemovedSystems(entt::registry& reg);

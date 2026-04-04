@@ -1411,6 +1411,9 @@ namespace PAIN {
         /* =========================================================================== */
         lua_.set_function("spawnParticles", [this](int id, int count) { if (api_) api_->SpawnParticles(id, count, false); });
         lua_.set_function("spawnParticlesIgnoreRotation", [this](int id, int count) { if (api_) api_->SpawnParticles(id, count, true); });
+        lua_.set_function("particleSystemPlay", [this](int id) { if (api_) api_->ParticleSystem_Play(id); });
+        lua_.set_function("particleSystemStop", [this](int id) { if (api_) api_->ParticleSystem_Stop(id); });
+        lua_.set_function("particleSystemRestart", [this](int id) { if (api_) api_->ParticleSystem_Restart(id); });
 
         /* =========================================================================== */
         /*                              Input Helpers                                  */
