@@ -92,11 +92,9 @@ local function applySceneVolumes()
         if trackCount >= 1 then globalBGMFade(0, mainBGMVolume, CONFIG.fadeDuration) end
         
     elseif currentScene == "cutscene" then
-        -- Cutscene uses same main BGM as mainmenu/tutorial
-        local mainBGMVolume = linearToDb(MAINMENU_BGM_VOLUME_SCALE)
-        if trackCount >= 1 then globalBGMFade(0, mainBGMVolume, CONFIG.fadeDuration) end
-        for i = 1, trackCount - 1 do
-            globalBGMFade(i, CONFIG.mutedVolume, 0.1)
+        -- Mute all BGM tracks during cutscenes (cutscene master audio plays as SFX instead)
+        for i = 0, trackCount - 1 do
+            globalBGMFade(i, CONFIG.mutedVolume, 0.3)
         end
         
     elseif currentScene == "tutorial" or currentScene == "level1" or currentScene == "level2" or currentScene == "level" then
