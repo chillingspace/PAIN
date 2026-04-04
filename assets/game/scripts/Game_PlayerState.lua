@@ -45,6 +45,7 @@ _G.PlayerState = _G.PlayerState or {
 
     player = nil, -- cache the player entity
     carriedLetter = nil, -- entity id of letter currently on back
+    collectibleOriginPos = nil, -- world pos of gear entity at moment of pickup
     pickupRadius = 0.5,  -- how close player must be to pick up letter
     deliveryRadius  = 0.5, --  to drop off at collection point
     lettersDelivered = 0,  -- letters delivered so far
@@ -301,6 +302,7 @@ function S.init(player)
         S.lives = 3
         S.lettersDelivered = 0
         S.carriedLetter = nil
+        S.collectibleOriginPos = nil
         S.hidden = false
         S.hiddenIn = nil
         S.inPipe = false
@@ -747,6 +749,10 @@ end
 -- Helper: Pick up a letter
 -------------------------------------------------
 local function pickupLetter(letter)
+    -- Capture original world position before the entity is repositioned
+    local lx, ly, lz = getPosition(letter)
+    S.collectibleOriginPos = { x = lx, y = ly, z = lz }
+
     S.carriedLetter = letter
 
     if removeTag then removeTag(letter, "letter_collectible") end
@@ -1235,30 +1241,33 @@ function S.onCaught(player)
     -- Play respawn SFX at player position
     audioPlaySFXFromEntity(SFX_RESPAWN, player, VOL_RESPAWN)
 
-    -- drop carried letter
+    -- If player had the gear, keep it on their back and respawn at the gear's origin.
+    -- If they hadn't collected it yet, fall through to normal checkpoint/start respawn.
     if S.carriedLetter then
-        setPosition(S.carriedLetter, deathPos.x, deathPos.y, deathPos.z)
-        setVisibility(S.carriedLetter, true)
-        enablePhysics(S.carriedLetter)
-        if particleSystemPlay then particleSystemPlay(S.carriedLetter) end
-        if removeTag then removeTag(S.carriedLetter, "letter_carried") end
-        if addTag then addTag(S.carriedLetter, "letter_collectible") end
-        SetModel(S.player, "Frog_Anim.mesh")
-        log("[PlayerState] Dropped carried letter at death position")
-        -- REMOVED: playSfx(S.sfxDrop)
-        S.carriedLetter = nil
-    end
-
-    -- respawn away from the trigger a bit
-    local respawn = S.checkpointPos or S.startPos
-    if respawn then
-        -- just store, dont teleport yet cos gives mem leak
-        S.pendingRespawn = {
-            entity = player,
-            x = respawn.x ,
-            y = respawn.y,
-            z = respawn.z,
-        }
+        -- Do NOT drop the gear — leave carriedLetter, letter_carried tag, and
+        -- Frog_Anim_Gear.mesh all intact. Respawn player at gear's original position.
+        local originPos = S.collectibleOriginPos or S.startPos
+        if originPos then
+            S.pendingRespawn = {
+                entity = player,
+                x = originPos.x,
+                y = originPos.y,
+                z = originPos.z,
+            }
+        end
+        log("[PlayerState] Died with gear — respawning at gear origin, gear retained")
+    else
+        -- No gear collected: respawn at checkpoint or start as usual
+        local respawn = S.checkpointPos or S.startPos
+        if respawn then
+            -- just store, dont teleport yet cos gives mem leak
+            S.pendingRespawn = {
+                entity = player,
+                x = respawn.x,
+                y = respawn.y,
+                z = respawn.z,
+            }
+        end
     end
 
     -- 1 second of invincibility

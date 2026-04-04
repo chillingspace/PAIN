@@ -103,6 +103,7 @@ for _, keyName in ipairs(ALL_LISTEN_KEYS) do
 end
 
 local speed = 3
+local pipeSpeedFactor = 0.65  -- multiplier applied to speed while inside a pipe
 local jumpSpeed = 5
 local isGrounded = true
 local wasGrounded = true
@@ -280,7 +281,7 @@ registerUpdate(function(dt)
         local currentT = toCurX * S.pipeDirX + toCurY * S.pipeDirY + toCurZ * S.pipeDirZ
 
         -- advance and clamp within [0, pipeLen]
-        local newT = currentT + fwd * speed * dt
+        local newT = currentT + fwd * speed * pipeSpeedFactor * dt
 
         newT = math.max(0.0, math.min(S.pipeLen, newT))
         setPosition(id,
