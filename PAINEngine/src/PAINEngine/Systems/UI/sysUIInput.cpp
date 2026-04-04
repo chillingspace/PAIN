@@ -817,8 +817,7 @@ namespace PAIN {
 				text_height = num_lines * max_glyph_height * text_comp.line_height;
 
 				// Adjust width based on alignment
-				float min_x = text_pos.x;
-				float max_x = text_pos.x;
+				float min_x, max_x;
 
 				if (text_comp.alignment == TextAlignment::Left) {
 					min_x = text_pos.x - text_width;
