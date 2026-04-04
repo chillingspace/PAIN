@@ -103,7 +103,7 @@ for _, keyName in ipairs(ALL_LISTEN_KEYS) do
 end
 
 local speed = 3
-local pipeSpeedFactor = 0.65  -- multiplier applied to speed while inside a pipe
+local pipeSpeedFactor = 0.50  -- multiplier applied to speed while inside a pipe
 local jumpSpeed = 5
 local isGrounded = true
 local wasGrounded = true

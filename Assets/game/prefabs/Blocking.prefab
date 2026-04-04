@@ -1,0 +1,69 @@
+{
+    "entities": [
+        {
+            "components": {
+                "Hierarchy": {
+                    "childrenGUIDs": [],
+                    "parentGUID": "00000000-0000-0000-0000-000000000000",
+                    "siblingIndex": 0
+                },
+                "Layer": {
+                    "layer_id": 0,
+                    "layer_mask": 1
+                },
+                "LocalTransform": {
+                    "position": [
+                        14.086516380310059,
+                        0.0,
+                        42.102455139160156
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "Name": {
+                    "name": "Blocking"
+                },
+                "RigidBody3D": {
+                    "angular_velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "collider_offset": [
+                        0.800000011920929,
+                        1.399999976158142,
+                        -1.7000000476837158
+                    ],
+                    "collider_scale": [
+                        8.100000381469727,
+                        3.0,
+                        2.5999999046325684
+                    ],
+                    "motion_type": 0,
+                    "physics_behavior": {
+                        "behavior": 0
+                    },
+                    "physics_enabled": true,
+                    "use_gravity": true,
+                    "velocity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "entityGUID": "2e0913aa-2ef3-d043-ac90-d78055204b88"
+        }
+    ],
+    "prefabName": "Blocking",
+    "rootEntityGUID": "2e0913aa-2ef3-d043-ac90-d78055204b88"
+}
