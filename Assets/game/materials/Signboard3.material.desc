@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Signboard3.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 10932102863939120705
+  },
+  "descriptor_version": 1,
+  "guid": "2a37258e-bd56-b74f-a5e5-e6127b7fcd95",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Signboard3.material"
+  }
+}

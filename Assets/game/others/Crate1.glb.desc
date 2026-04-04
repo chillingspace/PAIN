@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Crate1.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 9099332972302681914
+  },
+  "descriptor_version": 1,
+  "guid": "035baafb-9585-5f4d-9260-d6f921ba1e71",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\Crate1.glb"
+  }
+}

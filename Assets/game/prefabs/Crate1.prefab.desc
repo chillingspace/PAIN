@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Crate1.prefab",
+    "type": "Prefabs"
+  },
+  "build_data": {
+    "hash": 15595577175982743698
+  },
+  "descriptor_version": 1,
+  "guid": "fc66f1c6-3510-8444-9758-b14f93bb93c4",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\prefabs\\Crate1.prefab"
+  }
+}

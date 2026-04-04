@@ -1,0 +1,23 @@
+{
+  "asset_info": {
+    "name": "Crate1_baseColor_1001.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 6324610825497397111
+  },
+  "descriptor_version": 1,
+  "guid": "c89e7411-6aa7-6840-81bf-95375d3ae823",
+  "import_settings": {
+    "android_allow_astc_hdr": false,
+    "android_bake_cubemap": false,
+    "android_compression": "ASTC_4x4",
+    "android_skybox_source_format": "R16G16B16A16",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Crate1_baseColor_1001.png"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Signboard3.glb",
+    "type": "Other"
+  },
+  "build_data": {
+    "hash": 1610729953349732285
+  },
+  "descriptor_version": 1,
+  "guid": "11a62d89-6a32-5b41-a23f-e2c68726a694",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\others\\Signboard3.glb"
+  }
+}
