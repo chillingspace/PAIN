@@ -304,9 +304,9 @@
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            -1.963789701461792,
-            7.534677028656006,
-            -13.639369010925293
+            -0.9081534743309021,
+            16.393245697021484,
+            -22.30914306640625
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 31.100000381469727,
@@ -318,6 +318,138 @@
     },
     "ecs": {
         "Entities": [
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "567f066a-8083-4c40-8a71-ab76030eedf2"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "fog"
+                        },
+                        "ParticleSystem": {
+                            "angularVelocity": 0.0,
+                            "angularVelocityVariance": 0.0,
+                            "blendMode": 0,
+                            "colorOverLifetime": [],
+                            "directionMode": 0,
+                            "directionSpace": 0,
+                            "drag": 0.0,
+                            "emissionDirection": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissionRate": 85.0,
+                            "emissionShape": 1,
+                            "emissionSpread": 90.0,
+                            "gravityMultiplier": 0.0,
+                            "lifetime": 8.0,
+                            "lifetimeVariance": 0.0,
+                            "looping": true,
+                            "maxParticles": 760,
+                            "particleTexture": "2d69738e-73a7-144a-a4ee-64a5c0bca3f2",
+                            "playDuration": 0.0,
+                            "playOnAwake": true,
+                            "renderShape": 2,
+                            "shapeParams": {
+                                "boxHalfExtents": [
+                                    0.5,
+                                    0.5,
+                                    0.5
+                                ],
+                                "circleArc": 360.0,
+                                "circleRadius": 0.5,
+                                "coneAngle": 25.0,
+                                "sphereRadius": 100.0,
+                                "volumeEmission": true
+                            },
+                            "simulationSpace": 0,
+                            "sizeOverLifetime": [],
+                            "sizeOverLifetimeMultiplier": 1.0,
+                            "softEdge": 0.8999999761581421,
+                            "sortMode": 1,
+                            "speed": 0.11999999731779099,
+                            "speedVariance": 0.18000000715255737,
+                            "startColor": [
+                                0.2980392277240753,
+                                0.24705882370471954,
+                                0.11372549086809158,
+                                0.3137255012989044
+                            ],
+                            "startColorVariance": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "startRotation": 0.0,
+                            "startRotationVariance": 0.0,
+                            "startSize": 120.0,
+                            "startSizeVariance": 0.0,
+                            "velocityOverLifetime": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "velocityOverLifetimeEnabled": false
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "LocalTransform": {
+                                    "position": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "scale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "1cd37017-0e82-4448-8d55-3d0a6c0897e5",
+                            "instanceRootGUID": "567f066a-8083-4c40-8a71-ab76030eedf2",
+                            "sourcePrefabGUID": "7f415f74-9bc2-af46-9387-89aec9a95838"
+                        }
+                    },
+                    "Name": "fog"
+                }
+            },
             {
                 "Entity": {
                     "Components": {
@@ -460,7 +592,7 @@
                                 "2f302265-5980-0547-9770-c2556c443231"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 0
+                            "siblingIndex": 1
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -781,13 +913,13 @@
                         "Texture2D": {
                             "opacity": 1.0,
                             "pos": [
-                                -0.1606454849243164,
-                                0.8818792700767517
+                                0.6536568999290466,
+                                0.9315667152404785
                             ],
                             "texture_guid": "bd0a7c29-ace7-3748-9bb0-beba7ab453fd",
                             "texture_scale": [
-                                0.011217143386602402,
-                                0.008546395227313042
+                                0.016016555950045586,
+                                0.012203090824186802
                             ]
                         },
                         "UIElement": {
@@ -840,9 +972,9 @@
                                 1.0
                             ],
                             "scale": [
-                                0.011217143386602402,
-                                0.008546395227313042,
-                                0.25639185309410095
+                                0.016016555950045586,
+                                0.012203090824186802,
+                                0.366092711687088
                             ],
                             "size_delta": [
                                 70.0,
@@ -898,13 +1030,13 @@
                         "Texture2D": {
                             "opacity": 1.0,
                             "pos": [
-                                -0.19643907248973846,
-                                0.96202152967453
+                                0.6230893731117249,
+                                0.9127317667007446
                             ],
                             "texture_guid": "bd0a7c29-ace7-3748-9bb0-beba7ab453fd",
                             "texture_scale": [
-                                0.022197265177965164,
-                                0.01644030399620533
+                                0.01159073319286108,
+                                0.00883103534579277
                             ]
                         },
                         "UIElement": {
@@ -957,9 +1089,9 @@
                                 1.0
                             ],
                             "scale": [
-                                0.022197265177965164,
-                                0.01644030399620533,
-                                0.6088392734527588
+                                0.01159073319286108,
+                                0.00883103534579277,
+                                0.2649310529232025
                             ],
                             "size_delta": [
                                 70.0,
@@ -1058,7 +1190,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 1
+                            "siblingIndex": 2
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -1208,7 +1340,7 @@
                                 "ebe0ec7f-38b5-714b-a408-860bc520815e"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 2
+                            "siblingIndex": 3
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -14550,113 +14682,6 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
-                            "guid": "bf33c5df-934f-134b-9130-190f86c7f871"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 3
-                        },
-                        "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                2.427999973297119,
-                                -6.5229997634887695
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "fog"
-                        },
-                        "ParticleSystem": {
-                            "angularVelocity": 0.0,
-                            "angularVelocityVariance": 0.0,
-                            "blendMode": 0,
-                            "colorOverLifetime": [],
-                            "directionMode": 0,
-                            "directionSpace": 0,
-                            "drag": 0.0,
-                            "emissionDirection": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "emissionRate": 75.0,
-                            "emissionShape": 1,
-                            "emissionSpread": 95.0,
-                            "gravityMultiplier": 0.0,
-                            "lifetime": 8.0,
-                            "lifetimeVariance": 0.0,
-                            "looping": true,
-                            "maxParticles": 680,
-                            "particleTexture": "b6fdf19d-f8ab-0d4b-ae8e-22626c9fb75f",
-                            "playDuration": 0.0,
-                            "playOnAwake": true,
-                            "renderShape": 2,
-                            "shapeParams": {
-                                "boxHalfExtents": [
-                                    0.5,
-                                    0.5,
-                                    0.5
-                                ],
-                                "circleArc": 360.0,
-                                "circleRadius": 0.5,
-                                "coneAngle": 25.0,
-                                "sphereRadius": 100.0,
-                                "volumeEmission": true
-                            },
-                            "simulationSpace": 0,
-                            "sizeOverLifetime": [],
-                            "sizeOverLifetimeMultiplier": 1.0,
-                            "softEdge": 0.8299999833106995,
-                            "sortMode": 1,
-                            "speed": 0.14000000059604645,
-                            "speedVariance": 0.12000000476837158,
-                            "startColor": [
-                                0.2980392277240753,
-                                0.24705882370471954,
-                                0.11372549086809158,
-                                0.18039216101169586
-                            ],
-                            "startColorVariance": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "startRotation": 0.0,
-                            "startRotationVariance": 0.0,
-                            "startSize": 145.0,
-                            "startSizeVariance": 0.0,
-                            "velocityOverLifetime": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "velocityOverLifetimeEnabled": false
-                        }
-                    },
-                    "Name": "fog"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "GUID": {
                             "guid": "5b06bcce-31b8-8340-baaa-ac9c654e80d8"
                         },
                         "Hierarchy": {
@@ -27412,26 +27437,54 @@
                             "name": "Gear"
                         },
                         "ParticleSystem": {
-                            "angularVelocity": 0.0,
-                            "angularVelocityVariance": 0.0,
-                            "blendMode": 0,
-                            "colorOverLifetime": [],
+                            "angularVelocity": 65.0,
+                            "angularVelocityVariance": 110.0,
+                            "blendMode": 1,
+                            "colorOverLifetime": [
+                                {
+                                    "color": [
+                                        1.0,
+                                        0.9700000286102295,
+                                        0.7699999809265137,
+                                        1.0
+                                    ],
+                                    "time": 0.0
+                                },
+                                {
+                                    "color": [
+                                        1.0,
+                                        0.8600000143051147,
+                                        0.4699999988079071,
+                                        0.6499999761581421
+                                    ],
+                                    "time": 0.550000011920929
+                                },
+                                {
+                                    "color": [
+                                        1.0,
+                                        0.7400000095367432,
+                                        0.3400000035762787,
+                                        0.0
+                                    ],
+                                    "time": 1.0
+                                }
+                            ],
                             "directionMode": 0,
                             "directionSpace": 0,
-                            "drag": 0.0,
+                            "drag": 0.44999998807907104,
                             "emissionDirection": [
                                 0.0,
-                                0.0,
+                                1.0,
                                 0.0
                             ],
-                            "emissionRate": 3.0,
-                            "emissionShape": 1,
-                            "emissionSpread": 2.0,
-                            "gravityMultiplier": 0.0,
-                            "lifetime": 2.0,
-                            "lifetimeVariance": 0.0,
+                            "emissionRate": 14.0,
+                            "emissionShape": 3,
+                            "emissionSpread": 24.0,
+                            "gravityMultiplier": -0.18000000715255737,
+                            "lifetime": 1.25,
+                            "lifetimeVariance": 0.30000001192092896,
                             "looping": true,
-                            "maxParticles": 10,
+                            "maxParticles": 32,
                             "particleTexture": "b6fdf19d-f8ab-0d4b-ae8e-22626c9fb75f",
                             "playDuration": 0.0,
                             "playOnAwake": true,
@@ -27443,40 +27496,53 @@
                                     0.5
                                 ],
                                 "circleArc": 360.0,
-                                "circleRadius": 0.5,
+                                "circleRadius": 0.2199999988079071,
                                 "coneAngle": 25.0,
                                 "sphereRadius": 0.15000000596046448,
                                 "volumeEmission": true
                             },
                             "simulationSpace": 0,
-                            "sizeOverLifetime": [],
+                            "sizeOverLifetime": [
+                                {
+                                    "time": 0.0,
+                                    "value": 0.75
+                                },
+                                {
+                                    "time": 0.25,
+                                    "value": 1.149999976158142
+                                },
+                                {
+                                    "time": 1.0,
+                                    "value": 0.0
+                                }
+                            ],
                             "sizeOverLifetimeMultiplier": 1.0,
-                            "softEdge": 0.20000000298023224,
-                            "sortMode": 0,
-                            "speed": 0.699999988079071,
-                            "speedVariance": 0.0,
+                            "softEdge": 0.4000000059604645,
+                            "sortMode": 1,
+                            "speed": 0.6499999761581421,
+                            "speedVariance": 0.25,
                             "startColor": [
-                                0.9882352948188782,
                                 1.0,
-                                0.8392156958580017,
+                                0.949999988079071,
+                                0.6700000166893005,
                                 1.0
                             ],
                             "startColorVariance": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0
+                                0.05999999865889549,
+                                0.05000000074505806,
+                                0.10000000149011612,
+                                0.03999999910593033
                             ],
                             "startRotation": 0.0,
-                            "startRotationVariance": 0.0,
-                            "startSize": 0.029999999329447746,
-                            "startSizeVariance": 0.0,
+                            "startRotationVariance": 60.0,
+                            "startSize": 0.06499999761581421,
+                            "startSizeVariance": 0.02500000037252903,
                             "velocityOverLifetime": [
                                 0.0,
-                                0.0,
+                                0.07000000029802322,
                                 0.0
                             ],
-                            "velocityOverLifetimeEnabled": false
+                            "velocityOverLifetimeEnabled": true
                         },
                         "PrefabInstance": {
                             "componentOverrides": {
@@ -27766,13 +27832,13 @@
                         "Texture2D": {
                             "opacity": 1.0,
                             "pos": [
-                                -0.45891496539115906,
-                                0.37736451625823975
+                                -0.06411417573690414,
+                                0.9854581356048584
                             ],
                             "texture_guid": "bd0a7c29-ace7-3748-9bb0-beba7ab453fd",
                             "texture_scale": [
-                                0.014066409319639206,
-                                0.01071726344525814
+                                0.019495846703648567,
+                                0.014853977598249912
                             ]
                         },
                         "UIElement": {
@@ -27825,9 +27891,9 @@
                                 1.0
                             ],
                             "scale": [
-                                0.014066409319639206,
-                                0.01071726344525814,
-                                0.3215179145336151
+                                0.019495846703648567,
+                                0.014853977598249912,
+                                0.4456193447113037
                             ],
                             "size_delta": [
                                 70.0,
@@ -27883,13 +27949,13 @@
                         "Texture2D": {
                             "opacity": 1.0,
                             "pos": [
-                                -0.7764469981193542,
-                                0.737149178981781
+                                -0.025276802480220795,
+                                0.937031090259552
                             ],
                             "texture_guid": "bd0a7c29-ace7-3748-9bb0-beba7ab453fd",
                             "texture_scale": [
-                                0.010262686759233475,
-                                0.007819190621376038
+                                0.011745202355086803,
+                                0.008948725648224354
                             ]
                         },
                         "UIElement": {
@@ -27942,9 +28008,9 @@
                                 1.0
                             ],
                             "scale": [
-                                0.010262686759233475,
-                                0.007819190621376038,
-                                0.23457571864128113
+                                0.011745202355086803,
+                                0.008948725648224354,
+                                0.26846176385879517
                             ],
                             "size_delta": [
                                 70.0,
@@ -28000,13 +28066,13 @@
                         "Texture2D": {
                             "opacity": 1.0,
                             "pos": [
-                                -0.5012128949165344,
-                                0.66047203540802
+                                0.11086425185203552,
+                                0.9192731380462646
                             ],
                             "texture_guid": "bd0a7c29-ace7-3748-9bb0-beba7ab453fd",
                             "texture_scale": [
-                                0.011735565960407257,
-                                0.008941383101046085
+                                0.01508275792002678,
+                                0.011491624638438225
                             ]
                         },
                         "UIElement": {
@@ -28059,9 +28125,9 @@
                                 1.0
                             ],
                             "scale": [
-                                0.011735565960407257,
-                                0.008941383101046085,
-                                0.2682414948940277
+                                0.01508275792002678,
+                                0.011491624638438225,
+                                0.34474873542785645
                             ],
                             "size_delta": [
                                 70.0,
@@ -28117,13 +28183,13 @@
                         "Texture2D": {
                             "opacity": 1.0,
                             "pos": [
-                                -0.561663031578064,
-                                0.9408478736877441
+                                0.2229674607515335,
+                                0.9076316952705383
                             ],
                             "texture_guid": "bd0a7c29-ace7-3748-9bb0-beba7ab453fd",
                             "texture_scale": [
-                                0.009719773195683956,
-                                0.007405541837215424
+                                0.011640825308859348,
+                                0.008869200013577938
                             ]
                         },
                         "UIElement": {
@@ -28176,9 +28242,9 @@
                                 1.0
                             ],
                             "scale": [
-                                0.009719773195683956,
-                                0.007405541837215424,
-                                0.2221662551164627
+                                0.011640825308859348,
+                                0.008869200013577938,
+                                0.266075998544693
                             ],
                             "size_delta": [
                                 70.0,
@@ -28234,13 +28300,13 @@
                         "Texture2D": {
                             "opacity": 1.0,
                             "pos": [
-                                0.9147138595581055,
-                                0.9809299111366272
+                                -0.767829418182373,
+                                0.9612207412719727
                             ],
                             "texture_guid": "bd0a7c29-ace7-3748-9bb0-beba7ab453fd",
                             "texture_scale": [
-                                0.020825261250138283,
-                                0.015424136072397232
+                                0.02208976075053215,
+                                0.016830293461680412
                             ]
                         },
                         "UIElement": {
@@ -28293,9 +28359,9 @@
                                 1.0
                             ],
                             "scale": [
-                                0.020825261250138283,
-                                0.015424136072397232,
-                                0.5712071657180786
+                                0.02208976075053215,
+                                0.016830293461680412,
+                                0.5049088001251221
                             ],
                             "size_delta": [
                                 70.0,
@@ -29700,22 +29766,36 @@
                             "blendMode": 0,
                             "colorOverLifetime": [
                                 {
-                                    "color": [0.78, 0.74, 0.68, 0.95],
+                                    "color": [
+                                        0.7799999713897705,
+                                        0.7400000095367432,
+                                        0.6800000071525574,
+                                        0.949999988079071
+                                    ],
                                     "time": 0.0
                                 },
                                 {
-                                    "color": [0.52, 0.49, 0.45, 0.0],
+                                    "color": [
+                                        0.5199999809265137,
+                                        0.49000000953674316,
+                                        0.44999998807907104,
+                                        0.0
+                                    ],
                                     "time": 1.0
                                 }
                             ],
                             "directionMode": 0,
                             "directionSpace": 0,
-                            "drag": 0.9,
-                            "emissionDirection": [0.0, 1.0, 0.0],
+                            "drag": 0.8999999761581421,
+                            "emissionDirection": [
+                                0.0,
+                                1.0,
+                                0.0
+                            ],
                             "emissionRate": 20.0,
                             "emissionShape": 0,
                             "emissionSpread": 64.0,
-                            "gravityMultiplier": 1.8,
+                            "gravityMultiplier": 1.7999999523162842,
                             "lifetime": 2.0,
                             "lifetimeVariance": 0.0,
                             "looping": false,
@@ -29725,7 +29805,11 @@
                             "playOnAwake": false,
                             "renderShape": 1,
                             "shapeParams": {
-                                "boxHalfExtents": [0.5, 0.5, 0.5],
+                                "boxHalfExtents": [
+                                    0.5,
+                                    0.5,
+                                    0.5
+                                ],
                                 "circleArc": 360.0,
                                 "circleRadius": 0.5,
                                 "coneAngle": 25.0,
@@ -29736,11 +29820,11 @@
                             "sizeOverLifetime": [
                                 {
                                     "time": 0.0,
-                                    "value": 0.8
+                                    "value": 0.800000011920929
                                 },
                                 {
-                                    "time": 0.4,
-                                    "value": 0.45
+                                    "time": 0.4000000059604645,
+                                    "value": 0.44999998807907104
                                 },
                                 {
                                     "time": 1.0,
@@ -29751,14 +29835,28 @@
                             "softEdge": 0.0,
                             "sortMode": 0,
                             "speed": 2.5,
-                            "speedVariance": 0.95,
-                            "startColor": [0.72, 0.68, 0.62, 0.95],
-                            "startColorVariance": [0.08, 0.08, 0.08, 0.04],
+                            "speedVariance": 0.949999988079071,
+                            "startColor": [
+                                0.7200000286102295,
+                                0.6800000071525574,
+                                0.6200000047683716,
+                                0.949999988079071
+                            ],
+                            "startColorVariance": [
+                                0.07999999821186066,
+                                0.07999999821186066,
+                                0.07999999821186066,
+                                0.03999999910593033
+                            ],
                             "startRotation": 0.0,
                             "startRotationVariance": 35.0,
-                            "startSize": 0.05,
-                            "startSizeVariance": 0.016,
-                            "velocityOverLifetime": [0.0, 0.0, 0.0],
+                            "startSize": 0.05000000074505806,
+                            "startSizeVariance": 0.01600000075995922,
+                            "velocityOverLifetime": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
                             "velocityOverLifetimeEnabled": false
                         },
                         "RigidBody3D": {
@@ -30402,22 +30500,41 @@
                             "blendMode": 1,
                             "colorOverLifetime": [
                                 {
-                                    "color": [1.0, 0.9900000095367432, 0.9200000166893005, 1.0],
+                                    "color": [
+                                        1.0,
+                                        0.9900000095367432,
+                                        0.9200000166893005,
+                                        1.0
+                                    ],
                                     "time": 0.0
                                 },
                                 {
-                                    "color": [1.0, 0.8199999928474426, 0.4000000059604645, 0.6800000071525574],
+                                    "color": [
+                                        1.0,
+                                        0.8199999928474426,
+                                        0.4000000059604645,
+                                        0.6800000071525574
+                                    ],
                                     "time": 0.3499999940395355
                                 },
                                 {
-                                    "color": [1.0, 0.41999998688697815, 0.10000000149011612, 0.0],
+                                    "color": [
+                                        1.0,
+                                        0.41999998688697815,
+                                        0.10000000149011612,
+                                        0.0
+                                    ],
                                     "time": 1.0
                                 }
                             ],
                             "directionMode": 0,
                             "directionSpace": 0,
                             "drag": 0.75,
-                            "emissionDirection": [0.0, 0.0, 1.0],
+                            "emissionDirection": [
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
                             "emissionRate": 72.0,
                             "emissionShape": 0,
                             "emissionSpread": 24.0,
@@ -30431,7 +30548,11 @@
                             "playOnAwake": false,
                             "renderShape": 1,
                             "shapeParams": {
-                                "boxHalfExtents": [0.5, 0.5, 0.5],
+                                "boxHalfExtents": [
+                                    0.5,
+                                    0.5,
+                                    0.5
+                                ],
                                 "circleArc": 360.0,
                                 "circleRadius": 0.5,
                                 "coneAngle": 25.0,
@@ -30454,13 +30575,27 @@
                             "sortMode": 1,
                             "speed": 6.0,
                             "speedVariance": 2.4000000953674316,
-                            "startColor": [1.0, 0.9599999785423279, 0.800000011920929, 1.0],
-                            "startColorVariance": [0.05999999865889549, 0.14000000059604645, 0.25999999046325684, 0.0],
+                            "startColor": [
+                                1.0,
+                                0.9599999785423279,
+                                0.800000011920929,
+                                1.0
+                            ],
+                            "startColorVariance": [
+                                0.05999999865889549,
+                                0.14000000059604645,
+                                0.25999999046325684,
+                                0.0
+                            ],
                             "startRotation": 0.0,
                             "startRotationVariance": 85.0,
                             "startSize": 0.07500000298023224,
                             "startSizeVariance": 0.029999999329447746,
-                            "velocityOverLifetime": [0.0, 0.0, 0.0],
+                            "velocityOverLifetime": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
                             "velocityOverLifetimeEnabled": false
                         },
                         "Tag": {
@@ -30501,9 +30636,9 @@
             0.7990195751190186
         ],
         "worldLightPosition": [
-            9.701916694641113,
-            26.19980812072754,
-            -8.9730863571167
+            10.757553100585938,
+            35.05837631225586,
+            -17.642860412597656
         ],
         "worldLightShadowFollowDistance": 22.5,
         "worldLightShadowResolution": 1024,

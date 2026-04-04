@@ -283,9 +283,9 @@
         ],
         "farPlane": 100.0,
         "forward": [
-            0.12138809263706207,
-            -0.7155025005340576,
-            0.6879833936691284
+            0.15647326409816742,
+            -0.8770153522491455,
+            0.45426899194717407
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
@@ -304,6 +304,138 @@
     },
     "ecs": {
         "Entities": [
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "6efb2daf-7215-f641-981d-a14afbbe6be6"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "fog"
+                        },
+                        "ParticleSystem": {
+                            "angularVelocity": 0.0,
+                            "angularVelocityVariance": 0.0,
+                            "blendMode": 0,
+                            "colorOverLifetime": [],
+                            "directionMode": 0,
+                            "directionSpace": 0,
+                            "drag": 0.0,
+                            "emissionDirection": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissionRate": 85.0,
+                            "emissionShape": 1,
+                            "emissionSpread": 90.0,
+                            "gravityMultiplier": 0.0,
+                            "lifetime": 8.0,
+                            "lifetimeVariance": 0.0,
+                            "looping": true,
+                            "maxParticles": 760,
+                            "particleTexture": "2d69738e-73a7-144a-a4ee-64a5c0bca3f2",
+                            "playDuration": 0.0,
+                            "playOnAwake": true,
+                            "renderShape": 2,
+                            "shapeParams": {
+                                "boxHalfExtents": [
+                                    0.5,
+                                    0.5,
+                                    0.5
+                                ],
+                                "circleArc": 360.0,
+                                "circleRadius": 0.5,
+                                "coneAngle": 25.0,
+                                "sphereRadius": 100.0,
+                                "volumeEmission": true
+                            },
+                            "simulationSpace": 0,
+                            "sizeOverLifetime": [],
+                            "sizeOverLifetimeMultiplier": 1.0,
+                            "softEdge": 0.8999999761581421,
+                            "sortMode": 1,
+                            "speed": 0.11999999731779099,
+                            "speedVariance": 0.18000000715255737,
+                            "startColor": [
+                                0.2980392277240753,
+                                0.24705882370471954,
+                                0.11372549086809158,
+                                0.3137255012989044
+                            ],
+                            "startColorVariance": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "startRotation": 0.0,
+                            "startRotationVariance": 0.0,
+                            "startSize": 120.0,
+                            "startSizeVariance": 0.0,
+                            "velocityOverLifetime": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "velocityOverLifetimeEnabled": false
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "LocalTransform": {
+                                    "position": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "scale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "1cd37017-0e82-4448-8d55-3d0a6c0897e5",
+                            "instanceRootGUID": "6efb2daf-7215-f641-981d-a14afbbe6be6",
+                            "sourcePrefabGUID": "7f415f74-9bc2-af46-9387-89aec9a95838"
+                        }
+                    },
+                    "Name": "fog"
+                }
+            },
             {
                 "Entity": {
                     "Components": {
@@ -5029,124 +5161,13 @@
             {
                 "Entity": {
                     "Components": {
-                        "EditorVisible": {
-                            "locked": false,
-                            "visible": true
-                        },
-                        "GUID": {
-                            "guid": "03e16e0a-c5aa-5143-ab45-929fbb405ffe"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 2
-                        },
-                        "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                2.428318500518799,
-                                -6.523167610168457
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "fog"
-                        },
-                        "ParticleSystem": {
-                            "angularVelocity": 0.0,
-                            "angularVelocityVariance": 0.0,
-                            "blendMode": 0,
-                            "colorOverLifetime": [],
-                            "directionMode": 0,
-                            "directionSpace": 0,
-                            "drag": 0.0,
-                            "emissionDirection": [
-                                1.0,
-                                0.0,
-                                1.0
-                            ],
-                            "emissionRate": 65.0,
-                            "emissionShape": 1,
-                            "emissionSpread": 100.0,
-                            "gravityMultiplier": 0.0,
-                            "lifetime": 8.0,
-                            "lifetimeVariance": 0.0,
-                            "looping": true,
-                            "maxParticles": 520,
-                            "particleTexture": "b6fdf19d-f8ab-0d4b-ae8e-22626c9fb75f",
-                            "playDuration": 0.0,
-                            "playOnAwake": true,
-                            "renderShape": 2,
-                            "shapeParams": {
-                                "boxHalfExtents": [
-                                    0.5,
-                                    0.5,
-                                    0.5
-                                ],
-                                "circleArc": 360.0,
-                                "circleRadius": 0.5,
-                                "coneAngle": 25.0,
-                                "sphereRadius": 90.0,
-                                "volumeEmission": true
-                            },
-                            "simulationSpace": 0,
-                            "sizeOverLifetime": [],
-                            "sizeOverLifetimeMultiplier": 1.0,
-                            "softEdge": 0.75,
-                            "sortMode": 1,
-                            "speed": 0.18000000715255737,
-                            "speedVariance": 0.09000000357627869,
-                            "startColor": [
-                                0.2980392277240753,
-                                0.24705882370471954,
-                                0.11372549086809158,
-                                0.16862745583057404
-                            ],
-                            "startColorVariance": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "startRotation": 0.0,
-                            "startRotationVariance": 0.0,
-                            "startSize": 170.0,
-                            "startSizeVariance": 0.0,
-                            "velocityOverLifetime": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "velocityOverLifetimeEnabled": false
-                        }
-                    },
-                    "Name": "fog"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
                         "GUID": {
                             "guid": "11abc438-8283-104d-a8b1-c830bc555243"
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 3
+                            "siblingIndex": 2
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -5223,7 +5244,7 @@
                                 "b3e953c2-2ebc-8b4c-aafd-452d74965515"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 4
+                            "siblingIndex": 3
                         },
                         "Layer": {
                             "layer_id": 6,
@@ -5258,7 +5279,7 @@
                                         "b3e953c2-2ebc-8b4c-aafd-452d74965515"
                                     ],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 4
+                                    "siblingIndex": 3
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -5659,7 +5680,7 @@
                                 "2987b941-811b-1846-90ac-69bed20a8ac3"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 5
+                            "siblingIndex": 4
                         },
                         "Layer": {
                             "layer_id": 7,
@@ -5694,7 +5715,7 @@
                                         "2987b941-811b-1846-90ac-69bed20a8ac3"
                                     ],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 5
+                                    "siblingIndex": 4
                                 }
                             },
                             "correspondingPrefabEntityGUID": "96b89587-c8d8-9142-995d-209c05066e8c",
@@ -6064,7 +6085,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 6
+                            "siblingIndex": 5
                         },
                         "Layer": {
                             "layer_id": 7,
@@ -6096,7 +6117,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 6
+                                    "siblingIndex": 5
                                 },
                                 "Layer": {
                                     "layer_id": 7,
@@ -6195,7 +6216,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 7
+                            "siblingIndex": 6
                         },
                         "Layer": {
                             "layer_id": 6,
@@ -6227,7 +6248,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 7
+                                    "siblingIndex": 6
                                 },
                                 "Layer": {
                                     "layer_id": 6,
@@ -6329,7 +6350,7 @@
                                 "675345f8-21f4-d84c-a928-f9bcdd48cb9f"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 8
+                            "siblingIndex": 7
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -7542,7 +7563,7 @@
                                 "6ab9c0ad-0050-ed49-8499-b6b60d2c3a57"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 9
+                            "siblingIndex": 8
                         },
                         "Layer": {
                             "layer_id": 3,
@@ -7765,7 +7786,7 @@
                                 "7793f64e-0c39-a64b-8aff-3cb5abaa0837"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 10
+                            "siblingIndex": 9
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -9177,7 +9198,7 @@
                                 "e2bea19d-c0ee-5145-b2fb-a9507a66b77b"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 11
+                            "siblingIndex": 10
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -9758,7 +9779,7 @@
                                 "9bf4b89e-0533-6f4c-8cdd-d87badf74cec"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 12
+                            "siblingIndex": 11
                         },
                         "Layer": {
                             "layer_id": 4,
@@ -9793,7 +9814,7 @@
                                         "9bf4b89e-0533-6f4c-8cdd-d87badf74cec"
                                     ],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 12
+                                    "siblingIndex": 11
                                 }
                             },
                             "correspondingPrefabEntityGUID": "d740ec1e-700a-1141-9969-7b51e60d2fd1",
@@ -10195,7 +10216,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 13
+                            "siblingIndex": 12
                         },
                         "Layer": {
                             "layer_id": 4,
@@ -10227,7 +10248,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 13
+                                    "siblingIndex": 12
                                 },
                                 "Texture2D": {
                                     "opacity": 1.0,
@@ -10326,7 +10347,7 @@
                                 "85229db1-9cf5-064e-bd77-71c88e8dbfcc"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 14
+                            "siblingIndex": 13
                         },
                         "Layer": {
                             "layer_id": 2,
@@ -10362,7 +10383,7 @@
                                         "85229db1-9cf5-064e-bd77-71c88e8dbfcc"
                                     ],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 14
+                                    "siblingIndex": 13
                                 }
                             },
                             "correspondingPrefabEntityGUID": "cbc53e43-5867-7042-86ff-da57ea2d741f",
@@ -10951,7 +10972,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 15
+                            "siblingIndex": 14
                         },
                         "Layer": {
                             "layer_id": 2,
@@ -10983,7 +11004,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 15
+                                    "siblingIndex": 14
                                 },
                                 "Texture2D": {
                                     "opacity": 1.0,
@@ -11078,7 +11099,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 16
+                            "siblingIndex": 15
                         },
                         "Layer": {
                             "layer_id": 5,
@@ -11110,7 +11131,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 16
+                                    "siblingIndex": 15
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -11227,7 +11248,7 @@
                                 "01217e52-b00d-084d-bea0-6c5346f3d94f"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 17
+                            "siblingIndex": 16
                         },
                         "Layer": {
                             "layer_id": 1,
@@ -12981,7 +13002,7 @@
                                 "c842c73c-e519-ea47-8c54-b995ff2e3843"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 18
+                            "siblingIndex": 17
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -13083,26 +13104,54 @@
                             "name": "Gear"
                         },
                         "ParticleSystem": {
-                            "angularVelocity": 0.0,
-                            "angularVelocityVariance": 0.0,
-                            "blendMode": 0,
-                            "colorOverLifetime": [],
+                            "angularVelocity": 65.0,
+                            "angularVelocityVariance": 110.0,
+                            "blendMode": 1,
+                            "colorOverLifetime": [
+                                {
+                                    "color": [
+                                        1.0,
+                                        0.9700000286102295,
+                                        0.7699999809265137,
+                                        1.0
+                                    ],
+                                    "time": 0.0
+                                },
+                                {
+                                    "color": [
+                                        1.0,
+                                        0.8600000143051147,
+                                        0.4699999988079071,
+                                        0.6499999761581421
+                                    ],
+                                    "time": 0.550000011920929
+                                },
+                                {
+                                    "color": [
+                                        1.0,
+                                        0.7400000095367432,
+                                        0.3400000035762787,
+                                        0.0
+                                    ],
+                                    "time": 1.0
+                                }
+                            ],
                             "directionMode": 0,
                             "directionSpace": 0,
-                            "drag": 0.0,
+                            "drag": 0.44999998807907104,
                             "emissionDirection": [
                                 0.0,
-                                0.0,
+                                1.0,
                                 0.0
                             ],
-                            "emissionRate": 3.0,
-                            "emissionShape": 1,
-                            "emissionSpread": 2.0,
-                            "gravityMultiplier": 0.0,
-                            "lifetime": 2.0,
-                            "lifetimeVariance": 0.0,
+                            "emissionRate": 14.0,
+                            "emissionShape": 3,
+                            "emissionSpread": 24.0,
+                            "gravityMultiplier": -0.18000000715255737,
+                            "lifetime": 1.25,
+                            "lifetimeVariance": 0.30000001192092896,
                             "looping": true,
-                            "maxParticles": 10,
+                            "maxParticles": 32,
                             "particleTexture": "b6fdf19d-f8ab-0d4b-ae8e-22626c9fb75f",
                             "playDuration": 0.0,
                             "playOnAwake": true,
@@ -13114,40 +13163,53 @@
                                     0.5
                                 ],
                                 "circleArc": 360.0,
-                                "circleRadius": 0.5,
+                                "circleRadius": 0.2199999988079071,
                                 "coneAngle": 25.0,
                                 "sphereRadius": 0.15000000596046448,
                                 "volumeEmission": true
                             },
                             "simulationSpace": 0,
-                            "sizeOverLifetime": [],
+                            "sizeOverLifetime": [
+                                {
+                                    "time": 0.0,
+                                    "value": 0.75
+                                },
+                                {
+                                    "time": 0.25,
+                                    "value": 1.149999976158142
+                                },
+                                {
+                                    "time": 1.0,
+                                    "value": 0.0
+                                }
+                            ],
                             "sizeOverLifetimeMultiplier": 1.0,
-                            "softEdge": 0.20000000298023224,
-                            "sortMode": 0,
-                            "speed": 0.699999988079071,
-                            "speedVariance": 0.0,
+                            "softEdge": 0.4000000059604645,
+                            "sortMode": 1,
+                            "speed": 0.6499999761581421,
+                            "speedVariance": 0.25,
                             "startColor": [
-                                0.9882352948188782,
                                 1.0,
-                                0.8392156958580017,
+                                0.949999988079071,
+                                0.6700000166893005,
                                 1.0
                             ],
                             "startColorVariance": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0
+                                0.05999999865889549,
+                                0.05000000074505806,
+                                0.10000000149011612,
+                                0.03999999910593033
                             ],
                             "startRotation": 0.0,
-                            "startRotationVariance": 0.0,
-                            "startSize": 0.029999999329447746,
-                            "startSizeVariance": 0.0,
+                            "startRotationVariance": 60.0,
+                            "startSize": 0.06499999761581421,
+                            "startSizeVariance": 0.02500000037252903,
                             "velocityOverLifetime": [
                                 0.0,
-                                0.0,
+                                0.07000000029802322,
                                 0.0
                             ],
-                            "velocityOverLifetimeEnabled": false
+                            "velocityOverLifetimeEnabled": true
                         },
                         "PrefabInstance": {
                             "componentOverrides": {
@@ -13409,17 +13471,17 @@
                         "Texture2D": {
                             "opacity": 1.0,
                             "pos": [
-                                0.7323529720306396,
-                                0.9778212904930115
+                                0.5506807565689087,
+                                0.9514042139053345
                             ],
                             "texture_guid": "bd0a7c29-ace7-3748-9bb0-beba7ab453fd",
                             "texture_scale": [
-                                0.015335396863520145,
-                                0.011684111319482327
+                                0.01262452732771635,
+                                0.009618687443435192
                             ]
                         },
                         "UIElement": {
-                            "b_is_enabled": false,
+                            "b_is_enabled": true,
                             "b_is_interactable": true,
                             "layer": 0
                         },
@@ -13468,9 +13530,9 @@
                                 1.0
                             ],
                             "scale": [
-                                0.015335396863520145,
-                                0.011684111319482327,
-                                0.35052335262298584
+                                0.01262452732771635,
+                                0.009618687443435192,
+                                0.2885606288909912
                             ],
                             "size_delta": [
                                 70.0,
@@ -13536,7 +13598,7 @@
                             ]
                         },
                         "UIElement": {
-                            "b_is_enabled": false,
+                            "b_is_enabled": true,
                             "b_is_interactable": true,
                             "layer": 0
                         },
@@ -14247,7 +14309,7 @@
                                 "82bda318-997b-3f40-a7d8-1634ac23bb04"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 19
+                            "siblingIndex": 18
                         },
                         "Layer": {
                             "layer_id": 3,
@@ -20858,7 +20920,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 20
+                            "siblingIndex": 19
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -20964,7 +21026,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 21
+                            "siblingIndex": 20
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -21031,22 +21093,36 @@
                             "blendMode": 0,
                             "colorOverLifetime": [
                                 {
-                                    "color": [0.78, 0.74, 0.68, 0.95],
+                                    "color": [
+                                        0.7799999713897705,
+                                        0.7400000095367432,
+                                        0.6800000071525574,
+                                        0.949999988079071
+                                    ],
                                     "time": 0.0
                                 },
                                 {
-                                    "color": [0.52, 0.49, 0.45, 0.0],
+                                    "color": [
+                                        0.5199999809265137,
+                                        0.49000000953674316,
+                                        0.44999998807907104,
+                                        0.0
+                                    ],
                                     "time": 1.0
                                 }
                             ],
                             "directionMode": 0,
                             "directionSpace": 0,
-                            "drag": 0.9,
-                            "emissionDirection": [0.0, 1.0, 0.0],
+                            "drag": 0.8999999761581421,
+                            "emissionDirection": [
+                                0.0,
+                                1.0,
+                                0.0
+                            ],
                             "emissionRate": 20.0,
                             "emissionShape": 0,
                             "emissionSpread": 64.0,
-                            "gravityMultiplier": 1.8,
+                            "gravityMultiplier": 1.7999999523162842,
                             "lifetime": 2.0,
                             "lifetimeVariance": 0.0,
                             "looping": false,
@@ -21056,7 +21132,11 @@
                             "playOnAwake": false,
                             "renderShape": 1,
                             "shapeParams": {
-                                "boxHalfExtents": [0.5, 0.5, 0.5],
+                                "boxHalfExtents": [
+                                    0.5,
+                                    0.5,
+                                    0.5
+                                ],
                                 "circleArc": 360.0,
                                 "circleRadius": 0.5,
                                 "coneAngle": 25.0,
@@ -21067,11 +21147,11 @@
                             "sizeOverLifetime": [
                                 {
                                     "time": 0.0,
-                                    "value": 0.8
+                                    "value": 0.800000011920929
                                 },
                                 {
-                                    "time": 0.4,
-                                    "value": 0.45
+                                    "time": 0.4000000059604645,
+                                    "value": 0.44999998807907104
                                 },
                                 {
                                     "time": 1.0,
@@ -21082,14 +21162,28 @@
                             "softEdge": 0.0,
                             "sortMode": 0,
                             "speed": 2.5,
-                            "speedVariance": 0.95,
-                            "startColor": [0.72, 0.68, 0.62, 0.95],
-                            "startColorVariance": [0.08, 0.08, 0.08, 0.04],
+                            "speedVariance": 0.949999988079071,
+                            "startColor": [
+                                0.7200000286102295,
+                                0.6800000071525574,
+                                0.6200000047683716,
+                                0.949999988079071
+                            ],
+                            "startColorVariance": [
+                                0.07999999821186066,
+                                0.07999999821186066,
+                                0.07999999821186066,
+                                0.03999999910593033
+                            ],
                             "startRotation": 0.0,
                             "startRotationVariance": 35.0,
-                            "startSize": 0.05,
-                            "startSizeVariance": 0.016,
-                            "velocityOverLifetime": [0.0, 0.0, 0.0],
+                            "startSize": 0.05000000074505806,
+                            "startSizeVariance": 0.01600000075995922,
+                            "velocityOverLifetime": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
                             "velocityOverLifetimeEnabled": false
                         },
                         "RigidBody3D": {
@@ -21153,7 +21247,7 @@
                                 "907a1195-b2a6-0043-8310-bf00276c7d9f"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 22
+                            "siblingIndex": 21
                         },
                         "Layer": {
                             "layer_id": 3,
@@ -21808,7 +21902,7 @@
                                 "f43d5820-93eb-b846-9f31-f2adea46d86e"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 23
+                            "siblingIndex": 22
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -25478,7 +25572,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 24
+                            "siblingIndex": 23
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -25545,22 +25639,41 @@
                             "blendMode": 1,
                             "colorOverLifetime": [
                                 {
-                                    "color": [1.0, 0.9800000190734863, 0.8799999952316284, 1.0],
+                                    "color": [
+                                        1.0,
+                                        0.9800000190734863,
+                                        0.8799999952316284,
+                                        1.0
+                                    ],
                                     "time": 0.0
                                 },
                                 {
-                                    "color": [1.0, 0.7799999713897705, 0.36000001430511475, 0.6200000047683716],
+                                    "color": [
+                                        1.0,
+                                        0.7799999713897705,
+                                        0.36000001430511475,
+                                        0.6200000047683716
+                                    ],
                                     "time": 0.3499999940395355
                                 },
                                 {
-                                    "color": [1.0, 0.36000001430511475, 0.07999999821186066, 0.0],
+                                    "color": [
+                                        1.0,
+                                        0.36000001430511475,
+                                        0.07999999821186066,
+                                        0.0
+                                    ],
                                     "time": 1.0
                                 }
                             ],
                             "directionMode": 0,
                             "directionSpace": 0,
                             "drag": 0.8999999761581421,
-                            "emissionDirection": [0.0, 0.0, 1.0],
+                            "emissionDirection": [
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
                             "emissionRate": 48.0,
                             "emissionShape": 0,
                             "emissionSpread": 18.0,
@@ -25574,7 +25687,11 @@
                             "playOnAwake": false,
                             "renderShape": 1,
                             "shapeParams": {
-                                "boxHalfExtents": [0.5, 0.5, 0.5],
+                                "boxHalfExtents": [
+                                    0.5,
+                                    0.5,
+                                    0.5
+                                ],
                                 "circleArc": 360.0,
                                 "circleRadius": 0.5,
                                 "coneAngle": 25.0,
@@ -25597,13 +25714,27 @@
                             "sortMode": 1,
                             "speed": 4.5,
                             "speedVariance": 1.7999999523162842,
-                            "startColor": [1.0, 0.9399999976158142, 0.7799999713897705, 1.0],
-                            "startColorVariance": [0.05000000074505806, 0.11999999731779099, 0.2199999988079071, 0.0],
+                            "startColor": [
+                                1.0,
+                                0.9399999976158142,
+                                0.7799999713897705,
+                                1.0
+                            ],
+                            "startColorVariance": [
+                                0.05000000074505806,
+                                0.11999999731779099,
+                                0.2199999988079071,
+                                0.0
+                            ],
                             "startRotation": 0.0,
                             "startRotationVariance": 70.0,
                             "startSize": 0.05999999865889549,
                             "startSizeVariance": 0.019999999552965164,
-                            "velocityOverLifetime": [0.0, 0.0, 0.0],
+                            "velocityOverLifetime": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
                             "velocityOverLifetimeEnabled": false
                         },
                         "Tag": {
