@@ -14,7 +14,9 @@ namespace PAIN {
         glm::vec3 position = glm::vec3(0.0f);
         glm::vec3 velocity = glm::vec3(0.0f);
         glm::vec4 color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+        glm::vec4 initialColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
         float size = 1.0f;
+        float initialSize = 1.0f;
         float rotation = 0.0f;          // radians
         float angularVelocity = 0.0f;   // radians / sec
         float lifetime = 1.0f;    // Total lifetime
@@ -211,19 +213,29 @@ namespace PAIN {
 
             if (!m_HasPreviousEmitterPosition) {
                 m_PreviousEmitterPosition = emitterPosition;
+                m_PreviousEmitterRotation = emitterRotation;
                 m_HasPreviousEmitterPosition = true;
             }
 
             if (m_Config.simulationSpace == ParticleSimulationSpace::Local) {
                 const glm::vec3 delta = emitterPosition - m_PreviousEmitterPosition;
-                if (delta != glm::vec3(0.0f)) {
+                const glm::quat currentEmitterRotation = glm::normalize(emitterRotation);
+                const glm::quat previousEmitterRotation = glm::normalize(m_PreviousEmitterRotation);
+                const glm::quat deltaRotation = glm::normalize(currentEmitterRotation * glm::inverse(previousEmitterRotation));
+                const bool hasTranslationDelta = glm::dot(delta, delta) > 0.0000001f;
+                const bool hasRotationDelta = glm::abs(deltaRotation.w - 1.0f) > 0.00001f;
+
+                if (hasTranslationDelta || hasRotationDelta) {
                     for (int idx : m_Pool.GetAliveIndices()) {
                         Particle& p = m_Pool.GetParticle(idx);
-                        p.position += delta;
+                        const glm::vec3 localOffset = p.position - m_PreviousEmitterPosition;
+                        const glm::vec3 rotatedOffset = hasRotationDelta ? (deltaRotation * localOffset) : localOffset;
+                        p.position = emitterPosition + rotatedOffset;
                     }
                 }
             }
             m_PreviousEmitterPosition = emitterPosition;
+            m_PreviousEmitterRotation = emitterRotation;
             
             // Check play duration
             m_Config.currentPlayTime += deltaTime;
@@ -259,6 +271,7 @@ namespace PAIN {
         // Emission accumulation for fractional particles
         float m_EmissionAccumulator = 0.0f;
         glm::vec3 m_PreviousEmitterPosition = glm::vec3(0.0f);
+        glm::quat m_PreviousEmitterRotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
         bool m_HasPreviousEmitterPosition = false;
 
         static void SortCurves(ParticleSystemComponent& config) {
@@ -276,15 +289,15 @@ namespace PAIN {
             m_Config.playOnAwake = config.playOnAwake;
             m_Config.particleTexture = config.particleTexture;
             m_Config.renderShape = config.renderShape;
-            m_Config.softEdge = config.softEdge;
-            m_Config.startSize = config.startSize;
-            m_Config.startSizeVariance = config.startSizeVariance;
-            m_Config.startColor = config.startColor;
-            m_Config.startColorVariance = config.startColorVariance;
-            m_Config.emissionRate = config.emissionRate;
-            m_Config.maxParticles = config.maxParticles;
-            m_Config.speed = config.speed;
-            m_Config.speedVariance = config.speedVariance;
+            m_Config.softEdge = glm::clamp(config.softEdge, 0.0f, 1.0f);
+            m_Config.startSize = glm::max(0.01f, config.startSize);
+            m_Config.startSizeVariance = glm::max(0.0f, config.startSizeVariance);
+            m_Config.startColor = glm::clamp(config.startColor, glm::vec4(0.0f), glm::vec4(1.0f));
+            m_Config.startColorVariance = glm::max(config.startColorVariance, glm::vec4(0.0f));
+            m_Config.emissionRate = glm::max(0.0f, config.emissionRate);
+            m_Config.maxParticles = glm::max(1, config.maxParticles);
+            m_Config.speed = glm::max(0.0f, config.speed);
+            m_Config.speedVariance = glm::max(0.0f, config.speedVariance);
             m_Config.velocityOverLifetimeEnabled = config.velocityOverLifetimeEnabled;
             m_Config.velocityOverLifetime = config.velocityOverLifetime;
             m_Config.gravityMultiplier = config.gravityMultiplier;
@@ -295,8 +308,13 @@ namespace PAIN {
             m_Config.angularVelocityVariance = config.angularVelocityVariance;
             m_Config.emissionShape = config.emissionShape;
             m_Config.shapeParams = config.shapeParams;
+            m_Config.shapeParams.sphereRadius = glm::max(0.0f, m_Config.shapeParams.sphereRadius);
+            m_Config.shapeParams.boxHalfExtents = glm::max(m_Config.shapeParams.boxHalfExtents, glm::vec3(0.0f));
+            m_Config.shapeParams.circleRadius = glm::max(0.0f, m_Config.shapeParams.circleRadius);
+            m_Config.shapeParams.circleArc = glm::clamp(m_Config.shapeParams.circleArc, 0.0f, 360.0f);
+            m_Config.shapeParams.coneAngle = glm::clamp(m_Config.shapeParams.coneAngle, 0.0f, 89.0f);
             m_Config.emissionDirection = config.emissionDirection;
-            m_Config.emissionSpread = config.emissionSpread;
+            m_Config.emissionSpread = glm::clamp(config.emissionSpread, 0.0f, 180.0f);
             m_Config.directionMode = config.directionMode;
             m_Config.directionSpace = config.directionSpace;
             m_Config.sizeOverLifetime = config.sizeOverLifetime;
@@ -342,7 +360,8 @@ namespace PAIN {
                 
                 // Set initial size with variance
                 float sizeVariance = m_Config.startSizeVariance * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
-                p.size = m_Config.startSize + sizeVariance;
+                p.initialSize = glm::max(0.0f, m_Config.startSize + sizeVariance);
+                p.size = p.initialSize;
 
                 // Set initial rotation and angular velocity
                 float startRotVariance = m_Config.startRotationVariance * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
@@ -352,11 +371,13 @@ namespace PAIN {
                 p.angularVelocity = glm::radians(m_Config.angularVelocity + angularVelVariance);
                 
                 // Set initial color with variance
-                p.color = m_Config.startColor;
-                p.color.r += m_Config.startColorVariance.r * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
-                p.color.g += m_Config.startColorVariance.g * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
-                p.color.b += m_Config.startColorVariance.b * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
-                p.color.a += m_Config.startColorVariance.a * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
+                p.initialColor = m_Config.startColor;
+                p.initialColor.r += m_Config.startColorVariance.r * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
+                p.initialColor.g += m_Config.startColorVariance.g * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
+                p.initialColor.b += m_Config.startColorVariance.b * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
+                p.initialColor.a += m_Config.startColorVariance.a * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f);
+                p.initialColor = glm::clamp(p.initialColor, glm::vec4(0.0f), glm::vec4(1.0f));
+                p.color = p.initialColor;
             }
         }
         
@@ -481,10 +502,10 @@ namespace PAIN {
                 // Update size based on lifetime curve
                 float normalizedAge = p.age / p.lifetime;
                 const float sizeFactor = EvaluateSizeCurve(normalizedAge) * m_Config.sizeOverLifetimeMultiplier;
-                p.size = glm::max(0.0f, m_Config.startSize * sizeFactor);
+                p.size = glm::max(0.0f, p.initialSize * sizeFactor);
                 
                 // Update color based on lifetime curve
-                p.color = m_Config.startColor * EvaluateColorCurve(normalizedAge);
+                p.color = glm::clamp(p.initialColor * EvaluateColorCurve(normalizedAge), glm::vec4(0.0f), glm::vec4(1.0f));
             }
         }
         

@@ -1516,6 +1516,10 @@ namespace PAIN {
 			static GLint locUseTexture = -1;
 			static GLint locShape = -1;
 			static GLint locSoftEdge = -1;
+			static GLint locSceneDepth = -1;
+			static GLint locInvScreenSize = -1;
+			static GLint locDepthFadeDistance = -1;
+			static GLint locNearFar = -1;
 			if (cachedUniformProgram != particleProgram) {
 				cachedUniformProgram = particleProgram;
 				locTexSampler = glGetUniformLocation(particleProgram, "tex");
@@ -1524,6 +1528,10 @@ namespace PAIN {
 				locUseTexture = glGetUniformLocation(particleProgram, "u_UseTexture");
 				locShape = glGetUniformLocation(particleProgram, "u_Shape");
 				locSoftEdge = glGetUniformLocation(particleProgram, "u_SoftEdge");
+				locSceneDepth = glGetUniformLocation(particleProgram, "u_SceneDepth");
+				locInvScreenSize = glGetUniformLocation(particleProgram, "u_InvScreenSize");
+				locDepthFadeDistance = glGetUniformLocation(particleProgram, "u_DepthFadeDistance");
+				locNearFar = glGetUniformLocation(particleProgram, "u_NearFar");
 			}
 
 			// Billboard quad vertices (centered at origin, facing +Z)
@@ -1638,6 +1646,9 @@ namespace PAIN {
 			if (locTexSampler >= 0) {
 				glUniform1i(locTexSampler, 0);
 			}
+			if (locSceneDepth >= 0) {
+				glUniform1i(locSceneDepth, 1);
+			}
 			logParticleGLError("set tex uniform");
 
 			// Set view and projection matrices
@@ -1647,10 +1658,32 @@ namespace PAIN {
 			if (locProjection >= 0) {
 				glUniformMatrix4fv(locProjection, 1, GL_FALSE, &activeCam->projection()[0][0]);
 			}
+			if (locInvScreenSize >= 0) {
+				auto windowService = services.lock()->get<Window::Window>();
+				glm::vec2 fb(1.0f, 1.0f);
+				if (windowService) {
+					auto frameBuffer = windowService->getFrameBuffer();
+					fb = glm::vec2(static_cast<float>(frameBuffer.x), static_cast<float>(frameBuffer.y));
+				}
+				const float safeW = glm::max(1.0f, fb.x);
+				const float safeH = glm::max(1.0f, fb.y);
+				glUniform2f(locInvScreenSize, 1.0f / safeW, 1.0f / safeH);
+			}
+			if (locDepthFadeDistance >= 0) {
+				glUniform1f(locDepthFadeDistance, 2.5f);
+			}
+			if (locNearFar >= 0) {
+				glUniform2f(locNearFar, activeCam->near_plane, activeCam->far_plane);
+			}
 			logParticleGLError("set VP uniforms");
 
 			glBindVertexArray(quadVAO);
 			logParticleGLError("bind particle vao");
+
+			const GLuint sceneDepthTexture = rendererService->w_renderer->getSceneDepthTexture();
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, sceneDepthTexture);
+			glActiveTexture(GL_TEXTURE0);
 
 			std::vector<float> instanceData;
 			instanceData.reserve(2048);
@@ -1729,8 +1762,12 @@ namespace PAIN {
 				GLuint particleTextureId = 0;
 				if (assetManager && ps.particleTexture.IsValid()) {
 					auto textureOpt = assetManager->getAsset<Assets::Texture>(ps.particleTexture);
-					if (textureOpt.has_value() && textureOpt.value() && textureOpt.value()->gl_texture != 0) {
-						particleTextureId = textureOpt.value()->gl_texture;
+					if (textureOpt.has_value() && textureOpt.value()) {
+						auto textureAsset = textureOpt.value();
+						if (textureAsset->gl_texture == 0) {
+							rendererService->uploadTexture(textureAsset);
+						}
+						particleTextureId = textureAsset->gl_texture;
 					}
 				}
 
@@ -1769,6 +1806,9 @@ namespace PAIN {
 				logParticleGLError("draw instanced particles");
 			}
 
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, 0);
+			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, 0);
 			glBindVertexArray(0);
 			glUseProgram(0);

@@ -213,6 +213,10 @@ namespace PAIN {
 			return final_texture;
 		}
 
+		unsigned int getSceneDepthTexture() const {
+			return ds_depth_texture;
+		}
+
 		unsigned int getMinimapTexture() const {
 			return minimap_texture;
 		}

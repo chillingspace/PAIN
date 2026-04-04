@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "cs2 master audio.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 1588640986369318129
+  },
+  "descriptor_version": 1,
+  "guid": "74d5c07c-754f-6f4e-b04c-81da789b5e52",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": false,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\sfx\\cutscenes\\cs2 master audio.wav"
+  }
+}
