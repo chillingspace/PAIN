@@ -41,8 +41,8 @@ local SFX_ALERT_LOOP = "game/audio/sfx/enemy/Enemy_Alert_Loop_v1.wav"
 local alertLoopChannel = -1
 
 -- SFX volumes
-local VOL_ALERT_HIT  = 0.0
-local VOL_ALERT_LOOP = 0.0
+local VOL_ALERT_HIT  = 0.8
+local VOL_ALERT_LOOP = 0.7
 
 -- internal state
 ui.active         = false
@@ -152,13 +152,8 @@ function ui.begin(enemyEntity, autoConfirmHit)
     triggerDangerHapticPulse()
 
     if alertSfxCooldown <= 0 then
-        if enemyEntity then
-            audioPlaySFXFromEntity(SFX_ALERT_HIT, enemyEntity, VOL_ALERT_HIT)
-            alertLoopChannel = audioPlaySFXFromEntity(SFX_ALERT_LOOP, enemyEntity, VOL_ALERT_LOOP, true)
-        else
-            audioPlaySFX(SFX_ALERT_HIT, VOL_ALERT_HIT)
-            alertLoopChannel = audioPlaySFX(SFX_ALERT_LOOP, VOL_ALERT_LOOP, true)
-        end
+        audioPlaySFX(SFX_ALERT_HIT, VOL_ALERT_HIT)
+        alertLoopChannel = audioPlaySFX(SFX_ALERT_LOOP, VOL_ALERT_LOOP, true)
         alertSfxCooldown = ALERT_SFX_COOLDOWN_TIME
 
         if alertLoopChannel >= 0 then
