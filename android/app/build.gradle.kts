@@ -91,7 +91,7 @@ android {
             versionNameSuffix = "-DEBUG"    // Version shows as "1.0-DEBUG"
             
             // Different app name in launcher to distinguish them
-            manifestPlaceholders["appName"] = "Ribbit Express (Debug)"
+            manifestPlaceholders["appName"] = "Friends Frog-Ever (Debug)"
             
             // For debug/emulator: Only ARM to avoid KTX x86 compilation error
             // Modern emulators can use ARM via translation
@@ -118,7 +118,7 @@ android {
 
             
             // Production app name
-            manifestPlaceholders["appName"] = "Ribbit Express"
+            manifestPlaceholders["appName"] = "Friends Frog-Ever"
             
             // Optimize native builds
             externalNativeBuild {
