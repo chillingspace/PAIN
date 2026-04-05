@@ -20,6 +20,8 @@ local SFX_PIPE_IN   = "game/audio/sfx/player/hide/Box In.wav"   -- swap pipe sfx
 local SFX_PIPE_OUT  = "game/audio/sfx/player/hide/Box Out.wav"
 local SFX_COLLECT   = "game/audio/sfx/Gear Pick Up.wav"
 local SFX_DELIVER   = "game/audio/sfx/Gear Put Down.wav"
+local SFX_SUCCESS   = "game/audio/sfx/success_short_jingle.wav"
+local SFX_WIN_MUSIC = "game/audio/music/WinScreen_v1.wav"
 
 -- Pipe group suffixes — tag pipe ends as "pipe_entrance_A" / "pipe_exit_A", etc.
 local PIPE_GROUPS = { "A","B","C","D","E","F","G","H","I","J","K","L","M","N","O",
@@ -32,6 +34,8 @@ local VOL_RESPAWN = -3.0
 local VOL_HIDE = 0.0
 local VOL_COLLECT = 0.0
 local VOL_DELIVER = 0.0
+local VOL_SUCCESS = 0.0
+local VOL_WIN_MUSIC = 0.0
 
 
 -- global so other scripts can use
@@ -160,6 +164,10 @@ local function triggerGameWin()
     if S.gameEnded then return end
     S.gameEnded = true
     S.gameWon   = true
+
+    -- Play win screen music (one-shot, no loop)
+    if audioPlaySFX then audioPlaySFX(SFX_WIN_MUSIC, VOL_WIN_MUSIC) end
+
     SetGamePaused(S.gameWon) 
     requestEndOverlay("win")
 end
@@ -682,6 +690,13 @@ local function completeDeliverySequence()
     S.lettersDelivered = (S.lettersDelivered or 0) + 1
 
     if audioPlaySFX then audioPlaySFX(SFX_DELIVER, VOL_DELIVER) end
+
+    -- Play success jingle 1 second after deliver SFX (non-blocking, won't cut off SFX_DELIVER)
+    if setTimeout and audioPlaySFX then
+        setTimeout(function()
+            audioPlaySFX(SFX_SUCCESS, VOL_SUCCESS)
+        end, 1.0)
+    end
 
     log(string.format("[PlayerState] Delivered letter %d / %d", S.lettersDelivered, S.lettersToWin or 3))
 

@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "Main_Menu_BGM_v1.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 17041521686335693231
+  },
+  "descriptor_version": 1,
+  "guid": "b6310086-d594-074f-8a6e-911a43657662",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": true,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\bgm\\Main_Menu_BGM_v1.wav"
+  }
+}

@@ -43,7 +43,7 @@ local CONFIG = {
     
     -- Default volumes (dB)
     defaultVolume = 0.0,    -- Full volume
-    ambientVolume = -6.0,   -- Ambient slightly quieter
+    ambientVolume = -3.0,   -- Ambient slightly quieter
     mutedVolume = -80.0     -- Muted
 }
 
@@ -184,25 +184,17 @@ end
 
 -- ==================== GAME OVER DUCKING ====================
 function GlobalAudio_SetGameOver(active)
-    -- Only relevant for Tutorial and Level1 where we have BGM + Game Over Loop
-    if currentScene ~= "tutorial" and currentScene ~= "level1" and currentScene ~= "level2" and currentScene ~= "level" then return end
-    
     local trackCount = globalBGMGetTrackCount()
     if trackCount < 1 then return end
 
     if active then
-        -- Duck Main BGM (Track 0) to 0.1 linear volume
-        local duckVol = linearToDb(0.0)
-        globalBGMFade(0, duckVol, 0.5)
-        log("[GlobalAudio] Game Over: Ducking BGM to 0.1")
+        -- Duck Main BGM (Track 0) to silence so game-over SFX is clearly audible
+        local duckVol = linearToDb(0.0)  -- -80 dB (silence)
+        globalBGMFade(0, duckVol, 0.3)
+        log("[GlobalAudio] Game Over: Ducking main BGM to silence")
     else
-        -- Restore original volume
-        local targetVol = CONFIG.defaultVolume
-        if currentScene == "tutorial" then targetVol = linearToDb(TUTORIAL_BGM_VOLUME_SCALE) end
-        if currentScene == "level1"   then targetVol = linearToDb(LEVEL1_BGM_VOLUME_SCALE) end
-        if currentScene == "level2"   then targetVol = linearToDb(LEVEL2_BGM_VOLUME_SCALE) end
-
-        globalBGMFade(0, targetVol, 1.0)
+        -- Restore scene-appropriate volumes
+        applySceneVolumes()
         log("[GlobalAudio] Game Over Ended: Restoring BGM")
     end
 end

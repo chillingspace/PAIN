@@ -1,0 +1,20 @@
+{
+  "asset_info": {
+    "name": "WinScreen_v1.wav",
+    "type": "Audio"
+  },
+  "build_data": {
+    "hash": 1337810880220574769
+  },
+  "descriptor_version": 1,
+  "guid": "13238d99-4376-5045-9090-55618dee50cb",
+  "import_settings": {
+    "compression": "OGG",
+    "extension": ".ogg",
+    "loop": true,
+    "quality": 0.8
+  },
+  "meta_data": {
+    "source_file": "game\\audio\\music\\WinScreen_v1.wav"
+  }
+}
