@@ -3107,7 +3107,7 @@
                                         0.0,
                                         0.0
                                     ],
-                                    "texture_guid": "b04a897d-7fb8-3142-914c-9fd583d244f3",
+                                    "texture_guid": "75bbd8a8-3b2a-f54a-97a3-dbc5c5d8c02d",
                                     "texture_scale": [
                                         2.0,
                                         1.0
@@ -3124,7 +3124,7 @@
                                 0.0,
                                 0.0
                             ],
-                            "texture_guid": "b04a897d-7fb8-3142-914c-9fd583d244f3",
+                            "texture_guid": "75bbd8a8-3b2a-f54a-97a3-dbc5c5d8c02d",
                             "texture_scale": [
                                 2.0,
                                 1.0
@@ -11027,7 +11027,7 @@
                             "normal_color": -1,
                             "payload": "",
                             "pressed_color": -5592406,
-                            "state": "Normal"
+                            "state": "Highlighted"
                         },
                         "UIElement": {
                             "b_is_enabled": true,
@@ -11082,9 +11082,9 @@
                         },
                         "UVCoordinates": {
                             "uv": [
-                                0.0016556291375309229,
+                                0.501655638217926,
                                 0.009615384973585606,
-                                0.498344361782074,
+                                0.998344361782074,
                                 0.9903846383094788
                             ]
                         }
