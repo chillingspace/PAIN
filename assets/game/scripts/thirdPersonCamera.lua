@@ -501,6 +501,10 @@ registerUpdate(function(dt)
         frozenTx, frozenTy, frozenTz = lx, ly, lz
 
         cameraSetTransform(pipeCamX, pipeCamY, pipeCamZ, lx, ly, lz, upX, upY, upZ)
+        _G.CurrentGameplayCamera = {
+            px = pipeCamX, py = pipeCamY, pz = pipeCamZ,
+            lx = lx, ly = ly, lz = lz,
+        }
         return
     end
     -- Not in pipe: reset so next entry transitions from current position
@@ -571,6 +575,11 @@ registerUpdate(function(dt)
         smoothX, smoothY + 0.1, smoothZ, -- Target
         0.0, 1.0, 0.0
     )
+
+    _G.CurrentGameplayCamera = {
+        px = cx, py = cy, pz = cz,
+        lx = smoothX, ly = smoothY + 0.1, lz = smoothZ,
+    }
 
     _G.CameraState.yaw   = yaw
     _G.CameraState.pitch = pitch

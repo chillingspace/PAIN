@@ -650,6 +650,66 @@ local function lerp(a, b, t)
     return a + (b - a) * t
 end
 
+local function normalizeVector3(x, y, z)
+    local len = math.sqrt((x * x) + (y * y) + (z * z))
+    if len < 0.0001 then
+        return 0.0, 0.0, 1.0
+    end
+    return x / len, y / len, z / len
+end
+
+local function hasClearDeliveryView(camX, camY, camZ, lookX, lookY, lookZ)
+    if not hasLineOfSight then
+        return true
+    end
+    return hasLineOfSight(camX, camY, camZ, lookX, lookY, lookZ)
+end
+
+local function selectDeliveryCameraShot(deliveryPoint, px, py, pz, cfg)
+    local rx, ry, rz = getPosition(deliveryPoint)
+    local lookX = rx
+    local lookY = ry + cfg.lookHeight
+    local lookZ = rz
+
+    local liveCam = _G.CurrentGameplayCamera
+    local camDirX, camDirY, camDirZ
+    local shotTag = "live_camera"
+
+    if liveCam and liveCam.px and liveCam.py and liveCam.pz then
+        camDirX = liveCam.px - px
+        camDirY = liveCam.py - py
+        camDirZ = liveCam.pz - pz
+    else
+        local fallbackX = px - rx
+        local fallbackY = cfg.camHeight
+        local fallbackZ = pz - rz
+        camDirX, camDirY, camDirZ = fallbackX, fallbackY, fallbackZ
+        shotTag = "fallback_camera"
+    end
+
+    camDirX, camDirY, camDirZ = normalizeVector3(camDirX, camDirY, camDirZ)
+
+    local desiredX = lookX + camDirX * cfg.camDistance
+    local desiredY = lookY + camDirY * cfg.camDistance
+    local desiredZ = lookZ + camDirZ * cfg.camDistance
+
+    local camX, camY, camZ = desiredX, desiredY, desiredZ
+    if cameraGetPositionWithCollision then
+        camX, camY, camZ = cameraGetPositionWithCollision(
+            lookX, lookY, lookZ,
+            desiredX, desiredY, desiredZ,
+            S.player or deliveryPoint
+        )
+        shotTag = shotTag .. "_collision"
+    end
+
+    if not hasClearDeliveryView(camX, camY, camZ, lookX, lookY, lookZ) then
+        return desiredX, desiredY, desiredZ, lookX, lookY, lookZ, shotTag .. "_blocked"
+    end
+
+    return camX, camY, camZ, lookX, lookY, lookZ, shotTag
+end
+
 local function ensureDeliveryLight()
     local deliveryObjective = S.deliveryObjective
     local sparkCfg = S.deliverySparkConfig
@@ -817,23 +877,10 @@ local function beginDeliverySequence(deliveryPoint, px, py, pz)
     hidePressed = false
     resetInputState()
 
-    local rx, ry, rz = getPosition(deliveryPoint)
-    local dx = px - rx
-    local dz = pz - rz
-    local len = math.sqrt(dx * dx + dz * dz)
-    if len < 0.0001 then
-        dx, dz, len = 0.0, 1.0, 1.0
-    end
-    dx = dx / len
-    dz = dz / len
-
     local cfg = getDeliverySequenceConfig()
-    local camX = rx + dx * cfg.camDistance
-    local camY = ry + cfg.camHeight
-    local camZ = rz + dz * cfg.camDistance
-    local lookX = rx
-    local lookY = ry + cfg.lookHeight
-    local lookZ = rz
+    local camX, camY, camZ, lookX, lookY, lookZ, shotTag = selectDeliveryCameraShot(deliveryPoint, px, py, pz, cfg)
+
+    log(string.format("[PlayerState] Delivery camera shot selected: %s", tostring(shotTag)))
 
     S.deliverySparkElapsed = 0.0
     S.deliverySparkConfig = cfg
