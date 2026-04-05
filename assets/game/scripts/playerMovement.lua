@@ -81,7 +81,12 @@ local ALL_LISTEN_KEYS = {
     "A","B","C","D","E","F","G","H","I","J","K","L","M",
     "N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
     "0","1","2","3","4","5","6","7","8","9",
-    "SPACE","TAB","LSHIFT","RSHIFT"
+    "SPACE","TAB","ENTER",
+    "LSHIFT","RSHIFT","LCTRL","RCTRL","LALT","RALT","CAPSLOCK",
+    "KEY_U","KEY_D","KEY_L","KEY_R",
+    "COMMA","PERIOD","SLASH","SEMICOLON","APOSTROPHE",
+    "EQUAL","MINUS","LBRACKET","RBRACKET","BACKSLASH","GRAVE",
+    "DELETE","INSERT","HOME","END","PAGEUP","PAGEDOWN"
 }
 
 for _, keyName in ipairs(ALL_LISTEN_KEYS) do

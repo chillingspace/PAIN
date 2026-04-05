@@ -270,11 +270,36 @@ namespace PAIN {
             case GLFW_KEY_DOWN: return "KEY_D";
             case GLFW_KEY_UP: return "KEY_U";
 
-            // Shift keys
+            // Modifier keys
             case GLFW_KEY_LEFT_SHIFT: return "LSHIFT";
             case GLFW_KEY_RIGHT_SHIFT: return "RSHIFT";
             case GLFW_KEY_LEFT_CONTROL: return "LCTRL";
             case GLFW_KEY_RIGHT_CONTROL: return "RCTRL";
+            case GLFW_KEY_LEFT_ALT: return "LALT";
+            case GLFW_KEY_RIGHT_ALT: return "RALT";
+            case GLFW_KEY_CAPS_LOCK: return "CAPSLOCK";
+
+            // Punctuation / symbol keys
+            case GLFW_KEY_COMMA: return "COMMA";
+            case GLFW_KEY_PERIOD: return "PERIOD";
+            case GLFW_KEY_SLASH: return "SLASH";
+            case GLFW_KEY_SEMICOLON: return "SEMICOLON";
+            case GLFW_KEY_APOSTROPHE: return "APOSTROPHE";
+            case GLFW_KEY_EQUAL: return "EQUAL";
+            case GLFW_KEY_MINUS: return "MINUS";
+            case GLFW_KEY_LEFT_BRACKET: return "LBRACKET";
+            case GLFW_KEY_RIGHT_BRACKET: return "RBRACKET";
+            case GLFW_KEY_BACKSLASH: return "BACKSLASH";
+            case GLFW_KEY_GRAVE_ACCENT: return "GRAVE";
+
+            // Navigation / editing keys
+            case GLFW_KEY_BACKSPACE: return "BACKSPACE";
+            case GLFW_KEY_DELETE: return "DELETE";
+            case GLFW_KEY_INSERT: return "INSERT";
+            case GLFW_KEY_HOME: return "HOME";
+            case GLFW_KEY_END: return "END";
+            case GLFW_KEY_PAGE_UP: return "PAGEUP";
+            case GLFW_KEY_PAGE_DOWN: return "PAGEDOWN";
 #endif
 
 #ifdef PN_PLATFORM_ANDROID

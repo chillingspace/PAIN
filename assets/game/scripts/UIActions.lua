@@ -63,7 +63,8 @@ local KB_DEFAULTS = {
 
 local KB_ACTION_NAMES = { "forward", "left", "right", "backward", "jump", "hide" }
 
--- Valid keys that can be used for rebinding (excludes F-keys, system keys, arrows)
+-- Valid keys that can be used for rebinding
+-- Excludes: ESCAPE (cancel), F1-F12, Windows key, etc.
 local KB_VALID_KEYS = {}
 for c = string.byte("A"), string.byte("Z") do
     KB_VALID_KEYS[string.char(c)] = true
@@ -73,8 +74,38 @@ for i = 0, 9 do
 end
 KB_VALID_KEYS["SPACE"]  = true
 KB_VALID_KEYS["TAB"]    = true
+KB_VALID_KEYS["ENTER"]  = true
 KB_VALID_KEYS["LSHIFT"] = true
 KB_VALID_KEYS["RSHIFT"] = true
+KB_VALID_KEYS["LCTRL"]  = true
+KB_VALID_KEYS["RCTRL"]  = true
+KB_VALID_KEYS["LALT"]   = true
+KB_VALID_KEYS["RALT"]   = true
+KB_VALID_KEYS["CAPSLOCK"] = true
+KB_VALID_KEYS["KEY_U"]  = true  -- Arrow Up
+KB_VALID_KEYS["KEY_D"]  = true  -- Arrow Down
+KB_VALID_KEYS["KEY_L"]  = true  -- Arrow Left
+KB_VALID_KEYS["KEY_R"]  = true  -- Arrow Right
+-- Punctuation / symbol keys
+KB_VALID_KEYS["COMMA"]      = true
+KB_VALID_KEYS["PERIOD"]     = true
+KB_VALID_KEYS["SLASH"]      = true
+KB_VALID_KEYS["SEMICOLON"]  = true
+KB_VALID_KEYS["APOSTROPHE"] = true
+KB_VALID_KEYS["EQUAL"]      = true
+KB_VALID_KEYS["MINUS"]      = true
+KB_VALID_KEYS["LBRACKET"]   = true
+KB_VALID_KEYS["RBRACKET"]   = true
+KB_VALID_KEYS["BACKSLASH"]  = true
+KB_VALID_KEYS["GRAVE"]      = true
+-- Navigation / editing keys
+KB_VALID_KEYS["BACKSPACE"]  = false  -- BACKSPACE is used to unbind (set to NIL)
+KB_VALID_KEYS["DELETE"]     = true
+KB_VALID_KEYS["INSERT"]     = true
+KB_VALID_KEYS["HOME"]       = true
+KB_VALID_KEYS["END"]        = true
+KB_VALID_KEYS["PAGEUP"]     = true
+KB_VALID_KEYS["PAGEDOWN"]   = true
 
 -- Init global table
 _G.KeyBindings = _G.KeyBindings or {}
@@ -128,17 +159,60 @@ end
 -- Rebinding state
 KB._pendingRebind = nil
 KB._pendingEntity = nil
+KB._previousKey = nil  -- stores old key for cancel/restore
+
+-- Maps action name to UI entity name ("backward" -> "controls_back")
+local ACTION_TO_ENTITY = {
+    forward  = "controls_forward",
+    left     = "controls_left",
+    right    = "controls_right",
+    backward = "controls_back",
+    jump     = "controls_jump",
+    hide     = "controls_hide",
+}
+
+function KB.getEntityForAction(action)
+    return ACTION_TO_ENTITY[action] or ("controls_" .. action)
+end
 
 function KB.isValidKey(keyName)
     return KB_VALID_KEYS[keyName] == true
 end
 
 function KB.getDisplayName(keyName)
-    if     keyName == "SPACE"  then return "SPACE"
-    elseif keyName == "LSHIFT" then return "L-SHIFT"
-    elseif keyName == "RSHIFT" then return "R-SHIFT"
-    elseif keyName == "TAB"    then return "TAB"
-    elseif keyName == ""       then return "---"
+    if     keyName == "SPACE"      then return "SPACE"
+    elseif keyName == "ENTER"      then return "ENTER"
+    elseif keyName == "LSHIFT"     then return "L-SHIFT"
+    elseif keyName == "RSHIFT"     then return "R-SHIFT"
+    elseif keyName == "LCTRL"      then return "L-CTRL"
+    elseif keyName == "RCTRL"      then return "R-CTRL"
+    elseif keyName == "LALT"       then return "L-ALT"
+    elseif keyName == "RALT"       then return "R-ALT"
+    elseif keyName == "CAPSLOCK"   then return "CAPS"
+    elseif keyName == "TAB"        then return "TAB"
+    elseif keyName == "KEY_U"      then return "UP"
+    elseif keyName == "KEY_D"      then return "DOWN"
+    elseif keyName == "KEY_L"      then return "LEFT"
+    elseif keyName == "KEY_R"      then return "RIGHT"
+    elseif keyName == "COMMA"      then return ","
+    elseif keyName == "PERIOD"     then return "."
+    elseif keyName == "SLASH"      then return "/"
+    elseif keyName == "SEMICOLON"  then return ";"
+    elseif keyName == "APOSTROPHE" then return "'"
+    elseif keyName == "EQUAL"      then return "="
+    elseif keyName == "MINUS"      then return "-"
+    elseif keyName == "LBRACKET"   then return "["
+    elseif keyName == "RBRACKET"   then return "]"
+    elseif keyName == "BACKSLASH"  then return "\\"
+    elseif keyName == "GRAVE"      then return "`"
+    elseif keyName == "BACKSPACE"  then return "BKSP"
+    elseif keyName == "DELETE"     then return "DEL"
+    elseif keyName == "INSERT"     then return "INS"
+    elseif keyName == "HOME"       then return "HOME"
+    elseif keyName == "END"        then return "END"
+    elseif keyName == "PAGEUP"     then return "PG UP"
+    elseif keyName == "PAGEDOWN"   then return "PG DN"
+    elseif keyName == ""           then return "NIL"
     else   return keyName
     end
 end
@@ -153,8 +227,24 @@ function KB.findActionByKey(keyName)
 end
 
 function KB.startRebind(action, uiEntity)
+    -- If already rebinding a different action, restore the previous one first
+    if KB._pendingRebind and KB._pendingEntity and KB._previousKey then
+        if setUIText then
+            setUIText(KB._pendingEntity, KB.getDisplayName(KB._previousKey))
+        end
+    end
+
     KB._pendingRebind = action
     KB._pendingEntity = uiEntity
+    KB._previousKey = KB[action] or ""
+
+    -- Clear UIText to indicate listening mode
+    if uiEntity and setUIText then
+        setUIText(uiEntity, "")
+    end
+
+    KB._justStartedRebind = true
+
     printLog("[KeyBindings] Waiting for key input to rebind: " .. action)
 end
 
@@ -163,8 +253,9 @@ function KB.tryApplyRebind(keyName)
 
     local action = KB._pendingRebind
 
+    -- Invalid/unrecognized key = cancel rebinding (same as ESC)
     if not KB.isValidKey(keyName) then
-        printLog("[KeyBindings] Invalid key for rebind: " .. tostring(keyName))
+        KB.cancelRebind()
         return true
     end
 
@@ -174,7 +265,8 @@ function KB.tryApplyRebind(keyName)
         KB[existingAction] = ""
         printLog("[KeyBindings] Unbound " .. existingAction .. " (was " .. keyName .. ")")
 
-        local orphanEntity = findEntity("bind_" .. existingAction)
+        local orphanEntityName = KB.getEntityForAction(existingAction)
+        local orphanEntity = findEntity(orphanEntityName)
         if orphanEntity and setUIText then
             setUIText(orphanEntity, KB.getDisplayName(""))
         end
@@ -192,14 +284,22 @@ function KB.tryApplyRebind(keyName)
     KB.saveAll()
     KB._pendingRebind = nil
     KB._pendingEntity = nil
+    KB._previousKey = nil
     return true
 end
 
 function KB.cancelRebind()
     if KB._pendingRebind then
         printLog("[KeyBindings] Rebind cancelled for: " .. KB._pendingRebind)
+
+        -- Restore the original key text
+        if KB._pendingEntity and setUIText and KB._previousKey then
+            setUIText(KB._pendingEntity, KB.getDisplayName(KB._previousKey))
+        end
+
         KB._pendingRebind = nil
         KB._pendingEntity = nil
+        KB._previousKey = nil
     end
 end
 
@@ -1183,16 +1283,14 @@ local handlers = {
             printLog("[UI] Controls reset to defaults")
 
             -- Update all UI text entities for the 6 controls
-            -- The UI entities should be named: "bind_forward", "bind_left", etc.
             local actionNames = { "forward", "left", "right", "backward", "jump", "hide" }
             for _, action in ipairs(actionNames) do
-                local entityName = "bind_" .. action
+                local entityName = KB.getEntityForAction(action)
                 local e = findEntity(entityName)
                 if e and setUIText then
                     local keyName = KB[action] or ""
-                    local displayName = KB.getDisplayName and KB.getDisplayName(keyName) or keyName
-                    setUIText(e, displayName)
-                    printLog("[UI] Reset " .. action .. " display to " .. displayName)
+                    setUIText(e, KB.getDisplayName(keyName))
+                    printLog("[UI] Reset " .. action .. " display to " .. KB.getDisplayName(keyName))
                 end
             end
         end
@@ -1216,7 +1314,12 @@ local REBIND_LISTEN_KEYS = {
     "A","B","C","D","E","F","G","H","I","J","K","L","M",
     "N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
     "0","1","2","3","4","5","6","7","8","9",
-    "SPACE","TAB","LSHIFT","RSHIFT"
+    "SPACE","TAB","ENTER",
+    "LSHIFT","RSHIFT","LCTRL","RCTRL","LALT","RALT","CAPSLOCK",
+    "KEY_U","KEY_D","KEY_L","KEY_R",
+    "COMMA","PERIOD","SLASH","SEMICOLON","APOSTROPHE",
+    "EQUAL","MINUS","LBRACKET","RBRACKET","BACKSLASH","GRAVE",
+    "BACKSPACE","DELETE","INSERT","HOME","END","PAGEUP","PAGEDOWN"
 }
 
 for _, keyName in ipairs(REBIND_LISTEN_KEYS) do
@@ -1224,6 +1327,48 @@ for _, keyName in ipairs(REBIND_LISTEN_KEYS) do
         local KB = _G.KeyBindings
         if KB and KB._pendingRebind then
             KB.tryApplyRebind(keyName)
+        end
+    end)
+end
+
+-- ESC key cancels rebinding
+registerKeyDown("ESCAPE", function()
+    local KB = _G.KeyBindings
+    if KB and KB._pendingRebind then
+        KB.cancelRebind()
+    end
+end)
+
+-- BACKSPACE key unbinds the control (sets to NIL)
+registerKeyDown("BACKSPACE", function()
+    local KB = _G.KeyBindings
+    if not KB or not KB._pendingRebind then return end
+
+    local action = KB._pendingRebind
+    KB[action] = ""
+    printLog("[KeyBindings] Unbound " .. action .. " (BACKSPACE)")
+
+    if KB._pendingEntity and setUIText then
+        setUIText(KB._pendingEntity, KB.getDisplayName(""))
+    end
+
+    KB.saveAll()
+    KB._pendingRebind = nil
+    KB._pendingEntity = nil
+    KB._previousKey = nil
+end)
+
+-- Mouse click cancels rebinding (e.g. clicking away or clicking another button)
+-- Uses _justStartedRebind flag to skip the initial click that STARTED the rebind
+if registerOnClick then
+    registerOnClick(function()
+        local KB = _G.KeyBindings
+        if KB and KB._pendingRebind then
+            if KB._justStartedRebind then
+                KB._justStartedRebind = false
+            else
+                KB.cancelRebind()
+            end
         end
     end)
 end
@@ -1246,12 +1391,11 @@ registerUpdate(function(dt)
         if KB then
             local actionNames = { "forward", "left", "right", "backward", "jump", "hide" }
             for _, action in ipairs(actionNames) do
-                local entityName = "bind_" .. action
+                local entityName = KB.getEntityForAction(action)
                 local e = findEntity(entityName)
                 if e and setUIText then
                     local keyName = KB[action] or ""
-                    local displayName = KB.getDisplayName and KB.getDisplayName(keyName) or keyName
-                    setUIText(e, displayName)
+                    setUIText(e, KB.getDisplayName(keyName))
                 end
             end
         end
