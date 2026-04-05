@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "AnimationPanel.h"
+#include "LayeredSystems/LevelEditor/EditorTheme.h"
 
 #include "EntityPanel.h"
 #include "ECS/Components/AllComponents.h"
@@ -87,7 +88,7 @@ namespace PAIN {
                 auto metadata = services->get<MetaData::Service>();
                 if (metadata) {
                     std::string entityName = metadata->getEntityName(m_SelectedEntity);
-                    ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "Entity: %s", entityName.c_str());
+                    ImGui::TextColored(Theme::current().animEntityName, "Entity: %s", entityName.c_str());
                     ImGui::Spacing();
                     ImGui::Separator();
                     ImGui::Spacing();
@@ -107,13 +108,13 @@ namespace PAIN {
                 // Get Animation System
                 auto animSysOpt = ecs->getSystem<AnimationSystem::System>();                 
                 if (!animSysOpt) {
-                    ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "Animation System not found!");
+                    ImGui::TextColored(Theme::current().animError, "Animation System not found!");
                     return;
                 }
 
                 auto animSys = animSysOpt.get();
 
-                ImGui::TextColored(ImVec4(0.3f, 0.8f, 1.0f, 1.0f), "Global Animation Controls");
+                ImGui::TextColored(Theme::current().animControls, "Global Animation Controls");
                 ImGui::Spacing();
 
                 // Enable/Disable All Animations
@@ -162,7 +163,7 @@ namespace PAIN {
 
                 // Status display
                 ImGui::Spacing();
-                ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f),
+                ImGui::TextColored(Theme::current().animMuted,
                     "Status: %s | Speed: %.2fx",
                     isEnabled ? "Running" : "Paused",
                     timeScale);
@@ -223,10 +224,10 @@ namespace PAIN {
 
                             ImGui::SameLine();
                             if (anim.isPlaying) {
-                                ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "[Playing]");
+                                ImGui::TextColored(Theme::current().animPlaying, "[Playing]");
                             }
                             else {
-                                ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "[Paused]");
+                                ImGui::TextColored(Theme::current().animPaused, "[Paused]");
                             }
                         }
 
@@ -243,7 +244,7 @@ namespace PAIN {
 
                 if (foundAnimated) {
                     ImGui::Spacing();
-                    ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f),
+                    ImGui::TextColored(Theme::current().animMuted,
                         "Click on an entity to edit its animations");
                 }
             }
@@ -397,13 +398,13 @@ namespace PAIN {
                 draw_list->AddRectFilled(
                     canvas_pos,
                     ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y),
-                    IM_COL32(40, 40, 40, 255)
+                    Theme::current().animTimelineBg
                 );
 
                 draw_list->AddRect(
                     canvas_pos,
                     ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y),
-                    IM_COL32(100, 100, 100, 255)
+                    Theme::current().animTimelineGrid
                 );
 
                 float timelineWidth = canvas_size.x;
@@ -417,7 +418,7 @@ namespace PAIN {
                     draw_list->AddLine(
                         ImVec2(x, canvas_pos.y),
                         ImVec2(x, canvas_pos.y + tickHeight),
-                        IM_COL32(150, 150, 150, 255),
+                        Theme::current().animTimelineTick,
                         1.0f
                     );
 
@@ -426,7 +427,7 @@ namespace PAIN {
                         snprintf(label, sizeof(label), "%.1fs", t);
                         draw_list->AddText(
                             ImVec2(x - 15, canvas_pos.y + 18),
-                            IM_COL32(200, 200, 200, 255),
+                            Theme::current().animTimelineLabel,
                             label
                         );
                     }
@@ -436,7 +437,7 @@ namespace PAIN {
                 draw_list->AddLine(
                     ImVec2(currentX, canvas_pos.y),
                     ImVec2(currentX, canvas_pos.y + canvas_size.y),
-                    IM_COL32(255, 200, 0, 255),
+                    Theme::current().animKeyframe,
                     2.5f
                 );
 
@@ -445,7 +446,7 @@ namespace PAIN {
                     ImVec2(currentX + 6, canvas_pos.y),
                     ImVec2(currentX, canvas_pos.y + 10)
                 };
-                draw_list->AddTriangleFilled(triangle[0], triangle[1], triangle[2], IM_COL32(255, 200, 0, 255));
+                draw_list->AddTriangleFilled(triangle[0], triangle[1], triangle[2], Theme::current().animKeyframe);
 
                 ImGui::InvisibleButton("timeline", canvas_size);
                 if (ImGui::IsItemClicked()) {

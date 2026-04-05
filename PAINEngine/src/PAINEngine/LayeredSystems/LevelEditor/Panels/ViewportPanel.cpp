@@ -14,6 +14,7 @@
 #ifdef _DEBUG
 
 #include "pch.h"
+#include "LayeredSystems/LevelEditor/EditorTheme.h"
 #ifdef max
 #undef max
 #endif
@@ -385,7 +386,7 @@ namespace PAIN {
 						entityName = *std::any_cast<std::shared_ptr<std::string>>(data);
 
 					ImGui::Text("Delete \"%s\"?", entityName.c_str());
-					ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "This action cannot be undone.");
+					ImGui::TextColored(Theme::current().vpTextMuted, "This action cannot be undone.");
 					ImGui::Spacing();
 
 					if (ImGui::Button("Delete", ImVec2(120, 0))) {
@@ -640,19 +641,19 @@ namespace PAIN {
 						ImGui::Spacing();
 						ImGui::SameLine();
 
-						ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
+						ImGui::PushStyleColor(ImGuiCol_Text, Theme::current().vpTextMuted);
 						ImGui::Text("Cam:");
 						ImGui::PopStyleColor();
 						for (int i = 0; i < 5; ++i) {
 							ImGui::SameLine(0, 2);
 							bool occupied = scene->getCameraBookmark(i).occupied;
 							if (occupied) {
-								ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.55f, 1.0f, 0.8f));
-								ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.7f, 1.0f, 1.0f));
+								ImGui::PushStyleColor(ImGuiCol_Button,        Theme::current().btnAccent);
+								ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Theme::current().btnAccentHovered);
 							}
 							else {
-								ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.2f, 0.2f, 0.5f));
-								ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.3f, 0.3f, 0.8f));
+								ImGui::PushStyleColor(ImGuiCol_Button,        Theme::current().btnSecondary);
+								ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Theme::current().btnSecondaryHovered);
 							}
 							std::string label = std::to_string(i + 1) + "##bm";
 							if (ImGui::SmallButton(label.c_str())) {
@@ -1065,12 +1066,12 @@ namespace PAIN {
 									ImVec2 rectMax(screenCX + screenW * 0.5f, screenCY + screenH * 0.5f);
 
 									ImDrawList* dl = ImGui::GetWindowDrawList();
-									dl->AddRectFilled(rectMin, rectMax, IM_COL32(100, 180, 255, 30));
-									dl->AddRect(rectMin, rectMax, IM_COL32(100, 180, 255, 255), 0.0f, 0, 2.0f);
+									dl->AddRectFilled(rectMin, rectMax, Theme::current().vpSelectFill);
+									dl->AddRect(rectMin, rectMax, Theme::current().vpSelectBorder, 0.0f, 0, 2.0f);
 
 									float hs = 5.0f;
 									auto corner = [&](float cx, float cy) {
-										dl->AddRectFilled(ImVec2(cx - hs, cy - hs), ImVec2(cx + hs, cy + hs), IM_COL32(100, 180, 255, 255));
+										dl->AddRectFilled(ImVec2(cx - hs, cy - hs), ImVec2(cx + hs, cy + hs), Theme::current().vpSelectHandle);
 										};
 									corner(rectMin.x, rectMin.y); corner(rectMax.x, rectMin.y);
 									corner(rectMin.x, rectMax.y); corner(rectMax.x, rectMax.y);

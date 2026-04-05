@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "DebugPanel.h"
+#include "LayeredSystems/LevelEditor/EditorTheme.h"
 #include "PAINEngine/Applications/Application.h"
 #include "PAINEngine/CoreSystems/Renderer/sRenderer.h"
 
@@ -43,7 +44,7 @@ namespace PAIN {
 				if (ImGui::CollapsingHeader("Command History", ImGuiTreeNodeFlags_DefaultOpen)) {
 
 					if (!command_manager) {
-						ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f), "Command Manager not available");
+						ImGui::TextColored(Theme::current().textError, "Command Manager not available");
 					}
 					else {
 						size_t undo_count = command_manager->getUndoCount();
@@ -55,7 +56,7 @@ namespace PAIN {
 						ImGui::Text("Redo Stack: %zu", redo_count);
 
 						ImGui::Spacing();
-						ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f),
+						ImGui::TextColored(Theme::current().textMuted,
 							"Ctrl+Z to Undo  |  Ctrl+Y to Redo");
 						ImGui::Spacing();
 						ImGui::Separator();
@@ -64,7 +65,7 @@ namespace PAIN {
 						// Next action previews
 						if (command_manager->canUndo()) {
 							std::string desc = command_manager->getNextUndoDescription();
-							ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 1.0f, 0.4f, 1.0f));
+							ImGui::PushStyleColor(ImGuiCol_Text, Theme::current().historyUndo);
 							ImGui::Text("Next Undo: %s", desc.empty() ? "[Unnamed]" : desc.c_str());
 							ImGui::PopStyleColor();
 						}
@@ -74,7 +75,7 @@ namespace PAIN {
 
 						if (command_manager->canRedo()) {
 							std::string desc = command_manager->getNextRedoDescription();
-							ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.7f, 1.0f, 1.0f));
+							ImGui::PushStyleColor(ImGuiCol_Text, Theme::current().historyRedo);
 							ImGui::Text("Next Redo: %s", desc.empty() ? "[Unnamed]" : desc.c_str());
 							ImGui::PopStyleColor();
 						}
@@ -92,7 +93,7 @@ namespace PAIN {
 							// Deque: front = oldest, back = most recent (next to undo)
 							const auto& undoHistory = command_manager->getUndoHistory();
 
-							ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f),
+							ImGui::TextColored(Theme::current().historyUndo,
 								"Undo Stack (%zu)  [newest at top]", undoHistory.size());
 							ImGui::Separator();
 
@@ -111,7 +112,7 @@ namespace PAIN {
 
 									if (isNext) {
 										// Highlight the action that would be undone next
-										ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.3f, 1.0f));
+										ImGui::PushStyleColor(ImGuiCol_Text, Theme::current().historyNext);
 										ImGui::BulletText("[NEXT] %s", desc.c_str());
 										ImGui::PopStyleColor();
 									}
@@ -128,7 +129,7 @@ namespace PAIN {
 							// -- Redo stack --
 							const auto& redoHistory = command_manager->getRedoHistory();
 
-							ImGui::TextColored(ImVec4(0.4f, 0.7f, 1.0f, 1.0f),
+							ImGui::TextColored(Theme::current().historyRedo,
 								"Redo Stack (%zu)  [newest at top]", redoHistory.size());
 							ImGui::Separator();
 
@@ -146,7 +147,7 @@ namespace PAIN {
 									bool isNext = (i == (int)redoHistory.size() - 1);
 
 									if (isNext) {
-										ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.3f, 1.0f));
+										ImGui::PushStyleColor(ImGuiCol_Text, Theme::current().historyNext);
 										ImGui::BulletText("[NEXT] %s", desc.c_str());
 										ImGui::PopStyleColor();
 									}
@@ -167,19 +168,19 @@ namespace PAIN {
 				// ===== 3. Log Console =====
 				if (ImGui::CollapsingHeader("Log Console", ImGuiTreeNodeFlags_DefaultOpen)) {
 
-					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.6f, 0.6f, 0.6f, 1.0f));
+					ImGui::PushStyleColor(ImGuiCol_Text, Theme::current().logTrace);
 					ImGui::Checkbox("Trace##logfilter", &log_filter_trace);
 					ImGui::PopStyleColor();
 					ImGui::SameLine();
-					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.9f, 0.4f, 1.0f));
+					ImGui::PushStyleColor(ImGuiCol_Text, Theme::current().logInfo);
 					ImGui::Checkbox("Info##logfilter", &log_filter_info);
 					ImGui::PopStyleColor();
 					ImGui::SameLine();
-					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.8f, 0.0f, 1.0f));
+					ImGui::PushStyleColor(ImGuiCol_Text, Theme::current().logWarn);
 					ImGui::Checkbox("Warn##logfilter", &log_filter_warn);
 					ImGui::PopStyleColor();
 					ImGui::SameLine();
-					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.3f, 0.3f, 1.0f));
+					ImGui::PushStyleColor(ImGuiCol_Text, Theme::current().logError);
 					ImGui::Checkbox("Error##logfilter", &log_filter_error);
 					ImGui::PopStyleColor();
 					ImGui::SameLine();
@@ -203,13 +204,14 @@ namespace PAIN {
 								entry.level == spdlog::level::critical) && !log_filter_error) continue;
 
 							ImVec4 color;
+							const auto& th = Theme::current();
 							switch (entry.level) {
-							case spdlog::level::trace:    color = ImVec4(0.6f, 0.6f, 0.6f, 1.0f); break;
-							case spdlog::level::info:     color = ImVec4(0.4f, 0.9f, 0.4f, 1.0f); break;
-							case spdlog::level::warn:     color = ImVec4(1.0f, 0.8f, 0.0f, 1.0f); break;
-							case spdlog::level::err:      color = ImVec4(1.0f, 0.3f, 0.3f, 1.0f); break;
-							case spdlog::level::critical: color = ImVec4(1.0f, 0.0f, 0.5f, 1.0f); break;
-							default:                      color = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); break;
+							case spdlog::level::trace:    color = th.logTrace;    break;
+							case spdlog::level::info:     color = th.logInfo;     break;
+							case spdlog::level::warn:     color = th.logWarn;     break;
+							case spdlog::level::err:      color = th.logError;    break;
+							case spdlog::level::critical: color = th.logCritical; break;
+							default:                      color = th.textDefault; break;
 							}
 
 							ImGui::PushStyleColor(ImGuiCol_Text, color);

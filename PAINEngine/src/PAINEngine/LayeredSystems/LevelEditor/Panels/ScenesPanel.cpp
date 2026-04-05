@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "ScenesPanel.h"
+#include "LayeredSystems/LevelEditor/EditorTheme.h"
 
 #ifdef _DEBUG
 #include "CoreSystems/Serialization/sSerialization.h"
@@ -40,7 +41,7 @@ namespace PAIN {
             std::function<void(std::any const&)> ScenesPanel::createScenePopup(std::string const& popup_id)
             {
                 return [this, popup_id](std::any const&) {
-                    ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Create New Scene");
+                    ImGui::TextColored(Theme::current().textSuccess, "Create New Scene");
                     ImGui::Separator();
                     ImGui::Spacing();
 
@@ -75,7 +76,7 @@ namespace PAIN {
             std::function<void(std::any const&)> ScenesPanel::saveSceneAsPopup(std::string const& popup_id)
             {
                 return [this, popup_id](std::any const&) {
-                    ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "Save Scene As");
+                    ImGui::TextColored(Theme::current().textInfo, "Save Scene As");
                     ImGui::Separator();
                     ImGui::Spacing();
 
@@ -112,12 +113,12 @@ namespace PAIN {
             std::function<void(std::any const&)> ScenesPanel::deleteScenePopup(std::string const& popup_id)
             {
                 return [this, popup_id](std::any const&) {
-                    ImGui::TextColored(ImVec4(1.0f, 0.7f, 0.2f, 1.0f), "Delete Scene");
+                    ImGui::TextColored(Theme::current().textWarning, "Delete Scene");
                     ImGui::Separator();
                     ImGui::Spacing();
 
                     ImGui::TextWrapped("Are you sure you want to delete this scene?");
-                    ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "This action cannot be undone.");
+                    ImGui::TextColored(Theme::current().textMuted, "This action cannot be undone.");
                     ImGui::Spacing();
                     ImGui::Separator();
                     ImGui::Spacing();
@@ -176,7 +177,7 @@ namespace PAIN {
                 if (!showDelete_) return;
                 ImGui::OpenPopup("Delete Scene");
                 if (ImGui::BeginPopupModal("Delete Scene", &showDelete_, ImGuiWindowFlags_AlwaysAutoResize)) {
-                    ImGui::TextColored(ImVec4(1, 0, 0, 1), "This action cannot be undone!");
+                    ImGui::TextColored(Theme::current().textError, "This action cannot be undone!");
                     ImGui::TextUnformatted("Are you sure you want to delete this scene?");
                     ImGui::Spacing();
 
@@ -246,7 +247,7 @@ namespace PAIN {
                 }
 
                 ImGui::TextWrapped("This matrix defines which layers can interact with each other.");
-                ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Checked = layers can collide/interact");
+                ImGui::TextColored(Theme::current().textMuted, "Checked = layers can collide/interact");
                 ImGui::Separator();
                 ImGui::Spacing();
 
@@ -444,7 +445,7 @@ namespace PAIN {
 
                 if (layers.empty()) {
                     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 100);
-                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_Text, Theme::current().textMuted);
                     float textWidth = ImGui::CalcTextSize("No layers created yet").x;
                     ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - textWidth) * 0.5f);
                     ImGui::Text("No layers created yet");
@@ -462,7 +463,7 @@ namespace PAIN {
                     ImVec2 cardPos = ImGui::GetCursorScreenPos();
                     ImVec2 cardSize = ImVec2(ImGui::GetContentRegionAvail().x, 100);
 
-                    ImU32 cardColor = isSelected ? IM_COL32(60, 80, 100, 255) : IM_COL32(40, 45, 50, 255);
+                    ImU32 cardColor = isSelected ? Theme::current().layerCardSelected : Theme::current().layerCardDefault;
                     ImGui::GetWindowDrawList()->AddRectFilled(
                         cardPos, ImVec2(cardPos.x + cardSize.x, cardPos.y + cardSize.y), cardColor, 4.0f);
 
@@ -479,7 +480,7 @@ namespace PAIN {
                     {
                         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 4);
 
-                        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.2f, 0.25f, 0.3f, 0.8f));
+                        ImGui::PushStyleColor(ImGuiCol_FrameBg, Theme::current().layerFrameBg);
                         ImGui::SetNextItemWidth(250);
                         char nameBuf[64];
                         strncpy(nameBuf, layer.name.c_str(), sizeof(nameBuf) - 1);
@@ -526,7 +527,7 @@ namespace PAIN {
                         if (ImGui::IsItemHovered()) ImGui::SetTooltip(layer.pickable ? "Can be selected by mouse" : "Cannot be selected by mouse");
 
                         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 4);
-                        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
+                        ImGui::PushStyleColor(ImGuiCol_Text, Theme::current().textMuted);
                         ImGui::Text("ID");
                         ImGui::SameLine();
                         ImGui::SetNextItemWidth(65);
@@ -551,8 +552,8 @@ namespace PAIN {
                         if (it != layerEntityCounts.end()) entityCount = it->second;
 
                         ImVec4 countColor = entityCount > 0
-                            ? ImVec4(0.7f, 0.9f, 0.7f, 1.0f)
-                            : ImVec4(0.6f, 0.6f, 0.6f, 1.0f);
+                            ? Theme::current().layerCountActive
+                            : Theme::current().layerCountEmpty;
                         ImGui::PushStyleColor(ImGuiCol_Text, countColor);
                         ImGui::Text("Entities: %d", entityCount);
                         ImGui::PopStyleColor();
@@ -705,7 +706,7 @@ namespace PAIN {
                         }
                     }
                     if (!hasMappedShadow && worldLight->getShadowType() != Light::SHADOW_TYPES::MAPPED) {
-                        ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.0f, 1.0f), "Shadow budget full - reduce entity shadows");
+                        ImGui::TextColored(Theme::current().sceneWarning, "Shadow budget full - reduce entity shadows");
                     }
                     
                     // Debug info
@@ -961,7 +962,7 @@ namespace PAIN {
                 ImGui::EndDisabled();
 
                 if (!floorEnabled) {
-                    ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.0f, 1.0f), "Floor collision is DISABLED");
+                    ImGui::TextColored(Theme::current().sceneWarning, "Floor collision is DISABLED");
                     ImGui::TextWrapped("Camera will not collide with the floor. Useful for flying cameras.");
                 }
                 else {
@@ -1027,7 +1028,7 @@ namespace PAIN {
 
                 auto& loadingScreen = scn_service->loadingScreen;
 
-                ImGui::TextColored(ImVec4(0.7f, 0.9f, 1.0f, 1.0f), "Loading Screen Configuration");
+                ImGui::TextColored(Theme::current().sceneActiveLabel, "Loading Screen Configuration");
                 ImGui::Separator();
                 ImGui::Spacing();
 
@@ -1085,7 +1086,7 @@ namespace PAIN {
                             loadingScreen->setProgressBarPosition(sw * 0.5f, sh * 0.15f);
                         }
 
-                        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.55f, 0.55f, 0.55f, 1.0f));
+                        ImGui::PushStyleColor(ImGuiCol_Text, Theme::current().textMuted);
                         ImGui::TextWrapped("Resolution: %.0f x %.0f", sw, sh);
                         ImGui::PopStyleColor();
                     }
@@ -1153,7 +1154,7 @@ namespace PAIN {
                             loadingScreen->setStatusTextPosition(sw * 0.5f, sh * 0.92f);
                         }
 
-                        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.55f, 0.55f, 0.55f, 1.0f));
+                        ImGui::PushStyleColor(ImGuiCol_Text, Theme::current().textMuted);
                         ImGui::TextWrapped("Bar at (%.0f, %.0f) - Resolution: %.0f x %.0f", bp.x, bp.y, sw, sh);
                         ImGui::PopStyleColor();
                     }
@@ -1171,7 +1172,7 @@ namespace PAIN {
 
                     auto bgColor = loadingScreen->getBackgroundColor();
                     float bgfillColorArray[3] = { bgColor.r, bgColor.g, bgColor.b };
-                    ImGui::TextColored(ImVec4(0.9f, 0.9f, 1.0f, 1.0f), "Background Appearance");
+                    ImGui::TextColored(Theme::current().sceneHeading, "Background Appearance");
                     ImGui::Separator();
                     ImGui::Spacing();
 
@@ -1183,7 +1184,7 @@ namespace PAIN {
                     if (ImGui::IsItemHovered()) ImGui::SetTooltip("Color of the background");
 
                     ImGui::Spacing();
-                    ImGui::TextColored(ImVec4(0.9f, 0.9f, 1.0f, 1.0f), "Progress Bar Appearance");
+                    ImGui::TextColored(Theme::current().sceneHeading, "Progress Bar Appearance");
                     ImGui::Separator();
                     ImGui::Spacing();
 
@@ -1271,7 +1272,7 @@ namespace PAIN {
                     ImGui::Separator();
                     ImGui::Spacing();
 
-                    ImGui::TextColored(ImVec4(0.9f, 0.9f, 0.5f, 1.0f), "Spritesheet Overlay (optional)");
+                    ImGui::TextColored(Theme::current().sceneSubheading, "Spritesheet Overlay (optional)");
                     ImGui::TextWrapped("Choose a separate spritesheet texture to render over the background. Configure position and scale in pixels.");
                     ImGui::Spacing();
 
@@ -1297,7 +1298,7 @@ namespace PAIN {
                     ImGui::Spacing();
                     ImGui::Separator();
                     ImGui::Spacing();
-                    ImGui::TextColored(ImVec4(0.9f, 0.9f, 0.5f, 1.0f), "Spritesheet Animation");
+                    ImGui::TextColored(Theme::current().sceneSubheading, "Spritesheet Animation");
                     ImGui::TextWrapped("Configure spritesheet-based animation for the background texture.");
                     ImGui::Spacing();
 
@@ -1353,7 +1354,7 @@ namespace PAIN {
                 if (ImGui::CollapsingHeader("Live Preview")) {
                     ImGui::Indent();
 
-                    ImGui::TextColored(ImVec4(0.8f, 1.0f, 0.8f, 1.0f), "Loading Screen Preview");
+                    ImGui::TextColored(Theme::current().scenePreviewLabel, "Loading Screen Preview");
                     ImGui::TextWrapped("Preview the loading screen in real-time without reloading the scene.");
                     ImGui::Spacing();
 
@@ -1397,7 +1398,7 @@ namespace PAIN {
                 if (ImGui::Button("Default Configuration##LoadingScreen")) loadingScreen->defaultSetup();
 
                 ImGui::Spacing();
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.6f, 0.6f, 0.6f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_Text, Theme::current().textMuted);
                 ImGui::TextWrapped("All settings are applied in real-time. Changes will be visible the next time the loading screen is displayed.");
                 ImGui::PopStyleColor();
             }
@@ -1429,7 +1430,7 @@ namespace PAIN {
                     const auto dot = scnName.rfind('.');
                     if (dot != std::string::npos) scnName = scnName.substr(0, dot);
 
-                    ImGui::TextColored(ImVec4(0.7f, 0.9f, 1.0f, 1.0f), "Active Scene:");
+                    ImGui::TextColored(Theme::current().sceneActiveLabel, "Active Scene:");
                     ImGui::SameLine();
                     ImGui::TextUnformatted(scnName.c_str());
                 }
@@ -1499,7 +1500,7 @@ namespace PAIN {
                     ImGui::Spacing();
 
                     if (allScenes.empty()) {
-                        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
+                        ImGui::PushStyleColor(ImGuiCol_Text, Theme::current().textMuted);
                         float tw = ImGui::CalcTextSize("No scenes found").x;
                         ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - tw) * 0.5f);
                         ImGui::TextUnformatted("No scenes found");
@@ -1531,13 +1532,13 @@ namespace PAIN {
                             ImVec2 cardPos = ImGui::GetCursorScreenPos();
                             ImVec2 cardSize = ImVec2(ImGui::GetContentRegionAvail().x, 52.f);
 
-                            ImU32 cardBg = isActive ? IM_COL32(40, 80, 55, 255)
-                                : isSelected ? IM_COL32(50, 70, 100, 255)
-                                : IM_COL32(38, 42, 48, 255);
+                            ImU32 cardBg = isActive   ? Theme::current().sceneCardActive
+                                         : isSelected ? Theme::current().sceneCardSelected
+                                                      : Theme::current().sceneCardDefault;
 
-                            ImU32 borderColor = isActive ? IM_COL32(80, 200, 120, 255)
-                                : isSelected ? IM_COL32(100, 150, 230, 255)
-                                : IM_COL32(60, 65, 70, 255);
+                            ImU32 borderColor = isActive   ? Theme::current().sceneBorderActive
+                                              : isSelected ? Theme::current().sceneBorderSelected
+                                                           : Theme::current().sceneBorderDefault;
 
                             ImDrawList* dl = ImGui::GetWindowDrawList();
                             dl->AddRectFilled(cardPos,
@@ -1548,21 +1549,21 @@ namespace PAIN {
                             // Thumbnail placeholder
                             ImVec2 thumbMin = ImVec2(cardPos.x + 6, cardPos.y + 6);
                             ImVec2 thumbMax = ImVec2(cardPos.x + 42, cardPos.y + 42);
-                            dl->AddRectFilled(thumbMin, thumbMax, IM_COL32(30, 30, 35, 255), 3.f);
-                            dl->AddRect(thumbMin, thumbMax, IM_COL32(70, 70, 80, 255), 3.f);
+                            dl->AddRectFilled(thumbMin, thumbMax, Theme::current().sceneThumb, 3.f);
+                            dl->AddRect(thumbMin, thumbMax, Theme::current().sceneThumbBorder, 3.f);
                             dl->AddText(ImVec2(thumbMin.x + 10, thumbMin.y + 8),
-                                IM_COL32(150, 150, 170, 255), isActive ? ">>>" : "SCN");
+                                Theme::current().sceneThumbText, isActive ? ">>>" : "SCN");
 
                             // Card text
                             ImGui::SetCursorScreenPos(ImVec2(cardPos.x + 50, cardPos.y + 8));
                             ImGui::BeginGroup();
                             {
                                 if (isActive) {
-                                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 1.0f, 0.6f, 1.0f));
+                                    ImGui::PushStyleColor(ImGuiCol_Text, Theme::current().sceneTextActive);
                                     ImGui::TextUnformatted(displayName.c_str());
                                     ImGui::PopStyleColor();
                                     ImGui::SameLine();
-                                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.3f, 0.9f, 0.5f, 1.0f));
+                                    ImGui::PushStyleColor(ImGuiCol_Text, Theme::current().sceneTextActiveHov);
                                     ImGui::TextUnformatted("[ACTIVE]");
                                     ImGui::PopStyleColor();
                                 }
@@ -1570,7 +1571,7 @@ namespace PAIN {
                                     ImGui::TextUnformatted(displayName.c_str());
                                 }
 
-                                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.45f, 0.45f, 0.5f, 1.0f));
+                                ImGui::PushStyleColor(ImGuiCol_Text, Theme::current().sceneTextInactive);
                                 ImGui::TextUnformatted(sceneData->name.c_str());
                                 ImGui::PopStyleColor();
                             }

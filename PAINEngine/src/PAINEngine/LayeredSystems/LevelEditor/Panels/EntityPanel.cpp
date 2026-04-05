@@ -9,6 +9,7 @@
  *********************************************************************/
 
 #include "pch.h"
+#include "LayeredSystems/LevelEditor/EditorTheme.h"
 #include "../Editor.h"
 #include "EntityPanel.h"
 #include "ECS/Controller.h"
@@ -134,7 +135,7 @@ namespace PAIN {
                     ImGui::Spacing();
                     ImGui::TextWrapped("Are you sure you want to remove '%s'?", selected_name.c_str());
                     ImGui::Spacing();
-                    ImGui::TextColored(ImVec4(1.0f, 0.6f, 0.0f, 1.0f), "Warning: This action cannot be undone!");
+                    ImGui::TextColored(Theme::current().entityWarning, "Warning: This action cannot be undone!");
                     ImGui::Spacing();
                     ImGui::Separator();
                     ImGui::Spacing();
@@ -375,7 +376,7 @@ namespace PAIN {
 
                 ImGui::Text("Number of entities in level: %d", total_entities);
                 ImGui::Spacing();
-                ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "Drag entities to group them");
+                ImGui::TextColored(Theme::current().entityDragHint, "Drag entities to group them");
                 ImGui::Spacing();
 
                 if (ImGui::Checkbox("Sort A-Z", &sort_alphabetically)) {
@@ -531,9 +532,9 @@ namespace PAIN {
 
                 // Draw collapse toggle for entities with children
                 if (has_children) {
-                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.3f, 0.3f, 0.5f));
-                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.4f, 0.4f, 0.4f, 0.5f));
+                    ImGui::PushStyleColor(ImGuiCol_Button,        Theme::current().btnGhost);
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Theme::current().btnGhostHovered);
+                    ImGui::PushStyleColor(ImGuiCol_ButtonActive,  Theme::current().btnGhostActive);
                     
                     std::string arrow_label = std::string(is_collapsed ? ">" : "v") + "##toggle" + std::to_string(static_cast<uint32_t>(entity));
                     if (ImGui::SmallButton(arrow_label.c_str())) {
@@ -563,15 +564,15 @@ namespace PAIN {
                 bool color_pushed = false;
                 if (!search_filter.empty() && matches_search) {
                     // Highlight matching entities in yellow/gold color
-                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.9f, 0.3f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_Text, Theme::current().entityPrefabTint);
                     color_pushed = true;
                 }
                 else if (is_prefab_instance) {
-                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.7f, 1.0f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_Text, Theme::current().entityTemplateTint);
                     color_pushed = true;
                 }
                 else if (depth > 0) {
-                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.9f, 1.0f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_Text, Theme::current().entityNormalTint);
                     color_pushed = true;
                 }
 
