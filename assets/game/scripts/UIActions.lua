@@ -29,6 +29,7 @@ local layers = {
     CREDITS_1 = 9,
     CREDITS_2 = 10,
     SETTINGS_CONTROLS = 11,
+    SETTINGS_DISPLAYMODE = 12
 }
 
 -- ==================== GRAPHICS SETTINGS ====================
@@ -1110,6 +1111,7 @@ local handlers = {
         setLayerEnabled(layers.AUDIO, false)
         setLayerEnabled(layers.GRAPHICS, false)
         setLayerEnabled(layers.CONTROLS, false)
+        setLayerEnabled(layers.SETTINGS_DISPLAYMODE, false)
         
         -- Enable settingsUI layer
         setLayerEnabled(layers.SETTINGS, true)
@@ -1133,15 +1135,22 @@ local handlers = {
             end
         end
 
-        -- Disable settingsUI layer
+        -- Disable settings UI layers
         setLayerEnabled(layers.SETTINGS, false)
         setLayerEnabled(layers.SETTINGS_CONTROLS, false)
+        setLayerEnabled(layers.SETTINGS_DISPLAYMODE, false)
 
         if payload then
-            local layer = layers[string.upper(payload)]
+            local key = string.upper(payload)
+            local layer = layers[key]
 
             if layer then
                 setLayerEnabled(layer, true)
+
+                -- Show display mode buttons only on non-Android graphics page
+                if key == "GRAPHICS" and not (isAndroid and isAndroid()) then
+                    setLayerEnabled(layers.SETTINGS_DISPLAYMODE, true)
+                end
             else
                 printLog("[UI] Invalid payload: " .. tostring(payload))
                 setLayerEnabled(layers.SETTINGS, true)
