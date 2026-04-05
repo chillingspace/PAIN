@@ -1893,6 +1893,18 @@ namespace PAIN {
 			//	PN_CORE_WARN("[SceneManager::onStop] GameScriptingSystem not found!");
 			//}
 
+			// Stop SFX channels before destroying entities.
+			// Looping SFX (e.g. enemy walk sounds) are FMOD channels independent of
+			// ECS entities and will keep playing after entities are destroyed.
+			// Only stop "sfx" group — BGM persists across scene changes.
+			{
+				auto audio = services->get<Audio::Audio>();
+				if (audio) {
+					audio->stopGroup("sfx");
+					PN_CORE_INFO("[SceneManager] Stopped SFX group for scene transition");
+				}
+			}
+
 			// Destroy all ECS entities
 			auto controller = services->get<ECS::Controller>();
 			if (controller) {
@@ -2050,6 +2062,15 @@ namespace PAIN {
 			}
 			else {
 				PN_CORE_WARN("[SceneManager::onStop] GameScriptingSystem not found!");
+			}
+
+			// Stop SFX channels before destroying entities (BGM persists)
+			{
+				auto audio = services->get<Audio::Audio>();
+				if (audio) {
+					audio->stopGroup("sfx");
+					PN_CORE_INFO("[SceneManager] Stopped SFX group (unloadScene)");
+				}
 			}
 
 			// Destroy all ECS entities

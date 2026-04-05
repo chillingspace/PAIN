@@ -63,7 +63,8 @@ namespace PAIN {
 			}
 			auto win_dim = svc->get<Window::Window>()->getFrameBuffer();
 			// this projection gives allows us to work in screen space coordinates
-			static const glm::mat4 proj = glm::ortho(0.0f, win_dim.x * 1.f, 0.0f, win_dim.y * 1.f);
+			// Recalculate every call to handle window resize
+			const glm::mat4 proj = glm::ortho(0.0f, (float)win_dim.x, 0.0f, (float)win_dim.y);
 			return proj;
 		}
 
