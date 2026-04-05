@@ -1,6 +1,7 @@
 #ifdef PN_PLATFORM_WINDOWS
 #ifdef _DEBUG
 #include "PrefabsPanel.h"
+#include "LayeredSystems/LevelEditor/EditorTheme.h"
 #include "CoreSystems/Assets/sAssets.h"
 #include "CoreSystems/Prefabs/sPrefab.h"
 #include "CoreSystems/Renderer/sRenderer.h"
@@ -344,7 +345,7 @@ namespace PAIN {
 										   ImGuiWindowFlags_AlwaysAutoResize |
 											   ImGuiWindowFlags_NoMove)) {
 
-					ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "Warning");
+					ImGui::TextColored(Theme::current().prefabWarning, "Warning");
 					ImGui::Spacing();
 					ImGui::Separator();
 					ImGui::Spacing();
@@ -367,11 +368,9 @@ namespace PAIN {
 					// ========================================
 					// Save Button (Green)
 					// ========================================
-					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.7f, 0.2f, 1.0f));
-					ImGui::PushStyleColor(ImGuiCol_ButtonHovered,
-										  ImVec4(0.3f, 0.8f, 0.3f, 1.0f));
-					ImGui::PushStyleColor(ImGuiCol_ButtonActive,
-										  ImVec4(0.1f, 0.6f, 0.1f, 1.0f));
+					ImGui::PushStyleColor(ImGuiCol_Button,        Theme::current().btnSuccess);
+					ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Theme::current().btnSuccessHovered);
+					ImGui::PushStyleColor(ImGuiCol_ButtonActive,  Theme::current().btnSuccessActive);
 
 					if (ImGui::Button("Save", ImVec2(buttonWidth, 0))) {
 						saveCurrentPrefab();
@@ -386,11 +385,9 @@ namespace PAIN {
 					// ========================================
 					// Discard Button (Red)
 					// ========================================
-					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
-					ImGui::PushStyleColor(ImGuiCol_ButtonHovered,
-										  ImVec4(1.0f, 0.3f, 0.3f, 1.0f));
-					ImGui::PushStyleColor(ImGuiCol_ButtonActive,
-										  ImVec4(0.6f, 0.1f, 0.1f, 1.0f));
+					ImGui::PushStyleColor(ImGuiCol_Button,        Theme::current().btnDanger);
+					ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Theme::current().btnDangerHovered);
+					ImGui::PushStyleColor(ImGuiCol_ButtonActive,  Theme::current().btnDangerActive);
 
 					if (ImGui::Button("Discard", ImVec2(buttonWidth, 0))) {
 						exitEditMode();
@@ -473,8 +470,7 @@ namespace PAIN {
 				bool hasChanges = hasPrefabChanged();
 
 				if (hasChanges) {
-					ImGui::PushStyleColor(ImGuiCol_Button,
-										  ImVec4(0.2f, 0.7f, 0.2f, 1.0f)); // Green
+					ImGui::PushStyleColor(ImGuiCol_Button, Theme::current().btnSuccess);
 				}
 
 				if (ImGui::Button("Save Prefab", ImVec2(120, 30))) {
@@ -515,14 +511,14 @@ namespace PAIN {
 				// Unsaved Changes Indicator
 				// ========================================
 				if (hasChanges) {
-					ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "Unsaved changes");
+					ImGui::TextColored(Theme::current().prefabWarning, "Unsaved changes");
 				} else {
-					ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "No changes");
+					ImGui::TextColored(Theme::current().prefabNoChanges, "No changes");
 				}
 			}
 
 			void PrefabPanel::renderInstanceTools() {
-				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+				ImGui::PushStyleColor(ImGuiCol_Text, Theme::current().prefabInstances);
 
 				// Get instances of prefabs from main scene
 				auto prefab_instances =
