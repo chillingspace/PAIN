@@ -1,15 +1,5 @@
 {
     "assets": [
-        "9299e062-af2a-cb4c-8ae2-fbd228835828",
-        "89e040b6-c439-7c45-a630-000c72698fcf",
-        "5aa8f938-deee-7048-9a6b-33482dd8252b",
-        "37866613-e4bf-e54f-bad7-60f6f99f0c98",
-        "27878181-a46a-494c-91d4-953c69e3a1d3",
-        "0955a106-00fb-8040-8ce5-9402d6bd1c59",
-        "154c6c51-982f-d845-b493-e30d07a80100",
-        "44bd363b-5d65-664a-a1dd-c750fad4e7c6",
-        "633f661d-20e5-3b45-b5a5-299f91b71e17",
-        "db504491-476b-9442-8649-25cd5de072a3",
         "b3f81bf0-716b-6e48-92ab-3bffc63be450",
         "ea2431c4-c2c5-724e-a713-daf897030244",
         "14c2b2ac-66d8-104e-98f3-96bbd5bc18b6",
@@ -18,10 +8,8 @@
         "38a421a9-1ffc-3c47-a8e2-f0af50f2e2c2",
         "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
         "d54d96e7-2dc0-c947-8f1a-bab6892ff688",
-        "466ca22c-0eb2-0d49-ac1a-b9d822cc1ce4",
         "4727438d-9c1f-ea47-91e0-8911d3412588",
         "08527159-b243-d742-a313-9001198b2097",
-        "5d46bba2-ab81-064e-bab5-2517c42f6aca",
         "ffd57a3d-b8b4-2b40-94a5-52ecd82a5a5f",
         "983594dc-c8f4-924f-a7ea-78b53ef38cd7",
         "f59e4cbd-b183-3541-9531-bd14b87115de",
@@ -56,6 +44,8 @@
         "4b1f318e-49f7-1545-bb84-b9c6608f3471",
         "6a6e7d67-82c1-f846-96c5-4c5338a9a7ec",
         "3da3f0aa-e9d3-634a-b1c9-f88763fb5bae",
+        "5b25ecd9-f723-f043-9333-6045100eaeeb",
+        "31f050fc-b8fd-9f44-9f4c-c2b19a10e63e",
         "146f4e3b-5c24-624f-80c8-d74159ed9f41",
         "a8977689-ded0-fa41-9efb-33354e83dec7",
         "41022c20-5591-324d-80ff-f14090e5e9d3",
@@ -73,7 +63,17 @@
         "295d61ce-c962-d94a-89f8-b3f682cff675",
         "7e497655-b825-b848-b5ca-05f125dc8770",
         "256aaf03-37ee-654a-947b-dba5e889cb54",
+        "37866613-e4bf-e54f-bad7-60f6f99f0c98",
+        "5aa8f938-deee-7048-9a6b-33482dd8252b",
         "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+        "9299e062-af2a-cb4c-8ae2-fbd228835828",
+        "89e040b6-c439-7c45-a630-000c72698fcf",
+        "27878181-a46a-494c-91d4-953c69e3a1d3",
+        "0955a106-00fb-8040-8ce5-9402d6bd1c59",
+        "154c6c51-982f-d845-b493-e30d07a80100",
+        "44bd363b-5d65-664a-a1dd-c750fad4e7c6",
+        "633f661d-20e5-3b45-b5a5-299f91b71e17",
+        "db504491-476b-9442-8649-25cd5de072a3",
         "6f5d22ac-86ff-ed4e-978c-55ceb1b59a3f",
         "15d07ef6-eadd-cf49-bf8f-8825d014f2c5",
         "bc6e0fa5-83e5-494b-af30-8887a30a971f",
@@ -136,7 +136,6 @@
         "af95e0ee-f1ac-1d45-88e1-e7bbd2979f36",
         "c3be7e4a-501e-0744-ac10-55d1b5a38d86",
         "510e3ede-f637-c448-99e8-7dc200d60c8f",
-        "164de26f-1403-e146-8a76-735d5dc42155",
         "b3ec7aee-c5ff-af48-9aa1-f912f843a888",
         "9dc666a4-a004-0346-803d-0530eb3a2f70",
         "c3240e7d-4066-2444-a024-c1d31c71a299",
@@ -203,7 +202,6 @@
         "cbc0efba-5a42-af42-8453-ce9966dc2b34",
         "2675eeff-5329-9d40-b56f-6f613855b441",
         "ee65299b-47d9-4648-ae3d-7a9e1ae75012",
-        "6fc0ccbc-ae9d-a948-9557-6140470621c4",
         "259d9f3b-aa62-7148-8f9b-2377b7ba1ddd",
         "d58ec965-4a8b-2446-955b-707274af2082",
         "9a2fc438-1e78-3d47-be1b-4284d567444c",
@@ -53231,9 +53229,9 @@
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [
-                                "7f20ef65-a9d5-4541-859b-ff911ea58a59",
                                 "c8989800-69e0-aa48-a789-d62df22f9123",
-                                "a1063123-23b1-454b-b06c-05b48726d559"
+                                "a1063123-23b1-454b-b06c-05b48726d559",
+                                "d3b54299-585b-d947-8441-6651a9678d2c"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
                             "siblingIndex": 30
@@ -53777,488 +53775,6 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
-                            "guid": "7f20ef65-a9d5-4541-859b-ff911ea58a59"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [
-                                "c9bc93bb-fca8-4341-952c-6f550e3190ac",
-                                "83b6ccea-04e0-a54a-93c0-c94fbdccd8de",
-                                "919b7422-5e7c-c140-b2c0-91ef65fa8262",
-                                "ed6a6e74-7994-c248-a26d-f26266100543",
-                                "0bc01f26-6cfb-764e-be79-5687771ff08a"
-                            ],
-                            "parentGUID": "08f7b37b-512b-8046-aa8f-df4df3c659da",
-                            "siblingIndex": 1
-                        },
-                        "Layer": {
-                            "layer_id": 1,
-                            "layer_mask": 2
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "hearts"
-                        }
-                    },
-                    "Name": "hearts"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "GUID": {
-                            "guid": "c9bc93bb-fca8-4341-952c-6f550e3190ac"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "7f20ef65-a9d5-4541-859b-ff911ea58a59",
-                            "siblingIndex": 0
-                        },
-                        "Layer": {
-                            "layer_id": 1,
-                            "layer_mask": 2
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "heart_1"
-                        },
-                        "Scripts": {
-                            "scripts": [
-                                {
-                                    "enabled": true,
-                                    "script_asset": "357751f9-ce90-1a4a-9151-75339efa9e50"
-                                }
-                            ]
-                        },
-                        "Texture2D": {
-                            "opacity": 1.0,
-                            "pos": [
-                                -0.20999999344348907,
-                                -0.6000000238418579
-                            ],
-                            "texture_guid": "c20e7ad2-648a-5740-8abd-717a03ef4a82",
-                            "texture_scale": [
-                                0.6600000262260437,
-                                0.09000000357627869
-                            ]
-                        },
-                        "UIElement": {
-                            "b_is_enabled": true,
-                            "b_is_interactable": false,
-                            "layer": 0
-                        },
-                        "UIRectTransform": {
-                            "anchor_max": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchor_min": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchored_position": [
-                                0.0,
-                                0.0
-                            ],
-                            "local_position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "offset_max": [
-                                0.0,
-                                0.0
-                            ],
-                            "offset_min": [
-                                0.0,
-                                0.0
-                            ],
-                            "pivot": [
-                                0.5,
-                                0.5
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "size_delta": [
-                                100.0,
-                                100.0
-                            ]
-                        }
-                    },
-                    "Name": "heart_1"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "GUID": {
-                            "guid": "83b6ccea-04e0-a54a-93c0-c94fbdccd8de"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "7f20ef65-a9d5-4541-859b-ff911ea58a59",
-                            "siblingIndex": 1
-                        },
-                        "Layer": {
-                            "layer_id": 1,
-                            "layer_mask": 2
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "heart_2"
-                        },
-                        "Scripts": {
-                            "scripts": [
-                                {
-                                    "enabled": true,
-                                    "script_asset": "357751f9-ce90-1a4a-9151-75339efa9e50"
-                                }
-                            ]
-                        },
-                        "Texture2D": {
-                            "opacity": 1.0,
-                            "pos": [
-                                0.0,
-                                -0.6000000238418579
-                            ],
-                            "texture_guid": "c20e7ad2-648a-5740-8abd-717a03ef4a82",
-                            "texture_scale": [
-                                0.6600000262260437,
-                                0.09000000357627869
-                            ]
-                        },
-                        "UIElement": {
-                            "b_is_enabled": true,
-                            "b_is_interactable": false,
-                            "layer": 0
-                        },
-                        "UIRectTransform": {
-                            "anchor_max": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchor_min": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchored_position": [
-                                0.0,
-                                0.0
-                            ],
-                            "local_position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "offset_max": [
-                                0.0,
-                                0.0
-                            ],
-                            "offset_min": [
-                                0.0,
-                                0.0
-                            ],
-                            "pivot": [
-                                0.5,
-                                0.5
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "size_delta": [
-                                100.0,
-                                100.0
-                            ]
-                        }
-                    },
-                    "Name": "heart_2"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "GUID": {
-                            "guid": "919b7422-5e7c-c140-b2c0-91ef65fa8262"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "7f20ef65-a9d5-4541-859b-ff911ea58a59",
-                            "siblingIndex": 3
-                        },
-                        "Layer": {
-                            "layer_id": 1,
-                            "layer_mask": 2
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "heart_3"
-                        },
-                        "Scripts": {
-                            "scripts": [
-                                {
-                                    "enabled": true,
-                                    "script_asset": "357751f9-ce90-1a4a-9151-75339efa9e50"
-                                }
-                            ]
-                        },
-                        "Texture2D": {
-                            "opacity": 1.0,
-                            "pos": [
-                                0.20999999344348907,
-                                -0.6000000238418579
-                            ],
-                            "texture_guid": "c20e7ad2-648a-5740-8abd-717a03ef4a82",
-                            "texture_scale": [
-                                0.6600000262260437,
-                                0.09000000357627869
-                            ]
-                        },
-                        "UIElement": {
-                            "b_is_enabled": true,
-                            "b_is_interactable": false,
-                            "layer": 0
-                        },
-                        "UIRectTransform": {
-                            "anchor_max": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchor_min": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchored_position": [
-                                0.0,
-                                0.0
-                            ],
-                            "local_position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "offset_max": [
-                                0.0,
-                                0.0
-                            ],
-                            "offset_min": [
-                                0.0,
-                                0.0
-                            ],
-                            "pivot": [
-                                0.5,
-                                0.5
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "size_delta": [
-                                100.0,
-                                100.0
-                            ]
-                        }
-                    },
-                    "Name": "heart_3"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "GUID": {
-                            "guid": "0bc01f26-6cfb-764e-be79-5687771ff08a"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "7f20ef65-a9d5-4541-859b-ff911ea58a59",
-                            "siblingIndex": 3
-                        },
-                        "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "heart border"
-                        },
-                        "Texture2D": {
-                            "opacity": 1.0,
-                            "pos": [
-                                0.0,
-                                -0.6000000238418579
-                            ],
-                            "texture_guid": "21c8c800-9042-1547-b52b-4fee191116f7",
-                            "texture_scale": [
-                                0.6499999761581421,
-                                0.09000000357627869
-                            ]
-                        },
-                        "UIElement": {
-                            "b_is_enabled": true,
-                            "b_is_interactable": false,
-                            "layer": 0
-                        },
-                        "UIRectTransform": {
-                            "anchor_max": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchor_min": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchored_position": [
-                                0.0,
-                                0.0
-                            ],
-                            "local_position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "offset_max": [
-                                0.0,
-                                0.0
-                            ],
-                            "offset_min": [
-                                0.0,
-                                0.0
-                            ],
-                            "pivot": [
-                                0.5,
-                                0.5
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "size_delta": [
-                                100.0,
-                                100.0
-                            ]
-                        }
-                    },
-                    "Name": "heart border"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "GUID": {
                             "guid": "a1063123-23b1-454b-b06c-05b48726d559"
                         },
                         "Hierarchy": {
@@ -54269,7 +53785,7 @@
                                 "e3927ba1-b069-884a-9b75-dbbd8c802aba"
                             ],
                             "parentGUID": "08f7b37b-512b-8046-aa8f-df4df3c659da",
-                            "siblingIndex": 2
+                            "siblingIndex": 1
                         },
                         "Layer": {
                             "layer_id": 1,
@@ -54306,7 +53822,7 @@
                                         "e3927ba1-b069-884a-9b75-dbbd8c802aba"
                                     ],
                                     "parentGUID": "08f7b37b-512b-8046-aa8f-df4df3c659da",
-                                    "siblingIndex": 2
+                                    "siblingIndex": 1
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -54970,6 +54486,570 @@
                         }
                     },
                     "Name": "jump button"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "d3b54299-585b-d947-8441-6651a9678d2c"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [
+                                "ada75476-475b-e44b-80b8-139f84235c46",
+                                "f6369820-8bf8-d74d-8cd3-a295dcba51a5",
+                                "42b086a0-5d78-9c43-bea5-22fb943d135d",
+                                "1dc8f071-9489-0846-abbf-cf2034f8c49c"
+                            ],
+                            "parentGUID": "08f7b37b-512b-8046-aa8f-df4df3c659da",
+                            "siblingIndex": 2
+                        },
+                        "Layer": {
+                            "layer_id": 1,
+                            "layer_mask": 2
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                9.791471481323242,
+                                0.0,
+                                -4.972426891326904
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "hearts"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [
+                                        "ada75476-475b-e44b-80b8-139f84235c46",
+                                        "f6369820-8bf8-d74d-8cd3-a295dcba51a5",
+                                        "42b086a0-5d78-9c43-bea5-22fb943d135d",
+                                        "1dc8f071-9489-0846-abbf-cf2034f8c49c"
+                                    ],
+                                    "parentGUID": "08f7b37b-512b-8046-aa8f-df4df3c659da",
+                                    "siblingIndex": 2
+                                },
+                                "LocalTransform": {
+                                    "position": [
+                                        9.791471481323242,
+                                        0.0,
+                                        -4.972426891326904
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "scale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "7f20ef65-a9d5-4541-859b-ff911ea58a59",
+                            "instanceRootGUID": "d3b54299-585b-d947-8441-6651a9678d2c",
+                            "sourcePrefabGUID": "050b5602-9340-4b49-a18b-b210b351c61f"
+                        }
+                    },
+                    "Name": "hearts"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "ada75476-475b-e44b-80b8-139f84235c46"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "d3b54299-585b-d947-8441-6651a9678d2c",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 1,
+                            "layer_mask": 2
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "heart_1"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "d3b54299-585b-d947-8441-6651a9678d2c",
+                                    "siblingIndex": 0
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "c9bc93bb-fca8-4341-952c-6f550e3190ac",
+                            "instanceRootGUID": "d3b54299-585b-d947-8441-6651a9678d2c",
+                            "sourcePrefabGUID": "050b5602-9340-4b49-a18b-b210b351c61f"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "357751f9-ce90-1a4a-9151-75339efa9e50"
+                                }
+                            ]
+                        },
+                        "Texture2D": {
+                            "opacity": 1.0,
+                            "pos": [
+                                -0.20000000298023224,
+                                -0.6000000238418579
+                            ],
+                            "texture_guid": "c20e7ad2-648a-5740-8abd-717a03ef4a82",
+                            "texture_scale": [
+                                0.4000000059604645,
+                                0.09000000357627869
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": false,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "heart_1"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "f6369820-8bf8-d74d-8cd3-a295dcba51a5"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "d3b54299-585b-d947-8441-6651a9678d2c",
+                            "siblingIndex": 1
+                        },
+                        "Layer": {
+                            "layer_id": 1,
+                            "layer_mask": 2
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "heart_2"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "d3b54299-585b-d947-8441-6651a9678d2c",
+                                    "siblingIndex": 1
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "83b6ccea-04e0-a54a-93c0-c94fbdccd8de",
+                            "instanceRootGUID": "d3b54299-585b-d947-8441-6651a9678d2c",
+                            "sourcePrefabGUID": "050b5602-9340-4b49-a18b-b210b351c61f"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "357751f9-ce90-1a4a-9151-75339efa9e50"
+                                }
+                            ]
+                        },
+                        "Texture2D": {
+                            "opacity": 1.0,
+                            "pos": [
+                                0.009999999776482582,
+                                -0.6000000238418579
+                            ],
+                            "texture_guid": "c20e7ad2-648a-5740-8abd-717a03ef4a82",
+                            "texture_scale": [
+                                0.4000000059604645,
+                                0.09000000357627869
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": false,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "heart_2"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "42b086a0-5d78-9c43-bea5-22fb943d135d"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "d3b54299-585b-d947-8441-6651a9678d2c",
+                            "siblingIndex": 2
+                        },
+                        "Layer": {
+                            "layer_id": 1,
+                            "layer_mask": 2
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "heart_3"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "d3b54299-585b-d947-8441-6651a9678d2c",
+                                    "siblingIndex": 2
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "919b7422-5e7c-c140-b2c0-91ef65fa8262",
+                            "instanceRootGUID": "d3b54299-585b-d947-8441-6651a9678d2c",
+                            "sourcePrefabGUID": "050b5602-9340-4b49-a18b-b210b351c61f"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "357751f9-ce90-1a4a-9151-75339efa9e50"
+                                }
+                            ]
+                        },
+                        "Texture2D": {
+                            "opacity": 1.0,
+                            "pos": [
+                                0.25,
+                                -0.6000000238418579
+                            ],
+                            "texture_guid": "c20e7ad2-648a-5740-8abd-717a03ef4a82",
+                            "texture_scale": [
+                                0.4000000059604645,
+                                0.09000000357627869
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": false,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "heart_3"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "1dc8f071-9489-0846-abbf-cf2034f8c49c"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "d3b54299-585b-d947-8441-6651a9678d2c",
+                            "siblingIndex": 3
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "heart border"
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "Hierarchy": {
+                                    "childrenGUIDs": [],
+                                    "parentGUID": "d3b54299-585b-d947-8441-6651a9678d2c",
+                                    "siblingIndex": 3
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "f8495ff6-3c5f-5e4a-ac09-4b84b0cc68fb",
+                            "instanceRootGUID": "d3b54299-585b-d947-8441-6651a9678d2c",
+                            "sourcePrefabGUID": "050b5602-9340-4b49-a18b-b210b351c61f"
+                        },
+                        "Texture2D": {
+                            "opacity": 1.0,
+                            "pos": [
+                                0.0,
+                                -0.6000000238418579
+                            ],
+                            "texture_guid": "21c8c800-9042-1547-b52b-4fee191116f7",
+                            "texture_scale": [
+                                0.8299999833106995,
+                                0.09000000357627869
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": false,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "heart border"
                 }
             },
             {
@@ -56475,8 +56555,8 @@
                         "Texture2D": {
                             "opacity": 1.0,
                             "pos": [
-                                -0.9214485883712769,
-                                0.9024048447608948
+                                -0.9214488863945007,
+                                0.9024047255516052
                             ],
                             "texture_guid": "bd0a7c29-ace7-3748-9bb0-beba7ab453fd",
                             "texture_scale": [
@@ -56485,7 +56565,7 @@
                             ]
                         },
                         "UIElement": {
-                            "b_is_enabled": false,
+                            "b_is_enabled": true,
                             "b_is_interactable": true,
                             "layer": 0
                         },
