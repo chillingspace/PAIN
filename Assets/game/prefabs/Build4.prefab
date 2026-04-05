@@ -93,6 +93,11 @@
                         0.0,
                         0.0
                     ]
+                },
+                "Tag": {
+                    "tags": [
+                        "wall"
+                    ]
                 }
             },
             "entityGUID": "8da6dfb8-8395-4945-b85b-1fb79976bcb7"
