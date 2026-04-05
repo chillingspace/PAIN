@@ -714,17 +714,11 @@ namespace PAIN {
 				}
 
 				// Get text bounds in screen pixel coordinates
-				// Scale position based on reference_resolution if set, then convert to bottom-left origin
+				// Position is normalized (0-1, top-left origin), convert to bottom-left origin pixels
 				// to match the text renderer's glm::ortho projection
-				glm::vec2 text_pos = text_comp.position;
-				if (text_comp.reference_resolution.x > 0 && text_comp.reference_resolution.y > 0) {
-					text_pos.x = text_comp.position.x * (fb.x / text_comp.reference_resolution.x);
-					text_pos.y = text_comp.position.y * (fb.y / text_comp.reference_resolution.y);
-				}
-				else {
-					text_comp.reference_resolution = fb;
-				}
-				text_pos.y = fb.y - text_pos.y;
+				glm::vec2 text_pos;
+				text_pos.x = text_comp.position.x * fb.x;
+				text_pos.y = fb.y - (text_comp.position.y * fb.y);
 				float text_width = 0.0f;
 				float text_height = 0.0f;
 

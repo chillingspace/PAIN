@@ -761,14 +761,14 @@ namespace PAIN {
 						changed = true;
 					}
 
-					// Font position (screen pixels, bottom-left origin)
+					// Font position (normalized 0-1, top-left origin)
 					changed |= ImGui::DragFloat2(
 						"Text Position",
 						&text.position.x,
+						0.001f,
+						0.0f,
 						1.0f,
-						-10000.0f,
-						10000.0f,
-						"%.2f"
+						"%.3f"
 					);
 
 					// Font size
