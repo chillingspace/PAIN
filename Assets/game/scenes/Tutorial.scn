@@ -308,6 +308,138 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
+                            "guid": "6efb2daf-7215-f641-981d-a14afbbe6be6"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "fog"
+                        },
+                        "ParticleSystem": {
+                            "angularVelocity": 0.0,
+                            "angularVelocityVariance": 0.0,
+                            "blendMode": 0,
+                            "colorOverLifetime": [],
+                            "directionMode": 0,
+                            "directionSpace": 0,
+                            "drag": 0.0,
+                            "emissionDirection": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "emissionRate": 85.0,
+                            "emissionShape": 1,
+                            "emissionSpread": 90.0,
+                            "gravityMultiplier": 0.0,
+                            "lifetime": 8.0,
+                            "lifetimeVariance": 0.0,
+                            "looping": true,
+                            "maxParticles": 760,
+                            "particleTexture": "2d69738e-73a7-144a-a4ee-64a5c0bca3f2",
+                            "playDuration": 0.0,
+                            "playOnAwake": true,
+                            "renderShape": 2,
+                            "shapeParams": {
+                                "boxHalfExtents": [
+                                    0.5,
+                                    0.5,
+                                    0.5
+                                ],
+                                "circleArc": 360.0,
+                                "circleRadius": 0.5,
+                                "coneAngle": 25.0,
+                                "sphereRadius": 100.0,
+                                "volumeEmission": true
+                            },
+                            "simulationSpace": 0,
+                            "sizeOverLifetime": [],
+                            "sizeOverLifetimeMultiplier": 1.0,
+                            "softEdge": 0.8999999761581421,
+                            "sortMode": 1,
+                            "speed": 0.11999999731779099,
+                            "speedVariance": 0.18000000715255737,
+                            "startColor": [
+                                0.2980392277240753,
+                                0.24705882370471954,
+                                0.11372549086809158,
+                                0.3137255012989044
+                            ],
+                            "startColorVariance": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "startRotation": 0.0,
+                            "startRotationVariance": 0.0,
+                            "startSize": 120.0,
+                            "startSizeVariance": 0.0,
+                            "velocityOverLifetime": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "velocityOverLifetimeEnabled": false
+                        },
+                        "PrefabInstance": {
+                            "componentOverrides": {
+                                "LocalTransform": {
+                                    "position": [
+                                        0.0,
+                                        0.0,
+                                        0.0
+                                    ],
+                                    "rotation": [
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ],
+                                    "scale": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ]
+                                }
+                            },
+                            "correspondingPrefabEntityGUID": "1cd37017-0e82-4448-8d55-3d0a6c0897e5",
+                            "instanceRootGUID": "6efb2daf-7215-f641-981d-a14afbbe6be6",
+                            "sourcePrefabGUID": "7f415f74-9bc2-af46-9387-89aec9a95838"
+                        }
+                    },
+                    "Name": "fog"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
                             "guid": "83b9fa39-fffe-ba4c-b805-24c049842a54"
                         },
                         "Hierarchy": {
@@ -1071,11 +1203,6 @@
                                 0.0,
                                 0.0,
                                 0.0
-                            ]
-                        },
-                        "Tag": {
-                            "tags": [
-                                "wall"
                             ]
                         }
                     },
@@ -3480,11 +3607,6 @@
                                 0.0,
                                 0.0
                             ]
-                        },
-                        "Tag": {
-                            "tags": [
-                                "wall"
-                            ]
                         }
                     },
                     "Name": "Build4"
@@ -4057,11 +4179,6 @@
                                 0.0,
                                 0.0
                             ]
-                        },
-                        "Tag": {
-                            "tags": [
-                                "wall"
-                            ]
                         }
                     },
                     "Name": "Build3"
@@ -4468,11 +4585,6 @@
                                 0.0,
                                 0.0
                             ]
-                        },
-                        "Tag": {
-                            "tags": [
-                                "wall"
-                            ]
                         }
                     },
                     "Name": "Build5"
@@ -4605,151 +4717,9 @@
                                 0.0,
                                 0.0
                             ]
-                        },
-                        "Tag": {
-                            "tags": [
-                                "wall"
-                            ]
                         }
                     },
                     "Name": "Build5"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "GUID": {
-                            "guid": "6efb2daf-7215-f641-981d-a14afbbe6be6"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 1
-                        },
-                        "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "fog"
-                        },
-                        "ParticleSystem": {
-                            "angularVelocity": 0.0,
-                            "angularVelocityVariance": 0.0,
-                            "blendMode": 0,
-                            "colorOverLifetime": [],
-                            "directionMode": 0,
-                            "directionSpace": 0,
-                            "drag": 0.0,
-                            "emissionDirection": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "emissionRate": 85.0,
-                            "emissionShape": 1,
-                            "emissionSpread": 90.0,
-                            "gravityMultiplier": 0.0,
-                            "lifetime": 8.0,
-                            "lifetimeVariance": 0.0,
-                            "looping": true,
-                            "maxParticles": 760,
-                            "particleTexture": "2d69738e-73a7-144a-a4ee-64a5c0bca3f2",
-                            "playDuration": 0.0,
-                            "playOnAwake": true,
-                            "renderShape": 2,
-                            "shapeParams": {
-                                "boxHalfExtents": [
-                                    0.5,
-                                    0.5,
-                                    0.5
-                                ],
-                                "circleArc": 360.0,
-                                "circleRadius": 0.5,
-                                "coneAngle": 25.0,
-                                "sphereRadius": 100.0,
-                                "volumeEmission": true
-                            },
-                            "simulationSpace": 0,
-                            "sizeOverLifetime": [],
-                            "sizeOverLifetimeMultiplier": 1.0,
-                            "softEdge": 0.8999999761581421,
-                            "sortMode": 1,
-                            "speed": 0.11999999731779099,
-                            "speedVariance": 0.18000000715255737,
-                            "startColor": [
-                                0.2980392277240753,
-                                0.24705882370471954,
-                                0.11372549086809158,
-                                0.3137255012989044
-                            ],
-                            "startColorVariance": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "startRotation": 0.0,
-                            "startRotationVariance": 0.0,
-                            "startSize": 120.0,
-                            "startSizeVariance": 0.0,
-                            "velocityOverLifetime": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "velocityOverLifetimeEnabled": false
-                        },
-                        "PrefabInstance": {
-                            "componentOverrides": {
-                                "Hierarchy": {
-                                    "childrenGUIDs": [],
-                                    "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 1
-                                },
-                                "LocalTransform": {
-                                    "position": [
-                                        0.0,
-                                        0.0,
-                                        0.0
-                                    ],
-                                    "rotation": [
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        1.0
-                                    ],
-                                    "scale": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ]
-                                }
-                            },
-                            "correspondingPrefabEntityGUID": "1cd37017-0e82-4448-8d55-3d0a6c0897e5",
-                            "instanceRootGUID": "6efb2daf-7215-f641-981d-a14afbbe6be6",
-                            "sourcePrefabGUID": "7f415f74-9bc2-af46-9387-89aec9a95838"
-                        }
-                    },
-                    "Name": "fog"
                 }
             },
             {
@@ -4764,7 +4734,7 @@
                                 "ef70de61-5f27-3f47-8882-c109e400bccb"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 2
+                            "siblingIndex": 1
                         },
                         "Layer": {
                             "layer_id": 5,
@@ -4799,7 +4769,7 @@
                                         "ef70de61-5f27-3f47-8882-c109e400bccb"
                                     ],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 2
+                                    "siblingIndex": 1
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -5197,7 +5167,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 3
+                            "siblingIndex": 2
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -5274,7 +5244,7 @@
                                 "b3e953c2-2ebc-8b4c-aafd-452d74965515"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 4
+                            "siblingIndex": 3
                         },
                         "Layer": {
                             "layer_id": 6,
@@ -5309,7 +5279,7 @@
                                         "b3e953c2-2ebc-8b4c-aafd-452d74965515"
                                     ],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 4
+                                    "siblingIndex": 3
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -5710,7 +5680,7 @@
                                 "2987b941-811b-1846-90ac-69bed20a8ac3"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 5
+                            "siblingIndex": 4
                         },
                         "Layer": {
                             "layer_id": 7,
@@ -5745,7 +5715,7 @@
                                         "2987b941-811b-1846-90ac-69bed20a8ac3"
                                     ],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 5
+                                    "siblingIndex": 4
                                 }
                             },
                             "correspondingPrefabEntityGUID": "96b89587-c8d8-9142-995d-209c05066e8c",
@@ -6115,7 +6085,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 6
+                            "siblingIndex": 5
                         },
                         "Layer": {
                             "layer_id": 7,
@@ -6147,7 +6117,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 6
+                                    "siblingIndex": 5
                                 },
                                 "Layer": {
                                     "layer_id": 7,
@@ -6246,7 +6216,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 7
+                            "siblingIndex": 6
                         },
                         "Layer": {
                             "layer_id": 6,
@@ -6278,7 +6248,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 7
+                                    "siblingIndex": 6
                                 },
                                 "Layer": {
                                     "layer_id": 6,
@@ -6380,7 +6350,7 @@
                                 "675345f8-21f4-d84c-a928-f9bcdd48cb9f"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 8
+                            "siblingIndex": 7
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -7593,7 +7563,7 @@
                                 "6ab9c0ad-0050-ed49-8499-b6b60d2c3a57"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 9
+                            "siblingIndex": 8
                         },
                         "Layer": {
                             "layer_id": 3,
@@ -7816,7 +7786,7 @@
                                 "7793f64e-0c39-a64b-8aff-3cb5abaa0837"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 10
+                            "siblingIndex": 9
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -9228,7 +9198,7 @@
                                 "e2bea19d-c0ee-5145-b2fb-a9507a66b77b"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 11
+                            "siblingIndex": 10
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -9809,7 +9779,7 @@
                                 "9bf4b89e-0533-6f4c-8cdd-d87badf74cec"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 12
+                            "siblingIndex": 11
                         },
                         "Layer": {
                             "layer_id": 4,
@@ -9844,7 +9814,7 @@
                                         "9bf4b89e-0533-6f4c-8cdd-d87badf74cec"
                                     ],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 12
+                                    "siblingIndex": 11
                                 }
                             },
                             "correspondingPrefabEntityGUID": "d740ec1e-700a-1141-9969-7b51e60d2fd1",
@@ -10246,7 +10216,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 13
+                            "siblingIndex": 12
                         },
                         "Layer": {
                             "layer_id": 4,
@@ -10278,7 +10248,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 13
+                                    "siblingIndex": 12
                                 },
                                 "Texture2D": {
                                     "opacity": 1.0,
@@ -10377,7 +10347,7 @@
                                 "85229db1-9cf5-064e-bd77-71c88e8dbfcc"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 14
+                            "siblingIndex": 13
                         },
                         "Layer": {
                             "layer_id": 2,
@@ -10413,7 +10383,7 @@
                                         "85229db1-9cf5-064e-bd77-71c88e8dbfcc"
                                     ],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 14
+                                    "siblingIndex": 13
                                 }
                             },
                             "correspondingPrefabEntityGUID": "cbc53e43-5867-7042-86ff-da57ea2d741f",
@@ -11002,7 +10972,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 15
+                            "siblingIndex": 14
                         },
                         "Layer": {
                             "layer_id": 2,
@@ -11034,7 +11004,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 15
+                                    "siblingIndex": 14
                                 },
                                 "Texture2D": {
                                     "opacity": 1.0,
@@ -11129,7 +11099,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 16
+                            "siblingIndex": 15
                         },
                         "Layer": {
                             "layer_id": 5,
@@ -11161,7 +11131,7 @@
                                 "Hierarchy": {
                                     "childrenGUIDs": [],
                                     "parentGUID": "00000000-0000-0000-0000-000000000000",
-                                    "siblingIndex": 16
+                                    "siblingIndex": 15
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -11273,12 +11243,12 @@
                         },
                         "Hierarchy": {
                             "childrenGUIDs": [
+                                "7f20ef65-a9d5-4541-859b-ff911ea58a59",
                                 "c8989800-69e0-aa48-a789-d62df22f9123",
-                                "01217e52-b00d-084d-bea0-6c5346f3d94f",
-                                "bc5dbd9a-1611-d646-a4a4-57f86a541097"
+                                "01217e52-b00d-084d-bea0-6c5346f3d94f"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 17
+                            "siblingIndex": 16
                         },
                         "Layer": {
                             "layer_id": 1,
@@ -11819,6 +11789,487 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
+                            "guid": "7f20ef65-a9d5-4541-859b-ff911ea58a59"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [
+                                "c9bc93bb-fca8-4341-952c-6f550e3190ac",
+                                "83b6ccea-04e0-a54a-93c0-c94fbdccd8de",
+                                "919b7422-5e7c-c140-b2c0-91ef65fa8262",
+                                "ec57d320-b00e-8a4a-a2c7-dceddbe7cadd"
+                            ],
+                            "parentGUID": "08f7b37b-512b-8046-aa8f-df4df3c659da",
+                            "siblingIndex": 1
+                        },
+                        "Layer": {
+                            "layer_id": 1,
+                            "layer_mask": 2
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "hearts"
+                        }
+                    },
+                    "Name": "hearts"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "c9bc93bb-fca8-4341-952c-6f550e3190ac"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "7f20ef65-a9d5-4541-859b-ff911ea58a59",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 1,
+                            "layer_mask": 2
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "heart_1"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "357751f9-ce90-1a4a-9151-75339efa9e50"
+                                }
+                            ]
+                        },
+                        "Texture2D": {
+                            "opacity": 1.0,
+                            "pos": [
+                                -0.20999999344348907,
+                                -0.6000000238418579
+                            ],
+                            "texture_guid": "c20e7ad2-648a-5740-8abd-717a03ef4a82",
+                            "texture_scale": [
+                                0.6600000262260437,
+                                0.09000000357627869
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": false,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "heart_1"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "83b6ccea-04e0-a54a-93c0-c94fbdccd8de"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "7f20ef65-a9d5-4541-859b-ff911ea58a59",
+                            "siblingIndex": 1
+                        },
+                        "Layer": {
+                            "layer_id": 1,
+                            "layer_mask": 2
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "heart_2"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "357751f9-ce90-1a4a-9151-75339efa9e50"
+                                }
+                            ]
+                        },
+                        "Texture2D": {
+                            "opacity": 1.0,
+                            "pos": [
+                                0.0,
+                                -0.6000000238418579
+                            ],
+                            "texture_guid": "c20e7ad2-648a-5740-8abd-717a03ef4a82",
+                            "texture_scale": [
+                                0.6600000262260437,
+                                0.09000000357627869
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": false,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "heart_2"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "919b7422-5e7c-c140-b2c0-91ef65fa8262"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "7f20ef65-a9d5-4541-859b-ff911ea58a59",
+                            "siblingIndex": 2
+                        },
+                        "Layer": {
+                            "layer_id": 1,
+                            "layer_mask": 2
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "heart_3"
+                        },
+                        "Scripts": {
+                            "scripts": [
+                                {
+                                    "enabled": true,
+                                    "script_asset": "357751f9-ce90-1a4a-9151-75339efa9e50"
+                                }
+                            ]
+                        },
+                        "Texture2D": {
+                            "opacity": 1.0,
+                            "pos": [
+                                0.20999999344348907,
+                                -0.6000000238418579
+                            ],
+                            "texture_guid": "c20e7ad2-648a-5740-8abd-717a03ef4a82",
+                            "texture_scale": [
+                                0.6600000262260437,
+                                0.09000000357627869
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": false,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "heart_3"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "ec57d320-b00e-8a4a-a2c7-dceddbe7cadd"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "7f20ef65-a9d5-4541-859b-ff911ea58a59",
+                            "siblingIndex": 3
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "Name": {
+                            "name": "heart border"
+                        },
+                        "Texture2D": {
+                            "opacity": 1.0,
+                            "pos": [
+                                0.0,
+                                -0.6000000238418579
+                            ],
+                            "texture_guid": "21c8c800-9042-1547-b52b-4fee191116f7",
+                            "texture_scale": [
+                                0.6499999761581421,
+                                0.09000000357627869
+                            ]
+                        },
+                        "UIElement": {
+                            "b_is_enabled": true,
+                            "b_is_interactable": false,
+                            "layer": 0
+                        },
+                        "UIRectTransform": {
+                            "anchor_max": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchor_min": [
+                                0.5,
+                                0.5
+                            ],
+                            "anchored_position": [
+                                0.0,
+                                0.0
+                            ],
+                            "local_position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "offset_max": [
+                                0.0,
+                                0.0
+                            ],
+                            "offset_min": [
+                                0.0,
+                                0.0
+                            ],
+                            "pivot": [
+                                0.5,
+                                0.5
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "size_delta": [
+                                100.0,
+                                100.0
+                            ]
+                        }
+                    },
+                    "Name": "heart border"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
                             "guid": "01217e52-b00d-084d-bea0-6c5346f3d94f"
                         },
                         "Hierarchy": {
@@ -11829,7 +12280,7 @@
                                 "898332ec-5a8a-be4c-8f4b-9ab84cb080a9"
                             ],
                             "parentGUID": "08f7b37b-512b-8046-aa8f-df4df3c659da",
-                            "siblingIndex": 1
+                            "siblingIndex": 2
                         },
                         "Layer": {
                             "layer_id": 1,
@@ -11866,7 +12317,7 @@
                                         "898332ec-5a8a-be4c-8f4b-9ab84cb080a9"
                                     ],
                                     "parentGUID": "08f7b37b-512b-8046-aa8f-df4df3c659da",
-                                    "siblingIndex": 1
+                                    "siblingIndex": 2
                                 },
                                 "LocalTransform": {
                                     "position": [
@@ -12536,570 +12987,6 @@
                 "Entity": {
                     "Components": {
                         "GUID": {
-                            "guid": "bc5dbd9a-1611-d646-a4a4-57f86a541097"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [
-                                "0b92d16c-5871-dc43-935c-271f554b0c77",
-                                "7cb1f1dc-b304-c94c-9591-99e73c2ad430",
-                                "ef85bd50-5b85-5348-8b1f-e44ef9858c97",
-                                "233047f2-e39f-d049-be77-4ee661b36ecc"
-                            ],
-                            "parentGUID": "08f7b37b-512b-8046-aa8f-df4df3c659da",
-                            "siblingIndex": 2
-                        },
-                        "Layer": {
-                            "layer_id": 1,
-                            "layer_mask": 2
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                -3.7609810829162598,
-                                0.0,
-                                -1.8677325248718262
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "hearts"
-                        },
-                        "PrefabInstance": {
-                            "componentOverrides": {
-                                "Hierarchy": {
-                                    "childrenGUIDs": [
-                                        "0b92d16c-5871-dc43-935c-271f554b0c77",
-                                        "7cb1f1dc-b304-c94c-9591-99e73c2ad430",
-                                        "ef85bd50-5b85-5348-8b1f-e44ef9858c97",
-                                        "233047f2-e39f-d049-be77-4ee661b36ecc"
-                                    ],
-                                    "parentGUID": "08f7b37b-512b-8046-aa8f-df4df3c659da",
-                                    "siblingIndex": 2
-                                },
-                                "LocalTransform": {
-                                    "position": [
-                                        -3.7609810829162598,
-                                        0.0,
-                                        -1.8677325248718262
-                                    ],
-                                    "rotation": [
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        1.0
-                                    ],
-                                    "scale": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ]
-                                }
-                            },
-                            "correspondingPrefabEntityGUID": "7f20ef65-a9d5-4541-859b-ff911ea58a59",
-                            "instanceRootGUID": "bc5dbd9a-1611-d646-a4a4-57f86a541097",
-                            "sourcePrefabGUID": "050b5602-9340-4b49-a18b-b210b351c61f"
-                        }
-                    },
-                    "Name": "hearts"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "GUID": {
-                            "guid": "0b92d16c-5871-dc43-935c-271f554b0c77"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "bc5dbd9a-1611-d646-a4a4-57f86a541097",
-                            "siblingIndex": 0
-                        },
-                        "Layer": {
-                            "layer_id": 1,
-                            "layer_mask": 2
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "heart_1"
-                        },
-                        "PrefabInstance": {
-                            "componentOverrides": {
-                                "Hierarchy": {
-                                    "childrenGUIDs": [],
-                                    "parentGUID": "bc5dbd9a-1611-d646-a4a4-57f86a541097",
-                                    "siblingIndex": 0
-                                }
-                            },
-                            "correspondingPrefabEntityGUID": "c9bc93bb-fca8-4341-952c-6f550e3190ac",
-                            "instanceRootGUID": "bc5dbd9a-1611-d646-a4a4-57f86a541097",
-                            "sourcePrefabGUID": "050b5602-9340-4b49-a18b-b210b351c61f"
-                        },
-                        "Scripts": {
-                            "scripts": [
-                                {
-                                    "enabled": true,
-                                    "script_asset": "357751f9-ce90-1a4a-9151-75339efa9e50"
-                                }
-                            ]
-                        },
-                        "Texture2D": {
-                            "opacity": 1.0,
-                            "pos": [
-                                -0.20000000298023224,
-                                -0.6000000238418579
-                            ],
-                            "texture_guid": "c20e7ad2-648a-5740-8abd-717a03ef4a82",
-                            "texture_scale": [
-                                0.4000000059604645,
-                                0.09000000357627869
-                            ]
-                        },
-                        "UIElement": {
-                            "b_is_enabled": true,
-                            "b_is_interactable": false,
-                            "layer": 0
-                        },
-                        "UIRectTransform": {
-                            "anchor_max": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchor_min": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchored_position": [
-                                0.0,
-                                0.0
-                            ],
-                            "local_position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "offset_max": [
-                                0.0,
-                                0.0
-                            ],
-                            "offset_min": [
-                                0.0,
-                                0.0
-                            ],
-                            "pivot": [
-                                0.5,
-                                0.5
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "size_delta": [
-                                100.0,
-                                100.0
-                            ]
-                        }
-                    },
-                    "Name": "heart_1"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "GUID": {
-                            "guid": "7cb1f1dc-b304-c94c-9591-99e73c2ad430"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "bc5dbd9a-1611-d646-a4a4-57f86a541097",
-                            "siblingIndex": 1
-                        },
-                        "Layer": {
-                            "layer_id": 1,
-                            "layer_mask": 2
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "heart_2"
-                        },
-                        "PrefabInstance": {
-                            "componentOverrides": {
-                                "Hierarchy": {
-                                    "childrenGUIDs": [],
-                                    "parentGUID": "bc5dbd9a-1611-d646-a4a4-57f86a541097",
-                                    "siblingIndex": 1
-                                }
-                            },
-                            "correspondingPrefabEntityGUID": "83b6ccea-04e0-a54a-93c0-c94fbdccd8de",
-                            "instanceRootGUID": "bc5dbd9a-1611-d646-a4a4-57f86a541097",
-                            "sourcePrefabGUID": "050b5602-9340-4b49-a18b-b210b351c61f"
-                        },
-                        "Scripts": {
-                            "scripts": [
-                                {
-                                    "enabled": true,
-                                    "script_asset": "357751f9-ce90-1a4a-9151-75339efa9e50"
-                                }
-                            ]
-                        },
-                        "Texture2D": {
-                            "opacity": 1.0,
-                            "pos": [
-                                0.009999999776482582,
-                                -0.6000000238418579
-                            ],
-                            "texture_guid": "c20e7ad2-648a-5740-8abd-717a03ef4a82",
-                            "texture_scale": [
-                                0.4000000059604645,
-                                0.09000000357627869
-                            ]
-                        },
-                        "UIElement": {
-                            "b_is_enabled": true,
-                            "b_is_interactable": false,
-                            "layer": 0
-                        },
-                        "UIRectTransform": {
-                            "anchor_max": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchor_min": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchored_position": [
-                                0.0,
-                                0.0
-                            ],
-                            "local_position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "offset_max": [
-                                0.0,
-                                0.0
-                            ],
-                            "offset_min": [
-                                0.0,
-                                0.0
-                            ],
-                            "pivot": [
-                                0.5,
-                                0.5
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "size_delta": [
-                                100.0,
-                                100.0
-                            ]
-                        }
-                    },
-                    "Name": "heart_2"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "GUID": {
-                            "guid": "ef85bd50-5b85-5348-8b1f-e44ef9858c97"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "bc5dbd9a-1611-d646-a4a4-57f86a541097",
-                            "siblingIndex": 2
-                        },
-                        "Layer": {
-                            "layer_id": 1,
-                            "layer_mask": 2
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "heart_3"
-                        },
-                        "PrefabInstance": {
-                            "componentOverrides": {
-                                "Hierarchy": {
-                                    "childrenGUIDs": [],
-                                    "parentGUID": "bc5dbd9a-1611-d646-a4a4-57f86a541097",
-                                    "siblingIndex": 2
-                                }
-                            },
-                            "correspondingPrefabEntityGUID": "919b7422-5e7c-c140-b2c0-91ef65fa8262",
-                            "instanceRootGUID": "bc5dbd9a-1611-d646-a4a4-57f86a541097",
-                            "sourcePrefabGUID": "050b5602-9340-4b49-a18b-b210b351c61f"
-                        },
-                        "Scripts": {
-                            "scripts": [
-                                {
-                                    "enabled": true,
-                                    "script_asset": "357751f9-ce90-1a4a-9151-75339efa9e50"
-                                }
-                            ]
-                        },
-                        "Texture2D": {
-                            "opacity": 1.0,
-                            "pos": [
-                                0.25,
-                                -0.6000000238418579
-                            ],
-                            "texture_guid": "c20e7ad2-648a-5740-8abd-717a03ef4a82",
-                            "texture_scale": [
-                                0.4000000059604645,
-                                0.09000000357627869
-                            ]
-                        },
-                        "UIElement": {
-                            "b_is_enabled": true,
-                            "b_is_interactable": false,
-                            "layer": 0
-                        },
-                        "UIRectTransform": {
-                            "anchor_max": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchor_min": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchored_position": [
-                                0.0,
-                                0.0
-                            ],
-                            "local_position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "offset_max": [
-                                0.0,
-                                0.0
-                            ],
-                            "offset_min": [
-                                0.0,
-                                0.0
-                            ],
-                            "pivot": [
-                                0.5,
-                                0.5
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "size_delta": [
-                                100.0,
-                                100.0
-                            ]
-                        }
-                    },
-                    "Name": "heart_3"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "GUID": {
-                            "guid": "233047f2-e39f-d049-be77-4ee661b36ecc"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "bc5dbd9a-1611-d646-a4a4-57f86a541097",
-                            "siblingIndex": 3
-                        },
-                        "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        },
-                        "Name": {
-                            "name": "heart border"
-                        },
-                        "PrefabInstance": {
-                            "componentOverrides": {
-                                "Hierarchy": {
-                                    "childrenGUIDs": [],
-                                    "parentGUID": "bc5dbd9a-1611-d646-a4a4-57f86a541097",
-                                    "siblingIndex": 3
-                                }
-                            },
-                            "correspondingPrefabEntityGUID": "f8495ff6-3c5f-5e4a-ac09-4b84b0cc68fb",
-                            "instanceRootGUID": "bc5dbd9a-1611-d646-a4a4-57f86a541097",
-                            "sourcePrefabGUID": "050b5602-9340-4b49-a18b-b210b351c61f"
-                        },
-                        "Texture2D": {
-                            "opacity": 1.0,
-                            "pos": [
-                                0.0,
-                                -0.6000000238418579
-                            ],
-                            "texture_guid": "21c8c800-9042-1547-b52b-4fee191116f7",
-                            "texture_scale": [
-                                0.8299999833106995,
-                                0.09000000357627869
-                            ]
-                        },
-                        "UIElement": {
-                            "b_is_enabled": true,
-                            "b_is_interactable": false,
-                            "layer": 0
-                        },
-                        "UIRectTransform": {
-                            "anchor_max": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchor_min": [
-                                0.5,
-                                0.5
-                            ],
-                            "anchored_position": [
-                                0.0,
-                                0.0
-                            ],
-                            "local_position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "offset_max": [
-                                0.0,
-                                0.0
-                            ],
-                            "offset_min": [
-                                0.0,
-                                0.0
-                            ],
-                            "pivot": [
-                                0.5,
-                                0.5
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "size_delta": [
-                                100.0,
-                                100.0
-                            ]
-                        }
-                    },
-                    "Name": "heart border"
-                }
-            },
-            {
-                "Entity": {
-                    "Components": {
-                        "GUID": {
                             "guid": "75d1f30b-c786-784b-baba-f6f13f5e7436"
                         },
                         "Hierarchy": {
@@ -13115,7 +13002,7 @@
                                 "c842c73c-e519-ea47-8c54-b995ff2e3843"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 18
+                            "siblingIndex": 17
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -14422,7 +14309,7 @@
                                 "82bda318-997b-3f40-a7d8-1634ac23bb04"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 19
+                            "siblingIndex": 18
                         },
                         "Layer": {
                             "layer_id": 3,
@@ -21033,7 +20920,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 20
+                            "siblingIndex": 19
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -21139,7 +21026,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 21
+                            "siblingIndex": 20
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -21360,7 +21247,7 @@
                                 "907a1195-b2a6-0043-8310-bf00276c7d9f"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 22
+                            "siblingIndex": 21
                         },
                         "Layer": {
                             "layer_id": 3,
@@ -22015,7 +21902,7 @@
                                 "f43d5820-93eb-b846-9f31-f2adea46d86e"
                             ],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 23
+                            "siblingIndex": 22
                         },
                         "Layer": {
                             "layer_id": 0,
@@ -25685,7 +25572,7 @@
                         "Hierarchy": {
                             "childrenGUIDs": [],
                             "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 24
+                            "siblingIndex": 23
                         },
                         "Layer": {
                             "layer_id": 0,
