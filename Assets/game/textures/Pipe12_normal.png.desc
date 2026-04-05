@@ -1,0 +1,23 @@
+{
+  "asset_info": {
+    "name": "Pipe12_normal.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 8331806255839672962
+  },
+  "descriptor_version": 1,
+  "guid": "983594dc-c8f4-924f-a7ea-78b53ef38cd7",
+  "import_settings": {
+    "android_allow_astc_hdr": false,
+    "android_bake_cubemap": false,
+    "android_compression": "ASTC_4x4",
+    "android_skybox_source_format": "R16G16B16A16",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Pipe12_normal.png"
+  }
+}

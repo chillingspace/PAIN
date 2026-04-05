@@ -1,0 +1,23 @@
+{
+  "asset_info": {
+    "name": "Pipe12_baseColor.png",
+    "type": "Texture"
+  },
+  "build_data": {
+    "hash": 5553822043839918501
+  },
+  "descriptor_version": 1,
+  "guid": "aaaf3df1-6059-664d-b8ff-72421baddb74",
+  "import_settings": {
+    "android_allow_astc_hdr": false,
+    "android_bake_cubemap": false,
+    "android_compression": "ASTC_4x4",
+    "android_skybox_source_format": "R16G16B16A16",
+    "generate_mipmaps": true,
+    "max_size": 1024,
+    "window_compression": "BC7"
+  },
+  "meta_data": {
+    "source_file": "game\\textures\\Pipe12_baseColor.png"
+  }
+}

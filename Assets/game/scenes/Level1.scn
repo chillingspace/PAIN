@@ -2,16 +2,14 @@
     "assets": [
         "41022c20-5591-324d-80ff-f14090e5e9d3",
         "5367dfeb-d87d-fa47-bfb0-d5c8ad9d732a",
-        "c4d2104e-7356-854b-976e-2cb44e856fd8",
-        "7d8bffc6-b461-c14a-9401-6124713c0747",
-        "841e487f-5eab-f24d-9eae-9dfbb83fcc02",
-        "60d237d0-60e1-c146-86e6-e76c967840d4",
-        "9bc1e511-f6a7-9d48-9723-5cd1200ca942",
-        "efff96ab-9011-d248-a0e3-56bb0e76f8e6",
-        "c0baaed2-d818-9d47-84ad-339768d40e62",
-        "df160745-bc2d-d949-a8c3-e7181514ac0a",
-        "1708e4d2-69c9-ba43-9ef6-85d417b11f01",
-        "ba8ea99f-16b6-da48-9465-54f48d7cd3a7",
+        "e478dd37-7777-cb49-b2c6-b3409fc4c2a6",
+        "a8a9e677-4cd6-524b-b77b-0227fe39f7a2",
+        "aaaf3df1-6059-664d-b8ff-72421baddb74",
+        "f59e4cbd-b183-3541-9531-bd14b87115de",
+        "983594dc-c8f4-924f-a7ea-78b53ef38cd7",
+        "4aecfe47-ed20-4341-805a-b691f14700e1",
+        "c22d6814-e124-7a42-81c6-5f64fc3b7645",
+        "29aa3017-d7ed-4d4b-80ec-b6779081f2f9",
         "e353042d-e2a6-c24b-ad19-719886b7d7b6",
         "d9977322-f31e-bc4c-b298-fbcd6690c4ba",
         "4b1f318e-49f7-1545-bb84-b9c6608f3471",
@@ -19,7 +17,6 @@
         "3da3f0aa-e9d3-634a-b1c9-f88763fb5bae",
         "146f4e3b-5c24-624f-80c8-d74159ed9f41",
         "a8977689-ded0-fa41-9efb-33354e83dec7",
-        "f59e4cbd-b183-3541-9531-bd14b87115de",
         "39040d83-c6c4-d64f-9043-9f95bcec758f",
         "4a319130-c746-0d4d-9463-ea992d847946",
         "1eb84c15-dddb-a141-87cb-fc6117158943",
@@ -43,6 +40,9 @@
         "9dc666a4-a004-0346-803d-0530eb3a2f70",
         "c3240e7d-4066-2444-a024-c1d31c71a299",
         "ec6d2ba2-bfee-cf42-870e-ee2c25049905",
+        "ba8ea99f-16b6-da48-9465-54f48d7cd3a7",
+        "df160745-bc2d-d949-a8c3-e7181514ac0a",
+        "1708e4d2-69c9-ba43-9ef6-85d417b11f01",
         "c79c529b-71e5-164c-854d-f8cf076f5318",
         "b4a81861-94f2-584b-9da1-dbb24a91f93c",
         "9ef7daa0-a9f9-4342-b301-c4dbaf9926f4",
@@ -64,8 +64,6 @@
         "11f20ced-0a55-f344-a74e-7a57022bd83e",
         "d7e85790-e5af-0d4b-92e0-05aa2c94aed5",
         "4e94a305-8f71-4440-a978-1f584b2b04c7",
-        "4aecfe47-ed20-4341-805a-b691f14700e1",
-        "c22d6814-e124-7a42-81c6-5f64fc3b7645",
         "a8e232d8-24bd-f148-b8d8-848747b4d484",
         "f89629ad-fef5-bf45-8454-eeb919b907ed",
         "c1a6b5fd-5b24-6545-9358-65dd293c1d5e",
@@ -123,6 +121,13 @@
         "256aaf03-37ee-654a-947b-dba5e889cb54",
         "5aa8f938-deee-7048-9a6b-33482dd8252b",
         "4ad77538-55dd-0549-b0cd-59b7f3ac8e50",
+        "c4d2104e-7356-854b-976e-2cb44e856fd8",
+        "7d8bffc6-b461-c14a-9401-6124713c0747",
+        "841e487f-5eab-f24d-9eae-9dfbb83fcc02",
+        "60d237d0-60e1-c146-86e6-e76c967840d4",
+        "9bc1e511-f6a7-9d48-9723-5cd1200ca942",
+        "efff96ab-9011-d248-a0e3-56bb0e76f8e6",
+        "c0baaed2-d818-9d47-84ad-339768d40e62",
         "f79091e8-3999-8543-a6da-c631ad94a064",
         "15d07ef6-eadd-cf49-bf8f-8825d014f2c5",
         "9da056a0-d46c-664b-a2bd-9ba986135c23",
@@ -166,7 +171,6 @@
         "e3c50ccd-4dd5-024b-bde1-eb1f473cb339",
         "bc3ef3ce-e400-1247-acaa-e9e34cd3b2cd",
         "9299e062-af2a-cb4c-8ae2-fbd228835828",
-        "a8a9e677-4cd6-524b-b77b-0227fe39f7a2",
         "cb4f12f2-ee24-f145-8c48-9cab6179e963",
         "836b6944-2065-e24e-8a21-a59e9ab0859d",
         "3a976dda-9eeb-ae41-9050-0b7dcae71a10",
@@ -299,16 +303,16 @@
         ],
         "farPlane": 100.0,
         "forward": [
-            -0.44736969470977783,
-            -0.8942047357559204,
-            0.01607445813715458
+            -0.42273345589637756,
+            -0.9048750400543213,
+            -0.049975425004959106
         ],
         "fov": 60.0,
         "nearPlane": 0.10000000149011612,
         "position": [
-            3.323918342590332,
-            26.998355865478516,
-            -31.273157119750977
+            -0.516358494758606,
+            20.325178146362305,
+            -31.710893630981445
         ],
         "sensitivity": 0.10000000149011612,
         "speed": 31.100000381469727,
@@ -551,7 +555,7 @@
                                     ],
                                     "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "7d8bffc6-b461-c14a-9401-6124713c0747",
+                                    "materialGUID": "e478dd37-7777-cb49-b2c6-b3409fc4c2a6",
                                     "metallicOverride": 1.0,
                                     "metallicTextureOverride": "ba8ea99f-16b6-da48-9465-54f48d7cd3a7",
                                     "normalTextureOverride": "c0baaed2-d818-9d47-84ad-339768d40e62",
@@ -592,40 +596,6 @@
                                         1.0,
                                         0.9999999403953552
                                     ]
-                                },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "doubleSidedShadows": false,
-                                    "isStatic": false,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "60d237d0-60e1-c146-86e6-e76c967840d4",
-                                            "aoTextureOverride": "ba8ea99f-16b6-da48-9465-54f48d7cd3a7",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "7d8bffc6-b461-c14a-9401-6124713c0747",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "ba8ea99f-16b6-da48-9465-54f48d7cd3a7",
-                                            "normalTextureOverride": "c0baaed2-d818-9d47-84ad-339768d40e62",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "ba8ea99f-16b6-da48-9465-54f48d7cd3a7",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "5367dfeb-d87d-fa47-bfb0-d5c8ad9d732a",
-                                    "receiveShadows": true,
-                                    "visible": true
                                 }
                             },
                             "correspondingPrefabEntityGUID": "9e4114ae-3255-8b48-ac80-a1ac23cb388f",
@@ -2434,7 +2404,7 @@
                                     ],
                                     "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "7d8bffc6-b461-c14a-9401-6124713c0747",
+                                    "materialGUID": "e478dd37-7777-cb49-b2c6-b3409fc4c2a6",
                                     "metallicOverride": 1.0,
                                     "metallicTextureOverride": "ba8ea99f-16b6-da48-9465-54f48d7cd3a7",
                                     "normalTextureOverride": "c0baaed2-d818-9d47-84ad-339768d40e62",
@@ -2475,40 +2445,6 @@
                                         1.0,
                                         0.9999998211860657
                                     ]
-                                },
-                                "ModelRenderer": {
-                                    "castShadows": true,
-                                    "doubleSidedShadows": false,
-                                    "isStatic": false,
-                                    "materials": [
-                                        {
-                                            "albedoTextureOverride": "60d237d0-60e1-c146-86e6-e76c967840d4",
-                                            "aoTextureOverride": "ba8ea99f-16b6-da48-9465-54f48d7cd3a7",
-                                            "baseColorOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveOverride": [
-                                                1.0,
-                                                1.0,
-                                                1.0
-                                            ],
-                                            "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "7d8bffc6-b461-c14a-9401-6124713c0747",
-                                            "metallicOverride": 1.0,
-                                            "metallicTextureOverride": "ba8ea99f-16b6-da48-9465-54f48d7cd3a7",
-                                            "normalTextureOverride": "c0baaed2-d818-9d47-84ad-339768d40e62",
-                                            "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "roughnessOverride": 1.0,
-                                            "roughnessTextureOverride": "ba8ea99f-16b6-da48-9465-54f48d7cd3a7",
-                                            "useOverrides": false
-                                        }
-                                    ],
-                                    "modelGUID": "5367dfeb-d87d-fa47-bfb0-d5c8ad9d732a",
-                                    "receiveShadows": true,
-                                    "visible": true
                                 },
                                 "Name": {
                                     "name": "pipe1"
@@ -2847,6 +2783,11 @@
                                 0.0,
                                 0.0,
                                 0.0
+                            ]
+                        },
+                        "Tag": {
+                            "tags": [
+                                "wall"
                             ]
                         }
                     },
@@ -12744,6 +12685,11 @@
                                 0.0,
                                 0.0
                             ]
+                        },
+                        "Tag": {
+                            "tags": [
+                                "wall"
+                            ]
                         }
                     },
                     "Name": "Build5"
@@ -13035,6 +12981,11 @@
                                 0.0,
                                 0.0,
                                 0.0
+                            ]
+                        },
+                        "Tag": {
+                            "tags": [
+                                "wall"
                             ]
                         }
                     },
@@ -13437,6 +13388,11 @@
                                 0.0,
                                 0.0
                             ]
+                        },
+                        "Tag": {
+                            "tags": [
+                                "wall"
+                            ]
                         }
                     },
                     "Name": "Build7"
@@ -13705,6 +13661,11 @@
                                 0.0,
                                 0.0,
                                 0.0
+                            ]
+                        },
+                        "Tag": {
+                            "tags": [
+                                "wall"
                             ]
                         }
                     },
@@ -30639,9 +30600,9 @@
             0.7990195751190186
         ],
         "worldLightPosition": [
-            14.989624977111816,
-            45.66348648071289,
-            -26.606874465942383
+            11.149348258972168,
+            38.99031066894531,
+            -27.04461097717285
         ],
         "worldLightShadowFollowDistance": 22.5,
         "worldLightShadowResolution": 1024,
