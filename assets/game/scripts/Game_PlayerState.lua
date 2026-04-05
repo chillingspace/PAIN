@@ -61,10 +61,9 @@ _G.PlayerState = _G.PlayerState or {
     },
     deliverySequenceActive = false,
     deliveryObjective = nil,
-    deliverySparkTimer = 0.0,
     deliverySparkElapsed = 0.0,
     deliverySparkConfig = nil,
-    deliveryCameraTarget = nil,
+    deliveryLightScale = 0.0,
 
     hidden = false, -- is player hiding
     hiddenIn = nil, -- which spot
@@ -327,10 +326,9 @@ function S.init(player)
         S.gameWon = false
         S.deliverySequenceActive = false
         S.deliveryObjective = nil
-        S.deliverySparkTimer = 0.0
         S.deliverySparkElapsed = 0.0
         S.deliverySparkConfig = nil
-        S.deliveryCameraTarget = nil
+        S.deliveryLightScale = 0.0
         S.spawnGraceTime = 5.0
         S.playerBaseScale = nil -- force re-cache
         S.letterBaseScale = nil
@@ -603,75 +601,177 @@ local function getDeliverySequenceConfig()
     local scenePath = currentScene() or CURRENT_SCENE_PATH or ""
     if string.find(scenePath, "Level 2.scn", 1, true) then
         return {
+            phase = "success_ignite",
             panDuration = 0.65,
-            holdDuration = 1.7,
+            holdDuration = 1.85,
             returnDuration = 0.75,
             camDistance = 3.9,
             camHeight = 2.0,
             lookHeight = 1.2,
-            sparkInterval = 0.07,
-            sparkBurstCount = 16,
-            sparkOffsetY = 0.95,
+            lightOffsetY = 1.05,
+            lightColor = { r = 2.2, g = 1.55, b = 0.75 },
+            idleLightScale = 0.68,
+            keepLightOn = true,
         }
     elseif string.find(scenePath, "Level1.scn", 1, true) then
         return {
+            phase = "unstable_reboot",
             panDuration = 0.55,
             holdDuration = 1.45,
             returnDuration = 0.65,
             camDistance = 3.7,
             camHeight = 1.85,
             lookHeight = 1.1,
-            sparkInterval = 0.09,
-            sparkBurstCount = 11,
-            sparkOffsetY = 0.85,
+            lightOffsetY = 0.95,
+            lightColor = { r = 1.45, g = 0.95, b = 0.4 },
+            shutdownColor = { r = 1.15, g = 0.14, b = 0.08 },
+            idleLightScale = 0.0,
+            keepLightOn = false,
         }
     end
 
     return {
+        phase = "failed_flicker",
         panDuration = 0.45,
         holdDuration = 1.2,
         returnDuration = 0.55,
         camDistance = 3.4,
         camHeight = 1.65,
         lookHeight = 1.0,
-        sparkInterval = 0.11,
-        sparkBurstCount = 8,
-        sparkOffsetY = 0.75,
+        lightOffsetY = 0.9,
+        lightColor = { r = 1.1, g = 0.72, b = 0.28 },
+        shutdownColor = { r = 0.95, g = 0.1, b = 0.06 },
+        idleLightScale = 0.0,
+        keepLightOn = false,
     }
 end
 
-local function emitDeliverySparks()
+local function lerp(a, b, t)
+    return a + (b - a) * t
+end
+
+local function ensureDeliveryLight()
     local deliveryObjective = S.deliveryObjective
     local sparkCfg = S.deliverySparkConfig
-    local cameraTarget = S.deliveryCameraTarget
-    if not deliveryObjective or not sparkCfg or not cameraTarget or not spawnParticlesTowardPoint then
+    if not deliveryObjective or not sparkCfg or not addLight then
+        return false
+    end
+
+    if hasLight and not hasLight(deliveryObjective) then
+        addLight(deliveryObjective)
+    elseif not hasLight then
+        addLight(deliveryObjective)
+    end
+
+    if setLightType then
+        setLightType(deliveryObjective, 0)
+    end
+    if setShadowType then
+        setShadowType(deliveryObjective, 0)
+    end
+    if setLightPosition then
+        setLightPosition(deliveryObjective, 0.0, sparkCfg.lightOffsetY or 0.9, 0.0)
+    end
+    return true
+end
+
+local function setDeliveryLight(scale, colorOverride)
+    local deliveryObjective = S.deliveryObjective
+    local sparkCfg = S.deliverySparkConfig
+    if not deliveryObjective or not sparkCfg or not setLightIntensity then
         return
     end
 
-    spawnParticlesTowardPoint(
-        deliveryObjective,
-        sparkCfg.sparkBurstCount,
-        0.0,
-        sparkCfg.sparkOffsetY,
-        0.0,
-        cameraTarget.x,
-        cameraTarget.y,
-        cameraTarget.z
-    )
+    if setLightPosition then
+        setLightPosition(deliveryObjective, 0.0, sparkCfg.lightOffsetY or 0.9, 0.0)
+    end
+
+    local color = colorOverride or sparkCfg.lightColor or { r = 1.0, g = 1.0, b = 1.0 }
+    local clampedScale = math.max(0.0, scale or 0.0)
+    setLightIntensity(deliveryObjective, color.r * clampedScale, color.g * clampedScale, color.b * clampedScale)
+    S.deliveryLightScale = clampedScale
+end
+
+local function updateDeliverySequenceEffects(dt)
+    local cfg = S.deliverySparkConfig
+    if not S.deliverySequenceActive or not cfg or not S.deliveryObjective then
+        return
+    end
+
+    ensureDeliveryLight()
+
+    local t = S.deliverySparkElapsed or 0.0
+    local lightScale = 0.0
+    local lightColorOverride = nil
+
+    if cfg.phase == "failed_flicker" then
+        if t < 0.14 then
+            lightScale = lerp(0.0, 0.55, t / 0.14)
+        elseif t < 0.24 then
+            lightScale = 0.18
+        elseif t < 0.36 then
+            lightScale = 0.0
+        elseif t < 0.52 then
+            lightScale = 0.42
+        elseif t < 0.72 then
+            lightScale = 0.34
+            lightColorOverride = cfg.shutdownColor
+        elseif t < 1.1 then
+            lightScale = lerp(0.34, 0.0, (t - 0.72) / 0.38)
+            lightColorOverride = cfg.shutdownColor
+        end
+    elseif cfg.phase == "unstable_reboot" then
+        if t < 0.18 then
+            lightScale = lerp(0.0, 0.72, t / 0.18)
+        elseif t < 0.36 then
+            lightScale = 0.3
+        elseif t < 0.62 then
+            lightScale = 0.95
+        elseif t < 0.86 then
+            lightScale = 0.24
+        elseif t < 1.08 then
+            lightScale = 0.82
+        elseif t < 1.34 then
+            lightScale = 0.38
+            lightColorOverride = cfg.shutdownColor
+        elseif t < 1.84 then
+            lightScale = lerp(0.38, 0.0, (t - 1.34) / 0.5)
+            lightColorOverride = cfg.shutdownColor
+        end
+    else
+        if t < 0.34 then
+            lightScale = lerp(0.12, 0.75, t / 0.34)
+        elseif t < 0.7 then
+            lightScale = lerp(0.75, 1.3, (t - 0.34) / 0.36)
+        elseif t < 1.0 then
+            lightScale = 1.45
+        elseif t < 1.16 then
+            lightScale = 2.1
+        else
+            lightScale = cfg.idleLightScale or 0.82
+        end
+    end
+
+    setDeliveryLight(lightScale, lightColorOverride)
+
 end
 
 local function completeDeliverySequence()
     local deliveredLetter = S.carriedLetter
     local deliveryObjective = S.deliveryObjective
+    local deliveryCfg = S.deliverySparkConfig
 
-    if deliveryObjective and particleSystemStop then
-        particleSystemStop(deliveryObjective)
+    if deliveryObjective and setLightIntensity then
+        if deliveryCfg and deliveryCfg.keepLightOn then
+            setDeliveryLight(deliveryCfg.idleLightScale or 0.82)
+        else
+            setLightIntensity(deliveryObjective, 0.0, 0.0, 0.0)
+        end
     end
 
-    S.deliverySparkTimer = 0.0
     S.deliverySparkElapsed = 0.0
     S.deliverySparkConfig = nil
-    S.deliveryCameraTarget = nil
+    S.deliveryLightScale = 0.0
 
     if deliveredLetter then
         if deleteEntity then
@@ -735,12 +835,12 @@ local function beginDeliverySequence(deliveryPoint, px, py, pz)
     local lookY = ry + cfg.lookHeight
     local lookZ = rz
 
-    S.deliverySparkTimer = 0.0
     S.deliverySparkElapsed = 0.0
     S.deliverySparkConfig = cfg
-    S.deliveryCameraTarget = { x = camX, y = camY, z = camZ }
+    S.deliveryLightScale = 0.0
 
-    emitDeliverySparks()
+    ensureDeliveryLight()
+    setDeliveryLight(0.0)
 
     if _G.StartCameraPan then
         _G.StartCameraPan({
@@ -1099,13 +1199,9 @@ function S.update(dt)
         return
     end
 
-    if S.deliverySequenceActive and S.deliverySparkConfig and S.deliveryObjective and spawnParticlesTowardPoint then
-        S.deliverySparkTimer = (S.deliverySparkTimer or 0.0) - dt
+    if S.deliverySequenceActive and S.deliverySparkConfig and S.deliveryObjective then
         S.deliverySparkElapsed = (S.deliverySparkElapsed or 0.0) + dt
-        while S.deliverySparkTimer <= 0.0 and S.deliverySparkElapsed <= ((S.deliverySparkConfig.holdDuration or 0.0) + (S.deliverySparkConfig.panDuration or 0.0)) do
-            emitDeliverySparks()
-            S.deliverySparkTimer = S.deliverySparkTimer + (S.deliverySparkConfig.sparkInterval or 0.1)
-        end
+        updateDeliverySequenceEffects(dt)
     end
 
     -------------------------------------------------
