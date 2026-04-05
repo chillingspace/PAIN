@@ -1,0 +1,15 @@
+{
+  "asset_info": {
+    "name": "Pipe12.material",
+    "type": "Materials"
+  },
+  "build_data": {
+    "hash": 12386624475803292588
+  },
+  "descriptor_version": 1,
+  "guid": "e478dd37-7777-cb49-b2c6-b3409fc4c2a6",
+  "import_settings": null,
+  "meta_data": {
+    "source_file": "game\\materials\\Pipe12.material"
+  }
+}
