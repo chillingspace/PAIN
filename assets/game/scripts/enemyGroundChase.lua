@@ -226,22 +226,24 @@ do
         end
     end
 
+    local function stopMoving()
+        local _, curr_vy, _ = getVelocity(enemy)
+        setVelocity(enemy, 0.0, curr_vy or 0.0, 0.0)
+    end
+
     local function moveToward(tx, ty, tz, speed, dt)
         local ex, ey, ez = getEnemyPos()
         local dx = tx - ex
-        local dy = ty - ey
         local dz = tz - ez
-        local nx, ny, nz, dist = normalize(dx, dy, dz)
-        if dist <= ARRIVE_EPSILON then
-            setPosition(enemy, tx, ty, tz)
+        local distXZ = math.sqrt(dx * dx + dz * dz)
+        if distXZ <= ARRIVE_EPSILON then
+            stopMoving()
             return true
         end
-        local step = speed * dt
-        if step >= dist then
-            setPosition(enemy, tx, ty, tz)
-            return true
-        end
-        setPosition(enemy, ex + nx * step, ey + ny * step, ez + nz * step)
+        local nx = dx / distXZ
+        local nz = dz / distXZ
+        local _, curr_vy, _ = getVelocity(enemy)
+        setVelocity(enemy, nx * speed, curr_vy or 0.0, nz * speed)
         return false
     end
 
@@ -530,6 +532,7 @@ do
     local function beginPatrolScan(travelYaw)
         state = STATE_PATROL_SCAN
         stateTimer = 0.0
+        stopMoving()
 
         scanBaseYaw = travelYaw
         scanCyclesLeft = math.random(SCAN_CYCLES_MIN, SCAN_CYCLES_MAX)
@@ -549,6 +552,7 @@ do
     local function beginPatrolTurn()
         state = STATE_PATROL_TURN
         stateTimer = 0.0
+        stopMoving()
         setDetectionUIActive(false)
         refreshAlertIconForState()
         setMoveAnim(false)
@@ -578,6 +582,7 @@ do
             -- Record where the enemy was when it spotted the player
             local ex, ey, ez = getEnemyPos()
             chaseOrigin = { x = ex, y = ey, z = ez }
+            stopMoving()
             setMoveAnim(false)
             playGroundAudio(SFX_DETECTION)
 
@@ -719,19 +724,13 @@ do
             -- Move
             local dist = math.sqrt(distSq)
             local nx, nz = dx / dist, dz / dist
-            local step = PATROL_SPEED * dt
-            if step >= dist then
-                setPosition(enemy, tx, ty, tz)
-                local travelYaw = math.atan(nx, nz)
-                beginPatrolScan(travelYaw)
-                return
-            end
 
-            setPosition(enemy, ex + nx * step, ey, ez + nz * step)
-
-            -- Face movement direction (no scanning while walking)
+            -- Face first so setEnemyYaw's internal setPosition doesn't wipe the velocity we're about to set
             local moveYaw = math.atan(nx, nz)
             setEnemyYaw(moveYaw)
+
+            local _, curr_vy, _ = getVelocity(enemy)
+            setVelocity(enemy, nx * PATROL_SPEED, curr_vy or 0.0, nz * PATROL_SPEED)
 
         -- =============================================================
         -- PATROL_SCAN: at endpoint, scan left/right with pauses
@@ -881,8 +880,9 @@ do
 
             local px, py, pz = getPlayerPos()
             if px then
-                moveToward(px, py, pz, CHASE_SPEED, dt)
+                local _, ey, _ = getEnemyPos()
                 faceToward(px, py, pz)
+                moveToward(px, ey, pz, CHASE_SPEED, dt)
             end
 
         -- =============================================================
@@ -899,12 +899,13 @@ do
 
             local SEARCH_TURN_SPEED = math.rad(SEARCH_TURN_SPEED_DEG)
 
-            -- Phase 1: walk to last-seen position
+            -- Phase 1: walk to last-seen position (timeout so walls can't trap us)
             if (not searchArrived) and lastSeen then
-                local arrived = moveToward(lastSeen.x, lastSeen.y, lastSeen.z, RETURN_SPEED, dt)
                 faceToward(lastSeen.x, lastSeen.y, lastSeen.z)
-                if arrived then
+                local arrived = moveToward(lastSeen.x, lastSeen.y, lastSeen.z, RETURN_SPEED, dt)
+                if arrived or stateTimer >= SEARCH_WAIT_TIME then
                     searchArrived = true
+                    stopMoving()
                     -- Set up phased scan at arrival facing direction
                     scanBaseYaw = currentYaw
                     scanCyclesLeft = math.random(SEARCH_CYCLES_MIN, SEARCH_CYCLES_MAX)
@@ -983,10 +984,10 @@ do
                 goingToB = false -- after arriving at B, next patrol goes to A
             end
 
-            local arrived = moveToward(returnTarget.x, returnTarget.y, returnTarget.z, RETURN_SPEED, dt)
             faceToward(returnTarget.x, returnTarget.y, returnTarget.z)
+            local arrived = moveToward(returnTarget.x, returnTarget.y, returnTarget.z, RETURN_SPEED, dt)
 
-            if arrived then
+            if arrived or stateTimer >= MAX_CHASE_DISTANCE / RETURN_SPEED then
                 -- Resume patrol: scan at this endpoint, then walk to the other
                 patrolTarget = goingToB and pointB or pointA
                 local travelYaw = yawBetween(returnTarget.x, returnTarget.z,
