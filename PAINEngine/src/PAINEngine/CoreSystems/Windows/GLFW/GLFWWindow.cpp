@@ -156,26 +156,45 @@ namespace PAIN {
 			is_fullscreen_ = false;
 			LogWindowDisplayDiagnostics(ptr_window, "init_windowed");
 #else
-			// Create windowed window in Release mode (user can toggle fullscreen from settings).
+			// Release: always start in exclusive fullscreen at native monitor resolution.
+			// Display mode is not persisted, so every launch starts fullscreen.
+			// The user can toggle to windowed via the in-game graphics settings.
+
+			// Save package dimensions as the windowed fallback size (used by setFullscreen(false))
+			windowed_w_ = static_cast<int>(package.width);
+			windowed_h_ = static_cast<int>(package.height);
+
+			// Use native monitor resolution for exclusive fullscreen
+			const int fsWidth  = mode ? mode->width  : static_cast<int>(frame_buffer.x);
+			const int fsHeight = mode ? mode->height : static_cast<int>(frame_buffer.y);
+			const int refreshRate = mode ? mode->refreshRate : GLFW_DONT_CARE;
+
+			glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
 			ptr_window = glfwCreateWindow(
-				static_cast<int>(frame_buffer.x),
-				static_cast<int>(frame_buffer.y),
+				fsWidth,
+				fsHeight,
 				package.title.c_str(),
-				nullptr,  // nullptr = windowed; fullscreen is toggled via setFullscreen()
+				monitor,  // non-null = exclusive fullscreen
 				nullptr
 			);
 
 			if (!ptr_window) {
-				PN_CORE_ERROR("Failed to create window");
+				PN_CORE_ERROR("Failed to create fullscreen window");
 				glfwTerminate();
 				throw std::exception();
 			}
-			is_fullscreen_ = false;
+			is_fullscreen_ = true;
+
+			// Update frame buffer to actual fullscreen resolution
+			int w, h;
+			glfwGetFramebufferSize(ptr_window, &w, &h);
+			frame_buffer = { w, h };
 
 			// Disable vsync by default in release mode for uncapped FPS and lowest input lag
 			GraphicsSettings::get().swap_interval = 0;
 
-			LogWindowDisplayDiagnostics(ptr_window, "init_windowed");
+			PN_CORE_INFO("[Window] Created exclusive fullscreen window {}x{} @ {}Hz", fsWidth, fsHeight, refreshRate);
+			LogWindowDisplayDiagnostics(ptr_window, "init_fullscreen");
 #endif
 
 			// Persist current windowed reference size for future restore.
