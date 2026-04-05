@@ -851,7 +851,7 @@ local handlers = {
             if isMobile then
                 hideCursor(false)
             end
-            _G_root.TogglePause()
+            -- _G_root.TogglePause()
 
             printLog("[UI] QuitOverlay (layer 5) hidden - returning to menu")
         else
