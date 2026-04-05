@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "ToolsPanel.h"
 #include "EntityPanel.h"
+#include "LayeredSystems/LevelEditor/EditorTheme.h"
 #include "ComponentsPanel.h"
 #include "ECS/Components/AllComponents.h"
 #include "../Editor.h"
@@ -62,7 +63,7 @@ namespace PAIN {
 				return [this, popup_id](std::any const& data) {
 					static char scene_name[128] = "";
 
-					ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Create New Scene");
+					ImGui::TextColored(Theme::current().textSuccess, "Create New Scene");
 					ImGui::Separator();
 					ImGui::Spacing();
 
@@ -107,7 +108,7 @@ namespace PAIN {
 					auto asset_service = PN_ASSET_SERVICE;
 					auto scn_service = PN_SCENE_SERVICE;
 
-					ImGui::TextColored(ImVec4(0.5f, 0.8f, 1.0f, 1.0f), "Load Scene");
+					ImGui::TextColored(Theme::current().textAccent, "Load Scene");
 					ImGui::Separator();
 					ImGui::Spacing();
 
@@ -187,7 +188,7 @@ namespace PAIN {
 				return [this, popup_id](std::any const& data) {
 					static char scene_name[128] = "";
 
-					ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "Save Scene As");
+					ImGui::TextColored(Theme::current().textInfo, "Save Scene As");
 					ImGui::Separator();
 					ImGui::Spacing();
 
@@ -379,7 +380,7 @@ namespace PAIN {
 						return;
 					}
 
-					ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "Add Component");
+					ImGui::TextColored(Theme::current().textInfo, "Add Component");
 					ImGui::Separator();
 					ImGui::Spacing();
 
@@ -619,6 +620,20 @@ namespace PAIN {
 						ImGui::EndMenu();
 					}
 
+					// ---- View ----
+					if (ImGui::BeginMenu("View")) {
+						if (ImGui::BeginMenu("Theme")) {
+							for (const auto& preset : ThemeManager::presetNames()) {
+								bool isActive = (ThemeManager::get().activeName() == preset);
+								if (ImGui::MenuItem(preset.c_str(), nullptr, isActive)) {
+									ThemeManager::get().setTheme(preset);
+								}
+							}
+							ImGui::EndMenu();
+						}
+						ImGui::EndMenu();
+					}
+
 					// ---- Component ----
 					if (ImGui::BeginMenu("Component")) {
 						if (ImGui::MenuItem("Add...")) { openPopUp("Add Component"); }
@@ -645,7 +660,7 @@ namespace PAIN {
 						float current_x = ImGui::GetCursorPosX();
 						if (center_x > current_x) ImGui::SetCursorPosX(center_x);
 
-						ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "%s", scn_name.c_str());
+						ImGui::TextColored(Theme::current().textSceneName, "%s", scn_name.c_str());
 					}
 
 					ImGui::EndMenuBar();

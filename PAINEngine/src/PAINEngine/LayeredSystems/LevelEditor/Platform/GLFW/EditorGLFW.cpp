@@ -4,7 +4,8 @@
 #ifdef PN_PLATFORM_WINDOWS
 
 #include "EditorGLFW.h"
-#include "ImGuizmo.h" 
+#include "ImGuizmo.h"
+#include "LayeredSystems/LevelEditor/EditorTheme.h"
 
 #include "CoreSystems/Events/GLFW/WindowEvents.h"
 #include "CoreSystems/Events/GLFW/KeyEvents.h"
@@ -101,6 +102,7 @@ namespace PAIN {
             io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
             ImGui::StyleColorsDark();
+            ThemeManager::get().applyToImGui();
 
             // Init GLFW/OpenGL3 backends
             ImGui_ImplGlfw_InitForOpenGL(g_window, true);

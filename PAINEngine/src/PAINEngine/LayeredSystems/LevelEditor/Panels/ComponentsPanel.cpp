@@ -3,6 +3,7 @@
 
 #ifdef _DEBUG
 
+#include "LayeredSystems/LevelEditor/EditorTheme.h"
 #include "../Editor.h"
 #include "CoreSystems/Scene/Scene.h"
 #include "ECS/sMetaData.h"
@@ -387,14 +388,14 @@ namespace PAIN {
 
 						ImGui::Spacing();
 						ImGui::Separator();
-						ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "Runtime Debug Info");
+						ImGui::TextColored(Theme::current().textMuted, "Runtime Debug Info");
 
 						// Show Status
 						if (anim.isPlaying) {
-							ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.2f, 1.0f), "Status: Playing");
+							ImGui::TextColored(Theme::current().textSuccess, "Status: Playing");
 						}
 						else {
-							ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.2f, 1.0f), "Status: Paused");
+							ImGui::TextColored(Theme::current().textWarning, "Status: Paused");
 						}
 
 						// Read-only Runtime Values
@@ -676,23 +677,23 @@ namespace PAIN {
 						ImGui::Spacing();
 						
 						// Runtime Controls Section
-						ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "Runtime Controls");
-						
+						ImGui::TextColored(Theme::current().textMuted, "Runtime Controls");
+
 						// Status display
 						const char* statusText = "Unknown";
-						ImVec4 statusColor = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
+						ImVec4 statusColor = Theme::current().textMuted;
 						switch (ps.state) {
 							case PAIN::ParticleSystemState::Playing:
 								statusText = "Playing";
-								statusColor = ImVec4(0.2f, 1.0f, 0.2f, 1.0f);
+								statusColor = Theme::current().textSuccess;
 								break;
 							case PAIN::ParticleSystemState::Paused:
 								statusText = "Paused";
-								statusColor = ImVec4(1.0f, 1.0f, 0.2f, 1.0f);
+								statusColor = Theme::current().textWarning;
 								break;
 							case PAIN::ParticleSystemState::Stopped:
 								statusText = "Stopped";
-								statusColor = ImVec4(1.0f, 0.2f, 0.2f, 1.0f);
+								statusColor = Theme::current().textError;
 								break;
 						}
 						ImGui::TextColored(statusColor, "Status: %s", statusText);
@@ -1255,7 +1256,7 @@ namespace PAIN {
 							ImGui::SameLine();
 
 							// Remove button
-							ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.6f, 0.2f, 0.2f, 1.0f));
+							ImGui::PushStyleColor(ImGuiCol_Button, Theme::current().btnDanger);
 							if (ImGui::Button(("X##rm" + std::to_string(i)).c_str())) {
 								removeIdx = static_cast<int>(i);
 							}
@@ -1400,8 +1401,7 @@ namespace PAIN {
 								}
 
 								// Remove button
-								ImGui::PushStyleColor(ImGuiCol_Button,
-													  ImVec4(0.6f, 0.2f, 0.2f, 1.0f));
+								ImGui::PushStyleColor(ImGuiCol_Button, Theme::current().btnDanger);
 								if (ImGui::Button("Remove Shape")) {
 									toRemove = static_cast<int>(i);
 								}
@@ -1523,10 +1523,9 @@ namespace PAIN {
 						ImGui::EndDisabled();
 
 						if (joystick.is_dragging) {
-							ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.2f, 1.0f),
-											   "Currently dragging!");
+							ImGui::TextColored(Theme::current().textSuccess, "Currently dragging!");
 						} else {
-							ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Not dragging");
+							ImGui::TextColored(Theme::current().textMuted, "Not dragging");
 						}
 
 						ImGui::PopStyleVar();
@@ -1751,7 +1750,7 @@ namespace PAIN {
 						return;
 					}
 
-					ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "Add Component");
+					ImGui::TextColored(Theme::current().textInfo, "Add Component");
 					ImGui::Separator();
 					ImGui::Spacing();
 
@@ -1860,18 +1859,18 @@ namespace PAIN {
 						return;
 					}
 
-					ImGui::TextColored(ImVec4(1.0f, 0.7f, 0.0f, 1.0f), "Remove Component");
+					ImGui::TextColored(Theme::current().textWarning, "Remove Component");
 					ImGui::Separator();
 					ImGui::Spacing();
 
 					ImGui::Text("Component:");
 					ImGui::SameLine();
-					ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "%s",
+					ImGui::TextColored(Theme::current().textInfo, "%s",
 									   comp_string_ref.c_str());
 
 					ImGui::Spacing();
 					ImGui::TextWrapped("Are you sure you want to remove this component?");
-					ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f),
+					ImGui::TextColored(Theme::current().textMuted,
 									   "This action cannot be undone.");
 
 					ImGui::Spacing();
@@ -1886,12 +1885,10 @@ namespace PAIN {
 					if (offset > 0)
 						ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
 
-					// Remove button (red)
-					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
-					ImGui::PushStyleColor(ImGuiCol_ButtonHovered,
-										  ImVec4(1.0f, 0.3f, 0.3f, 1.0f));
-					ImGui::PushStyleColor(ImGuiCol_ButtonActive,
-										  ImVec4(0.6f, 0.1f, 0.1f, 1.0f));
+					// Remove button (danger)
+					ImGui::PushStyleColor(ImGuiCol_Button,        Theme::current().btnDanger);
+					ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Theme::current().btnDangerHovered);
+					ImGui::PushStyleColor(ImGuiCol_ButtonActive,  Theme::current().btnDangerActive);
 
 					bool remove_clicked = ImGui::Button("Remove", ImVec2(button_width, 0));
 
@@ -1966,51 +1963,56 @@ namespace PAIN {
 
 			void ComponentsPanel::renderEntityComponents(entt::entity entity, const char* filter) {
 
-				static const std::unordered_map<std::string, ImU32> comp_category_colors = {
-					// Transform / Hierarchy
-					{ "LocalTransform",     IM_COL32(255, 220,  80, 255) }, // yellow
-					{ "WorldTransform",     IM_COL32(255, 220,  80, 255) },
-					{ "Hierarchy",          IM_COL32(255, 220,  80, 255) },
-					{ "GUID",               IM_COL32(180, 180, 180, 255) }, // grey
-					// Rendering
-					{ "ModelRenderer",      IM_COL32(80, 160, 255, 255) }, // blue
-					{ "Texture2D",          IM_COL32(80, 160, 255, 255) },
-					{ "Lighting",           IM_COL32(255, 200,  80, 255) }, // warm yellow
-					{ "BoundingVolume",     IM_COL32(120, 200, 120, 255) }, // green
-					// Physics
-					{ "RigidBody3D",        IM_COL32(255, 140,  40, 255) }, // orange
-					{ "CompoundCollider",   IM_COL32(255, 140,  40, 255) },
-					{ "Joint",              IM_COL32(255, 140,  40, 255) },
-					// Animation
-					{ "Animation",          IM_COL32(180,  80, 255, 255) }, // purple
-					// Audio
-					{ "AudioSource",        IM_COL32(80, 220, 200, 255) }, // teal
-					// AI
-					{ "AIController",       IM_COL32(255,  80,  80, 255) }, // red
-					{ "AISensors",          IM_COL32(255,  80,  80, 255) },
-					{ "AINavAgent",         IM_COL32(255,  80,  80, 255) },
-					{ "AISteering",         IM_COL32(255,  80,  80, 255) },
-					{ "AIBlackboard",       IM_COL32(255,  80,  80, 255) },
-					{ "AICommandQueue",     IM_COL32(255,  80,  80, 255) },
-					// Particles
-					{ "ParticleSystem",     IM_COL32(255, 160, 200, 255) }, // pink
-					// UI
-					{ "UIText",             IM_COL32(80, 200, 255, 255) }, // light blue
-					{ "UIButton",           IM_COL32(80, 200, 255, 255) },
-					{ "UICanvas",           IM_COL32(80, 200, 255, 255) },
-					{ "UIElement",          IM_COL32(80, 200, 255, 255) },
-					{ "UIRectTransform",    IM_COL32(80, 200, 255, 255) },
-					{ "UIAnimation",        IM_COL32(80, 200, 255, 255) },
-					{ "UIJoystick",         IM_COL32(80, 200, 255, 255) },
-					{ "UIFollowsWorldEntity", IM_COL32(80, 200, 255, 255) },
-					// Scripts
-					{ "Scripts",            IM_COL32(120, 220, 120, 255) }, // green
-					// Misc
-					{ "Tag",                IM_COL32(180, 180, 180, 255) },
-					{ "PrefabInstance",     IM_COL32(100, 180, 255, 255) },
-					{ "Camera",             IM_COL32(255, 220,  80, 255) },
-					{ "CustomHitbox2D",     IM_COL32(255, 140,  40, 255) },
+				// Category pill colours pulled from the active theme
+				auto buildCategoryColors = []() -> std::unordered_map<std::string, ImU32> {
+					const auto& th = Theme::current();
+					return {
+						// Transform / Hierarchy
+						{ "LocalTransform",       th.compTransform  },
+						{ "WorldTransform",       th.compTransform  },
+						{ "Hierarchy",            th.compTransform  },
+						{ "GUID",                 th.compMetadata   },
+						// Rendering
+						{ "ModelRenderer",        th.compRendering  },
+						{ "Texture2D",            th.compRendering  },
+						{ "Lighting",             th.compLighting   },
+						{ "BoundingVolume",       th.compBounding   },
+						// Physics
+						{ "RigidBody3D",          th.compPhysics    },
+						{ "CompoundCollider",     th.compPhysics    },
+						{ "Joint",                th.compPhysics    },
+						// Animation
+						{ "Animation",            th.compAnimation  },
+						// Audio
+						{ "AudioSource",          th.compAudio      },
+						// AI
+						{ "AIController",         th.compAI         },
+						{ "AISensors",            th.compAI         },
+						{ "AINavAgent",           th.compAI         },
+						{ "AISteering",           th.compAI         },
+						{ "AIBlackboard",         th.compAI         },
+						{ "AICommandQueue",       th.compAI         },
+						// Particles
+						{ "ParticleSystem",       th.compParticle   },
+						// UI
+						{ "UIText",               th.compUI         },
+						{ "UIButton",             th.compUI         },
+						{ "UICanvas",             th.compUI         },
+						{ "UIElement",            th.compUI         },
+						{ "UIRectTransform",      th.compUI         },
+						{ "UIAnimation",          th.compUI         },
+						{ "UIJoystick",           th.compUI         },
+						{ "UIFollowsWorldEntity", th.compUI         },
+						// Scripts
+						{ "Scripts",              th.compScript     },
+						// Misc
+						{ "Tag",                  th.compMetadata   },
+						{ "PrefabInstance",       th.compPrefab     },
+						{ "Camera",               th.compTransform  },
+						{ "CustomHitbox2D",       th.compPhysics    },
+					};
 				};
+				const auto comp_category_colors = buildCategoryColors();
 				
 				auto ecs = services->get<ECS::Controller>();
 
@@ -2062,14 +2064,9 @@ namespace PAIN {
 					// Apply special styling for overridden components
 					// ========================================
 					if (isOverridden) {
-						// Blue color scheme for overridden components
-						ImGui::PushStyleColor(ImGuiCol_Header,
-											  ImVec4(0.2f, 0.4f, 0.8f, 1.0f)); // Base blue
-						ImGui::PushStyleColor(ImGuiCol_HeaderHovered,
-											  ImVec4(0.3f, 0.5f, 0.9f, 1.0f)); // Lighter on hover
-						ImGui::PushStyleColor(
-							ImGuiCol_HeaderActive,
-							ImVec4(0.15f, 0.35f, 0.7f, 1.0f)); // Darker when active
+						ImGui::PushStyleColor(ImGuiCol_Header,        Theme::current().compHeaderBtn);
+						ImGui::PushStyleColor(ImGuiCol_HeaderHovered, Theme::current().compHeaderBtnHov);
+						ImGui::PushStyleColor(ImGuiCol_HeaderActive,  Theme::current().compHeaderBtnAct);
 					}
 					// Component header with TreeNode
 					ImGuiTreeNodeFlags node_flags =
@@ -2091,7 +2088,7 @@ namespace PAIN {
 
 					// Draw color dot before the tree node
 					{
-						ImU32 dot_color = IM_COL32(160, 160, 160, 255); // default grey
+						ImU32 dot_color = Theme::current().compDefault;
 						auto it = comp_category_colors.find(comp_name);
 						if (it != comp_category_colors.end())
 							dot_color = it->second;
@@ -2122,11 +2119,9 @@ namespace PAIN {
 						ImGui::SameLine();
 						ImGui::Text("(Override)");
 						ImGui::SameLine();
-						ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.6f, 0.35f, 0.2f, 0.8f));
-						ImGui::PushStyleColor(ImGuiCol_ButtonHovered,
-											  ImVec4(0.8f, 0.45f, 0.25f, 1.0f));
-						ImGui::PushStyleColor(ImGuiCol_ButtonActive,
-											  ImVec4(0.5f, 0.25f, 0.15f, 1.0f));
+						ImGui::PushStyleColor(ImGuiCol_Button,        Theme::current().btnTertiary);
+						ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Theme::current().btnTertiaryHovered);
+						ImGui::PushStyleColor(ImGuiCol_ButtonActive,  Theme::current().btnTertiaryActive);
 						if (ImGui::SmallButton("Revert")) {
 							if (prefabService) {
 								prefabService->revertComponentOverride(entity, comp_name,
@@ -2142,14 +2137,14 @@ namespace PAIN {
 					}
 					// Right-click context menu
 					if (ImGui::BeginPopupContextItem()) {
-						ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "%s",
+						ImGui::TextColored(Theme::current().textInfo, "%s",
 										   comp_name.c_str());
 
 						// ========================================
 						// Show override status in context menu
 						// ========================================
 						if (isOverridden) {
-							ImGui::TextColored(ImVec4(0.4f, 0.7f, 1.0f, 1.0f), "(Overridden)");
+							ImGui::TextColored(Theme::current().textHighlight, "(Overridden)");
 						}
 
 						ImGui::Separator();
@@ -2237,10 +2232,10 @@ namespace PAIN {
 							ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
 						}
 
-						// Red remove button
-						ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.7f, 0.2f, 0.2f, 0.8f));
-						ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.3f, 0.3f, 1.0f));
-						ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.1f, 0.1f, 1.0f));
+						// Danger remove button
+						ImGui::PushStyleColor(ImGuiCol_Button,        Theme::current().btnDanger);
+						ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Theme::current().btnDangerHovered);
+						ImGui::PushStyleColor(ImGuiCol_ButtonActive,  Theme::current().btnDangerActive);
 
 						if (ImGui::Button("Remove Component", ImVec2(buttonWidth, 0))) {
 							comp_string_ref = componentName;
@@ -2321,13 +2316,13 @@ namespace PAIN {
 					if (offset > 0)
 						ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
 
-					ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "%s", placeholder);
+					ImGui::TextColored(Theme::current().textMuted, "%s", placeholder);
 					return;
 				}
 
 				ImGui::Spacing();
 
-				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.9f, 1.0f, 1.0f));
+				ImGui::PushStyleColor(ImGuiCol_Text, Theme::current().textInfo);
 				ImGui::Text("Entity Components");
 				ImGui::PopStyleColor();
 
@@ -2336,8 +2331,8 @@ namespace PAIN {
 				float scrollbar_width = ImGui::GetStyle().ScrollbarSize;
 				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + available - 130.0f - scrollbar_width);
 
-				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.2f, 0.2f, 0.6f));
-				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.3f, 0.3f, 0.8f));
+				ImGui::PushStyleColor(ImGuiCol_Button,        Theme::current().btnSecondary);
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Theme::current().btnSecondaryHovered);
 				if (ImGui::SmallButton("Collapse All")) {
 					collapse_all_requested = true;
 					expand_all_requested = false;
@@ -2526,7 +2521,7 @@ namespace PAIN {
 				ImGui::Separator();
 				ImGui::Spacing();
 
-				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.9f, 1.0f, 1.0f));
+				ImGui::PushStyleColor(ImGuiCol_Text, Theme::current().textInfo);
 				ImGui::Text("Entity Components");
 				ImGui::PopStyleColor();
 				ImGui::Spacing();
@@ -2584,7 +2579,7 @@ namespace PAIN {
 							ImGui::Separator();
 							ImGui::Spacing();
 
-							ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.9f, 1.0f, 1.0f));
+							ImGui::PushStyleColor(ImGuiCol_Text, Theme::current().textInfo);
 							bool open = ImGui::CollapsingHeader(
 								"UI Followers", ImGuiTreeNodeFlags_DefaultOpen);
 							ImGui::PopStyleColor();
@@ -2615,9 +2610,9 @@ namespace PAIN {
 
 				ImVec2 button_size = ImVec2(ImGui::GetContentRegionAvail().x, 35);
 
-				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.5f, 0.8f, 0.8f));
-				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.6f, 0.9f, 1.0f));
-				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.15f, 0.4f, 0.7f, 1.0f));
+				ImGui::PushStyleColor(ImGuiCol_Button,        Theme::current().btnPrimary);
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Theme::current().btnPrimaryHovered);
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive,  Theme::current().btnPrimaryActive);
 
 				if (ImGui::Button("+ Add Component", button_size)) {
 					openPopUp("AddComponent");
