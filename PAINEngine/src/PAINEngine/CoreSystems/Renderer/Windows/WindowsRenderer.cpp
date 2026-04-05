@@ -2279,12 +2279,16 @@ namespace PAIN {
 
 		auto window_service = services->get<Window::Window>();
 		auto framebuffer = window_service->getFrameBuffer();
-		// float aspect_ratio = static_cast<float>(framebuffer.x) / static_cast<float>(framebuffer.y);
-
+#ifdef PN_PLATFORM_ANDROID
 		// Use design aspect ratio (18:9) as reference, not current screen ratio
 		// This ensures UI elements designed for 18:9 look correct on any screen
 		const float design_aspect = 18.0f / 9.0f;
 		glm::vec2 corrected_scale = glm::vec2(scale.x / design_aspect, scale.y);
+#else
+		float aspect_ratio =
+			static_cast<float>(framebuffer.x) / static_cast<float>(framebuffer.y);
+		glm::vec2 corrected_scale = glm::vec2(scale.x / aspect_ratio, scale.y);
+#endif
 
 		texture2d_shader->Bind();
 
