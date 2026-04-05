@@ -1,9 +1,5 @@
 {
     "assets": [
-        "a5302a28-588d-fc4d-a39a-57873647e5c1",
-        "9aac41f9-737d-d540-a485-7155b0011394",
-        "5cccecaa-acca-ae47-a45d-0210732e76aa",
-        "4515fcc7-a4d7-654b-b5a0-a2b191ab7f7c",
         "f59e4cbd-b183-3541-9531-bd14b87115de",
         "70e060fa-e805-a24b-8f37-cce5a7a9fc73",
         "7555c2b8-dfee-174c-b955-e7c939d7b8f0",
@@ -11,6 +7,10 @@
         "4a319130-c746-0d4d-9463-ea992d847946",
         "370df759-71e5-3e49-bf8b-55152b0ae22c",
         "80f91347-fd0a-1c41-b7ca-79f38b83d77b",
+        "a5302a28-588d-fc4d-a39a-57873647e5c1",
+        "9aac41f9-737d-d540-a485-7155b0011394",
+        "5cccecaa-acca-ae47-a45d-0210732e76aa",
+        "4515fcc7-a4d7-654b-b5a0-a2b191ab7f7c",
         "efff96ab-9011-d248-a0e3-56bb0e76f8e6",
         "6466af7c-6447-2043-b9f5-6fd7dfada5d4",
         "7b6d729f-2477-6e43-a93a-4a9f65732f3d",
@@ -163,103 +163,6 @@
     },
     "ecs": {
         "Entities": [
-            {
-                "Entity": {
-                    "Components": {
-                        "GUID": {
-                            "guid": "924cce9c-58e1-7f49-bf90-6a84dbc8125b"
-                        },
-                        "Hierarchy": {
-                            "childrenGUIDs": [],
-                            "parentGUID": "00000000-0000-0000-0000-000000000000",
-                            "siblingIndex": 0
-                        },
-                        "Layer": {
-                            "layer_id": 0,
-                            "layer_mask": 1
-                        },
-                        "Lighting": {
-                            "direction": [
-                                0.0,
-                                -1.0,
-                                0.0
-                            ],
-                            "inner_angle": 12.5,
-                            "light_intensity": [
-                                0.3730829358100891,
-                                0.5406211614608765,
-                                0.9175823926925659
-                            ],
-                            "light_type": 1,
-                            "offset": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "outer_angle": 17.5,
-                            "shadow_resolution": 1024,
-                            "shadow_type": 0,
-                            "volumetric": true
-                        },
-                        "LocalTransform": {
-                            "position": [
-                                0.0,
-                                0.0,
-                                0.0
-                            ],
-                            "rotation": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "scale": [
-                                0.6000000238418579,
-                                0.6000000238418579,
-                                0.6000000238418579
-                            ]
-                        },
-                        "ModelRenderer": {
-                            "castShadows": true,
-                            "doubleSidedShadows": false,
-                            "isStatic": false,
-                            "materials": [
-                                {
-                                    "albedoTextureOverride": "4a319130-c746-0d4d-9463-ea992d847946",
-                                    "aoTextureOverride": "80f91347-fd0a-1c41-b7ca-79f38b83d77b",
-                                    "baseColorOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveOverride": [
-                                        1.0,
-                                        1.0,
-                                        1.0
-                                    ],
-                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "39040d83-c6c4-d64f-9043-9f95bcec758f",
-                                    "metallicOverride": 1.0,
-                                    "metallicTextureOverride": "80f91347-fd0a-1c41-b7ca-79f38b83d77b",
-                                    "normalTextureOverride": "370df759-71e5-3e49-bf8b-55152b0ae22c",
-                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "roughnessOverride": 1.0,
-                                    "roughnessTextureOverride": "80f91347-fd0a-1c41-b7ca-79f38b83d77b",
-                                    "useOverrides": false
-                                }
-                            ],
-                            "modelGUID": "f59e4cbd-b183-3541-9531-bd14b87115de",
-                            "receiveShadows": true,
-                            "visible": true
-                        },
-                        "Name": {
-                            "name": "skybox"
-                        }
-                    },
-                    "Name": "skybox"
-                }
-            },
             {
                 "Entity": {
                     "Components": {
@@ -925,6 +828,103 @@
                         }
                     },
                     "Name": "howtoplay_text1"
+                }
+            },
+            {
+                "Entity": {
+                    "Components": {
+                        "GUID": {
+                            "guid": "924cce9c-58e1-7f49-bf90-6a84dbc8125b"
+                        },
+                        "Hierarchy": {
+                            "childrenGUIDs": [],
+                            "parentGUID": "00000000-0000-0000-0000-000000000000",
+                            "siblingIndex": 0
+                        },
+                        "Layer": {
+                            "layer_id": 0,
+                            "layer_mask": 1
+                        },
+                        "Lighting": {
+                            "direction": [
+                                0.0,
+                                -1.0,
+                                0.0
+                            ],
+                            "inner_angle": 12.5,
+                            "light_intensity": [
+                                0.3730829358100891,
+                                0.5406211614608765,
+                                0.9175823926925659
+                            ],
+                            "light_type": 1,
+                            "offset": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "outer_angle": 17.5,
+                            "shadow_resolution": 1024,
+                            "shadow_type": 0,
+                            "volumetric": true
+                        },
+                        "LocalTransform": {
+                            "position": [
+                                0.0,
+                                0.0,
+                                0.0
+                            ],
+                            "rotation": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "scale": [
+                                0.6000000238418579,
+                                0.6000000238418579,
+                                0.6000000238418579
+                            ]
+                        },
+                        "ModelRenderer": {
+                            "castShadows": true,
+                            "doubleSidedShadows": false,
+                            "isStatic": false,
+                            "materials": [
+                                {
+                                    "albedoTextureOverride": "4a319130-c746-0d4d-9463-ea992d847946",
+                                    "aoTextureOverride": "80f91347-fd0a-1c41-b7ca-79f38b83d77b",
+                                    "baseColorOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveOverride": [
+                                        1.0,
+                                        1.0,
+                                        1.0
+                                    ],
+                                    "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "materialGUID": "39040d83-c6c4-d64f-9043-9f95bcec758f",
+                                    "metallicOverride": 1.0,
+                                    "metallicTextureOverride": "80f91347-fd0a-1c41-b7ca-79f38b83d77b",
+                                    "normalTextureOverride": "370df759-71e5-3e49-bf8b-55152b0ae22c",
+                                    "opacityTextureOverride": "00000000-0000-0000-0000-000000000000",
+                                    "roughnessOverride": 1.0,
+                                    "roughnessTextureOverride": "80f91347-fd0a-1c41-b7ca-79f38b83d77b",
+                                    "useOverrides": false
+                                }
+                            ],
+                            "modelGUID": "f59e4cbd-b183-3541-9531-bd14b87115de",
+                            "receiveShadows": true,
+                            "visible": true
+                        },
+                        "Name": {
+                            "name": "skybox"
+                        }
+                    },
+                    "Name": "skybox"
                 }
             },
             {
@@ -3860,7 +3860,7 @@
                     "Components": {
                         "AudioSource": {
                             "audio_tracks": [
-                                "e87054db-0ef8-f34b-96a0-e2fede943a49",
+                                "b6310086-d594-074f-8a6e-911a43657662",
                                 "82bb33a4-ab3b-254d-b093-b2b9d7ab363d"
                             ],
                             "group_name": "",

@@ -34,8 +34,8 @@ local VOL_RESPAWN = -3.0
 local VOL_HIDE = 0.0
 local VOL_COLLECT = 0.0
 local VOL_DELIVER = 0.0
-local VOL_SUCCESS = 0.0
-local VOL_WIN_MUSIC = 0.0
+local VOL_SUCCESS = -3.0
+local VOL_WIN_MUSIC = -9.0  -- Original is very loud
 
 
 -- global so other scripts can use

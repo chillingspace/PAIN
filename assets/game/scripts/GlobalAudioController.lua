@@ -21,7 +21,7 @@
 
 -- ==================== USER SETTINGS ====================
 -- Control the volume of the Main Menu BGM here (0.0 to 1.0)
-local MAINMENU_BGM_VOLUME_SCALE = 0.5
+local MAINMENU_BGM_VOLUME_SCALE = 0.4
 local TUTORIAL_BGM_VOLUME_SCALE = 0.25
 local LEVEL1_BGM_VOLUME_SCALE   = 0.25
 local LEVEL2_BGM_VOLUME_SCALE   = 0.25
