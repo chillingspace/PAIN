@@ -2279,10 +2279,12 @@ namespace PAIN {
 
 		auto window_service = services->get<Window::Window>();
 		auto framebuffer = window_service->getFrameBuffer();
+		// float aspect_ratio = static_cast<float>(framebuffer.x) / static_cast<float>(framebuffer.y);
 
-		float aspect_ratio =
-			static_cast<float>(framebuffer.x) / static_cast<float>(framebuffer.y);
-		glm::vec2 corrected_scale = glm::vec2(scale.x / aspect_ratio, scale.y);
+		// Use design aspect ratio (18:9) as reference, not current screen ratio
+		// This ensures UI elements designed for 18:9 look correct on any screen
+		const float design_aspect = 18.0f / 9.0f;
+		glm::vec2 corrected_scale = glm::vec2(scale.x / design_aspect, scale.y);
 
 		texture2d_shader->Bind();
 

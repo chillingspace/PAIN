@@ -3224,7 +3224,7 @@ namespace PAIN {
 					uv_transform = glm::vec4(width, height, uv_comp->uv.x, uv_comp->uv.y);
 				}
 
-			// Only sync position/scale from UIRectTransform for entities that follow world entities
+			// Sync position/scale from UIRectTransform for UI elements
 			glm::vec2 render_pos = texture_comp.pos;
 			glm::vec2 render_scale = texture_comp.texture_scale;
 			
@@ -3235,6 +3235,27 @@ namespace PAIN {
 
 				render_pos = texture_comp.pos;
 				render_scale = texture_comp.texture_scale;
+			}
+			else if (registry.all_of<UIRectTransform>(entity)) {
+				// For regular UI elements managed by layout system, use layout-calculated values
+				// This ensures correct positioning/scaling across different aspect ratios
+				if (!rect_comp.layout_dirty) {
+					// Convert layout pixel coords to NDC
+					auto window_service = services.lock()->get<Window::Window>();
+					glm::vec2 viewport = window_service->getFrameBuffer();
+					glm::vec2 ndc_pos;
+					ndc_pos.x = (rect_comp.calculated_world_position.x / viewport.x) * 2.0f;
+					ndc_pos.y = (rect_comp.calculated_world_position.y / viewport.y) * 2.0f;
+					
+					texture_comp.pos = ndc_pos;
+					texture_comp.texture_scale = glm::vec2(
+						rect_comp.calculated_world_size.x / viewport.x,
+						rect_comp.calculated_world_size.y / viewport.y
+					);
+					
+					render_pos = texture_comp.pos;
+					render_scale = texture_comp.texture_scale;
+				}
 			}
 
 			rendererService->w_renderer->Render2DTexture(
