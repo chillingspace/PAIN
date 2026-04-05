@@ -12,10 +12,11 @@
         "5cccecaa-acca-ae47-a45d-0210732e76aa",
         "4515fcc7-a4d7-654b-b5a0-a2b191ab7f7c",
         "efff96ab-9011-d248-a0e3-56bb0e76f8e6",
-        "6466af7c-6447-2043-b9f5-6fd7dfada5d4",
-        "7b6d729f-2477-6e43-a93a-4a9f65732f3d",
-        "cc4071a7-9223-6e4e-bab8-da7e8df1b667",
-        "4e937e21-0623-ad45-ad95-e4c416c20b1b",
+        "3da3f0aa-e9d3-634a-b1c9-f88763fb5bae",
+        "4b1f318e-49f7-1545-bb84-b9c6608f3471",
+        "476662dc-9a7b-2243-97be-6e01bceeb854",
+        "351d0711-28db-d346-81fe-fe5904ff854a",
+        "f8f9abf4-39b2-3f41-9e00-4bdfd4476881",
         "31f050fc-b8fd-9f44-9f4c-c2b19a10e63e",
         "a77749e3-6c15-7446-a792-5609dd96b391",
         "a67656ca-15a5-d441-b14d-dae036e5245e",
@@ -40,7 +41,6 @@
         "1810e2f9-2fcb-dd4c-bcc1-d51eb2bf7d3f",
         "61f3c20b-d44c-544d-9a0d-d130e05c67a9",
         "6621d58f-1f66-bb4f-8c78-b77404b6296b",
-        "3da3f0aa-e9d3-634a-b1c9-f88763fb5bae",
         "5b25ecd9-f723-f043-9333-6045100eaeeb",
         "a5dee0ac-d873-6648-bb32-5bea6e1322b6"
     ],
@@ -1164,8 +1164,8 @@
                             ],
                             "outline_thickness": 0.0,
                             "position": [
-                                1230.0,
-                                300.0
+                                0.7699999809265137,
+                                0.328000009059906
                             ],
                             "shadow_color": [
                                 0.0,
@@ -1300,8 +1300,8 @@
                             ],
                             "outline_thickness": 0.0,
                             "position": [
-                                1230.0,
-                                375.0
+                                0.7699999809265137,
+                                0.41499999165534973
                             ],
                             "shadow_color": [
                                 0.0,
@@ -1436,8 +1436,8 @@
                             ],
                             "outline_thickness": 0.0,
                             "position": [
-                                1230.0,
-                                455.0
+                                0.7699999809265137,
+                                0.5040000081062317
                             ],
                             "shadow_color": [
                                 0.0,
@@ -1572,8 +1572,8 @@
                             ],
                             "outline_thickness": 0.0,
                             "position": [
-                                1230.0,
-                                530.0
+                                0.7699999809265137,
+                                0.5879999995231628
                             ],
                             "shadow_color": [
                                 0.0,
@@ -1708,8 +1708,8 @@
                             ],
                             "outline_thickness": 0.0,
                             "position": [
-                                1230.0,
-                                605.0
+                                0.7699999809265137,
+                                0.671999990940094
                             ],
                             "shadow_color": [
                                 0.0,
@@ -1844,8 +1844,8 @@
                             ],
                             "outline_thickness": 0.0,
                             "position": [
-                                1230.0,
-                                685.0
+                                0.7699999809265137,
+                                0.7609999775886536
                             ],
                             "shadow_color": [
                                 0.0,
@@ -11413,7 +11413,7 @@
                                     ],
                                     "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                     "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                    "materialGUID": "6466af7c-6447-2043-b9f5-6fd7dfada5d4",
+                                    "materialGUID": "4b1f318e-49f7-1545-bb84-b9c6608f3471",
                                     "metallicOverride": 1.0,
                                     "metallicTextureOverride": "4e937e21-0623-ad45-ad95-e4c416c20b1b",
                                     "normalTextureOverride": "cc4071a7-9223-6e4e-bab8-da7e8df1b667",
@@ -11505,7 +11505,7 @@
                                             ],
                                             "emissiveTextureOverride": "00000000-0000-0000-0000-000000000000",
                                             "heightTextureOverride": "00000000-0000-0000-0000-000000000000",
-                                            "materialGUID": "6466af7c-6447-2043-b9f5-6fd7dfada5d4",
+                                            "materialGUID": "4b1f318e-49f7-1545-bb84-b9c6608f3471",
                                             "metallicOverride": 1.0,
                                             "metallicTextureOverride": "4e937e21-0623-ad45-ad95-e4c416c20b1b",
                                             "normalTextureOverride": "cc4071a7-9223-6e4e-bab8-da7e8df1b667",
@@ -11618,42 +11618,6 @@
                                 0.0,
                                 0.0
                             ]
-                        },
-                        "UIText": {
-                            "alignment": "Right",
-                            "color": [
-                                1.0,
-                                1.0,
-                                1.0
-                            ],
-                            "display_text": "Hello",
-                            "font_guid": "d8686eae-3f4c-d948-9902-6c9942842042",
-                            "font_size": 200.0,
-                            "line_height": 1.2000000476837158,
-                            "max_length": 0,
-                            "outline_color": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0
-                            ],
-                            "outline_thickness": 0.0,
-                            "position": [
-                                0.0,
-                                0.0
-                            ],
-                            "shadow_color": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.5
-                            ],
-                            "shadow_offset": [
-                                0.0,
-                                0.0
-                            ],
-                            "word_wrap": true,
-                            "wrap_width": 0.0
                         }
                     },
                     "Name": "BigGround"

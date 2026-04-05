@@ -3279,24 +3279,13 @@ namespace PAIN {
 					text_comp.scale_factor = rect_comp.scale.z;
 				}
 				else {
-					// For standalone UI text, convert designer position (top-left origin, pixels)
+					// For standalone UI text, convert normalized position (0-1, top-left origin)
 					// to text renderer coords (bottom-left origin for glm::ortho)
 					auto window_service = services.lock()->get<Window::Window>();
 					glm::vec2 viewport = window_service->getFrameBuffer();
 					
-					// Auto-capture reference resolution on first render
-					if (text_comp.reference_resolution.x == 0 || text_comp.reference_resolution.y == 0) {
-						text_comp.reference_resolution = viewport;
-					}
-
-					// Scale position based on current viewport vs reference resolution
-					glm::vec2 scaled_pos{};
-					scaled_pos.x = text_comp.position.x * (viewport.x / text_comp.reference_resolution.x);
-					scaled_pos.y = text_comp.position.y * (viewport.y / text_comp.reference_resolution.y);
-				
-					
-					text_comp.text_pos.x = scaled_pos.x;
-					text_comp.text_pos.y = viewport.y - scaled_pos.y;
+					text_comp.text_pos.x = text_comp.position.x * viewport.x;
+					text_comp.text_pos.y = viewport.y - (text_comp.position.y * viewport.y);
 					text_comp.scale_factor = 1.0f;
 				}
 

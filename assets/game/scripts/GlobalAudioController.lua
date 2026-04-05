@@ -37,7 +37,9 @@ end
 local CONFIG = {
     -- Fade durations (seconds)
     fadeDuration = 1.0,           -- Fade-in after scene loads (was 2.0)
-    crossfadeDuration = 1.5,      -- Combat crossfade duration
+    crossfadeDuration = 1.0,      -- Combat fade-in duration (normal -> combat)
+    combatFadeOutDuration = 3.5,  -- Combat fade-out duration (combat -> normal, slower)
+    combatReturnDelay = 0.8,      -- Seconds to wait before starting the return-to-normal fade
     quitFadeDuration = 2.0,       -- Fade-out when quitting game
     sceneTransitionDelay = 1.5,   -- Delay before scene actually changes (fade-out time)
     
@@ -175,10 +177,14 @@ function GlobalAudio_SetCombat(combatActive)
         if trackCount >= 1 then globalBGMFade(0, CONFIG.mutedVolume, CONFIG.crossfadeDuration) end
         if trackCount >= 3 then globalBGMFade(2, CONFIG.defaultVolume, CONFIG.crossfadeDuration) end
     else
-        -- Fade in main BGM, fade out combat layer
+        -- Delay slightly, then do a slow fade back to normal so it doesn't feel abrupt
         local targetVol = linearToDb(LEVEL2_BGM_VOLUME_SCALE)
-        if trackCount >= 1 then globalBGMFade(0, targetVol, CONFIG.crossfadeDuration) end
-        if trackCount >= 3 then globalBGMFade(2, CONFIG.mutedVolume, CONFIG.crossfadeDuration) end
+        setTimeout(function()
+            if not inCombat then
+                if trackCount >= 1 then globalBGMFade(0, targetVol, CONFIG.combatFadeOutDuration) end
+                if trackCount >= 3 then globalBGMFade(2, CONFIG.mutedVolume, CONFIG.combatFadeOutDuration) end
+            end
+        end, CONFIG.combatReturnDelay)
     end
 end
 

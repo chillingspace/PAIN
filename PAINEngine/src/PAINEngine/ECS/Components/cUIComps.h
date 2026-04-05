@@ -238,8 +238,7 @@ namespace PAIN {
 		int max_length = 0;                   // 0 = unlimited, >0 = truncate text
 
 		// ─── Positioning ───
-		glm::vec2 position{ 0, 0 };           // Screen position in pixels (top-left origin). Set by designers.
-		glm::vec2 reference_resolution{ 0, 0 }; // Captured framebuffer size when position was set. Auto-updated by renderer on first use.
+		glm::vec2 position{ 0.5f, 0.5f };     // Normalized screen position (0-1). (0,0)=top-left, (1,1)=bottom-right.
 		glm::vec2 text_pos{ 0, 0 };          // Calculated by renderer (bottom-left origin, pixels)
 		float scale_factor = 1.0f;            // Calculated by renderer
 	};
