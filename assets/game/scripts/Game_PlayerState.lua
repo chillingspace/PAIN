@@ -21,7 +21,6 @@ local SFX_PIPE_OUT  = "game/audio/sfx/player/hide/Box Out.wav"
 local SFX_COLLECT   = "game/audio/sfx/Gear Pick Up.wav"
 local SFX_DELIVER   = "game/audio/sfx/Gear Put Down.wav"
 local SFX_ROBOT_INTERACT = "game/audio/sfx/cutscenes/gear turning cutscene.wav"
-local SFX_SUCCESS   = "game/audio/sfx/success_short_jingle.wav"
 local SFX_WIN_MUSIC = "game/audio/music/WinScreen_v1.wav"
 
 -- Pipe group suffixes — tag pipe ends as "pipe_entrance_A" / "pipe_exit_A", etc.
@@ -36,7 +35,6 @@ local VOL_HIDE = 0.0
 local VOL_COLLECT = 0.0
 local VOL_DELIVER = 0.0
 local VOL_ROBOT_INTERACT = 0.0
-local VOL_SUCCESS = -3.0
 local VOL_WIN_MUSIC = -9.0  -- Original is very loud
 
 
@@ -842,14 +840,7 @@ local function completeDeliverySequence()
     S.deliverySequenceActive = false
     S.lettersDelivered = (S.lettersDelivered or 0) + 1
 
-    if audioPlaySFX then audioPlaySFX(SFX_DELIVER, VOL_DELIVER) end
 
-    -- Play success jingle 1 second after deliver SFX (non-blocking, won't cut off SFX_DELIVER)
-    if setTimeout and audioPlaySFX then
-        setTimeout(function()
-            audioPlaySFX(SFX_SUCCESS, VOL_SUCCESS)
-        end, 1.0)
-    end
 
     log(string.format("[PlayerState] Delivered letter %d / %d", S.lettersDelivered, S.lettersToWin or 3))
 
@@ -882,8 +873,15 @@ local function beginDeliverySequence(deliveryPoint, px, py, pz)
     ensureDeliveryLight()
     setDeliveryLight(0.0)
 
+    -- Play SFX_DELIVER first (gear dropped), then SFX_ROBOT_INTERACT after it finishes.
+    -- SFX_DELIVER is ~0.2s, so we delay SFX_ROBOT_INTERACT by 0.3s for a noticeable gap.
     if audioPlaySFX then
-        audioPlaySFX(SFX_ROBOT_INTERACT, VOL_ROBOT_INTERACT)
+        audioPlaySFX(SFX_DELIVER, VOL_DELIVER)
+        if setTimeout then
+            setTimeout(function()
+                audioPlaySFX(SFX_ROBOT_INTERACT, VOL_ROBOT_INTERACT)
+            end, 0.3)
+        end
     end
 
     if _G.StartCameraPan then
