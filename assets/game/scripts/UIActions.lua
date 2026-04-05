@@ -33,7 +33,7 @@ local layers = {
 
 -- ==================== GRAPHICS SETTINGS ====================
 G.GraphicsSettings = G.GraphicsSettings or {
-    displayMode = "windowed"
+    displayMode = (isFullscreen and isFullscreen()) and "fullscreen" or "windowed"
 }
 
 local function updateGraphicsModeDisplay()

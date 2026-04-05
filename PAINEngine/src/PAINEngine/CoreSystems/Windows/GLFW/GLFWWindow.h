@@ -76,6 +76,7 @@ namespace PAIN {
 			void hideCursor(bool hide) override;
 
 		void setFullscreen(bool fullscreen) override;
+		bool isFullscreen() const override { return is_fullscreen_; }
 
 		};
 	}

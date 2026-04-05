@@ -74,6 +74,7 @@ namespace PAIN {
 
 			//Fullscreen toggle (PC only, no-op on mobile)
 			virtual void setFullscreen(bool fullscreen) {}
+			virtual bool isFullscreen() const { return false; }
 
 			//Create window
 			static Window* create(void* app = nullptr, Package const& package = Package());
