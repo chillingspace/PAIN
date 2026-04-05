@@ -1127,6 +1127,14 @@ namespace PAIN {
             window->setFullscreen(fullscreen);
             });
 
+        // isFullscreen() -> bool - Query current fullscreen state
+        lua_.set_function("isFullscreen", [this]() -> bool {
+            if (!services_) return false;
+            auto window = services_->get<Window::Window>();
+            if (!window) return false;
+            return window->isFullscreen();
+            });
+
         // ==================== Settings Persistence ====================
         // Simple key=value file I/O for user settings (volume, etc.)
         // Uses Path service for cross-platform writable paths:
